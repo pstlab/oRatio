@@ -22,45 +22,45 @@
 
 namespace ac {
 
-    class network;
+	class network;
 
-    class propagator {
-        friend class network;
-    public:
-        propagator(propagator&&) = delete;
-        virtual ~propagator();
+	class propagator {
+		friend class network;
+	public:
+		propagator(propagator&&) = delete;
+		virtual ~propagator();
 
-        std::vector<var*> get_vars();
-    protected:
-        network* const _net;
-        std::vector<var*> _vars;
+		std::vector<var*> get_vars();
+	protected:
+		network* const _net;
+		std::vector<var*> _vars;
 
-        propagator(network* const n);
+		propagator(network* const n);
 
-        template<typename T>
-        bool complement(enum_var<T>* v, const std::unordered_set<T>& vals) {
-            return v->complement(vals, this);
-        }
+		template<typename T>
+		bool complement(enum_var<T>* v, const std::unordered_set<T>& vals) {
+			return v->complement(vals, this);
+		}
 
-        template<typename T>
-        bool exclude_val(enum_var<T>* v, const T& val) {
-            return v->complement({ val }, this);
-        }
+		template<typename T>
+		bool exclude_val(enum_var<T>* v, const T& val) {
+			return v->complement({ val }, this);
+		}
 
-        template<typename T>
-        bool intersect(enum_var<T>* v, const std::unordered_set<T>& vals) {
-            return v->intersect(vals, this);
-        }
+		template<typename T>
+		bool intersect(enum_var<T>* v, const std::unordered_set<T>& vals) {
+			return v->intersect(vals, this);
+		}
 
-        template<typename T>
-        bool assign_val(enum_var<T>* v, const T& val) {
-            return v->intersect({ val }, this);
-        }
+		template<typename T>
+		bool assign_val(enum_var<T>* v, const T& val) {
+			return v->intersect({ val }, this);
+		}
 
-        bool intersect(arith_var* v, const interval& i) {
-            return v->intersect(i, this);
-        }
-    private:
-        virtual bool propagate(const var * const v) = 0;
-    };
+		bool intersect(arith_var* v, const interval& i) {
+			return v->intersect(i, this);
+		}
+	private:
+		virtual bool propagate(const var * const v) = 0;
+	};
 }

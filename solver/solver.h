@@ -51,7 +51,7 @@ namespace oratio {
 
         std::vector<decision*> get_inconsistencies();
 
-        void push(choice * const ch);
+        bool push(choice * const ch);
         void pop(long unsigned int n = 1);
 
         struct layer {

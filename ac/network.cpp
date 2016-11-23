@@ -181,6 +181,7 @@ void network::push() {
 }
 
 void network::pop() {
+	std::queue<var*>().swap(_prop_q);
 	_solver->pop();
 	for (const auto& d : _layers.top()->_domains) {
 		d.first->restore();
@@ -217,20 +218,28 @@ bool network::add(const z3::expr& e) {
 	_solver->add(e);
 	_state = _solver->check();
 	switch (_state) {
-	case z3::unsat:
+	case z3::unsat: {
+		z3::expr_vector ev = _solver->unsat_core();
+		for (unsigned int i = 0; i < ev.size(); i++) {
+			_unsat_core.push_back(_smt_map.at(&ev[i]));
+		}
 		return false;
-	case z3::sat:
+	}
+	case z3::sat: {
 		_model = _solver->get_model();
 		return true;
-	default:
+	}
+	default: {
 		std::cerr << "invalid smt solver state.." << std::endl;
 		return false;
+	}
 	}
 }
 
 bool network::assign_true(bool_var* choice_var) {
 	_solver->push();
 	_layers.push(new layer(choice_var));
+	_unsat_core.clear();
 	bool prop = add({ choice_var });
 	return prop;
 }

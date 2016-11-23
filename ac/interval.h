@@ -22,139 +22,139 @@
 
 namespace ac {
 
-    class interval {
-    public:
-        double lb;
-        double ub;
+	class interval {
+	public:
+		double lb;
+		double ub;
 
-        interval();
-        interval(double value);
-        interval(double lb, double ub);
-        virtual ~interval();
+		interval();
+		interval(double value);
+		interval(double lb, double ub);
+		virtual ~interval();
 
-        bool consistent() const;
-        bool constant() const;
-        bool intersecting(const interval& i) const;
-        bool contains(const interval& bound) const;
+		bool consistent() const;
+		bool constant() const;
+		bool intersecting(const interval& i) const;
+		bool contains(const interval& bound) const;
 
-        bool operator!=(const interval& right) const;
-        bool operator<(const interval& right) const;
-        bool operator<=(const interval& right) const;
-        bool operator==(const interval& right) const;
-        bool operator>=(const interval& right) const;
-        bool operator>(const interval& right) const;
+		bool operator!=(const interval& right) const;
+		bool operator<(const interval& right) const;
+		bool operator<=(const interval& right) const;
+		bool operator==(const interval& right) const;
+		bool operator>=(const interval& right) const;
+		bool operator>(const interval& right) const;
 
-        friend interval operator&&(const interval& lhs, const interval& rhs) {
-            return interval(std::max(lhs.lb, rhs.lb), std::min(lhs.ub, rhs.ub));
-        }
+		friend interval operator&&(const interval& lhs, const interval& rhs) {
+			return interval(std::max(lhs.lb, rhs.lb), std::min(lhs.ub, rhs.ub));
+		}
 
-        friend interval operator+(const interval& lhs, const interval& rhs) {
-            return interval(lhs.lb + rhs.lb, lhs.ub + rhs.ub);
-        }
+		friend interval operator+(const interval& lhs, const interval& rhs) {
+			return interval(lhs.lb + rhs.lb, lhs.ub + rhs.ub);
+		}
 
-        friend interval operator+(const interval& lhs, const double& rhs) {
-            return interval(lhs.lb + rhs, lhs.ub + rhs);
-        }
+		friend interval operator+(const interval& lhs, const double& rhs) {
+			return interval(lhs.lb + rhs, lhs.ub + rhs);
+		}
 
-        friend interval operator+(const double& lhs, const interval& rhs) {
-            return interval(lhs + rhs.lb, lhs + rhs.ub);
-        }
+		friend interval operator+(const double& lhs, const interval& rhs) {
+			return interval(lhs + rhs.lb, lhs + rhs.ub);
+		}
 
-        friend interval operator-(const interval& lhs, const interval& rhs) {
-            return interval(lhs.lb - rhs.ub, lhs.ub - rhs.lb);
-        }
+		friend interval operator-(const interval& lhs, const interval& rhs) {
+			return interval(lhs.lb - rhs.ub, lhs.ub - rhs.lb);
+		}
 
-        friend interval operator-(const interval& lhs, const double& rhs) {
-            return interval(lhs.lb - rhs, lhs.ub - rhs);
-        }
+		friend interval operator-(const interval& lhs, const double& rhs) {
+			return interval(lhs.lb - rhs, lhs.ub - rhs);
+		}
 
-        friend interval operator-(const double& lhs, const interval& rhs) {
-            return interval(lhs - rhs.ub, lhs - rhs.lb);
-        }
+		friend interval operator-(const double& lhs, const interval& rhs) {
+			return interval(lhs - rhs.ub, lhs - rhs.lb);
+		}
 
-        friend interval operator*(const interval& lhs, const interval& rhs) {
-            interval result(std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
-            for (const auto& i : { lhs.lb * rhs.lb, lhs.lb * rhs.ub, lhs.ub * rhs.lb, lhs.ub * rhs.ub }) {
-                if (i < result.lb)
-                    result.lb = i;
-                if (i > result.ub)
-                    result.ub = i;
-            }
-            return result;
-        }
+		friend interval operator*(const interval& lhs, const interval& rhs) {
+			interval result(std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
+			for (const auto& i : { lhs.lb * rhs.lb, lhs.lb * rhs.ub, lhs.ub * rhs.lb, lhs.ub * rhs.ub }) {
+				if (i < result.lb)
+					result.lb = i;
+				if (i > result.ub)
+					result.ub = i;
+			}
+			return result;
+		}
 
-        friend interval operator*(const interval& lhs, const double& rhs) {
-            if (rhs >= 0) {
-                return interval(lhs.lb * rhs, lhs.ub * rhs);
-            }
-            else {
-                return interval(lhs.ub * rhs, lhs.lb * rhs);
-            }
-        }
+		friend interval operator*(const interval& lhs, const double& rhs) {
+			if (rhs >= 0) {
+				return interval(lhs.lb * rhs, lhs.ub * rhs);
+			}
+			else {
+				return interval(lhs.ub * rhs, lhs.lb * rhs);
+			}
+		}
 
-        friend interval operator*(const double& lhs, const interval& rhs) {
-            if (lhs >= 0) {
-                return interval(rhs.lb * lhs, rhs.ub * lhs);
-            }
-            else {
-                return interval(rhs.ub * lhs, rhs.lb * lhs);
-            }
-        }
+		friend interval operator*(const double& lhs, const interval& rhs) {
+			if (lhs >= 0) {
+				return interval(rhs.lb * lhs, rhs.ub * lhs);
+			}
+			else {
+				return interval(rhs.ub * lhs, rhs.lb * lhs);
+			}
+		}
 
-        friend interval operator/(const interval& lhs, const interval& rhs) {
-            if (rhs.lb <= 0 && rhs.ub >= 0) {
-                // 0 appears in the denominator..
-                return interval();
-            }
-            else {
-                interval result(std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
-                for (const auto& i : { lhs.lb / rhs.lb, lhs.lb / rhs.ub, lhs.ub / rhs.lb, lhs.ub / rhs.ub }) {
-                    if (i < result.lb)
-                        result.lb = i;
-                    if (i > result.ub)
-                        result.ub = i;
-                }
-                return result;
-            }
-        }
+		friend interval operator/(const interval& lhs, const interval& rhs) {
+			if (rhs.lb <= 0 && rhs.ub >= 0) {
+				// 0 appears in the denominator..
+				return interval();
+			}
+			else {
+				interval result(std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
+				for (const auto& i : { lhs.lb / rhs.lb, lhs.lb / rhs.ub, lhs.ub / rhs.lb, lhs.ub / rhs.ub }) {
+					if (i < result.lb)
+						result.lb = i;
+					if (i > result.ub)
+						result.ub = i;
+				}
+				return result;
+			}
+		}
 
-        friend interval operator/(const interval& lhs, const double& rhs) {
-            if (rhs >= 0) {
-                return interval(lhs.lb / rhs, lhs.ub / rhs);
-            }
-            else {
-                return interval(lhs.ub / rhs, lhs.lb / rhs);
-            }
-        }
+		friend interval operator/(const interval& lhs, const double& rhs) {
+			if (rhs >= 0) {
+				return interval(lhs.lb / rhs, lhs.ub / rhs);
+			}
+			else {
+				return interval(lhs.ub / rhs, lhs.lb / rhs);
+			}
+		}
 
-        friend interval operator/(const double& lhs, const interval& rhs) {
-            if (rhs.lb <= 0 && rhs.ub >= 0) {
-                // 0 appears in the denominator..
-                return interval();
-            }
-            else {
-                interval result(std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
-                for (const auto& i : { lhs / rhs.lb, lhs / rhs.ub }) {
-                    if (i < result.lb)
-                        result.lb = i;
-                    if (i > result.ub)
-                        result.ub = i;
-                }
-                return result;
-            }
-        }
+		friend interval operator/(const double& lhs, const interval& rhs) {
+			if (rhs.lb <= 0 && rhs.ub >= 0) {
+				// 0 appears in the denominator..
+				return interval();
+			}
+			else {
+				interval result(std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity());
+				for (const auto& i : { lhs / rhs.lb, lhs / rhs.ub }) {
+					if (i < result.lb)
+						result.lb = i;
+					if (i > result.ub)
+						result.ub = i;
+				}
+				return result;
+			}
+		}
 
-        interval& operator+=(const interval& right);
-        interval& operator+=(const double& right);
-        interval& operator-=(const interval& right);
-        interval& operator-=(const double& right);
-        interval& operator*=(const interval& right);
-        interval& operator*=(const double& right);
-        interval& operator/=(const interval& right);
-        interval& operator/=(const double& right);
+		interval& operator+=(const interval& right);
+		interval& operator+=(const double& right);
+		interval& operator-=(const interval& right);
+		interval& operator-=(const double& right);
+		interval& operator*=(const interval& right);
+		interval& operator*=(const double& right);
+		interval& operator/=(const interval& right);
+		interval& operator/=(const double& right);
 
-        interval operator-() const;
-    };
+		interval operator-() const;
+	};
 }
 
 
