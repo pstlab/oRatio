@@ -126,6 +126,8 @@ namespace ac {
 		std::queue<var*> _prop_q;
 		std::unordered_map<var*, propagator*> _causes;
 		std::vector<bool_var*> _unsat_core;
+		// the reason for a variable for being singleton..
+		std::unordered_map<var*, bool_var*> _reason;
 
 		struct layer {
 

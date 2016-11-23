@@ -38,7 +38,7 @@ network::network() : _context(new z3::context()), _solver(new z3::solver(*_conte
 
 network::~network() {}
 
-void ac::network::store(propagator * const p) {
+void network::store(propagator * const p) {
 	for (const auto& arg : p->_vars) {
 		if (!arg->singleton()) {
 			if (_watches.find(arg) == _watches.end()) {
@@ -49,7 +49,7 @@ void ac::network::store(propagator * const p) {
 	}
 }
 
-void ac::network::forget(propagator * const p) {
+void network::forget(propagator * const p) {
 	for (const auto& arg : p->_vars) {
 		if (_watches.find(arg) == _watches.end()) {
 			_watches.at(arg).remove(p);
@@ -60,11 +60,11 @@ void ac::network::forget(propagator * const p) {
 	}
 }
 
-bool_var * ac::network::new_bool() {
+bool_var * network::new_bool() {
 	return new bool_var(this, "b" + std::to_string(n_vars++), { true, false });
 }
 
-bool_var * ac::network::new_bool(bool value) {
+bool_var * network::new_bool(bool value) {
 	return new bool_var(this, value ? "true" : "false", { value });
 }
 
@@ -218,23 +218,26 @@ bool network::add(const z3::expr& e) {
 	_solver->add(e);
 	_state = _solver->check();
 	switch (_state) {
-	case z3::unsat: {
-		if (!root_level()) {
-			z3::expr_vector ev = _solver->unsat_core();
-			for (unsigned int i = 0; i < ev.size(); i++) {
-				_unsat_core.push_back(_smt_map.at(&ev[i]));
+		case z3::unsat:
+		{
+			if (!root_level()) {
+				z3::expr_vector ev = _solver->unsat_core();
+				for (unsigned int i = 0; i < ev.size(); i++) {
+					_unsat_core.push_back(_smt_map.at(&ev[i]));
+				}
 			}
+			return false;
 		}
-		return false;
-	}
-	case z3::sat: {
-		_model = _solver->get_model();
-		return true;
-	}
-	default: {
-		std::cerr << "invalid smt solver state.." << std::endl;
-		return false;
-	}
+		case z3::sat:
+		{
+			_model = _solver->get_model();
+			return true;
+		}
+		default:
+		{
+			std::cerr << "invalid smt solver state.." << std::endl;
+			return false;
+		}
 	}
 }
 
@@ -246,21 +249,24 @@ bool network::assign_true(bool_var* choice_var) {
 	return prop;
 }
 
-bool ac::network::enqueue(var * const v, domain * const d, propagator * const p) {
+bool network::enqueue(var * const v, domain * const d, propagator * const p) {
 	if (!root_level()) {
 		if (_layers.top()->_domains.find(v) == _layers.top()->_domains.end()) {
 			_layers.top()->_domains.insert({ v, d });
+			_layers.top()->_impl_graph.insert({ v, std::vector<propagator*>() });
+		}
+		_layers.top()->_impl_graph.at(v).push_back(p);
+		if (v->empty) {
+			assert(_unsat_core.empty());
+			// TODO: we generate the no-good..
+		}
+		else if (v->singleton()) {
+			_reason.insert({ v, _layers.top()->_choice_var });
 		}
 	}
 	if (_watches.find(v) != _watches.end()) {
 		_prop_q.push(v);
 		_causes.insert({ v, p });
 	}
-	if (v->empty()) {
-		// TODO: generate no-good..
-		return false;
-	}
-	else {
-		return true;
-	}
+	return !v->empty();
 }
