@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <stack>
+#include <list>
 #include <queue>
 #include <z3++.h>
 
@@ -32,6 +33,8 @@ namespace ac {
     class enum_var;
     typedef enum_var<bool> bool_var;
     class arith_var;
+	template<typename T>
+	class enum_eq_propagator;
 
     class network {
         template<typename T>

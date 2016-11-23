@@ -221,7 +221,6 @@ namespace ac {
             return static_cast<arith_domain*>(_domain)->intersects(static_cast<arith_domain*>(var._domain)->_interval);
         }
     private:
-        arith_domain* _domain;
         z3::expr _expr;
 
         void restore() override {
@@ -230,12 +229,12 @@ namespace ac {
         }
 
         bool intersect(const interval& i, propagator* prop) {
-            if (i.contains(_domain->_interval)) {
+            if (i.contains(static_cast<arith_domain*>(_domain)->_interval)) {
                 return true;
             }
             else {
-                arith_domain* c_domain = new arith_domain(_domain->_interval);
-                _domain->_interval = _domain->_interval && i;
+                arith_domain* c_domain = new arith_domain(static_cast<arith_domain*>(_domain)->_interval);
+				static_cast<arith_domain*>(_domain)->_interval = static_cast<arith_domain*>(_domain)->_interval && i;
                 return _net->enqueue(this, c_domain, prop);
             }
         }
