@@ -1,0 +1,16 @@
+predicate ImpulsivePredicate(real at) {
+    at >= origin;
+    at <= horizon;
+}
+
+predicate IntervalPredicate(real start, real end, real duration) {
+    start >= origin;
+    end <= horizon;
+    duration == end - start;
+    duration >= 0;
+}
+
+real origin;
+real horizon;
+origin >= 0;
+origin <= horizon;
