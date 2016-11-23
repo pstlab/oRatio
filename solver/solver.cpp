@@ -40,7 +40,7 @@ solver::solver() {
 	_types.insert({ sv->_name, sv });
 }
 
-solver::~solver() { }
+solver::~solver() {}
 
 enum_item* solver::new_enum(const type * const t, const std::unordered_set<item*>& allowed_vals) {
 	enum_item* ei = core::new_enum(t, allowed_vals);
@@ -168,6 +168,11 @@ main_loop:
 				most_expensive_decision = d;
 				d_cost = d->_estimated_cost;
 			}
+			else if (d->_estimated_cost == d_cost && most_expensive_decision) {
+				if (_net.relevance(d->_in_plan) > _net.relevance(most_expensive_decision->_in_plan)) {
+					most_expensive_decision = d;
+				}
+			}
 		}
 
 		// this is the best choice to take..
@@ -178,6 +183,11 @@ main_loop:
 				assert(ch->_in_plan->allows(true));
 				least_expensive_choice = ch;
 				ch_cost = ch->_estimated_cost;
+			}
+			else if (ch->_estimated_cost == ch_cost && least_expensive_choice) {
+				if (_net.relevance(ch->_in_plan) < _net.relevance(least_expensive_choice->_in_plan)) {
+					least_expensive_choice = ch;
+				}
 			}
 		}
 
@@ -360,9 +370,9 @@ void solver::pop(long unsigned int n) {
 	}
 }
 
-find_solution_choice::find_solution_choice(solver * const s) : choice(s, s->_net.new_real(0), nullptr) { }
+find_solution_choice::find_solution_choice(solver * const s) : choice(s, s->_net.new_real(0), nullptr) {}
 
-find_solution_choice::~find_solution_choice() { }
+find_solution_choice::~find_solution_choice() {}
 
 bool find_solution_choice::apply() {
 	return true;

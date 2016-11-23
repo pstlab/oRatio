@@ -249,6 +249,16 @@ bool network::assign_true(bool_var* choice_var) {
 	return prop;
 }
 
+unsigned int network::relevance(var * const v) {
+	if (_watches.find(v) != _watches.end()) {
+		assert(!_watches.at(v).empty());
+		return _watches.at(v).size();
+	}
+	else {
+		return 0;
+	}
+}
+
 bool network::enqueue(var * const v, domain * const d, propagator * const p) {
 	if (!root_level()) {
 		if (_layers.top()->_domains.find(v) == _layers.top()->_domains.end()) {

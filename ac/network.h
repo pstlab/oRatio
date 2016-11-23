@@ -113,13 +113,15 @@ namespace ac {
 			return _layers.empty();
 		}
 
-		size_t level() {
+		unsigned int level() {
 			return _layers.size();
 		}
 
 		std::vector<bool_var*> get_unsat_core() {
 			return _unsat_core;
 		}
+
+		unsigned int relevance(var * const v);
 	private:
 		unsigned int n_vars = 0;
 		std::unordered_map<var*, std::list<propagator*>> _watches;
@@ -131,7 +133,7 @@ namespace ac {
 
 		struct layer {
 
-			layer(bool_var * const cv) : _choice_var(cv) { }
+			layer(bool_var * const cv) : _choice_var(cv) {}
 
 			bool_var * const _choice_var;
 			std::unordered_map<var*, domain*> _domains;
