@@ -23,6 +23,7 @@
 #include "goal_decision.h"
 #include "disjunction_decision.h"
 #include "crafty_type.h"
+#include "timelines\state_variable.h"
 
 using namespace oratio;
 
@@ -31,6 +32,11 @@ solver::solver() {
     _ctr_var = _choice->_in_plan;
     bool assert_facts = _net.add({ _choice->_in_plan });
     assert(assert_facts);
+
+	bool r = read(std::vector<std::string>({ "time.ratio" }));
+	assert(r);
+	timelines::state_variable* sv = new timelines::state_variable(this);
+	_types.insert({ sv->_name, sv });
 }
 
 solver::~solver() { }

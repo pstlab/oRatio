@@ -78,4 +78,9 @@
       <Filter>Source Files\timelines</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="time.ratio">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

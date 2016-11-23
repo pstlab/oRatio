@@ -15,7 +15,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "oratio.h"
+#include "../solver/solver.h"
 
 int main(int argc, char** argv) {
     std::cout << "Starting oRatio solver.." << std::endl;
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    oratio::oratio_solver s;
+    oratio::solver s;
 
     std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
     std::cout << "Reading " << argc - 1 << " files.." << std::endl;

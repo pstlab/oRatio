@@ -132,13 +132,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="oratio.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="oratio.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="time.ratio" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
