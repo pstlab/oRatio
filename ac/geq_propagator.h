@@ -21,23 +21,23 @@
 
 namespace ac {
 
-    class geq_propagator : public propagator {
-        friend class network;
-    public:
-        geq_propagator(geq_propagator&&) = delete;
-        virtual ~geq_propagator();
+	class geq_propagator : public propagator {
+		friend class network;
+	public:
+		geq_propagator(geq_propagator&&) = delete;
+		virtual ~geq_propagator();
 
-        static std::unordered_set<bool> evaluate(arith_var * const left, arith_var * const right);
-    private:
-        arith_var * const _left;
-        arith_var * const _right;
-        bool_var * const _geq;
-        z3::expr _geq_expr;
+		static std::unordered_set<bool> evaluate(arith_var * const left, arith_var * const right);
+	private:
+		arith_var * const _left;
+		arith_var * const _right;
+		bool_var * const _geq;
+		z3::expr _geq_expr;
 
-        geq_propagator(network * const net, arith_var * const left, arith_var * const right);
-        bool propagate(const var * const v) override;
-        static bool_var * evaluate(network * const net, arith_var * const left, arith_var * const right);
-        static std::string to_string(arith_var * const left, arith_var * const right);
-    };
+		geq_propagator(network * const net, arith_var * const left, arith_var * const right);
+		bool propagate(const var * const v) override;
+		static bool_var * evaluate(network * const net, arith_var * const left, arith_var * const right);
+		static std::string to_string(arith_var * const left, arith_var * const right);
+	};
 }
 

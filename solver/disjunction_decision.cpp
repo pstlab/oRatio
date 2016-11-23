@@ -26,10 +26,10 @@ disjunction_decision::disjunction_decision(solver * const s, choice * const caus
 disjunction_decision::~disjunction_decision() { }
 
 bool disjunction_decision::compute_choices(std::vector<choice*>& cs) {
-    for (const auto& c : _disjunction->get_conjunctions()) {
-        cs.push_back(new choose_conjunction(_solver, _solver->_net.new_real(1), this, c));
-    }
-    return true;
+	for (const auto& c : _disjunction->get_conjunctions()) {
+		cs.push_back(new choose_conjunction(_solver, _solver->_net.new_real(1), this, c));
+	}
+	return true;
 }
 
 disjunction_decision::choose_conjunction::choose_conjunction(solver * const s, ac::arith_var* cost, disjunction_decision * const dp, conjunction * const c) : choice(s, cost, dp), _conjunction(c) { }
@@ -37,5 +37,5 @@ disjunction_decision::choose_conjunction::choose_conjunction(solver * const s, a
 disjunction_decision::choose_conjunction::~choose_conjunction() { }
 
 bool disjunction_decision::choose_conjunction::apply() {
-    return _conjunction->apply(static_cast<disjunction_decision*> (_effect)->_env);
+	return _conjunction->apply(static_cast<disjunction_decision*> (_effect)->_env);
 }

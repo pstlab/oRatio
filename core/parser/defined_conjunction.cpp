@@ -15,13 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   defined_conjunction.cpp
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- * 
- * Created on November 9, 2016, 6:30 PM
- */
-
 #include "defined_conjunction.h"
 #include "statement_visitor.h"
 #include "../core.h"
@@ -34,5 +27,5 @@ defined_conjunction::defined_conjunction(core * const c, scope * const s, ac::ar
 defined_conjunction::~defined_conjunction() { }
 
 bool defined_conjunction::apply(env * const e) const {
-    return statement_visitor(_core, new env(_core, e)).visit(_block);
+	return statement_visitor(_core, new env(_core, e)).visit(_block);
 }

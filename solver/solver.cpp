@@ -261,6 +261,7 @@ main_loop:
 }
 
 bool solver::build_planning_graph() {
+	assert(_net.root_level());
 	choice* c = _choice;
 	while (c->_estimated_cost == std::numeric_limits<double>::infinity() && !_decision_q.empty()) {
 		decision* d = _decision_q.front();

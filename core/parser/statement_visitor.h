@@ -21,27 +21,27 @@
 
 namespace oratio {
 
-    class parser;
-    class env;
+	class parser;
+	class env;
 
-    class statement_visitor : public oRatioBaseVisitor {
-    public:
-        statement_visitor(parser * const p, env * const e);
-        statement_visitor(statement_visitor&&) = delete;
-        virtual ~statement_visitor();
-    private:
-        parser * const _parser;
-        env * const _env;
+	class statement_visitor : public oRatioBaseVisitor {
+	public:
+		statement_visitor(parser * const p, env * const e);
+		statement_visitor(statement_visitor&&) = delete;
+		virtual ~statement_visitor();
+	private:
+		parser * const _parser;
+		env * const _env;
 
-        antlrcpp::Any visitCompilation_unit(oRatioParser::Compilation_unitContext* ctx) override;
-        antlrcpp::Any visitBlock(oRatioParser::BlockContext* ctx) override;
-        antlrcpp::Any visitConjunction(oRatioParser::ConjunctionContext* ctx) override;
-        antlrcpp::Any visitAssignment_statement(oRatioParser::Assignment_statementContext* ctx) override;
-        antlrcpp::Any visitLocal_variable_statement(oRatioParser::Local_variable_statementContext* ctx) override;
-        antlrcpp::Any visitExpression_statement(oRatioParser::Expression_statementContext* ctx) override;
-        antlrcpp::Any visitFormula_statement(oRatioParser::Formula_statementContext* ctx) override;
-        antlrcpp::Any visitReturn_statement(oRatioParser::Return_statementContext* ctx) override;
-        antlrcpp::Any visitDisjunction_statement(oRatioParser::Disjunction_statementContext* ctx) override;
-    };
+		antlrcpp::Any visitCompilation_unit(oRatioParser::Compilation_unitContext* ctx) override;
+		antlrcpp::Any visitBlock(oRatioParser::BlockContext* ctx) override;
+		antlrcpp::Any visitConjunction(oRatioParser::ConjunctionContext* ctx) override;
+		antlrcpp::Any visitAssignment_statement(oRatioParser::Assignment_statementContext* ctx) override;
+		antlrcpp::Any visitLocal_variable_statement(oRatioParser::Local_variable_statementContext* ctx) override;
+		antlrcpp::Any visitExpression_statement(oRatioParser::Expression_statementContext* ctx) override;
+		antlrcpp::Any visitFormula_statement(oRatioParser::Formula_statementContext* ctx) override;
+		antlrcpp::Any visitReturn_statement(oRatioParser::Return_statementContext* ctx) override;
+		antlrcpp::Any visitDisjunction_statement(oRatioParser::Disjunction_statementContext* ctx) override;
+	};
 }
 

@@ -15,32 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   defined_conjunction.h
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- *
- * Created on November 9, 2016, 6:30 PM
- */
-
-#ifndef DEFINED_CONJUNCTION_H
-#define DEFINED_CONJUNCTION_H
+#pragma once
 
 #include "../disjunction.h"
 #include "oRatioParser.h"
 
 namespace oratio {
 
-    class defined_conjunction : public conjunction {
-    public:
-        defined_conjunction(core * const c, scope * const s, ac::arith_var& cst, oRatioParser::BlockContext * const b);
-        defined_conjunction(defined_conjunction&&) = delete;
-        virtual ~defined_conjunction();
-    private:
-        oRatioParser::BlockContext * const _block;
+	class defined_conjunction : public conjunction {
+	public:
+		defined_conjunction(core * const c, scope * const s, ac::arith_var& cst, oRatioParser::BlockContext * const b);
+		defined_conjunction(defined_conjunction&&) = delete;
+		virtual ~defined_conjunction();
+	private:
+		oRatioParser::BlockContext * const _block;
 
-        bool apply(env * const e) const override;
-    };
+		bool apply(env * const e) const override;
+	};
 }
-
-#endif /* DEFINED_CONJUNCTION_H */
 

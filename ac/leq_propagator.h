@@ -21,23 +21,23 @@
 
 namespace ac {
 
-    class leq_propagator : public propagator {
-        friend class network;
-    public:
-        leq_propagator(leq_propagator&&) = delete;
-        virtual ~leq_propagator();
+	class leq_propagator : public propagator {
+		friend class network;
+	public:
+		leq_propagator(leq_propagator&&) = delete;
+		virtual ~leq_propagator();
 
-        static std::unordered_set<bool> evaluate(arith_var * const left, arith_var * const right);
-    private:
-        arith_var * const _left;
-        arith_var * const _right;
-        bool_var * const _leq;
-        z3::expr _leq_expr;
+		static std::unordered_set<bool> evaluate(arith_var * const left, arith_var * const right);
+	private:
+		arith_var * const _left;
+		arith_var * const _right;
+		bool_var * const _leq;
+		z3::expr _leq_expr;
 
-        leq_propagator(network * const net, arith_var * const left, arith_var * const right);
-        bool propagate(const var * const v) override;
-        static bool_var * evaluate(network * const net, arith_var * const left, arith_var * const right);
-        static std::string to_string(arith_var * const left, arith_var * const right);
-    };
+		leq_propagator(network * const net, arith_var * const left, arith_var * const right);
+		bool propagate(const var * const v) override;
+		static bool_var * evaluate(network * const net, arith_var * const left, arith_var * const right);
+		static std::string to_string(arith_var * const left, arith_var * const right);
+	};
 }
 

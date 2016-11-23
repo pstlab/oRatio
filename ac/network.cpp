@@ -219,9 +219,11 @@ bool network::add(const z3::expr& e) {
 	_state = _solver->check();
 	switch (_state) {
 	case z3::unsat: {
-		z3::expr_vector ev = _solver->unsat_core();
-		for (unsigned int i = 0; i < ev.size(); i++) {
-			_unsat_core.push_back(_smt_map.at(&ev[i]));
+		if (!root_level()) {
+			z3::expr_vector ev = _solver->unsat_core();
+			for (unsigned int i = 0; i < ev.size(); i++) {
+				_unsat_core.push_back(_smt_map.at(&ev[i]));
+			}
 		}
 		return false;
 	}

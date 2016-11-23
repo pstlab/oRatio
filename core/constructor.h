@@ -21,20 +21,20 @@
 
 namespace oratio {
 
-    class env;
-    class item;
+	class env;
+	class item;
 
-    class constructor : public scope {
-        friend class type;
-    public:
-        constructor(core * const c, scope * const s, const std::vector<field*>& args);
-        constructor(constructor&&) = delete;
-        virtual ~constructor();
+	class constructor : public scope {
+		friend class type;
+	public:
+		constructor(core * const c, scope * const s, const std::vector<field*>& args);
+		constructor(constructor&&) = delete;
+		virtual ~constructor();
 
-        virtual item * new_instance(env * const e, const std::vector<item*>& exprs);
-        virtual bool invoke(item * const i, const std::vector<item*>& exprs) = 0;
-    protected:
-        const std::vector<field*> _args;
-    };
+		virtual item * new_instance(env * const e, const std::vector<item*>& exprs);
+		virtual bool invoke(item * const i, const std::vector<item*>& exprs) = 0;
+	protected:
+		const std::vector<field*> _args;
+	};
 }
 

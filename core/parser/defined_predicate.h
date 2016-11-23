@@ -15,32 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   defined_predicate.h
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- *
- * Created on November 9, 2016, 6:29 PM
- */
-
-#ifndef DEFINED_PREDICATE_H
-#define DEFINED_PREDICATE_H
+#pragma once
 
 #include "../predicate.h"
 #include "oRatioParser.h"
 
 namespace oratio {
 
-    class defined_predicate : public predicate {
-    public:
-        defined_predicate(core * const c, scope * const s, const std::string& name, const std::vector<field*>& args, oRatioParser::BlockContext * const b);
-        defined_predicate(defined_predicate&&) = delete;
-        virtual ~defined_predicate();
-    private:
-        oRatioParser::BlockContext * const _block;
+	class defined_predicate : public predicate {
+	public:
+		defined_predicate(core * const c, scope * const s, const std::string& name, const std::vector<field*>& args, oRatioParser::BlockContext * const b);
+		defined_predicate(defined_predicate&&) = delete;
+		virtual ~defined_predicate();
+	private:
+		oRatioParser::BlockContext * const _block;
 
-        bool apply_rule(atom * const a) const override;
-    };
+		bool apply_rule(atom * const a) const override;
+	};
 }
-
-#endif /* DEFINED_PREDICATE_H */
 

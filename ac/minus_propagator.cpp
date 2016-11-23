@@ -20,39 +20,39 @@
 using namespace ac;
 
 minus_propagator::minus_propagator(network * const net, arith_var * const v) : propagator(net), _var(v), _minus(evaluate(net, v)) {
-    assert(evaluate(_var).consistent());
-    _vars.push_back(_var);
-    _vars.push_back(_minus);
-    if (!_net->root_level()) {
-        bool i = intersect(_minus, evaluate(_var));
-        assert(i);
-    }
+	assert(evaluate(_var).consistent());
+	_vars.push_back(_var);
+	_vars.push_back(_minus);
+	if (!_net->root_level()) {
+		bool i = intersect(_minus, evaluate(_var));
+		assert(i);
+	}
 }
 
 minus_propagator::~minus_propagator() {
-    delete _minus;
+	delete _minus;
 }
 
 bool minus_propagator::propagate(const var * const v) {
-    if (v == _var) {
-        interval val = -_var->to_interval();
-        return intersect(_minus, val);
-    }
-    else {
-        interval val = -_minus->to_interval();
-        return intersect(_var, val);
-    }
+	if (v == _var) {
+		interval val = -_var->to_interval();
+		return intersect(_minus, val);
+	}
+	else {
+		interval val = -_minus->to_interval();
+		return intersect(_var, val);
+	}
 }
 
 interval minus_propagator::evaluate(arith_var * const v) {
-    return -v->to_interval();
+	return -v->to_interval();
 }
 
 arith_var* minus_propagator::evaluate(network * const net, arith_var * const v) {
-    if (net->root_level()) {
-        return new arith_var(net, "-" + v->_name, evaluate(v), -v->_expr);
-    }
-    else {
-        return new arith_var(net, "-" + v->_name, interval(), -v->_expr);
-    }
+	if (net->root_level()) {
+		return new arith_var(net, "-" + v->_name, evaluate(v), -v->_expr);
+	}
+	else {
+		return new arith_var(net, "-" + v->_name, interval(), -v->_expr);
+	}
 }

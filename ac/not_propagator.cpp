@@ -20,46 +20,46 @@
 using namespace ac;
 
 not_propagator::not_propagator(network * const net, bool_var * const v) : propagator(net), _var(v), _not(evaluate(net, v)) {
-    assert(!evaluate(_var).empty());
-    _vars.push_back(_var);
-    _vars.push_back(_not);
-    if (!_net->root_level()) {
-        bool i = intersect(_not, evaluate(_var));
-        assert(i);
-    }
+	assert(!evaluate(_var).empty());
+	_vars.push_back(_var);
+	_vars.push_back(_not);
+	if (!_net->root_level()) {
+		bool i = intersect(_not, evaluate(_var));
+		assert(i);
+	}
 }
 
 not_propagator::~not_propagator() {
-    delete _not;
+	delete _not;
 }
 
 bool not_propagator::propagate(const var * const v)
 {
-    if (_var->singleton()) {
-        std::unordered_set<bool> vals = _var->to_vals();
-        return complement(_not, vals);
-    }
-    else if (_not->singleton()) {
-        std::unordered_set<bool> vals = _not->to_vals();
-        return complement(_var, vals);
-    }
-    return true;
+	if (_var->singleton()) {
+		std::unordered_set<bool> vals = _var->to_vals();
+		return complement(_not, vals);
+	}
+	else if (_not->singleton()) {
+		std::unordered_set<bool> vals = _not->to_vals();
+		return complement(_var, vals);
+	}
+	return true;
 }
 
 bool_var * not_propagator::evaluate(network * const net, const bool_var * const v) {
-    if (net->root_level()) {
-        return new bool_var(net, "!" + v->_name, evaluate(v));
-    }
-    else {
-        return new bool_var(net, "!" + v->_name, { true, false });
-    }
+	if (net->root_level()) {
+		return new bool_var(net, "!" + v->_name, evaluate(v));
+	}
+	else {
+		return new bool_var(net, "!" + v->_name, { true, false });
+	}
 }
 
 std::unordered_set<bool> not_propagator::evaluate(const bool_var * const v) {
-    if (v->singleton()) {
-        return{ !*v->to_vals().begin() };
-    }
-    else {
-        return{ true, false };
-    }
+	if (v->singleton()) {
+		return{ !*v->to_vals().begin() };
+	}
+	else {
+		return{ true, false };
+	}
 }

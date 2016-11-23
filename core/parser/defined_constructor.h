@@ -15,33 +15,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   defined_constructor.h
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- *
- * Created on November 9, 2016, 6:15 PM
- */
-
-#ifndef DEFINED_CONSTRUCTOR_H
-#define DEFINED_CONSTRUCTOR_H
+#pragma once
 
 #include "../constructor.h"
 #include "oRatioParser.h"
 
 namespace oratio {
 
-    class defined_constructor : public constructor {
-    public:
-        defined_constructor(core * const c, scope * const s, const std::vector<field*>& args, std::vector<oRatioParser::Initializer_elementContext*> init_els, oRatioParser::BlockContext * const b);
-        defined_constructor(defined_constructor&&) = delete;
-        virtual ~defined_constructor();
-    private:
-        std::vector<oRatioParser::Initializer_elementContext*> _init_els;
-        oRatioParser::BlockContext * const _block;
+	class defined_constructor : public constructor {
+	public:
+		defined_constructor(core * const c, scope * const s, const std::vector<field*>& args, std::vector<oRatioParser::Initializer_elementContext*> init_els, oRatioParser::BlockContext * const b);
+		defined_constructor(defined_constructor&&) = delete;
+		virtual ~defined_constructor();
+	private:
+		std::vector<oRatioParser::Initializer_elementContext*> _init_els;
+		oRatioParser::BlockContext * const _block;
 
-        bool invoke(item * const i, const std::vector<item*>& exprs) override;
-    };
+		bool invoke(item * const i, const std::vector<item*>& exprs) override;
+	};
 }
-
-#endif /* DEFINED_CONSTRUCTOR_H */
 

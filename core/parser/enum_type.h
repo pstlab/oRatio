@@ -15,37 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   enum_type.h
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- *
- * Created on November 9, 2016, 5:33 PM
- */
-
-#ifndef ENUM_TYPE_H
-#define ENUM_TYPE_H
+#pragma once
 
 #include "../type.h"
 #include "../item.h"
 
 namespace oratio {
 
-    class enum_type : public type {
-        friend class type_declaration_listener;
-        friend class type_refinement_listener;
-    public:
-        enum_type(core * const c, scope * const s, const std::string& name);
-        enum_type(enum_type&&) = delete;
-        virtual ~enum_type();
+	class enum_type : public type {
+		friend class type_declaration_listener;
+		friend class type_refinement_listener;
+	public:
+		enum_type(core * const c, scope * const s, const std::string& name);
+		enum_type(enum_type&&) = delete;
+		virtual ~enum_type();
 
-        std::vector<string_item*> get_enums();
-        item * new_instance(env * const e) override;
-    private:
-        std::vector<enum_type*> _enums;
+		std::vector<string_item*> get_enums();
+		item * new_instance(env * const e) override;
+	private:
+		std::vector<enum_type*> _enums;
 
-        void add_enum(string_item * const i);
-    };
+		void add_enum(string_item * const i);
+	};
 }
-
-#endif /* ENUM_TYPE_H */
 

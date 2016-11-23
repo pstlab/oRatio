@@ -27,109 +27,109 @@
 
 namespace oratio {
 
-    class item;
-    class env;
-    class constructor;
+	class item;
+	class env;
+	class constructor;
 
-    class type : public scope {
-        friend class item;
-        friend class type_declaration_listener;
-        friend class type_refinement_listener;
-    public:
-        type(core * const c, scope * const s, const std::string& name, bool primitive = false);
-        type(type&&) = delete;
-        virtual ~type();
+	class type : public scope {
+		friend class item;
+		friend class type_declaration_listener;
+		friend class type_refinement_listener;
+	public:
+		type(core * const c, scope * const s, const std::string& name, bool primitive = false);
+		type(type&&) = delete;
+		virtual ~type();
 
-        std::vector<type*> get_supertypes() const {
-            return _supertypes;
-        }
+		std::vector<type*> get_supertypes() const {
+			return _supertypes;
+		}
 
-        bool is_assignable_from(const type& t) const;
+		bool is_assignable_from(const type& t) const;
 
-        virtual item * new_instance(env * const e);
-        virtual item * new_existential();
+		virtual item * new_instance(env * const e);
+		virtual item * new_existential();
 
-        std::unordered_set<item*> get_instances() const {
-            return _instances;
-        }
+		std::unordered_set<item*> get_instances() const {
+			return _instances;
+		}
 
-        constructor * get_constructor(const std::vector<const type*>& ts) const;
+		constructor * get_constructor(const std::vector<const type*>& ts) const;
 
-        std::vector<constructor*> get_constructors() const {
-            return _constructors;
-        }
+		std::vector<constructor*> get_constructors() const {
+			return _constructors;
+		}
 
-        field * get_field(const std::string& name) const override;
-        method * get_method(const std::string& name, const std::vector<const type*>& ts) const override;
+		field * get_field(const std::string& name) const override;
+		method * get_method(const std::string& name, const std::vector<const type*>& ts) const override;
 
-        std::vector<method*> get_methods() const override {
-            std::vector<method*> methods;
-            for (const auto& ms : _methods) {
-                methods.insert(methods.begin(), ms.second.begin(), ms.second.end());
-            }
-            return methods;
-        }
+		std::vector<method*> get_methods() const override {
+			std::vector<method*> methods;
+			for (const auto& ms : _methods) {
+				methods.insert(methods.begin(), ms.second.begin(), ms.second.end());
+			}
+			return methods;
+		}
 
-        predicate * get_predicate(const std::string& name) const override;
+		predicate * get_predicate(const std::string& name) const override;
 
-        std::unordered_map<std::string, predicate*> get_predicates() const override {
-            return _predicates;
-        }
+		std::unordered_map<std::string, predicate*> get_predicates() const override {
+			return _predicates;
+		}
 
-        type * get_type(const std::string& name) const override;
+		type * get_type(const std::string& name) const override;
 
-        std::unordered_map<std::string, type*> get_types() const override {
-            return _types;
-        }
-    public:
-        const std::string _name;
-        const bool _primitive;
-    protected:
-        std::vector<type*> _supertypes;
-        std::vector<constructor*> _constructors;
-        std::unordered_map<std::string, std::vector<method*>> _methods;
-        std::unordered_map<std::string, type*> _types;
-        std::unordered_map<std::string, predicate*> _predicates;
-        std::unordered_set<item*> _instances;
-    protected:
+		std::unordered_map<std::string, type*> get_types() const override {
+			return _types;
+		}
+	public:
+		const std::string _name;
+		const bool _primitive;
+	protected:
+		std::vector<type*> _supertypes;
+		std::vector<constructor*> _constructors;
+		std::unordered_map<std::string, std::vector<method*>> _methods;
+		std::unordered_map<std::string, type*> _types;
+		std::unordered_map<std::string, predicate*> _predicates;
+		std::unordered_set<item*> _instances;
+	protected:
 
-        virtual void predicate_defined(predicate * const p) { }
-    };
+		virtual void predicate_defined(predicate * const p) { }
+	};
 
-    class bool_type : public type {
-    public:
-        bool_type(core * const c);
-        bool_type(bool_type&&) = delete;
-        virtual ~bool_type();
+	class bool_type : public type {
+	public:
+		bool_type(core * const c);
+		bool_type(bool_type&&) = delete;
+		virtual ~bool_type();
 
-        item* new_instance(env * const e) override;
-    };
+		item* new_instance(env * const e) override;
+	};
 
-    class int_type : public type {
-    public:
-        int_type(core * const c);
-        int_type(int_type&&) = delete;
-        virtual ~int_type();
+	class int_type : public type {
+	public:
+		int_type(core * const c);
+		int_type(int_type&&) = delete;
+		virtual ~int_type();
 
-        item* new_instance(env * const e) override;
-    };
+		item* new_instance(env * const e) override;
+	};
 
-    class real_type : public type {
-    public:
-        real_type(core * const c);
-        real_type(real_type&&) = delete;
-        virtual ~real_type();
+	class real_type : public type {
+	public:
+		real_type(core * const c);
+		real_type(real_type&&) = delete;
+		virtual ~real_type();
 
-        item* new_instance(env * const e) override;
-    };
+		item* new_instance(env * const e) override;
+	};
 
-    class string_type : public type {
-    public:
-        string_type(core * const c);
-        string_type(string_type&&) = delete;
-        virtual ~string_type();
+	class string_type : public type {
+	public:
+		string_type(core * const c);
+		string_type(string_type&&) = delete;
+		virtual ~string_type();
 
-        item* new_instance(env * const e) override;
-    };
+		item* new_instance(env * const e) override;
+	};
 }
 

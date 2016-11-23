@@ -27,18 +27,18 @@ state_variable::state_variable(core * const c) : crafty_type(c, c, STATE_VARIABL
 state_variable::~state_variable() { }
 
 void state_variable::predicate_defined(predicate * const p) {
-    p->get_supertypes().push_back(_core->get_predicate("IntervalPredicate"));
+	p->get_supertypes().push_back(_core->get_predicate("IntervalPredicate"));
 }
 
 std::vector<decision*> state_variable::get_inconsistencies() {
-    std::vector<decision*> incs;
-    return incs;
+	std::vector<decision*> incs;
+	return incs;
 }
 
 state_variable::state_variable_constructor::state_variable_constructor(core * const c, state_variable * const sv) : constructor(c, sv, std::vector<field*>(0)) { }
 
 bool state_variable::state_variable_constructor::invoke(item * const i, const std::vector<item*>& exprs) {
-    return true;
+	return true;
 }
 
 state_variable::state_variable_constructor::~state_variable_constructor() { }

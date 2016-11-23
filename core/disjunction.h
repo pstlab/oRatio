@@ -22,35 +22,35 @@
 
 namespace oratio {
 
-    class conjunction;
-    class env;
+	class conjunction;
+	class env;
 
-    class disjunction : public scope {
-    public:
-        disjunction(core * const c, scope * const s);
-        disjunction(disjunction&&) = delete;
-        virtual ~disjunction();
+	class disjunction : public scope {
+	public:
+		disjunction(core * const c, scope * const s);
+		disjunction(disjunction&&) = delete;
+		virtual ~disjunction();
 
-        std::vector<conjunction*> get_conjunctions() const {
-            return _conjunctions;
-        }
-    private:
-        std::vector<conjunction*> _conjunctions;
-    };
+		std::vector<conjunction*> get_conjunctions() const {
+			return _conjunctions;
+		}
+	private:
+		std::vector<conjunction*> _conjunctions;
+	};
 
-    class conjunction : public scope {
-    public:
-        conjunction(core * const c, scope * const s, ac::arith_var& cst);
-        conjunction(conjunction&&) = delete;
-        virtual ~conjunction();
+	class conjunction : public scope {
+	public:
+		conjunction(core * const c, scope * const s, ac::arith_var& cst);
+		conjunction(conjunction&&) = delete;
+		virtual ~conjunction();
 
-        ac::arith_var& get_cost() const {
-            return _cost;
-        }
+		ac::arith_var& get_cost() const {
+			return _cost;
+		}
 
-        virtual bool apply(env * const e) const = 0;
-    private:
-        ac::arith_var& _cost;
-    };
+		virtual bool apply(env * const e) const = 0;
+	private:
+		ac::arith_var& _cost;
+	};
 }
 

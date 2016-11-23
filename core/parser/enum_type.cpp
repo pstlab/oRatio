@@ -25,24 +25,24 @@ enum_type::enum_type(core * const c, scope * const s, const std::string& name) :
 enum_type::~enum_type() { }
 
 std::vector<string_item*> enum_type::get_enums() {
-    std::vector<string_item*> enums;
-    for (const auto& i : _instances) {
-        enums.push_back(static_cast<string_item*> (i));
-    }
-    for (const auto& e : _enums) {
-        std::vector<string_item*> c_enums = e->get_enums();
-        for (const auto& i : c_enums) {
-            enums.push_back(i);
-        }
-    }
-    return enums;
+	std::vector<string_item*> enums;
+	for (const auto& i : _instances) {
+		enums.push_back(static_cast<string_item*> (i));
+	}
+	for (const auto& e : _enums) {
+		std::vector<string_item*> c_enums = e->get_enums();
+		for (const auto& i : c_enums) {
+			enums.push_back(i);
+		}
+	}
+	return enums;
 }
 
 item* enum_type::new_instance(env * const e) {
-    std::unordered_set<item*> enums(get_enums().begin(), get_enums().end());
-    return _core->new_enum(this, enums);
+	std::unordered_set<item*> enums(get_enums().begin(), get_enums().end());
+	return _core->new_enum(this, enums);
 }
 
 void enum_type::add_enum(string_item * const i) {
-    _instances.insert(i);
+	_instances.insert(i);
 }

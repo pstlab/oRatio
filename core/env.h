@@ -22,28 +22,28 @@
 
 namespace oratio {
 
-    class core;
-    class item;
+	class core;
+	class item;
 
-    class env {
-        friend class default_constructor;
-        friend class defined_constructor;
-        friend class defined_method;
-        friend class defined_predicate;
-        friend class defined_conjunction;
-        friend class statement_visitor;
-    public:
-        env(core * const c, env * const e);
-        env(env&&) = delete;
-        virtual ~env();
+	class env {
+		friend class default_constructor;
+		friend class defined_constructor;
+		friend class defined_method;
+		friend class defined_predicate;
+		friend class defined_conjunction;
+		friend class statement_visitor;
+	public:
+		env(core * const c, env * const e);
+		env(env&&) = delete;
+		virtual ~env();
 
-        virtual item* get(const std::string& name) const;
-        std::unordered_map<std::string, item*> get_items() const;
-    public:
-        core * const _core;
-        env * const _env;
-    protected:
-        std::unordered_map<std::string, item*> _items;
-    };
+		virtual item* get(const std::string& name) const;
+		std::unordered_map<std::string, item*> get_items() const;
+	public:
+		core * const _core;
+		env * const _env;
+	protected:
+		std::unordered_map<std::string, item*> _items;
+	};
 }
 

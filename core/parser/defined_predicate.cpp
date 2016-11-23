@@ -15,13 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   defined_predicate.cpp
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- * 
- * Created on November 9, 2016, 6:29 PM
- */
-
 #include "defined_predicate.h"
 #include "statement_visitor.h"
 #include "../core.h"
@@ -35,11 +28,11 @@ defined_predicate::defined_predicate(core * const c, scope * const s, const std:
 defined_predicate::~defined_predicate() { }
 
 bool defined_predicate::apply_rule(atom * const a) const {
-    for (const auto& sp : get_supertypes()) {
-        static_cast<predicate*> (sp)->apply_rule(a);
-    }
+	for (const auto& sp : get_supertypes()) {
+		static_cast<predicate*> (sp)->apply_rule(a);
+	}
 
-    env* c_env = new env(_core, a);
-    c_env->_items.insert({THIS_KEYWORD, a});
-    return statement_visitor(_core, c_env).visit(_block);
+	env* c_env = new env(_core, a);
+	c_env->_items.insert({ THIS_KEYWORD, a });
+	return statement_visitor(_core, c_env).visit(_block);
 }

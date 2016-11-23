@@ -15,13 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   defined_constructor.cpp
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- * 
- * Created on November 9, 2016, 6:15 PM
- */
-
 #include "defined_constructor.h"
 #include "instantiated_field.h"
 #include "expression_visitor.h"
@@ -37,46 +30,49 @@ defined_constructor::defined_constructor(core * const c, scope * const s, const 
 defined_constructor::~defined_constructor() { }
 
 bool defined_constructor::invoke(item * const i, const std::vector<item*>& exprs) {
-    std::unordered_map<std::string, field*> fields = _scope->get_fields();
-    for (const auto& f : fields) {
-        if (instantiated_field * inst_f = dynamic_cast<instantiated_field*> (f.second)) {
-            i->_items.insert({f.second->_name, expression_visitor(_core, i).visit(inst_f->_expr)});
-        }
-    }
-    env* c_env = new env(_core, i);
-    c_env->_items.insert({THIS_KEYWORD, i});
+	std::unordered_map<std::string, field*> fields = _scope->get_fields();
+	for (const auto& f : fields) {
+		if (instantiated_field * inst_f = dynamic_cast<instantiated_field*> (f.second)) {
+			i->_items.insert({ f.second->_name, expression_visitor(_core, i).visit(inst_f->_expr) });
+		}
+	}
+	env* c_env = new env(_core, i);
+	c_env->_items.insert({ THIS_KEYWORD, i });
 
-    for (unsigned int j = 0; j < _args.size(); j++) {
-        c_env->_items.insert({_args[j]->_name, exprs[j]});
-    }
-    for (const auto& el : _init_els) {
-        if (fields.find(el->name->getText()) != fields.end()) {
-            i->_items.insert({el->name->getText(), expression_visitor(_core, c_env).visit(el->expr_list()->expr(0))});
-        } else {
-            std::vector<item*> exprs;
-            std::vector<const type*> par_types;
-            if (el->expr_list()) {
-                for (const auto& expr : el->expr_list()->expr()) {
-                    item * i = expression_visitor(_core, c_env).visit(expr).as<item*>();
-                    exprs.push_back(i);
-                    par_types.push_back(i->get_type());
-                }
-            }
-            get_type(el->name->getText())->get_constructor(par_types)->invoke(i, exprs);
-        }
-    }
+	for (unsigned int j = 0; j < _args.size(); j++) {
+		c_env->_items.insert({ _args[j]->_name, exprs[j] });
+	}
+	for (const auto& el : _init_els) {
+		if (fields.find(el->name->getText()) != fields.end()) {
+			i->_items.insert({ el->name->getText(), expression_visitor(_core, c_env).visit(el->expr_list()->expr(0)) });
+		}
+		else {
+			std::vector<item*> exprs;
+			std::vector<const type*> par_types;
+			if (el->expr_list()) {
+				for (const auto& expr : el->expr_list()->expr()) {
+					item * i = expression_visitor(_core, c_env).visit(expr).as<item*>();
+					exprs.push_back(i);
+					par_types.push_back(i->get_type());
+				}
+			}
+			get_type(el->name->getText())->get_constructor(par_types)->invoke(i, exprs);
+		}
+	}
 
-    for (const auto& f : _scope->get_fields()) {
-        if (!f.second->_synthetic) {
-            if (instantiated_field * inst_f = dynamic_cast<instantiated_field*> (f.second)) {
-                i->_items.insert({f.second->_name, expression_visitor(_core, i).visit(inst_f->_expr)});
-            } else if (f.second->_type->_primitive) {
-                i->_items.insert({f.second->_name, const_cast<type*> (f.second->_type)->new_instance(i)});
-            } else {
-                i->_items.insert({f.second->_name, const_cast<type*> (f.second->_type)->new_existential()});
-            }
-        }
-    }
+	for (const auto& f : _scope->get_fields()) {
+		if (!f.second->_synthetic) {
+			if (instantiated_field * inst_f = dynamic_cast<instantiated_field*> (f.second)) {
+				i->_items.insert({ f.second->_name, expression_visitor(_core, i).visit(inst_f->_expr) });
+			}
+			else if (f.second->_type->_primitive) {
+				i->_items.insert({ f.second->_name, const_cast<type*> (f.second->_type)->new_instance(i) });
+			}
+			else {
+				i->_items.insert({ f.second->_name, const_cast<type*> (f.second->_type)->new_existential() });
+			}
+		}
+	}
 
-    return statement_visitor(_core, c_env).visit(_block);
+	return statement_visitor(_core, c_env).visit(_block);
 }

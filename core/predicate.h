@@ -21,19 +21,19 @@
 
 namespace oratio {
 
-    class predicate : public type {
-    public:
-        predicate(core * const c, scope * const s, const std::string& name, const std::vector<field*>& args);
-        predicate(predicate&&) = delete;
-        virtual ~predicate();
+	class predicate : public type {
+	public:
+		predicate(core * const c, scope * const s, const std::string& name, const std::vector<field*>& args);
+		predicate(predicate&&) = delete;
+		virtual ~predicate();
 
-        const std::vector<field*> get_args() const {
-            return _args;
-        }
+		const std::vector<field*> get_args() const {
+			return _args;
+		}
 
-        virtual bool apply_rule(atom * const a) const = 0;
-    protected:
-        const std::vector<field*> _args;
-    };
+		virtual bool apply_rule(atom * const a) const = 0;
+	protected:
+		const std::vector<field*> _args;
+	};
 }
 

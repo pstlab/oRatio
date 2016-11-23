@@ -23,112 +23,112 @@
 
 namespace oratio {
 
-    class type;
+	class type;
 
-    class item : public virtual env {
-    public:
-        item(core * const c, env * const e, const type * const t);
-        item(item&&) = delete;
-        virtual ~item();
+	class item : public virtual env {
+	public:
+		item(core * const c, env * const e, const type * const t);
+		item(item&&) = delete;
+		virtual ~item();
 
-        const type * const get_type() const {
-            return _type;
-        }
+		const type * const get_type() const {
+			return _type;
+		}
 
-        virtual ac::bool_var * eq(item * const i);
-        virtual bool equates(item * const i);
-    public:
-        const type * const _type;
-    };
+		virtual ac::bool_var * eq(item * const i);
+		virtual bool equates(item * const i);
+	public:
+		const type * const _type;
+	};
 
-    class bool_item : public virtual item {
-    public:
-        bool_item(core * const c, ac::bool_var& v);
-        bool_item(bool_item&&) = delete;
+	class bool_item : public virtual item {
+	public:
+		bool_item(core * const c, ac::bool_var& v);
+		bool_item(bool_item&&) = delete;
 
-        ac::bool_var& get_bool_var() const {
-            return _var;
-        }
+		ac::bool_var& get_bool_var() const {
+			return _var;
+		}
 
-        ac::bool_var* eq(item * const i) override;
-        bool equates(item * const i) override;
-    protected:
-        ac::bool_var& _var;
-    };
+		ac::bool_var* eq(item * const i) override;
+		bool equates(item * const i) override;
+	protected:
+		ac::bool_var& _var;
+	};
 
-    class arith_item : public virtual item {
-    public:
-        arith_item(core * const c, const type * const t, ac::arith_var& v);
-        arith_item(arith_item&&) = delete;
+	class arith_item : public virtual item {
+	public:
+		arith_item(core * const c, const type * const t, ac::arith_var& v);
+		arith_item(arith_item&&) = delete;
 
-        ac::arith_var& get_arith_var() const {
-            return _var;
-        }
+		ac::arith_var& get_arith_var() const {
+			return _var;
+		}
 
-        ac::bool_var* eq(item * const i) override;
-        bool equates(item * const i) override;
-    protected:
-        ac::arith_var& _var;
-    };
+		ac::bool_var* eq(item * const i) override;
+		bool equates(item * const i) override;
+	protected:
+		ac::arith_var& _var;
+	};
 
-    class string_item : public item {
-    public:
-        string_item(core * const c, std::string& v);
-        string_item(string_item&&) = delete;
+	class string_item : public item {
+	public:
+		string_item(core * const c, std::string& v);
+		string_item(string_item&&) = delete;
 
-        std::string& get_value() const {
-            return _val;
-        }
+		std::string& get_value() const {
+			return _val;
+		}
 
-        void set_value(const std::string& _val) {
-            this->_val = _val;
-        }
+		void set_value(const std::string& _val) {
+			this->_val = _val;
+		}
 
-        ac::bool_var* eq(item * const i) override;
-        bool equates(item * const i) override;
-    protected:
-        std::string& _val;
-    };
+		ac::bool_var* eq(item * const i) override;
+		bool equates(item * const i) override;
+	protected:
+		std::string& _val;
+	};
 
-    class enum_item : public virtual item {
-        friend class core;
-    public:
-        enum_item(core * const c, const type * const t, ac::enum_var<item*>& v);
-        enum_item(enum_item&&) = delete;
+	class enum_item : public virtual item {
+		friend class core;
+	public:
+		enum_item(core * const c, const type * const t, ac::enum_var<item*>& v);
+		enum_item(enum_item&&) = delete;
 
-        item* get(const std::string& name) const override;
+		item* get(const std::string& name) const override;
 
-        ac::enum_var<item*>& get_enum_var() const {
-            return _var;
-        }
+		ac::enum_var<item*>& get_enum_var() const {
+			return _var;
+		}
 
-        ac::bool_var* allows(item * const i) const {
-            return _eqs.at(i);
-        }
+		ac::bool_var* allows(item * const i) const {
+			return _eqs.at(i);
+		}
 
-        ac::bool_var* eq(item * const i) override;
-        bool equates(item * const i) override;
-    protected:
-        ac::enum_var<item*>& _var;
-        std::unordered_map<item*, ac::bool_var*> _eqs;
-    };
+		ac::bool_var* eq(item * const i) override;
+		bool equates(item * const i) override;
+	protected:
+		ac::enum_var<item*>& _var;
+		std::unordered_map<item*, ac::bool_var*> _eqs;
+	};
 
-    class bool_enum : public bool_item, public enum_item {
-    public:
-        bool_enum(core * const c, ac::bool_var& v, ac::enum_var<item*>& vs);
-        bool_enum(bool_enum&&) = delete;
+	class bool_enum : public bool_item, public enum_item {
+	public:
+		bool_enum(core * const c, ac::bool_var& v, ac::enum_var<item*>& vs);
+		bool_enum(bool_enum&&) = delete;
 
-        ac::bool_var* eq(item * const i) override;
-        bool equates(item * const i) override;
-    };
+		ac::bool_var* eq(item * const i) override;
+		bool equates(item * const i) override;
+	};
 
-    class arith_enum : public arith_item, public enum_item {
-    public:
-        arith_enum(core * const c, const type * const t, ac::arith_var& v, ac::enum_var<item*>& vs);
-        arith_enum(arith_enum&&) = delete;
+	class arith_enum : public arith_item, public enum_item {
+	public:
+		arith_enum(core * const c, const type * const t, ac::arith_var& v, ac::enum_var<item*>& vs);
+		arith_enum(arith_enum&&) = delete;
 
-        ac::bool_var* eq(item * const i) override;
-        bool equates(item * const i) override;
-    };
+		ac::bool_var* eq(item * const i) override;
+		bool equates(item * const i) override;
+	};
 }
 

@@ -21,23 +21,23 @@
 
 namespace oratio {
 
-    class parser;
+	class parser;
 
-    class type_visitor : public oRatioBaseVisitor {
-    public:
-        type_visitor(parser * const p);
-        type_visitor(type_visitor&&) = delete;
-        virtual ~type_visitor();
-    private:
-        parser * const _parser;
+	class type_visitor : public oRatioBaseVisitor {
+	public:
+		type_visitor(parser * const p);
+		type_visitor(type_visitor&&) = delete;
+		virtual ~type_visitor();
+	private:
+		parser * const _parser;
 
-        antlrcpp::Any visitLiteral_expression(oRatioParser::Literal_expressionContext* ctx) override;
-        antlrcpp::Any visitCast_expression(oRatioParser::Cast_expressionContext* ctx) override;
-        antlrcpp::Any visitPrimitive_type(oRatioParser::Primitive_typeContext* ctx) override;
-        antlrcpp::Any visitClass_type(oRatioParser::Class_typeContext* ctx) override;
-        antlrcpp::Any visitQualified_id(oRatioParser::Qualified_idContext* ctx) override;
-        antlrcpp::Any visitQualified_id_expression(oRatioParser::Qualified_id_expressionContext* ctx) override;
-        antlrcpp::Any visitConstructor_expression(oRatioParser::Constructor_expressionContext* ctx) override;
-    };
+		antlrcpp::Any visitLiteral_expression(oRatioParser::Literal_expressionContext* ctx) override;
+		antlrcpp::Any visitCast_expression(oRatioParser::Cast_expressionContext* ctx) override;
+		antlrcpp::Any visitPrimitive_type(oRatioParser::Primitive_typeContext* ctx) override;
+		antlrcpp::Any visitClass_type(oRatioParser::Class_typeContext* ctx) override;
+		antlrcpp::Any visitQualified_id(oRatioParser::Qualified_idContext* ctx) override;
+		antlrcpp::Any visitQualified_id_expression(oRatioParser::Qualified_id_expressionContext* ctx) override;
+		antlrcpp::Any visitConstructor_expression(oRatioParser::Constructor_expressionContext* ctx) override;
+	};
 }
 

@@ -22,23 +22,23 @@
 
 namespace oratio {
 
-    class predicate;
+	class predicate;
 
-    enum atom_state {
-        active, inactive, unified
-    };
+	enum atom_state {
+		active, inactive, unified
+	};
 
-    class atom : public item {
-    public:
-        atom(core * const c, env * const e, const predicate * const p);
-        atom(atom&&) = delete;
-        virtual ~atom();
+	class atom : public item {
+	public:
+		atom(core * const c, env * const e, const predicate * const p);
+		atom(atom&&) = delete;
+		virtual ~atom();
 
-        ac::enum_var<int>& get_state() const {
-            return _state;
-        }
-    private:
-        ac::enum_var<int>& _state;
-    };
+		ac::enum_var<int>& get_state() const {
+			return _state;
+		}
+	private:
+		ac::enum_var<int>& _state;
+	};
 }
 

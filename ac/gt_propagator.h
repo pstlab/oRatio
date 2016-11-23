@@ -21,23 +21,23 @@
 
 namespace ac {
 
-    class gt_propagator : public propagator {
-        friend class network;
-    public:
-        gt_propagator(gt_propagator&&) = delete;
-        virtual ~gt_propagator();
+	class gt_propagator : public propagator {
+		friend class network;
+	public:
+		gt_propagator(gt_propagator&&) = delete;
+		virtual ~gt_propagator();
 
-        static std::unordered_set<bool> evaluate(arith_var * const left, arith_var * const right);
-    private:
-        arith_var * const _left;
-        arith_var * const _right;
-        bool_var * const _gt;
-        z3::expr _gt_expr;
+		static std::unordered_set<bool> evaluate(arith_var * const left, arith_var * const right);
+	private:
+		arith_var * const _left;
+		arith_var * const _right;
+		bool_var * const _gt;
+		z3::expr _gt_expr;
 
-        gt_propagator(network * const net, arith_var * const left, arith_var * const right);
-        bool propagate(const var * const v) override;
-        static bool_var * evaluate(network * const net, arith_var * const left, arith_var * const right);
-        static std::string to_string(arith_var * const left, arith_var * const right);
-    };
+		gt_propagator(network * const net, arith_var * const left, arith_var * const right);
+		bool propagate(const var * const v) override;
+		static bool_var * evaluate(network * const net, arith_var * const left, arith_var * const right);
+		static std::string to_string(arith_var * const left, arith_var * const right);
+	};
 }
 

@@ -22,40 +22,40 @@
 
 namespace oratio {
 
-    class core;
-    class scope;
+	class core;
+	class scope;
 
-    class parser {
-        friend class type_declaration_listener;
-        friend class type_refinement_listener;
-        friend class type_visitor;
-        friend class expression_visitor;
-        friend class statement_visitor;
-    public:
-        parser(core * const c);
-        parser(parser&&) = delete;
-        virtual ~parser();
+	class parser {
+		friend class type_declaration_listener;
+		friend class type_refinement_listener;
+		friend class type_visitor;
+		friend class expression_visitor;
+		friend class statement_visitor;
+	public:
+		parser(core * const c);
+		parser(parser&&) = delete;
+		virtual ~parser();
 
-        virtual bool read(const std::string& script);
-        virtual bool read(const std::vector<std::string>& files);
-    public:
-        core * const _core;
+		virtual bool read(const std::string& script);
+		virtual bool read(const std::vector<std::string>& files);
+	public:
+		core * const _core;
 
-    private:
-        std::map<antlr4::tree::ParseTree*, scope*> _scopes;
-        oRatioParser * _parser;
+	private:
+		std::map<antlr4::tree::ParseTree*, scope*> _scopes;
+		oRatioParser * _parser;
 
-        class snippet {
-            friend class parser;
-        private:
-            const std::string& _file;
-            oRatioParser * const _parser;
-            oRatioParser::Compilation_unitContext * const _cu;
+		class snippet {
+			friend class parser;
+		private:
+			const std::string& _file;
+			oRatioParser * const _parser;
+			oRatioParser::Compilation_unitContext * const _cu;
 
-            snippet(const std::string& file, oRatioParser * const p, oRatioParser::Compilation_unitContext * const cu);
-            snippet(snippet&&) = delete;
-            virtual ~snippet();
-        };
-    };
+			snippet(const std::string& file, oRatioParser * const p, oRatioParser::Compilation_unitContext * const cu);
+			snippet(snippet&&) = delete;
+			virtual ~snippet();
+		};
+	};
 }
 

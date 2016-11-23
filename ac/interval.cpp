@@ -28,130 +28,130 @@ interval::interval(double lb, double ub) : lb(lb), ub(ub) {}
 interval::~interval() {}
 
 bool interval::consistent() const {
-    return lb <= ub;
+	return lb <= ub;
 }
 
 bool interval::constant() const {
-    return lb == ub;
+	return lb == ub;
 }
 
 bool interval::intersecting(const interval& i) const {
-    return ub >= i.lb && lb <= i.ub;
+	return ub >= i.lb && lb <= i.ub;
 }
 
 bool interval::contains(const interval& i) const {
-    return lb <= i.lb && ub >= i.ub;
+	return lb <= i.lb && ub >= i.ub;
 }
 
 bool interval::operator!=(const interval& right) const {
-    return ub < right.lb || lb > right.ub;
+	return ub < right.lb || lb > right.ub;
 }
 
 bool interval::operator<(const interval& right) const {
-    return ub < right.lb;
+	return ub < right.lb;
 }
 
 bool interval::operator<=(const interval& right) const {
-    return ub <= right.lb;
+	return ub <= right.lb;
 }
 
 bool interval::operator==(const interval& right) const {
-    return constant() && right.constant() && lb == right.lb;
+	return constant() && right.constant() && lb == right.lb;
 }
 
 bool interval::operator>=(const interval& right) const {
-    return lb >= right.ub;
+	return lb >= right.ub;
 }
 
 bool interval::operator>(const interval& right) const {
-    return lb > right.ub;
+	return lb > right.ub;
 }
 
 interval& interval::operator+=(const interval& right) {
-    lb += right.lb;
-    ub += right.ub;
-    return *this;
+	lb += right.lb;
+	ub += right.ub;
+	return *this;
 }
 
 interval& interval::operator+=(const double& right) {
-    lb += right;
-    ub += right;
-    return *this;
+	lb += right;
+	ub += right;
+	return *this;
 }
 
 interval& interval::operator-=(const interval& right) {
-    lb -= right.ub;
-    ub -= right.lb;
-    return *this;
+	lb -= right.ub;
+	ub -= right.lb;
+	return *this;
 }
 
 interval& interval::operator-=(const double& right) {
-    lb -= right;
-    ub -= right;
-    return *this;
+	lb -= right;
+	ub -= right;
+	return *this;
 }
 
 interval& interval::operator*=(const interval& right) {
-    double c_lb = std::numeric_limits<double>::infinity();
-    double c_ub = -std::numeric_limits<double>::infinity();
-    for (const auto& i : { lb * right.lb, lb * right.ub, ub * right.lb, ub * right.ub }) {
-        if (i < c_lb)
-            c_lb = i;
-        if (i > c_ub)
-            c_ub = i;
-    }
-    lb = c_lb;
-    ub = c_ub;
-    return *this;
+	double c_lb = std::numeric_limits<double>::infinity();
+	double c_ub = -std::numeric_limits<double>::infinity();
+	for (const auto& i : { lb * right.lb, lb * right.ub, ub * right.lb, ub * right.ub }) {
+		if (i < c_lb)
+			c_lb = i;
+		if (i > c_ub)
+			c_ub = i;
+	}
+	lb = c_lb;
+	ub = c_ub;
+	return *this;
 }
 
 interval& interval::operator*=(const double& right) {
-    if (right >= 0) {
-        lb *= right;
-        ub *= right;
-    }
-    else {
-        double c_lb = lb;
-        lb = ub * right;
-        ub = c_lb * right;
-    }
-    return *this;
+	if (right >= 0) {
+		lb *= right;
+		ub *= right;
+	}
+	else {
+		double c_lb = lb;
+		lb = ub * right;
+		ub = c_lb * right;
+	}
+	return *this;
 }
 
 interval& interval::operator/=(const interval& right) {
-    if (right.lb <= 0 && right.ub >= 0) {
-        // 0 appears in the denominator..
-        lb = -std::numeric_limits<double>::infinity();
-        ub = std::numeric_limits<double>::infinity();
-    }
-    else {
-        double c_lb = std::numeric_limits<double>::infinity();
-        double c_ub = -std::numeric_limits<double>::infinity();
-        for (const auto& i : { lb / right.lb, lb / right.ub, ub / right.lb, ub / right.ub }) {
-            if (i < c_lb)
-                c_lb = i;
-            if (i > c_ub)
-                c_ub = i;
-        }
-        lb = c_lb;
-        ub = c_ub;
-    }
-    return *this;
+	if (right.lb <= 0 && right.ub >= 0) {
+		// 0 appears in the denominator..
+		lb = -std::numeric_limits<double>::infinity();
+		ub = std::numeric_limits<double>::infinity();
+	}
+	else {
+		double c_lb = std::numeric_limits<double>::infinity();
+		double c_ub = -std::numeric_limits<double>::infinity();
+		for (const auto& i : { lb / right.lb, lb / right.ub, ub / right.lb, ub / right.ub }) {
+			if (i < c_lb)
+				c_lb = i;
+			if (i > c_ub)
+				c_ub = i;
+		}
+		lb = c_lb;
+		ub = c_ub;
+	}
+	return *this;
 }
 
 interval& interval::operator/=(const double& right) {
-    if (right >= 0) {
-        lb /= right;
-        ub /= right;
-    }
-    else {
-        double c_lb = lb;
-        lb = ub / right;
-        ub = c_lb / right;
-    }
-    return *this;
+	if (right >= 0) {
+		lb /= right;
+		ub /= right;
+	}
+	else {
+		double c_lb = lb;
+		lb = ub / right;
+		ub = c_lb / right;
+	}
+	return *this;
 }
 
 interval interval::operator-() const {
-    return interval(-ub, -lb);
+	return interval(-ub, -lb);
 }

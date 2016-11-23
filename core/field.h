@@ -21,17 +21,17 @@
 
 namespace oratio {
 
-    class type;
+	class type;
 
-    class field {
-    public:
-        field(const type * const t, const std::string& name, bool synthetic = false);
-        field(field&&) = delete;
-        virtual ~field();
-    public:
-        const type * const _type;
-        const std::string _name;
-        const bool _synthetic;
-    };
+	class field {
+	public:
+		field(const type * const t, const std::string& name, bool synthetic = false);
+		field(field&&) = delete;
+		virtual ~field();
+	public:
+		const type * const _type;
+		const std::string _name;
+		const bool _synthetic;
+	};
 }
 

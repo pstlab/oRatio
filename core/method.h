@@ -21,24 +21,24 @@
 
 namespace oratio {
 
-    class env;
-    class item;
+	class env;
+	class item;
 
-    class method : public scope {
-        friend class core;
-        friend class type;
-    public:
-        method(core * const c, scope * const s, const std::string& name, const std::vector<field*>& args, const type * const return_type = nullptr);
-        method(method&&) = delete;
-        virtual ~method();
+	class method : public scope {
+		friend class core;
+		friend class type;
+	public:
+		method(core * const c, scope * const s, const std::string& name, const std::vector<field*>& args, const type * const return_type = nullptr);
+		method(method&&) = delete;
+		virtual ~method();
 
-        virtual bool invoke(env * const e, const std::vector<item*>& exprs) = 0;
-    public:
-        const std::string _name;
-    protected:
-        const std::vector<field*> _args;
-    public:
-        const type * const _return_type;
-    };
+		virtual bool invoke(env * const e, const std::vector<item*>& exprs) = 0;
+	public:
+		const std::string _name;
+	protected:
+		const std::vector<field*> _args;
+	public:
+		const type * const _return_type;
+	};
 }
 

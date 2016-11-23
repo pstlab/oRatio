@@ -24,5 +24,5 @@ propagator::propagator(network * const n) :_net(n) {}
 propagator::~propagator() {}
 
 std::vector<var*> ac::propagator::get_vars() {
-    return _vars;
+	return _vars;
 }

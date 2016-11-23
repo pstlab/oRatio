@@ -27,11 +27,11 @@ enum_decision::enum_decision(solver * const s, choice * const cause, enum_item *
 enum_decision::~enum_decision() { }
 
 bool enum_decision::compute_choices(std::vector<choice*>& cs) {
-    std::unordered_set<item*> vals = _enum->get_enum_var().to_vals();
-    for (const auto& val : vals) {
-        cs.push_back(new choose_value(_solver, _solver->_net.new_real(1.0 / vals.size()), this, val));
-    }
-    return true;
+	std::unordered_set<item*> vals = _enum->get_enum_var().to_vals();
+	for (const auto& val : vals) {
+		cs.push_back(new choose_value(_solver, _solver->_net.new_real(1.0 / vals.size()), this, val));
+	}
+	return true;
 }
 
 enum_decision::choose_value::choose_value(solver * const s, ac::arith_var* cost, enum_decision * const ep, item * const val) : choice(s, cost, ep), _value(val) { }
@@ -39,6 +39,6 @@ enum_decision::choose_value::choose_value(solver * const s, ac::arith_var* cost,
 enum_decision::choose_value::~choose_value() { }
 
 bool enum_decision::choose_value::apply() {
-    _estimated_cost = 0;
-    return _solver->_net.add({ _solver->_net.eq(_in_plan, static_cast<enum_decision*> (_effect)->_enum->allows(_value)) });
+	_estimated_cost = 0;
+	return _solver->_net.add({ _solver->_net.eq(_in_plan, static_cast<enum_decision*> (_effect)->_enum->allows(_value)) });
 }

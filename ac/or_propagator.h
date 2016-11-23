@@ -21,23 +21,23 @@
 
 namespace ac {
 
-    class or_propagator : public propagator {
-        friend class network;
-    public:
-        or_propagator(or_propagator&&) = delete;
-        virtual ~or_propagator();
+	class or_propagator : public propagator {
+		friend class network;
+	public:
+		or_propagator(or_propagator&&) = delete;
+		virtual ~or_propagator();
 
-        static bool satisfied(const std::vector <bool_var*>& vars);
-        static bool unsatisfiable(const std::vector <bool_var*>& vars);
-        static std::unordered_set<bool> evaluate(const std::vector <bool_var*>& vars);
-    private:
-        const std::vector<bool_var*> _vars;
-        bool_var * const _or;
+		static bool satisfied(const std::vector <bool_var*>& vars);
+		static bool unsatisfiable(const std::vector <bool_var*>& vars);
+		static std::unordered_set<bool> evaluate(const std::vector <bool_var*>& vars);
+	private:
+		const std::vector<bool_var*> _vars;
+		bool_var * const _or;
 
-        or_propagator(network * const net, const std::vector<bool_var*> vars);
-        bool propagate(const var * const v) override;
-        static bool_var * evaluate(network * const net, const std::vector <bool_var*>& vars);
-        static std::string to_string(const std::vector<bool_var*>& vars);
-    };
+		or_propagator(network * const net, const std::vector<bool_var*> vars);
+		bool propagate(const var * const v) override;
+		static bool_var * evaluate(network * const net, const std::vector <bool_var*>& vars);
+		static std::string to_string(const std::vector<bool_var*>& vars);
+	};
 }
 

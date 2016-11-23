@@ -27,8 +27,8 @@ fact_decision::fact_decision(solver * const s, choice * const cause, atom * cons
 fact_decision::~fact_decision() { }
 
 bool fact_decision::compute_choices(std::vector<choice*>& cs) {
-    cs.push_back(new add_fact(_solver, _solver->_net.new_real(0), this));
-    return true;
+	cs.push_back(new add_fact(_solver, _solver->_net.new_real(0), this));
+	return true;
 }
 
 fact_decision::add_fact::add_fact(solver * const s, ac::arith_var* cost, fact_decision * const f) : choice(s, cost, f) { }
@@ -36,6 +36,6 @@ fact_decision::add_fact::add_fact(solver * const s, ac::arith_var* cost, fact_de
 fact_decision::add_fact::~add_fact() { }
 
 bool fact_decision::add_fact::apply() {
-    _estimated_cost = 0;
-    return _solver->_net.add({ _solver->_net.eq(_in_plan, _solver->_net.eq<int>(&static_cast<fact_decision*> (_effect)->_atom->get_state(), atom_state::active)) });
+	_estimated_cost = 0;
+	return _solver->_net.add({ _solver->_net.eq(_in_plan, _solver->_net.eq<int>(&static_cast<fact_decision*> (_effect)->_atom->get_state(), atom_state::active)) });
 }

@@ -21,21 +21,21 @@
 
 namespace ac {
 
-    class sum_propagator : public propagator {
-        friend class network;
-    public:
-        sum_propagator(sum_propagator&&) = delete;
-        virtual ~sum_propagator();
+	class sum_propagator : public propagator {
+		friend class network;
+	public:
+		sum_propagator(sum_propagator&&) = delete;
+		virtual ~sum_propagator();
 
-        static interval evaluate(const std::vector <arith_var*>& vars);
-    private:
-        const std::vector<arith_var*> _vars;
-        arith_var * const _sum;
+		static interval evaluate(const std::vector <arith_var*>& vars);
+	private:
+		const std::vector<arith_var*> _vars;
+		arith_var * const _sum;
 
-        sum_propagator(network * const net, const std::vector<arith_var*> vars);
-        bool propagate(const var * const v) override;
-        static arith_var * evaluate(network * const net, const std::vector <arith_var*>& vars);
-        static std::string to_string(const std::vector<arith_var*>& vars);
-    };
+		sum_propagator(network * const net, const std::vector<arith_var*> vars);
+		bool propagate(const var * const v) override;
+		static arith_var * evaluate(network * const net, const std::vector <arith_var*>& vars);
+		static std::string to_string(const std::vector<arith_var*>& vars);
+	};
 }
 

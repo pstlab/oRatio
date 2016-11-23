@@ -21,20 +21,20 @@
 
 namespace ac {
 
-    class minus_propagator : public propagator {
-        friend class network;
-    public:
-        minus_propagator(minus_propagator&&) = delete;
-        virtual ~minus_propagator();
+	class minus_propagator : public propagator {
+		friend class network;
+	public:
+		minus_propagator(minus_propagator&&) = delete;
+		virtual ~minus_propagator();
 
-        static interval evaluate(arith_var * const v);
-    private:
-        arith_var * const _var;
-        arith_var * const _minus;
+		static interval evaluate(arith_var * const v);
+	private:
+		arith_var * const _var;
+		arith_var * const _minus;
 
-        minus_propagator(network * const net, arith_var * const v);
-        bool propagate(const var * const v) override;
-        static arith_var * evaluate(network * const net, arith_var * const v);
-    };
+		minus_propagator(network * const net, arith_var * const v);
+		bool propagate(const var * const v) override;
+		static arith_var * evaluate(network * const net, arith_var * const v);
+	};
 }
 

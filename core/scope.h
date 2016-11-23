@@ -26,59 +26,59 @@
 
 namespace oratio {
 
-    class core;
-    class field;
-    class method;
-    class type;
-    class predicate;
-    class atom;
+	class core;
+	class field;
+	class method;
+	class type;
+	class predicate;
+	class atom;
 
-    class scope {
-        friend class type_refinement_listener;
-    public:
-        scope(core * const c, scope * const s);
-        scope(scope&&) = delete;
-        virtual ~scope();
+	class scope {
+		friend class type_refinement_listener;
+	public:
+		scope(core * const c, scope * const s);
+		scope(scope&&) = delete;
+		virtual ~scope();
 
-        virtual field * get_field(const std::string& name) const;
-        std::unordered_map<std::string, field*> get_fields() const;
+		virtual field * get_field(const std::string& name) const;
+		std::unordered_map<std::string, field*> get_fields() const;
 
-        virtual method * get_method(const std::string& name, const std::vector<const type*>& ts) const {
-            return _scope->get_method(name, ts);
-        }
+		virtual method * get_method(const std::string& name, const std::vector<const type*>& ts) const {
+			return _scope->get_method(name, ts);
+		}
 
-        virtual std::vector<method*> get_methods() const {
-            return _scope->get_methods();
-        }
+		virtual std::vector<method*> get_methods() const {
+			return _scope->get_methods();
+		}
 
-        virtual type * get_type(const std::string& name) const {
-            return _scope->get_type(name);
-        }
+		virtual type * get_type(const std::string& name) const {
+			return _scope->get_type(name);
+		}
 
-        virtual std::unordered_map<std::string, type*> get_types() const {
-            return _scope->get_types();
-        }
+		virtual std::unordered_map<std::string, type*> get_types() const {
+			return _scope->get_types();
+		}
 
-        virtual predicate * get_predicate(const std::string& name) const {
-            return _scope->get_predicate(name);
-        }
+		virtual predicate * get_predicate(const std::string& name) const {
+			return _scope->get_predicate(name);
+		}
 
-        virtual std::unordered_map<std::string, predicate*> get_predicates() const {
-            return _scope->get_predicates();
-        }
+		virtual std::unordered_map<std::string, predicate*> get_predicates() const {
+			return _scope->get_predicates();
+		}
 
-        virtual bool fact_created(atom * const a) {
-            return true;
-        }
+		virtual bool fact_created(atom * const a) {
+			return true;
+		}
 
-        virtual bool goal_created(atom * const a) {
-            return true;
-        }
-    public:
-        core * const _core;
-        scope * const _scope;
-    protected:
-        std::unordered_map<std::string, field*> _fields;
-    };
+		virtual bool goal_created(atom * const a) {
+			return true;
+		}
+	public:
+		core * const _core;
+		scope * const _scope;
+	protected:
+		std::unordered_map<std::string, field*> _fields;
+	};
 }
 

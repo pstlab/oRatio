@@ -15,13 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   default_constructor.cpp
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- * 
- * Created on November 9, 2016, 6:05 PM
- */
-
 #include "default_constructor.h"
 #include "../type.h"
 #include "instantiated_field.h"
@@ -36,19 +29,21 @@ default_constructor::default_constructor(core * const c, scope * const s) : cons
 default_constructor::~default_constructor() { }
 
 bool default_constructor::invoke(item * const i, const std::vector<item*>& exprs) {
-    for (const auto& st : static_cast<type*> (_scope)->get_supertypes()) {
-        st->get_constructor(std::vector<const type*>(0))->invoke(i, exprs);
-    }
-    for (const auto& f : _scope->get_fields()) {
-        if (!f.second->_synthetic) {
-            if (instantiated_field * inst_f = dynamic_cast<instantiated_field*> (f.second)) {
-                i->_items.insert({f.second->_name, expression_visitor(_core, i).visit(inst_f->_expr)});
-            } else if (f.second->_type->_primitive) {
-                i->_items.insert({f.second->_name, const_cast<type*> (f.second->_type)->new_instance(i)});
-            } else {
-                i->_items.insert({f.second->_name, const_cast<type*> (f.second->_type)->new_existential()});
-            }
-        }
-    }
-    return true;
+	for (const auto& st : static_cast<type*> (_scope)->get_supertypes()) {
+		st->get_constructor(std::vector<const type*>(0))->invoke(i, exprs);
+	}
+	for (const auto& f : _scope->get_fields()) {
+		if (!f.second->_synthetic) {
+			if (instantiated_field * inst_f = dynamic_cast<instantiated_field*> (f.second)) {
+				i->_items.insert({ f.second->_name, expression_visitor(_core, i).visit(inst_f->_expr) });
+			}
+			else if (f.second->_type->_primitive) {
+				i->_items.insert({ f.second->_name, const_cast<type*> (f.second->_type)->new_instance(i) });
+			}
+			else {
+				i->_items.insert({ f.second->_name, const_cast<type*> (f.second->_type)->new_existential() });
+			}
+		}
+	}
+	return true;
 }

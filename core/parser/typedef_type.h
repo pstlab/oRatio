@@ -22,18 +22,18 @@
 
 namespace oratio {
 
-    class parser;
+	class parser;
 
-    class typedef_type : public type {
-    public:
-        typedef_type(core * const c, scope * const s, const std::string& name, type * const base_type, oRatioParser::ExprContext * const expr);
-        typedef_type(typedef_type&&) = delete;
-        virtual ~typedef_type();
+	class typedef_type : public type {
+	public:
+		typedef_type(core * const c, scope * const s, const std::string& name, type * const base_type, oRatioParser::ExprContext * const expr);
+		typedef_type(typedef_type&&) = delete;
+		virtual ~typedef_type();
 
-        item* new_instance(env * const e) override;
-    private:
-        type * const _base_type;
-        oRatioParser::ExprContext * const _expr;
-    };
+		item* new_instance(env * const e) override;
+	private:
+		type * const _base_type;
+		oRatioParser::ExprContext * const _expr;
+	};
 }
 

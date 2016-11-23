@@ -21,25 +21,25 @@
 
 namespace ac {
 
-    class network;
-    template<typename T>
-    class enum_var;
-    typedef enum_var<bool> bool_var;
+	class network;
+	template<typename T>
+	class enum_var;
+	typedef enum_var<bool> bool_var;
 
-    class not_propagator : public propagator {
-        friend class network;
-    public:
-        not_propagator(not_propagator&&) = delete;
-        virtual ~not_propagator();
+	class not_propagator : public propagator {
+		friend class network;
+	public:
+		not_propagator(not_propagator&&) = delete;
+		virtual ~not_propagator();
 
-        static std::unordered_set<bool> evaluate(const bool_var * const v);
-    private:
-        bool_var * const _var;
-        bool_var * const _not;
+		static std::unordered_set<bool> evaluate(const bool_var * const v);
+	private:
+		bool_var * const _var;
+		bool_var * const _not;
 
-        not_propagator(network * const net, bool_var * const v);
-        bool propagate(const var * const v) override;
-        static bool_var * evaluate(network * const net, const bool_var * const v);
-    };
+		not_propagator(network * const net, bool_var * const v);
+		bool propagate(const var * const v) override;
+		static bool_var * evaluate(network * const net, const bool_var * const v);
+	};
 }
 

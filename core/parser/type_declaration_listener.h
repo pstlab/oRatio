@@ -21,24 +21,24 @@
 
 namespace oratio {
 
-    class parser;
-    class scope;
+	class parser;
+	class scope;
 
-    class type_declaration_listener : public oRatioBaseListener {
-    public:
-        type_declaration_listener(parser * const p);
-        type_declaration_listener(type_declaration_listener&&) = delete;
-        virtual ~type_declaration_listener();
-    private:
-        parser * const _parser;
-        scope * _scope;
+	class type_declaration_listener : public oRatioBaseListener {
+	public:
+		type_declaration_listener(parser * const p);
+		type_declaration_listener(type_declaration_listener&&) = delete;
+		virtual ~type_declaration_listener();
+	private:
+		parser * const _parser;
+		scope * _scope;
 
-        void enterCompilation_unit(oRatioParser::Compilation_unitContext* ctx) override;
-        void enterTypedef_declaration(oRatioParser::Typedef_declarationContext* ctx) override;
-        void enterEnum_declaration(oRatioParser::Enum_declarationContext* ctx) override;
-        void enterClass_declaration(oRatioParser::Class_declarationContext* ctx) override;
-        void exitClass_declaration(oRatioParser::Class_declarationContext* ctx) override;
-        void enterClass_type(oRatioParser::Class_typeContext* ctx) override;
-    };
+		void enterCompilation_unit(oRatioParser::Compilation_unitContext* ctx) override;
+		void enterTypedef_declaration(oRatioParser::Typedef_declarationContext* ctx) override;
+		void enterEnum_declaration(oRatioParser::Enum_declarationContext* ctx) override;
+		void enterClass_declaration(oRatioParser::Class_declarationContext* ctx) override;
+		void exitClass_declaration(oRatioParser::Class_declarationContext* ctx) override;
+		void enterClass_type(oRatioParser::Class_typeContext* ctx) override;
+	};
 }
 

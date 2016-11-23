@@ -15,15 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   defined_method.h
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- *
- * Created on November 9, 2016, 6:29 PM
- */
-
-#ifndef DEFINED_METHOD_H
-#define DEFINED_METHOD_H
+#pragma once
 
 #include "../method.h"
 #include "oRatioParser.h"
@@ -41,6 +33,4 @@ namespace oratio {
         bool invoke(env * const e, const std::vector<item*>& exprs) override;
     };
 }
-
-#endif /* DEFINED_METHOD_H */
 

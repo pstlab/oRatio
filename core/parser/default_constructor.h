@@ -15,29 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   default_constructor.h
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- *
- * Created on November 9, 2016, 6:05 PM
- */
-
-#ifndef DEFAULT_CONSTRUCTOR_H
-#define DEFAULT_CONSTRUCTOR_H
+#pragma once
 
 #include "../constructor.h"
 
 namespace oratio {
 
-    class default_constructor : public constructor {
-    public:
-        default_constructor(core * const c, scope * const s);
-        default_constructor(default_constructor&&) = delete;
-        virtual ~default_constructor();
-    private:
-        bool invoke(item * const i, const std::vector<item*>& exprs) override;
-    };
+	class default_constructor : public constructor {
+	public:
+		default_constructor(core * const c, scope * const s);
+		default_constructor(default_constructor&&) = delete;
+		virtual ~default_constructor();
+	private:
+		bool invoke(item * const i, const std::vector<item*>& exprs) override;
+	};
 }
-
-#endif /* DEFAULT_CONSTRUCTOR_H */
 

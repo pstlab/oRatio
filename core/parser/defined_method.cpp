@@ -15,13 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* 
- * File:   defined_method.cpp
- * Author: Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
- * 
- * Created on November 9, 2016, 6:29 PM
- */
-
 #include "defined_method.h"
 #include "statement_visitor.h"
 #include "../core.h"
@@ -36,12 +29,12 @@ defined_method::defined_method(core * const c, scope * const s, const std::strin
 defined_method::~defined_method() { }
 
 bool defined_method::invoke(env * const e, const std::vector<item*>& exprs) {
-    env* c_env = new env(_core, e);
-    if (item * i = dynamic_cast<item*> (e)) {
-        c_env->_items.insert({THIS_KEYWORD, i});
-    }
-    for (unsigned int j = 0; j < _args.size(); j++) {
-        c_env->_items.insert({_args[j]->_name, exprs[j]});
-    }
-    return statement_visitor(_core, e).visit(_block);
+	env* c_env = new env(_core, e);
+	if (item * i = dynamic_cast<item*> (e)) {
+		c_env->_items.insert({ THIS_KEYWORD, i });
+	}
+	for (unsigned int j = 0; j < _args.size(); j++) {
+		c_env->_items.insert({ _args[j]->_name, exprs[j] });
+	}
+	return statement_visitor(_core, e).visit(_block);
 }
