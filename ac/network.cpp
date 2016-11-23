@@ -256,7 +256,7 @@ bool network::enqueue(var * const v, domain * const d, propagator * const p) {
 			_layers.top()->_impl_graph.insert({ v, std::vector<propagator*>() });
 		}
 		_layers.top()->_impl_graph.at(v).push_back(p);
-		if (v->empty) {
+		if (v->empty()) {
 			assert(_unsat_core.empty());
 			// TODO: we generate the no-good..
 		}
