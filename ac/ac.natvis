@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="ac::var" Inheritable="false">
+    <DisplayString>{_name}</DisplayString>
+  </Type>
+
+  <Type Name="ac::enum_domain&lt;*&gt;">
+    <DisplayString>{_vals}</DisplayString>
+    <Expand>
+      <Item Name="vals">_vals,na</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="ac::enum_var&lt;*&gt;">
+    <DisplayString>{_name} = {_domain,na}</DisplayString>
+    <Expand>
+      <Item Name="domain">_domain,na</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="ac::interval">
+    <DisplayString Condition="lb == ub">{lb}</DisplayString>
+    <DisplayString>[{lb}, {ub}]</DisplayString>
+  </Type>
+
+  <Type Name="ac::arith_domain">
+    <DisplayString>{_interval}</DisplayString>
+    <Expand>
+      <Item Name="vals">_interval,na</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="ac::arith_var">
+    <DisplayString>{_name} = {_domain,na}</DisplayString>
+    <Expand>
+      <Item Name="domain">_domain,na</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="ac::not_propagator">
+    <DisplayString>{_not,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::and_propagator">
+    <DisplayString>{_and,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::or_propagator">
+    <DisplayString>{_or,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::exct_one_propagator">
+    <DisplayString>{_exct_one,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::minus_propagator">
+    <DisplayString>{_minus,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::sum_propagator">
+    <DisplayString>{_sum,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::product_propagator">
+    <DisplayString>{_prod,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::div_propagator">
+    <DisplayString>{_div,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::lt_propagator">
+    <DisplayString>{_lt,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::leq_propagator">
+    <DisplayString>{_leq,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::arith_eq_propagator">
+    <DisplayString>{_eq,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::enum_eq_propagator&lt;*&gt;">
+    <DisplayString>{_eq,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::geq_propagator">
+    <DisplayString>{_geq,na}</DisplayString>
+  </Type>
+
+  <Type Name="ac::gt_propagator">
+    <DisplayString>{_gt,na}</DisplayString>
+  </Type>
+</AutoVisualizer>

@@ -168,6 +168,9 @@
     <ClCompile Include="propagator.cpp" />
     <ClCompile Include="sum_propagator.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="ac.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

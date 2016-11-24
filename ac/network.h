@@ -113,7 +113,7 @@ namespace ac {
 			return _layers.empty();
 		}
 
-		unsigned int level() {
+		size_t level() {
 			return _layers.size();
 		}
 

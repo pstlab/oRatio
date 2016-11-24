@@ -126,4 +126,9 @@
       <Filter>Source Files\propagators</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="ac.natvis">
+      <Filter>Resource Files</Filter>
+    </Natvis>
+  </ItemGroup>
 </Project>
