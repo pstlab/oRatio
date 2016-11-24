@@ -34,40 +34,40 @@ public:
 	TEST_METHOD(TestACNoGood) {
 		ac::network n;
 
-		ac::bool_var* x0 = n.new_bool();
-		ac::bool_var* x1 = n.new_bool();
-		ac::bool_var* x2 = n.new_bool();
-		ac::bool_var* x3 = n.new_bool();
-		ac::bool_var* x4 = n.new_bool();
-		ac::bool_var* x5 = n.new_bool();
-		ac::bool_var* x6 = n.new_bool();
-		ac::bool_var* x7 = n.new_bool();
-		ac::bool_var* x8 = n.new_bool();
+		ac::bool_var* b0 = n.new_bool();
+		ac::bool_var* b1 = n.new_bool();
+		ac::bool_var* b2 = n.new_bool();
+		ac::bool_var* b3 = n.new_bool();
+		ac::bool_var* b4 = n.new_bool();
+		ac::bool_var* b5 = n.new_bool();
+		ac::bool_var* b6 = n.new_bool();
+		ac::bool_var* b7 = n.new_bool();
+		ac::bool_var* b8 = n.new_bool();
 
 		bool added;
-		added = n.add({ n.disjunction({ x0, x1 }) });
+		added = n.add({ n.disjunction({ b0, b1 }) });
 		Assert::IsTrue(added);
-		added = n.add({ n.disjunction({ x0, x2, x6 }) });
+		added = n.add({ n.disjunction({ b0, b2, b6 }) });
 		Assert::IsTrue(added);
-		added = n.add({ n.disjunction({ n.negate(x1), n.negate(x2), x3 }) });
+		added = n.add({ n.disjunction({ n.negate(b1), n.negate(b2), b3 }) });
 		Assert::IsTrue(added);
-		added = n.add({ n.disjunction({ n.negate(x3), x4, x7 }) });
+		added = n.add({ n.disjunction({ n.negate(b3), b4, b7 }) });
 		Assert::IsTrue(added);
-		added = n.add({ n.disjunction({ n.negate(x3), x5, x8 }) });
+		added = n.add({ n.disjunction({ n.negate(b3), b5, b8 }) });
 		Assert::IsTrue(added);
-		added = n.add({ n.disjunction({ n.negate(x4), n.negate(x5) }) });
+		added = n.add({ n.disjunction({ n.negate(b4), n.negate(b5) }) });
 		Assert::IsTrue(added);
 
 		bool assigned;
-		assigned = n.assign_true(n.negate(x6));
+		assigned = n.assign_true(n.negate(b6));
 		Assert::IsTrue(assigned);
-		assigned = n.assign_true(n.negate(x7));
+		assigned = n.assign_true(n.negate(b7));
 		Assert::IsTrue(assigned);
-		assigned = n.assign_true(n.negate(x8));
+		assigned = n.assign_true(n.negate(b8));
 		Assert::IsTrue(assigned);
 
 		// this assignment should create an inconsistency..
-		assigned = n.assign_true(n.negate(x1));
+		assigned = n.assign_true(n.negate(b0));
 		Assert::IsFalse(assigned);
 
 		// this is the unsat core..

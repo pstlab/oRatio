@@ -33,8 +33,7 @@ not_propagator::~not_propagator() {
 	delete _not;
 }
 
-bool not_propagator::propagate(const var * const v)
-{
+bool not_propagator::propagate(const var * const v) {
 	if (_var->singleton()) {
 		std::unordered_set<bool> vals = _var->to_vals();
 		return complement(_not, vals);
