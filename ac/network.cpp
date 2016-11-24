@@ -266,8 +266,40 @@ bool network::add(const std::vector<bool_var*>& exprs) {
 		propagator* cause = _causes.at(v);
 		_causes.erase(v);
 		for (const auto& p : _watches.at(v)) {
-			if (p != cause && !p->propagate(v)) {
-				return false;
+			if (p != cause) {
+				if (!p->propagate(v)) {
+					// we use the conflict 'p' to generate the no-good..
+					assert(_unsat_core.empty());
+
+					std::unordered_set<var*> visited;
+					std::queue<var*> q;
+					for (const auto& c_v : p->_vars) {
+						q.push(c_v);
+					}
+
+					while (!q.empty()) {
+						var* c_v = q.front();
+						if (visited.find(c_v) == visited.end()) {
+							visited.insert(c_v);
+							if (_layers.top()->_impl_graph.find(c_v) != _layers.top()->_impl_graph.end()) {
+								// the variable is in the implication graph..
+								for (const auto& c_p : _layers.top()->_impl_graph.at(v)) {
+									for (const auto& c_c_v : c_p->_vars) {
+										if (visited.find(c_v) == visited.end()) {
+											q.push(c_c_v);
+										}
+									}
+								}
+							}
+							else if (_reason.find(c_v) != _reason.end()) {
+								// the variable has been assigned at a previous level..
+								_unsat_core.push_back(_reason.at(c_v));
+							}
+						}
+						q.pop();
+					}
+					return false;
+				}
 			}
 		}
 		if (v->singleton() && root_level()) {
@@ -322,48 +354,14 @@ size_t network::relevance(var * const v) {
 	}
 }
 
-bool network::enqueue(var * const v, domain * const d, propagator * const p) {
+void network::enqueue(var * const v, domain * const d, propagator * const p) {
 	if (!root_level()) {
 		if (_layers.top()->_domains.find(v) == _layers.top()->_domains.end()) {
 			_layers.top()->_domains.insert({ v, d });
 			_layers.top()->_impl_graph.insert({ v, std::vector<propagator*>() });
 		}
 		_layers.top()->_impl_graph.at(v).push_back(p);
-		if (v->empty()) {
-			assert(_unsat_core.empty());
-			// we generate the no-good..
-
-			std::unordered_set<var*> visited;
-			std::queue<var*> q;
-			for (const auto& c_p : _layers.top()->_impl_graph.at(v)) {
-				for (const auto& c_v : c_p->_vars) {
-					q.push(c_v);
-				}
-			}
-
-			while (q.empty()) {
-				var* c_v = q.front();
-				if (visited.find(c_v) == visited.end()) {
-					visited.insert(c_v);
-					if (_layers.top()->_impl_graph.find(c_v) != _layers.top()->_impl_graph.end()) {
-						// the variable is in the implication graph..
-						for (const auto& c_p : _layers.top()->_impl_graph.at(v)) {
-							for (const auto& c_c_v : c_p->_vars) {
-								if (visited.find(c_v) == visited.end()) {
-									q.push(c_c_v);
-								}
-							}
-						}
-					}
-					else if (_reason.find(c_v) != _reason.end()) {
-						// the variable has been assigned at a previous level..
-						_unsat_core.push_back(_reason.at(c_v));
-					}
-				}
-				q.pop();
-			}
-		}
-		else if (v->singleton()) {
+		if (v->singleton()) {
 			_reason.insert({ v, _layers.top()->_choice_var });
 		}
 	}
@@ -371,5 +369,4 @@ bool network::enqueue(var * const v, domain * const d, propagator * const p) {
 		_prop_q.push(v);
 		_causes.insert({ v, p });
 	}
-	return !v->empty();
 }

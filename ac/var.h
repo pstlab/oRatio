@@ -143,7 +143,8 @@ namespace ac {
 				for (const auto& i : intersection) {
 					static_cast<enum_domain<T>*>(_domain)->_vals.erase(i);
 				}
-				return _net->enqueue(this, c_domain, prop);
+				_net->enqueue(this, c_domain, prop);
+				return !_domain->empty();
 			}
 			assert(!static_cast<enum_domain<T>*>(_domain)->empty());
 			return true;
@@ -156,7 +157,8 @@ namespace ac {
 				for (const auto& i : difference) {
 					static_cast<enum_domain<T>*>(_domain)->_vals.erase(i);
 				}
-				return _net->enqueue(this, c_domain, prop);
+				_net->enqueue(this, c_domain, prop);
+				return !_domain->empty();
 			}
 			assert(!static_cast<enum_domain<T>*>(_domain)->empty());
 			return true;
@@ -169,9 +171,9 @@ namespace ac {
 		friend class arith_var;
 	public:
 
-		arith_domain(interval i) : _interval(i) { }
+		arith_domain(interval i) : _interval(i) {}
 
-		~arith_domain() { }
+		~arith_domain() {}
 
 		bool empty() const override {
 			return !_interval.consistent();
@@ -201,8 +203,8 @@ namespace ac {
 		friend class geq_propagator;
 		friend class gt_propagator;
 	public:
-		arith_var(network * const net, double value) : var(net, std::to_string(value), new arith_domain(value)), _expr(net->_context->real_val(std::to_string(value).c_str())) { }
-		arith_var(network * const net, const std::string name, interval i, z3::expr e) : var(net, name, new arith_domain(i)), _expr(e) { }
+		arith_var(network * const net, double value) : var(net, std::to_string(value), new arith_domain(value)), _expr(net->_context->real_val(std::to_string(value).c_str())) {}
+		arith_var(network * const net, const std::string name, interval i, z3::expr e) : var(net, name, new arith_domain(i)), _expr(e) {}
 		arith_var(arith_var&&) = delete;
 
 		virtual ~arith_var() {
@@ -235,7 +237,8 @@ namespace ac {
 			else {
 				arith_domain* c_domain = new arith_domain(static_cast<arith_domain*>(_domain)->_interval);
 				static_cast<arith_domain*>(_domain)->_interval = static_cast<arith_domain*>(_domain)->_interval && i;
-				return _net->enqueue(this, c_domain, prop);
+				_net->enqueue(this, c_domain, prop);
+				return !_domain->empty();
 			}
 		}
 	};

@@ -156,7 +156,7 @@ namespace ac {
 		};
 		std::stack<layer*> _layers;
 
-		bool enqueue(var * const v, domain * const d, propagator * const p);
+		void enqueue(var * const v, domain * const d, propagator * const p);
 
 		z3::context * const _context;
 		z3::solver * const _solver;
