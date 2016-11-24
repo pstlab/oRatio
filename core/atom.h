@@ -24,9 +24,9 @@ namespace oratio {
 
 	class predicate;
 
-	enum atom_state {
-		active, inactive, unified
-	};
+	class atom_state {};
+
+	static atom_state active, inactive, unified;
 
 	class atom : public item {
 	public:
@@ -34,11 +34,11 @@ namespace oratio {
 		atom(atom&&) = delete;
 		virtual ~atom();
 
-		ac::enum_var<int>& get_state() const {
+		ac::enum_var<atom_state*>& get_state() const {
 			return _state;
 		}
 	private:
-		ac::enum_var<int>& _state;
+		ac::enum_var<atom_state*>& _state;
 	};
 }
 

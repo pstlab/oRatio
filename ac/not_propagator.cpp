@@ -47,10 +47,10 @@ bool not_propagator::propagate(const var * const v) {
 
 bool_var * not_propagator::evaluate(network * const net, const bool_var * const v) {
 	if (net->root_level()) {
-		return new bool_var(net, "!" + v->_name, evaluate(v));
+		return new bool_var(net, to_string(v), evaluate(v));
 	}
 	else {
-		return new bool_var(net, "!" + v->_name, { true, false });
+		return new bool_var(net, to_string(v), { true, false });
 	}
 }
 
@@ -61,4 +61,8 @@ std::unordered_set<bool> not_propagator::evaluate(const bool_var * const v) {
 	else {
 		return{ true, false };
 	}
+}
+
+std::string not_propagator::to_string(const bool_var * const v) {
+	return "!" + v->_name;
 }

@@ -27,14 +27,15 @@ namespace ac {
 		minus_propagator(minus_propagator&&) = delete;
 		virtual ~minus_propagator();
 
-		static interval evaluate(arith_var * const v);
+		static interval evaluate(const arith_var * const v);
 	private:
 		arith_var * const _var;
 		arith_var * const _minus;
 
 		minus_propagator(network * const net, arith_var * const v);
 		bool propagate(const var * const v) override;
-		static arith_var * evaluate(network * const net, arith_var * const v);
+		static arith_var * evaluate(network * const net, const arith_var * const v);
+		static std::string to_string(const arith_var * const v);
 	};
 }
 

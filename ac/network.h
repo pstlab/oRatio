@@ -65,7 +65,18 @@ namespace ac {
 
 		template<typename T>
 		enum_var<T>* new_enum(const std::unordered_set<T>& allowed_vals) {
-			return new enum_var<T>(this, "e" + std::to_string(n_vars++), allowed_vals);
+			if (allowed_vals.size() == 1) {
+				if (_vals.find(*allowed_vals.begin()) != _vals.end()) {
+					return static_cast<enum_var<T>*>(_vals.at(*allowed_vals.begin()));
+				}
+			}
+			std::string name("e" + std::to_string(_vars.size()));
+			enum_var<T>* ev = new enum_var<T>(this, name, allowed_vals);
+			if (allowed_vals.size() == 1) {
+				_vals.insert({ *allowed_vals.begin(),ev });
+			}
+			_vars.insert({ name,ev });
+			return ev;
 		}
 
 		bool_var* negate(bool_var * const var);
@@ -90,14 +101,17 @@ namespace ac {
 
 		template<typename T>
 		enum_var<bool>* eq(enum_var<T> * const var0, enum_var<T> * const var1) {
+			if (_vars.find(enum_eq_propagator<T>::to_string(var0, var1)) != _vars.end()) {
+				return static_cast<bool_var*>(_vars.at(enum_eq_propagator<T>::to_string(var0, var1)));
+			}
 			enum_eq_propagator<T>* prop = new enum_eq_propagator<T>(this, var0, var1);
+			_vars.insert({ prop->_eq->_name,prop->_eq });
 			return prop->_eq;
 		}
 
 		template<typename T>
 		enum_var<bool>* eq(enum_var<T> * const var0, const T& val) {
-			enum_eq_propagator<T>* prop = new enum_eq_propagator<T>(this, var0, new_enum<T>(std::unordered_set<T>({ val })));
-			return prop->_eq;
+			return eq(var0, new_enum<T>(std::unordered_set<T>({ val })));
 		}
 
 		void push();
@@ -121,9 +135,10 @@ namespace ac {
 			return _unsat_core;
 		}
 
-		unsigned int relevance(var * const v);
+		size_t relevance(var * const v);
 	private:
-		unsigned int n_vars = 0;
+		std::unordered_map<std::string, var*> _vars;
+		std::unordered_map<void*, var*> _vals;
 		std::unordered_map<var*, std::list<propagator*>> _watches;
 		std::queue<var*> _prop_q;
 		std::unordered_map<var*, propagator*> _causes;

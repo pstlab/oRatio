@@ -44,15 +44,19 @@ bool minus_propagator::propagate(const var * const v) {
 	}
 }
 
-interval minus_propagator::evaluate(arith_var * const v) {
+interval minus_propagator::evaluate(const arith_var * const v) {
 	return -v->to_interval();
 }
 
-arith_var* minus_propagator::evaluate(network * const net, arith_var * const v) {
+arith_var* minus_propagator::evaluate(network * const net, const arith_var * const v) {
 	if (net->root_level()) {
-		return new arith_var(net, "-" + v->_name, evaluate(v), -v->_expr);
+		return new arith_var(net, to_string(v), evaluate(v), -v->_expr);
 	}
 	else {
-		return new arith_var(net, "-" + v->_name, interval(), -v->_expr);
+		return new arith_var(net, to_string(v), interval(), -v->_expr);
 	}
+}
+
+std::string minus_propagator::to_string(const arith_var * const v) {
+	return "-" + v->_name;
 }

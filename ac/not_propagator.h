@@ -40,6 +40,7 @@ namespace ac {
 		not_propagator(network * const net, bool_var * const v);
 		bool propagate(const var * const v) override;
 		static bool_var * evaluate(network * const net, const bool_var * const v);
+		static std::string to_string(const bool_var * const v);
 	};
 }
 

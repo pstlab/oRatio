@@ -37,5 +37,5 @@ fact_decision::add_fact::~add_fact() { }
 
 bool fact_decision::add_fact::apply() {
 	_estimated_cost = 0;
-	return _solver->_net.add({ _solver->_net.eq(_in_plan, _solver->_net.eq<int>(&static_cast<fact_decision*> (_effect)->_atom->get_state(), atom_state::active)) });
+	return _solver->_net.add({ _solver->_net.eq(_in_plan, _solver->_net.eq<atom_state*>(&static_cast<fact_decision*> (_effect)->_atom->get_state(), &active)) });
 }

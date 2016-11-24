@@ -21,7 +21,7 @@
 
 using namespace oratio;
 
-atom::atom(core * const c, env * const e, const predicate * const p) : env(c, e), item(c, e, p), _state(*c->_net.new_enum(std::unordered_set<int>({ atom_state::active, atom_state::inactive, atom_state::unified }))) { }
+atom::atom(core * const c, env * const e, const predicate * const p) : env(c, e), item(c, e, p), _state(*c->_net.new_enum(std::unordered_set<atom_state*>({ &active, &inactive, &unified }))) { }
 
 atom::~atom() { }
 

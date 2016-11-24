@@ -27,7 +27,7 @@ using namespace oratio;
 goal_decision::goal_decision(solver * const s, choice * const cause, atom * const a) : decision(s, cause), _atom(a) {
 	// if in_plan, atom state is not equal to inactive..
 	bool assert_facts = _solver->_net.add({
-		_solver->_net.eq(_in_plan, _solver->_net.negate(_solver->_net.eq<int>(&_atom->get_state(), atom_state::inactive)))
+		_solver->_net.eq(_in_plan, _solver->_net.negate(_solver->_net.eq<atom_state*>(&_atom->get_state(), &inactive)))
 	});
 	assert(assert_facts);
 }
@@ -38,7 +38,7 @@ bool goal_decision::compute_choices(std::vector<choice*>& cs) {
 	bool solved = false;
 	for (auto& inst : _atom->get_type()->get_instances()) {
 		atom * const a = static_cast<atom * const> (inst);
-		if (_atom != a && a->get_state().allows(atom_state::active) && _solver->_atom_decision.at(a)->expanded() && _atom->equates(a)) {
+		if (_atom != a && a->get_state().allows(&active) && _solver->_atom_decision.at(a)->expanded() && _atom->equates(a)) {
 			// this atom is a good candidate for unification
 			unify_choice* u = new unify_choice(_solver, _solver->_net.new_real(0), this, a);
 			_solver->_net.push();
@@ -57,7 +57,7 @@ bool goal_decision::compute_choices(std::vector<choice*>& cs) {
 
 	if (!solved) {
 		// we remove unification from atom state..
-		bool assert_facts = _solver->_net.add({ _solver->_net.negate(_solver->_net.eq<int>(&_atom->get_state(), atom_state::unified)) });
+		bool assert_facts = _solver->_net.add({ _solver->_net.negate(_solver->_net.eq<atom_state*>(&_atom->get_state(), &unified)) });
 		assert(assert_facts);
 	}
 
@@ -70,7 +70,7 @@ goal_decision::expand_choice::~expand_choice() { }
 
 bool goal_decision::expand_choice::apply() {
 	goal_decision* g = static_cast<goal_decision*> (_effect);
-	return _solver->_net.add({ _solver->_net.eq(_in_plan, _solver->_net.eq<int>(&g->_atom->get_state(), atom_state::active)) }) && static_cast<const predicate*> (g->_atom->get_type())->apply_rule(g->_atom);
+	return _solver->_net.add({ _solver->_net.eq(_in_plan, _solver->_net.eq<atom_state*>(&g->_atom->get_state(), &active)) }) && static_cast<const predicate*> (g->_atom->get_type())->apply_rule(g->_atom);
 }
 
 goal_decision::unify_choice::unify_choice(solver * const s, ac::arith_var* cost, goal_decision * const g, atom * const a) : choice(s, cost, g), _atom(a), _eq(evaluate()) { }
@@ -80,7 +80,7 @@ goal_decision::unify_choice::~unify_choice() { }
 bool goal_decision::unify_choice::apply() {
 	_estimated_cost = 0;
 	return _solver->_net.add({
-		_solver->_net.imply(_in_plan, _solver->_net.eq<int>(&static_cast<goal_decision*> (_effect)->_atom->get_state(), atom_state::unified)),
+		_solver->_net.imply(_in_plan, _solver->_net.eq<atom_state*>(&static_cast<goal_decision*> (_effect)->_atom->get_state(), &unified)),
 		_solver->_net.eq(_in_plan, _eq)
 	});
 }
@@ -111,8 +111,8 @@ ac::bool_var* goal_decision::unify_choice::evaluate() {
 		}
 		d = d->cause()->effect();
 	}
-	vars.push_back(_solver->_net.eq<int>(&static_cast<goal_decision*> (_effect)->_atom->get_state(), atom_state::unified));
-	vars.push_back(_solver->_net.eq<int>(&_atom->get_state(), atom_state::active));
+	vars.push_back(_solver->_net.eq<atom_state*>(&static_cast<goal_decision*> (_effect)->_atom->get_state(), &unified));
+	vars.push_back(_solver->_net.eq<atom_state*>(&_atom->get_state(), &active));
 	vars.push_back(static_cast<goal_decision*> (_effect)->_atom->eq(_atom));
 	return _solver->_net.conjunction(vars);
 }

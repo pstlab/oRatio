@@ -61,7 +61,10 @@ void network::forget(propagator * const p) {
 }
 
 bool_var * network::new_bool() {
-	return new bool_var(this, "b" + std::to_string(n_vars++), { true, false });
+	std::string name("b" + std::to_string(_vars.size()));
+	bool_var* bv = new bool_var(this, name, { true, false });
+	_vars.insert({ name,bv });
+	return bv;
 }
 
 bool_var * network::new_bool(bool value) {
@@ -69,8 +72,10 @@ bool_var * network::new_bool(bool value) {
 }
 
 arith_var* network::new_int() {
-	std::string name("x" + std::to_string(n_vars++));
-	return new arith_var(this, name, interval(), _context->int_const(name.c_str()));
+	std::string name("x" + std::to_string(_vars.size()));
+	arith_var* av = new arith_var(this, name, interval(), _context->int_const(name.c_str()));
+	_vars.insert({ name,av });
+	return av;
 }
 
 arith_var* network::new_int(long value) {
@@ -78,8 +83,10 @@ arith_var* network::new_int(long value) {
 }
 
 arith_var* network::new_real() {
-	std::string name("x" + std::to_string(n_vars++));
-	return new arith_var(this, name, interval(), _context->real_const(name.c_str()));
+	std::string name("x" + std::to_string(_vars.size()));
+	arith_var* av = new arith_var(this, name, interval(), _context->real_const(name.c_str()));
+	_vars.insert({ name,av });
+	return av;
 }
 
 arith_var* network::new_real(double value) {
@@ -87,38 +94,62 @@ arith_var* network::new_real(double value) {
 }
 
 bool_var* network::negate(bool_var * const var) {
+	if (_vars.find(not_propagator::to_string(var)) != _vars.end()) {
+		return static_cast<bool_var*>(_vars.at(not_propagator::to_string(var)));
+	}
 	not_propagator* prop = new not_propagator(this, var);
 	store(prop);
+	_vars.insert({ prop->_not->_name,prop->_not });
 	return prop->_not;
 }
 
 bool_var* network::conjunction(const std::vector<bool_var*>& vars) {
+	if (_vars.find(and_propagator::to_string(vars)) != _vars.end()) {
+		return static_cast<bool_var*>(_vars.at(and_propagator::to_string(vars)));
+	}
 	and_propagator* prop = new and_propagator(this, vars);
 	store(prop);
+	_vars.insert({ prop->_and->_name,prop->_and });
 	return prop->_and;
 }
 
 bool_var* network::disjunction(const std::vector<bool_var*>& vars) {
+	if (_vars.find(or_propagator::to_string(vars)) != _vars.end()) {
+		return static_cast<bool_var*>(_vars.at(or_propagator::to_string(vars)));
+	}
 	or_propagator* prop = new or_propagator(this, vars);
 	store(prop);
+	_vars.insert({ prop->_or->_name,prop->_or });
 	return prop->_or;
 }
 
 bool_var* network::exactly_one(const std::vector<bool_var*>& vars) {
+	if (_vars.find(exct_one_propagator::to_string(vars)) != _vars.end()) {
+		return static_cast<bool_var*>(_vars.at(exct_one_propagator::to_string(vars)));
+	}
 	exct_one_propagator* prop = new exct_one_propagator(this, vars);
 	store(prop);
+	_vars.insert({ prop->_exct_one->_name,prop->_exct_one });
 	return prop->_exct_one;
 }
 
 arith_var* network::minus(arith_var * const var) {
+	if (_vars.find(minus_propagator::to_string(var)) != _vars.end()) {
+		return static_cast<arith_var*>(_vars.at(minus_propagator::to_string(var)));
+	}
 	minus_propagator* prop = new minus_propagator(this, var);
 	store(prop);
+	_vars.insert({ prop->_minus->_name,prop->_minus });
 	return prop->_minus;
 }
 
 arith_var* network::sum(const std::vector<arith_var*>& vars) {
+	if (_vars.find(sum_propagator::to_string(vars)) != _vars.end()) {
+		return static_cast<arith_var*>(_vars.at(sum_propagator::to_string(vars)));
+	}
 	sum_propagator* prop = new sum_propagator(this, vars);
 	store(prop);
+	_vars.insert({ prop->_sum->_name,prop->_sum });
 	return prop->_sum;
 }
 
@@ -128,50 +159,82 @@ arith_var* network::sub(const std::vector<arith_var*>& vars) {
 	for (unsigned int i = 1; i < vars.size(); i++) {
 		c_vars.push_back(minus(vars.at(i)));
 	}
+	if (_vars.find(sum_propagator::to_string(c_vars)) != _vars.end()) {
+		return static_cast<arith_var*>(_vars.at(sum_propagator::to_string(c_vars)));
+	}
 	sum_propagator* prop = new sum_propagator(this, c_vars);
 	store(prop);
+	_vars.insert({ prop->_sum->_name,prop->_sum });
 	return prop->_sum;
 }
 
 arith_var* network::mult(const std::vector<arith_var*>& vars) {
+	if (_vars.find(product_propagator::to_string(vars)) != _vars.end()) {
+		return static_cast<arith_var*>(_vars.at(product_propagator::to_string(vars)));
+	}
 	product_propagator* prop = new product_propagator(this, vars);
 	store(prop);
+	_vars.insert({ prop->_prod->_name,prop->_prod });
 	return prop->_prod;
 }
 
 arith_var* network::div(arith_var * const var0, arith_var * const var1) {
+	if (_vars.find(div_propagator::to_string(var0, var1)) != _vars.end()) {
+		return static_cast<arith_var*>(_vars.at(div_propagator::to_string(var0, var1)));
+	}
 	div_propagator* prop = new div_propagator(this, var0, var1);
 	store(prop);
+	_vars.insert({ prop->_div->_name,prop->_div });
 	return prop->_div;
 }
 
 bool_var* network::lt(arith_var * const var0, arith_var * const var1) {
+	if (_vars.find(lt_propagator::to_string(var0, var1)) != _vars.end()) {
+		return static_cast<bool_var*>(_vars.at(lt_propagator::to_string(var0, var1)));
+	}
 	lt_propagator* prop = new lt_propagator(this, var0, var1);
 	store(prop);
+	_vars.insert({ prop->_lt->_name,prop->_lt });
 	return prop->_lt;
 }
 
 bool_var* network::leq(arith_var * const var0, arith_var * const var1) {
+	if (_vars.find(leq_propagator::to_string(var0, var1)) != _vars.end()) {
+		return static_cast<bool_var*>(_vars.at(leq_propagator::to_string(var0, var1)));
+	}
 	leq_propagator* prop = new leq_propagator(this, var0, var1);
 	store(prop);
+	_vars.insert({ prop->_leq->_name,prop->_leq });
 	return prop->_leq;
 }
 
 bool_var* network::eq(arith_var * const var0, arith_var * const var1) {
+	if (_vars.find(arith_eq_propagator::to_string(var0, var1)) != _vars.end()) {
+		return static_cast<bool_var*>(_vars.at(arith_eq_propagator::to_string(var0, var1)));
+	}
 	arith_eq_propagator* prop = new arith_eq_propagator(this, var0, var1);
 	store(prop);
+	_vars.insert({ prop->_eq->_name,prop->_eq });
 	return prop->_eq;
 }
 
 bool_var* network::geq(arith_var * const var0, arith_var * const var1) {
+	if (_vars.find(geq_propagator::to_string(var0, var1)) != _vars.end()) {
+		return static_cast<bool_var*>(_vars.at(geq_propagator::to_string(var0, var1)));
+	}
 	geq_propagator* prop = new geq_propagator(this, var0, var1);
 	store(prop);
+	_vars.insert({ prop->_geq->_name,prop->_geq });
 	return prop->_geq;
 }
 
 bool_var* network::gt(arith_var * const var0, arith_var * const var1) {
+	if (_vars.find(gt_propagator::to_string(var0, var1)) != _vars.end()) {
+		return static_cast<bool_var*>(_vars.at(gt_propagator::to_string(var0, var1)));
+	}
 	gt_propagator* prop = new gt_propagator(this, var0, var1);
 	store(prop);
+	_vars.insert({ prop->_gt->_name,prop->_gt });
 	return prop->_gt;
 }
 
@@ -249,7 +312,7 @@ bool network::assign_true(bool_var* choice_var) {
 	return prop;
 }
 
-unsigned int network::relevance(var * const v) {
+size_t network::relevance(var * const v) {
 	if (_watches.find(v) != _watches.end()) {
 		assert(!_watches.at(v).empty());
 		return _watches.at(v).size();
