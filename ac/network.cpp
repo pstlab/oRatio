@@ -283,9 +283,9 @@ bool network::add(const std::vector<bool_var*>& exprs) {
 							visited.insert(c_v);
 							if (_layers.top()->_impl_graph.find(c_v) != _layers.top()->_impl_graph.end()) {
 								// the variable is in the implication graph..
-								for (const auto& c_p : _layers.top()->_impl_graph.at(v)) {
+								for (const auto& c_p : _layers.top()->_impl_graph.at(c_v)) {
 									for (const auto& c_c_v : c_p->_vars) {
-										if (visited.find(c_v) == visited.end()) {
+										if (visited.find(c_c_v) == visited.end()) {
 											q.push(c_c_v);
 										}
 									}
@@ -358,9 +358,13 @@ void network::enqueue(var * const v, domain * const d, propagator * const p) {
 	if (!root_level()) {
 		if (_layers.top()->_domains.find(v) == _layers.top()->_domains.end()) {
 			_layers.top()->_domains.insert({ v, d });
-			_layers.top()->_impl_graph.insert({ v, std::vector<propagator*>() });
 		}
-		_layers.top()->_impl_graph.at(v).push_back(p);
+		if (p) {
+			if (_layers.top()->_impl_graph.find(v) == _layers.top()->_impl_graph.end()) {
+				_layers.top()->_impl_graph.insert({ v, std::vector<propagator*>() });
+			}
+			_layers.top()->_impl_graph.at(v).push_back(p);
+		}
 		if (v->singleton()) {
 			_reason.insert({ v, _layers.top()->_choice_var });
 		}

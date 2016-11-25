@@ -38,58 +38,58 @@
   </Type>
 
   <Type Name="ac::not_propagator">
-    <DisplayString>{_not,na}</DisplayString>
+    <DisplayString>[{_not,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::and_propagator">
-    <DisplayString>{_and,na}</DisplayString>
+    <DisplayString>[{_and,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::or_propagator">
-    <DisplayString>{_or,na}</DisplayString>
+    <DisplayString>[{_or,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::exct_one_propagator">
-    <DisplayString>{_exct_one,na}</DisplayString>
+    <DisplayString>[{_exct_one,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::minus_propagator">
-    <DisplayString>{_minus,na}</DisplayString>
+    <DisplayString>[{_minus,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::sum_propagator">
-    <DisplayString>{_sum,na}</DisplayString>
+    <DisplayString>[{_sum,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::product_propagator">
-    <DisplayString>{_prod,na}</DisplayString>
+    <DisplayString>[{_prod,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::div_propagator">
-    <DisplayString>{_div,na}</DisplayString>
+    <DisplayString>[{_div,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::lt_propagator">
-    <DisplayString>{_lt,na}</DisplayString>
+    <DisplayString>[{_lt,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::leq_propagator">
-    <DisplayString>{_leq,na}</DisplayString>
+    <DisplayString>[{_leq,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::arith_eq_propagator">
-    <DisplayString>{_eq,na}</DisplayString>
+    <DisplayString>[{_eq,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::enum_eq_propagator&lt;*&gt;">
-    <DisplayString>{_eq,na}</DisplayString>
+    <DisplayString>[{_eq,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::geq_propagator">
-    <DisplayString>{_geq,na}</DisplayString>
+    <DisplayString>[{_geq,na}]</DisplayString>
   </Type>
 
   <Type Name="ac::gt_propagator">
-    <DisplayString>{_gt,na}</DisplayString>
+    <DisplayString>[{_gt,na}]</DisplayString>
   </Type>
 </AutoVisualizer>
