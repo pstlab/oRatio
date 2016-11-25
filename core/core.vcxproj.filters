@@ -224,4 +224,9 @@
       <Filter>Resource Files\parser</Filter>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="core.natvis">
+      <Filter>Resource Files</Filter>
+    </Natvis>
+  </ItemGroup>
 </Project>

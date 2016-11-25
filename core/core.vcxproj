@@ -201,6 +201,9 @@
     <None Include="parser\oRatio.tokens" />
     <None Include="parser\oRatioLexer.tokens" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="core.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
