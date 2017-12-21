@@ -7,5 +7,7 @@ include_directories( ${CMAKE_SOURCE_DIR}/smt-lib ${CMAKE_SOURCE_DIR}/core-lib ${
 
 add_executable( ${PROJECT_NAME} ${SOURCES} )
 
-include( CTest )
-add_subdirectory( smt-lib/tests )
+IF( CMAKE_BUILD_TYPE MATCHES Debug )
+  include( CTest )
+  add_subdirectory( smt-lib/tests )
+ENDIF()
