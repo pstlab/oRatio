@@ -38,7 +38,7 @@ make
 
 ### Building on Windows
 
-The easiest way to compile oRatio for Windows is through [Visual Studio](https://www.visualstudio.com/). Download and install Visual Studio, download Git and CMake. Start a Visual Studio Command prompt, move to a desired folder and clone the oRatio repository
+The easiest way to compile oRatio on Windows is through [Visual Studio](https://www.visualstudio.com/). Download and install Visual Studio, download Git and CMake. Start a Visual Studio Command prompt, move to a desired folder and clone the oRatio repository
 
 ```
 git clone https://github.com/riccardodebenedictis/oRatio
