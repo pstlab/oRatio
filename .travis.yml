@@ -1,4 +1,4 @@
 language: cpp
 
 script:
-  - mkdir build && cd build && cmake .. && ctest
+  - mkdir build && cd build && cmake .. && make && ctest
