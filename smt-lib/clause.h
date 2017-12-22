@@ -21,7 +21,6 @@ class clause
     std::vector<lit> get_lits() const { return lits; }
 
     bool propagate(const lit &p);
-    std::string to_string() const;
 
   private:
     sat_core &s;
