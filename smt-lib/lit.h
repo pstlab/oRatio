@@ -19,7 +19,7 @@ public:
   bool operator!=(const lit &rhs) const { return !operator==(rhs); }
 
 public:
-  const var v;
-  const bool sign;
+  var v;
+  bool sign;
 };
 }
