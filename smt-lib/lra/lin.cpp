@@ -120,21 +120,6 @@ lin lin::operator+=(const lin &right)
     return *this;
 }
 
-lin lin::operator+=(const std::pair<var, rational> &term)
-{
-    const auto trm_it = vars.find(term.first);
-    if (trm_it == vars.end())
-        vars.insert(term);
-    else
-    {
-        trm_it->second += term.second;
-        if (trm_it->second == rational::ZERO)
-            vars.erase(term.first);
-    }
-
-    return *this;
-}
-
 lin lin::operator+=(const rational &right)
 {
     known_term += right;
@@ -156,20 +141,6 @@ lin lin::operator-=(const lin &right)
         }
     }
     known_term -= right.known_term;
-    return *this;
-}
-
-lin lin::operator-=(const std::pair<var, rational> &term)
-{
-    const auto trm_it = vars.find(term.first);
-    if (trm_it == vars.end())
-        vars.insert({term.first, -term.second});
-    else
-    {
-        trm_it->second -= term.second;
-        if (trm_it->second == rational::ZERO)
-            vars.erase(term.first);
-    }
     return *this;
 }
 

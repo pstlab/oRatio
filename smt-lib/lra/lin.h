@@ -30,11 +30,9 @@ public:
   lin operator/(const rational &right) const;
 
   lin operator+=(const lin &right);
-  lin operator+=(const std::pair<var, rational> &term);
   lin operator+=(const rational &right);
 
   lin operator-=(const lin &right);
-  lin operator-=(const std::pair<var, rational> &term);
   lin operator-=(const rational &right);
 
   lin operator*=(const rational &right);
