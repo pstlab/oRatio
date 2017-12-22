@@ -1,6 +1,8 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 
 project ( oRatio VERSION 0.2 LANGUAGES CXX )
+
+set (CMAKE_CXX_STANDARD 11)
 
 file( GLOB SOURCES main.cpp smt-lib/*.cpp core-lib/*.cpp cg-lib/*.cpp )
 include_directories( smt-lib core-lib cg-lib )
