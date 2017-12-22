@@ -4,7 +4,7 @@ project ( oRatio VERSION 0.2 LANGUAGES CXX )
 
 set (CMAKE_CXX_STANDARD 11)
 
-file( GLOB SOURCES main.cpp smt-lib/*.cpp core-lib/*.cpp cg-lib/*.cpp )
+file( GLOB SOURCES main.cpp smt-lib/*.cpp smt-lib/lra/*.cpp core-lib/*.cpp cg-lib/*.cpp )
 include_directories( smt-lib core-lib cg-lib )
 
 add_executable( ${PROJECT_NAME} ${SOURCES} )

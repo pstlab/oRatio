@@ -1,5 +1,6 @@
 #include "clause.h"
 #include "sat_core.h"
+#include <algorithm>
 
 namespace smt
 {
