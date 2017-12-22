@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace smt
 {
 
@@ -91,6 +93,8 @@ public:
       v = -v;
     return u * (v / gcd(u, v));
   }
+
+  std::string to_string() const;
 
 private:
   void normalize()

@@ -1,4 +1,5 @@
 #include "sat_core.h"
+#include "lra_theory.h"
 #include <cassert>
 
 using namespace smt;
@@ -68,8 +69,32 @@ void test_no_good()
     assert(assm);
 }
 
+void test_rationals_0()
+{
+    rational r0;
+    r0 += 1;
+    r0 += rational(1, 2);
+    r0 += rational::NEGATIVE_INFINITY;
+    rational r1(4, 2);
+    rational r2 = r1 / r0;
+    r2 += 2;
+    r2 -= -2;
+    r2 *= 2;
+}
+
+void test_rationals_1()
+{
+    assert(rational::NEGATIVE_INFINITY < rational::POSITIVE_INFINITY);
+    assert(rational::NEGATIVE_INFINITY <= rational::POSITIVE_INFINITY);
+    assert(rational::POSITIVE_INFINITY >= rational::NEGATIVE_INFINITY);
+    assert(rational::POSITIVE_INFINITY > rational::NEGATIVE_INFINITY);
+}
+
 int main(int argc, char *argv[])
 {
     test_basic_core();
     test_no_good();
+
+    test_rationals_0();
+    test_rationals_1();
 }
