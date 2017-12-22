@@ -57,7 +57,7 @@ public:
   bool check();
   bool check(const std::vector<lit> &lits);
 
-  lbool value(const var &x) const { return assigns[x]; } // returns the value of variable 'v'..
+  lbool value(const var &x) const { return assigns.at(x); } // returns the value of variable 'v'..
   lbool value(const lit &p) const
   {
     switch (value(p.v))
@@ -84,8 +84,8 @@ private:
   void pop_one();
 
   void add_theory(theory &th) { theories.push_back(&th); }
-  void bind(const var &v, theory &th) { bounds[v].push_back(&th); }
-  void listen(const var &v, sat_value_listener *const l) { listening[v].insert(l); }
+  void bind(const var &v, theory &th) { bounds[v].insert(&th); }
+  void listen(const var &v, sat_value_listener &l) { listening[v].insert(&l); }
 
 private:
   std::vector<clause *> constrs;              // collection of problem constraints..
@@ -99,7 +99,7 @@ private:
   std::unordered_map<std::string, var> exprs; // the already existing expressions (string to bool variable)..
 
   std::vector<theory *> theories; // all the theories..
-  std::unordered_map<var, std::vector<theory *>> bounds;
+  std::unordered_map<var, std::set<theory *>> bounds;
   std::unordered_map<var, std::set<sat_value_listener *>> listening;
 };
 }

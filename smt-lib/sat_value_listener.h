@@ -1,4 +1,5 @@
 #pragma once
+
 #include "sat_core.h"
 
 namespace smt
@@ -14,7 +15,7 @@ public:
   virtual ~sat_value_listener() {}
 
 protected:
-  void listen_sat(var v) { sat.listen(v, this); }
+  void listen_sat(var v) { sat.listen(v, *this); }
 
 private:
   virtual void sat_value_change(const var &) {}

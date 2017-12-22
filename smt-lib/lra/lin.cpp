@@ -183,7 +183,7 @@ lin lin::operator-() const
 {
     lin res;
     for (auto &term : vars)
-        res.vars[term.first] = -term.second;
+        res.vars.at(term.first) = -term.second;
     res.known_term = -known_term;
     return res;
 }

@@ -135,6 +135,31 @@ void test_lin()
     assert(l2.vars.at(1) == rational(4));
 }
 
+void test_lra_theory()
+{
+    sat_core core;
+    lra_theory lra(core);
+
+    var x = lra.new_var();
+    var y = lra.new_var();
+    var s1 = lra.new_var(lin(x, -1) + lin(y, 1));
+    var s2 = lra.new_var(lin(x, 1) + lin(y, 1));
+
+    // x <= -4
+    bool nc = core.new_clause({lra.new_leq(lin(x, 1), lin(rational(-4)))}) && core.check();
+    assert(nc);
+    // x >= -8
+    nc = core.new_clause({lra.new_geq(lin(x, 1), lin(rational(-8)))}) && core.check();
+    assert(nc);
+    // s1 <= 1
+    nc = core.new_clause({lra.new_leq(lin(s1, 1), lin(rational(1)))}) && core.check();
+    assert(nc);
+
+    // s2 >= -3
+    bool assm = core.assume(lra.new_geq(lin(s2, 1), lin(rational(-3))));
+    assert(assm);
+}
+
 int main(int argc, char *argv[])
 {
     test_basic_core();
@@ -143,4 +168,6 @@ int main(int argc, char *argv[])
     test_rationals_0();
     test_rationals_1();
     test_lin();
+
+    test_lra_theory();
 }
