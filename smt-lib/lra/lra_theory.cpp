@@ -3,6 +3,7 @@
 #include "row.h"
 #include "assertion.h"
 #include "lra_value_listener.h"
+#include <algorithm>
 #include <cassert>
 
 namespace smt
