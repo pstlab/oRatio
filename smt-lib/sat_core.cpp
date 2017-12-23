@@ -398,9 +398,9 @@ bool sat_core::enqueue(const lit &p, clause *const c)
         return false;
     case Undefined:
     {
-        assigns.insert(assigns.begin() + p.v, p.sign ? True : False);
-        level.insert(level.begin() + p.v, decision_level());
-        reason.insert(reason.begin() + p.v, c);
+        assigns[p.v] = p.sign ? True : False;
+        level[p.v] = decision_level();
+        reason[p.v] = c;
         trail.push_back(p);
         prop_q.push(p);
         const auto at_p = listening.find(p.v);
@@ -417,9 +417,9 @@ bool sat_core::enqueue(const lit &p, clause *const c)
 void sat_core::pop_one()
 {
     const var v = trail.back().v;
-    assigns.insert(assigns.begin() + v, Undefined);
-    level.insert(level.begin() + v, 0);
-    reason.insert(reason.begin() + v, nullptr);
+    assigns[v] = Undefined;
+    level[v] = 0;
+    reason[v] = nullptr;
     trail.pop_back();
     const auto at_v = listening.find(v);
     if (at_v != listening.end())

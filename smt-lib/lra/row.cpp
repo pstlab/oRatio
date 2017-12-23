@@ -54,7 +54,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                     switch (c->o)
                     {
                     case leq: // the assertion is unsatisfable..
-                        cnfl.insert(cnfl.begin(), lit(c->b, false));
+                        cnfl[0] = lit(c->b, false);
                         switch (th.sat.value(c->b))
                         {
                         case True: // we have a propositional inconsistency..
@@ -64,7 +64,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                         }
                         break;
                     case geq: // the assertion is satisfied..
-                        cnfl.insert(cnfl.begin(), c->b);
+                        cnfl[0] = c->b;
                         switch (th.sat.value(c->b))
                         {
                         case False: // we have a propositional inconsistency..
@@ -110,7 +110,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                     switch (c->o)
                     {
                     case leq: // the assertion is satisfied..
-                        cnfl.insert(cnfl.begin(), c->b);
+                        cnfl[0] = c->b;
                         switch (th.sat.value(c->b))
                         {
                         case False: // we have a propositional inconsistency..
@@ -120,7 +120,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                         }
                         break;
                     case geq: // the assertion is unsatisfable..
-                        cnfl.insert(cnfl.begin(), lit(c->b, false));
+                        cnfl[0] = lit(c->b, false);
                         switch (th.sat.value(c->b))
                         {
                         case True: // we have a propositional inconsistency..
@@ -176,7 +176,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                     switch (c->o)
                     {
                     case leq: // the assertion is satisfied..
-                        cnfl.insert(cnfl.begin(), c->b);
+                        cnfl[0] = c->b;
                         switch (th.sat.value(c->b))
                         {
                         case False: // we have a propositional inconsistency..
@@ -186,7 +186,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                         }
                         break;
                     case geq: // the assertion is unsatisfable..
-                        cnfl.insert(cnfl.begin(), lit(c->b, false));
+                        cnfl[0] = lit(c->b, false);
                         switch (th.sat.value(c->b))
                         {
                         case True: // we have a propositional inconsistency..
@@ -232,7 +232,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                     switch (c->o)
                     {
                     case leq: // the assertion is unsatisfable..
-                        cnfl.insert(cnfl.begin(), lit(c->b, false));
+                        cnfl[0] = lit(c->b, false);
                         switch (th.sat.value(c->b))
                         {
                         case True: // we have a propositional inconsistency..
@@ -242,7 +242,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                         }
                         break;
                     case geq: // the assertion is satisfied..
-                        cnfl.insert(cnfl.begin(), c->b);
+                        cnfl[0] = c->b;
                         switch (th.sat.value(c->b))
                         {
                         case False: // we have a propositional inconsistency..

@@ -35,7 +35,7 @@ const var lra_theory::new_var(const lin &l)
     {
         const var slack = new_var();
         exprs.insert({s_expr, slack});
-        vals.insert(vals.begin() + slack, value(l));       // we set the initial value of the new slack variable..
+        vals[slack] = value(l);                            // we set the initial value of the new slack variable..
         tableau.insert({slack, new row(*this, slack, l)}); // we add a new row into the tableau..
         return slack;
     }
@@ -271,7 +271,7 @@ void lra_theory::pop()
     for (const auto &b : layers.back())
     {
         delete assigns.at(b.first).reason;
-        assigns.insert(assigns.begin() + b.first, b.second);
+        assigns[b.first] = b.second;
     }
     layers.pop_back();
 }
@@ -291,7 +291,7 @@ bool lra_theory::assert_lower(const var &x_i, const inf_rational &val, const lit
     {
         if (!layers.empty() && layers.back().find(lb_index(x_i)) == layers.back().end())
             layers.back().insert({lb_index(x_i), {lb(x_i), assigns.at(lb_index(x_i)).reason}});
-        assigns.insert(assigns.begin() + lb_index(x_i), {val, new lit(p.v, p.sign)});
+        assigns[lb_index(x_i)] = {val, new lit(p.v, p.sign)};
 
         if (vals.at(x_i) < val && tableau.find(x_i) == tableau.end())
             update(x_i, val);
@@ -324,7 +324,7 @@ bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit
     {
         if (!layers.empty() && layers.back().find(ub_index(x_i)) == layers.back().end())
             layers.back().insert({ub_index(x_i), {ub(x_i), assigns.at(ub_index(x_i)).reason}});
-        assigns.insert(assigns.begin() + ub_index(x_i), {val, new lit(p.v, p.sign)});
+        assigns[ub_index(x_i)] = {val, new lit(p.v, p.sign)};
 
         if (vals.at(x_i) > val && tableau.find(x_i) == tableau.end())
             update(x_i, val);
