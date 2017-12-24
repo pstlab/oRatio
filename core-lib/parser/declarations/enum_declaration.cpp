@@ -1,4 +1,6 @@
 #include "enum_declaration.h"
+#include "enum_type.h"
+#include "core.h"
 
 namespace ratio
 {

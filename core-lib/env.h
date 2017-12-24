@@ -8,11 +8,17 @@ namespace ratio
 {
 
 class core;
+class constructor;
+class method;
+class var_item;
 
 class env
 {
 
   friend class context;
+  friend class constructor;
+  friend class method;
+  friend class var_item;
 
 public:
   env(core &cr, const context ctx);

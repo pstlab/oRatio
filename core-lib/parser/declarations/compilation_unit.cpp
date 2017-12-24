@@ -1,4 +1,7 @@
 #include "compilation_unit.h"
+#include "method.h"
+#include "predicate.h"
+#include "statement.h"
 
 namespace ratio
 {

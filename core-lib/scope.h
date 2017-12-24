@@ -16,8 +16,14 @@ class method;
 class type;
 class predicate;
 
+namespace ast
+{
+class field_declaration;
+}
+
 class scope
 {
+  friend class field_declaration;
 
 public:
   scope(core &cr, scope &scp);

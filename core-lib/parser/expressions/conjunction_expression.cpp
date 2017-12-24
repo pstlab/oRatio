@@ -1,6 +1,6 @@
 #include "conjunction_expression.h"
 #include "context.h"
-#include "scope.h"
+#include "core.h"
 
 namespace ratio
 {

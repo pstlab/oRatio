@@ -1,4 +1,8 @@
 #include "method_declaration.h"
+#include "type.h"
+#include "field.h"
+#include "method.h"
+#include "core.h"
 
 namespace ratio
 {

@@ -1,4 +1,7 @@
 #include "field_declaration.h"
+#include "type.h"
+#include "field.h"
+#include "variable_declaration.h"
 
 namespace ratio
 {

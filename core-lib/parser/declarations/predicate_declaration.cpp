@@ -1,4 +1,7 @@
 #include "predicate_declaration.h"
+#include "field.h"
+#include "predicate.h"
+#include "core.h"
 
 namespace ratio
 {

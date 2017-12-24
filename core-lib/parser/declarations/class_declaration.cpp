@@ -1,4 +1,9 @@
 #include "class_declaration.h"
+#include "core.h"
+#include "field.h"
+#include "constructor.h"
+#include "method.h"
+#include "predicate.h"
 
 namespace ratio
 {
