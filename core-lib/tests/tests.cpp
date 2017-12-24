@@ -7,7 +7,8 @@ using namespace ratio;
 
 void test_lexer()
 {
-    lexer l(std::stringstream("real a = 5 + 2;\nfalse;"));
+    std::stringstream ss("real a = 5 + 2;\nfalse;");
+    lexer l(ss);
     token *t0 = l.next();
     assert(t0->sym == REAL_ID);
     token *t1 = l.next();
