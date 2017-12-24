@@ -2,6 +2,7 @@
 #include "type.h"
 #include "field.h"
 #include "variable_declaration.h"
+#include "context.h"
 
 namespace ratio
 {

@@ -1,4 +1,9 @@
 #include "local_field_statement.h"
+#include "expression.h"
+#include "type.h"
+#include "core.h"
+#include "field.h"
+#include "item.h"
 
 namespace ratio
 {

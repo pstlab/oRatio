@@ -1,4 +1,7 @@
 #include "return_statement.h"
+#include "expression.h"
+#include "scope.h"
+#include "item.h"
 
 namespace ratio
 {

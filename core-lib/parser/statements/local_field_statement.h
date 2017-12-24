@@ -9,6 +9,8 @@ namespace ratio
 namespace ast
 {
 
+class expression;
+
 class local_field_statement : public statement
 {
 public:

@@ -1,4 +1,10 @@
 #include "disjunction_statement.h"
+#include "statement.h"
+#include "expression.h"
+#include "conjunction.h"
+#include "disjunction.h"
+#include "item.h"
+#include "core.h"
 
 namespace ratio
 {
@@ -22,11 +28,11 @@ void disjunction_statement::execute(const scope &scp, context &ctx) const
     std::vector<const conjunction *> cs;
     for (const auto &c : conjunctions)
     {
-        lin cost(1);
+        smt::rational cost(1);
         if (c.second)
         {
             arith_expr a_xpr = c.second->evaluate(scp, ctx);
-            cost = a_xpr->l;
+            cost = a_xpr->l.known_term;
         }
         cs.push_back(new conjunction(scp.get_core(), const_cast<scope &>(scp), cost, c.first));
     }

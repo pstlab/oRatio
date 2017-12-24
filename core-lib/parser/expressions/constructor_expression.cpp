@@ -1,5 +1,7 @@
 #include "constructor_expression.h"
-#include "context.h"
+#include "item.h"
+#include "type.h"
+#include "constructor.h"
 
 namespace ratio
 {

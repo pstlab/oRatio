@@ -2,6 +2,7 @@
 #include "field.h"
 #include "predicate.h"
 #include "core.h"
+#include "statement.h"
 
 namespace ratio
 {

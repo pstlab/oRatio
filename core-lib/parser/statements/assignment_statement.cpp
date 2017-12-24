@@ -1,4 +1,6 @@
 #include "assignment_statement.h"
+#include "expression.h"
+#include "item.h"
 
 namespace ratio
 {

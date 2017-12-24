@@ -1,6 +1,7 @@
 #include "typedef_declaration.h"
 #include "typedef_type.h"
 #include "core.h"
+#include "expression.h"
 
 namespace ratio
 {

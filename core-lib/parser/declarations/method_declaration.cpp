@@ -3,6 +3,7 @@
 #include "field.h"
 #include "method.h"
 #include "core.h"
+#include "statement.h"
 
 namespace ratio
 {

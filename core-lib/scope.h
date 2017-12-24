@@ -19,13 +19,15 @@ class predicate;
 namespace ast
 {
 class field_declaration;
+class local_field_statement;
 }
 
 class scope
 {
   friend class core;
   friend class type;
-  friend class field_declaration;
+  friend class ast::field_declaration;
+  friend class ast::local_field_statement;
 
 public:
   scope(core &cr, scope &scp);

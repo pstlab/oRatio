@@ -1,4 +1,9 @@
 #include "formula_statement.h"
+#include "expression.h"
+#include "core.h"
+#include "atom.h"
+#include "predicate.h"
+#include "field.h"
 
 namespace ratio
 {
@@ -84,7 +89,6 @@ void formula_statement::execute(const scope &scp, context &ctx) const
     while (!q.empty())
     {
         for (const auto &arg : q.front()->get_args())
-        {
             if (a->items.find(arg->name) == a->items.end())
             {
                 // the field is uninstantiated..
@@ -94,7 +98,6 @@ void formula_statement::execute(const scope &scp, context &ctx) const
                 else
                     a->items.insert({arg->name, tp.new_existential()});
             }
-        }
         for (const auto &sp : q.front()->get_supertypes())
             q.push(static_cast<predicate *>(sp));
         q.pop();

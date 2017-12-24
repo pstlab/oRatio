@@ -1,5 +1,7 @@
 #include "range_expression.h"
-#include "context.h"
+#include "core.h"
+#include "item.h"
+#include "type.h"
 
 namespace ratio
 {

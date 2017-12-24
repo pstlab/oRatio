@@ -1,4 +1,7 @@
 #include "expression_statement.h"
+#include "expression.h"
+#include "core.h"
+#include "item.h"
 
 namespace ratio
 {

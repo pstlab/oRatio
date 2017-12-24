@@ -1,5 +1,5 @@
 #include "implication_expression.h"
-#include "context.h"
+#include "core.h"
 
 namespace ratio
 {

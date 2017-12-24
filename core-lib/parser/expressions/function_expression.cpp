@@ -1,5 +1,8 @@
 #include "function_expression.h"
-#include "context.h"
+#include "type.h"
+#include "method.h"
+#include "core.h"
+#include "item.h"
 
 namespace ratio
 {
