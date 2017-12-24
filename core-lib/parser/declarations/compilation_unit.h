@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace lucy
+namespace ratio
 {
 
 class scope;

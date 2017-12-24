@@ -2,7 +2,7 @@
 
 #include "type_declaration.h"
 
-namespace lucy
+namespace ratio
 {
 
 namespace ast

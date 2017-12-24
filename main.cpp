@@ -2,7 +2,7 @@
 
 int main(int argc, char *argv[])
 {
-    std::cout << "starting lucy";
+    std::cout << "starting ratio";
 #ifndef NDEBUG
     std::cout << " in debug mode";
 #endif

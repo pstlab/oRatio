@@ -3,7 +3,7 @@
 #include "type_declaration.h"
 #include <vector>
 
-namespace lucy
+namespace ratio
 {
 
 namespace ast

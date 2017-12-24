@@ -40,7 +40,8 @@ public:
   virtual std::map<std::string, predicate *> get_predicates() const noexcept;
 
 protected:
-  static void add_field(scope &s, field &f);
+  static void add_fields(scope &s, const std::vector<const field *> &fs);
+  void add_fields(const std::vector<const field *> &fs);
 
 protected:
   core &cr;

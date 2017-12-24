@@ -12,6 +12,8 @@ class core;
 class env
 {
 
+  friend class context;
+
 public:
   env(core &cr, const context ctx);
   env(const env &orig) = delete;

@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-namespace lucy
+namespace ratio
 {
 
 class scope;
