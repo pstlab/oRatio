@@ -35,11 +35,11 @@ std::map<std::string, predicate *> scope::get_predicates() const noexcept { retu
 void scope::add_fields(scope &s, const std::vector<field *> &fs)
 {
     for (const auto &f : fs)
-        s.fields.insert({f.name, &f});
+        s.fields.insert({f->name, f});
 }
 void scope::add_fields(const std::vector<field *> &fs)
 {
     for (const auto &f : fs)
-        fields.insert({f.name, &f});
+        fields.insert({f->name, f});
 }
 }

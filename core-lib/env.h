@@ -16,6 +16,7 @@ class var_item;
 class env
 {
 
+  friend class core;
   friend class context;
   friend class constructor;
   friend class method;

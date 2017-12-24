@@ -1,9 +1,12 @@
 #include "class_declaration.h"
+#include "type.h"
 #include "core.h"
-#include "field.h"
 #include "constructor.h"
-#include "method.h"
-#include "predicate.h"
+#include "field_declaration.h"
+#include "constructor_declaration.h"
+#include "method_declaration.h"
+#include "predicate_declaration.h"
+#include "type_declaration.h"
 
 namespace ratio
 {

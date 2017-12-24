@@ -23,6 +23,8 @@ class field_declaration;
 
 class scope
 {
+  friend class core;
+  friend class type;
   friend class field_declaration;
 
 public:

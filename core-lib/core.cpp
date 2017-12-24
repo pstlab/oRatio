@@ -3,6 +3,8 @@
 #include "atom.h"
 #include "method.h"
 #include "field.h"
+#include "parser.h"
+#include "compilation_unit.h"
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -45,8 +47,7 @@ void core::read(const std::string &script)
     std::stringstream ss(script);
     parser prs(ss);
     ast::compilation_unit *cu = prs.parse();
-    ss.close();
-    cus.insert({cu, prs});
+    cus.push_back(cu);
 
     cu->declare(*this);
     cu->refine(*this);
@@ -90,10 +91,10 @@ void core::read(const std::vector<std::string> &files)
 bool_expr core::new_bool() { return new bool_item(*this, sat_cr.new_var()); }
 bool_expr core::new_bool(const bool &val) { return new bool_item(*this, val); }
 
-arith_expr core::new_int() { return new arith_item(*this, *types.at(INT_KEYWORD), lin(la_th.new_var(), 1)); }
+arith_expr core::new_int() { return new arith_item(*this, *types.at(INT_KEYWORD), lin(lra_th.new_var(), 1)); }
 arith_expr core::new_int(const I &val) { return new arith_item(*this, *types.at(INT_KEYWORD), lin(val)); }
 
-arith_expr core::new_real() { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(la_th.new_var(), 1)); }
+arith_expr core::new_real() { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(lra_th.new_var(), 1)); }
 arith_expr core::new_real(const rational &val) { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(val)); }
 
 string_expr core::new_string() { return new string_item(*this, ""); }
@@ -127,7 +128,7 @@ expr core::new_enum(const type &tp, const std::vector<var> &vars, const std::vec
         bool nc;
         for (size_t i = 0; i < vars.size(); ++i)
         {
-            nc = sat_cr.new_clause({lit(vars.at(i), false), sat_cr.new_conj({la_th.new_leq(ie->l, dynamic_cast<arith_item *>(vals.at(i))->l), la_th.new_geq(ie->l, dynamic_cast<arith_item *>(vals.at(i))->l)})});
+            nc = sat_cr.new_clause({lit(vars.at(i), false), sat_cr.new_conj({lra_th.new_leq(ie->l, dynamic_cast<arith_item *>(vals.at(i))->l), lra_th.new_geq(ie->l, dynamic_cast<arith_item *>(vals.at(i))->l)})});
             assert(nc);
         }
         return ie;
@@ -138,7 +139,7 @@ expr core::new_enum(const type &tp, const std::vector<var> &vars, const std::vec
         bool nc;
         for (size_t i = 0; i < vars.size(); ++i)
         {
-            nc = sat_cr.new_clause({lit(vars.at(i), false), sat_cr.new_conj({la_th.new_leq(re->l, dynamic_cast<arith_item *>(vals.at(i))->l), la_th.new_geq(re->l, dynamic_cast<arith_item *>(vals.at(i))->l)})});
+            nc = sat_cr.new_clause({lit(vars.at(i), false), sat_cr.new_conj({lra_th.new_leq(re->l, dynamic_cast<arith_item *>(vals.at(i))->l), lra_th.new_geq(re->l, dynamic_cast<arith_item *>(vals.at(i))->l)})});
             assert(nc);
         }
         return re;
@@ -198,14 +199,14 @@ arith_expr core::sub(const std::vector<arith_expr> &exprs)
 arith_expr core::mult(const std::vector<arith_expr> &exprs)
 {
     assert(exprs.size() > 1);
-    arith_expr ae = *std::find_if(exprs.begin(), exprs.end(), [&](arith_expr ae) { return la_th.lb(ae->l) == la_th.ub(ae->l); });
+    arith_expr ae = *std::find_if(exprs.begin(), exprs.end(), [&](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); });
     lin l = ae->l;
     for (const auto &aex : exprs)
         if (aex != ae)
         {
-            assert(la_th.lb(aex->l) == la_th.ub(aex->l) && "non-linear expression..");
-            assert(la_th.value(aex->l).get_infinitesimal() == rational::ZERO);
-            l *= la_th.value(aex->l).get_rational();
+            assert(lra_th.lb(aex->l) == lra_th.ub(aex->l) && "non-linear expression..");
+            assert(lra_th.value(aex->l).get_infinitesimal() == rational::ZERO);
+            l *= lra_th.value(aex->l).get_rational();
         }
     return new arith_item(*this, *types.at(REAL_KEYWORD), l);
 }
@@ -213,24 +214,24 @@ arith_expr core::mult(const std::vector<arith_expr> &exprs)
 arith_expr core::div(const std::vector<arith_expr> &exprs)
 {
     assert(exprs.size() > 1);
-    assert(std::all_of(++exprs.begin(), exprs.end(), [&](arith_expr ae) { return la_th.lb(ae->l) == la_th.ub(ae->l); }) && "non-linear expression..");
-    assert(la_th.value(exprs.at(1)->l).get_infinitesimal() == rational::ZERO);
-    rational c = la_th.value(exprs.at(1)->l).get_rational();
+    assert(std::all_of(++exprs.begin(), exprs.end(), [&](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
+    assert(lra_th.value(exprs.at(1)->l).get_infinitesimal() == rational::ZERO);
+    rational c = lra_th.value(exprs.at(1)->l).get_rational();
     for (size_t i = 2; i < exprs.size(); i++)
     {
-        assert(la_th.value(exprs.at(i)->l).get_infinitesimal() == rational::ZERO);
-        c *= la_th.value(exprs.at(i)->l).get_rational();
+        assert(lra_th.value(exprs.at(i)->l).get_infinitesimal() == rational::ZERO);
+        c *= lra_th.value(exprs.at(i)->l).get_rational();
     }
     return new arith_item(*this, *types.at(REAL_KEYWORD), exprs.at(0)->l / c);
 }
 
 arith_expr core::minus(arith_expr ex) { return new arith_item(*this, *types.at(REAL_KEYWORD), -ex->l); }
 
-bool_expr core::lt(arith_expr left, arith_expr right) { return new bool_item(*this, la_th.new_lt(left->l, right->l)); }
-bool_expr core::leq(arith_expr left, arith_expr right) { return new bool_item(*this, la_th.new_leq(left->l, right->l)); }
-bool_expr core::eq(arith_expr left, arith_expr right) { return new bool_item(*this, sat_cr.new_conj({la_th.new_leq(left->l, right->l), la_th.new_geq(left->l, right->l)})); }
-bool_expr core::geq(arith_expr left, arith_expr right) { return new bool_item(*this, la_th.new_geq(left->l, right->l)); }
-bool_expr core::gt(arith_expr left, arith_expr right) { return new bool_item(*this, la_th.new_gt(left->l, right->l)); }
+bool_expr core::lt(arith_expr left, arith_expr right) { return new bool_item(*this, lra_th.new_lt(left->l, right->l)); }
+bool_expr core::leq(arith_expr left, arith_expr right) { return new bool_item(*this, lra_th.new_leq(left->l, right->l)); }
+bool_expr core::eq(arith_expr left, arith_expr right) { return new bool_item(*this, sat_cr.new_conj({lra_th.new_leq(left->l, right->l), lra_th.new_geq(left->l, right->l)})); }
+bool_expr core::geq(arith_expr left, arith_expr right) { return new bool_item(*this, lra_th.new_geq(left->l, right->l)); }
+bool_expr core::gt(arith_expr left, arith_expr right) { return new bool_item(*this, lra_th.new_gt(left->l, right->l)); }
 
 bool_expr core::eq(expr left, expr right) { return new bool_item(*this, left->eq(*right)); }
 
@@ -306,9 +307,9 @@ expr core::get(const std::string &name) const
 }
 
 lbool core::bool_value(const bool_expr &x) const noexcept { return sat_cr.value(x->l); }
-inf_rational core::arith_lb(const arith_expr &x) const noexcept { return la_th.lb(x->l); }
-inf_rational core::arith_ub(const arith_expr &x) const noexcept { return la_th.ub(x->l); }
-inf_rational core::arith_value(const arith_expr &x) const noexcept { return la_th.value(x->l); }
+inf_rational core::arith_lb(const arith_expr &x) const noexcept { return lra_th.lb(x->l); }
+inf_rational core::arith_ub(const arith_expr &x) const noexcept { return lra_th.ub(x->l); }
+inf_rational core::arith_value(const arith_expr &x) const noexcept { return lra_th.value(x->l); }
 std::unordered_set<var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th.value(x->ev); }
 
 std::string core::to_string(const std::map<std::string, expr> &c_items) const noexcept
@@ -339,13 +340,13 @@ std::string core::to_string(const std::map<std::string, expr> &c_items) const no
         }
         else if (arith_item *ai = dynamic_cast<arith_item *>(&*is_it->second))
         {
-            const auto val = la_th.value(ai->l);
+            const auto val = lra_th.value(ai->l);
             iss += "{ \"lin\" : \"" + ai->l.to_string() + "\", \"val\" : ";
             iss += "{ \"num\" : " + std::to_string(val.get_rational().numerator()) + ", \"den\" : " + std::to_string(val.get_rational().denominator());
             if (val.get_infinitesimal() != rational::ZERO)
                 iss += ", \"inf\" : { \"num\" : " + std::to_string(val.get_infinitesimal().numerator()) + ", \"den\" : " + std::to_string(val.get_infinitesimal().denominator()) + " }";
             iss += " }";
-            const auto lb = la_th.lb(ai->l);
+            const auto lb = lra_th.lb(ai->l);
             if (!lb.is_negative_infinite())
             {
                 iss += ", \"lb\" : { \"num\" : " + std::to_string(lb.get_rational().numerator()) + ", \"den\" : " + std::to_string(lb.get_rational().denominator());
@@ -353,7 +354,7 @@ std::string core::to_string(const std::map<std::string, expr> &c_items) const no
                     iss += ", \"inf\" : { \"num\" : " + std::to_string(lb.get_infinitesimal().numerator()) + ", \"den\" : " + std::to_string(lb.get_infinitesimal().denominator()) + " }";
                 iss += " }";
             }
-            const auto ub = la_th.ub(ai->l);
+            const auto ub = lra_th.ub(ai->l);
             if (!ub.is_positive_infinite())
             {
                 iss += ", \"ub\" : { \"num\" : " + std::to_string(ub.get_rational().numerator()) + ", \"den\" : " + std::to_string(ub.get_rational().denominator());

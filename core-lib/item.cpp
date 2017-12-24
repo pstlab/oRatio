@@ -188,6 +188,7 @@ expr var_item::get(const std::string &name) const
                     return *vals_set.begin();
                 var_expr e = cr.new_enum(tp.get_field(name).tp, c_vars, c_vals);
                 const_cast<var_item *>(this)->items.insert({name, e});
+                return e;
             }
         }
         else

@@ -1,6 +1,7 @@
 #include "compilation_unit.h"
-#include "method.h"
-#include "predicate.h"
+#include "type_declaration.h"
+#include "method_declaration.h"
+#include "predicate_declaration.h"
 #include "statement.h"
 
 namespace ratio

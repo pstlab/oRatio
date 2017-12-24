@@ -11,6 +11,7 @@ namespace ratio
 
 class constructor;
 class context;
+class expr;
 class atom;
 
 namespace ast

@@ -1,4 +1,9 @@
 #include "constructor_declaration.h"
+#include "type.h"
+#include "field.h"
+#include "constructor.h"
+#include "expression.h"
+#include "statement.h"
 
 namespace ratio
 {
