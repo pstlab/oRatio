@@ -43,8 +43,7 @@ core::~core()
 void core::read(const std::string &script)
 {
     std::stringstream ss(script);
-    lexer lex(ss);
-    parser prs(lex);
+    parser prs(ss);
     ast::compilation_unit *cu = prs.parse();
     ss.close();
     cus.insert({cu, prs});
@@ -66,8 +65,7 @@ void core::read(const std::vector<std::string> &files)
         std::ifstream ifs(f);
         if (ifs)
         {
-            lexer lex(ifs);
-            parser prs(lex);
+            parser prs(ifs);
             ast::compilation_unit *cu = prs.parse();
             ifs.close();
             c_cus.push_back(cu);
