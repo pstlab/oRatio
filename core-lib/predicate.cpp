@@ -3,6 +3,7 @@
 #include "atom.h"
 #include "context.h"
 #include "statement.h"
+#include <queue>
 
 namespace ratio
 {

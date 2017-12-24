@@ -5,6 +5,7 @@
 #include "constructor.h"
 #include "method.h"
 #include "predicate.h"
+#include "context.h"
 #include <algorithm>
 #include <unordered_set>
 #include <cassert>

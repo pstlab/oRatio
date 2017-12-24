@@ -1,4 +1,5 @@
 #include "env.h"
+#include "core.h"
 #include <cassert>
 
 namespace ratio
