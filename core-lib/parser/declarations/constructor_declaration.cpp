@@ -4,6 +4,7 @@
 #include "constructor.h"
 #include "expression.h"
 #include "statement.h"
+#include "context.h"
 
 namespace ratio
 {
