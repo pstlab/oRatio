@@ -566,7 +566,10 @@ token *lexer::next()
     case 'Y':
     case 'Z':
     case '_':
-        return finish_id(std::string());
+    {
+        std::string str;
+        return finish_id(str);
+    }
     case '\t':
     case ' ':
     case '\r':
