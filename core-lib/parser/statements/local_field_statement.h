@@ -2,6 +2,7 @@
 
 #include "statement.h"
 #include <vector>
+#include <string>
 
 namespace ratio
 {
