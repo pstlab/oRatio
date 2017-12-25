@@ -2,6 +2,7 @@
 
 #include "expression.h"
 #include <vector>
+#include <string>
 
 namespace ratio
 {
