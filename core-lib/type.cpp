@@ -82,7 +82,13 @@ expr type::new_existential()
     }
 }
 
-constructor &type::get_constructor(const std::vector<const type *> &ts) const
+void type::new_constructors(const std::vector<const constructor *> &cs)
+{
+    for (const auto &c : cs)
+        constructors.push_back(c);
+}
+
+const constructor &type::get_constructor(const std::vector<const type *> &ts) const
 {
     assert(std::none_of(ts.begin(), ts.end(), [](const type *t) { return t == nullptr; }));
     bool found = false;
@@ -133,7 +139,13 @@ field &type::get_field(const std::string &f_name) const
     throw std::out_of_range(f_name);
 }
 
-method &type::get_method(const std::string &m_name, const std::vector<const type *> &ts) const
+void type::new_methods(const std::vector<const method *> &ms)
+{
+    for (const auto &m : ms)
+        methods[m->name].push_back(m);
+}
+
+const method &type::get_method(const std::string &m_name, const std::vector<const type *> &ts) const
 {
     const auto at_m = methods.find(m_name);
     if (at_m != methods.end())
@@ -178,6 +190,12 @@ method &type::get_method(const std::string &m_name, const std::vector<const type
     throw std::out_of_range(m_name);
 }
 
+void core::new_predicates(const std::vector<predicate *> &ps)
+{
+    for (const auto &p : ps)
+        predicates.insert({p->name, p});
+}
+
 predicate &type::get_predicate(const std::string &p_name) const
 {
     const auto at_p = predicates.find(p_name);
@@ -206,6 +224,12 @@ predicate &type::get_predicate(const std::string &p_name) const
 
     // not found
     throw std::out_of_range(p_name);
+}
+
+void core::new_types(const std::vector<type *> &ts)
+{
+    for (const auto &t : ts)
+        types.insert({t->name, t});
 }
 
 type &type::get_type(const std::string &t_name) const

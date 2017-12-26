@@ -19,7 +19,7 @@ method::method(core &cr, scope &scp, const type *const return_type, const std::s
 
 method::~method() {}
 
-item *method::invoke(context &ctx, const std::vector<expr> &exprs)
+item *method::invoke(context &ctx, const std::vector<expr> &exprs) const
 {
     assert(args.size() == exprs.size());
     context c_ctx(new env(cr, ctx));

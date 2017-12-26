@@ -114,20 +114,23 @@ public:
 
   field &get_field(const std::string &name) const override;
 
-  method &get_method(const std::string &name, const std::vector<const type *> &ts) const override;
-  std::vector<method *> get_methods() const noexcept override
+  void new_methods(const std::vector<const method *> &ms);
+  const method &get_method(const std::string &name, const std::vector<const type *> &ts) const override;
+  std::vector<const method *> get_methods() const noexcept override
   {
-    std::vector<method *> c_methods;
+    std::vector<const method *> c_methods;
     for (const auto &ms : methods)
       c_methods.insert(c_methods.begin(), ms.second.begin(), ms.second.end());
     return c_methods;
   }
 
-  type &get_type(const std::string &name) const override;
-  std::map<std::string, type *> get_types() const noexcept override { return types; }
-
+  void new_predicates(const std::vector<predicate *> &ps);
   predicate &get_predicate(const std::string &name) const override;
   std::map<std::string, predicate *> get_predicates() const noexcept override { return predicates; }
+
+  void new_types(const std::vector<type *> &ts);
+  type &get_type(const std::string &name) const override;
+  std::map<std::string, type *> get_types() const noexcept override { return types; }
 
   expr get(const std::string &name) const override;
 
@@ -174,7 +177,7 @@ private:
   var ctr_var = TRUE_var;
 
 protected:
-  std::map<std::string, std::vector<method *>> methods;
+  std::map<std::string, std::vector<const method *>> methods;
   std::map<std::string, type *> types;
   std::map<std::string, predicate *> predicates;
 };

@@ -26,7 +26,7 @@ public:
 
   const std::vector<field *> get_args() const { return args; }
 
-  item *invoke(context &ctx, const std::vector<expr> &exprs);
+  item *invoke(context &ctx, const std::vector<expr> &exprs) const;
 
 public:
   const type *const return_type;

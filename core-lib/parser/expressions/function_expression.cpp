@@ -32,7 +32,7 @@ expr function_expression::evaluate(const scope &scp, context &ctx) const
         par_types.push_back(&i->tp);
     }
 
-    method &m = s->get_method(function_name, par_types);
+    const method &m = s->get_method(function_name, par_types);
     if (m.return_type)
     {
         if (m.return_type == &scp.get_core().get_type(BOOL_KEYWORD))

@@ -24,10 +24,10 @@ public:
   constructor(const constructor &orig) = delete;
   virtual ~constructor();
 
-  expr new_instance(context &ctx, const std::vector<expr> &exprs);
+  expr new_instance(context &ctx, const std::vector<expr> &exprs) const;
 
 private:
-  void invoke(item &i, const std::vector<expr> &exprs);
+  void invoke(item &i, const std::vector<expr> &exprs) const;
 
 private:
   const std::vector<field *> args;

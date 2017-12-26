@@ -14,13 +14,7 @@
 namespace ratio
 {
 
-core::core() : scope(*this, *this), env(*this, this), sat_cr(), lra_th(sat_cr), ov_th(sat_cr)
-{
-    types.insert({BOOL_KEYWORD, new bool_type(*this)});
-    types.insert({INT_KEYWORD, new int_type(*this)});
-    types.insert({REAL_KEYWORD, new real_type(*this)});
-    types.insert({STRING_KEYWORD, new string_type(*this)});
-}
+core::core() : scope(*this, *this), env(*this, this), sat_cr(), lra_th(sat_cr), ov_th(sat_cr) { new_types({new bool_type(*this), new int_type(*this), new real_type(*this), new string_type(*this)}); }
 
 core::~core()
 {
@@ -252,7 +246,13 @@ field &core::get_field(const std::string &name) const
     throw std::out_of_range(name);
 }
 
-method &core::get_method(const std::string &name, const std::vector<const type *> &ts) const
+void core::new_methods(const std::vector<const method *> &ms)
+{
+    for (const auto &m : ms)
+        methods[m->name].push_back(m);
+}
+
+const method &core::get_method(const std::string &name, const std::vector<const type *> &ts) const
 {
     const auto at_m = methods.find(name);
     if (at_m != methods.end())
@@ -277,6 +277,12 @@ method &core::get_method(const std::string &name, const std::vector<const type *
     throw std::out_of_range(name);
 }
 
+void core::new_predicates(const std::vector<predicate *> &ps)
+{
+    for (const auto &p : ps)
+        predicates.insert({p->name, p});
+}
+
 predicate &core::get_predicate(const std::string &name) const
 {
     const auto at_p = predicates.find(name);
@@ -285,6 +291,12 @@ predicate &core::get_predicate(const std::string &name) const
 
     // not found
     throw std::out_of_range(name);
+}
+
+void core::new_types(const std::vector<type *> &ts)
+{
+    for (const auto &t : ts)
+        types.insert({t->name, t});
 }
 
 type &core::get_type(const std::string &name) const

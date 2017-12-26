@@ -40,8 +40,8 @@ public:
   virtual field &get_field(const std::string &name) const;
   std::map<std::string, field *> get_fields() const noexcept;
 
-  virtual method &get_method(const std::string &name, const std::vector<const type *> &ts) const;
-  virtual std::vector<method *> get_methods() const noexcept;
+  virtual const method &get_method(const std::string &name, const std::vector<const type *> &ts) const;
+  virtual std::vector<const method *> get_methods() const noexcept;
 
   virtual type &get_type(const std::string &name) const;
   virtual std::map<std::string, type *> get_types() const noexcept;

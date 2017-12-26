@@ -17,7 +17,7 @@ constructor::constructor(core &cr, scope &scp, const std::vector<field *> &args,
 
 constructor::~constructor() {}
 
-expr constructor::new_instance(context &ctx, const std::vector<expr> &exprs)
+expr constructor::new_instance(context &ctx, const std::vector<expr> &exprs) const
 {
     assert(args.size() == exprs.size());
 
@@ -29,7 +29,7 @@ expr constructor::new_instance(context &ctx, const std::vector<expr> &exprs)
     return i;
 }
 
-void constructor::invoke(item &itm, const std::vector<expr> &exprs)
+void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
 {
     context ctx(new env(cr, &itm));
     ctx->items.insert({THIS_KEYWORD, expr(&itm)});

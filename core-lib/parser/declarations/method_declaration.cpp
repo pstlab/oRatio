@@ -44,13 +44,13 @@ void method_declaration::refine(scope &scp) const
     if (core *c = dynamic_cast<core *>(&scp))
     {
         if (c->methods.find(name) == c->methods.end())
-            c->methods.insert({name, *new std::vector<method *>()});
+            c->methods.insert({name, *new std::vector<const method *>()});
         c->methods.at(name).push_back(m);
     }
     else if (type *t = dynamic_cast<type *>(&scp))
     {
         if (t->methods.find(name) == t->methods.end())
-            t->methods.insert({name, *new std::vector<method *>()});
+            t->methods.insert({name, *new std::vector<const method *>()});
         t->methods.at(name).push_back(m);
     }
 }
