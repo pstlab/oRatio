@@ -11,8 +11,6 @@
 #define REAL_KEYWORD "real"
 #define STRING_KEYWORD "string"
 
-using namespace smt;
-
 namespace ratio
 {
 

@@ -4,8 +4,6 @@
 #include "lit.h"
 #include <string>
 
-using namespace smt;
-
 namespace ratio
 {
 
@@ -75,7 +73,7 @@ public:
 protected:
   static void inherit(type &base, type &derived);
 
-  void set_var(const var &v);
+  void set_var(const smt::var &v);
   void restore_var();
 
 private:
