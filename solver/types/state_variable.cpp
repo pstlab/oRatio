@@ -1,8 +1,8 @@
 #include "state_variable.h"
-
-#include "state_variable.h"
 #include "predicate.h"
 #include "combinations.h"
+
+using namespace smt;
 
 namespace ratio
 {
@@ -25,7 +25,7 @@ std::vector<flaw *> state_variable::get_flaws()
         // we collect atoms for each state variable..
         std::unordered_map<item *, std::vector<atom *>> sv_instances;
         for (const auto &atm : atoms)
-            if (slv.sat_cr.value(atm.first->sigma) == smt::True) // we filter out those which are not strictly active..
+            if (slv.sat_cr.value(atm.first->sigma) == True) // we filter out those which are not strictly active..
             {
                 expr c_scope = atm.first->get(TAU);
                 if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
@@ -41,18 +41,18 @@ std::vector<flaw *> state_variable::get_flaws()
         for (const auto &sv : sv_instances)
         {
             // for each pulse, the atoms starting at that pulse..
-            std::map<smt::inf_rational, std::set<atom *>> starting_atoms;
+            std::map<inf_rational, std::set<atom *>> starting_atoms;
             // for each pulse, the atoms ending at that pulse..
-            std::map<smt::inf_rational, std::set<atom *>> ending_atoms;
+            std::map<inf_rational, std::set<atom *>> ending_atoms;
             // all the pulses of the timeline..
-            std::set<smt::inf_rational> pulses;
+            std::set<inf_rational> pulses;
 
             for (const auto &atm : sv.second)
             {
                 arith_expr s_expr = atm->get("start");
                 arith_expr e_expr = atm->get("end");
-                smt::inf_rational start = slv.arith_value(s_expr);
-                smt::inf_rational end = slv.arith_value(e_expr);
+                inf_rational start = slv.arith_value(s_expr);
+                inf_rational end = slv.arith_value(e_expr);
                 starting_atoms[start].insert(atm);
                 ending_atoms[end].insert(atm);
                 pulses.insert(start);
@@ -130,10 +130,10 @@ void state_variable::sv_flaw::compute_resolvers()
         arith_expr a1_end = as[1]->get("end");
 
         bool_expr a0_before_a1 = slv.leq(a0_end, a1_start);
-        if (slv.bool_value(a0_before_a1) != smt::False)
+        if (slv.bool_value(a0_before_a1) != False)
             add_resolver(*new order_resolver(slv, a0_before_a1->l.v, *this, *as[0], *as[1]));
         bool_expr a1_before_a0 = slv.leq(a1_end, a0_start);
-        if (slv.bool_value(a1_before_a0) != smt::False)
+        if (slv.bool_value(a1_before_a0) != False)
             add_resolver(*new order_resolver(slv, a1_before_a0->l.v, *this, *as[1], *as[0]));
 
         expr a0_tau = as[0]->get(TAU);
@@ -146,16 +146,16 @@ void state_variable::sv_flaw::compute_resolvers()
                 a0_tau_itm = &*a0_tau;
             if (!a1_tau_itm)
                 a1_tau_itm = &*a1_tau;
-            add_resolver(*new displace_resolver(slv, *this, *as[0], *as[1], smt::lit(a0_tau_itm->eq(*a1_tau_itm), false)));
+            add_resolver(*new displace_resolver(slv, *this, *as[0], *as[1], lit(a0_tau_itm->eq(*a1_tau_itm), false)));
         }
     }
 }
 
-state_variable::order_resolver::order_resolver(solver &slv, const smt::var &r, sv_flaw &f, const atom &before, const atom &after) : resolver(slv, r, 0, f), before(before), after(after) {}
+state_variable::order_resolver::order_resolver(solver &slv, const var &r, sv_flaw &f, const atom &before, const atom &after) : resolver(slv, r, 0, f), before(before), after(after) {}
 state_variable::order_resolver::~order_resolver() {}
 void state_variable::order_resolver::apply() {}
 
-state_variable::displace_resolver::displace_resolver(solver &slv, sv_flaw &f, const atom &a0, const atom &a1, const smt::lit &neq_lit) : resolver(slv, 0, f), a0(a0), a1(a1), neq_lit(neq_lit) {}
+state_variable::displace_resolver::displace_resolver(solver &slv, sv_flaw &f, const atom &a0, const atom &a1, const lit &neq_lit) : resolver(slv, 0, f), a0(a0), a1(a1), neq_lit(neq_lit) {}
 state_variable::displace_resolver::~displace_resolver() {}
-void state_variable::displace_resolver::apply() { slv.sat_cr.new_clause({smt::lit(rho, false), neq_lit}); }
+void state_variable::displace_resolver::apply() { slv.sat_cr.new_clause({lit(rho, false), neq_lit}); }
 }

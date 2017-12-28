@@ -3,6 +3,8 @@
 #include "solver.h"
 #include <cassert>
 
+using namespace smt;
+
 namespace ratio
 {
 
@@ -14,21 +16,21 @@ flaw::flaw(solver &slv, const std::vector<resolver *> &causes, const bool &exclu
 
 flaw::~flaw() {}
 
-smt::rational flaw::get_estimated_cost() const
+rational flaw::get_estimated_cost() const
 {
     resolver *c_res = get_best_resolver();
     if (c_res)
         return c_res->get_estimated_cost();
     else
-        return smt::rational::POSITIVE_INFINITY;
+        return rational::POSITIVE_INFINITY;
 }
 
 resolver *flaw::get_best_resolver() const
 {
     resolver *c_res = nullptr;
-    smt::rational c_cost = smt::rational::POSITIVE_INFINITY;
+    rational c_cost = rational::POSITIVE_INFINITY;
     for (const auto &r : resolvers)
-        if (slv.sat_cr.value(r->get_rho()) != smt::False && r->get_estimated_cost() < c_cost)
+        if (slv.sat_cr.value(r->get_rho()) != False && r->get_estimated_cost() < c_cost)
         {
             c_res = r;
             c_cost = r->get_estimated_cost();
@@ -42,11 +44,11 @@ void flaw::init()
 
     if (causes.empty())
         // the flaw is necessarily active..
-        phi = smt::TRUE_var;
+        phi = TRUE_var;
     else
     {
         // we create a new variable..
-        std::vector<smt::lit> cs;
+        std::vector<lit> cs;
         for (const auto &c : causes)
             cs.push_back(c->rho);
 
@@ -56,10 +58,10 @@ void flaw::init()
 
     switch (slv.sat_cr.value(phi))
     {
-    case smt::True: // we have a top-level (a landmark) flaw..
+    case True: // we have a top-level (a landmark) flaw..
         slv.flaws.insert(this);
         break;
-    case smt::Undefined: // we listen for the flaw to become active..
+    case Undefined: // we listen for the flaw to become active..
         slv.phis[phi].push_back(this);
         slv.bind(phi);
         break;
@@ -69,7 +71,7 @@ void flaw::init()
 void flaw::expand()
 {
     assert(!expanded);
-    assert(slv.sat_cr.value(phi) != smt::False);
+    assert(slv.sat_cr.value(phi) != False);
 
     // we compute the resolvers..
     compute_resolvers();
@@ -79,16 +81,16 @@ void flaw::expand()
     if (resolvers.empty())
     {
         // there is no way for solving this flaw..
-        if (!slv.sat_cr.new_clause({smt::lit(phi, false)}))
+        if (!slv.sat_cr.new_clause({lit(phi, false)}))
             throw unsolvable_exception();
     }
     else
     {
         // we need to take a decision for solving this flaw..
-        std::vector<smt::lit> r_chs;
+        std::vector<lit> r_chs;
         for (const auto &r : resolvers)
             r_chs.push_back(r->rho);
-        if (!slv.sat_cr.new_clause({smt::lit(phi, false), exclusive ? slv.sat_cr.new_exct_one(r_chs) : slv.sat_cr.new_disj(r_chs)}))
+        if (!slv.sat_cr.new_clause({lit(phi, false), exclusive ? slv.sat_cr.new_exct_one(r_chs) : slv.sat_cr.new_disj(r_chs)}))
             throw unsolvable_exception();
     }
 }

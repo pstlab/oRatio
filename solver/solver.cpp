@@ -8,11 +8,14 @@
 #include "reusable_resource.h"
 #include "propositional_agent.h"
 #include "propositional_state.h"
+#include <algorithm>
 #include <cassert>
+
+using namespace smt;
 
 namespace ratio
 {
-solver::solver() : core(), smt::theory(sat_cr) {}
+solver::solver() : core(), theory(sat_cr) {}
 solver::~solver() {}
 
 void solver::init()
@@ -93,7 +96,7 @@ void solver::solve()
 
     while (sat_cr.root_level())
     {
-        assert(sat_cr.value(gamma) == smt::False);
+        assert(sat_cr.value(gamma) == False);
         // we have exhausted the search within the graph: we extend the graph..
         add_layer();
     }
@@ -117,7 +120,7 @@ void solver::solve()
 
                 res = nullptr;
                 while (sat_cr.root_level())
-                    if (sat_cr.value(gamma) == smt::Undefined)
+                    if (sat_cr.value(gamma) == Undefined)
                     {
                         // we have learnt a unit clause! thus, we reassume the graph var..
                         if (!sat_cr.assume(gamma) || !sat_cr.check())
@@ -125,7 +128,7 @@ void solver::solve()
                     }
                     else
                     {
-                        assert(sat_cr.value(gamma) == smt::False);
+                        assert(sat_cr.value(gamma) == False);
                         // we have exhausted the search within the graph: we extend the graph..
                         add_layer();
                     }
@@ -146,7 +149,7 @@ void solver::build()
         if (flaw_q.empty())
             throw unsolvable_exception();
         assert(!flaw_q.front()->expanded);
-        if (sat_cr.value(flaw_q.front()->phi) != smt::False)
+        if (sat_cr.value(flaw_q.front()->phi) != False)
             if (is_deferrable(*flaw_q.front())) // we postpone the expansion..
                 flaw_q.push_back(flaw_q.front());
             else // we expand the flaw..
@@ -158,7 +161,7 @@ void solver::build()
     gamma = sat_cr.new_var();
     // these flaws have not been expanded, hence, cannot have a solution..
     for (const auto &f : flaw_q)
-        sat_cr.new_clause({smt::lit(gamma, false), smt::lit(f->phi, false)});
+        sat_cr.new_clause({lit(gamma, false), lit(f->phi, false)});
     // we use the new graph var to allow search within the current graph..
     if (!sat_cr.assume(gamma) || !sat_cr.check())
         throw unsolvable_exception();
@@ -170,8 +173,8 @@ bool solver::is_deferrable(flaw &f)
     q.push(&f);
     while (!q.empty())
     {
-        assert(sat_cr.value(q.front()->phi) != smt::False);
-        if (q.front()->get_estimated_cost() < smt::rational::POSITIVE_INFINITY) // we already have a possible solution for this flaw, thus we defer..
+        assert(sat_cr.value(q.front()->phi) != False);
+        if (q.front()->get_estimated_cost() < rational::POSITIVE_INFINITY) // we already have a possible solution for this flaw, thus we defer..
             return true;
         for (const auto &r : q.front()->causes)
             q.push(&r->effect);
@@ -194,7 +197,7 @@ void solver::add_layer()
         for (const auto &f : c_q)
         {
             assert(!f->expanded);
-            if (sat_cr.value(f->phi) != smt::False) // we expand the flaw..
+            if (sat_cr.value(f->phi) != False) // we expand the flaw..
                 expand_flaw(*f);
         }
     }
@@ -203,7 +206,7 @@ void solver::add_layer()
     gamma = sat_cr.new_var();
     // these flaws have not been expanded, hence, cannot have a solution..
     for (const auto &f : flaw_q)
-        sat_cr.new_clause({smt::lit(gamma, false), smt::lit(f->phi, false)});
+        sat_cr.new_clause({lit(gamma, false), lit(f->phi, false)});
     // we use the new graph var to allow search within the new graph..
     if (!sat_cr.assume(gamma) || !sat_cr.check())
         throw unsolvable_exception();
@@ -254,14 +257,14 @@ bool solver::has_inconsistencies()
 
 flaw *solver::select_flaw()
 {
-    assert(std::all_of(flaws.begin(), flaws.end(), [&](flaw *const f) { return f->expanded && sat_cr.value(f->phi) == smt::True; }));
+    assert(std::all_of(flaws.begin(), flaws.end(), [&](flaw *const f) { return f->expanded && sat_cr.value(f->phi) == True; }));
     // this is the next flaw to be solved (i.e., the most expensive one)..
     flaw *f_next = nullptr;
     for (auto it = flaws.begin(); it != flaws.end();)
-        if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat_cr.value(r->rho) == smt::True; }))
+        if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat_cr.value(r->rho) == True; }))
         {
             // we have either a trivial (i.e. has only one resolver) or an already solved flaw..
-            assert(sat_cr.value((*std::find_if((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat_cr.value(r->rho) != smt::False; }))->rho) == smt::True);
+            assert(sat_cr.value((*std::find_if((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat_cr.value(r->rho) != False; }))->rho) == True);
             // we remove the flaw from the current flaws..
             if (!trail.empty())
                 trail.back().solved_flaws.insert((*it));
@@ -303,7 +306,7 @@ void solver::apply_resolver(resolver &r)
     }
     catch (const inconsistency_exception &)
     {
-        if (!sat_cr.new_clause({smt::lit(r.rho, false)}))
+        if (!sat_cr.new_clause({lit(r.rho, false)}))
             throw unsolvable_exception();
     }
 
@@ -312,7 +315,7 @@ void solver::apply_resolver(resolver &r)
 
     restore_var();
     res = nullptr;
-    if (r.preconditions.empty() && sat_cr.value(r.rho) != smt::False) // there are no requirements for this resolver..
+    if (r.preconditions.empty() && sat_cr.value(r.rho) != False) // there are no requirements for this resolver..
         set_estimated_cost(r, 0);
 }
 
@@ -331,18 +334,18 @@ void solver::new_causal_link(flaw &f, resolver &r)
 {
     r.preconditions.push_back(&f);
     f.supports.push_back(&r);
-    bool new_clause = sat_cr.new_clause({smt::lit(r.rho, false), f.phi});
+    bool new_clause = sat_cr.new_clause({lit(r.rho, false), f.phi});
     assert(new_clause);
 }
 
-void solver::set_estimated_cost(resolver &r, const smt::rational &cst)
+void solver::set_estimated_cost(resolver &r, const rational &cst)
 {
     if (r.est_cost != cst)
     {
         if (!trail.empty())
             trail.back().old_costs.insert({&r, r.est_cost});
         // this is the current cost of the resolver's effect..
-        smt::rational f_cost = r.effect.get_estimated_cost();
+        rational f_cost = r.effect.get_estimated_cost();
         // we update the resolver's estimated cost..
         r.est_cost = cst;
 
@@ -356,10 +359,10 @@ void solver::set_estimated_cost(resolver &r, const smt::rational &cst)
             while (!resolver_q.empty())
             {
                 resolver &c_res = *resolver_q.front(); // the current resolver whose cost might require an update..
-                smt::rational r_cost = smt::rational::NEGATIVE_INFINITY;
+                rational r_cost = rational::NEGATIVE_INFINITY;
                 for (const auto &f : c_res.preconditions)
                 {
-                    smt::rational c = f->get_estimated_cost();
+                    rational c = f->get_estimated_cost();
                     if (c > r_cost)
                         r_cost = c;
                 }
@@ -382,7 +385,7 @@ void solver::set_estimated_cost(resolver &r, const smt::rational &cst)
     }
 }
 
-bool solver::propagate(const smt::lit &p, std::vector<smt::lit> &cnfl)
+bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
     const auto at_phis_p = phis.find(p.v);
@@ -400,12 +403,12 @@ bool solver::propagate(const smt::lit &p, std::vector<smt::lit> &cnfl)
     const auto at_rhos_p = rhos.find(p.v);
     if (at_rhos_p != rhos.end() && !p.sign) // a decision has been taken about the removal of some resolvers within the current partial solution..
         for (const auto &r : at_rhos_p->second)
-            set_estimated_cost(*r, smt::rational::POSITIVE_INFINITY);
+            set_estimated_cost(*r, rational::POSITIVE_INFINITY);
 
     return true;
 }
 
-bool solver::check(std::vector<smt::lit> &cnfl)
+bool solver::check(std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
     return true;
