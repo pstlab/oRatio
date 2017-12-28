@@ -34,6 +34,10 @@ public:
   atom_flaw &get_reason(const atom &atm) const { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
 
 private:
+  void build();                     // builds the planning graph..
+  bool is_deferrable(flaw &f);      // checks whether the given flaw is deferrable..
+  void add_layer();                 // adds a layer to the current planning graph..
+  bool has_inconsistencies();       // checks whether the types have some inconsistency..
   void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
   void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
 
@@ -56,9 +60,9 @@ private:
     layer(resolver *const r) : r(r) {}
 
     resolver *const r;
-    std::unordered_map<resolver *, double> old_costs; // the old estimated resolvers' costs..
-    std::unordered_set<flaw *> new_flaws;             // the just activated flaws..
-    std::unordered_set<flaw *> solved_flaws;          // the just solved flaws..
+    std::unordered_map<resolver *, smt::rational> old_costs; // the old estimated resolvers' costs..
+    std::unordered_set<flaw *> new_flaws;                    // the just activated flaws..
+    std::unordered_set<flaw *> solved_flaws;                 // the just solved flaws..
   };
 
   resolver *res = nullptr;                                    // the current resolver (will be into the trail)..

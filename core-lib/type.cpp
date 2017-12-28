@@ -190,7 +190,7 @@ const method &type::get_method(const std::string &m_name, const std::vector<cons
     throw std::out_of_range(m_name);
 }
 
-void core::new_predicates(const std::vector<predicate *> &ps)
+void type::new_predicates(const std::vector<predicate *> &ps)
 {
     for (const auto &p : ps)
         predicates.insert({p->name, p});
@@ -226,7 +226,7 @@ predicate &type::get_predicate(const std::string &p_name) const
     throw std::out_of_range(p_name);
 }
 
-void core::new_types(const std::vector<type *> &ts)
+void type::new_types(const std::vector<type *> &ts)
 {
     for (const auto &t : ts)
         types.insert({t->name, t});
