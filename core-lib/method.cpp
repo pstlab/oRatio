@@ -11,10 +11,10 @@ namespace ratio
 method::method(core &cr, scope &scp, const type *const return_type, const std::string &name, const std::vector<field *> &args, const std::vector<ast::statement *> &stmnts) : scope(cr, scp), return_type(return_type), name(name), args(args), statements(stmnts)
 {
     if (type *t = dynamic_cast<type *>(&scp))
-        add_fields({new field(*t, THIS_KEYWORD, nullptr, true)});
+        new_fields({new field(*t, THIS_KEYWORD, nullptr, true)});
     if (return_type)
-        add_fields({new field(*return_type, RETURN_KEYWORD, nullptr, true)});
-    add_fields(args);
+        new_fields({new field(*return_type, RETURN_KEYWORD, nullptr, true)});
+    new_fields(args);
 }
 
 method::~method() {}

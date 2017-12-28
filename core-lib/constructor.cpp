@@ -11,8 +11,8 @@ namespace ratio
 
 constructor::constructor(core &cr, scope &scp, const std::vector<field *> &args, const std::vector<std::pair<std::string, std::vector<ast::expression *>>> &il, const std::vector<ast::statement *> &stmnts) : scope(cr, scp), args(args), init_list(il), statements(stmnts)
 {
-    add_fields({new field(static_cast<type &>(scp), THIS_KEYWORD, nullptr, true)});
-    add_fields(args);
+    new_fields({new field(static_cast<type &>(scp), THIS_KEYWORD, nullptr, true)});
+    new_fields(args);
 }
 
 constructor::~constructor() {}

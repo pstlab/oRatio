@@ -5,7 +5,7 @@
 namespace ratio
 {
 
-conjunction::conjunction(core &cr, scope &scp, const rational &cst, const std::vector<const ast::statement *> &stmnts) : scope(cr, scp), cost(cst), statements(stmnts) {}
+conjunction::conjunction(core &cr, scope &scp, const smt::rational &cst, const std::vector<const ast::statement *> &stmnts) : scope(cr, scp), cost(cst), statements(stmnts) {}
 conjunction::~conjunction() {}
 
 void conjunction::apply(context &ctx) const

@@ -42,11 +42,11 @@ void flaw::init()
 
     if (causes.empty())
         // the flaw is necessarily active..
-        phi = TRUE_var;
+        phi = smt::TRUE_var;
     else
     {
         // we create a new variable..
-        std::vector<lit> cs;
+        std::vector<smt::lit> cs;
         for (const auto &c : causes)
             cs.push_back(c->rho);
 
@@ -56,10 +56,10 @@ void flaw::init()
 
     switch (slv.sat_cr.value(phi))
     {
-    case True: // we have a top-level (a landmark) flaw..
+    case smt::True: // we have a top-level (a landmark) flaw..
         slv.flaws.insert(this);
         break;
-    case Undefined: // we listen for the flaw to become active..
+    case smt::Undefined: // we listen for the flaw to become active..
         slv.phis[phi].push_back(this);
         slv.bind(phi);
         break;
@@ -79,16 +79,16 @@ void flaw::expand()
     if (resolvers.empty())
     {
         // there is no way for solving this flaw..
-        if (!slv.sat_cr.new_clause({lit(phi, false)}))
+        if (!slv.sat_cr.new_clause({smt::lit(phi, false)}))
             throw unsolvable_exception();
     }
     else
     {
         // we need to take a decision for solving this flaw..
-        std::vector<lit> r_chs;
+        std::vector<smt::lit> r_chs;
         for (const auto &r : resolvers)
             r_chs.push_back(r->rho);
-        if (!slv.sat_cr.new_clause({lit(phi, false), exclusive ? slv.sat_cr.new_exct_one(r_chs) : slv.sat_cr.new_disj(r_chs)}))
+        if (!slv.sat_cr.new_clause({smt::lit(phi, false), exclusive ? slv.sat_cr.new_exct_one(r_chs) : slv.sat_cr.new_disj(r_chs)}))
             throw unsolvable_exception();
     }
 }

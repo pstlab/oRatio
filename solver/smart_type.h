@@ -33,7 +33,7 @@ public:
   {
     std::unordered_set<resolver *> ress;
     for (const auto &atm : atms)
-      for (const auto &r : slv.get_flaw(*atm).get_resolvers())
+      for (const auto &r : slv.get_reason(*atm).get_resolvers())
         if (resolver *af = dynamic_cast<atom_flaw::activate_fact *>(r))
           ress.insert(af);
         else if (resolver *ag = dynamic_cast<atom_flaw::activate_goal *>(r))
@@ -49,7 +49,7 @@ protected:
 class atom_listener : public smt::sat_value_listener, public smt::lra_value_listener, public smt::ov_value_listener
 {
 public:
-  atom_listener(atom &atm) : smt::sat_value_listener(atm.get_core().sat_cr), smt::lra_value_listener(atm.get_core().la_th), smt::ov_value_listener(atm.get_core().ov_th), atm(atm)
+  atom_listener(atom &atm) : smt::sat_value_listener(atm.get_core().sat_cr), smt::lra_value_listener(atm.get_core().lra_th), smt::ov_value_listener(atm.get_core().ov_th), atm(atm)
   {
     std::queue<const type *> q;
     q.push(&atm.tp);

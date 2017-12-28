@@ -71,7 +71,7 @@ public:
   std::map<std::string, type *> get_types() const noexcept override { return types; }
 
 protected:
-  static void inherit(type &base, type &derived);
+  static void new_supertypes(type &t, const std::vector<type *> &sts);
 
   void set_var(const smt::var &v);
   void restore_var();

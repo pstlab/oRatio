@@ -262,10 +262,14 @@ type &type::get_type(const std::string &t_name) const
     throw std::out_of_range(t_name);
 }
 
-void type::set_var(const var &v) { cr.set_var(v); }
+void type::set_var(const smt::var &v) { cr.set_var(v); }
 void type::restore_var() { cr.restore_var(); }
 
-void type::inherit(type &base, type &derived) { derived.supertypes.push_back(&base); }
+void type::new_supertypes(type &t, const std::vector<type *> &sts)
+{
+    for (const auto &st : sts)
+        t.supertypes.push_back(st);
+}
 
 bool_type::bool_type(core &cr) : type(cr, cr, BOOL_KEYWORD, true) {}
 bool_type::~bool_type() {}

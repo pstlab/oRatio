@@ -2,11 +2,12 @@
 
 #include "flaw.h"
 #include "resolver.h"
+#include "context.h"
 
 namespace ratio
 {
 
-class context;
+class disjunction;
 class conjunction;
 
 class disjunction_flaw : public flaw

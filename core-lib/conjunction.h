@@ -20,12 +20,12 @@ public:
   conjunction(const conjunction &that) = delete;
   virtual ~conjunction();
 
-  rational get_cost() const { return cost; }
+  smt::rational get_cost() const { return cost; }
 
   void apply(context &ctx) const;
 
 private:
-  const rational cost;
+  const smt::rational cost;
   const std::vector<const ast::statement *> statements;
 };
 }

@@ -48,7 +48,7 @@ void atom_flaw::compute_resolvers()
             atom &c_atm = static_cast<atom &>(*i);
 
             // this is the target flaw (i.e. the one we are checking for unification) and cannot be in the current flaw's causes' effects..
-            atom_flaw &target = slv.get_flaw(c_atm);
+            atom_flaw &target = slv.get_reason(c_atm);
 
             if (!target.is_expanded() ||                       // the target flaw must hav been already expanded..
                 ancestors.find(&target) != ancestors.end() ||  // unifying with the target atom would introduce cyclic causality..
@@ -59,7 +59,7 @@ void atom_flaw::compute_resolvers()
             // the equality propositional variable..
             smt::var eq_v = atm.eq(c_atm);
 
-            if (slv.sat_cr.value(eq_v) == False) // the two atoms cannot unify, hence, we skip this instance..
+            if (slv.sat_cr.value(eq_v) == smt::False) // the two atoms cannot unify, hence, we skip this instance..
                 continue;
 
             // since atom 'c_atm' is a good candidate for unification, we build the unification literals..
@@ -91,10 +91,10 @@ void atom_flaw::compute_resolvers()
             {
                 // unification is actually possible!
                 unify_atom *u_res = new unify_atom(slv, *this, atm, c_atm, unif_lits);
-                assert(slv.sat_cr.value(u_res->get_rho()) != False);
+                assert(slv.sat_cr.value(u_res->get_rho()) != smt::False);
                 add_resolver(*u_res);
                 slv.new_causal_link(target, *u_res);
-                slv.set_est_cost(*u_res, target.get_estimated_cost());
+                slv.set_estimated_cost(*u_res, target.get_estimated_cost());
             }
         }
     }

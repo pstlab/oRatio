@@ -6,6 +6,8 @@
 #include "smart_type.h"
 #include "state_variable.h"
 #include "reusable_resource.h"
+#include "propositional_agent.h"
+#include "propositional_state.h"
 #include <cassert>
 
 namespace ratio

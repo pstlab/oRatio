@@ -32,12 +32,12 @@ std::map<std::string, type *> scope::get_types() const noexcept { return scp.get
 predicate &scope::get_predicate(const std::string &name) const { return scp.get_predicate(name); }
 std::map<std::string, predicate *> scope::get_predicates() const noexcept { return scp.get_predicates(); }
 
-void scope::add_fields(scope &s, const std::vector<field *> &fs)
+void scope::new_fields(scope &s, const std::vector<field *> &fs)
 {
     for (const auto &f : fs)
         s.fields.insert({f->name, f});
 }
-void scope::add_fields(const std::vector<field *> &fs)
+void scope::new_fields(const std::vector<field *> &fs)
 {
     for (const auto &f : fs)
         fields.insert({f->name, f});

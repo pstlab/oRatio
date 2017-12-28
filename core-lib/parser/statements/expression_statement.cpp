@@ -15,7 +15,7 @@ expression_statement::~expression_statement() { delete xpr; }
 void expression_statement::execute(const scope &scp, context &ctx) const
 {
     bool_expr be = xpr->evaluate(scp, ctx);
-    if (scp.get_core().sat_cr.value(be->l) != False)
+    if (scp.get_core().sat_cr.value(be->l) != smt::False)
         scp.get_core().assert_facts({be->l});
     else
         throw inconsistency_exception();

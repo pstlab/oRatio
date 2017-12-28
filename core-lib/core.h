@@ -77,15 +77,15 @@ public:
   bool_expr new_bool();
   bool_expr new_bool(const bool &val);
   arith_expr new_int();
-  arith_expr new_int(const I &val);
+  arith_expr new_int(const smt::I &val);
   arith_expr new_real();
-  arith_expr new_real(const rational &val);
+  arith_expr new_real(const smt::rational &val);
   string_expr new_string();
   string_expr new_string(const std::string &val);
   virtual expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals);
 
 private:
-  expr new_enum(const type &tp, const std::vector<var> &vars, const std::vector<item *> &vals);
+  expr new_enum(const type &tp, const std::vector<smt::var> &vars, const std::vector<item *> &vals);
 
 public:
   bool_expr negate(bool_expr var);
@@ -108,7 +108,7 @@ public:
 
   bool_expr eq(expr i0, expr i1);
 
-  void assert_facts(const std::vector<lit> &facts);
+  void assert_facts(const std::vector<smt::lit> &facts);
 
   field &get_field(const std::string &name) const override;
 
@@ -132,11 +132,11 @@ public:
 
   expr get(const std::string &name) const override;
 
-  lbool bool_value(const bool_expr &x) const noexcept;                          // the current value of the given boolean expression..
-  inf_rational arith_lb(const arith_expr &x) const noexcept;                    // the current lower bound of the given arith expression..
-  inf_rational arith_ub(const arith_expr &x) const noexcept;                    // the current upper bound of the given arith expression..
-  inf_rational arith_value(const arith_expr &x) const noexcept;                 // the current value of the given arith expression..
-  std::unordered_set<var_value *> enum_value(const var_expr &x) const noexcept; // the current allowed values of the given enum expression..
+  smt::lbool bool_value(const bool_expr &x) const noexcept;                          // the current value of the given boolean expression..
+  smt::inf_rational arith_lb(const arith_expr &x) const noexcept;                    // the current lower bound of the given arith expression..
+  smt::inf_rational arith_ub(const arith_expr &x) const noexcept;                    // the current upper bound of the given arith expression..
+  smt::inf_rational arith_value(const arith_expr &x) const noexcept;                 // the current value of the given arith expression..
+  std::unordered_set<smt::var_value *> enum_value(const var_expr &x) const noexcept; // the current allowed values of the given enum expression..
 
   virtual void solve() = 0;
 
@@ -146,7 +146,7 @@ protected:
   virtual void new_disjunction(context &ctx, const disjunction &disj) = 0;
 
 protected:
-  void set_var(const var &v)
+  void set_var(const smt::var &v)
   {
     tmp_var = ctr_var;
     ctr_var = v;
@@ -166,13 +166,13 @@ private:
   std::vector<ast::compilation_unit *> cus;
 
 public:
-  sat_core sat_cr;   // the sat core..
-  lra_theory lra_th; // the linear-real-arithmetic theory..
-  ov_theory ov_th;   // the object-variable theory..
+  smt::sat_core sat_cr;   // the sat core..
+  smt::lra_theory lra_th; // the linear-real-arithmetic theory..
+  smt::ov_theory ov_th;   // the object-variable theory..
 
 private:
-  var tmp_var;
-  var ctr_var = TRUE_var;
+  smt::var tmp_var;
+  smt::var ctr_var = smt::TRUE_var;
 
 protected:
   std::map<std::string, std::vector<const method *>> methods;

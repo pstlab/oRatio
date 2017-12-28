@@ -11,7 +11,7 @@ resolver::~resolver() {}
 
 void resolver::init()
 {
-    if (slv.sat_cr.value(rho) == Undefined) // we do not have a top-level (a landmark) resolver..
+    if (slv.sat_cr.value(rho) == smt::Undefined) // we do not have a top-level (a landmark) resolver..
     {
         // we listen for the resolver to become active..
         slv.rhos[rho].push_back(this);

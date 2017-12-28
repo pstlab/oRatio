@@ -5,39 +5,38 @@
 #include "flaw.h"
 #include "resolver.h"
 
-#define STATE_VARIABLE_NAME "StateVariable"
+#define PROPOSITIONAL_AGENT_NAME "PropositionalAgent"
 
 namespace ratio
 {
 
-class state_variable : public smart_type
+class propositional_agent : public smart_type
 {
 public:
-  state_variable(solver &slv);
-  state_variable(const state_variable &orig) = delete;
-  virtual ~state_variable();
+  propositional_agent(solver &s);
+  propositional_agent(const propositional_agent &orig) = delete;
+  virtual ~propositional_agent();
 
 private:
   std::vector<flaw *> get_flaws() override;
 
-  void new_predicate(predicate &pred) override;
   void new_fact(atom_flaw &f) override;
   void new_goal(atom_flaw &f) override;
 
-  class sv_constructor : public constructor
+  class agnt_constructor : public constructor
   {
   public:
-    sv_constructor(state_variable &sv) : constructor(sv.slv, sv, {}, {}, {}) {}
-    sv_constructor(sv_constructor &&) = delete;
-    virtual ~sv_constructor() {}
+    agnt_constructor(propositional_agent &agnt) : constructor(agnt.slv, agnt, {}, {}, {}) {}
+    agnt_constructor(agnt_constructor &&) = delete;
+    virtual ~agnt_constructor() {}
   };
 
-  class sv_atom_listener : public atom_listener
+  class agnt_atom_listener : public atom_listener
   {
   public:
-    sv_atom_listener(state_variable &sv, atom &atm);
-    sv_atom_listener(sv_atom_listener &&) = delete;
-    virtual ~sv_atom_listener();
+    agnt_atom_listener(propositional_agent &agnt, atom &a);
+    agnt_atom_listener(agnt_atom_listener &&) = delete;
+    virtual ~agnt_atom_listener();
 
   private:
     void something_changed();
@@ -47,17 +46,17 @@ private:
     void ov_value_change(const smt::var &) override { something_changed(); }
 
   protected:
-    state_variable &sv;
+    propositional_agent &agnt;
   };
 
-  class sv_flaw : public flaw
+  class agnt_flaw : public flaw
   {
   public:
-    sv_flaw(solver &slv, const std::set<atom *> &overlapping_atoms);
-    sv_flaw(sv_flaw &&) = delete;
-    virtual ~sv_flaw();
+    agnt_flaw(solver &s, const std::set<atom *> &overlapping_atoms);
+    agnt_flaw(agnt_flaw &&) = delete;
+    virtual ~agnt_flaw();
 
-    std::string get_label() const override { return "φ" + std::to_string(get_phi()) + "sv-flaw"; }
+    std::string get_label() const override { return "agent-flaw"; }
 
   private:
     void compute_resolvers() override;
@@ -69,7 +68,7 @@ private:
   class order_resolver : public resolver
   {
   public:
-    order_resolver(solver &slv, const smt::var &r, sv_flaw &f, const atom &before, const atom &after);
+    order_resolver(solver &slv, const smt::var &r, agnt_flaw &f, const atom &before, const atom &after);
     order_resolver(const order_resolver &that) = delete;
     virtual ~order_resolver();
 
@@ -86,7 +85,7 @@ private:
   class displace_resolver : public resolver
   {
   public:
-    displace_resolver(solver &slv, sv_flaw &f, const atom &a0, const atom &a1, const smt::lit &neq_lit);
+    displace_resolver(solver &slv, agnt_flaw &f, const atom &a0, const atom &a1, const smt::lit &neq_lit);
     displace_resolver(const displace_resolver &that) = delete;
     virtual ~displace_resolver();
 
@@ -102,7 +101,7 @@ private:
   };
 
 private:
-  std::set<item *> to_check;
-  std::vector<std::pair<atom *, sv_atom_listener *>> atoms;
+  std::set<atom *> to_check;
+  std::vector<std::pair<atom *, agnt_atom_listener *>> atoms;
 };
 }
