@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core.h"
+#include <deque>
 
 namespace ratio
 {
@@ -68,7 +69,7 @@ private:
   resolver *res = nullptr;                                    // the current resolver (will be into the trail)..
   smt::var gamma;                                             // this variable represents the validity of the current graph..
   unsigned short accuracy = 1;                                // the current heuristic accuracy..
-  std::list<flaw *> flaw_q;                                   // the flaw queue (for graph building procedure)..
+  std::deque<flaw *> flaw_q;                                  // the flaw queue (for graph building procedure)..
   std::unordered_set<flaw *> flaws;                           // the current active flaws..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (boolean variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (boolean variable to resolver) of the resolvers..

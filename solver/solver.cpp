@@ -185,12 +185,12 @@ void solver::add_layer()
 {
     assert(sat_cr.root_level());
 
-    std::list<flaw *> f_q(flaw_q);
+    std::deque<flaw *> f_q(flaw_q);
     while (std::all_of(f_q.begin(), f_q.end(), [&](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
     {
         if (flaw_q.empty())
             throw unsolvable_exception();
-        std::list<flaw *> c_q = std::move(flaw_q);
+        std::deque<flaw *> c_q = std::move(flaw_q);
         for (const auto &f : c_q)
         {
             assert(!f->expanded);
