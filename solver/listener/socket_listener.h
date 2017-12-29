@@ -10,6 +10,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #endif
+#include <string>
 
 namespace ratio
 {
@@ -33,9 +34,7 @@ class socket_listener : public solver_listener
 
     void causal_link_added(const flaw &f, const resolver &r) override;
 
-    void skt_init();
-    void skt_send(const std::string &msg);
-    void skt_close();
+    void send_message(const std::string &msg);
 
 #ifdef _WIN32
     SOCKET skt;

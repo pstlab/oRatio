@@ -2,6 +2,7 @@
 #include "solver.h"
 #include "flaw.h"
 #include "resolver.h"
+#include <algorithm>
 
 namespace ratio
 {
