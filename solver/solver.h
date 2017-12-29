@@ -9,12 +9,18 @@ namespace ratio
 class flaw;
 class resolver;
 class atom_flaw;
+#ifndef NDEBUG
+class solver_listener;
+#endif
 
 class solver : public core, public smt::theory
 {
   friend class flaw;
   friend class resolver;
   friend class atom_flaw;
+#ifndef NDEBUG
+  friend class solver_listener;
+#endif
 
 public:
   solver();
@@ -75,5 +81,8 @@ private:
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (boolean variable to resolver) of the resolvers..
   std::unordered_map<const atom *, atom_flaw *> reason;       // the reason for having introduced an atom..
   std::vector<layer> trail;                                   // the list of resolvers in chronological order..
+#ifndef NDEBUG
+  std::vector<solver_listener *> listeners; // the causal-graph listeners..
+#endif
 };
 }
