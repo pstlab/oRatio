@@ -35,6 +35,7 @@ public class App {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        System.out.println("starting GUIServer..");
         try {
             ServerSocket serverSocket = new ServerSocket(1100);
             Socket clientSocket = serverSocket.accept();

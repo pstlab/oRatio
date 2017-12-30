@@ -11,6 +11,8 @@ endif()
 
 include_directories( smt-lib smt-lib/lra smt-lib/ov core-lib core-lib/parser core-lib/parser/declarations core-lib/parser/statements core-lib/parser/expressions solver solver/listener solver/types )
 
+configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
+
 add_executable( ${PROJECT_NAME} ${SOURCES} )
 
 if( CMAKE_BUILD_TYPE MATCHES Debug )
