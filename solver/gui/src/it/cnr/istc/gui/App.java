@@ -62,7 +62,7 @@ public class App {
             }
         });
         try {
-            System.out.println("starting server..");
+            System.out.println("starting GUI server..");
             ServerSocket serverSocket = new ServerSocket(1100);
             Socket clientSocket = serverSocket.accept();
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);

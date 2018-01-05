@@ -1,0 +1,41 @@
+/**
+* Domain: Logistics
+* Problem: Logistics
+*/
+
+Airplane apn1 = new Airplane(1.0);
+Truck tru1 = new Truck(2.0);
+Truck tru2 = new Truck(3.0);
+Package obj11 = new Package(4.0);
+Package obj12 = new Package(5.0);
+Package obj13 = new Package(6.0);
+Package obj21 = new Package(7.0);
+Package obj22 = new Package(8.0);
+Package obj23 = new Package(9.0);
+Airport apt1 = new Airport(10.0);
+Airport apt2 = new Airport(11.0);
+Location pos1 = new Location(12.0);
+Location pos2 = new Location(13.0);
+City cit1 = new City(14.0);
+City cit2 = new City(15.0);
+
+LogisticsAgent agent = new LogisticsAgent();
+
+fact _at_apn1_apt2 = new agent.propositional_state.At(polarity:true, obj:apn1, l:apt2, start:origin);  _at_apn1_apt2.duration >= 1.0;
+fact _at_tru1_pos1 = new agent.propositional_state.At(polarity:true, obj:tru1, l:pos1, start:origin);  _at_tru1_pos1.duration >= 1.0;
+fact _at_tru2_pos2 = new agent.propositional_state.At(polarity:true, obj:tru2, l:pos2, start:origin);  _at_tru2_pos2.duration >= 1.0;
+fact _at_obj11_pos1 = new agent.propositional_state.At(polarity:true, obj:obj11, l:pos1, start:origin);  _at_obj11_pos1.duration >= 1.0;
+fact _at_obj12_pos1 = new agent.propositional_state.At(polarity:true, obj:obj12, l:pos1, start:origin);  _at_obj12_pos1.duration >= 1.0;
+fact _at_obj13_pos1 = new agent.propositional_state.At(polarity:true, obj:obj13, l:pos1, start:origin);  _at_obj13_pos1.duration >= 1.0;
+fact _at_obj21_pos2 = new agent.propositional_state.At(polarity:true, obj:obj21, l:pos2, start:origin);  _at_obj21_pos2.duration >= 1.0;
+fact _at_obj22_pos2 = new agent.propositional_state.At(polarity:true, obj:obj22, l:pos2, start:origin);  _at_obj22_pos2.duration >= 1.0;
+fact _at_obj23_pos2 = new agent.propositional_state.At(polarity:true, obj:obj23, l:pos2, start:origin);  _at_obj23_pos2.duration >= 1.0;
+fact in_city_apt1_cit1 = new agent.propositional_state.In_city(polarity:true, l:apt1, c:cit1, start:origin);  in_city_apt1_cit1.duration >= 1.0;
+fact in_city_apt2_cit2 = new agent.propositional_state.In_city(polarity:true, l:apt2, c:cit2, start:origin);  in_city_apt2_cit2.duration >= 1.0;
+fact in_city_pos1_cit1 = new agent.propositional_state.In_city(polarity:true, l:pos1, c:cit1, start:origin);  in_city_pos1_cit1.duration >= 1.0;
+fact in_city_pos2_cit2 = new agent.propositional_state.In_city(polarity:true, l:pos2, c:cit2, start:origin);  in_city_pos2_cit2.duration >= 1.0;
+
+goal _at_obj11_apt1 = new agent.propositional_state.At(polarity:true, obj:obj11, l:apt1, end:horizon);
+goal _at_obj13_apt1 = new agent.propositional_state.At(polarity:true, obj:obj13, l:apt1, end:horizon);
+goal _at_obj21_pos1 = new agent.propositional_state.At(polarity:true, obj:obj21, l:pos1, end:horizon);
+goal _at_obj23_pos1 = new agent.propositional_state.At(polarity:true, obj:obj23, l:pos1, end:horizon);

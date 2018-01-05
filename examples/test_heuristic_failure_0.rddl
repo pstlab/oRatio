@@ -1,0 +1,8 @@
+real n;
+
+predicate P(real x) {
+    x == n;
+}
+
+goal g0 = new P(x:0.0);
+goal g1 = new P(x:1.0);

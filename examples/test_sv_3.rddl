@@ -1,0 +1,88 @@
+class SV0 : StateVariable {
+
+    SV1 sv1;
+
+    SV0(SV1 sv1) : sv1(sv1) {
+    }
+
+    predicate P1() {
+        duration == 5.0;
+        goal p2 = new P2(start:end);
+    }
+
+    predicate P2() {
+        duration == 8.0;
+        goal p3 = new P3(start:end);
+    }
+
+    predicate P3() {
+        duration == 8.0;
+        goal p4 = new P4(start:end);
+    }
+
+    predicate P4() {
+        duration == 10.0;
+        {
+            goal p1 = new P1(start:end);
+        } or {
+            goal p2 = new P2(start:end);
+        }
+        goal p6 = new sv1.P6();
+        start >= p6.start;
+        end <= p6.end;
+    }
+}
+
+class SV1 : StateVariable {
+
+    predicate P5() {
+        duration >= 5.0;
+        goal p6 = new P6(start:end);
+    }
+
+    predicate P6() {
+        duration >= 8.0;
+        {
+            goal p7 = new P7(start:end);
+        } or {
+            goal p8 = new P8(start:end);
+        }
+    }
+
+    predicate P7() {
+        duration >= 8.0;
+        goal p8 = new P8(start:end);
+    }
+
+    predicate P8() {
+        duration >= 10.0;
+        goal p5 = new P5(start:end);
+    }
+}
+
+SV1 sv1 = new SV1();
+SV0 sv0 = new SV0(sv1);
+
+goal g1 = new sv0.P1(start:origin);
+goal g2 = new sv0.P4();
+goal g3 = new sv0.P4();
+goal g4 = new sv0.P3();
+fact g5 = new sv0.P1();
+
+g1.end <= g2.start;
+g2.end <= g3.start;
+g2.end <= g4.start;
+g3.end <= g5.start;
+g4.end <= g5.start;
+
+goal g6 = new sv1.P5(start:origin);
+goal g7 = new sv1.P5();
+goal g8 = new sv1.P8();
+goal g9 = new sv1.P7();
+fact g10 = new sv1.P5();
+
+g6.end <= g7.start;
+g6.end <= g8.start;
+g7.end <= g9.start;
+g8.end <= g9.start;
+g9.end <= g10.start;

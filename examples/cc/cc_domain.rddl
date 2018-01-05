@@ -1,0 +1,156 @@
+class Plate {
+
+    real id;
+    ReusableResource capacity = new ReusableResource(1.0);
+
+    Plate(real id) : id(id) {}
+}
+
+class Water : StateVariable {
+
+    real id;
+    real boiling_time;
+
+    Water(real id, real boiling_time) : id(id), boiling_time(boiling_time) {}
+
+    predicate Boiling(Plate p) {
+        duration == boiling_time;
+
+        fact requires_plate = new p.capacity.Use(start:start, end:end, duration:duration, amount:1.0);
+    }
+
+    predicate HotWater() {
+        duration >= 1.0;
+
+        goal boiling = new Boiling(end:start);
+    }
+}
+
+class Oil : StateVariable {
+
+    real id;
+    real boiling_time;
+
+    Oil(real id, real boiling_time) : id(id), boiling_time(boiling_time) {}
+
+    predicate Boiling(Plate p) {
+        duration == boiling_time;
+
+        fact requires_plate = new p.capacity.Use(start:start, end:end, duration:duration, amount:1.0);
+    }
+
+    predicate HotOil() {
+        duration >= 1.0;
+
+        goal boiling = new Boiling(end:start);
+    }
+}
+
+class Spaghetti : StateVariable {
+
+    real id;
+    real cooking_time;
+
+    Spaghetti(real id, real cooking_time) : id(id), cooking_time(cooking_time) {}
+
+    predicate Cooking(Water w) {
+        duration == cooking_time;
+
+        goal hot_water = new w.HotWater();
+        hot_water.start <= start;
+        hot_water.end >= end;
+    }
+
+    predicate Cooked() {
+        duration >= 1.0;
+
+        goal cooking = new Cooking(end:start);
+    }
+}
+
+class Lardon : StateVariable {
+
+    real id;
+    real cooking_time;
+
+    Lardon(real id, real cooking_time) : id(id), cooking_time(cooking_time) {}
+
+    predicate Cooking(Oil o) {
+        duration == cooking_time;
+
+        goal hot_oil = new o.HotOil();
+        hot_oil.start <= start;
+        hot_oil.end >= end;
+    }
+
+    predicate Cooked() {
+        duration >= 1.0;
+
+        goal cooking = new Cooking(end:start);
+    }
+}
+
+class Eggs : StateVariable {
+
+    real id;
+    real beating_time;
+
+    Eggs(real id, real beating_time) : id(id), beating_time(beating_time) {}
+
+    predicate Beating() {
+        duration == beating_time;
+    }
+
+    predicate Beaten() {
+        duration >= 1.0;
+
+        goal beating = new Beating(end:start);
+    }
+}
+
+class Carbonara : StateVariable {
+
+    real id;
+    Spaghetti spaghetti;
+    Lardon lardon;
+    Eggs eggs;
+
+    Carbonara(real id, Spaghetti spaghetti, Lardon lardon, Eggs eggs) : id(id), spaghetti(spaghetti), lardon(lardon), eggs(eggs) {}
+
+    predicate Cooking(Plate p) {
+        duration == 3.0;
+
+        goal cooked_spaghetti = new spaghetti.Cooked();
+        cooked_spaghetti.start <= start;
+        cooked_spaghetti.end >= end;
+
+        goal cooked_lardon = new lardon.Cooked();
+        cooked_lardon.start <= start;
+        cooked_lardon.end >= end;
+
+        goal beaten_eggs = new eggs.Beaten();
+        beaten_eggs.start <= start;
+        beaten_eggs.end >= end;
+
+        fact requires_plate = new p.capacity.Use(start:start, end:end, duration:duration, amount:1.0);
+    }
+
+    predicate Cooked() {
+        duration >= 1.0;
+
+        goal cooking = new Cooking(end:start);
+    }
+
+    predicate Eating() {
+        duration == 5.0;
+
+        goal cooked = new Cooked(end:start);
+        cooked.duration <= 5.0;
+    }
+
+    predicate Eaten() {
+        duration >= 1.0;
+
+        goal eating = new Eating(end:start);
+    }
+}
