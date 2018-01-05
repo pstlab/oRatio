@@ -11,6 +11,8 @@ class resolver;
 
 class solver_listener
 {
+  friend class solver;
+
 public:
   solver_listener(solver &s);
   solver_listener(const solver_listener &orig) = delete;

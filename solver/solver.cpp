@@ -8,6 +8,10 @@
 #include "reusable_resource.h"
 #include "propositional_agent.h"
 #include "propositional_state.h"
+#ifndef NDEBUG
+#include "solver_listener.h"
+#include <iostream>
+#endif
 #include <algorithm>
 #include <cassert>
 
@@ -108,11 +112,20 @@ void solver::solve()
 
         if (f_next)
         {
+#ifndef NDEBUG
+            std::cout << "(" << std::to_string(trail.size()) << "): " << f_next->get_label();
+#endif
             assert(!f_next->get_estimated_cost().is_infinite());
             if (!f_next->structural || !has_inconsistencies()) // we run out of inconsistencies, thus, we renew them..
             {
                 // this is the next resolver to be assumed..
                 res = f_next->get_best_resolver();
+#ifndef NDEBUG
+                std::cout << " " << res->get_label() << std::endl;
+                // we notify the listeners that we have selected a resolver..
+                for (const auto &l : listeners)
+                    l->current_resolver(*res);
+#endif
 
                 // we apply the resolver..
                 if (!sat_cr.assume(res->rho) || !sat_cr.check())
@@ -142,6 +155,9 @@ void solver::solve()
 
 void solver::build()
 {
+#ifndef NDEBUG
+    std::cout << "building the causal graph.." << std::endl;
+#endif
     assert(sat_cr.root_level());
 
     while (std::any_of(flaws.begin(), flaws.end(), [&](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
@@ -159,6 +175,9 @@ void solver::build()
 
     // we create a new graph var..
     gamma = sat_cr.new_var();
+#ifndef NDEBUG
+    std::cout << "graph var is: γ" << std::to_string(gamma) << std::endl;
+#endif
     // these flaws have not been expanded, hence, cannot have a solution..
     for (const auto &f : flaw_q)
         sat_cr.new_clause({lit(gamma, false), lit(f->phi, false)});
@@ -186,6 +205,9 @@ bool solver::is_deferrable(flaw &f)
 
 void solver::add_layer()
 {
+#ifndef NDEBUG
+    std::cout << "adding a layer to the causal graph.." << std::endl;
+#endif
     assert(sat_cr.root_level());
 
     std::deque<flaw *> f_q(flaw_q);
@@ -204,6 +226,9 @@ void solver::add_layer()
 
     // we create a new graph var..
     gamma = sat_cr.new_var();
+#ifndef NDEBUG
+    std::cout << "graph var is: γ" << std::to_string(gamma) << std::endl;
+#endif
     // these flaws have not been expanded, hence, cannot have a solution..
     for (const auto &f : flaw_q)
         sat_cr.new_clause({lit(gamma, false), lit(f->phi, false)});
@@ -214,6 +239,9 @@ void solver::add_layer()
 
 bool solver::has_inconsistencies()
 {
+#ifndef NDEBUG
+    std::cout << " (checking for inconsistencies..)";
+#endif
     std::vector<flaw *> incs;
     std::queue<type *> q;
     for (const auto &t : get_types())
@@ -243,12 +271,20 @@ bool solver::has_inconsistencies()
         for (const auto &f : incs)
         {
             f->init();
+#ifdef NDEBUG
+            // we notify the listeners that a new flaw has arised..
+            for (const auto &l : listeners)
+                l->new_flaw(*f);
+#endif
             expand_flaw(*f);
         }
 
         // we re-assume the current graph var to allow search within the current graph..
         if (!sat_cr.assume(gamma) || !sat_cr.check())
             throw unsolvable_exception();
+#ifndef NDEBUG
+        std::cout << ": " << std::to_string(incs.size()) << std::endl;
+#endif
         return true;
     }
     else
@@ -282,6 +318,11 @@ flaw *solver::select_flaw()
             ++it;
         }
 
+#ifndef NDEBUG
+    if (f_next) // we notify the listeners that we have selected a flaw..
+        for (const auto &l : listeners)
+            l->current_flaw(*f_next);
+#endif
     return f_next;
 }
 
@@ -322,12 +363,22 @@ void solver::apply_resolver(resolver &r)
 void solver::new_flaw(flaw &f)
 {
     f.init(); // flaws' initialization requires being at root-level..
+#ifndef NDEBUG
+    // we notify the listeners that a new flaw has arised..
+    for (const auto &l : listeners)
+        l->new_flaw(f);
+#endif
     flaw_q.push_back(&f);
 }
 
 void solver::new_resolver(resolver &r)
 {
     r.init();
+#ifndef NDEBUG
+    // we notify the listeners that a new resolver has arised..
+    for (const auto &l : listeners)
+        l->new_resolver(r);
+#endif
 }
 
 void solver::new_causal_link(flaw &f, resolver &r)
@@ -336,6 +387,11 @@ void solver::new_causal_link(flaw &f, resolver &r)
     f.supports.push_back(&r);
     bool new_clause = sat_cr.new_clause({lit(r.rho, false), f.phi});
     assert(new_clause);
+#ifndef NDEBUG
+    // we notify the listeners that a new causal link has been created..
+    for (const auto &l : listeners)
+        l->causal_link_added(f, r);
+#endif
 }
 
 void solver::set_estimated_cost(resolver &r, const rational &cst)
@@ -348,6 +404,11 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
         rational f_cost = r.effect.get_estimated_cost();
         // we update the resolver's estimated cost..
         r.est_cost = cst;
+#ifndef NDEBUG
+        // we notify the listeners that a resolver cost has changed..
+        for (const auto &l : listeners)
+            l->resolver_cost_changed(r);
+#endif
 
         if (f_cost != r.effect.get_estimated_cost()) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update,hence, we propagate the update to all the supports of the resolver's effect..
         {
@@ -374,6 +435,11 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
                     f_cost = c_res.effect.get_estimated_cost();
                     // we update the resolver's estimated cost..
                     c_res.est_cost = r_cost;
+#ifndef NDEBUG
+                    // we notify the listeners that a resolver cost has changed..
+                    for (const auto &l : listeners)
+                        l->resolver_cost_changed(c_res);
+#endif
 
                     if (f_cost != c_res.effect.get_estimated_cost())  // the cost of the resolver's effect has changed as a consequence of the resolver's cost update..
                         for (const auto &c_r : c_res.effect.supports) // hence, we propagate the update to all the supports of the resolver's effect..
@@ -396,6 +462,11 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                 flaws.insert(f);
                 if (!trail.empty())
                     trail.back().new_flaws.insert(f);
+#ifndef NDEBUG
+                // we notify the listeners that the state of the flaw has changed..
+                for (const auto &l : listeners)
+                    l->flaw_state_changed(*f);
+#endif
             }
             else // this flaw has been removed from the current partial solution..
                 assert(flaws.find(f) == flaws.end());
@@ -438,6 +509,13 @@ void solver::pop()
     // we restore the resolvers' estimated costs..
     for (const auto &r : trail.back().old_costs)
         r.first->est_cost = r.second;
+
+#ifdef BUILD_GUI
+    // we notify the listeners that the cost of some resolvers has been restored..
+    for (const auto &l : listeners)
+        for (const auto &c : trail.back().old_costs)
+            l->resolver_cost_changed(*c.first);
+#endif
 
     trail.pop_back();
 }

@@ -169,7 +169,7 @@ public class CausalGraph extends Display {
         layout.add(colors);
         layout.add(new LabelLayout2(EDGE_DECORATORS));
         layout.add(new LabelLayout2(NODE_DECORATORS));
-        layout.add(new ForceDirectedLayout(GRAPH, true));
+        layout.add(new ForceDirectedLayout(GRAPH, false));
         layout.add(new RepaintAction());
         m_vis.putAction("layout", layout);
 
@@ -240,14 +240,14 @@ public class CausalGraph extends Display {
     void flaw_created(final FlawCreated fc) {
         synchronized (m_vis) {
             assert !flaws.containsKey(fc.flaw) : "the flaw already exists..";
-            assert Arrays.stream(fc.cause).allMatch(c -> resolvers.containsKey(c)) : "the flaw's cause does not exist: " + Arrays.toString(fc.cause) + resolvers;
+            assert Arrays.stream(fc.causes).allMatch(c -> resolvers.containsKey(c)) : "the flaw's cause does not exist: " + Arrays.toString(fc.causes) + resolvers;
             Node flaw_node = g.addNode();
             flaw_node.set(VisualItem.LABEL, fc.label);
             flaw_node.set(NODE_TYPE, "flaw");
             flaw_node.set(NODE_COST, Double.NEGATIVE_INFINITY);
             flaw_node.set(NODE_STATE, fc.state);
             flaws.put(fc.flaw, flaw_node);
-            for (String c : fc.cause) {
+            for (String c : fc.causes) {
                 Edge c_edge = g.addEdge(flaw_node, resolvers.get(c));
                 c_edge.set(EDGE_STATE, resolvers.get(c).get(NODE_STATE));
             }
@@ -370,7 +370,7 @@ public class CausalGraph extends Display {
     static class FlawCreated {
 
         private String flaw;
-        private String[] cause;
+        private String[] causes;
         private String label;
         private int state;
     }

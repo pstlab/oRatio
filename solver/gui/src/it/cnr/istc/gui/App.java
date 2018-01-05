@@ -55,18 +55,13 @@ public class App {
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.add(cg);
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                frame.setVisible(true);
-            }
-        });
+        SwingUtilities.invokeLater(() -> frame.setVisible(true));
         try {
             System.out.println("starting GUI server..");
             ServerSocket serverSocket = new ServerSocket(1100);
             Socket clientSocket = serverSocket.accept();
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 System.out.println(inputLine);

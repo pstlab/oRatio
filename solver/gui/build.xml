@@ -20,7 +20,7 @@
 
     <target name="compile" depends="init" description="compile the source">
         <!-- Compile the java code from ${src} into ${build} -->
-        <javac srcdir="${src}" destdir="${build}" classpathref="build.path" includeantruntime="false"/>
+        <javac srcdir="${src}" destdir="${build}" classpathref="build.path" includeantruntime="false" debug="on"/>
     </target>
 
     <target name="dist" depends="compile" description="generate the distribution">
