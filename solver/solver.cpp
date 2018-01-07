@@ -271,7 +271,7 @@ bool solver::has_inconsistencies()
         for (const auto &f : incs)
         {
             f->init();
-#ifdef NDEBUG
+#ifndef NDEBUG
             // we notify the listeners that a new flaw has arised..
             for (const auto &l : listeners)
                 l->new_flaw(*f);
