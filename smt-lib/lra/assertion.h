@@ -31,6 +31,9 @@ private:
   bool propagate_lb(const var &x, std::vector<lit> &cnfl);
   bool propagate_ub(const var &x, std::vector<lit> &cnfl);
 
+public:
+  std::string to_string() const;
+
 private:
   lra_theory &th;
   const op o;

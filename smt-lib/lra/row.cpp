@@ -257,4 +257,6 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
     cnfl.clear();
     return true;
 }
+
+std::string row::to_string() const { return "{ \"var\" : \"x" + std::to_string(x) + "\", \"expr\" : \"" + l.to_string() + "\" }"; }
 }

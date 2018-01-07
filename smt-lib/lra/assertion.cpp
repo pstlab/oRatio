@@ -74,4 +74,34 @@ bool assertion::propagate_ub(const var &x_i, std::vector<lit> &cnfl)
 
     return true;
 }
+
+std::string assertion::to_string() const
+{
+    std::string asrt;
+    asrt += "{ \"var\" : \"b" + std::to_string(b) + "\", \"val\" : \"";
+    switch (th.get_core().value(b))
+    {
+    case True:
+        asrt += "True";
+        break;
+    case False:
+        asrt += "False";
+        break;
+    case Undefined:
+        asrt += "Undefined";
+        break;
+    }
+    asrt += "\", \"constr\" : \"x" + std::to_string(x);
+    switch (o)
+    {
+    case leq:
+        asrt += " <= ";
+        break;
+    case geq:
+        asrt += " >= ";
+        break;
+    }
+    asrt += v.to_string() + "\" }";
+    return asrt;
+}
 }

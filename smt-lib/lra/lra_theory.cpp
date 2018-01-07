@@ -428,4 +428,38 @@ void lra_theory::pivot(const var x_i, const var x_j)
     // we add a new row into the tableau..
     tableau.insert({x_j, new row(*this, x_j, expr)});
 }
+
+std::string lra_theory::to_string()
+{
+    std::string la;
+    la += "{ \"vars\" : [";
+    for (size_t i = 0; i < vals.size(); i++)
+    {
+        if (i)
+            la += ", ";
+        la += "{ \"name\" : \"x" + std::to_string(i) + "\", \"value\" : " + value(i).to_string();
+        if (!lb(i).is_negative_infinite())
+            la += ", \"lb\" : " + lb(i).to_string();
+        if (!ub(i).is_positive_infinite())
+            la += ", \"ub\" : " + ub(i).to_string();
+        la += "}";
+    }
+    la += "], \"asrts\" : [";
+    for (std::unordered_map<var, assertion *>::const_iterator it = v_asrts.begin(); it != v_asrts.end(); ++it)
+    {
+        if (it != v_asrts.begin())
+            la += ", ";
+        la += it->second->to_string();
+    }
+    la += "], \"tableau\" : [";
+    for (std::map<var, row *>::const_iterator it = tableau.begin(); it != tableau.end(); ++it)
+    {
+        if (it != tableau.begin())
+            la += ", ";
+        la += it->second->to_string();
+    }
+    la += "]";
+    la += "}";
+    return la;
+}
 }

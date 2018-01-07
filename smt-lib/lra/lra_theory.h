@@ -75,6 +75,9 @@ class lra_theory : public theory
     static size_t lb_index(const var &v) { return v << 1; }       // the index of the lower bound of the 'v' variable..
     static size_t ub_index(const var &v) { return (v << 1) ^ 1; } // the index of the upper bound of the 'v' variable..
 
+  public:
+    std::string to_string();
+
   private:
     /**
      * Represents the bound of a variable and the reason for its existence.
