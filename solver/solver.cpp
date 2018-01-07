@@ -510,7 +510,7 @@ void solver::pop()
     for (const auto &r : trail.back().old_costs)
         r.first->est_cost = r.second;
 
-#ifdef BUILD_GUI
+#ifndef BUILD_GUI
     // we notify the listeners that the cost of some resolvers has been restored..
     for (const auto &l : listeners)
         for (const auto &c : trail.back().old_costs)
