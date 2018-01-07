@@ -1,4 +1,4 @@
-file( GLOB SOLVER_SOURCES tests.cpp ${CMAKE_SOURCE_DIR}/smt-lib/*.cpp ${CMAKE_SOURCE_DIR}/smt-lib/lra/*.cpp ${CMAKE_SOURCE_DIR}/smt-lib/ov/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/parser/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/parser/declarations/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/parser/statements/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/parser/expressions/*.cpp ${CMAKE_SOURCE_DIR}/solver/*.cpp ${CMAKE_SOURCE_DIR}/solver/types/*.cpp ${CMAKE_SOURCE_DIR}/solver/listener/*.cpp )
+file( GLOB SOLVER_SOURCES tests.cpp ${CMAKE_SOURCE_DIR}/smt-lib/*.cpp ${CMAKE_SOURCE_DIR}/smt-lib/lra/*.cpp ${CMAKE_SOURCE_DIR}/smt-lib/ov/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/parser/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/parser/declarations/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/parser/statements/*.cpp ${CMAKE_SOURCE_DIR}/core-lib/parser/expressions/*.cpp ${CMAKE_SOURCE_DIR}/solver/*.cpp ${CMAKE_SOURCE_DIR}/solver/types/*.cpp ${CMAKE_SOURCE_DIR}/solver/listener/solver_listener.cpp )
 
 add_executable( solver_tests ${SOLVER_SOURCES} )
 
