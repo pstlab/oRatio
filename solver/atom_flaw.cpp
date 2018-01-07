@@ -36,7 +36,7 @@ void atom_flaw::compute_resolvers()
                 ancestors.insert(q.front());
                 for (const auto &supp : q.front()->get_supports())
                     if (slv.sat_cr.value(supp->get_rho()) != False) // if false, the edge is broken..
-                        q.push(&supp->get_effect());                     // we push its effect..
+                        q.push(&supp->get_effect());                // we push its effect..
             }
             q.pop();
         }
@@ -52,10 +52,10 @@ void atom_flaw::compute_resolvers()
             // this is the target flaw (i.e. the one we are checking for unification) and cannot be in the current flaw's causes' effects..
             atom_flaw &target = slv.get_reason(c_atm);
 
-            if (!target.is_expanded() ||                       // the target flaw must hav been already expanded..
-                ancestors.find(&target) != ancestors.end() ||  // unifying with the target atom would introduce cyclic causality..
-                slv.sat_cr.value(c_atm.sigma) == False || // the target atom is unified with some other atom..
-                !atm.equates(c_atm))                           // the atom does not equate with the target target..
+            if (!target.is_expanded() ||                      // the target flaw must hav been already expanded..
+                ancestors.find(&target) != ancestors.end() || // unifying with the target atom would introduce cyclic causality..
+                slv.sat_cr.value(c_atm.sigma) == False ||     // the target atom is unified with some other atom..
+                !atm.equates(c_atm))                          // the atom does not equate with the target target..
                 continue;
 
             // the equality propositional variable..
@@ -69,7 +69,7 @@ void atom_flaw::compute_resolvers()
             q.push(this);
             q.push(&target);
             unif_lits.push_back(lit(atm.sigma, false)); // we force the state of this atom to be 'unified' within the unification literals..
-            unif_lits.push_back(c_atm.sigma);                // we force the state of the target atom to be 'active' within the unification literals..
+            unif_lits.push_back(c_atm.sigma);           // we force the state of the target atom to be 'active' within the unification literals..
             std::unordered_set<const flaw *> seen;
             while (!q.empty())
             {
@@ -121,7 +121,7 @@ void atom_flaw::activate_goal::apply()
     static_cast<const predicate &>(atm.tp).apply_rule(atm);
 }
 
-atom_flaw::unify_atom::unify_atom(solver &slv, atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(slv, 1, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}
+atom_flaw::unify_atom::unify_atom(solver &slv, atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(slv, 0, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}
 atom_flaw::unify_atom::~unify_atom() {}
 
 void atom_flaw::unify_atom::apply()
