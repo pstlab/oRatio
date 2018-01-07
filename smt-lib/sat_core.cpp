@@ -251,20 +251,24 @@ bool sat_core::check()
 
 bool sat_core::check(const std::vector<lit> &lits)
 {
-    size_t c_level = decision_level();
-    std::vector<lit> cnfl;
+    trail_lim.push_back(trail.size());
     for (const auto &p : lits)
-    {
-        // notice that these literals can be modified by propagation..
-        if (!assume(p) || !propagate(cnfl))
+        if (!enqueue(p))
         {
-            while (decision_level() > c_level)
-                pop();
+            while (trail_lim.back() < trail.size())
+                pop_one();
+            trail_lim.pop_back();
             return false;
         }
-    }
-    while (decision_level() > c_level)
+    for (const auto &th : theories)
+        th->push();
+    std::vector<lit> cnfl;
+    if (!propagate(cnfl))
+    {
         pop();
+        return false;
+    }
+    pop();
     return true;
 }
 
