@@ -327,7 +327,7 @@ void sat_core::analyze(const std::vector<lit> &cnfl, std::vector<lit> &out_learn
     int counter = 0; // this is the number of variables of the current decision level that have already been seen..
     lit p;
     std::vector<lit> p_reason = std::move(cnfl);
-    out_learnt.push_back(lit());
+    out_learnt.push_back(p);
     out_btlevel = 0;
     do
     {
@@ -365,7 +365,7 @@ void sat_core::analyze(const std::vector<lit> &cnfl, std::vector<lit> &out_learn
     // 'p' is now the first Unique Implication Point (UIP), possibly the asserting literal, that led to the conflict..
     assert(value(p) == Undefined);
     assert(std::all_of(out_learnt.begin() + 1, out_learnt.end(), [&](const lit &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
-    out_learnt.insert(out_learnt.begin(), !p);
+    out_learnt[0] = !p;
 }
 
 void sat_core::record(const std::vector<lit> &lits)
