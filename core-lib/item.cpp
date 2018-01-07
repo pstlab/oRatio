@@ -17,7 +17,7 @@ var item::eq(item &i) noexcept
 {
     if (this == &i)
         return TRUE_var;
-    if (tp.name.compare(i.tp.name) == 0)
+    if (tp.name.compare(i.tp.name) != 0)
         return FALSE_var;
     else if (var_item *ei = dynamic_cast<var_item *>(&i))
         return ei->eq(*this);
@@ -52,7 +52,7 @@ bool item::equates(const item &i) const noexcept
 {
     if (this == &i)
         return true;
-    if (tp.name.compare(i.tp.name) == 0)
+    if (tp.name.compare(i.tp.name) != 0)
         return false;
     else if (const var_item *ei = dynamic_cast<const var_item *>(&i))
         return ei->equates(*this);
