@@ -76,7 +76,7 @@ void socket_listener::resolver_created(const resolver &r)
     std::stringstream ss;
     ss << "resolver_created {\"resolver\":\"" << static_cast<const void *>(&r) << "\", \"effect\":\"" << static_cast<const void *>(&r.get_effect()) << "\", \"label\":\"" << r.get_label() << "\", \"cost\":{"
        << "\"num\":" << std::to_string(est_cost.numerator()) << ", \"den\":" << std::to_string(est_cost.denominator()) << "}"
-       << "\", \"state\":" << std::to_string(slv.sat_cr.value(r.get_rho())) << "}\n";
+       << ", \"state\":" << std::to_string(slv.sat_cr.value(r.get_rho())) << "}\n";
     send_message(ss.str());
 }
 void socket_listener::resolver_state_changed(const resolver &r)
