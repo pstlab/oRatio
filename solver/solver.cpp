@@ -299,8 +299,6 @@ flaw *solver::select_flaw()
     for (auto it = flaws.begin(); it != flaws.end();)
         if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat_cr.value(r->rho) == True; }))
         {
-            // we have either a trivial (i.e. has only one resolver) or an already solved flaw..
-            assert(sat_cr.value((*std::find_if((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat_cr.value(r->rho) != False; }))->rho) == True);
             // we remove the flaw from the current flaws..
             if (!trail.empty())
                 trail.back().solved_flaws.insert((*it));
