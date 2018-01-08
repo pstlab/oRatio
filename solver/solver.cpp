@@ -164,13 +164,19 @@ void solver::build()
     {
         if (flaw_q.empty())
             throw unsolvable_exception();
+#ifdef DEFERRABLES
         assert(!flaw_q.front()->expanded);
         if (sat_cr.value(flaw_q.front()->phi) != False)
             if (is_deferrable(*flaw_q.front())) // we postpone the expansion..
                 flaw_q.push_back(flaw_q.front());
-            else // we expand the flaw..
-                expand_flaw(*flaw_q.front());
+            else
+                expand_flaw(*flaw_q.front()); // we expand the flaw..
         flaw_q.pop_front();
+#else
+        std::deque<flaw *> c_q = std::move(flaw_q);
+        for (const auto &f : c_q)
+            expand_flaw(*f); // we expand the flaw..
+#endif
     }
 
     // we create a new graph var..
@@ -288,7 +294,12 @@ bool solver::has_inconsistencies()
         return true;
     }
     else
+    {
+#ifndef NDEBUG
+        std::cout << std::endl;
+#endif
         return false;
+    }
 }
 
 flaw *solver::select_flaw()

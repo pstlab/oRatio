@@ -13,7 +13,13 @@ include_directories( smt-lib smt-lib/lra smt-lib/ov core-lib core-lib/parser cor
 
 configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
+option( DEFERRABLES "Use deferrables when building the planning graph" ON )
+
 add_executable( ${PROJECT_NAME} ${SOURCES} )
+
+if( DEFERRABLES )
+  target_compile_definitions( ${PROJECT_NAME} PRIVATE DEFERRABLES=1 )
+endif()
 
 if( CMAKE_BUILD_TYPE MATCHES Debug )
   if(WIN32)
