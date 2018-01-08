@@ -64,6 +64,7 @@ void atom_flaw::compute_resolvers()
             if (slv.sat_cr.value(eq_v) == False) // the two atoms cannot unify, hence, we skip this instance..
                 continue;
 
+#ifdef CHECK_UNIFICATIONS
             // since atom 'c_atm' is a good candidate for unification, we build the unification literals..
             std::vector<lit> unif_lits;
             q.push(this);
@@ -88,16 +89,19 @@ void atom_flaw::compute_resolvers()
 
             if (slv.sat_cr.value(eq_v) != True)
                 unif_lits.push_back(eq_v);
-
             if (unif_lits.empty() || slv.sat_cr.check(unif_lits))
             {
-                // unification is actually possible!
                 unify_atom *u_res = new unify_atom(slv, *this, atm, c_atm, unif_lits);
+#else
+            unify_atom *u_res = new unify_atom(slv, *this, atm, c_atm, {lit(atm.sigma, false), c_atm.sigma, eq_v});
+#endif
                 assert(slv.sat_cr.value(u_res->get_rho()) != False);
                 add_resolver(*u_res);
                 slv.new_causal_link(target, *u_res);
                 slv.set_estimated_cost(*u_res, target.get_estimated_cost());
+#ifdef CHECK_UNIFICATIONS
             }
+#endif
         }
     }
 
