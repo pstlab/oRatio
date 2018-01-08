@@ -29,7 +29,7 @@ std::vector<flaw *> propositional_state::get_flaws()
 
 void propositional_state::new_predicate(predicate &pred)
 {
-    new_supertypes(pred, {&slv.get_predicate("IntervalPredicate")});
+    new_supertypes(pred, {&get_predicate(PROPOSITIONAL_STATE_PREDICATE_NAME)});
     new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
 }
 

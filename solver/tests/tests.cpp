@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
     // the solution file..
     std::string sol_name = argv[argc - 1];
 
-    std::cout << "starting ratio";
+    std::cout << "starting oRatio";
 #ifndef NDEBUG
     std::cout << " in debug mode";
 #endif

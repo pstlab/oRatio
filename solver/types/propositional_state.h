@@ -7,7 +7,7 @@
 #include "resolver.h"
 
 #define PROPOSITIONAL_STATE_NAME "PropositionalState"
-#define PROPOSITIONAL_STATE_PREDICATE_NAME "Use"
+#define PROPOSITIONAL_STATE_PREDICATE_NAME "PropositionalStatePredicate"
 #define PROPOSITIONAL_STATE_POLARITY_NAME "polarity"
 
 namespace ratio
