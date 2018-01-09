@@ -104,7 +104,10 @@ void solver::solve()
     {
         assert(sat_cr.value(gamma) == False);
         // we have exhausted the search within the graph: we extend the graph..
-        add_layer();
+        if (accuracy < max_accuracy)
+            increase_accuracy();
+        else
+            add_layer();
     }
 
     while (true)
@@ -158,7 +161,10 @@ void solver::solve()
                     {
                         assert(sat_cr.value(gamma) == False);
                         // we have exhausted the search within the graph: we extend the graph..
-                        add_layer();
+                        if (accuracy < max_accuracy)
+                            increase_accuracy();
+                        else
+                            add_layer();
                     }
             }
         }
