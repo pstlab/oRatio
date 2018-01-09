@@ -424,11 +424,12 @@ void solver::expand_flaw(flaw &f)
                     apply_resolver(*r);
             }
     f.expand();
-    if (!sat_cr.check())
-        throw unsolvable_exception();
 
     for (const auto &r : f.resolvers)
         apply_resolver(*r);
+
+    if (!sat_cr.check())
+        throw unsolvable_exception();
 }
 
 void solver::apply_resolver(resolver &r)
@@ -444,9 +445,6 @@ void solver::apply_resolver(resolver &r)
         if (!sat_cr.new_clause({lit(r.rho, false)}))
             throw unsolvable_exception();
     }
-
-    if (!sat_cr.check())
-        throw unsolvable_exception();
 
     restore_var();
     res = nullptr;
