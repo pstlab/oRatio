@@ -37,8 +37,21 @@ int main(int argc, char *argv[])
 
         std::cout << "solving the problem.." << std::endl;
         s.solve();
-
         std::cout << "hurray!! we have found a solution.." << std::endl;
+
+#ifdef STATISTICS
+        std::cout << "Created flaws:" << std::endl;
+        std::cout << " - facts:           " << s.nr_created_facts() << std::endl;
+        std::cout << " - goals:           " << s.nr_created_goals() << std::endl;
+        std::cout << " - disjunctions:    " << s.nr_created_disjs() << std::endl;
+        std::cout << " - inconsistencies: " << s.nr_created_incs() << std::endl;
+        std::cout << "Solved flaws:" << std::endl;
+        std::cout << " - facts:           " << s.nr_solved_facts() << std::endl;
+        std::cout << " - goals:           " << s.nr_solved_goals() << std::endl;
+        std::cout << " - disjunctions:    " << s.nr_solved_disjs() << std::endl;
+        std::cout << " - inconsistencies: " << s.nr_solved_incs() << std::endl;
+#endif
+
         std::ofstream sol_file;
         sol_file.open(sol_name);
         sol_file << s.to_string();

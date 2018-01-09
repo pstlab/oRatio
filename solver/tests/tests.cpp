@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
 
         std::cout << "solving the problem.." << std::endl;
         s.solve();
-
         std::cout << "hurray!! we have found a solution.." << std::endl;
     }
     catch (const std::exception &ex)

@@ -81,7 +81,33 @@ private:
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (boolean variable to resolver) of the resolvers..
   std::unordered_map<const atom *, atom_flaw *> reason;       // the reason for having introduced an atom..
   std::vector<layer> trail;                                   // the list of resolvers in chronological order..
+#ifdef STATISTICS
+public:
+  unsigned nr_created_facts() const { return n_created_facts; }
+  unsigned nr_created_goals() const { return n_created_goals; }
+  unsigned nr_created_disjs() const { return n_created_disjs; }
+  unsigned nr_created_vars() const { return n_created_vars; }
+  unsigned nr_created_incs() const { return n_created_incs; }
+  unsigned nr_solved_facts() const { return n_solved_facts; }
+  unsigned nr_solved_goals() const { return n_solved_goals; }
+  unsigned nr_solved_disjs() const { return n_solved_disjs; }
+  unsigned nr_solved_vars() const { return n_solved_vars; }
+  unsigned nr_solved_incs() const { return n_solved_incs; }
+
+private:
+  unsigned n_created_facts = 0; // the number of created facts..
+  unsigned n_created_goals = 0; // the number of created goals..
+  unsigned n_created_disjs = 0; // the number of created disjunctions..
+  unsigned n_created_vars = 0;  // the number of created variables..
+  unsigned n_created_incs = 0;  // the number of created inconsistencies..
+  unsigned n_solved_facts = 0;  // the number of solved facts..
+  unsigned n_solved_goals = 0;  // the number of solved goals..
+  unsigned n_solved_disjs = 0;  // the number of solved disjunctions..
+  unsigned n_solved_vars = 0;   // the number of solved variables..
+  unsigned n_solved_incs = 0;   // the number of solved inconsistencies..
+#endif
 #ifndef NDEBUG
+private:
   std::vector<solver_listener *> listeners; // the causal-graph listeners..
 #endif
 };

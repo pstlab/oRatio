@@ -112,10 +112,23 @@ void solver::solve()
 
         if (f_next)
         {
+            assert(!f_next->get_estimated_cost().is_infinite());
 #ifndef NDEBUG
             std::cout << "(" << std::to_string(trail.size()) << "): " << f_next->get_label();
 #endif
-            assert(!f_next->get_estimated_cost().is_infinite());
+#ifdef STATISTICS
+            if (atom_flaw *af = dynamic_cast<atom_flaw *>(f_next))
+                if (af->is_atom_fact())
+                    n_solved_facts++;
+                else
+                    n_solved_goals++;
+            else if (disjunction_flaw *df = dynamic_cast<disjunction_flaw *>(f_next))
+                n_solved_disjs++;
+            else if (var_flaw *ef = dynamic_cast<var_flaw *>(f_next))
+                n_solved_vars++;
+            else
+                n_solved_incs++;
+#endif
             if (!f_next->structural || !has_inconsistencies()) // we run out of inconsistencies, thus, we renew them..
             {
                 // this is the next resolver to be assumed..
@@ -376,6 +389,19 @@ void solver::new_flaw(flaw &f)
     // we notify the listeners that a new flaw has arised..
     for (const auto &l : listeners)
         l->new_flaw(f);
+#endif
+#ifdef STATISTICS
+    if (atom_flaw *af = dynamic_cast<atom_flaw *>(&f))
+        if (af->is_atom_fact())
+            n_created_facts++;
+        else
+            n_created_goals++;
+    else if (disjunction_flaw *df = dynamic_cast<disjunction_flaw *>(&f))
+        n_created_disjs++;
+    else if (var_flaw *ef = dynamic_cast<var_flaw *>(&f))
+        n_created_vars++;
+    else
+        n_created_incs++;
 #endif
     flaw_q.push_back(&f);
 }

@@ -15,12 +15,20 @@ configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
 option( DEFERRABLES "Use deferrables when building the planning graph" ON )
 option( CHECK_UNIFICATIONS "Check unifications when building the planning graph" OFF )
+option( STATISTICS "Collect statistics while building the graph and while solving the problem" OFF )
+
+message( "Use deferrables:    " ${DEFERRABLES} )
+message( "Check unifications: " ${CHECK_UNIFICATIONS} )
+message( "Collect statistics: " ${STATISTICS} )
 
 if( DEFERRABLES )
   add_definitions( -DDEFERRABLES )
 endif()
 if( CHECK_UNIFICATIONS )
   add_definitions( -DCHECK_UNIFICATIONS )
+endif()
+if( STATISTICS )
+  add_definitions( -DSTATISTICS )
 endif()
 
 add_executable( ${PROJECT_NAME} ${SOURCES} )
