@@ -340,6 +340,9 @@ bool solver::has_inconsistencies()
             for (const auto &l : listeners)
                 l->new_flaw(*f);
 #endif
+#ifdef STATISTICS
+            created_flaw(*f);
+#endif
             expand_flaw(*f);
         }
 
