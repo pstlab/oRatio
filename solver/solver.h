@@ -9,6 +9,7 @@ namespace ratio
 class flaw;
 class resolver;
 class atom_flaw;
+class hyper_flaw;
 #ifndef NDEBUG
 class solver_listener;
 #endif
@@ -18,6 +19,7 @@ class solver : public core, public smt::theory
   friend class flaw;
   friend class resolver;
   friend class atom_flaw;
+  friend class hyper_flaw;
 #ifndef NDEBUG
   friend class solver_listener;
 #endif
@@ -75,6 +77,7 @@ private:
   resolver *res = nullptr;                                    // the current resolver (will be into the trail)..
   smt::var gamma;                                             // this variable represents the validity of the current graph..
   unsigned short accuracy = 1;                                // the current heuristic accuracy..
+  std::map<std::set<flaw *>, hyper_flaw *> hyper_flaws;       // the enclosing flaws for each hyper-flaw..
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for graph building procedure)..
   std::unordered_set<flaw *> flaws;                           // the current active flaws..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (boolean variable to flaws) of the flaws..

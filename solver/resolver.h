@@ -34,6 +34,7 @@ public:
   const smt::var &get_rho() const { return rho; }
   flaw &get_effect() const { return effect; }
   std::vector<flaw *> get_preconditions() const { return preconditions; }
+  smt::rational get_intrinsic_cost() const { return intrinsic_cost; }
   smt::rational get_estimated_cost() const { return est_cost + intrinsic_cost; }
 
   virtual std::string get_label() const = 0;
