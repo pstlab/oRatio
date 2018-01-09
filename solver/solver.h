@@ -43,7 +43,8 @@ public:
   atom_flaw &get_reason(const atom &atm) const { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
 
 private:
-  void build();                     // builds the planning graph..
+  void build_graph();               // builds the planning graph..
+  void check_graph();               // checks whether the planning graph can be used for the search..
   bool is_deferrable(flaw &f);      // checks whether the given flaw is deferrable..
   void add_layer();                 // adds a layer to the current planning graph..
   void increase_accuracy();         // increases the heuristic accuracy by one..
@@ -88,11 +89,13 @@ private:
   std::vector<layer> trail;                                   // the list of resolvers in chronological order..
 #ifdef STATISTICS
 public:
+  void created_flaw(flaw &f);
   unsigned nr_created_facts() const { return n_created_facts; }
   unsigned nr_created_goals() const { return n_created_goals; }
   unsigned nr_created_disjs() const { return n_created_disjs; }
   unsigned nr_created_vars() const { return n_created_vars; }
   unsigned nr_created_incs() const { return n_created_incs; }
+  void solved_flaw(flaw &f);
   unsigned nr_solved_facts() const { return n_solved_facts; }
   unsigned nr_solved_goals() const { return n_solved_goals; }
   unsigned nr_solved_disjs() const { return n_solved_disjs; }

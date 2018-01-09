@@ -97,18 +97,8 @@ void solver::new_disjunction(context &d_ctx, const disjunction &disj)
 
 void solver::solve()
 {
-    // we build the causal graph..
-    build();
-
-    while (sat_cr.root_level())
-    {
-        assert(sat_cr.value(gamma) == False);
-        // we have exhausted the search within the graph: we extend the graph..
-        if (accuracy < max_accuracy)
-            increase_accuracy();
-        else
-            add_layer();
-    }
+    build_graph(); // we build the causal graph..
+    check_graph(); // we check whether the planning graph can be used for the search..
 
     while (true)
     {
@@ -120,19 +110,12 @@ void solver::solve()
             assert(!f_next->get_estimated_cost().is_infinite());
 #ifndef NDEBUG
             std::cout << "(" << std::to_string(trail.size()) << "): " << f_next->get_label();
+            // we notify the listeners that we have selected a flaw..
+            for (const auto &l : listeners)
+                l->current_flaw(*f_next);
 #endif
 #ifdef STATISTICS
-            if (atom_flaw *af = dynamic_cast<atom_flaw *>(f_next))
-                if (af->is_fact)
-                    n_solved_facts++;
-                else
-                    n_solved_goals++;
-            else if (disjunction_flaw *df = dynamic_cast<disjunction_flaw *>(f_next))
-                n_solved_disjs++;
-            else if (var_flaw *ef = dynamic_cast<var_flaw *>(f_next))
-                n_solved_vars++;
-            else
-                n_solved_incs++;
+            solved_flaw(*f_next);
 #endif
             if (!f_next->structural || !has_inconsistencies()) // we run out of inconsistencies, thus, we renew them..
             {
@@ -150,22 +133,8 @@ void solver::solve()
                     throw unsolvable_exception();
 
                 res = nullptr;
-                while (sat_cr.root_level())
-                    if (sat_cr.value(gamma) == Undefined)
-                    {
-                        // we have learnt a unit clause! thus, we reassume the graph var..
-                        if (!sat_cr.assume(gamma) || !sat_cr.check())
-                            throw unsolvable_exception();
-                    }
-                    else
-                    {
-                        assert(sat_cr.value(gamma) == False);
-                        // we have exhausted the search within the graph: we extend the graph..
-                        if (accuracy < max_accuracy)
-                            increase_accuracy();
-                        else
-                            add_layer();
-                    }
+
+                check_graph(); // we check whether the planning graph can be used for the search..
             }
         }
         else if (!has_inconsistencies()) // we run out of flaws, we check for inconsistencies one last time..
@@ -174,7 +143,7 @@ void solver::solve()
     }
 }
 
-void solver::build()
+void solver::build_graph()
 {
     assert(sat_cr.root_level());
 #ifndef NDEBUG
@@ -220,6 +189,26 @@ void solver::build()
 #endif
 }
 
+void solver::check_graph()
+{
+    while (sat_cr.root_level())
+        if (sat_cr.value(gamma) == Undefined)
+        {
+            // we have learnt a unit clause! thus, we reassume the graph var..
+            if (!sat_cr.assume(gamma) || !sat_cr.check())
+                throw unsolvable_exception();
+        }
+        else
+        {
+            assert(sat_cr.value(gamma) == False);
+            // we have exhausted the search within the graph: we extend the graph..
+            if (accuracy < max_accuracy)
+                increase_accuracy();
+            else
+                add_layer();
+        }
+}
+
 bool solver::is_deferrable(flaw &f)
 {
     std::queue<flaw *> q;
@@ -254,11 +243,8 @@ void solver::add_layer()
             throw unsolvable_exception();
         std::deque<flaw *> c_q = std::move(flaw_q);
         for (const auto &f : c_q)
-        {
-            assert(!f->expanded);
             if (sat_cr.value(f->phi) != False) // we expand the flaw..
                 expand_flaw(*f);
-        }
     }
 
     // we create a new graph var..
@@ -301,6 +287,7 @@ void solver::increase_accuracy()
         else
             ++it;
 
+    flaw_q.clear();
     if (flaws.size() >= accuracy)
     {
         std::vector<std::vector<flaw *>> fss = combinations(std::vector<flaw *>(flaws.begin(), flaws.end()), accuracy);
@@ -311,7 +298,7 @@ void solver::increase_accuracy()
         new_flaw(*new hyper_flaw(*this, res, std::vector<flaw *>(flaws.begin(), flaws.end())));
 
     // we restart the building graph procedure..
-    build();
+    build_graph();
 }
 
 bool solver::has_inconsistencies()
@@ -398,26 +385,33 @@ flaw *solver::select_flaw()
             ++it;
         }
 
-#ifndef NDEBUG
-    if (f_next) // we notify the listeners that we have selected a flaw..
-        for (const auto &l : listeners)
-            l->current_flaw(*f_next);
-#endif
     return f_next;
 }
 
 void solver::expand_flaw(flaw &f)
 {
+#ifndef NDEBUG
+    for (const auto &l : listeners)
+        l->current_flaw(f);
+#endif
+    assert(!f.expanded);
     // we expand the flaw..
     if (hyper_flaw *sf = dynamic_cast<hyper_flaw *>(&f))
         // we expand the unexpanded enclosing flaws..
         for (const auto &c_f : sf->flaws)
             if (!c_f->expanded)
             {
+#ifndef NDEBUG
+                for (const auto &l : listeners)
+                    l->current_flaw(*c_f);
+#endif
+                assert(!c_f->expanded);
                 // we expand the enclosing flaw..
                 c_f->expand();
                 // ..and remove it from the flaw queue..
-                flaw_q.erase(std::find(flaw_q.begin(), flaw_q.end(), c_f));
+                auto f_it = std::find(flaw_q.begin(), flaw_q.end(), c_f);
+                if (f_it != flaw_q.end())
+                    flaw_q.erase(f_it);
 
                 // we apply the enclosing flaw's resolvers..
                 for (const auto &r : c_f->resolvers)
@@ -461,17 +455,7 @@ void solver::new_flaw(flaw &f)
         l->new_flaw(f);
 #endif
 #ifdef STATISTICS
-    if (atom_flaw *af = dynamic_cast<atom_flaw *>(&f))
-        if (af->is_fact)
-            n_created_facts++;
-        else
-            n_created_goals++;
-    else if (disjunction_flaw *df = dynamic_cast<disjunction_flaw *>(&f))
-        n_created_disjs++;
-    else if (var_flaw *ef = dynamic_cast<var_flaw *>(&f))
-        n_created_vars++;
-    else
-        n_created_incs++;
+    created_flaw(f);
 #endif
     flaw_q.push_back(&f);
 }
@@ -624,4 +608,42 @@ void solver::pop()
 
     trail.pop_back();
 }
+
+#ifdef STATISTICS
+void solver::created_flaw(flaw &f)
+{
+    if (hyper_flaw *hf = dynamic_cast<hyper_flaw *>(&f))
+    { // do nothing..
+    }
+    else if (atom_flaw *af = dynamic_cast<atom_flaw *>(&f))
+        if (af->is_fact)
+            n_created_facts++;
+        else
+            n_created_goals++;
+    else if (disjunction_flaw *df = dynamic_cast<disjunction_flaw *>(&f))
+        n_created_disjs++;
+    else if (var_flaw *ef = dynamic_cast<var_flaw *>(&f))
+        n_created_vars++;
+    else
+        n_created_incs++;
+}
+
+void solver::solved_flaw(flaw &f)
+{
+    if (hyper_flaw *hf = dynamic_cast<hyper_flaw *>(&f))
+        for (const auto &c_f : hf->flaws)
+            solved_flaw(*c_f);
+    else if (atom_flaw *af = dynamic_cast<atom_flaw *>(&f))
+        if (af->is_fact)
+            n_solved_facts++;
+        else
+            n_solved_goals++;
+    else if (disjunction_flaw *df = dynamic_cast<disjunction_flaw *>(&f))
+        n_solved_disjs++;
+    else if (var_flaw *ef = dynamic_cast<var_flaw *>(&f))
+        n_solved_vars++;
+    else
+        n_solved_incs++;
+}
+#endif
 }
