@@ -40,6 +40,10 @@ core::~core()
 
 void core::read(const std::string &script)
 {
+#ifdef STATISTICS
+    auto start_parsing = std::chrono::steady_clock::now();
+#endif
+
     std::stringstream ss(script);
     parser prs(ss);
     ast::compilation_unit *cu = prs.parse();
@@ -50,12 +54,21 @@ void core::read(const std::string &script)
     context c_ctx(this);
     cu->execute(*this, c_ctx);
 
+#ifdef STATISTICS
+    auto end_parsing = std::chrono::steady_clock::now();
+    parsing_time += end_parsing - start_parsing;
+#endif
+
     if (!sat_cr.check())
         throw unsolvable_exception("the input problem is inconsistent");
 }
 
 void core::read(const std::vector<std::string> &files)
 {
+#ifdef STATISTICS
+    auto start_parsing = std::chrono::steady_clock::now();
+#endif
+
     std::vector<ast::compilation_unit *> c_cus;
     for (const auto &f : files)
     {
@@ -79,6 +92,11 @@ void core::read(const std::vector<std::string> &files)
     context c_ctx(this);
     for (const auto &cu : c_cus)
         cu->execute(*this, c_ctx);
+
+#ifdef STATISTICS
+    auto end_parsing = std::chrono::steady_clock::now();
+    parsing_time += end_parsing - start_parsing;
+#endif
 
     if (!sat_cr.check())
         throw unsolvable_exception("the input problem is inconsistent");

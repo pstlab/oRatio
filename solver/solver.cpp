@@ -118,7 +118,7 @@ void solver::solve()
 #endif
 #ifdef STATISTICS
             if (atom_flaw *af = dynamic_cast<atom_flaw *>(f_next))
-                if (af->is_atom_fact())
+                if (af->is_fact)
                     n_solved_facts++;
                 else
                     n_solved_goals++;
@@ -168,10 +168,13 @@ void solver::solve()
 
 void solver::build()
 {
+    assert(sat_cr.root_level());
 #ifndef NDEBUG
     std::cout << "building the causal graph.." << std::endl;
 #endif
-    assert(sat_cr.root_level());
+#ifdef STATISTICS
+    auto start_building = std::chrono::steady_clock::now();
+#endif
 
     while (std::any_of(flaws.begin(), flaws.end(), [&](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
     {
@@ -203,6 +206,10 @@ void solver::build()
     // we use the new graph var to allow search within the current graph..
     if (!sat_cr.assume(gamma) || !sat_cr.check())
         throw unsolvable_exception();
+#ifdef STATISTICS
+    auto end_building = std::chrono::steady_clock::now();
+    graph_building_time += end_building - start_building;
+#endif
 }
 
 bool solver::is_deferrable(flaw &f)
@@ -224,10 +231,13 @@ bool solver::is_deferrable(flaw &f)
 
 void solver::add_layer()
 {
+    assert(sat_cr.root_level());
 #ifndef NDEBUG
     std::cout << "adding a layer to the causal graph.." << std::endl;
 #endif
-    assert(sat_cr.root_level());
+#ifdef STATISTICS
+    auto start_building = std::chrono::steady_clock::now();
+#endif
 
     std::deque<flaw *> f_q(flaw_q);
     while (std::all_of(f_q.begin(), f_q.end(), [&](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
@@ -254,6 +264,10 @@ void solver::add_layer()
     // we use the new graph var to allow search within the new graph..
     if (!sat_cr.assume(gamma) || !sat_cr.check())
         throw unsolvable_exception();
+#ifdef STATISTICS
+    auto end_building = std::chrono::steady_clock::now();
+    graph_building_time += end_building - start_building;
+#endif
 }
 
 bool solver::has_inconsistencies()
@@ -392,7 +406,7 @@ void solver::new_flaw(flaw &f)
 #endif
 #ifdef STATISTICS
     if (atom_flaw *af = dynamic_cast<atom_flaw *>(&f))
-        if (af->is_atom_fact())
+        if (af->is_fact)
             n_created_facts++;
         else
             n_created_goals++;

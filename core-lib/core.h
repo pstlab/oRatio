@@ -5,6 +5,9 @@
 #include "sat_core.h"
 #include "lra_theory.h"
 #include "ov_theory.h"
+#ifdef STATISTICS
+#include <chrono>
+#endif
 
 #define BOOL_KEYWORD "bool"
 #define INT_KEYWORD "int"
@@ -178,5 +181,13 @@ protected:
   std::map<std::string, std::vector<const method *>> methods;
   std::map<std::string, type *> types;
   std::map<std::string, predicate *> predicates;
+
+#ifdef STATISTICS
+public:
+  std::chrono::duration<double> get_parsing_time() const { return parsing_time; }
+
+private:
+  std::chrono::duration<double> parsing_time = std::chrono::duration<double>::zero();
+#endif
 };
 }

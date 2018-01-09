@@ -5,6 +5,24 @@
 #include <iostream>
 #include <fstream>
 
+#ifdef STATISTICS
+void print_statistics(ratio::solver &s)
+{
+    std::cout << "Created flaws" << std::endl;
+    std::cout << " - facts:            " << s.nr_created_facts() << std::endl;
+    std::cout << " - goals:            " << s.nr_created_goals() << std::endl;
+    std::cout << " - disjunctions:     " << s.nr_created_disjs() << std::endl;
+    std::cout << " - inconsistencies:  " << s.nr_created_incs() << std::endl;
+    std::cout << "Solved flaws" << std::endl;
+    std::cout << " - facts:            " << s.nr_solved_facts() << std::endl;
+    std::cout << " - goals:            " << s.nr_solved_goals() << std::endl;
+    std::cout << " - disjunctions:     " << s.nr_solved_disjs() << std::endl;
+    std::cout << " - inconsistencies:  " << s.nr_solved_incs() << std::endl;
+    std::cout << "Parsing time:        " << double(std::chrono::duration_cast<std::chrono::milliseconds>(s.get_parsing_time()).count()) / 1000 << "s" << std::endl;
+    std::cout << "Graph building time: " << double(std::chrono::duration_cast<std::chrono::milliseconds>(s.get_graph_building_time()).count()) / 1000 << "s" << std::endl;
+}
+#endif
+
 int main(int argc, char *argv[])
 {
     using namespace ratio;
@@ -30,6 +48,10 @@ int main(int argc, char *argv[])
 
     s.init();
 
+#ifdef STATISTICS
+    auto start_solving = std::chrono::high_resolution_clock::now();
+#endif
+
     try
     {
         std::cout << "parsing input files.." << std::endl;
@@ -40,16 +62,10 @@ int main(int argc, char *argv[])
         std::cout << "hurray!! we have found a solution.." << std::endl;
 
 #ifdef STATISTICS
-        std::cout << "Created flaws:" << std::endl;
-        std::cout << " - facts:           " << s.nr_created_facts() << std::endl;
-        std::cout << " - goals:           " << s.nr_created_goals() << std::endl;
-        std::cout << " - disjunctions:    " << s.nr_created_disjs() << std::endl;
-        std::cout << " - inconsistencies: " << s.nr_created_incs() << std::endl;
-        std::cout << "Solved flaws:" << std::endl;
-        std::cout << " - facts:           " << s.nr_solved_facts() << std::endl;
-        std::cout << " - goals:           " << s.nr_solved_goals() << std::endl;
-        std::cout << " - disjunctions:    " << s.nr_solved_disjs() << std::endl;
-        std::cout << " - inconsistencies: " << s.nr_solved_incs() << std::endl;
+        print_statistics(s);
+        auto end_solving = std::chrono::high_resolution_clock::now();
+        auto solving_time = end_solving - start_solving;
+        std::cout << "Total solving time:  " << double(std::chrono::duration_cast<std::chrono::milliseconds>(solving_time).count()) / 1000 << "s" << std::endl;
 #endif
 
         std::ofstream sol_file;
@@ -60,6 +76,13 @@ int main(int argc, char *argv[])
     catch (const std::exception &ex)
     {
         std::cout << ex.what() << std::endl;
+
+#ifdef STATISTICS
+        print_statistics(s);
+        auto end_solving = std::chrono::high_resolution_clock::now();
+        auto solving_time = end_solving - start_solving;
+        std::cout << "Total solving time:  " << double(std::chrono::duration_cast<std::chrono::milliseconds>(solving_time).count()) / 1000 << "s" << std::endl;
+#endif
         return 1;
     }
 }

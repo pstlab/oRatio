@@ -94,6 +94,8 @@ public:
   unsigned nr_solved_vars() const { return n_solved_vars; }
   unsigned nr_solved_incs() const { return n_solved_incs; }
 
+  std::chrono::duration<double> get_graph_building_time() const { return graph_building_time; }
+
 private:
   unsigned n_created_facts = 0; // the number of created facts..
   unsigned n_created_goals = 0; // the number of created goals..
@@ -105,6 +107,8 @@ private:
   unsigned n_solved_disjs = 0;  // the number of solved disjunctions..
   unsigned n_solved_vars = 0;   // the number of solved variables..
   unsigned n_solved_incs = 0;   // the number of solved inconsistencies..
+
+  std::chrono::duration<double> graph_building_time = std::chrono::duration<double>::zero();
 #endif
 #ifndef NDEBUG
 private:

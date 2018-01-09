@@ -17,8 +17,6 @@ public:
   atom_flaw(const atom_flaw &orig) = delete;
   virtual ~atom_flaw();
 
-  bool is_atom_fact() const { return is_fact; }
-
   atom &get_atom() const { return atm; }
   std::string get_label() const override { return "φ" + std::to_string(get_phi()) + (is_fact ? " fact σ" : " goal σ") + std::to_string(atm.sigma) + " " + atm.tp.name; }
 
@@ -77,6 +75,8 @@ private:
 
 private:
   atom &atm;
+
+public:
   const bool is_fact;
 };
 }
