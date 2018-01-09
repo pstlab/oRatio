@@ -603,7 +603,7 @@ void solver::pop()
     for (const auto &r : trail.back().old_costs)
         r.first->est_cost = r.second;
 
-#ifndef BUILD_GUI
+#ifndef NDEBUG
     // we notify the listeners that the cost of some resolvers has been restored..
     for (const auto &l : listeners)
         for (const auto &c : trail.back().old_costs)
