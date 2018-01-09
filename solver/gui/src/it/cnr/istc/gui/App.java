@@ -64,7 +64,6 @@ public class App {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), "UTF-8"));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                System.out.println(inputLine);
                 if (inputLine.startsWith(FLAW_CREATED)) {
                     cg.flaw_created(gson.fromJson(inputLine.substring(FLAW_CREATED.length()), CausalGraph.FlawCreated.class));
                 } else if (inputLine.startsWith(FLAW_STATE_CHANGED)) {
