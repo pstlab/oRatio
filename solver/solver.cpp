@@ -8,6 +8,8 @@
 #include "reusable_resource.h"
 #include "propositional_agent.h"
 #include "propositional_state.h"
+#include "hyper_flaw.h"
+#include "combinations.h"
 #ifndef NDEBUG
 #include "solver_listener.h"
 #include <iostream>
@@ -268,6 +270,42 @@ void solver::add_layer()
     auto end_building = std::chrono::steady_clock::now();
     graph_building_time += end_building - start_building;
 #endif
+}
+
+void solver::increase_accuracy()
+{
+#ifndef NDEBUG
+    std::cout << "heuristic accuracy is: " + std::to_string(accuracy + 1) << std::endl;
+#endif
+    accuracy++;
+    assert(sat_cr.root_level());
+
+    // we clean up super-flaws trivial flaws and already solved flaws..
+    for (auto it = flaws.begin(); it != flaws.end();)
+        if (hyper_flaw *sf = dynamic_cast<hyper_flaw *>(*it))
+            // we remove the super-flaw from the current flaws..
+            flaws.erase(it++);
+        else if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat_cr.value(r->rho) == True; }))
+        {
+            // we have either a trivial (i.e. has only one resolver) or an already solved flaw..
+            assert(sat_cr.value((*std::find_if((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat_cr.value(r->rho) != False; }))->rho) == True);
+            // we remove the flaw from the current flaws..
+            flaws.erase(it++);
+        }
+        else
+            ++it;
+
+    if (flaws.size() >= accuracy)
+    {
+        std::vector<std::vector<flaw *>> fss = combinations(std::vector<flaw *>(flaws.begin(), flaws.end()), accuracy);
+        for (const auto &fs : fss) // we create a new super flaw..
+            new_flaw(*new hyper_flaw(*this, res, fs));
+    }
+    else // we create a new super flaw..
+        new_flaw(*new hyper_flaw(*this, res, std::vector<flaw *>(flaws.begin(), flaws.end())));
+
+    // we restart the building graph procedure..
+    build();
 }
 
 bool solver::has_inconsistencies()

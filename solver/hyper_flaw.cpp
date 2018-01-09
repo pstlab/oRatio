@@ -29,6 +29,27 @@ void hyper_flaw::compute_resolvers()
     std::vector<std::vector<resolver *>> rs;
     for (const auto &f : flaws)
         rs.push_back(f->get_resolvers());
+#ifdef CHECK_HYPER_FLAWS
+    std::vector<smt::lit> check_lits;
+    std::queue<const flaw *> q;
+    q.push(this);
+    while (!q.empty())
+    {
+        if (seen.find(q.front()) == seen.end())
+        {
+            if (slv.sat_cr.value(q.front()->get_phi() == smt::False))
+                return;
+            seen.insert(q.front()); // we avoid some repetition of literals..
+            for (const auto &cause : q.front()->get_causes())
+                if (slv.sat_cr.value(cause->get_rho()) != smt::True)
+                {
+                    check_lits.push_back(cause->get_rho()); // we add the resolver's variable to the unification literals..
+                    q.push(&cause->get_effect());           // we push its effect..
+                }
+        }
+        q.pop();
+    }
+#endif
     for (const auto &rp : cartesian_product(rs))
     {
         // the resolver's cost is given by the maximum of the enclosing resolvers' costs..
@@ -41,8 +62,15 @@ void hyper_flaw::compute_resolvers()
             cnj.push_back(r->get_rho());
         }
         smt::var cnj_var = slv.sat_cr.new_conj(cnj);
-        if (slv.sat_cr.check({cnj_var}))
+#ifdef CHECK_HYPER_FLAWS
+        if (slv.sat_cr.check(check_lits))
+#else
+        if (slv.sat_cr.value(cnj_var) != smt::False)
+#endif
             add_resolver(*new hyper_resolver(slv, *this, cnj_var, cst, rp));
+#ifdef CHECK_HYPER_FLAWS
+        check_lits.pop_back();
+#endif
     }
 }
 
