@@ -78,7 +78,7 @@ private:
   resolver *res = nullptr;                                    // the current resolver (will be into the trail)..
   smt::var gamma;                                             // this variable represents the validity of the current graph..
   unsigned short accuracy = 1;                                // the current heuristic accuracy..
-  static const unsigned short max_accuracy = 1;               // the maximum heuristic accuracy..
+  static const unsigned short max_accuracy = 2;               // the maximum heuristic accuracy..
   std::map<std::set<flaw *>, hyper_flaw *> hyper_flaws;       // the enclosing flaws for each hyper-flaw..
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for graph building procedure)..
   std::unordered_set<flaw *> flaws;                           // the current active flaws..

@@ -409,6 +409,20 @@ flaw *solver::select_flaw()
 void solver::expand_flaw(flaw &f)
 {
     // we expand the flaw..
+    if (hyper_flaw *sf = dynamic_cast<hyper_flaw *>(&f))
+        // we expand the unexpanded enclosing flaws..
+        for (const auto &c_f : sf->flaws)
+            if (!c_f->expanded)
+            {
+                // we expand the enclosing flaw..
+                c_f->expand();
+                // ..and remove it from the flaw queue..
+                flaw_q.erase(std::find(flaw_q.begin(), flaw_q.end(), c_f));
+
+                // we apply the enclosing flaw's resolvers..
+                for (const auto &r : c_f->resolvers)
+                    apply_resolver(*r);
+            }
     f.expand();
     if (!sat_cr.check())
         throw unsolvable_exception();
