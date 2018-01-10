@@ -1,0 +1,6 @@
+ReusableResource rr = new ReusableResource(10.0);
+
+fact u0 = new rr.Use(amount:4.0, duration:2.0);
+fact u1 = new rr.Use(amount:4.0, duration:2.0);
+fact u2 = new rr.Use(amount:4.0, duration:2.0);
+fact u3 = new rr.Use(amount:4.0, duration:2.0);

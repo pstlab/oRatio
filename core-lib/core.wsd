@@ -1,0 +1,218 @@
+@startuml core-lib
+skinparam monochrome true
+skinparam handwritten true
+
+class context
+context : #ptr:env
+context : +context(ptr:env)
+
+class expr
+context <|-- expr
+expr : +expr(ptr:item)
+
+class bool_expr
+expr <|-- bool_expr
+bool_expr : +bool_expr(ptr:bool_item)
+
+class arith_expr
+expr <|-- arith_expr
+arith_expr : +arith_expr(ptr:arith_item)
+
+class string_expr
+expr <|-- string_expr
+string_expr : +string_expr(ptr:string_item)
+
+class variable_expr
+expr <|-- variable_expr
+variable_expr : +variable_expr(ptr:variable_item)
+
+class env
+env : -ref_count:unsigned
+env : -items:map<string,expr>
+env : +get(name:string):expr
+env o--> "1" core : cr
+env o--> "1" context : ctx
+
+class scope
+scope : scope(cr:core,scp:scope)
+scope : +get_core():core
+scope : +get_scope():scope
+scope : {static} +add_field(cs:scope,f:field):void
+scope : +get_field(f_name:string):field
+scope : +get_method(m_name:string,ts:vector<type>):method
+scope : +get_methods():vector<method>
+scope : +get_predicate(p_name:string):map<string,predicate>
+scope : +get_predicates():vector<predicate>
+scope : +get_type(t_name:string):type
+scope : +get_types():map<string,type>
+scope o--> "1" core : cr
+scope o--> "1" scope : scp
+
+class core
+env <|-- core
+scope <|-- core
+core : -sat_cr:sat_core
+core : -la_th:la_theory
+core : -ov_th:ov_theory
+core : -methods:map<string, vector<method>>
+core : -types:map<string, type>
+core : -predicates:map<string, predicate>
+core : +core()
+core : +get_field(f_name:string):field
+core : +get_method(m_name:string,ts:vector<type>):method
+core : +get_methods():vector<method>
+core : +get_type(t_name:string):type
+core : +get_types():map<string,type>
+core : +get_predicate(p_name:string):map<string,predicate>
+core : +get_predicates():vector<predicate>
+core : +get(name:string):expr
+core : +solve():bool
+core : +new_fact(a:atom):void
+core : +new_goal(a:atom):void
+core : +new_disjunction(ctx:context,d:disjunction):void
+core : #set_var(v:var):void
+core : #restore_var():void
+core : +to_string():string
+
+class type
+scope <|-- type
+type : +name:string
+type : -supertypes:vector<type>
+type : -constructors:vector<constructor>
+type : -methods:map<string, vector<method>>
+type : -types:map<string, type>
+type : -predicates:map<string, predicate>
+type : +type(cr:core,scp:scope,name:string,primitive:bool)
+type : +get_supertypes():vector<type>
+type : +is_assignable_from(t:type):bool
+type : +new_instance(ctx:context):expr
+type : +new_existential():expr
+type : +get_instances():vector<expr>
+type : +get_constructor(ts:vector<type>):constructor
+type : +get_constructors():vector<constructor>
+type : +get_field(f_name:string):field
+type : +get_method(m_name:string,ts:vector<type>):method
+type : +get_methods():vector<method>
+type : +get_type(t_name:string):type
+type : +get_types():map<string,type>
+type : +get_predicate(p_name:string):map<string,predicate>
+type : +get_predicates():vector<predicate>
+type : {static} #inherit(base:type,derived:type):void
+type : #set_var(v:var):void
+type : #restore_var():void
+type : -new_predicate(p:predicate):void
+
+class bool_type
+type <|-- bool_type
+bool_type : +bool_type(cr:core)
+bool_type : +new_instance(ctx:context):expr
+
+class int_type
+type <|-- int_type
+int_type : +int_type(cr:core)
+int_type : +new_instance(ctx:context):expr
+
+class real_type
+type <|-- real_type
+real_type : +real_type(cr:core)
+real_type : +new_instance(ctx:context):expr
+
+class string_type
+type <|-- string_type
+string_type : +string_type(cr:core)
+string_type : +new_instance(ctx:context):expr
+
+class typedef_type
+type <|-- typedef_type
+typedef_type : -xpr:expression
+typedef_type : +typedef_type(cr:core,scp:scope,n:string,bt:type,e:expression)
+typedef_type : +new_instance(ctx:context):expr
+item o--> "1" type : base_type
+
+class enum_type
+type <|-- enum_type
+enum_type : +enum_type(cr:core,scp:scope,n:string)
+enum_type : +new_instance(ctx:context):expr
+enum_type : +get_all_instances():set<item>
+enum_type o--> "*" enum_type : enums
+
+class item
+env <|-- item
+item : +item(cr:core,ctx:context,tp:type)
+item : +eq(i:item):var
+item : +eqates(i:item):bool
+item "*" o--> "1" type : tp
+
+class bool_item
+item <|-- bool_item
+bool_item : +bool_item(cr:core,ctx:context,l:lit)
+bool_item : +l:lit
+
+class arith_item
+item <|-- arith_item
+arith_item : +arith_item(cr:core,ctx:context,l:lin)
+arith_item : +l:lin
+
+class string_item
+item <|-- string_item
+string_item : +string_item(cr:core,ctx:context,v:string)
+string_item : +v:string
+
+class variable_item
+item <|-- variable_item
+variable_item : +variable_item(cr:core,ctx:context,v:var)
+variable_item : +v:var
+
+class predicate
+type <|-- predicate
+predicate : -statements:vector<statement>
+predicate : +predicate(cr:core,scp:scope,name:string,args:vector<field>,stmnts:vector<statement>)
+predicate : +get_args():vector<field>
+predicate o--> "*" field : args
+
+class atom
+item <|-- atom
+atom : +atom(cr:core,ctx:context,pred:predicate)
+atom : sigma:var
+
+class constructor
+scope <|-- constructor
+constructor : -init_list:vector<pair<string,vector<expression>>>
+constructor : -statements:vector<statement>
+constructor : +constructor(cr:core,scp:scope,args:vector<field>,il:vector<pair<string,vector<expression>>>,stmnts:vector<statement>)
+constructor : +new_instance(ctx:context,xprs:vector<expr>)
+constructor : +get_args():vector<field>
+constructor : -invoke(i:item,xprs:vector<expr>):item
+constructor o--> "*" field : args
+
+class method
+scope <|-- method
+method : +name:string
+method : +return_type:type
+method : -statements:vector<statement>
+method : +method(cr:core,scp:scope,rt:type,name:string,args:vector<field>,stmnts:vector<statement>)
+method : +get_args():vector<field>
+method : +invoke(ctx:context,xprs:vector<expr>)
+method o--> "*" field : args
+
+class disjunction
+scope <|-- disjunction
+disjunction : +disjunction(cr:core,scp:scope,conjs:vector<conjunction>)
+disjunction : +get_conjunctions():vector<conjunction>
+disjunction o--> "2..*" conjunction : conjunctions
+
+class conjunction
+scope <|-- conjunction
+conjunction : -cost:lin
+conjunction : -statements:vector<statement>
+conjunction : +conjunction(cr:core,scp:scope,cst:lin,stmnts:vector<statement>)
+conjunction : +get_cost():lin
+conjunction : +apply(ctx:context):void
+
+class field
+field : +name:string
+field : +xpr:expression
+field : +synth:bool
+field : +field(tp:type,name:string,e:expression,synth:bool)
+field o--> "1" type : tp
+@enduml

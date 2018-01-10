@@ -1,78 +1,126 @@
-/*
-* Copyright (C) 2016 Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #pragma once
 
-#include "../core/core.h"
-#include "choice.h"
+#include "core.h"
+#include <deque>
 
-namespace oratio {
+namespace ratio
+{
 
-    class decision;
-    class choice;
+class flaw;
+class resolver;
+class atom_flaw;
+class hyper_flaw;
+#ifndef NDEBUG
+class solver_listener;
+#endif
 
-    class solver : public core {
-        friend class choice;
-        friend class decision;
-        friend class goal_decision;
-    public:
-        solver();
-        solver(solver&&) = delete;
-        virtual ~solver();
+class solver : public core, public smt::theory
+{
+  friend class flaw;
+  friend class resolver;
+  friend class atom_flaw;
+  friend class hyper_flaw;
+#ifndef NDEBUG
+  friend class solver_listener;
+#endif
 
-        bool solve();
+public:
+  solver();
+  solver(const solver &orig) = delete;
+  virtual ~solver();
 
-        enum_item* new_enum(const type * const t, const std::unordered_set<item*>& allowed_vals) override;
-        bool new_fact(atom * const a) override;
-        bool new_goal(atom * const a) override;
-        bool new_disjunction(env * const e, oratio::disjunction * const d) override;
-    private:
-        choice * _choice;
-        std::queue<decision*> _decision_q;
-        std::unordered_map<atom*, decision*> _atom_decision;
+  void init(); // initializes the solver..
 
-        std::vector<ac::bool_var*> _no_good;
+  expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals) override;
 
-        bool build_planning_graph();
+private:
+  void new_fact(atom &atm) override;
+  void new_goal(atom &atm) override;
+  void new_disjunction(context &d_ctx, const disjunction &disj) override;
 
-        std::vector<decision*> get_inconsistencies();
+public:
+  void solve() override;                                                    // solves the given problem..
+  atom_flaw &get_reason(const atom &atm) const { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
 
-        bool push(choice * const ch);
-        void pop(long unsigned int n = 1);
+private:
+  void build_graph();               // builds the planning graph..
+  void check_graph();               // checks whether the planning graph can be used for the search..
+  bool is_deferrable(flaw &f);      // checks whether the given flaw is deferrable..
+  void add_layer();                 // adds a layer to the current planning graph..
+  void increase_accuracy();         // increases the heuristic accuracy by one..
+  bool has_inconsistencies();       // checks whether the types have some inconsistency..
+  void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
+  void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
 
-        struct layer {
+  void new_flaw(flaw &f);
+  void new_resolver(resolver &r);
+  void new_causal_link(flaw &f, resolver &r);
 
-            layer(choice * const ch) : _choice(ch) { }
+  void set_estimated_cost(resolver &r, const smt::rational &cst); // sets the estimated cost of the given resolver propagating it to other resolvers..
+  flaw *select_flaw();                                            // selects the most expensive flaw from the 'flaws' set, returns a nullptr if there are no active flaws..
 
-            choice * const _choice;
-            std::list<decision*> _pending_decisions;
-            std::unordered_map<choice*, double> _updated_choices;
-            std::unordered_map<decision*, double> _updated_decisions;
-        };
-        std::stack<layer*> _layers;
-    };
+  bool propagate(const smt::lit &p, std::vector<smt::lit> &cnfl) override;
+  bool check(std::vector<smt::lit> &cnfl) override;
+  void push() override;
+  void pop() override;
 
-    class find_solution_choice : public choice {
-    public:
-        find_solution_choice(solver * const s);
-        find_solution_choice(find_solution_choice&&) = delete;
-        virtual ~find_solution_choice();
-    private:
-        bool apply() override;
-    };
+private:
+  struct layer
+  {
+
+    layer(resolver *const r) : r(r) {}
+
+    resolver *const r;
+    std::unordered_map<resolver *, smt::rational> old_costs; // the old estimated resolvers' costs..
+    std::unordered_set<flaw *> new_flaws;                    // the just activated flaws..
+    std::unordered_set<flaw *> solved_flaws;                 // the just solved flaws..
+  };
+
+  resolver *res = nullptr;                                    // the current resolver (will be into the trail)..
+  smt::var gamma;                                             // this variable represents the validity of the current graph..
+  unsigned short accuracy = 1;                                // the current heuristic accuracy..
+  static const unsigned short max_accuracy = 1;               // the maximum heuristic accuracy..
+  std::map<std::set<flaw *>, hyper_flaw *> hyper_flaws;       // the enclosing flaws for each hyper-flaw..
+  std::deque<flaw *> flaw_q;                                  // the flaw queue (for graph building procedure)..
+  std::unordered_set<flaw *> flaws;                           // the current active flaws..
+  std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (boolean variable to flaws) of the flaws..
+  std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (boolean variable to resolver) of the resolvers..
+  std::unordered_map<const atom *, atom_flaw *> reason;       // the reason for having introduced an atom..
+  std::vector<layer> trail;                                   // the list of resolvers in chronological order..
+#ifdef STATISTICS
+public:
+  void created_flaw(flaw &f);
+  unsigned nr_created_facts() const { return n_created_facts; }
+  unsigned nr_created_goals() const { return n_created_goals; }
+  unsigned nr_created_disjs() const { return n_created_disjs; }
+  unsigned nr_created_vars() const { return n_created_vars; }
+  unsigned nr_created_incs() const { return n_created_incs; }
+  void solved_flaw(flaw &f);
+  unsigned nr_solved_facts() const { return n_solved_facts; }
+  unsigned nr_solved_goals() const { return n_solved_goals; }
+  unsigned nr_solved_disjs() const { return n_solved_disjs; }
+  unsigned nr_solved_vars() const { return n_solved_vars; }
+  unsigned nr_solved_incs() const { return n_solved_incs; }
+
+  std::chrono::duration<double> get_graph_building_time() const { return graph_building_time; }
+
+private:
+  unsigned n_created_facts = 0; // the number of created facts..
+  unsigned n_created_goals = 0; // the number of created goals..
+  unsigned n_created_disjs = 0; // the number of created disjunctions..
+  unsigned n_created_vars = 0;  // the number of created variables..
+  unsigned n_created_incs = 0;  // the number of created inconsistencies..
+  unsigned n_solved_facts = 0;  // the number of solved facts..
+  unsigned n_solved_goals = 0;  // the number of solved goals..
+  unsigned n_solved_disjs = 0;  // the number of solved disjunctions..
+  unsigned n_solved_vars = 0;   // the number of solved variables..
+  unsigned n_solved_incs = 0;   // the number of solved inconsistencies..
+
+  std::chrono::duration<double> graph_building_time = std::chrono::duration<double>::zero();
+#endif
+#ifndef NDEBUG
+private:
+  std::vector<solver_listener *> listeners; // the causal-graph listeners..
+#endif
+};
 }
-
