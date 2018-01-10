@@ -38,6 +38,9 @@ add_test( NAME TestBlocks16 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/b
 add_test( NAME TestBlocks17 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_17.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
 add_test( NAME TestBlocks18 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_18.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
 add_test( NAME TestBlocks19 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_19.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME TestBlocks20 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_20.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME TestBlocks21 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_21.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME TestBlocks22 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_22.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
 
 add_test( NAME TestLogisticsSV00 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/logistics_state_variables/logistics_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/logistics_state_variables/logistics_problem_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
 add_test( NAME TestLogisticsSV01 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/logistics_state_variables/logistics_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/logistics_state_variables/logistics_problem_1.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
