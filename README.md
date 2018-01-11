@@ -20,7 +20,7 @@ As an example, the following code invokes the oRatio solver using the domain mod
 oRatio examples/blocks/blocks_domain.rddl examples/blocks/blocks_problem_10.rddl solution.json
 ```
 
-Further information about the RIDDLE language, used for specifying the input files, can be found in the corresponding [[wiki|The RIDDLE Language]] page.
+Further information about the RIDDLE language, used for specifying the input files, can be found in the corresponding [wiki](https://github.com/riccardodebenedictis/oRatio/wiki/The-RIDDLE-Language) page.
 
 ## Building oRatio
 
