@@ -14,10 +14,10 @@ std::vector<std::vector<T>> cartesian_product(const std::vector<std::vector<T>> 
     std::vector<typename std::vector<T>::const_iterator> it;
     it.reserve(vs.size());
     for (const auto &v : vs)
-        it.push_back(v.begin());
+        it.push_back(v.cbegin());
 
     std::vector<std::vector<T>> s;
-    while (it[0] != vs[0].end())
+    while (it[0] != vs[0].cend())
     {
         std::vector<T> c_v;
         for (const auto &i : it)
@@ -25,9 +25,9 @@ std::vector<std::vector<T>> cartesian_product(const std::vector<std::vector<T>> 
         s.push_back(c_v);
 
         ++it[vs.size() - 1];
-        for (size_t i = vs.size() - 1; (i > 0) && (it[i] == vs[i].end()); --i)
+        for (size_t i = vs.size() - 1; (i > 0) && (it[i] == vs[i].cend()); --i)
         {
-            it[i] = vs[i].begin();
+            it[i] = vs[i].cbegin();
             ++it[i - 1];
         }
     }

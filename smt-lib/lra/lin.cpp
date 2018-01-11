@@ -194,8 +194,8 @@ std::string lin::to_string() const
         return known_term.to_string();
 
     std::string s;
-    for (std::map<var, rational>::const_iterator it = vars.begin(); it != vars.end(); ++it)
-        if (it == vars.begin())
+    for (std::map<var, rational>::const_iterator it = vars.cbegin(); it != vars.cend(); ++it)
+        if (it == vars.cbegin())
         {
             if (it->second == rational::ONE)
                 s += "x" + std::to_string(it->first);

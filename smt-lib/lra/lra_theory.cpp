@@ -445,16 +445,16 @@ std::string lra_theory::to_string()
         la += "}";
     }
     la += "], \"asrts\" : [";
-    for (std::unordered_map<var, assertion *>::const_iterator it = v_asrts.begin(); it != v_asrts.end(); ++it)
+    for (std::unordered_map<var, assertion *>::const_iterator it = v_asrts.cbegin(); it != v_asrts.cend(); ++it)
     {
-        if (it != v_asrts.begin())
+        if (it != v_asrts.cbegin())
             la += ", ";
         la += it->second->to_string();
     }
     la += "], \"tableau\" : [";
-    for (std::map<var, row *>::const_iterator it = tableau.begin(); it != tableau.end(); ++it)
+    for (std::map<var, row *>::const_iterator it = tableau.cbegin(); it != tableau.cend(); ++it)
     {
-        if (it != tableau.begin())
+        if (it != tableau.cbegin())
             la += ", ";
         la += it->second->to_string();
     }

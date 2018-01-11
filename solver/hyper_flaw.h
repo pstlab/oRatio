@@ -18,9 +18,9 @@ class hyper_flaw : public flaw
     std::string get_label() const override
     {
         std::string f_str = "φ" + std::to_string(get_phi()) + " {";
-        for (std::vector<flaw *>::const_iterator f_it = flaws.begin(); f_it != flaws.end(); ++f_it)
+        for (std::vector<flaw *>::const_iterator f_it = flaws.cbegin(); f_it != flaws.cend(); ++f_it)
         {
-            if (f_it != flaws.begin())
+            if (f_it != flaws.cbegin())
                 f_str += ", ";
             f_str += (*f_it)->get_label();
         }
@@ -41,9 +41,9 @@ class hyper_flaw : public flaw
         std::string get_label() const override
         {
             std::string r_str = "ρ" + std::to_string(rho) + " {";
-            for (std::vector<resolver *>::const_iterator r_it = resolvers.begin(); r_it != resolvers.end(); ++r_it)
+            for (std::vector<resolver *>::const_iterator r_it = resolvers.cbegin(); r_it != resolvers.cend(); ++r_it)
             {
-                if (r_it != resolvers.begin())
+                if (r_it != resolvers.cbegin())
                     r_str += ", ";
                 r_str += (*r_it)->get_label();
             }

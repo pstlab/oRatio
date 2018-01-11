@@ -202,8 +202,8 @@ arith_expr core::sub(const std::vector<arith_expr> &exprs)
 {
     assert(exprs.size() > 1);
     lin l;
-    for (std::vector<arith_expr>::const_iterator it = exprs.begin(); it != exprs.end(); ++it)
-        if (it == exprs.begin())
+    for (std::vector<arith_expr>::const_iterator it = exprs.cbegin(); it != exprs.cend(); ++it)
+        if (it == exprs.cbegin())
             l += (*it)->l;
         else
             l -= (*it)->l;
@@ -347,9 +347,9 @@ std::unordered_set<var_value *> core::enum_value(const var_expr &x) const noexce
 std::string core::to_string(const std::map<std::string, expr> &c_items) const noexcept
 {
     std::string iss;
-    for (std::map<std::string, expr>::const_iterator is_it = c_items.begin(); is_it != c_items.end(); ++is_it)
+    for (std::map<std::string, expr>::const_iterator is_it = c_items.cbegin(); is_it != c_items.cend(); ++is_it)
     {
-        if (is_it != c_items.begin())
+        if (is_it != c_items.cbegin())
             iss += ", ";
         iss += "{ \"name\" : \"" + is_it->first + "\", \"type\" : \"" + is_it->second->tp.name + "\", \"value\" : ";
         if (bool_item *bi = dynamic_cast<bool_item *>(&*is_it->second))
