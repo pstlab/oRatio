@@ -6,6 +6,22 @@
 
 oRatio is an Integrated Logic and Constraint based solver which takes inspiration from both Logic Programming (LP) and Constraint Programming (CP).
 
+## Getting started
+
+The oRatio system is invoked with a list of command line arguments representing the locations of the required [[compilation units|The RIDDLE Language]] (e.g. domain models, problem instances or plan adaptations) and the desired output file like in the following:
+
+```
+oRatio cu_0.rddl cu_1.rddl ... cu_n sol.json
+```
+
+As an example, the following code invokes the oRatio solver using the domain model defined in `examples/blocks/blocks_domain.rddl`, the problem instance specified in `examples/blocks/blocks_problem_10.rddl` and, once found a solution, writes it in the `solution.json` file:
+
+```
+oRatio examples/blocks/blocks_domain.rddl examples/blocks/blocks_problem_10.rddl solution.json
+```
+
+Further information about the RIDDLE language, used for specifying the input files, can be found in the corresponding [[wiki|The RIDDLE Language]] page.
+
 ## Building oRatio
 
 The basic requirements for building oRatio are:
