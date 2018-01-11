@@ -8,7 +8,7 @@ oRatio is an Integrated Logic and Constraint based solver which takes inspiratio
 
 ## Getting started
 
-The oRatio system is invoked with a list of command line arguments representing the locations of the required [[compilation units|The RIDDLE Language]] (e.g. domain models, problem instances or plan adaptations) and the desired output file like in the following:
+The oRatio system is invoked with a list of command line arguments representing the locations of the required [compilation units](https://github.com/pstlab/oRatio/wiki/The-RIDDLE-Language) (e.g. domain models, problem instances or plan adaptations) and the desired output file like in the following:
 
 ```
 oRatio cu_0.rddl cu_1.rddl ... cu_n sol.json
