@@ -11,11 +11,13 @@ void print_statistics(ratio::solver &s)
     std::cout << "Created flaws" << std::endl;
     std::cout << " - facts:            " << s.nr_created_facts() << std::endl;
     std::cout << " - goals:            " << s.nr_created_goals() << std::endl;
+    std::cout << " - variables:        " << s.nr_created_vars() << std::endl;
     std::cout << " - disjunctions:     " << s.nr_created_disjs() << std::endl;
     std::cout << " - inconsistencies:  " << s.nr_created_incs() << std::endl;
     std::cout << "Solved flaws" << std::endl;
     std::cout << " - facts:            " << s.nr_solved_facts() << std::endl;
     std::cout << " - goals:            " << s.nr_solved_goals() << std::endl;
+    std::cout << " - variables:        " << s.nr_solved_vars() << std::endl;
     std::cout << " - disjunctions:     " << s.nr_solved_disjs() << std::endl;
     std::cout << " - inconsistencies:  " << s.nr_solved_incs() << std::endl;
     std::cout << "Parsing time:        " << double(std::chrono::duration_cast<std::chrono::milliseconds>(s.get_parsing_time()).count()) / 1000 << "s" << std::endl;
