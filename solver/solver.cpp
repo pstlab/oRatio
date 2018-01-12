@@ -117,8 +117,10 @@ void solver::solve()
 #ifdef STATISTICS
             solved_flaw(*f_next);
 #endif
+#ifdef CHECK_INCONSISTENCIES
             if (!f_next->structural || !has_inconsistencies()) // we run out of inconsistencies, thus, we renew them..
             {
+#endif
                 // this is the next resolver to be assumed..
                 res = f_next->get_best_resolver();
 #ifndef NDEBUG
@@ -135,7 +137,9 @@ void solver::solve()
                 res = nullptr;
 
                 check_graph(); // we check whether the planning graph can be used for the search..
+#ifdef CHECK_INCONSISTENCIES
             }
+#endif
         }
         else if (!has_inconsistencies()) // we run out of flaws, we check for inconsistencies one last time..
             // Hurray!! we have found a solution..
