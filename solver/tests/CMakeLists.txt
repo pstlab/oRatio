@@ -44,3 +44,14 @@ add_test( NAME TestBlocks22 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/b
 
 add_test( NAME TestLogisticsSV00 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/logistics_state_variables/logistics_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/logistics_state_variables/logistics_problem_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
 add_test( NAME TestLogisticsSV01 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/logistics_state_variables/logistics_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/logistics_state_variables/logistics_problem_1.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+
+add_test( NAME CookingCarbonara_1_001 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_001.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME CookingCarbonara_1_002 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_002.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME CookingCarbonara_1_003 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_003.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME CookingCarbonara_1_004 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_004.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME CookingCarbonara_1_005 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_005.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME CookingCarbonara_1_006 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_006.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME CookingCarbonara_1_007 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_007.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME CookingCarbonara_1_008 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_008.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME CookingCarbonara_1_009 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_009.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
+add_test( NAME CookingCarbonara_1_010 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/cc/cc_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/cc/cc_problem_1_010.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
