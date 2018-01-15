@@ -1168,7 +1168,7 @@ expression *parser::_expression(const size_t &pr)
             std::vector<expression *> xprs;
             xprs.push_back(e);
 
-            while (match(BAR_ID))
+            while (match(AMP_ID))
                 xprs.push_back(_expression(2));
 
             e = new conjunction_expression(xprs);
@@ -1180,7 +1180,7 @@ expression *parser::_expression(const size_t &pr)
             std::vector<expression *> xprs;
             xprs.push_back(e);
 
-            while (match(BAR_ID))
+            while (match(CARET_ID))
                 xprs.push_back(_expression(2));
 
             e = new exct_one_expression(xprs);

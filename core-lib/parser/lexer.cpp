@@ -89,7 +89,11 @@ token *lexer::next()
         ch = next_char();
         return mk_token(PLUS_ID);
     case '-':
-        ch = next_char();
+        if ((ch = next_char()) == '>')
+        {
+            ch = next_char();
+            return mk_token(IMPLICATION_ID);
+        }
         return mk_token(MINUS_ID);
     case '*':
         ch = next_char();
