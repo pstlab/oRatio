@@ -1,0 +1,16 @@
+ReusableResource energy = new ReusableResource(1.0);
+
+Klin k1 = new Klin(1.0, energy, 2.0, 20.0);
+Klin k2 = new Klin(2.0, energy, 2.0, 20.0);
+Klin k3 = new Klin(3.0, energy, 2.0, 20.0);
+
+CeramicPiece p1 = new CeramicPiece(1.0, 5.0, 2.0);
+
+fact k1_ready = new k1.Ready(start:origin);
+k1_ready.duration >= 1.0;
+fact k2_ready = new k2.Ready(start:origin);
+k2_ready.duration >= 1.0;
+fact k3_ready = new k3.Ready(start:origin);
+k3_ready.duration >= 1.0;
+
+goal p1_baked = new p1.Baked(end:horizon);
