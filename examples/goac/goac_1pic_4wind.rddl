@@ -1,0 +1,45 @@
+real speed = 40.0/60.0;
+real picture_size = 40.0;
+real download_rate = 10.0/60.0;
+
+Location l_a = new Location(0.0);
+Location l_b = new Location(1.0);
+Location l_c = new Location(2.0);
+Location l_d = new Location(3.0);
+Location l_e = new Location(4.0);
+Location l_f = new Location(5.0);
+
+Map map = new Map();
+
+fact dist_a_b = new map.Distance(from:l_a, to:l_b, distance:600.0);
+fact dist_b_a = new map.Distance(from:l_b, to:l_a, distance:600.0);
+fact dist_b_c = new map.Distance(from:l_b, to:l_c, distance:800.0);
+fact dist_c_b = new map.Distance(from:l_c, to:l_b, distance:800.0);
+fact dist_a_c = new map.Distance(from:l_a, to:l_c, distance:1000.0);
+fact dist_c_a = new map.Distance(from:l_c, to:l_a, distance:1000.0);
+fact dist_c_d = new map.Distance(from:l_c, to:l_d, distance:1000.0);
+fact dist_d_c = new map.Distance(from:l_d, to:l_c, distance:1000.0);
+fact dist_a_e = new map.Distance(from:l_a, to:l_e, distance:1100.0);
+fact dist_e_a = new map.Distance(from:l_e, to:l_a, distance:1100.0);
+fact dist_e_d = new map.Distance(from:l_e, to:l_d, distance:1500.0);
+fact dist_d_e = new map.Distance(from:l_d, to:l_e, distance:1500.0);
+fact dist_e_f = new map.Distance(from:l_e, to:l_f, distance:200.0);
+fact dist_f_e = new map.Distance(from:l_f, to:l_e, distance:200.0);
+
+Visibility visibility = new Visibility();
+fact vis0 = new visibility.NotVisible(start:origin, end:280.0);
+fact vis1 = new visibility.Visible(start:vis0.end, end:4000.0);
+fact vis2 = new visibility.NotVisible(start:vis1.end, end:8000.0);
+fact vis3 = new visibility.Visible(start:vis2.end, end:10000.0);
+fact vis4 = new visibility.NotVisible(start:vis3.end, end:15000.0);
+fact vis5 = new visibility.Visible(start:vis4.end, end:20000.0);
+fact vis6 = new visibility.NotVisible(start:vis5.end, end:25000.0);
+fact vis7 = new visibility.Visible(start:vis6.end, end:30000.0);
+fact vis8 = new visibility.NotVisible(start:vis7.end, end:horizon);
+
+Robot robot = new Robot(map, visibility);
+
+fact at0 = new robot.navigator.At(l:l_a, start:origin);
+at0.duration >= 10.0;
+
+goal tp0 = new robot.Download(id:0.0, l:l_b);
