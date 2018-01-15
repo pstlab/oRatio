@@ -331,6 +331,9 @@ bool solver::has_inconsistencies()
     assert(std::none_of(incs.begin(), incs.end(), [&](flaw *f) { return f->structural; }));
     if (!incs.empty())
     {
+#ifndef NDEBUG
+        std::cout << ": " << std::to_string(incs.size()) << std::endl;
+#endif
         // we go back to root level..
         while (!sat_cr.root_level())
             sat_cr.pop();
@@ -351,11 +354,7 @@ bool solver::has_inconsistencies()
         }
 
         // we re-assume the current graph var to allow search within the current graph..
-        if (!sat_cr.assume(gamma) || !sat_cr.check())
-            throw unsolvable_exception();
-#ifndef NDEBUG
-        std::cout << ": " << std::to_string(incs.size()) << std::endl;
-#endif
+        check_graph();
         return true;
     }
     else
