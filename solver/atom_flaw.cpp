@@ -34,7 +34,7 @@ void atom_flaw::compute_resolvers()
             if (ancestors.find(q.front()) == ancestors.end())
             {
                 ancestors.insert(q.front());
-                for (const auto &supp : q.front()->get_supports())
+                for (const auto &supp : q.front()->get_causes())
                     if (slv.sat_cr.value(supp->get_rho()) != False) // if false, the edge is broken..
                         q.push(&supp->get_effect());                // we push its effect..
             }
