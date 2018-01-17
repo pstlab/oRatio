@@ -1,22 +1,19 @@
 cmake_minimum_required(VERSION 3.1)
 
-project ( oRatio VERSION 0.2 LANGUAGES CXX )
+project ( oRatio VERSION 1.0.1 LANGUAGES CXX )
 
-if ( NOT CMAKE_BUILD_TYPE )
-  message( STATUS "Setting build type to 'Release' as none was specified." )
-  set( CMAKE_BUILD_TYPE Release )
+# Set a default build type if none was specified
+set( default_build_type "Release" )
+if( EXISTS "${CMAKE_SOURCE_DIR}/.git" )
+  set( default_build_type "Debug" )
 endif()
-
-set ( CMAKE_CXX_STANDARD 14 )
-
-file( GLOB SOURCES main.cpp smt-lib/*.cpp smt-lib/lra/*.cpp smt-lib/ov/*.cpp core-lib/*.cpp core-lib/parser/*.cpp core-lib/parser/declarations/*.cpp core-lib/parser/statements/*.cpp core-lib/parser/expressions/*.cpp solver/*.cpp solver/types/*.cpp )
-if( CMAKE_BUILD_TYPE MATCHES Debug )
-  list( APPEND SOURCES solver/listener/solver_listener.cpp solver/listener/socket_listener.cpp ) 
+ 
+if( NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES )
+  message( STATUS "Setting build type to '${default_build_type}' as none was specified." )
+  set( CMAKE_BUILD_TYPE "${default_build_type}" CACHE STRING "Choose the type of build." FORCE )
+  # Set the possible values of build type for cmake-gui
+  set_property( CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo" )
 endif()
-
-include_directories( smt-lib smt-lib/lra smt-lib/ov core-lib core-lib/parser core-lib/parser/declarations core-lib/parser/statements core-lib/parser/expressions solver solver/listener solver/types )
-
-configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
 option( DEFERRABLES "Use deferrables when building the planning graph" ON )
 option( CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF )
@@ -29,6 +26,17 @@ message( STATUS "Check inconsistencies: ${CHECK_INCONSISTENCIES}" )
 message( STATUS "Check unifications:    ${CHECK_UNIFICATIONS}" )
 message( STATUS "Check hyper-flaws:     ${CHECK_HYPER_FLAWS}" )
 message( STATUS "Collect statistics:    ${STATISTICS}" )
+
+set ( CMAKE_CXX_STANDARD 14 )
+
+file( GLOB SOURCES main.cpp smt-lib/*.cpp smt-lib/lra/*.cpp smt-lib/ov/*.cpp core-lib/*.cpp core-lib/parser/*.cpp core-lib/parser/declarations/*.cpp core-lib/parser/statements/*.cpp core-lib/parser/expressions/*.cpp solver/*.cpp solver/types/*.cpp )
+if( CMAKE_BUILD_TYPE MATCHES Debug )
+  list( APPEND SOURCES solver/listener/solver_listener.cpp solver/listener/socket_listener.cpp ) 
+endif()
+
+include_directories( smt-lib smt-lib/lra smt-lib/ov core-lib core-lib/parser core-lib/parser/declarations core-lib/parser/statements core-lib/parser/expressions solver solver/listener solver/types )
+
+configure_file( solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY )
 
 if( DEFERRABLES )
   add_definitions( -DDEFERRABLES )
