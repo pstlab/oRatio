@@ -2,6 +2,7 @@
 
 #include "theory.h"
 #include "var_value.h"
+#include <string>
 #include <unordered_set>
 #include <unordered_map>
 #include <set>

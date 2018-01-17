@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.1)
 
 project ( oRatio VERSION 0.2 LANGUAGES CXX )
 
+if ( NOT CMAKE_BUILD_TYPE )
+  message( STATUS "Setting build type to 'Release' as none was specified." )
+  set( CMAKE_BUILD_TYPE Release )
+endif()
+
 set ( CMAKE_CXX_STANDARD 14 )
 
 file( GLOB SOURCES main.cpp smt-lib/*.cpp smt-lib/lra/*.cpp smt-lib/ov/*.cpp core-lib/*.cpp core-lib/parser/*.cpp core-lib/parser/declarations/*.cpp core-lib/parser/statements/*.cpp core-lib/parser/expressions/*.cpp solver/*.cpp solver/types/*.cpp )
@@ -19,11 +24,11 @@ option( CHECK_UNIFICATIONS "Check unifications when building the planning graph"
 option( CHECK_HYPER_FLAWS "Check hyper-flaws when building the planning graph" OFF )
 option( STATISTICS "Collect statistics while building the graph and while solving the problem" ON )
 
-message( "Use deferrables:       " ${DEFERRABLES} )
-message( "Check inconsistencies: " ${CHECK_INCONSISTENCIES} )
-message( "Check unifications:    " ${CHECK_UNIFICATIONS} )
-message( "Check hyper-flaws:     " ${CHECK_HYPER_FLAWS} )
-message( "Collect statistics:    " ${STATISTICS} )
+message( STATUS "Use deferrables:       ${DEFERRABLES}" )
+message( STATUS "Check inconsistencies: ${CHECK_INCONSISTENCIES}" )
+message( STATUS "Check unifications:    ${CHECK_UNIFICATIONS}" )
+message( STATUS "Check hyper-flaws:     ${CHECK_HYPER_FLAWS}" )
+message( STATUS "Collect statistics:    ${STATISTICS}" )
 
 if( DEFERRABLES )
   add_definitions( -DDEFERRABLES )
@@ -44,7 +49,7 @@ endif()
 add_executable( ${PROJECT_NAME} ${SOURCES} )
 
 if( CMAKE_BUILD_TYPE MATCHES Debug )
-  if(WIN32)
+  if( WIN32 )
     target_link_libraries( ${PROJECT_NAME} wsock32 ws2_32 #[[-PROFILE]] )
   endif()
   include( CTest )
