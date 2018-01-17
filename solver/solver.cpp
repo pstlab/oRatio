@@ -505,7 +505,7 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
             l->resolver_cost_changed(r);
 #endif
 
-        if (f_cost != r.effect.get_estimated_cost()) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update,hence, we propagate the update to all the supports of the resolver's effect..
+        if (f_cost != r.effect.get_estimated_cost()) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
         {
             // the resolver costs queue (for resolver cost propagation)..
             std::queue<resolver *> resolver_q;
