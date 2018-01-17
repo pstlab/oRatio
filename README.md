@@ -54,6 +54,23 @@ cmake ..
 make
 ```
 
+### Building on OS X
+
+The easiest way to install the building requirements on OS X consists in downloading and installing the [Command Line Tools](https://developer.apple.com/downloads/) and CMake. Once the building requirements are installed, open a terminal, move to a desired folder and clone the oRatio repository
+
+```
+git clone https://github.com/pstlab/oRatio
+```
+
+finally, build oRatio
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
 ### Building on Windows
 
 The easiest way to compile oRatio on Windows is through [Visual Studio](https://www.visualstudio.com/). Download and install Visual Studio, download Git and CMake. Start a Visual Studio Command prompt, move to a desired folder and clone the oRatio repository
@@ -69,4 +86,24 @@ mkdir build
 cd build
 cmake -G "NMake Makefiles" ..
 nmake
+```
+
+### Building notes
+
+The CMake building script, by default, generates a 'Debug' target resulting in a code that, when executed, performs several checks and is not optimized. A different target can be choosen either from the CMake gui, by setting the `CMAKE_BUILD_TYPE` parameter to the desired target, or from the command line, by providing CMake the same parameter through the `-D` option.
+
+Available targets are:
+
+* **Debug**, emits debug information and do not performs optimization
+* **Release**, omits debug information and performs optimization
+* **MinSizeRel**, optimizes for smallest binary
+* **RelWithDebInfo**, emits debug information and performs optimization
+
+As an example, an optimized target can be generated through the following command
+
+```
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make
 ```
