@@ -29,6 +29,12 @@ int main(int argc, char *argv[])
 {
     using namespace ratio;
 
+    if (argc < 3)
+    {
+        std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>" << std::endl;
+        return -1;
+    }
+
     // the problem files..
     std::vector<std::string> prob_names;
     for (int i = 1; i < argc - 1; i++)
