@@ -125,7 +125,7 @@ void atom_flaw::activate_goal::apply()
     static_cast<const predicate &>(atm.tp).apply_rule(atm);
 }
 
-atom_flaw::unify_atom::unify_atom(solver &slv, atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(slv, 0, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}
+atom_flaw::unify_atom::unify_atom(solver &slv, atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(slv, 1, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}
 atom_flaw::unify_atom::~unify_atom() {}
 
 void atom_flaw::unify_atom::apply()
