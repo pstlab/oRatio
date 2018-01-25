@@ -1,0 +1,300 @@
+class Navigator : StateVariable {
+
+    predicate At_a() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_b_a(end:start);
+        } or {
+            goal going = new GoingTo_c_a(end:start);
+        } or {
+            goal going = new GoingTo_e_a(end:start);
+        } or {
+            goal going = new GoingTo_f_a(end:start);
+        } or {
+            goal going = new GoingTo_j_a(end:start);
+        }
+    }
+
+    predicate GoingTo_b_a() { duration == 100.0; goal at = new At_b(end:start); }
+    predicate GoingTo_c_a() { duration == 200.0; goal at = new At_c(end:start); }
+    predicate GoingTo_e_a() { duration == 100.0; goal at = new At_e(end:start); }
+    predicate GoingTo_f_a() { duration == 200.0; goal at = new At_f(end:start); }
+    predicate GoingTo_j_a() { duration == 300.0; goal at = new At_j(end:start); }
+
+    predicate At_b() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_a_b(end:start);
+        } or {
+            goal going = new GoingTo_c_b(end:start);
+        } or {
+            goal going = new GoingTo_g_b(end:start);
+        }
+    }
+
+    predicate GoingTo_a_b() { duration == 100.0; goal at = new At_a(end:start); }
+    predicate GoingTo_c_b() { duration == 100.0; goal at = new At_c(end:start); }
+    predicate GoingTo_g_b() { duration == 200.0; goal at = new At_g(end:start); }
+
+    predicate At_c() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_a_c(end:start);
+        } or {
+            goal going = new GoingTo_b_c(end:start);
+        } or {
+            goal going = new GoingTo_d_c(end:start);
+        } or {
+            goal going = new GoingTo_h_c(end:start);
+        } or {
+            goal going = new GoingTo_i_c(end:start);
+        }
+    }
+
+    predicate GoingTo_a_c() { duration == 200.0; goal at = new At_a(end:start); }
+    predicate GoingTo_b_c() { duration == 100.0; goal at = new At_b(end:start); }
+    predicate GoingTo_d_c() { duration == 100.0; goal at = new At_d(end:start); }
+    predicate GoingTo_h_c() { duration == 200.0; goal at = new At_h(end:start); }
+    predicate GoingTo_i_c() { duration == 300.0; goal at = new At_i(end:start); }
+
+    predicate At_d() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_c_d(end:start);
+        } or {
+            goal going = new GoingTo_e_d(end:start);
+        } or {
+            goal going = new GoingTo_h_d(end:start);
+        } or {
+            goal going = new GoingTo_i_d(end:start);
+        }
+    }
+
+    predicate GoingTo_c_d() { duration == 100.0; goal at = new At_c(end:start); }
+    predicate GoingTo_e_d() { duration == 200.0; goal at = new At_e(end:start); }
+    predicate GoingTo_h_d() { duration == 100.0; goal at = new At_h(end:start); }
+    predicate GoingTo_i_d() { duration == 200.0; goal at = new At_i(end:start); }
+
+    predicate At_e() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_a_e(end:start);
+        } or {
+            goal going = new GoingTo_d_e(end:start);
+        } or {
+            goal going = new GoingTo_f_e(end:start);
+        } or {
+            goal going = new GoingTo_j_e(end:start);
+        }
+    }
+
+    predicate GoingTo_a_e() { duration == 100.0; goal at = new At_a(end:start); }
+    predicate GoingTo_d_e() { duration == 200.0; goal at = new At_d(end:start); }
+    predicate GoingTo_f_e() { duration == 100.0; goal at = new At_f(end:start); }
+    predicate GoingTo_j_e() { duration == 200.0; goal at = new At_j(end:start); }
+
+    predicate At_f() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_a_f(end:start);
+        } or {
+            goal going = new GoingTo_e_f(end:start);
+        } or {
+            goal going = new GoingTo_g_f(end:start);
+        } or {
+            goal going = new GoingTo_h_f(end:start);
+        } or {
+            goal going = new GoingTo_j_f(end:start);
+        }
+    }
+
+    predicate GoingTo_a_f() { duration == 200.0; goal at = new At_a(end:start); }
+    predicate GoingTo_e_f() { duration == 100.0; goal at = new At_e(end:start); }
+    predicate GoingTo_g_f() { duration == 100.0; goal at = new At_g(end:start); }
+    predicate GoingTo_h_f() { duration == 200.0; goal at = new At_h(end:start); }
+    predicate GoingTo_j_f() { duration == 100.0; goal at = new At_j(end:start); }
+
+    predicate At_g() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_b_g(end:start);
+        } or {
+            goal going = new GoingTo_f_g(end:start);
+        } or {
+            goal going = new GoingTo_h_g(end:start);
+        }
+    }
+
+    predicate GoingTo_b_g() { duration == 200.0; goal at = new At_b(end:start); }
+    predicate GoingTo_f_g() { duration == 100.0; goal at = new At_f(end:start); }
+    predicate GoingTo_h_g() { duration == 100.0; goal at = new At_h(end:start); }
+
+    predicate At_h() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_c_h(end:start);
+        } or {
+            goal going = new GoingTo_d_h(end:start);
+        } or {
+            goal going = new GoingTo_f_h(end:start);
+        } or {
+            goal going = new GoingTo_g_h(end:start);
+        } or {
+            goal going = new GoingTo_i_h(end:start);
+        }
+    }
+
+    predicate GoingTo_c_h() { duration == 200.0; goal at = new At_c(end:start); }
+    predicate GoingTo_d_h() { duration == 100.0; goal at = new At_d(end:start); }
+    predicate GoingTo_f_h() { duration == 200.0; goal at = new At_f(end:start); }
+    predicate GoingTo_g_h() { duration == 100.0; goal at = new At_g(end:start); }
+    predicate GoingTo_i_h() { duration == 100.0; goal at = new At_i(end:start); }
+
+    predicate At_i() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_c_i(end:start);
+        } or {
+            goal going = new GoingTo_d_i(end:start);
+        } or {
+            goal going = new GoingTo_h_i(end:start);
+        } or {
+            goal going = new GoingTo_j_i(end:start);
+        }
+    }
+
+    predicate GoingTo_c_i() { duration == 300.0; goal at = new At_c(end:start); }
+    predicate GoingTo_d_i() { duration == 200.0; goal at = new At_d(end:start); }
+    predicate GoingTo_h_i() { duration == 100.0; goal at = new At_h(end:start); }
+    predicate GoingTo_j_i() { duration == 200.0; goal at = new At_j(end:start); }
+
+    predicate At_j() {
+        duration >= 1;
+        {
+            goal going = new GoingTo_a_j(end:start);
+        } or {
+            goal going = new GoingTo_e_j(end:start);
+        } or {
+            goal going = new GoingTo_f_j(end:start);
+        } or {
+            goal going = new GoingTo_i_j(end:start);
+        }
+    }
+
+    predicate GoingTo_a_j() { duration == 300.0; goal at = new At_a(end:start); }
+    predicate GoingTo_e_j() { duration == 200.0; goal at = new At_e(end:start); }
+    predicate GoingTo_f_j() { duration == 100.0; goal at = new At_f(end:start); }
+    predicate GoingTo_i_j() { duration == 200.0; goal at = new At_i(end:start); }
+}
+
+class Visibility : StateVariable {
+
+    predicate Visible() {
+        false;
+    }
+
+    predicate NotVisible() {
+        false;
+    }
+}
+
+class Robot {
+
+    Navigator navigator = new Navigator();
+    ReusableResource antenna = new ReusableResource(1.0);
+    Visibility visibility;
+
+    Robot(Visibility visibility) : visibility(visibility) {}
+
+    predicate At_a() : IntervalPredicate { goal at = new navigator.At_a(start:start, end:end, duration:duration); }
+    predicate At_b() : IntervalPredicate { goal at = new navigator.At_b(start:start, end:end, duration:duration); }
+    predicate At_c() : IntervalPredicate { goal at = new navigator.At_c(start:start, end:end, duration:duration); }
+    predicate At_d() : IntervalPredicate { goal at = new navigator.At_d(start:start, end:end, duration:duration); }
+    predicate At_e() : IntervalPredicate { goal at = new navigator.At_e(start:start, end:end, duration:duration); }
+    predicate At_f() : IntervalPredicate { goal at = new navigator.At_f(start:start, end:end, duration:duration); }
+    predicate At_g() : IntervalPredicate { goal at = new navigator.At_g(start:start, end:end, duration:duration); }
+    predicate At_h() : IntervalPredicate { goal at = new navigator.At_h(start:start, end:end, duration:duration); }
+    predicate At_i() : IntervalPredicate { goal at = new navigator.At_i(start:start, end:end, duration:duration); }
+    predicate At_j() : IntervalPredicate { goal at = new navigator.At_j(start:start, end:end, duration:duration); }
+
+    predicate TakePicture_a() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_a(); at.start <= start; at.end >= end; }
+    predicate TakePicture_b() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_b(); at.start <= start; at.end >= end; }
+    predicate TakePicture_c() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_c(); at.start <= start; at.end >= end; }
+    predicate TakePicture_d() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_d(); at.start <= start; at.end >= end; }
+    predicate TakePicture_e() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_e(); at.start <= start; at.end >= end; }
+    predicate TakePicture_f() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_f(); at.start <= start; at.end >= end; }
+    predicate TakePicture_g() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_g(); at.start <= start; at.end >= end; }
+    predicate TakePicture_h() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_h(); at.start <= start; at.end >= end; }
+    predicate TakePicture_i() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_i(); at.start <= start; at.end >= end; }
+    predicate TakePicture_j() : IntervalPredicate { duration == 50.0; goal at = new navigator.At_j(); at.start <= start; at.end >= end; }
+
+    predicate Download_a() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_a(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+
+    predicate Download_b() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_b(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+
+    predicate Download_c() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_c(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+
+    predicate Download_d() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_d(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+
+    predicate Download_e() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_e(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+
+    predicate Download_f() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_f(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+
+    predicate Download_g() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_g(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+
+    predicate Download_h() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_h(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+
+    predicate Download_i() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_i(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+
+    predicate Download_j() : IntervalPredicate {
+        duration == 240.0;
+        goal tp = new TakePicture_j(); tp.end <= start;
+        fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
+    }
+}
