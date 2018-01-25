@@ -417,6 +417,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
 
     for (const auto &r : std::vector<row *>(t_watches.at(x_j).begin(), t_watches.at(x_j).end())) // these are the rows in which x_j appears..
     {
+        t_watches.at(x_j).erase(r);
         for (const auto &term : r->l.vars)
             t_watches.at(term.first).erase(r);
         rational cc = r->l.vars.at(x_j);
