@@ -28,6 +28,8 @@ class lra_theory : public theory
     const var new_var();
     const var new_var(const lin &l);
 
+    bool is_basic(const var &v) const { return tableau.find(v) != tableau.end(); }
+
     const var new_lt(const lin &left, const lin &right);
     const var new_leq(const lin &left, const lin &right);
     const var new_geq(const lin &left, const lin &right);
@@ -70,6 +72,7 @@ class lra_theory : public theory
     void update(const var &x_i, const inf_rational &v);
     void pivot_and_update(const var &x_i, const var &x_j, const inf_rational &v);
     void pivot(const var x_i, const var x_j);
+    void new_row(const var &x, const lin &l);
 
     void listen(const var &v, lra_value_listener *const l) { listening[v].insert(l); }
 
@@ -91,7 +94,7 @@ class lra_theory : public theory
 
     std::vector<bound> assigns;                            // the current assignments..
     std::vector<inf_rational> vals;                        // the current values..
-    std::map<var, row *> tableau;                          // the sparse matrix..
+    std::map<const var, row *> tableau;                    // the sparse matrix..
     std::unordered_map<std::string, var> exprs;            // the expressions (string to numeric variable) for which already exist slack variables..
     std::unordered_map<std::string, var> s_asrts;          // the assertions (string to boolean variable) used for reducing the number of boolean variables..
     std::unordered_map<var, assertion *> v_asrts;          // the assertions (boolean variable to assertion) used for enforcing (negating) assertions..

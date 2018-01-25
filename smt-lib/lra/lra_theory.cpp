@@ -27,6 +27,7 @@ const var lra_theory::new_var()
 
 const var lra_theory::new_var(const lin &l)
 {
+    assert(sat.root_level());
     const std::string s_expr = l.to_string();
     const auto at_expr = exprs.find(s_expr);
     if (at_expr != exprs.end()) // the expression already exists..
@@ -35,8 +36,8 @@ const var lra_theory::new_var(const lin &l)
     {
         const var slack = new_var();
         exprs.insert({s_expr, slack});
-        vals[slack] = value(l);                            // we set the initial value of the new slack variable..
-        tableau.insert({slack, new row(*this, slack, l)}); // we add a new row into the tableau..
+        vals[slack] = value(l); // we set the initial value of the new slack variable..
+        new_row(slack, l);      // we add a new row into the tableau..
         return slack;
     }
 }
@@ -293,7 +294,7 @@ bool lra_theory::assert_lower(const var &x_i, const inf_rational &val, const lit
             layers.back().insert({lb_index(x_i), {lb(x_i), assigns.at(lb_index(x_i)).reason}});
         assigns[lb_index(x_i)] = {val, new lit(p.v, p.sign)};
 
-        if (vals.at(x_i) < val && tableau.find(x_i) == tableau.end())
+        if (vals.at(x_i) < val && !is_basic(x_i))
             update(x_i, val);
 
         // unate propagation..
@@ -326,7 +327,7 @@ bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit
             layers.back().insert({ub_index(x_i), {ub(x_i), assigns.at(ub_index(x_i)).reason}});
         assigns[ub_index(x_i)] = {val, new lit(p.v, p.sign)};
 
-        if (vals.at(x_i) > val && tableau.find(x_i) == tableau.end())
+        if (vals.at(x_i) > val && !is_basic(x_i))
             update(x_i, val);
 
         // unate propagation..
@@ -344,7 +345,7 @@ bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit
 
 void lra_theory::update(const var &x_i, const inf_rational &v)
 {
-    assert(tableau.find(x_i) == tableau.end() && "x_i should be a non-basic variable..");
+    assert(!is_basic(x_i) && "x_i should be a non-basic variable..");
     for (const auto &c : t_watches.at(x_i))
     {
         // x_j = x_j + a_ji(v - x_i)..
@@ -364,8 +365,8 @@ void lra_theory::update(const var &x_i, const inf_rational &v)
 
 void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rational &v)
 {
-    assert(tableau.find(x_i) != tableau.end() && "x_i should be a basic variable..");
-    assert(tableau.find(x_j) == tableau.end() && "x_j should be a non-basic variable..");
+    assert(is_basic(x_i) && "x_i should be a basic variable..");
+    assert(!is_basic(x_j) && "x_j should be a non-basic variable..");
     assert(tableau.at(x_i)->l.vars.find(x_j) != tableau.at(x_i)->l.vars.end());
 
     const inf_rational theta = (v - vals.at(x_i)) / tableau.at(x_i)->l.vars.at(x_j);
@@ -426,7 +427,15 @@ void lra_theory::pivot(const var x_i, const var x_j)
     }
 
     // we add a new row into the tableau..
-    tableau.insert({x_j, new row(*this, x_j, expr)});
+    new_row(x_j, expr);
+}
+
+void lra_theory::new_row(const var &x, const lin &l)
+{
+    row *r = new row(*this, x, l);
+    tableau.insert({x, r});
+    for (const auto &term : l.vars)
+        t_watches.at(term.first).insert(r);
 }
 
 std::string lra_theory::to_string()

@@ -7,11 +7,7 @@
 namespace smt
 {
 
-row::row(lra_theory &th, const var x, lin l) : th(th), x(x), l(l)
-{
-    for (const auto &term : l.vars)
-        th.t_watches.at(term.first).insert(this);
-}
+row::row(lra_theory &th, const var x, lin l) : th(th), x(x), l(l) {}
 row::~row() {}
 
 bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
