@@ -417,14 +417,29 @@ void lra_theory::pivot(const var x_i, const var x_j)
 
     for (const auto &r : std::vector<row *>(t_watches.at(x_j).begin(), t_watches.at(x_j).end())) // these are the rows in which x_j appears..
     {
-        t_watches.at(x_j).erase(r);
-        for (const auto &term : r->l.vars)
-            t_watches.at(term.first).erase(r);
         rational cc = r->l.vars.at(x_j);
         r->l.vars.erase(x_j);
-        r->l += expr * cc;
-        for (const auto &term : r->l.vars)
-            t_watches.at(term.first).insert(r);
+        t_watches.at(x_j).erase(r);
+        for (auto &term : expr.vars)
+        {
+            const auto trm_it = r->l.vars.find(term.first);
+            if (trm_it == r->l.vars.end())
+            {
+                r->l.vars.insert({term.first, term.second * cc});
+                t_watches.at(term.first).insert(r);
+            }
+            else
+            {
+                assert(trm_it->first == term.first);
+                trm_it->second += term.second * cc;
+                if (trm_it->second == rational::ZERO)
+                {
+                    r->l.vars.erase(trm_it);
+                    t_watches.at(term.first).erase(r);
+                }
+            }
+        }
+        r->l.known_term += expr.known_term * cc;
     }
 
     // we add a new row into the tableau..
