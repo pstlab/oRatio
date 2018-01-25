@@ -4,6 +4,7 @@
 #include "lin.h"
 #include "inf_rational.h"
 #include <set>
+#include <unordered_set>
 #include <unordered_map>
 
 namespace smt
@@ -95,7 +96,7 @@ class lra_theory : public theory
     std::unordered_map<std::string, var> s_asrts;          // the assertions (string to boolean variable) used for reducing the number of boolean variables..
     std::unordered_map<var, assertion *> v_asrts;          // the assertions (boolean variable to assertion) used for enforcing (negating) assertions..
     std::vector<std::vector<assertion *>> a_watches;       // for each variable 'v', a list of assertions watching 'v'..
-    std::vector<std::set<row *>> t_watches;                // for each variable 'v', a list of tableau rows watching 'v'..
+    std::vector<std::unordered_set<row *>> t_watches;      // for each variable 'v', a list of tableau rows watching 'v'..
     std::vector<std::unordered_map<size_t, bound>> layers; // we store the updated bounds..
     std::unordered_map<var, std::set<lra_value_listener *>> listening;
 };

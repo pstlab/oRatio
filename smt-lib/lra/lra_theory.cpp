@@ -21,7 +21,7 @@ const var lra_theory::new_var()
     vals.push_back(rational::ZERO);                            // we set the current value at 0..
     exprs.insert({"x" + std::to_string(id), id});
     a_watches.push_back(std::vector<assertion *>());
-    t_watches.push_back(std::set<row *>());
+    t_watches.push_back(std::unordered_set<row *>());
     return id;
 }
 

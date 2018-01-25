@@ -7,7 +7,6 @@
 #include "predicate.h"
 #include "context.h"
 #include <algorithm>
-#include <unordered_set>
 #include <cassert>
 
 namespace ratio
