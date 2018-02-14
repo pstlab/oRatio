@@ -59,6 +59,9 @@ private:
   void set_estimated_cost(resolver &r, const smt::rational &cst); // sets the estimated cost of the given resolver propagating it to other resolvers..
   flaw *select_flaw();                                            // selects the most expensive flaw from the 'flaws' set, returns a nullptr if there are no active flaws..
 
+  static const smt::rational h_max(const std::vector<flaw *> &fs);
+  static const smt::rational h_add(const std::vector<flaw *> &fs);
+
   bool propagate(const smt::lit &p, std::vector<smt::lit> &cnfl) override;
   bool check(std::vector<smt::lit> &cnfl) override;
   void push() override;

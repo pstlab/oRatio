@@ -515,13 +515,7 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
             while (!resolver_q.empty())
             {
                 resolver &c_res = *resolver_q.front(); // the current resolver whose cost might require an update..
-                rational r_cost = rational::NEGATIVE_INFINITY;
-                for (const auto &f : c_res.preconditions)
-                {
-                    rational c = f->get_estimated_cost();
-                    if (c > r_cost)
-                        r_cost = c;
-                }
+                rational r_cost = h_add(c_res.preconditions);
                 if (c_res.est_cost != r_cost)
                 {
                     if (!trail.empty())
@@ -544,6 +538,25 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
             }
         }
     }
+}
+
+const smt::rational solver::h_max(const std::vector<flaw *> &fs)
+{
+    rational c_cost = rational::NEGATIVE_INFINITY;
+    for (const auto &f : fs)
+    {
+        rational c = f->get_estimated_cost();
+        if (c > c_cost)
+            c_cost = c;
+    }
+    return c_cost;
+}
+const smt::rational solver::h_add(const std::vector<flaw *> &fs)
+{
+    rational c_cost;
+    for (const auto &f : fs)
+        c_cost += f->get_estimated_cost();
+    return c_cost;
 }
 
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
