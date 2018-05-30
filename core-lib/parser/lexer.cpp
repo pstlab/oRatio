@@ -33,6 +33,7 @@ token *lexer::next()
             case '\r':
             case '\n':
                 error("newline in string literal..");
+                return nullptr;
             default:
                 str += ch;
             }
@@ -135,8 +136,9 @@ token *lexer::next()
                     break;
                 case '.':
                     error("invalid numeric literal..");
+                    return nullptr;
                 default:
-                    mk_rational_token("", dec);
+                    return mk_rational_token("", dec);
                 }
             }
         }
@@ -216,6 +218,7 @@ token *lexer::next()
                         break;
                     case '.':
                         error("invalid numeric literal..");
+                        return nullptr;
                     default:
                         return mk_rational_token(intgr, dcml);
                     }
@@ -643,4 +646,4 @@ token *lexer::finish_id(std::string &str)
 }
 
 void lexer::error(const std::string &err) { throw std::invalid_argument("[" + std::to_string(start_line) + ", " + std::to_string(start_pos) + "] " + err); }
-}
+} // namespace ratio
