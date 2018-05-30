@@ -33,7 +33,6 @@ token *lexer::next()
             case '\r':
             case '\n':
                 error("newline in string literal..");
-                return nullptr;
             default:
                 str += ch;
             }
@@ -136,7 +135,6 @@ token *lexer::next()
                     break;
                 case '.':
                     error("invalid numeric literal..");
-                    return nullptr;
                 default:
                     return mk_rational_token("", dec);
                 }
@@ -218,7 +216,6 @@ token *lexer::next()
                         break;
                     case '.':
                         error("invalid numeric literal..");
-                        return nullptr;
                     default:
                         return mk_rational_token(intgr, dcml);
                     }
@@ -598,7 +595,6 @@ token *lexer::next()
         return mk_token(EOF_ID);
     default:
         error("invalid token..");
-        return nullptr;
     }
 }
 
