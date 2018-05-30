@@ -279,7 +279,7 @@ token *lexer::next()
         if ((ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
-            return mk_token(BOOL_ID);
+            return mk_token(ENUM_ID);
     }
     case 'f':
     {
