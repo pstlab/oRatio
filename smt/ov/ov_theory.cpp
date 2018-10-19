@@ -1,5 +1,4 @@
 #include "ov_theory.h"
-#include "sat_core.h"
 #include "ov_value_listener.h"
 #include <algorithm>
 #include <cassert>
@@ -11,7 +10,7 @@ ov_theory::ov_theory(sat_core &sat) : theory(sat) {}
 
 ov_theory::~ov_theory() {}
 
-const var ov_theory::new_var(const std::unordered_set<var_value *> &items)
+var ov_theory::new_var(const std::unordered_set<var_value *> &items)
 {
     assert(!items.empty());
     const var id = assigns.size();
@@ -36,7 +35,7 @@ const var ov_theory::new_var(const std::unordered_set<var_value *> &items)
     return id;
 }
 
-const var ov_theory::new_var(const std::vector<var> &vars, const std::vector<var_value *> &vals)
+var ov_theory::new_var(const std::vector<var> &vars, const std::vector<var_value *> &vals)
 {
     assert(!vars.empty());
     assert(std::all_of(vars.begin(), vars.end(), [&](var v) { return is_contained_in.find(v) != is_contained_in.end(); }));
@@ -50,7 +49,7 @@ const var ov_theory::new_var(const std::vector<var> &vars, const std::vector<var
     return id;
 }
 
-const var ov_theory::allows(const var &v, var_value &val) const
+var ov_theory::allows(const var &v, var_value &val) const
 {
     const auto at_right = assigns.at(v).find(&val);
     if (at_right != assigns.at(v).end())
@@ -59,13 +58,13 @@ const var ov_theory::allows(const var &v, var_value &val) const
         return FALSE_var;
 }
 
-const var ov_theory::eq(const var &left, const var &right)
+var ov_theory::new_eq(const var &left, const var &right)
 {
     if (left == right)
         return TRUE_var;
 
     if (left > right)
-        return eq(right, left);
+        return new_eq(right, left);
 
     std::string s_expr = "e" + std::to_string(left) + " == " + "e" + std::to_string(right);
     const auto at_expr = exprs.find(s_expr);
@@ -107,6 +106,51 @@ const var ov_theory::eq(const var &left, const var &right)
         }
         exprs.insert({s_expr, e});
         return e;
+    }
+}
+
+bool ov_theory::eq(const var &left, const var &right, const var &p)
+{
+    if (left == right)
+        return true;
+
+    if (left > right)
+        return eq(right, left, p);
+
+    std::string s_expr = "e" + std::to_string(left) + " == " + "e" + std::to_string(right);
+    const auto at_expr = exprs.find(s_expr);
+    if (at_expr != exprs.end()) // the expression already exists..
+        return sat.eq(p, at_expr->second);
+    else
+    {
+        std::unordered_set<var_value *> intersection;
+        for (const auto &v : assigns.at(left))
+            if (assigns.at(right).find(v.first) != assigns.at(right).end())
+                intersection.insert(v.first);
+
+        if (intersection.empty())
+            return sat.eq(p, FALSE_var);
+
+        // we need to create a new variable..
+        for (const auto &v : assigns[left])
+            if (intersection.find(v.first) == intersection.end())
+                if (!sat.new_clause({lit(p, false), lit(v.second, false)}))
+                    return false;
+        for (const auto &v : assigns[right])
+            if (intersection.find(v.first) == intersection.end())
+                if (!sat.new_clause({lit(p, false), lit(v.second, false)}))
+                    return false;
+        for (const auto &v : intersection)
+        {
+            if (!sat.new_clause({lit(p, false), lit(assigns[left].at(v), false), assigns[right].at(v)}))
+                return false;
+            if (!sat.new_clause({lit(p, false), assigns[left].at(v), lit(assigns[right].at(v), false)}))
+                return false;
+            if (!sat.new_clause({p, lit(assigns[left].at(v), false), lit(assigns[right].at(v), false)}))
+                return false;
+        }
+        exprs.insert({s_expr, p});
+        return true;
     }
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "theory.h"
+#include "sat_core.h"
 #include "var_value.h"
 #include <string>
 #include <unordered_set>
@@ -21,11 +21,12 @@ public:
   ov_theory(const ov_theory &orig) = delete;
   virtual ~ov_theory();
 
-  const var new_var(const std::unordered_set<var_value *> &items);                       // creates and returns a new object variable having the given domain..
-  const var new_var(const std::vector<var> &vars, const std::vector<var_value *> &vals); // creates and returns a new object variable having the given domain, the presence of the values into the domain is controlled by the 'vars' propositional variables..
+  var new_var(const std::unordered_set<var_value *> &items);                       // creates and returns a new object variable having the given domain..
+  var new_var(const std::vector<var> &vars, const std::vector<var_value *> &vals); // creates and returns a new object variable having the given domain, the presence of the values into the domain is controlled by the 'vars' propositional variables..
 
-  const var allows(const var &v, var_value &val) const; // returns the propositional variable that controls the presence of the 'val' value into the domain of variable 'v'..
-  const var eq(const var &left, const var &right);      // creates an equality constraints between 'left' and 'right' variables returning a propositional variable that controls it..
+  var allows(const var &v, var_value &val) const;                      // returns the propositional variable that controls the presence of the 'val' value into the domain of variable 'v'..
+  var new_eq(const var &left, const var &right);                       // creates an equality constraints between 'left' and 'right' variables returning a propositional variable that controls it..
+  bool eq(const var &left, const var &right, const var &p = TRUE_var); // creates an equality constraints between 'left' and 'right' variables with 'p' propositional variable that controls it..
 
   std::unordered_set<var_value *> value(var v) const; // returns the current domain of the object variable 'v'..
 

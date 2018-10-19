@@ -1,5 +1,4 @@
 #include "lra_theory.h"
-#include "sat_core.h"
 #include "row.h"
 #include "assertion.h"
 #include "lra_value_listener.h"
@@ -13,7 +12,7 @@ lra_theory::lra_theory(sat_core &sat) : theory(sat) {}
 
 lra_theory::~lra_theory() {}
 
-const var lra_theory::new_var()
+var lra_theory::new_var()
 {
     const var id = vals.size();
     assigns.push_back({rational::NEGATIVE_INFINITY, nullptr}); // we set the lower bound at -inf..
@@ -25,7 +24,7 @@ const var lra_theory::new_var()
     return id;
 }
 
-const var lra_theory::new_var(const lin &l)
+var lra_theory::new_var(const lin &l)
 {
     assert(sat.root_level());
     const std::string s_expr = l.to_string();
@@ -42,7 +41,7 @@ const var lra_theory::new_var(const lin &l)
     }
 }
 
-const var lra_theory::new_lt(const lin &left, const lin &right)
+var lra_theory::new_lt(const lin &left, const lin &right)
 {
     lin expr = left - right;
     std::vector<var> vars;
@@ -78,12 +77,12 @@ const var lra_theory::new_lt(const lin &left, const lin &right)
         const var ctr = sat.new_var();
         bind(ctr);
         s_asrts.insert({s_assertion, ctr});
-        v_asrts.insert({ctr, new assertion(*this, op::leq, ctr, slack, c_right)});
+        v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr, slack, c_right));
         return ctr;
     }
 }
 
-const var lra_theory::new_leq(const lin &left, const lin &right)
+var lra_theory::new_leq(const lin &left, const lin &right)
 {
     lin expr = left - right;
     std::vector<var> vars;
@@ -119,12 +118,12 @@ const var lra_theory::new_leq(const lin &left, const lin &right)
         const var ctr = sat.new_var();
         bind(ctr);
         s_asrts.insert({s_assertion, ctr});
-        v_asrts.insert({ctr, new assertion(*this, op::leq, ctr, slack, c_right)});
+        v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr, slack, c_right));
         return ctr;
     }
 }
 
-const var lra_theory::new_geq(const lin &left, const lin &right)
+var lra_theory::new_geq(const lin &left, const lin &right)
 {
     lin expr = left - right;
     std::vector<var> vars;
@@ -160,12 +159,12 @@ const var lra_theory::new_geq(const lin &left, const lin &right)
         const var ctr = sat.new_var();
         bind(ctr);
         s_asrts.insert({s_assertion, ctr});
-        v_asrts.insert({ctr, new assertion(*this, op::geq, ctr, slack, c_right)});
+        v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr, slack, c_right));
         return ctr;
     }
 }
 
-const var lra_theory::new_gt(const lin &left, const lin &right)
+var lra_theory::new_gt(const lin &left, const lin &right)
 {
     lin expr = left - right;
     std::vector<var> vars;
@@ -201,22 +200,233 @@ const var lra_theory::new_gt(const lin &left, const lin &right)
         const var ctr = sat.new_var();
         bind(ctr);
         s_asrts.insert({s_assertion, ctr});
-        v_asrts.insert({ctr, new assertion(*this, op::geq, ctr, slack, c_right)});
+        v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr, slack, c_right));
         return ctr;
     }
+}
+
+bool lra_theory::lt(const lin &left, const lin &right, const var &p)
+{
+    lin expr = left - right;
+    std::vector<var> vars;
+    vars.reserve(expr.vars.size());
+    for (const auto &term : expr.vars)
+        vars.push_back(term.first);
+    for (const auto &v : vars)
+    {
+        const auto at_v = tableau.find(v);
+        if (at_v != tableau.end())
+        {
+            rational c = expr.vars.at(v);
+            expr.vars.erase(v);
+            expr += at_v->second->l * c;
+        }
+    }
+
+    const inf_rational c_right = inf_rational(-expr.known_term, -1);
+    expr.known_term = 0;
+
+    if (ub(expr) <= c_right) // the constraint is already satisfied..
+        return sat.eq(p, TRUE_var);
+    else if (lb(expr) > c_right) // the constraint is unsatisfable..
+        return sat.eq(p, FALSE_var);
+
+    const var slack = new_var(expr);
+    const std::string s_assertion = "x" + std::to_string(slack) + " <= " + c_right.to_string();
+    const auto at_asrt = s_asrts.find(s_assertion);
+    if (at_asrt != s_asrts.end()) // this assertion already exists..
+        return sat.eq(p, at_asrt->second);
+    else
+        switch (sat.value(p))
+        {
+        case True:
+        {
+            std::vector<lit> cnfl;
+            return assert_upper(slack, c_right, p, cnfl);
+        }
+        case False:
+        {
+            std::vector<lit> cnfl;
+            return assert_lower(slack, c_right, lit(p, false), cnfl);
+        }
+        default:
+        {
+            bind(p);
+            s_asrts.insert({s_assertion, p});
+            v_asrts[p].push_back(new assertion(*this, op::leq, p, slack, c_right));
+            return true;
+        }
+        }
+}
+
+bool lra_theory::leq(const lin &left, const lin &right, const var &p)
+{
+    lin expr = left - right;
+    std::vector<var> vars;
+    vars.reserve(expr.vars.size());
+    for (const auto &term : expr.vars)
+        vars.push_back(term.first);
+    for (const auto &v : vars)
+    {
+        const auto at_v = tableau.find(v);
+        if (at_v != tableau.end())
+        {
+            rational c = expr.vars.at(v);
+            expr.vars.erase(v);
+            expr += at_v->second->l * c;
+        }
+    }
+
+    const inf_rational c_right = -expr.known_term;
+    expr.known_term = 0;
+
+    if (ub(expr) <= c_right) // the constraint is already satisfied..
+        return sat.eq(p, TRUE_var);
+    else if (lb(expr) > c_right) // the constraint is unsatisfable..
+        return sat.eq(p, FALSE_var);
+
+    const var slack = new_var(expr);
+    const std::string s_assertion = "x" + std::to_string(slack) + " <= " + c_right.to_string();
+    const auto at_asrt = s_asrts.find(s_assertion);
+    if (at_asrt != s_asrts.end()) // this assertion already exists..
+        return sat.eq(p, at_asrt->second);
+    else
+        switch (sat.value(p))
+        {
+        case True:
+        {
+            std::vector<lit> cnfl;
+            return assert_upper(slack, c_right, p, cnfl);
+        }
+        case False:
+        {
+            std::vector<lit> cnfl;
+            return assert_lower(slack, c_right, lit(p, false), cnfl);
+        }
+        default:
+        {
+            bind(p);
+            s_asrts.insert({s_assertion, p});
+            v_asrts[p].push_back(new assertion(*this, op::leq, p, slack, c_right));
+            return true;
+        }
+        }
+}
+
+bool lra_theory::geq(const lin &left, const lin &right, const var &p)
+{
+    lin expr = left - right;
+    std::vector<var> vars;
+    vars.reserve(expr.vars.size());
+    for (const auto &term : expr.vars)
+        vars.push_back(term.first);
+    for (const auto &v : vars)
+    {
+        const auto at_v = tableau.find(v);
+        if (at_v != tableau.end())
+        {
+            rational c = expr.vars.at(v);
+            expr.vars.erase(v);
+            expr += at_v->second->l * c;
+        }
+    }
+
+    const inf_rational c_right = -expr.known_term;
+    expr.known_term = 0;
+
+    if (lb(expr) >= c_right) // the constraint is already satisfied..
+        return sat.eq(p, TRUE_var);
+    else if (ub(expr) < c_right) // the constraint is unsatisfable..
+        return sat.eq(p, FALSE_var);
+
+    const var slack = new_var(expr);
+    const std::string s_assertion = "x" + std::to_string(slack) + " >= " + c_right.to_string();
+    const auto at_asrt = s_asrts.find(s_assertion);
+    if (at_asrt != s_asrts.end()) // this assertion already exists..
+        return sat.eq(p, at_asrt->second);
+    else
+        switch (sat.value(p))
+        {
+        case True:
+        {
+            std::vector<lit> cnfl;
+            return assert_lower(slack, c_right, p, cnfl);
+        }
+        case False:
+        {
+            std::vector<lit> cnfl;
+            return assert_upper(slack, c_right, lit(p, false), cnfl);
+        }
+        default:
+        {
+            bind(p);
+            s_asrts.insert({s_assertion, p});
+            v_asrts[p].push_back(new assertion(*this, op::geq, p, slack, c_right));
+            return true;
+        }
+        }
+}
+
+bool lra_theory::gt(const lin &left, const lin &right, const var &p)
+{
+    lin expr = left - right;
+    std::vector<var> vars;
+    vars.reserve(expr.vars.size());
+    for (const auto &term : expr.vars)
+        vars.push_back(term.first);
+    for (const auto &v : vars)
+    {
+        const auto at_v = tableau.find(v);
+        if (at_v != tableau.end())
+        {
+            rational c = expr.vars.at(v);
+            expr.vars.erase(v);
+            expr += at_v->second->l * c;
+        }
+    }
+
+    const inf_rational c_right = inf_rational(-expr.known_term, 1);
+    expr.known_term = 0;
+
+    if (lb(expr) >= c_right) // the constraint is already satisfied..
+        return sat.eq(p, TRUE_var);
+    else if (ub(expr) < c_right) // the constraint is unsatisfable..
+        return sat.eq(p, FALSE_var);
+
+    const var slack = new_var(expr);
+    const std::string s_assertion = "x" + std::to_string(slack) + " >= " + c_right.to_string();
+    const auto at_asrt = s_asrts.find(s_assertion);
+    if (at_asrt != s_asrts.end()) // this assertion already exists..
+        return sat.eq(p, at_asrt->second);
+    else
+        switch (sat.value(p))
+        {
+        case True:
+        {
+            std::vector<lit> cnfl;
+            return assert_lower(slack, c_right, p, cnfl);
+        }
+        case False:
+        {
+            std::vector<lit> cnfl;
+            return assert_upper(slack, c_right, lit(p, false), cnfl);
+        }
+        default:
+        {
+            bind(p);
+            s_asrts.insert({s_assertion, p});
+            v_asrts[p].push_back(new assertion(*this, op::geq, p, slack, c_right));
+            return true;
+        }
+        }
 }
 
 bool lra_theory::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
-    const assertion *a = v_asrts.at(p.get_var());
-    switch (a->o)
-    {
-    case op::leq:
-        return p.get_sign() ? assert_upper(a->x, a->v, p, cnfl) : assert_lower(a->x, a->v, p, cnfl);
-    case op::geq:
-        return p.get_sign() ? assert_lower(a->x, a->v, p, cnfl) : assert_upper(a->x, a->v, p, cnfl);
-    }
+    for (const auto &a : v_asrts.at(p.get_var()))
+        if (!((p.get_sign() == (a->o == op::leq)) ? assert_upper(a->x, a->v, p, cnfl) : assert_lower(a->x, a->v, p, cnfl)))
+            return false;
 
     return true;
 }
@@ -476,11 +686,18 @@ std::string lra_theory::to_string()
         la += "}";
     }
     la += "], \"asrts\" : [";
-    for (std::unordered_map<var, assertion *>::const_iterator it = v_asrts.cbegin(); it != v_asrts.cend(); ++it)
+    for (std::unordered_map<var, std::vector<assertion *>>::const_iterator it = v_asrts.cbegin(); it != v_asrts.cend(); ++it)
     {
         if (it != v_asrts.cbegin())
             la += ", ";
-        la += it->second->to_string();
+        la += "[";
+        for (std::vector<assertion *>::const_iterator a_it = it->second.cbegin(); a_it != it->second.cend(); ++it)
+        {
+            if (a_it != it->second.cbegin())
+                la += ", ";
+            la += (*a_it)->to_string();
+        }
+        la += "]";
     }
     la += "], \"tableau\" : [";
     for (std::map<var, row *>::const_iterator it = tableau.cbegin(); it != tableau.cend(); ++it)

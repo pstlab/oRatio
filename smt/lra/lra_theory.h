@@ -1,6 +1,6 @@
 #pragma once
 
-#include "theory.h"
+#include "sat_core.h"
 #include "lin.h"
 #include "inf_rational.h"
 #include <set>
@@ -25,15 +25,20 @@ class lra_theory : public theory
     lra_theory(const lra_theory &orig) = delete;
     virtual ~lra_theory();
 
-    const var new_var();             // creates and returns a new numeric variable..
-    const var new_var(const lin &l); // creates and returns a new numeric variable and makes it equal to the given linear expression..
+    var new_var();             // creates and returns a new numeric variable..
+    var new_var(const lin &l); // creates and returns a new numeric variable and makes it equal to the given linear expression..
 
     bool is_basic(const var &v) const { return tableau.find(v) != tableau.end(); }
 
-    const var new_lt(const lin &left, const lin &right);
-    const var new_leq(const lin &left, const lin &right);
-    const var new_geq(const lin &left, const lin &right);
-    const var new_gt(const lin &left, const lin &right);
+    var new_lt(const lin &left, const lin &right);
+    var new_leq(const lin &left, const lin &right);
+    var new_geq(const lin &left, const lin &right);
+    var new_gt(const lin &left, const lin &right);
+
+    bool lt(const lin &left, const lin &right, const var &p = TRUE_var);
+    bool leq(const lin &left, const lin &right, const var &p = TRUE_var);
+    bool geq(const lin &left, const lin &right, const var &p = TRUE_var);
+    bool gt(const lin &left, const lin &right, const var &p = TRUE_var);
 
     inf_rational lb(const var &v) const { return assigns.at(lb_index(v)).value; } // the current lower bound of variable 'v'..
     inf_rational ub(const var &v) const { return assigns.at(ub_index(v)).value; } // the current upper bound of variable 'v'..
@@ -92,15 +97,15 @@ class lra_theory : public theory
         lit *reason;        // the reason for the value..
     };
 
-    std::vector<bound> assigns;                            // the current assignments..
-    std::vector<inf_rational> vals;                        // the current values..
-    std::map<const var, row *> tableau;                    // the sparse matrix..
-    std::unordered_map<std::string, var> exprs;            // the expressions (string to numeric variable) for which already exist slack variables..
-    std::unordered_map<std::string, var> s_asrts;          // the assertions (string to boolean variable) used for reducing the number of boolean variables..
-    std::unordered_map<var, assertion *> v_asrts;          // the assertions (boolean variable to assertion) used for enforcing (negating) assertions..
-    std::vector<std::vector<assertion *>> a_watches;       // for each variable 'v', a list of assertions watching 'v'..
-    std::vector<std::unordered_set<row *>> t_watches;      // for each variable 'v', a list of tableau rows watching 'v'..
-    std::vector<std::unordered_map<size_t, bound>> layers; // we store the updated bounds..
+    std::vector<bound> assigns;                                // the current assignments..
+    std::vector<inf_rational> vals;                            // the current values..
+    std::map<const var, row *> tableau;                        // the sparse matrix..
+    std::unordered_map<std::string, var> exprs;                // the expressions (string to numeric variable) for which already exist slack variables..
+    std::unordered_map<std::string, var> s_asrts;              // the assertions (string to propositional variable) used for reducing the number of boolean variables..
+    std::unordered_map<var, std::vector<assertion *>> v_asrts; // the assertions (propositional variable to assertions) used for enforcing (negating) assertions..
+    std::vector<std::vector<assertion *>> a_watches;           // for each variable 'v', a list of assertions watching 'v'..
+    std::vector<std::unordered_set<row *>> t_watches;          // for each variable 'v', a list of tableau rows watching 'v'..
+    std::vector<std::unordered_map<size_t, bound>> layers;     // we store the updated bounds..
     std::unordered_map<var, std::set<lra_value_listener *>> listening;
 };
 } // namespace smt
