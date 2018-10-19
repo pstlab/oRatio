@@ -5,6 +5,7 @@
 #include "theory.h"
 #include <vector>
 #include <queue>
+#include <string>
 #include <unordered_map>
 #include <set>
 

@@ -1,7 +1,7 @@
 #include "sat_core.h"
 #include "clause.h"
 #include "sat_value_listener.h"
-#include <string>
+#include <algorithm>
 #include <cassert>
 
 namespace smt
