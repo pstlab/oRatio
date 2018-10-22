@@ -211,6 +211,128 @@ var sat_core::new_exct_one(const std::vector<lit> &ls)
     }
 }
 
+bool sat_core::eq(const lit &left, const lit &right, const var &p)
+{
+    assert(root_level());
+    if (left == right)
+        return true;
+    if (left.get_var() > right.get_var())
+        return eq(right, left);
+    const std::string s_expr = (left.get_sign() ? "b" : "!b") + std::to_string(left.get_var()) + " == " + (right.get_sign() ? "b" : "!b") + std::to_string(right.get_var());
+    const auto at_expr = exprs.find(s_expr);
+    if (at_expr != exprs.end()) // the expression already exists..
+        return eq(p, at_expr->second);
+    else
+    {
+        if (!new_clause({lit(p, false), !left, right}))
+            return false;
+        if (!new_clause({lit(p, false), left, !right}))
+            return false;
+        if (!new_clause({p, !left, !right}))
+            return false;
+        exprs.insert({s_expr, p});
+        return true;
+    }
+}
+
+bool sat_core::conj(const std::vector<lit> &ls, const var &p)
+{
+    assert(root_level());
+    std::vector<lit> c_lits = ls;
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() > l1.get_var(); });
+    std::string s_expr;
+    for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
+    {
+        if (it != c_lits.cbegin())
+            s_expr += " & ";
+        s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
+    }
+    const auto at_expr = exprs.find(s_expr);
+    if (at_expr != exprs.end()) // the expression already exists..
+        return eq(p, at_expr->second);
+    else
+    {
+        std::vector<lit> lits;
+        lits.reserve(ls.size() + 1);
+        lits.push_back(p);
+        for (const auto &l : ls)
+        {
+            if (!new_clause({lit(p, false), l}))
+                return false;
+            lits.push_back(!l);
+        }
+        if (!new_clause(lits))
+            return false;
+        exprs.insert({s_expr, p});
+        return true;
+    }
+}
+
+bool sat_core::disj(const std::vector<lit> &ls, const var &p)
+{
+    std::vector<lit> c_lits = ls;
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() > l1.get_var(); });
+    std::string s_expr;
+    for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
+    {
+        if (it != c_lits.cbegin())
+            s_expr += " | ";
+        s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
+    }
+    const auto at_expr = exprs.find(s_expr);
+    if (at_expr != exprs.end()) // the expression already exists..
+        return eq(p, at_expr->second);
+    else
+    {
+        std::vector<lit> lits;
+        lits.reserve(ls.size() + 1);
+        lits.push_back(lit(p, false));
+        for (const auto &l : ls)
+        {
+            if (!new_clause({!l, p}))
+                return false;
+            lits.push_back(l);
+        }
+        if (!new_clause(lits))
+            return false;
+        exprs.insert({s_expr, p});
+        return true;
+    }
+}
+
+bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
+{
+    std::vector<lit> c_lits = ls;
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() > l1.get_var(); });
+    std::string s_expr;
+    for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
+    {
+        if (it != c_lits.cbegin())
+            s_expr += " ^ ";
+        s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
+    }
+    const auto at_expr = exprs.find(s_expr);
+    if (at_expr != exprs.end()) // the expression already exists..
+        return eq(p, at_expr->second);
+    else
+    {
+        std::vector<lit> lits;
+        lits.reserve(ls.size() + 1);
+        lits.push_back(lit(p, false));
+        for (size_t i = 0; i < ls.size(); i++)
+        {
+            for (size_t j = i + 1; j < ls.size(); j++)
+                if (!new_clause({!ls.at(i), !ls.at(j), lit(p, false)}))
+                    return false;
+            lits.push_back(ls.at(i));
+        }
+        if (!new_clause(lits))
+            return false;
+        exprs.insert({s_expr, p});
+        return true;
+    }
+}
+
 bool sat_core::assume(const lit &p)
 {
     trail_lim.push_back(trail.size());

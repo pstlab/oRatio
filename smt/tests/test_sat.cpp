@@ -3,7 +3,7 @@
 
 using namespace smt;
 
-void test_basic_core()
+void test_basic_core_0()
 {
     sat_core core;
     var b0 = core.new_var();
@@ -28,6 +28,29 @@ void test_basic_core()
     assert(assm);
     assert(core.value(b0) == True);
     assert(core.value(b1) == True);
+    assert(core.value(b2) == True);
+}
+
+void test_basic_core_1()
+{
+    sat_core core;
+    var b0 = core.new_var();
+    var b1 = core.new_var();
+    var b2 = core.new_var();
+
+    bool ch = core.eq(b0, !lit(b1)) && core.check();
+    assert(ch);
+    assert(core.value(b0) == Undefined);
+    assert(core.value(b1) == Undefined);
+    assert(core.value(b2) == Undefined);
+
+    ch = core.disj({b1, b2}, b0) && core.check();
+    assert(ch);
+
+    ch = core.assume(b0) && core.check();
+    assert(ch);
+    assert(core.value(b0) == True);
+    assert(core.value(b1) == False);
     assert(core.value(b2) == True);
 }
 
@@ -70,6 +93,8 @@ void test_no_good()
 
 int main(int argc, char *argv[])
 {
-    test_basic_core();
+    test_basic_core_0();
+    test_basic_core_1();
+
     test_no_good();
 }
