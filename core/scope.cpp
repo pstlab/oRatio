@@ -3,7 +3,7 @@
 namespace ratio
 {
 
-scope::scope() {}
+scope::scope(core &cr, scope &scp) : cr(cr), scp(scp) {}
 
 scope::~scope() {}
 } // namespace ratio

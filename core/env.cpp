@@ -3,7 +3,7 @@
 namespace ratio
 {
 
-env::env() {}
+env::env(core &cr) : cr(cr) {}
 
 env::~env() {}
 } // namespace ratio
