@@ -15,7 +15,7 @@ public:
   item(const item &orig) = delete;
   virtual ~item();
 
-  const type &get_type() { return tp; }
+  const type &get_type() const { return tp; }
 
 private:
   const type &tp;
