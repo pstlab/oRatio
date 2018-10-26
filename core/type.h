@@ -12,6 +12,8 @@ public:
   type(const type &orig) = delete;
   virtual ~type();
 
+  std::vector<type *> get_supertypes() const noexcept { return supertypes; } // returns the base types of this type..
+
   field &get_field(const std::string &name) const override; // returns the field having the given name..
 
   std::string get_name() const { return name; }
@@ -28,5 +30,37 @@ private:
   const std::string name;         // the name of this type..
   const bool primitive;           // is this type a primitive type?
   std::vector<type *> supertypes; // the base types (i.e. the types this type inherits from)..
+};
+
+class bool_type : public type
+{
+public:
+  bool_type(core &cr);
+  bool_type(const bool_type &that) = delete;
+  virtual ~bool_type();
+};
+
+class int_type : public type
+{
+public:
+  int_type(core &cr);
+  int_type(const int_type &that) = delete;
+  virtual ~int_type();
+};
+
+class real_type : public type
+{
+public:
+  real_type(core &cr);
+  real_type(const real_type &that) = delete;
+  virtual ~real_type();
+};
+
+class string_type : public type
+{
+public:
+  string_type(core &cr);
+  string_type(const string_type &that) = delete;
+  virtual ~string_type();
 };
 } // namespace ratio

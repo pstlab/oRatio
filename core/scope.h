@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#define THIS_KEYWORD "this"
+
 namespace ratio
 {
 
@@ -24,8 +26,15 @@ public:
   core &get_core() const { return cr; }    // returns the core in which this scope is defined..
   scope &get_scope() const { return scp; } // returns the enclosing scope..
 
-  virtual field &get_field(const std::string &name) const;    // returns the field having the given name..
-  std::map<std::string, field *> get_fields() const noexcept; // returns a map of fields having the fields' name as keys..
+  virtual field &get_field(const std::string &name) const;    // returns the field having the given name, check in the enclosed scope if the field is not found..
+  std::map<std::string, field *> get_fields() const noexcept; // returns a map of fields defined within this scope having the fields' names as keys..
+
+  virtual type &get_type(const std::string &name) const;            // returns the type having the given name, check in the enclosed scope if the type is not found..
+  virtual std::map<std::string, type *> get_types() const noexcept; // returns a map of types defined within this scope having the types' names as keys..
+
+protected:
+  static void new_fields(scope &s, const std::vector<field *> &fs);
+  void new_fields(const std::vector<field *> &fs);
 
 private:
   core &cr;   // the core in which this scope is defined..

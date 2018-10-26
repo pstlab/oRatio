@@ -1,4 +1,6 @@
 #include "type.h"
+#include "item.h"
+#include "core.h"
 
 namespace ratio
 {
@@ -34,4 +36,16 @@ field &type::get_field(const std::string &f_name) const
     // not found
     throw std::out_of_range(f_name);
 }
+
+bool_type::bool_type(core &cr) : type(cr, cr, BOOL_KEYWORD, true) {}
+bool_type::~bool_type() {}
+
+int_type::int_type(core &cr) : type(cr, cr, INT_KEYWORD, true) {}
+int_type::~int_type() {}
+
+real_type::real_type(core &cr) : type(cr, cr, REAL_KEYWORD, true) {}
+real_type::~real_type() {}
+
+string_type::string_type(core &cr) : type(cr, cr, STRING_KEYWORD, true) {}
+string_type::~string_type() {}
 } // namespace ratio
