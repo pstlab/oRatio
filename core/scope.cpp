@@ -28,6 +28,9 @@ std::map<std::string, field *> scope::get_fields() const noexcept { return field
 type &scope::get_type(const std::string &name) const { return scp.get_type(name); }
 std::map<std::string, type *> scope::get_types() const noexcept { return scp.get_types(); }
 
+predicate &scope::get_predicate(const std::string &name) const { return scp.get_predicate(name); }
+std::map<std::string, predicate *> scope::get_predicates() const noexcept { return scp.get_predicates(); }
+
 void scope::new_fields(scope &s, const std::vector<field *> &fs)
 {
     for (const auto &f : fs)

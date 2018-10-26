@@ -10,7 +10,16 @@ namespace ratio
 
 core::core() : scope(*this, *this), env(*this, this), sat_cr(), lra_th(sat_cr), ov_th(sat_cr) {}
 
-core::~core() {}
+core::~core()
+{
+    // we delete the predicates..
+    for (const auto &p : predicates)
+        delete p.second;
+
+    // we delete the types..
+    for (const auto &t : types)
+        delete t.second;
+}
 
 bool_expr core::new_bool() { return new bool_item(*this, sat_cr.new_var()); }
 bool_expr core::new_bool(const bool &val) { return new bool_item(*this, val); }
@@ -70,6 +79,38 @@ expr core::new_enum(const type &tp, const std::vector<var> &vars, const std::vec
     }
     else
         return new var_item(*this, tp, ov_th.new_var(vars, std::vector<var_value *>(vals.begin(), vals.end())));
+}
+
+void core::new_types(const std::vector<type *> &ts)
+{
+    for (const auto &t : ts)
+        types.insert({t->get_name(), t});
+}
+
+type &core::get_type(const std::string &name) const
+{
+    const auto at_tp = types.find(name);
+    if (at_tp != types.end())
+        return *at_tp->second;
+
+    // not found
+    throw std::out_of_range(name);
+}
+
+void core::new_predicates(const std::vector<predicate *> &ps)
+{
+    for (const auto &p : ps)
+        predicates.insert({p->get_name(), p});
+}
+
+predicate &core::get_predicate(const std::string &name) const
+{
+    const auto at_p = predicates.find(name);
+    if (at_p != predicates.end())
+        return *at_p->second;
+
+    // not found
+    throw std::out_of_range(name);
 }
 
 field &core::get_field(const std::string &name) const

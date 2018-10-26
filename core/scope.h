@@ -12,6 +12,7 @@ namespace ratio
 class core;
 class field;
 class type;
+class predicate;
 
 class scope
 {
@@ -31,6 +32,9 @@ public:
 
   virtual type &get_type(const std::string &name) const;            // returns the type having the given name, check in the enclosed scope if the type is not found..
   virtual std::map<std::string, type *> get_types() const noexcept; // returns a map of types defined within this scope having the types' names as keys..
+
+  virtual predicate &get_predicate(const std::string &name) const;            // returns the predicate having the given name, check in the enclosed scope if the predicate is not found..
+  virtual std::map<std::string, predicate *> get_predicates() const noexcept; // returns a map of predicates defined within this scope having the predicates' names as keys..
 
 protected:
   static void new_fields(scope &s, const std::vector<field *> &fs);

@@ -9,10 +9,8 @@ context::context(const context &orig) : ptr(orig.ptr) { ptr->ref_count++; }
 context::~context()
 {
     ptr->ref_count--;
-    if (ptr->ref_count == 0)
-    {
+    if (ptr->ref_count == 0) // there are no more references to this environment..
         delete ptr;
-    }
 }
 
 context::operator expr() const { return expr(static_cast<item *>(ptr)); }

@@ -40,7 +40,17 @@ public:
 private:
   expr new_enum(const type &tp, const std::vector<smt::var> &vars, const std::vector<item *> &vals);
 
+protected:
+  void new_types(const std::vector<type *> &ts);
+  void new_predicates(const std::vector<predicate *> &ps);
+
 public:
+  type &get_type(const std::string &name) const override;
+  std::map<std::string, type *> get_types() const noexcept override { return types; }
+
+  predicate &get_predicate(const std::string &name) const override;
+  std::map<std::string, predicate *> get_predicates() const noexcept override { return predicates; }
+
   field &get_field(const std::string &name) const override; // returns the field having the given name..
 
   expr get(const std::string &name) const override;
@@ -50,6 +60,7 @@ private:
   smt::lra_theory lra_th; // the linear-real-arithmetic theory..
   smt::ov_theory ov_th;   // the object-variable theory..
 
-  std::map<std::string, type *> types;
+  std::map<std::string, type *> types;           // the types defined within this core..
+  std::map<std::string, predicate *> predicates; // the predicates defined within this core..
 };
 } // namespace ratio
