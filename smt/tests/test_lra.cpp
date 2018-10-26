@@ -182,7 +182,7 @@ void test_strict_inequalities()
     assert(y_val == rational::ONE);
 }
 
-int main(int argc, char *argv[])
+int main(int, char **)
 {
     test_rationals_0();
     test_rationals_1();

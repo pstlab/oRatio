@@ -30,7 +30,7 @@ void test_lexer_0()
     assert(t9->sym == EOF_ID);
 }
 
-int main(int argc, char *argv[])
+int main(int, char **)
 {
     test_lexer_0();
 }

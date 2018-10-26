@@ -91,7 +91,7 @@ void test_no_good()
     assert(assm);
 }
 
-int main(int argc, char *argv[])
+int main(int, char **)
 {
     test_basic_core_0();
     test_basic_core_1();

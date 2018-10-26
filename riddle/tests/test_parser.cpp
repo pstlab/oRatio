@@ -25,7 +25,7 @@ void test_parser_2()
     ast::compilation_unit *cu = prs.parse();
 }
 
-int main(int argc, char *argv[])
+int main(int, char **)
 {
     test_parser_0();
     test_parser_1();

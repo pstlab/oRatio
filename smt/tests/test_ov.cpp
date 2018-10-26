@@ -66,7 +66,7 @@ void test_ov_1()
     assert(core.value(ov.allows(v1, b)) == True);
 }
 
-int main(int argc, char *argv[])
+int main(int, char **)
 {
     test_ov_0();
     test_ov_1();

@@ -11,6 +11,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 add_subdirectory(smt/tests)
 add_subdirectory(riddle/tests)
+add_subdirectory(core/tests)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
