@@ -31,7 +31,7 @@ private:
   core &cr; // the core in which this environment is created..
 
 private:
-  unsigned ref_count = 0; // the number of references for this environment (used for implementing a smart pointer infrastructure)..
+  unsigned ref_count; // the number of references for this environment (used for implementing a 'smart pointer' infrastructure)..
 
 private:
   const context ctx;                 // the context in which this environment was created..

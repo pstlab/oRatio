@@ -16,6 +16,10 @@ class arith_expr;
 class var_expr;
 class string_expr;
 
+/**
+ * This class is intended to implement a kinf of smart pointer infrastructure.
+ * This simple implementation allows an efficient management of memory for the expressions.
+ */
 class context
 {
 public:
