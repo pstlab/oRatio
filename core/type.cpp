@@ -5,6 +5,7 @@
 #include "constructor.h"
 #include "method.h"
 #include "predicate.h"
+#include <algorithm>
 #include <cassert>
 
 namespace ratio
