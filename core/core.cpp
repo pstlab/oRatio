@@ -88,6 +88,100 @@ expr core::new_enum(const type &tp, const std::vector<var> &vars, const std::vec
         return new var_item(*this, tp, ov_th.new_var(vars, std::vector<var_value *>(vals.begin(), vals.end())));
 }
 
+bool_expr core::negate(bool_expr var) { return new bool_item(*this, !var->l); }
+bool_expr core::eq(bool_expr left, bool_expr right) { return new bool_item(*this, sat_cr.new_eq(left->l, right->l)); }
+
+bool_expr core::conj(const std::vector<bool_expr> &exprs)
+{
+    std::vector<lit> lits;
+    for (const auto &bex : exprs)
+        lits.push_back(bex->l);
+    return new bool_item(*this, sat_cr.new_conj(lits));
+}
+
+bool_expr core::disj(const std::vector<bool_expr> &exprs)
+{
+    std::vector<lit> lits;
+    for (const auto &bex : exprs)
+        lits.push_back(bex->l);
+    return new bool_item(*this, sat_cr.new_disj(lits));
+}
+
+bool_expr core::exct_one(const std::vector<bool_expr> &exprs)
+{
+    std::vector<lit> lits;
+    for (const auto &bex : exprs)
+        lits.push_back(bex->l);
+    return new bool_item(*this, sat_cr.new_exct_one(lits));
+}
+
+arith_expr core::add(const std::vector<arith_expr> &exprs)
+{
+    assert(exprs.size() > 1);
+    lin l;
+    for (const auto &aex : exprs)
+        l += aex->l;
+    return new arith_item(*this, *types.at(REAL_KEYWORD), l);
+}
+
+arith_expr core::sub(const std::vector<arith_expr> &exprs)
+{
+    assert(exprs.size() > 1);
+    lin l;
+    for (std::vector<arith_expr>::const_iterator it = exprs.cbegin(); it != exprs.cend(); ++it)
+        if (it == exprs.cbegin())
+            l += (*it)->l;
+        else
+            l -= (*it)->l;
+    return new arith_item(*this, *types.at(REAL_KEYWORD), l);
+}
+
+arith_expr core::mult(const std::vector<arith_expr> &exprs)
+{
+    assert(exprs.size() > 1);
+    arith_expr ae = *std::find_if(exprs.begin(), exprs.end(), [&](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); });
+    lin l = ae->l;
+    for (const auto &aex : exprs)
+        if (aex != ae)
+        {
+            assert(lra_th.lb(aex->l) == lra_th.ub(aex->l) && "non-linear expression..");
+            assert(lra_th.value(aex->l).get_infinitesimal() == rational::ZERO);
+            l *= lra_th.value(aex->l).get_rational();
+        }
+    return new arith_item(*this, *types.at(REAL_KEYWORD), l);
+}
+
+arith_expr core::div(const std::vector<arith_expr> &exprs)
+{
+    assert(exprs.size() > 1);
+    assert(std::all_of(++exprs.begin(), exprs.end(), [&](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
+    assert(lra_th.value(exprs.at(1)->l).get_infinitesimal() == rational::ZERO);
+    rational c = lra_th.value(exprs.at(1)->l).get_rational();
+    for (size_t i = 2; i < exprs.size(); i++)
+    {
+        assert(lra_th.value(exprs.at(i)->l).get_infinitesimal() == rational::ZERO);
+        c *= lra_th.value(exprs.at(i)->l).get_rational();
+    }
+    return new arith_item(*this, *types.at(REAL_KEYWORD), exprs.at(0)->l / c);
+}
+
+arith_expr core::minus(arith_expr ex) { return new arith_item(*this, *types.at(REAL_KEYWORD), -ex->l); }
+
+bool_expr core::lt(arith_expr left, arith_expr right) { return new bool_item(*this, lra_th.new_lt(left->l, right->l)); }
+bool_expr core::leq(arith_expr left, arith_expr right) { return new bool_item(*this, lra_th.new_leq(left->l, right->l)); }
+bool_expr core::eq(arith_expr left, arith_expr right) { return new bool_item(*this, sat_cr.new_conj({lra_th.new_leq(left->l, right->l), lra_th.new_geq(left->l, right->l)})); }
+bool_expr core::geq(arith_expr left, arith_expr right) { return new bool_item(*this, lra_th.new_geq(left->l, right->l)); }
+bool_expr core::gt(arith_expr left, arith_expr right) { return new bool_item(*this, lra_th.new_gt(left->l, right->l)); }
+
+bool_expr core::eq(expr left, expr right) { return new bool_item(*this, left->eq(*right)); }
+
+void core::assert_facts(const std::vector<lit> &facts)
+{
+    for (const auto &f : facts)
+        if (!sat_cr.new_clause({lit(ni, false), f}))
+            throw std::runtime_error("the problem is unsolvable..");
+}
+
 void core::new_methods(const std::vector<const method *> &ms)
 {
     for (const auto &m : ms)

@@ -19,7 +19,7 @@ public:
   method(const method &orig) = delete;
   virtual ~method();
 
-  const type *get_type() const { return return_type; }         // returns the return type of this method (can be nullptr)..
+  const type *get_return_type() const { return return_type; }  // returns the return type of this method (can be nullptr)..
   std::string get_name() const { return name; }                // returns the name of this method..
   const std::vector<field *> get_args() const { return args; } // returns the list of arguments of this method..
 

@@ -37,6 +37,28 @@ public:
   string_expr new_string(const std::string &val);
   virtual expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals);
 
+  bool_expr negate(bool_expr var);
+  bool_expr eq(bool_expr left, bool_expr right);
+  bool_expr conj(const std::vector<bool_expr> &exprs);
+  bool_expr disj(const std::vector<bool_expr> &exprs);
+  bool_expr exct_one(const std::vector<bool_expr> &exprs);
+
+  arith_expr add(const std::vector<arith_expr> &exprs);
+  arith_expr sub(const std::vector<arith_expr> &exprs);
+  arith_expr mult(const std::vector<arith_expr> &exprs);
+  arith_expr div(const std::vector<arith_expr> &exprs);
+  arith_expr minus(arith_expr ex);
+
+  bool_expr lt(arith_expr left, arith_expr right);
+  bool_expr leq(arith_expr left, arith_expr right);
+  bool_expr eq(arith_expr left, arith_expr right);
+  bool_expr geq(arith_expr left, arith_expr right);
+  bool_expr gt(arith_expr left, arith_expr right);
+
+  bool_expr eq(expr i0, expr i1);
+
+  void assert_facts(const std::vector<smt::lit> &facts);
+
 private:
   expr new_enum(const type &tp, const std::vector<smt::var> &vars, const std::vector<item *> &vals);
 
@@ -65,6 +87,16 @@ public:
 
   expr get(const std::string &name) const override;
 
+protected:
+  smt::var get_ni() { return ni; }
+  void set_ni(const smt::var &v)
+  {
+    tmp_ni = ni;
+    ni = v;
+  }
+
+  void restore_ni() { ni = tmp_ni; }
+
 private:
   smt::sat_core sat_cr;   // the sat core..
   smt::lra_theory lra_th; // the linear-real-arithmetic theory..
@@ -73,5 +105,8 @@ private:
   std::map<std::string, std::vector<const method *>> methods; // the methods, indexed by their name, defined within this type..
   std::map<std::string, predicate *> predicates;              // the predicates, indexed by their name, defined within this core..
   std::map<std::string, type *> types;                        // the types, indexed by their name, defined within this core..
+
+  smt::var tmp_ni;             // the temporary controlling variable, used for restoring the controlling variable..
+  smt::var ni = smt::TRUE_var; // the controlling variable..
 };
 } // namespace ratio

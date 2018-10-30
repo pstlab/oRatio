@@ -24,7 +24,7 @@ public:
   bool_literal_expression(const bool_literal_expression &orig) = delete;
   virtual ~bool_literal_expression() {}
 
-private:
+protected:
   const bool literal;
 };
 
@@ -35,7 +35,7 @@ public:
   int_literal_expression(const int_literal_expression &orig) = delete;
   virtual ~int_literal_expression() {}
 
-private:
+protected:
   const smt::I literal;
 };
 
@@ -46,7 +46,7 @@ public:
   real_literal_expression(const real_literal_expression &orig) = delete;
   virtual ~real_literal_expression() {}
 
-private:
+protected:
   const smt::rational literal;
 };
 
@@ -57,7 +57,7 @@ public:
   string_literal_expression(const string_literal_expression &orig) = delete;
   virtual ~string_literal_expression() {}
 
-private:
+protected:
   const std::string literal;
 };
 
@@ -68,7 +68,7 @@ public:
   cast_expression(const cast_expression &orig) = delete;
   virtual ~cast_expression() { delete xpr; }
 
-private:
+protected:
   const std::vector<std::string> cast_to_type;
   const expression *const xpr;
 };
@@ -80,7 +80,7 @@ public:
   plus_expression(const plus_expression &orig) = delete;
   virtual ~plus_expression() { delete xpr; }
 
-private:
+protected:
   const expression *const xpr;
 };
 
@@ -91,7 +91,7 @@ public:
   minus_expression(const minus_expression &orig) = delete;
   virtual ~minus_expression() { delete xpr; }
 
-private:
+protected:
   const expression *const xpr;
 };
 
@@ -102,7 +102,7 @@ public:
   not_expression(const not_expression &orig) = delete;
   virtual ~not_expression() { delete xpr; }
 
-private:
+protected:
   const expression *const xpr;
 };
 
@@ -117,7 +117,7 @@ public:
     delete max_xpr;
   }
 
-private:
+protected:
   const expression *const min_xpr;
   const expression *const max_xpr;
 };
@@ -133,7 +133,7 @@ public:
       delete e;
   }
 
-private:
+protected:
   const std::vector<std::string> instance_type;
   const std::vector<expression *> expressions;
 };
@@ -149,7 +149,7 @@ public:
     delete right;
   }
 
-private:
+protected:
   const expression *const left;
   const expression *const right;
 };
@@ -165,7 +165,7 @@ public:
     delete right;
   }
 
-private:
+protected:
   const expression *const left;
   const expression *const right;
 };
@@ -181,7 +181,7 @@ public:
     delete right;
   }
 
-private:
+protected:
   const expression *const left;
   const expression *const right;
 };
@@ -197,7 +197,7 @@ public:
     delete right;
   }
 
-private:
+protected:
   const expression *const left;
   const expression *const right;
 };
@@ -213,7 +213,7 @@ public:
     delete right;
   }
 
-private:
+protected:
   const expression *const left;
   const expression *const right;
 };
@@ -229,7 +229,7 @@ public:
     delete right;
   }
 
-private:
+protected:
   const expression *const left;
   const expression *const right;
 };
@@ -245,7 +245,7 @@ public:
       delete e;
   }
 
-private:
+protected:
   const std::vector<std::string> ids;
   const std::string function_name;
   const std::vector<expression *> expressions;
@@ -258,7 +258,7 @@ public:
   id_expression(const id_expression &orig) = delete;
   virtual ~id_expression() {}
 
-private:
+protected:
   const std::vector<std::string> ids;
 };
 
@@ -273,7 +273,7 @@ public:
     delete right;
   }
 
-private:
+protected:
   const expression *const left;
   const expression *const right;
 };
@@ -289,7 +289,7 @@ public:
       delete e;
   }
 
-private:
+protected:
   const std::vector<expression *> expressions;
 };
 
@@ -304,7 +304,7 @@ public:
       delete e;
   }
 
-private:
+protected:
   const std::vector<expression *> expressions;
 };
 
@@ -319,7 +319,7 @@ public:
       delete e;
   }
 
-private:
+protected:
   const std::vector<expression *> expressions;
 };
 
@@ -334,7 +334,7 @@ public:
       delete e;
   }
 
-private:
+protected:
   const std::vector<expression *> expressions;
 };
 
@@ -349,7 +349,7 @@ public:
       delete e;
   }
 
-private:
+protected:
   const std::vector<expression *> expressions;
 };
 
@@ -364,7 +364,7 @@ public:
       delete e;
   }
 
-private:
+protected:
   const std::vector<expression *> expressions;
 };
 
@@ -379,7 +379,7 @@ public:
       delete e;
   }
 
-private:
+protected:
   const std::vector<expression *> expressions;
 };
 
@@ -398,7 +398,7 @@ public:
   local_field_statement(const local_field_statement &orig) = delete;
   virtual ~local_field_statement() { delete xpr; }
 
-private:
+protected:
   const std::vector<std::string> field_type;
   const std::string name;
   const expression *const xpr;
@@ -411,7 +411,7 @@ public:
   assignment_statement(const assignment_statement &orig) = delete;
   virtual ~assignment_statement() { delete xpr; }
 
-private:
+protected:
   const std::vector<std::string> ids;
   const std::string id;
   const expression *const xpr;
@@ -424,7 +424,7 @@ public:
   expression_statement(const expression_statement &orig) = delete;
   virtual ~expression_statement() { delete xpr; }
 
-private:
+protected:
   const expression *const xpr;
 };
 
@@ -443,7 +443,7 @@ public:
     }
   }
 
-private:
+protected:
   const std::vector<std::pair<std::vector<const statement *>, const expression *const>> conjunctions;
 };
 
@@ -458,7 +458,7 @@ public:
       delete st;
   }
 
-private:
+protected:
   const std::vector<const statement *> statements;
 };
 
@@ -473,7 +473,7 @@ public:
       delete asgnmnt.second;
   }
 
-private:
+protected:
   const bool is_fact;
   const std::string formula_name;
   const std::vector<std::string> formula_scope;
@@ -488,7 +488,7 @@ public:
   return_statement(const return_statement &orig) = delete;
   virtual ~return_statement() { delete xpr; }
 
-private:
+protected:
   const expression *const xpr;
 };
 
@@ -546,7 +546,7 @@ public:
   typedef_declaration(const typedef_declaration &orig) = delete;
   virtual ~typedef_declaration() { delete xpr; }
 
-private:
+protected:
   const std::string primitive_type;
   const expression *const xpr;
 };
@@ -572,7 +572,7 @@ public:
   variable_declaration(const variable_declaration &orig) = delete;
   virtual ~variable_declaration() { delete xpr; }
 
-private:
+protected:
   const std::string name;
   const expression *const xpr;
 };
