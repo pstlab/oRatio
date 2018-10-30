@@ -7,7 +7,7 @@ namespace ratio
 
 class expr;
 class context;
-class predicate;
+class constructor;
 
 class type : public scope
 {
@@ -27,7 +27,34 @@ public:
   virtual expr new_instance(context &ctx); // creates a new instance of this type within the given context..
   virtual expr new_existential();          // creates a new existential of this type (i.e. an object variable whose allowed values are all the current instances of this type)..
 
+  std::vector<expr> get_instances() const noexcept { return instances; } // returns the instances of this type..
+
+protected:
+  void new_constructors(const std::vector<const constructor *> &cs);
+  void new_methods(const std::vector<const method *> &ms);
+  void new_types(const std::vector<type *> &ts);
+  void new_predicates(const std::vector<predicate *> &ps);
+
+public:
+  const constructor &get_constructor(const std::vector<const type *> &ts) const;
+  std::vector<const constructor *> get_constructors() const noexcept { return constructors; }
+
   field &get_field(const std::string &name) const override; // returns the field having the given name..
+
+  const method &get_method(const std::string &m_name, const std::vector<const type *> &ts) const override;
+  std::vector<const method *> get_methods() const noexcept override
+  {
+    std::vector<const method *> c_methods;
+    for (const auto &ms : methods)
+      c_methods.insert(c_methods.begin(), ms.second.begin(), ms.second.end());
+    return c_methods;
+  }
+
+  type &get_type(const std::string &t_name) const override;
+  std::map<std::string, type *> get_types() const noexcept override { return types; }
+
+  predicate &get_predicate(const std::string &p_name) const override;
+  std::map<std::string, predicate *> get_predicates() const noexcept override { return predicates; }
 
 protected:
   static void new_supertypes(type &t, const std::vector<type *> &sts)
@@ -37,10 +64,14 @@ protected:
   }
 
 private:
-  const std::string name;         // the name of this type..
-  const bool primitive;           // is this type a primitive type?
-  std::vector<type *> supertypes; // the base types (i.e. the types this type inherits from)..
-  std::vector<expr> instances;    // a vector containing all the instances of this type..
+  const std::string name;                                     // the name of this type..
+  const bool primitive;                                       // is this type a primitive type?
+  std::vector<type *> supertypes;                             // the base types (i.e. the types this type inherits from)..
+  std::vector<const constructor *> constructors;              // the constructors defined within this type..
+  std::map<std::string, std::vector<const method *>> methods; // the methods, indexed by their name, defined within this type..
+  std::map<std::string, type *> types;                        // the inner types, indexed by their name, defined within this type..
+  std::map<std::string, predicate *> predicates;              // the inner predicates, indexed by their name, defined within this type..
+  std::vector<expr> instances;                                // a vector containing all the instances defined within this type..
 };
 
 class bool_type : public type

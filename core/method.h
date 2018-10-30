@@ -11,6 +11,9 @@ class item;
 
 class method : public scope
 {
+  friend class core;
+  friend class type;
+
 public:
   method(core &cr, scope &scp, const type *const return_type, const std::string &name, const std::vector<field *> &args);
   method(const method &orig) = delete;

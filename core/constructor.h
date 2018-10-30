@@ -11,6 +11,8 @@ class item;
 
 class constructor : public scope
 {
+  friend class type;
+
 public:
   constructor(core &cr, scope &scp, const std::vector<field *> &args);
   constructor(const constructor &orig) = delete;

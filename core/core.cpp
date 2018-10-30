@@ -1,6 +1,8 @@
 #include "core.h"
 #include "predicate.h"
 #include "atom.h"
+#include "field.h"
+#include "method.h"
 #include <cassert>
 
 using namespace smt;
@@ -19,6 +21,11 @@ core::~core()
     // we delete the types..
     for (const auto &t : types)
         delete t.second;
+
+    // we delete the methods..
+    for (const auto &ms : methods)
+        for (const auto &m : ms.second)
+            delete m;
 }
 
 bool_expr core::new_bool() { return new bool_item(*this, sat_cr.new_var()); }
@@ -81,10 +88,57 @@ expr core::new_enum(const type &tp, const std::vector<var> &vars, const std::vec
         return new var_item(*this, tp, ov_th.new_var(vars, std::vector<var_value *>(vals.begin(), vals.end())));
 }
 
+void core::new_methods(const std::vector<const method *> &ms)
+{
+    for (const auto &m : ms)
+        methods[m->get_name()].push_back(m);
+}
+
 void core::new_types(const std::vector<type *> &ts)
 {
     for (const auto &t : ts)
         types.insert({t->get_name(), t});
+}
+
+void core::new_predicates(const std::vector<predicate *> &ps)
+{
+    for (const auto &p : ps)
+        predicates.insert({p->get_name(), p});
+}
+
+field &core::get_field(const std::string &name) const
+{
+    const auto at_f = fields.find(name);
+    if (at_f != fields.end())
+        return *at_f->second;
+
+    // not found
+    throw std::out_of_range(name);
+}
+
+const method &core::get_method(const std::string &name, const std::vector<const type *> &ts) const
+{
+    const auto at_m = methods.find(name);
+    if (at_m != methods.end())
+    {
+        bool found = false;
+        for (const auto &mthd : at_m->second)
+            if (mthd->args.size() == ts.size())
+            {
+                found = true;
+                for (size_t i = 0; i < ts.size(); i++)
+                    if (!mthd->args.at(i)->get_type().is_assignable_from(*ts.at(i)))
+                    {
+                        found = false;
+                        break;
+                    }
+                if (found)
+                    return *mthd;
+            }
+    }
+
+    // not found
+    throw std::out_of_range(name);
 }
 
 type &core::get_type(const std::string &name) const
@@ -97,27 +151,11 @@ type &core::get_type(const std::string &name) const
     throw std::out_of_range(name);
 }
 
-void core::new_predicates(const std::vector<predicate *> &ps)
-{
-    for (const auto &p : ps)
-        predicates.insert({p->get_name(), p});
-}
-
 predicate &core::get_predicate(const std::string &name) const
 {
     const auto at_p = predicates.find(name);
     if (at_p != predicates.end())
         return *at_p->second;
-
-    // not found
-    throw std::out_of_range(name);
-}
-
-field &core::get_field(const std::string &name) const
-{
-    const auto at_f = fields.find(name);
-    if (at_f != fields.end())
-        return *at_f->second;
 
     // not found
     throw std::out_of_range(name);
