@@ -9,6 +9,53 @@ type::type(core &cr, scope &scp, const std::string &name, bool primitive) : scop
 
 type::~type() {}
 
+bool type::is_assignable_from(const type &t) const noexcept
+{
+    std::queue<const type *> q;
+    q.push(&t);
+    while (!q.empty())
+    {
+        if (q.front() == this)
+            return true;
+        else
+        {
+            for (const auto &st : q.front()->supertypes)
+                q.push(st);
+            q.pop();
+        }
+    }
+    return false;
+}
+
+expr type::new_instance(context &ctx)
+{
+    expr i = new item(cr, ctx, *this);
+    std::queue<type *> q;
+    q.push(this);
+    while (!q.empty())
+    {
+        q.front()->instances.push_back(i);
+        for (const auto &st : q.front()->supertypes)
+            q.push(st);
+        q.pop();
+    }
+
+    return i;
+}
+
+expr type::new_existential()
+{
+    if (instances.size() == 1)
+        return *instances.begin();
+    else
+    {
+        std::unordered_set<item *> c_items;
+        for (const auto &i : instances)
+            c_items.insert(&*i);
+        return cr.new_enum(*this, c_items);
+    }
+}
+
 field &type::get_field(const std::string &f_name) const
 {
     const auto at_f = fields.find(f_name);

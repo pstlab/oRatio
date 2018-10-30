@@ -9,11 +9,17 @@ namespace ratio
 
 class core;
 class context;
+class constructor;
+class method;
+class predicate;
 
 class env
 {
   friend class context;
   friend class core;
+  friend class constructor;
+  friend class method;
+  friend class predicate;
   friend class var_item;
 
 public:

@@ -5,6 +5,8 @@
 #include <vector>
 
 #define THIS_KEYWORD "this"
+#define RETURN_KEYWORD "return"
+#define TAU "tau"
 
 namespace ratio
 {
