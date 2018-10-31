@@ -2,6 +2,12 @@
 
 #include "scope.h"
 
+namespace riddle::ast
+{
+class expression;
+class statement;
+} // namespace riddle::ast
+
 namespace ratio
 {
 
@@ -14,7 +20,7 @@ class constructor : public scope
   friend class type;
 
 public:
-  constructor(core &cr, scope &scp, const std::vector<field *> &args);
+  constructor(core &cr, scope &scp, const std::vector<field *> &args, const std::vector<std::pair<std::string, std::vector<riddle::ast::expression *>>> &il, const std::vector<riddle::ast::statement *> &stmnts);
   constructor(const constructor &orig) = delete;
   virtual ~constructor();
 
@@ -27,5 +33,7 @@ private:
 
 private:
   const std::vector<field *> args;
+  const std::vector<std::pair<std::string, std::vector<riddle::ast::expression *>>> init_list;
+  const std::vector<riddle::ast::statement *> statements;
 };
 } // namespace ratio

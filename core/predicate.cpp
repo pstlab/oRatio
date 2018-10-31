@@ -1,15 +1,16 @@
 #include "predicate.h"
 #include "field.h"
 #include "atom.h"
+#include "riddle_parser.h"
 #include <queue>
 
 namespace ratio
 {
 
-predicate::predicate(core &cr, scope &scp, const std::string &name, const std::vector<field *> &args) : type(cr, scp, name), args(args)
+predicate::predicate(core &cr, scope &scp, const std::string &name, const std::vector<field *> &args, const std::vector<riddle::ast::statement *> &stmnts) : type(cr, scp, name), args(args), statements(stmnts)
 {
     if (type *t = dynamic_cast<type *>(&scp))
-        new_fields({new field(*t, THIS_KEYWORD, true)});
+        new_fields({new field(*t, THIS_KEYWORD, nullptr, true)});
     new_fields(args);
 }
 
@@ -39,7 +40,7 @@ void predicate::apply_rule(atom &a) const
 
     context ctx(new env(get_core(), &a));
     ctx->exprs.insert({THIS_KEYWORD, &a});
-
-    // TODO: execute the statements..
+    for (const auto &s : statements)
+        static_cast<const ast::statement *>(s)->execute(*this, ctx);
 }
 } // namespace ratio

@@ -125,7 +125,7 @@ protected:
 class constructor_expression : public expression
 {
 public:
-  constructor_expression(const std::vector<std::string> &it, const std::vector<expression *> &es) : instance_type(it), expressions(es) {}
+  constructor_expression(const std::vector<std::string> &it, const std::vector<const expression *> &es) : instance_type(it), expressions(es) {}
   constructor_expression(const constructor_expression &orig) = delete;
   virtual ~constructor_expression()
   {
@@ -135,7 +135,7 @@ public:
 
 protected:
   const std::vector<std::string> instance_type;
-  const std::vector<expression *> expressions;
+  const std::vector<const expression *> expressions;
 };
 
 class eq_expression : public expression
@@ -237,7 +237,7 @@ protected:
 class function_expression : public expression
 {
 public:
-  function_expression(const std::vector<std::string> &is, const std::string &fn, const std::vector<expression *> &es) : ids(is), function_name(fn), expressions(es) {}
+  function_expression(const std::vector<std::string> &is, const std::string &fn, const std::vector<const expression *> &es) : ids(is), function_name(fn), expressions(es) {}
   function_expression(const function_expression &orig) = delete;
   virtual ~function_expression()
   {
@@ -248,7 +248,7 @@ public:
 protected:
   const std::vector<std::string> ids;
   const std::string function_name;
-  const std::vector<expression *> expressions;
+  const std::vector<const expression *> expressions;
 };
 
 class id_expression : public expression
@@ -281,7 +281,7 @@ protected:
 class disjunction_expression : public expression
 {
 public:
-  disjunction_expression(const std::vector<expression *> &es) : expressions(es) {}
+  disjunction_expression(const std::vector<const expression *> &es) : expressions(es) {}
   disjunction_expression(const disjunction_expression &orig) = delete;
   virtual ~disjunction_expression()
   {
@@ -290,13 +290,13 @@ public:
   }
 
 protected:
-  const std::vector<expression *> expressions;
+  const std::vector<const expression *> expressions;
 };
 
 class conjunction_expression : public expression
 {
 public:
-  conjunction_expression(const std::vector<expression *> &es) : expressions(es) {}
+  conjunction_expression(const std::vector<const expression *> &es) : expressions(es) {}
   conjunction_expression(const conjunction_expression &orig) = delete;
   virtual ~conjunction_expression()
   {
@@ -305,13 +305,13 @@ public:
   }
 
 protected:
-  const std::vector<expression *> expressions;
+  const std::vector<const expression *> expressions;
 };
 
 class exct_one_expression : public expression
 {
 public:
-  exct_one_expression(const std::vector<expression *> &es) : expressions(es) {}
+  exct_one_expression(const std::vector<const expression *> &es) : expressions(es) {}
   exct_one_expression(const exct_one_expression &orig) = delete;
   virtual ~exct_one_expression()
   {
@@ -320,13 +320,13 @@ public:
   }
 
 protected:
-  const std::vector<expression *> expressions;
+  const std::vector<const expression *> expressions;
 };
 
 class addition_expression : public expression
 {
 public:
-  addition_expression(const std::vector<expression *> &es) : expressions(es) {}
+  addition_expression(const std::vector<const expression *> &es) : expressions(es) {}
   addition_expression(const addition_expression &orig) = delete;
   virtual ~addition_expression()
   {
@@ -335,13 +335,13 @@ public:
   }
 
 protected:
-  const std::vector<expression *> expressions;
+  const std::vector<const expression *> expressions;
 };
 
 class subtraction_expression : public expression
 {
 public:
-  subtraction_expression(const std::vector<expression *> &es) : expressions(es) {}
+  subtraction_expression(const std::vector<const expression *> &es) : expressions(es) {}
   subtraction_expression(const subtraction_expression &orig) = delete;
   virtual ~subtraction_expression()
   {
@@ -350,13 +350,13 @@ public:
   }
 
 protected:
-  const std::vector<expression *> expressions;
+  const std::vector<const expression *> expressions;
 };
 
 class multiplication_expression : public expression
 {
 public:
-  multiplication_expression(const std::vector<expression *> &es) : expressions(es) {}
+  multiplication_expression(const std::vector<const expression *> &es) : expressions(es) {}
   multiplication_expression(const multiplication_expression &orig) = delete;
   virtual ~multiplication_expression()
   {
@@ -365,13 +365,13 @@ public:
   }
 
 protected:
-  const std::vector<expression *> expressions;
+  const std::vector<const expression *> expressions;
 };
 
 class division_expression : public expression
 {
 public:
-  division_expression(const std::vector<expression *> &es) : expressions(es) {}
+  division_expression(const std::vector<const expression *> &es) : expressions(es) {}
   division_expression(const division_expression &orig) = delete;
   virtual ~division_expression()
   {
@@ -380,7 +380,7 @@ public:
   }
 
 protected:
-  const std::vector<expression *> expressions;
+  const std::vector<const expression *> expressions;
 };
 
 class statement
@@ -431,7 +431,7 @@ protected:
 class disjunction_statement : public statement
 {
 public:
-  disjunction_statement(const std::vector<std::pair<std::vector<const statement *>, const expression *const>> &conjs) : conjunctions(conjs) {}
+  disjunction_statement(const std::vector<std::pair<const std::vector<const statement *>, const expression *const>> &conjs) : conjunctions(conjs) {}
   disjunction_statement(const disjunction_statement &orig) = delete;
   virtual ~disjunction_statement()
   {
@@ -444,7 +444,7 @@ public:
   }
 
 protected:
-  const std::vector<std::pair<std::vector<const statement *>, const expression *const>> conjunctions;
+  const std::vector<std::pair<const std::vector<const statement *>, const expression *const>> conjunctions;
 };
 
 class conjunction_statement : public statement
@@ -465,7 +465,7 @@ protected:
 class formula_statement : public statement
 {
 public:
-  formula_statement(const bool &isf, const std::string &fn, const std::vector<std::string> &scp, const std::string &pn, const std::vector<std::pair<std::string, const expression *>> &assns) : is_fact(isf), formula_name(fn), formula_scope(scp), predicate_name(pn), assignments(assns) {}
+  formula_statement(const bool &isf, const std::string &fn, const std::vector<std::string> &scp, const std::string &pn, const std::vector<std::pair<const std::string, const expression *const>> &assns) : is_fact(isf), formula_name(fn), formula_scope(scp), predicate_name(pn), assignments(assns) {}
   formula_statement(const formula_statement &orig) = delete;
   virtual ~formula_statement()
   {
@@ -478,7 +478,7 @@ protected:
   const std::string formula_name;
   const std::vector<std::string> formula_scope;
   const std::string predicate_name;
-  const std::vector<std::pair<std::string, const expression *>> assignments;
+  const std::vector<std::pair<const std::string, const expression *const>> assignments;
 };
 
 class return_statement : public statement
@@ -506,7 +506,7 @@ protected:
 class method_declaration
 {
 public:
-  method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<std::vector<std::string>, std::string>> &pars, const std::vector<statement *> &stmnts) : return_type(rt), name(n), parameters(pars), statements(stmnts) {}
+  method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<const statement *> &stmnts) : return_type(rt), name(n), parameters(pars), statements(stmnts) {}
   method_declaration(const method_declaration &orig) = delete;
   virtual ~method_declaration()
   {
@@ -517,14 +517,14 @@ public:
 protected:
   const std::vector<std::string> return_type;
   const std::string name;
-  const std::vector<std::pair<std::vector<std::string>, std::string>> parameters;
-  const std::vector<statement *> statements;
+  const std::vector<std::pair<const std::vector<std::string>, const std::string>> parameters;
+  const std::vector<const statement *> statements;
 };
 
 class predicate_declaration
 {
 public:
-  predicate_declaration(const std::string &n, const std::vector<std::pair<std::vector<std::string>, std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<statement *> &stmnts) : name(n), parameters(pars), predicate_list(pl), statements(stmnts) {}
+  predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const statement *> &stmnts) : name(n), parameters(pars), predicate_list(pl), statements(stmnts) {}
   predicate_declaration(const predicate_declaration &orig) = delete;
   virtual ~predicate_declaration()
   {
@@ -534,9 +534,9 @@ public:
 
 protected:
   const std::string name;
-  const std::vector<std::pair<std::vector<std::string>, std::string>> parameters;
+  const std::vector<std::pair<const std::vector<std::string>, const std::string>> parameters;
   const std::vector<std::vector<std::string>> predicate_list;
-  const std::vector<statement *> statements;
+  const std::vector<const statement *> statements;
 };
 
 class typedef_declaration : public type_declaration
@@ -580,7 +580,7 @@ protected:
 class field_declaration
 {
 public:
-  field_declaration(const std::vector<std::string> &tp, const std::vector<variable_declaration *> &ds) : field_type(tp), declarations(ds) {}
+  field_declaration(const std::vector<std::string> &tp, const std::vector<const variable_declaration *> &ds) : field_type(tp), declarations(ds) {}
   field_declaration(const field_declaration &orig) = delete;
   virtual ~field_declaration()
   {
@@ -590,13 +590,13 @@ public:
 
 protected:
   const std::vector<std::string> field_type;
-  const std::vector<variable_declaration *> declarations;
+  const std::vector<const variable_declaration *> declarations;
 };
 
 class constructor_declaration
 {
 public:
-  constructor_declaration(const std::vector<std::pair<std::vector<std::string>, std::string>> &pars, const std::vector<std::pair<std::string, std::vector<expression *>>> &il, const std::vector<statement *> &stmnts) : parameters(pars), init_list(il), statements(stmnts) {}
+  constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const expression *>>> &il, const std::vector<const statement *> &stmnts) : parameters(pars), init_list(il), statements(stmnts) {}
   constructor_declaration(const constructor_declaration &orig) = delete;
   virtual ~constructor_declaration()
   {
@@ -608,15 +608,15 @@ public:
   }
 
 protected:
-  const std::vector<std::pair<std::vector<std::string>, std::string>> parameters;
-  const std::vector<std::pair<std::string, std::vector<expression *>>> init_list;
-  const std::vector<statement *> statements;
+  const std::vector<std::pair<const std::vector<std::string>, const std::string>> parameters;
+  const std::vector<std::pair<const std::string, const std::vector<const expression *>>> init_list;
+  const std::vector<const statement *> statements;
 };
 
 class class_declaration : public type_declaration
 {
 public:
-  class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<field_declaration *> &fs, const std::vector<constructor_declaration *> &cs, const std::vector<method_declaration *> &ms, const std::vector<predicate_declaration *> &ps, const std::vector<type_declaration *> &ts) : type_declaration(n), base_classes(bcs), fields(fs), constructors(cs), methods(ms), predicates(ps), types(ts) {}
+  class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const field_declaration *> &fs, const std::vector<const constructor_declaration *> &cs, const std::vector<const method_declaration *> &ms, const std::vector<const predicate_declaration *> &ps, const std::vector<const type_declaration *> &ts) : type_declaration(n), base_classes(bcs), fields(fs), constructors(cs), methods(ms), predicates(ps), types(ts) {}
   class_declaration(const class_declaration &orig) = delete;
   virtual ~class_declaration()
   {
@@ -634,17 +634,17 @@ public:
 
 protected:
   const std::vector<std::vector<std::string>> base_classes;
-  const std::vector<field_declaration *> fields;
-  const std::vector<constructor_declaration *> constructors;
-  const std::vector<method_declaration *> methods;
-  const std::vector<predicate_declaration *> predicates;
-  const std::vector<type_declaration *> types;
+  const std::vector<const field_declaration *> fields;
+  const std::vector<const constructor_declaration *> constructors;
+  const std::vector<const method_declaration *> methods;
+  const std::vector<const predicate_declaration *> predicates;
+  const std::vector<const type_declaration *> types;
 };
 
 class compilation_unit
 {
 public:
-  compilation_unit(const std::vector<method_declaration *> &ms, const std::vector<predicate_declaration *> &ps, const std::vector<type_declaration *> &ts, const std::vector<statement *> &stmnts) : methods(ms), predicates(ps), types(ts), statements(stmnts) {}
+  compilation_unit(const std::vector<const method_declaration *> &ms, const std::vector<const predicate_declaration *> &ps, const std::vector<const type_declaration *> &ts, const std::vector<const statement *> &stmnts) : methods(ms), predicates(ps), types(ts), statements(stmnts) {}
   compilation_unit(const compilation_unit &orig) = delete;
   virtual ~compilation_unit()
   {
@@ -659,10 +659,10 @@ public:
   }
 
 protected:
-  const std::vector<method_declaration *> methods;
-  const std::vector<predicate_declaration *> predicates;
-  const std::vector<type_declaration *> types;
-  const std::vector<statement *> statements;
+  const std::vector<const method_declaration *> methods;
+  const std::vector<const predicate_declaration *> predicates;
+  const std::vector<const type_declaration *> types;
+  const std::vector<const statement *> statements;
 };
 } // namespace ast
 
@@ -695,15 +695,15 @@ private:
   /**
    * The declarations.
    */
-  virtual ast::method_declaration *new_method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<std::vector<std::string>, std::string>> &pars, const std::vector<ast::statement *> &stmnts) { return new ast::method_declaration(rt, n, pars, stmnts); }
-  virtual ast::predicate_declaration *new_predicate_declaration(const std::string &n, const std::vector<std::pair<std::vector<std::string>, std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<ast::statement *> &stmnts) { return new ast::predicate_declaration(n, pars, pl, stmnts); }
-  virtual ast::typedef_declaration *new_typedef_declaration(const std::string &n, const std::string &pt, const ast::expression *const e) { return new ast::typedef_declaration(n, pt, e); }
+  virtual ast::method_declaration *new_method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<const ast::statement *> &stmnts) { return new ast::method_declaration(rt, n, pars, stmnts); }
+  virtual ast::predicate_declaration *new_predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const ast::statement *> &stmnts) { return new ast::predicate_declaration(n, pars, pl, stmnts); }
+  virtual ast::typedef_declaration *new_typedef_declaration(const std::string &n, const std::string &pt, const ast::expression *e) { return new ast::typedef_declaration(n, pt, e); }
   virtual ast::enum_declaration *new_enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs) { return new ast::enum_declaration(n, es, trs); }
-  virtual ast::class_declaration *new_class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<ast::field_declaration *> &fs, const std::vector<ast::constructor_declaration *> &cs, const std::vector<ast::method_declaration *> &ms, const std::vector<ast::predicate_declaration *> &ps, const std::vector<ast::type_declaration *> &ts) { return new ast::class_declaration(n, bcs, fs, cs, ms, ps, ts); }
+  virtual ast::class_declaration *new_class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const ast::field_declaration *> &fs, const std::vector<const ast::constructor_declaration *> &cs, const std::vector<const ast::method_declaration *> &ms, const std::vector<const ast::predicate_declaration *> &ps, const std::vector<const ast::type_declaration *> &ts) { return new ast::class_declaration(n, bcs, fs, cs, ms, ps, ts); }
   virtual ast::variable_declaration *new_variable_declaration(const std::string &n, const ast::expression *const e = nullptr) { return new ast::variable_declaration(n, e); }
-  virtual ast::field_declaration *new_field_declaration(const std::vector<std::string> &tp, const std::vector<ast::variable_declaration *> &ds) { return new ast::field_declaration(tp, ds); }
-  virtual ast::constructor_declaration *new_constructor_declaration(const std::vector<std::pair<std::vector<std::string>, std::string>> &pars, const std::vector<std::pair<std::string, std::vector<ast::expression *>>> &il, const std::vector<ast::statement *> &stmnts) { return new ast::constructor_declaration(pars, il, stmnts); }
-  virtual ast::compilation_unit *new_compilation_unit(const std::vector<ast::method_declaration *> &ms, const std::vector<ast::predicate_declaration *> &ps, const std::vector<ast::type_declaration *> &ts, const std::vector<ast::statement *> &stmnts) { return new ast::compilation_unit(ms, ps, ts, stmnts); }
+  virtual ast::field_declaration *new_field_declaration(const std::vector<std::string> &tp, const std::vector<const ast::variable_declaration *> &ds) { return new ast::field_declaration(tp, ds); }
+  virtual ast::constructor_declaration *new_constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const ast::expression *>>> &il, const std::vector<const ast::statement *> &stmnts) { return new ast::constructor_declaration(pars, il, stmnts); }
+  virtual ast::compilation_unit *new_compilation_unit(const std::vector<const ast::method_declaration *> &ms, const std::vector<const ast::predicate_declaration *> &ps, const std::vector<const ast::type_declaration *> &ts, const std::vector<const ast::statement *> &stmnts) { return new ast::compilation_unit(ms, ps, ts, stmnts); }
 
   /**
    * The statements.
@@ -711,9 +711,9 @@ private:
   virtual ast::local_field_statement *new_local_field_statement(const std::vector<std::string> &ft, const std::string &n, const ast::expression *const e = nullptr) { return new ast::local_field_statement(ft, n, e); }
   virtual ast::assignment_statement *new_assignment_statement(const std::vector<std::string> &is, const std::string &i, const ast::expression *const e) { return new ast::assignment_statement(is, i, e); }
   virtual ast::expression_statement *new_expression_statement(const ast::expression *const e) { return new ast::expression_statement(e); }
-  virtual ast::disjunction_statement *new_disjunction_statement(const std::vector<std::pair<std::vector<const ast::statement *>, const ast::expression *const>> &conjs) { return new ast::disjunction_statement(conjs); }
+  virtual ast::disjunction_statement *new_disjunction_statement(const std::vector<std::pair<const std::vector<const ast::statement *>, const ast::expression *const>> &conjs) { return new ast::disjunction_statement(conjs); }
   virtual ast::conjunction_statement *new_conjunction_statement(const std::vector<const ast::statement *> &stmnts) { return new ast::conjunction_statement(stmnts); }
-  virtual ast::formula_statement *new_formula_statement(const bool &isf, const std::string &fn, const std::vector<std::string> &scp, const std::string &pn, const std::vector<std::pair<std::string, const ast::expression *>> &assns) { return new ast::formula_statement(isf, fn, scp, pn, assns); }
+  virtual ast::formula_statement *new_formula_statement(const bool &isf, const std::string &fn, const std::vector<std::string> &scp, const std::string &pn, const std::vector<std::pair<const std::string, const ast::expression *const>> &assns) { return new ast::formula_statement(isf, fn, scp, pn, assns); }
   virtual ast::return_statement *new_return_statement(const ast::expression *const e) { return new ast::return_statement(e); }
 
   /**
@@ -728,28 +728,28 @@ private:
   virtual ast::minus_expression *new_minus_expression(const ast::expression *const e) { return new ast::minus_expression(e); }
   virtual ast::not_expression *new_not_expression(const ast::expression *const e) { return new ast::not_expression(e); }
   virtual ast::range_expression *new_range_expression(const ast::expression *const min_e, const ast::expression *const max_e) { return new ast::range_expression(min_e, max_e); }
-  virtual ast::constructor_expression *new_constructor_expression(const std::vector<std::string> &it, const std::vector<ast::expression *> &es) { return new ast::constructor_expression(it, es); }
+  virtual ast::constructor_expression *new_constructor_expression(const std::vector<std::string> &it, const std::vector<const ast::expression *> &es) { return new ast::constructor_expression(it, es); }
   virtual ast::eq_expression *new_eq_expression(const ast::expression *const l, const ast::expression *const r) { return new ast::eq_expression(l, r); }
   virtual ast::neq_expression *new_neq_expression(const ast::expression *const l, const ast::expression *const r) { return new ast::neq_expression(l, r); }
   virtual ast::lt_expression *new_lt_expression(const ast::expression *const l, const ast::expression *const r) { return new ast::lt_expression(l, r); }
   virtual ast::leq_expression *new_leq_expression(const ast::expression *const l, const ast::expression *const r) { return new ast::leq_expression(l, r); }
   virtual ast::geq_expression *new_geq_expression(const ast::expression *const l, const ast::expression *const r) { return new ast::geq_expression(l, r); }
   virtual ast::gt_expression *new_gt_expression(const ast::expression *const l, const ast::expression *const r) { return new ast::gt_expression(l, r); }
-  virtual ast::function_expression *new_function_expression(const std::vector<std::string> &is, const std::string &fn, const std::vector<ast::expression *> &es) { return new ast::function_expression(is, fn, es); }
+  virtual ast::function_expression *new_function_expression(const std::vector<std::string> &is, const std::string &fn, const std::vector<const ast::expression *> &es) { return new ast::function_expression(is, fn, es); }
   virtual ast::id_expression *new_id_expression(const std::vector<std::string> &is) { return new ast::id_expression(is); }
   virtual ast::implication_expression *new_implication_expression(const ast::expression *const l, const ast::expression *const r) { return new ast::implication_expression(l, r); }
-  virtual ast::disjunction_expression *new_disjunction_expression(const std::vector<ast::expression *> &es) { return new ast::disjunction_expression(es); }
-  virtual ast::conjunction_expression *new_conjunction_expression(const std::vector<ast::expression *> &es) { return new ast::conjunction_expression(es); }
-  virtual ast::exct_one_expression *new_exct_one_expression(const std::vector<ast::expression *> &es) { return new ast::exct_one_expression(es); }
-  virtual ast::addition_expression *new_addition_expression(const std::vector<ast::expression *> &es) { return new ast::addition_expression(es); }
-  virtual ast::subtraction_expression *new_subtraction_expression(const std::vector<ast::expression *> &es) { return new ast::subtraction_expression(es); }
-  virtual ast::multiplication_expression *new_multiplication_expression(const std::vector<ast::expression *> &es) { return new ast::multiplication_expression(es); }
-  virtual ast::division_expression *new_division_expression(const std::vector<ast::expression *> &es) { return new ast::division_expression(es); }
+  virtual ast::disjunction_expression *new_disjunction_expression(const std::vector<const ast::expression *> &es) { return new ast::disjunction_expression(es); }
+  virtual ast::conjunction_expression *new_conjunction_expression(const std::vector<const ast::expression *> &es) { return new ast::conjunction_expression(es); }
+  virtual ast::exct_one_expression *new_exct_one_expression(const std::vector<const ast::expression *> &es) { return new ast::exct_one_expression(es); }
+  virtual ast::addition_expression *new_addition_expression(const std::vector<const ast::expression *> &es) { return new ast::addition_expression(es); }
+  virtual ast::subtraction_expression *new_subtraction_expression(const std::vector<const ast::expression *> &es) { return new ast::subtraction_expression(es); }
+  virtual ast::multiplication_expression *new_multiplication_expression(const std::vector<const ast::expression *> &es) { return new ast::multiplication_expression(es); }
+  virtual ast::division_expression *new_division_expression(const std::vector<const ast::expression *> &es) { return new ast::division_expression(es); }
 
 private:
   lexer lex;                // the current lexer..
   token *tk = nullptr;      // the current lookahead token..
   std::vector<token *> tks; // all the tokens parsed so far..
-  size_t pos = 0;           // the current position within 0tks'..
+  size_t pos = 0;           // the current position within tks'..
 };
 } // namespace riddle

@@ -2,6 +2,11 @@
 
 #include "scope.h"
 
+namespace riddle::ast
+{
+class statement;
+} // namespace riddle::ast
+
 namespace ratio
 {
 
@@ -15,7 +20,7 @@ class method : public scope
   friend class type;
 
 public:
-  method(core &cr, scope &scp, const type *const return_type, const std::string &name, const std::vector<field *> &args);
+  method(core &cr, scope &scp, const type *const return_type, const std::string &name, const std::vector<field *> &args, const std::vector<riddle::ast::statement *> &stmnts);
   method(const method &orig) = delete;
   virtual ~method();
 
@@ -29,7 +34,8 @@ private:
   const type *const return_type; // the return type of this method (can be nullptr)..
   const std::string name;        // the name of this method..
 
-protected:
-  const std::vector<field *> args; // the arguments of this paper..
+private:
+  const std::vector<field *> args;                        // the arguments of this paper..
+  const std::vector<riddle::ast::statement *> statements; // the statements within the method's body..
 };
 } // namespace ratio

@@ -14,9 +14,20 @@
 namespace ratio
 {
 
+class atom;
+class disjunction;
+
+namespace ast
+{
+class formula_statement;
+class disjunction_statement;
+} // namespace ast
+
 class core : public scope, public env
 {
   friend class var_item;
+  friend class ast::formula_statement;
+  friend class ast::disjunction_statement;
 
 public:
   core();
@@ -87,6 +98,19 @@ public:
 
   expr get(const std::string &name) const override;
 
+  smt::lbool bool_value(const bool_expr &x) const noexcept;                          // the current value of the given boolean expression..
+  smt::inf_rational arith_lb(const arith_expr &x) const noexcept;                    // the current lower bound of the given arith expression..
+  smt::inf_rational arith_ub(const arith_expr &x) const noexcept;                    // the current upper bound of the given arith expression..
+  smt::inf_rational arith_value(const arith_expr &x) const noexcept;                 // the current value of the given arith expression..
+  std::unordered_set<smt::var_value *> enum_value(const var_expr &x) const noexcept; // the current allowed values of the given enum expression..
+
+  virtual void solve() {}
+
+protected:
+  virtual void new_fact(atom &atm) {}
+  virtual void new_goal(atom &atm) {}
+  virtual void new_disjunction(context &ctx, const disjunction &disj) {}
+
 protected:
   smt::var get_ni() { return ni; }
   void set_ni(const smt::var &v)
@@ -103,8 +127,8 @@ private:
   smt::ov_theory ov_th;   // the object-variable theory..
 
   std::map<std::string, std::vector<const method *>> methods; // the methods, indexed by their name, defined within this type..
-  std::map<std::string, predicate *> predicates;              // the predicates, indexed by their name, defined within this core..
   std::map<std::string, type *> types;                        // the types, indexed by their name, defined within this core..
+  std::map<std::string, predicate *> predicates;              // the predicates, indexed by their name, defined within this core..
 
   smt::var tmp_ni;             // the temporary controlling variable, used for restoring the controlling variable..
   smt::var ni = smt::TRUE_var; // the controlling variable..

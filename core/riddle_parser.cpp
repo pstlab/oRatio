@@ -1,9 +1,12 @@
 #include "riddle_parser.h"
 #include "core.h"
-#include "item.h"
-#include "type.h"
+#include "field.h"
+#include "atom.h"
+#include "predicate.h"
 #include "constructor.h"
 #include "method.h"
+#include "conjunction.h"
+#include "disjunction.h"
 
 namespace ratio
 {
@@ -40,11 +43,11 @@ expr plus_expression::evaluate(const scope &scp, context &ctx) const { return st
 
 minus_expression::minus_expression(const riddle::ast::expression *const e) : riddle::ast::minus_expression(e) {}
 minus_expression::~minus_expression() {}
-expr minus_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().minus(static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)); }
+expr minus_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().minus(static_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx)); }
 
 not_expression::not_expression(const riddle::ast::expression *const e) : riddle::ast::not_expression(e) {}
 not_expression::~not_expression() {}
-expr not_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().negate(static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)); }
+expr not_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().negate(static_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx)); }
 
 range_expression::range_expression(const riddle::ast::expression *const min_e, const riddle::ast::expression *const max_e) : riddle::ast::range_expression(min_e, max_e) {}
 range_expression::~range_expression() {}
@@ -57,7 +60,7 @@ expr range_expression::evaluate(const scope &scp, context &ctx) const
     return var;
 }
 
-constructor_expression::constructor_expression(const std::vector<std::string> &it, const std::vector<riddle::ast::expression *> &es) : riddle::ast::constructor_expression(it, es) {}
+constructor_expression::constructor_expression(const std::vector<std::string> &it, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::constructor_expression(it, es) {}
 constructor_expression::~constructor_expression() {}
 expr constructor_expression::evaluate(const scope &scp, context &ctx) const
 {
@@ -81,8 +84,8 @@ eq_expression::eq_expression(const riddle::ast::expression *const l, const riddl
 eq_expression::~eq_expression() {}
 expr eq_expression::evaluate(const scope &scp, context &ctx) const
 {
-    expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
-    expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
+    expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
+    expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
     return scp.get_core().eq(l, r);
 }
 
@@ -90,8 +93,8 @@ neq_expression::neq_expression(const riddle::ast::expression *const l, const rid
 neq_expression::~neq_expression() {}
 expr neq_expression::evaluate(const scope &scp, context &ctx) const
 {
-    expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
-    expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
+    expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
+    expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
     return scp.get_core().negate(scp.get_core().eq(l, r));
 }
 
@@ -99,8 +102,8 @@ lt_expression::lt_expression(const riddle::ast::expression *const l, const riddl
 lt_expression::~lt_expression() {}
 expr lt_expression::evaluate(const scope &scp, context &ctx) const
 {
-    arith_expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
-    arith_expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
+    arith_expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
+    arith_expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
     return scp.get_core().lt(l, r);
 }
 
@@ -108,8 +111,8 @@ leq_expression::leq_expression(const riddle::ast::expression *const l, const rid
 leq_expression::~leq_expression() {}
 expr leq_expression::evaluate(const scope &scp, context &ctx) const
 {
-    arith_expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
-    arith_expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
+    arith_expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
+    arith_expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
     return scp.get_core().leq(l, r);
 }
 
@@ -117,8 +120,8 @@ geq_expression::geq_expression(const riddle::ast::expression *const l, const rid
 geq_expression::~geq_expression() {}
 expr geq_expression::evaluate(const scope &scp, context &ctx) const
 {
-    arith_expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
-    arith_expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
+    arith_expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
+    arith_expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
     return scp.get_core().geq(l, r);
 }
 
@@ -126,12 +129,12 @@ gt_expression::gt_expression(const riddle::ast::expression *const l, const riddl
 gt_expression::~gt_expression() {}
 expr gt_expression::evaluate(const scope &scp, context &ctx) const
 {
-    arith_expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
-    arith_expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
+    arith_expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
+    arith_expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
     return scp.get_core().gt(l, r);
 }
 
-function_expression::function_expression(const std::vector<std::string> &is, const std::string &fn, const std::vector<riddle::ast::expression *> &es) : riddle::ast::function_expression(is, fn, es) {}
+function_expression::function_expression(const std::vector<std::string> &is, const std::string &fn, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::function_expression(is, fn, es) {}
 function_expression::~function_expression() {}
 expr function_expression::evaluate(const scope &scp, context &ctx) const
 {
@@ -181,7 +184,7 @@ expr implication_expression::evaluate(const scope &scp, context &ctx) const
     return scp.get_core().disj({scp.get_core().negate(l), r});
 }
 
-disjunction_expression::disjunction_expression(const std::vector<riddle::ast::expression *> &es) : riddle::ast::disjunction_expression(es) {}
+disjunction_expression::disjunction_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::disjunction_expression(es) {}
 disjunction_expression::~disjunction_expression() {}
 expr disjunction_expression::evaluate(const scope &scp, context &ctx) const
 {
@@ -191,7 +194,7 @@ expr disjunction_expression::evaluate(const scope &scp, context &ctx) const
     return scp.get_core().disj(exprs);
 }
 
-conjunction_expression::conjunction_expression(const std::vector<riddle::ast::expression *> &es) : riddle::ast::conjunction_expression(es) {}
+conjunction_expression::conjunction_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::conjunction_expression(es) {}
 conjunction_expression::~conjunction_expression() {}
 expr conjunction_expression::evaluate(const scope &scp, context &ctx) const
 {
@@ -201,7 +204,7 @@ expr conjunction_expression::evaluate(const scope &scp, context &ctx) const
     return scp.get_core().conj(exprs);
 }
 
-exct_one_expression::exct_one_expression(const std::vector<riddle::ast::expression *> &es) : riddle::ast::exct_one_expression(es) {}
+exct_one_expression::exct_one_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::exct_one_expression(es) {}
 exct_one_expression::~exct_one_expression() {}
 expr exct_one_expression::evaluate(const scope &scp, context &ctx) const
 {
@@ -211,7 +214,7 @@ expr exct_one_expression::evaluate(const scope &scp, context &ctx) const
     return scp.get_core().exct_one(exprs);
 }
 
-addition_expression::addition_expression(const std::vector<riddle::ast::expression *> &es) : riddle::ast::addition_expression(es) {}
+addition_expression::addition_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::addition_expression(es) {}
 addition_expression::~addition_expression() {}
 expr addition_expression::evaluate(const scope &scp, context &ctx) const
 {
@@ -221,7 +224,7 @@ expr addition_expression::evaluate(const scope &scp, context &ctx) const
     return scp.get_core().add(exprs);
 }
 
-subtraction_expression::subtraction_expression(const std::vector<riddle::ast::expression *> &es) : riddle::ast::subtraction_expression(es) {}
+subtraction_expression::subtraction_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::subtraction_expression(es) {}
 subtraction_expression::~subtraction_expression() {}
 expr subtraction_expression::evaluate(const scope &scp, context &ctx) const
 {
@@ -231,7 +234,7 @@ expr subtraction_expression::evaluate(const scope &scp, context &ctx) const
     return scp.get_core().sub(exprs);
 }
 
-multiplication_expression::multiplication_expression(const std::vector<riddle::ast::expression *> &es) : riddle::ast::multiplication_expression(es) {}
+multiplication_expression::multiplication_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::multiplication_expression(es) {}
 multiplication_expression::~multiplication_expression() {}
 expr multiplication_expression::evaluate(const scope &scp, context &ctx) const
 {
@@ -241,7 +244,7 @@ expr multiplication_expression::evaluate(const scope &scp, context &ctx) const
     return scp.get_core().mult(exprs);
 }
 
-division_expression::division_expression(const std::vector<riddle::ast::expression *> &es) : riddle::ast::division_expression(es) {}
+division_expression::division_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::division_expression(es) {}
 division_expression::~division_expression() {}
 expr division_expression::evaluate(const scope &scp, context &ctx) const
 {
@@ -250,6 +253,177 @@ expr division_expression::evaluate(const scope &scp, context &ctx) const
         exprs.push_back(static_cast<const ast::expression *>(e)->evaluate(scp, ctx));
     return scp.get_core().div(exprs);
 }
+
+statement::statement() {}
+statement::~statement() {}
+
+local_field_statement::local_field_statement(const std::vector<std::string> &ft, const std::string &n, const riddle::ast::expression *const e) : riddle::ast::local_field_statement(ft, n, e) {}
+local_field_statement::~local_field_statement() {}
+void local_field_statement::execute(const scope &scp, context &ctx) const
+{
+    if (xpr)
+        ctx->exprs.insert({name, static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)});
+    else
+    {
+        scope *s = const_cast<scope *>(&scp);
+        for (const auto &tp : field_type)
+            s = &s->get_type(tp);
+        type *t = static_cast<type *>(s);
+        if (t->is_primitive())
+            ctx->exprs.insert({name, t->new_instance(ctx)});
+        else
+            ctx->exprs.insert({name, t->new_existential()});
+    }
+    if (const core *c = dynamic_cast<const core *>(&scp)) // we create fields for root items..
+        const_cast<core *>(c)->fields.insert({name, new field(ctx->exprs.at(name)->get_type(), name)});
+}
+
+assignment_statement::assignment_statement(const std::vector<std::string> &is, const std::string &i, const riddle::ast::expression *const e) : riddle::ast::assignment_statement(is, i, e) {}
+assignment_statement::~assignment_statement() {}
+void assignment_statement::execute(const scope &scp, context &ctx) const
+{
+    env *c_e = &*ctx;
+    for (const auto &c_id : ids)
+        c_e = &*c_e->get(c_id);
+    c_e->exprs.insert({id, static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)});
+}
+
+expression_statement::expression_statement(const riddle::ast::expression *const e) : riddle::ast::expression_statement(e) {}
+expression_statement::~expression_statement() {}
+void expression_statement::execute(const scope &scp, context &ctx) const
+{
+    bool_expr be = static_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx);
+    if (scp.get_core().get_sat_core().value(be->l) != smt::False)
+        scp.get_core().assert_facts({be->l});
+    else
+        throw std::runtime_error("the problem is inconsistent..");
+}
+
+disjunction_statement::disjunction_statement(const std::vector<std::pair<const std::vector<const riddle::ast::statement *>, const riddle::ast::expression *const>> &conjs) : riddle::ast::disjunction_statement(conjs) {}
+disjunction_statement::~disjunction_statement() {}
+void disjunction_statement::execute(const scope &scp, context &ctx) const
+{
+    std::vector<const conjunction *> cs;
+    for (const auto &c : conjunctions)
+    {
+        smt::rational cost(1);
+        if (c.second)
+        {
+            arith_expr a_xpr = static_cast<const ast::expression *const>(c.second)->evaluate(scp, ctx);
+            cost = a_xpr->l.known_term;
+        }
+        cs.push_back(new conjunction(scp.get_core(), const_cast<scope &>(scp), cost, c.first));
+    }
+    disjunction *d = new disjunction(scp.get_core(), const_cast<scope &>(scp), cs);
+    scp.get_core().new_disjunction(ctx, *d);
+}
+
+conjunction_statement::conjunction_statement(const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::conjunction_statement(stmnts) {}
+conjunction_statement::~conjunction_statement() {}
+void conjunction_statement::execute(const scope &scp, context &ctx) const
+{
+    for (const auto &st : statements)
+        static_cast<const ast::statement *>(st)->execute(scp, ctx);
+}
+
+formula_statement::formula_statement(const bool &isf, const std::string &fn, const std::vector<std::string> &scp, const std::string &pn, const std::vector<std::pair<const std::string, const riddle::ast::expression *const>> &assns) : riddle::ast::formula_statement(isf, fn, scp, pn, assns) {}
+formula_statement::~formula_statement() {}
+void formula_statement::execute(const scope &scp, context &ctx) const
+{
+    predicate *p = nullptr;
+    std::unordered_map<std::string, expr> assgnments;
+    if (!formula_scope.empty()) // the scope is explicitely declared..
+    {
+        env *c_scope = &*ctx;
+        for (const auto &s : formula_scope)
+            c_scope = &*c_scope->get(s);
+        p = &static_cast<item *>(c_scope)->get_type().get_predicate(predicate_name);
+
+        if (var_item *ee = dynamic_cast<var_item *>(c_scope)) // the scope is an enumerative expression..
+            assgnments.insert({TAU, ee});
+        else // the scope is a single item..
+            assgnments.insert({TAU, context(c_scope)});
+    }
+    else
+    {
+        p = &scp.get_predicate(predicate_name);
+        if (&p->get_scope() != &scp.get_core()) // we inherit the scope..
+            assgnments.insert({TAU, ctx->get(TAU)});
+    }
+
+    for (const auto &a : assignments)
+    {
+        expr e = static_cast<const ast::expression *>(a.second)->evaluate(scp, ctx);
+        const type &tt = p->get_field(a.first).get_type(); // the target type..
+        if (tt.is_assignable_from(e->get_type()))          // the target type is a superclass of the assignment..
+            assgnments.insert({a.first, e});
+        else if (e->get_type().is_assignable_from(tt))        // the target type is a subclass of the assignment..
+            if (var_item *ae = dynamic_cast<var_item *>(&*e)) // some of the allowed values might be inhibited..
+            {
+                std::unordered_set<smt::var_value *> alwd_vals = scp.get_core().get_ov_theory().value(ae->ev); // the allowed values..
+                std::vector<smt::lit> not_alwd_vals;                                                           // the not allowed values..
+                for (const auto &ev : alwd_vals)
+                    if (!tt.is_assignable_from(static_cast<item *>(ev)->get_type())) // the target type is not a superclass of the value..
+                        not_alwd_vals.push_back(smt::lit(scp.get_core().get_ov_theory().allows(ae->ev, *ev), false));
+                if (alwd_vals.size() == not_alwd_vals.size())                  // none of the values is allowed..
+                    throw std::runtime_error("the problem is inconsistent.."); // no need to go further..
+                else
+                    scp.get_core().assert_facts(not_alwd_vals); // we inhibit the not allowed values..
+            }
+            else
+                throw std::runtime_error("the problem is inconsistent..");
+        else
+            throw std::runtime_error("the problem is inconsistent..");
+    }
+
+    atom *a;
+    if (assgnments.find(TAU) == assgnments.end())
+    {
+        // the new atom's scope is the core..
+        context c_scope = &scp.get_core();
+        a = static_cast<atom *>(&*p->new_instance(c_scope));
+    }
+    else
+    {
+        // we have computed the new atom's scope above..
+        context c_scope = assgnments.at(TAU);
+        a = static_cast<atom *>(&*p->new_instance(c_scope));
+    }
+
+    // we assign fields..
+    a->exprs.insert(assgnments.begin(), assgnments.end());
+
+    // we initialize atom's fields..
+    std::queue<predicate *> q;
+    q.push(p);
+    while (!q.empty())
+    {
+        for (const auto &arg : q.front()->get_args())
+            if (a->exprs.find(arg->get_name()) == a->exprs.end())
+            {
+                // the field is uninstantiated..
+                type &tp = const_cast<type &>(arg->get_type());
+                if (tp.is_primitive())
+                    a->exprs.insert({arg->get_name(), tp.new_instance(ctx)});
+                else
+                    a->exprs.insert({arg->get_name(), tp.new_existential()});
+            }
+        for (const auto &sp : q.front()->get_supertypes())
+            q.push(static_cast<predicate *>(sp));
+        q.pop();
+    }
+
+    if (is_fact)
+        scp.get_core().new_fact(*a);
+    else
+        scp.get_core().new_goal(*a);
+
+    ctx->exprs.insert({formula_name, expr(a)});
+}
+
+return_statement::return_statement(const riddle::ast::expression *const e) : riddle::ast::return_statement(e) {}
+return_statement::~return_statement() {}
+void return_statement::execute(const scope &scp, context &ctx) const { ctx->exprs.insert({RETURN_KEYWORD, static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)}); }
 } // namespace ast
 
 riddle_parser::riddle_parser(std::istream &is) : parser(is) {}

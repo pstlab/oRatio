@@ -41,10 +41,10 @@ compilation_unit *parser::parse()
 {
     tk = next();
 
-    std::vector<type_declaration *> ts;
-    std::vector<method_declaration *> ms;
-    std::vector<predicate_declaration *> ps;
-    std::vector<statement *> stmnts;
+    std::vector<const type_declaration *> ts;
+    std::vector<const method_declaration *> ms;
+    std::vector<const predicate_declaration *> ps;
+    std::vector<const statement *> stmnts;
 
     while (tk->sym != EOF_ID)
     {
@@ -208,13 +208,13 @@ enum_declaration *parser::_enum_declaration()
 
 class_declaration *parser::_class_declaration()
 {
-    std::string n;                             // the name of the class..
-    std::vector<std::vector<std::string>> bcs; // the base classes..
-    std::vector<field_declaration *> fs;       // the fields of the class..
-    std::vector<constructor_declaration *> cs; // the constructors of the class..
-    std::vector<method_declaration *> ms;      // the methods of the class..
-    std::vector<predicate_declaration *> ps;   // the predicates of the class..
-    std::vector<type_declaration *> ts;        // the types of the class..
+    std::string n;                                   // the name of the class..
+    std::vector<std::vector<std::string>> bcs;       // the base classes..
+    std::vector<const field_declaration *> fs;       // the fields of the class..
+    std::vector<const constructor_declaration *> cs; // the constructors of the class..
+    std::vector<const method_declaration *> ms;      // the methods of the class..
+    std::vector<const predicate_declaration *> ps;   // the predicates of the class..
+    std::vector<const type_declaration *> ts;        // the types of the class..
 
     if (!match(CLASS_ID))
         error("expected 'class'..");
@@ -350,7 +350,7 @@ field_declaration *parser::_field_declaration()
 {
     std::vector<std::string> tp;
     std::string n;
-    std::vector<variable_declaration *> ds;
+    std::vector<const variable_declaration *> ds;
 
     switch (tk->sym)
     {
@@ -415,8 +415,8 @@ method_declaration *parser::_method_declaration()
 {
     std::vector<std::string> rt;
     std::string n;
-    std::vector<std::pair<std::vector<std::string>, std::string>> pars;
-    std::vector<statement *> stmnts;
+    std::vector<std::pair<const std::vector<std::string>, const std::string>> pars;
+    std::vector<const statement *> stmnts;
 
     if (!match(VOID_ID))
     {
@@ -492,9 +492,9 @@ method_declaration *parser::_method_declaration()
 
 constructor_declaration *parser::_constructor_declaration()
 {
-    std::vector<std::pair<std::vector<std::string>, std::string>> pars;
-    std::vector<std::pair<std::string, std::vector<expression *>>> il;
-    std::vector<statement *> stmnts;
+    std::vector<std::pair<const std::vector<std::string>, const std::string>> pars;
+    std::vector<std::pair<const std::string, const std::vector<const expression *>>> il;
+    std::vector<const statement *> stmnts;
 
     if (!match(ID_ID))
         error("expected identifier..");
@@ -551,7 +551,7 @@ constructor_declaration *parser::_constructor_declaration()
         do
         {
             std::string pn;
-            std::vector<expression *> xprs;
+            std::vector<const expression *> xprs;
             if (!match(ID_ID))
                 error("expected identifier..");
             pn = static_cast<id_token *>(tks[pos - 2])->id;
@@ -585,9 +585,9 @@ constructor_declaration *parser::_constructor_declaration()
 predicate_declaration *parser::_predicate_declaration()
 {
     std::string n;
-    std::vector<std::pair<std::vector<std::string>, std::string>> pars;
+    std::vector<std::pair<const std::vector<std::string>, const std::string>> pars;
     std::vector<std::vector<std::string>> pl;
-    std::vector<statement *> stmnts;
+    std::vector<const statement *> stmnts;
 
     if (!match(PREDICATE_ID))
         error("expected 'predicate'..");
@@ -789,7 +789,7 @@ statement *parser::_statement()
         case LBRACKET_ID:
         case OR_ID: // a disjunctive statement..
         {
-            std::vector<std::pair<std::vector<const statement *>, const expression *const>> conjs;
+            std::vector<std::pair<const std::vector<const statement *>, const expression *const>> conjs;
             expression *e = nullptr;
             if (match(LBRACKET_ID))
             {
@@ -830,7 +830,7 @@ statement *parser::_statement()
         std::string fn;
         std::vector<std::string> scp;
         std::string pn;
-        std::vector<std::pair<std::string, const expression *>> assns;
+        std::vector<std::pair<const std::string, const expression *const>> assns;
 
         if (!match(ID_ID))
             error("expected identifier..");
@@ -989,7 +989,7 @@ expression *parser::_expression(const size_t &pr)
             ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
         } while (match(DOT_ID));
 
-        std::vector<expression *> xprs;
+        std::vector<const expression *> xprs;
         if (!match(LPAREN_ID))
             error("expected '('..");
 
@@ -1023,7 +1023,7 @@ expression *parser::_expression(const size_t &pr)
             tk = next();
             std::string fn = is.back();
             is.pop_back();
-            std::vector<expression *> xprs;
+            std::vector<const expression *> xprs;
             if (!match(LPAREN_ID))
                 error("expected '('..");
 
@@ -1114,7 +1114,7 @@ expression *parser::_expression(const size_t &pr)
         case BAR_ID:
         {
             assert(1 >= pr);
-            std::vector<expression *> xprs;
+            std::vector<const expression *> xprs;
             xprs.push_back(e);
 
             while (match(BAR_ID))
@@ -1126,7 +1126,7 @@ expression *parser::_expression(const size_t &pr)
         case AMP_ID:
         {
             assert(1 >= pr);
-            std::vector<expression *> xprs;
+            std::vector<const expression *> xprs;
             xprs.push_back(e);
 
             while (match(AMP_ID))
@@ -1138,7 +1138,7 @@ expression *parser::_expression(const size_t &pr)
         case CARET_ID:
         {
             assert(1 >= pr);
-            std::vector<expression *> xprs;
+            std::vector<const expression *> xprs;
             xprs.push_back(e);
 
             while (match(CARET_ID))
@@ -1150,7 +1150,7 @@ expression *parser::_expression(const size_t &pr)
         case PLUS_ID:
         {
             assert(2 >= pr);
-            std::vector<expression *> xprs;
+            std::vector<const expression *> xprs;
             xprs.push_back(e);
 
             while (match(PLUS_ID))
@@ -1162,7 +1162,7 @@ expression *parser::_expression(const size_t &pr)
         case MINUS_ID:
         {
             assert(2 >= pr);
-            std::vector<expression *> xprs;
+            std::vector<const expression *> xprs;
             xprs.push_back(e);
 
             while (match(MINUS_ID))
@@ -1174,7 +1174,7 @@ expression *parser::_expression(const size_t &pr)
         case STAR_ID:
         {
             assert(3 >= pr);
-            std::vector<expression *> xprs;
+            std::vector<const expression *> xprs;
             xprs.push_back(e);
 
             while (match(STAR_ID))
@@ -1186,7 +1186,7 @@ expression *parser::_expression(const size_t &pr)
         case SLASH_ID:
         {
             assert(3 >= pr);
-            std::vector<expression *> xprs;
+            std::vector<const expression *> xprs;
             xprs.push_back(e);
 
             while (match(SLASH_ID))

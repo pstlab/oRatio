@@ -263,4 +263,10 @@ expr core::get(const std::string &name) const
 
     throw std::out_of_range(name);
 }
+
+lbool core::bool_value(const bool_expr &x) const noexcept { return sat_cr.value(x->l); }
+inf_rational core::arith_lb(const arith_expr &x) const noexcept { return lra_th.lb(x->l); }
+inf_rational core::arith_ub(const arith_expr &x) const noexcept { return lra_th.ub(x->l); }
+inf_rational core::arith_value(const arith_expr &x) const noexcept { return lra_th.value(x->l); }
+std::unordered_set<var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th.value(x->ev); }
 } // namespace ratio

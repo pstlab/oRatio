@@ -2,6 +2,11 @@
 
 #include "type.h"
 
+namespace riddle::ast
+{
+class statement;
+} // namespace riddle::ast
+
 namespace ratio
 {
 
@@ -11,7 +16,7 @@ class atom;
 class predicate : public type
 {
 public:
-  predicate(core &cr, scope &scp, const std::string &name, const std::vector<field *> &args);
+  predicate(core &cr, scope &scp, const std::string &name, const std::vector<field *> &args, const std::vector<riddle::ast::statement *> &stmnts);
   predicate(const predicate &orig) = delete;
   virtual ~predicate();
 
@@ -21,7 +26,8 @@ public:
 
   void apply_rule(atom &a) const; // applies the rule associated to this predicate to the given atom..
 
-protected:
-  const std::vector<field *> args;
+private:
+  const std::vector<field *> args;                        // the arguments of the predicate..
+  const std::vector<riddle::ast::statement *> statements; // the statements constituting the rule's body..
 };
 } // namespace ratio

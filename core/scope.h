@@ -17,10 +17,16 @@ class method;
 class type;
 class predicate;
 
+namespace ast
+{
+class local_field_statement;
+} // namespace ast
+
 class scope
 {
   friend class core;
   friend class type;
+  friend class ast::local_field_statement;
 
 public:
   scope(core &cr, scope &scp);

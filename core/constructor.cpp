@@ -2,14 +2,15 @@
 #include "field.h"
 #include "type.h"
 #include "item.h"
+#include "riddle_parser.h"
 #include <cassert>
 
 namespace ratio
 {
 
-constructor::constructor(core &cr, scope &scp, const std::vector<field *> &args) : scope(cr, scp), args(args)
+constructor::constructor(core &cr, scope &scp, const std::vector<field *> &args, const std::vector<std::pair<std::string, std::vector<riddle::ast::expression *>>> &il, const std::vector<riddle::ast::statement *> &stmnts) : scope(cr, scp), args(args), init_list(il), statements(stmnts)
 {
-    new_fields({new field(static_cast<type &>(scp), THIS_KEYWORD, true)});
+    new_fields({new field(static_cast<type &>(scp), THIS_KEYWORD, nullptr, true)});
     new_fields(args);
 }
 
@@ -27,5 +28,63 @@ expr constructor::new_instance(context &ctx, const std::vector<expr> &exprs) con
     return i;
 }
 
-void constructor::invoke(item &itm, const std::vector<expr> &exprs) const {}
+void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
+{
+    context ctx(new env(get_core(), &itm));
+    ctx->exprs.insert({THIS_KEYWORD, expr(&itm)});
+    for (size_t i = 0; i < args.size(); i++)
+        ctx->exprs.insert({args.at(i)->get_name(), exprs.at(i)});
+
+    // we initialize the supertypes..
+    size_t il_idx = 0;
+    for (const auto &st : static_cast<type &>(get_scope()).get_supertypes())
+        if (il_idx < init_list.size() && init_list.at(il_idx).first.compare(st->get_name()) == 0) // explicit supertype constructor invocation..
+        {
+            std::vector<expr> c_exprs;
+            std::vector<const type *> par_types;
+            for (const auto &ex : init_list.at(il_idx).second)
+            {
+                expr c_expr = static_cast<ast::expression *>(ex)->evaluate(*this, ctx);
+                c_exprs.push_back(c_expr);
+                par_types.push_back(&c_expr->get_type());
+            }
+
+            // we assume that the constructor exists..
+            st->get_constructor(par_types).invoke(itm, c_exprs);
+            il_idx++;
+        }
+        else // implicit supertype (default) constructor invocation..
+        {
+            // we assume that the default constructor exists..
+            st->get_constructor({}).invoke(itm, {});
+        }
+
+    // we procede with the assignment list..
+    for (; il_idx < init_list.size(); il_idx++)
+    {
+        assert(init_list[il_idx].second.size() == 1);
+        itm.exprs.insert({init_list[il_idx].first, static_cast<const ast::expression *>(init_list[il_idx].second[0])->evaluate(*this, ctx)});
+    }
+
+    // we instantiate the uninstantiated fields..
+    for (const auto &f : get_scope().get_fields())
+        if (!f.second->is_synthetic() && itm.exprs.find((f.second->get_name())) == itm.exprs.end())
+        {
+            // the field is uninstantiated..
+            if (f.second->get_expression())
+                itm.exprs.insert({f.second->get_name(), static_cast<const ast::expression *>(f.second->get_expression())->evaluate(*this, ctx)});
+            else
+            {
+                type &tp = const_cast<type &>(f.second->get_type());
+                if (tp.is_primitive())
+                    itm.exprs.insert({f.second->get_name(), tp.new_instance(ctx)});
+                else
+                    itm.exprs.insert({f.second->get_name(), tp.new_existential()});
+            }
+        }
+
+    // finally, we execute the constructor body..
+    for (const auto &s : statements)
+        static_cast<const ast::statement *>(s)->execute(*this, ctx);
+}
 } // namespace ratio

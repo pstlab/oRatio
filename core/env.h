@@ -13,6 +13,14 @@ class constructor;
 class method;
 class predicate;
 
+namespace ast
+{
+class local_field_statement;
+class assignment_statement;
+class formula_statement;
+class return_statement;
+} // namespace ast
+
 class env
 {
   friend class context;
@@ -21,6 +29,10 @@ class env
   friend class method;
   friend class predicate;
   friend class var_item;
+  friend class ast::local_field_statement;
+  friend class ast::assignment_statement;
+  friend class ast::formula_statement;
+  friend class ast::return_statement;
 
 public:
   env(core &cr, const context ctx);
