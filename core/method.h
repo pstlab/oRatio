@@ -20,13 +20,13 @@ class method : public scope
   friend class type;
 
 public:
-  method(core &cr, scope &scp, const type *const return_type, const std::string &name, const std::vector<field *> &args, const std::vector<riddle::ast::statement *> &stmnts);
+  method(core &cr, scope &scp, const type *const return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
   method(const method &orig) = delete;
   virtual ~method();
 
-  const type *get_return_type() const { return return_type; }  // returns the return type of this method (can be nullptr)..
-  std::string get_name() const { return name; }                // returns the name of this method..
-  const std::vector<field *> get_args() const { return args; } // returns the list of arguments of this method..
+  const type *get_return_type() const { return return_type; }        // returns the return type of this method (can be nullptr)..
+  std::string get_name() const { return name; }                      // returns the name of this method..
+  const std::vector<const field *> get_args() const { return args; } // returns the list of arguments of this method..
 
   item *invoke(context &ctx, const std::vector<expr> &exprs) const;
 
@@ -35,7 +35,7 @@ private:
   const std::string name;        // the name of this method..
 
 private:
-  const std::vector<field *> args;                        // the arguments of this paper..
-  const std::vector<riddle::ast::statement *> statements; // the statements within the method's body..
+  const std::vector<const field *> args;                        // the arguments of this paper..
+  const std::vector<const riddle::ast::statement *> statements; // the statements within the method's body..
 };
 } // namespace ratio

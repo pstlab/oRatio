@@ -495,12 +495,9 @@ protected:
 class type_declaration
 {
 public:
-  type_declaration(const std::string &n) : name(n) {}
+  type_declaration() {}
   type_declaration(const type_declaration &orig) = delete;
   virtual ~type_declaration() {}
-
-protected:
-  const std::string name;
 };
 
 class method_declaration
@@ -542,11 +539,12 @@ protected:
 class typedef_declaration : public type_declaration
 {
 public:
-  typedef_declaration(const std::string &n, const std::string &pt, const expression *const e) : type_declaration(n), primitive_type(pt), xpr(e) {}
+  typedef_declaration(const std::string &n, const std::string &pt, const expression *const e) : name(n), primitive_type(pt), xpr(e) {}
   typedef_declaration(const typedef_declaration &orig) = delete;
   virtual ~typedef_declaration() { delete xpr; }
 
 protected:
+  const std::string name;
   const std::string primitive_type;
   const expression *const xpr;
 };
@@ -554,11 +552,12 @@ protected:
 class enum_declaration : public type_declaration
 {
 public:
-  enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs) : type_declaration(n), enums(es), type_refs(trs) {}
+  enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs) : name(n), enums(es), type_refs(trs) {}
   enum_declaration(const enum_declaration &orig) = delete;
   virtual ~enum_declaration() {}
 
 protected:
+  const std::string name;
   const std::vector<std::string> enums;
   const std::vector<std::vector<std::string>> type_refs;
 };
@@ -616,7 +615,7 @@ protected:
 class class_declaration : public type_declaration
 {
 public:
-  class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const field_declaration *> &fs, const std::vector<const constructor_declaration *> &cs, const std::vector<const method_declaration *> &ms, const std::vector<const predicate_declaration *> &ps, const std::vector<const type_declaration *> &ts) : type_declaration(n), base_classes(bcs), fields(fs), constructors(cs), methods(ms), predicates(ps), types(ts) {}
+  class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const field_declaration *> &fs, const std::vector<const constructor_declaration *> &cs, const std::vector<const method_declaration *> &ms, const std::vector<const predicate_declaration *> &ps, const std::vector<const type_declaration *> &ts) : name(n), base_classes(bcs), fields(fs), constructors(cs), methods(ms), predicates(ps), types(ts) {}
   class_declaration(const class_declaration &orig) = delete;
   virtual ~class_declaration()
   {
@@ -633,6 +632,7 @@ public:
   }
 
 protected:
+  const std::string name;
   const std::vector<std::vector<std::string>> base_classes;
   const std::vector<const field_declaration *> fields;
   const std::vector<const constructor_declaration *> constructors;

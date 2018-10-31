@@ -20,6 +20,7 @@ class predicate;
 namespace ast
 {
 class local_field_statement;
+class field_declaration;
 } // namespace ast
 
 class scope
@@ -27,6 +28,7 @@ class scope
   friend class core;
   friend class type;
   friend class ast::local_field_statement;
+  friend class ast::field_declaration;
 
 public:
   scope(core &cr, scope &scp);
@@ -36,8 +38,8 @@ public:
   core &get_core() const { return cr; }    // returns the core in which this scope is defined..
   scope &get_scope() const { return scp; } // returns the enclosing scope..
 
-  virtual field &get_field(const std::string &name) const;    // returns the field having the given name, check in the enclosed scope if the field is not found..
-  std::map<std::string, field *> get_fields() const noexcept; // returns a map of fields defined within this scope having the fields' names as keys..
+  virtual const field &get_field(const std::string &name) const;          // returns the field having the given name, check in the enclosed scope if the field is not found..
+  std::map<std::string, const field *> get_fields() const noexcept; // returns a map of fields defined within this scope having the fields' names as keys..
 
   virtual const method &get_method(const std::string &name, const std::vector<const type *> &ts) const; // returns the method having the given name and the given argument types, check in the enclosed scope if the type is not found..
   virtual std::vector<const method *> get_methods() const noexcept;                                     // returns the vector of methods defined within this scope..
@@ -49,14 +51,14 @@ public:
   virtual std::map<std::string, predicate *> get_predicates() const noexcept; // returns a map of predicates defined within this scope having the predicates' names as keys..
 
 protected:
-  static void new_fields(scope &s, const std::vector<field *> &fs);
-  void new_fields(const std::vector<field *> &fs);
+  static void new_fields(scope &s, const std::vector<const field *> &fs);
+  void new_fields(const std::vector<const field *> &fs);
 
 private:
   core &cr;   // the core in which this scope is defined..
   scope &scp; // the enclosing scope..
 
 private:
-  std::map<std::string, field *> fields; // the fields of this scope..
+  std::map<std::string, const field *> fields; // the fields of this scope..
 };
 } // namespace ratio

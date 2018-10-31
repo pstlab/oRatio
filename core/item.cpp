@@ -128,7 +128,7 @@ var_item::~var_item() {}
 
 expr var_item::get(const std::string &name) const
 {
-    std::map<std::string, field *> accessible_fields;
+    std::map<std::string, const field *> accessible_fields;
     std::queue<const type *> q;
     q.push(&get_type());
     while (!q.empty())

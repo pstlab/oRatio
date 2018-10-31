@@ -8,10 +8,28 @@ namespace ratio
 class expr;
 class context;
 class constructor;
+class enum_type;
+
+namespace ast
+{
+class method_declaration;
+class predicate_declaration;
+class typedef_declaration;
+class enum_declaration;
+class constructor_declaration;
+class class_declaration;
+} // namespace ast
 
 class type : public scope
 {
   friend class predicate;
+  friend class enum_type;
+  friend class ast::method_declaration;
+  friend class ast::predicate_declaration;
+  friend class ast::typedef_declaration;
+  friend class ast::enum_declaration;
+  friend class ast::constructor_declaration;
+  friend class ast::class_declaration;
 
 public:
   type(core &cr, scope &scp, const std::string &name, bool primitive = false);
@@ -39,7 +57,7 @@ public:
   const constructor &get_constructor(const std::vector<const type *> &ts) const;
   std::vector<const constructor *> get_constructors() const noexcept { return constructors; }
 
-  field &get_field(const std::string &name) const override; // returns the field having the given name..
+  const field &get_field(const std::string &name) const override; // returns the field having the given name..
 
   const method &get_method(const std::string &m_name, const std::vector<const type *> &ts) const override;
   std::vector<const method *> get_methods() const noexcept override
@@ -62,6 +80,9 @@ protected:
     for (const auto &st : sts)
       t.supertypes.push_back(st);
   }
+
+private:
+  virtual void new_predicate(predicate &) {}
 
 private:
   const std::string name;                                     // the name of this type..

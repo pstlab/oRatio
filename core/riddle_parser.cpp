@@ -3,6 +3,8 @@
 #include "field.h"
 #include "atom.h"
 #include "predicate.h"
+#include "typedef_type.h"
+#include "enum_type.h"
 #include "constructor.h"
 #include "method.h"
 #include "conjunction.h"
@@ -424,6 +426,230 @@ void formula_statement::execute(const scope &scp, context &ctx) const
 return_statement::return_statement(const riddle::ast::expression *const e) : riddle::ast::return_statement(e) {}
 return_statement::~return_statement() {}
 void return_statement::execute(const scope &scp, context &ctx) const { ctx->exprs.insert({RETURN_KEYWORD, static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)}); }
+
+type_declaration::type_declaration() {}
+type_declaration::~type_declaration() {}
+
+method_declaration::method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::method_declaration(rt, n, pars, stmnts) {}
+method_declaration::~method_declaration() {}
+void method_declaration::refine(scope &scp) const
+{
+    type *rt = nullptr;
+    if (!return_type.empty())
+    {
+        scope *s = &scp;
+        for (const auto &id : return_type)
+            s = &s->get_type(id);
+        rt = static_cast<type *>(s);
+    }
+
+    std::vector<const field *> args;
+    for (const auto &par : parameters)
+    {
+        scope *s = &scp;
+        for (const auto &id : par.first)
+            s = &s->get_type(id);
+        type *tp = static_cast<type *>(s);
+        args.push_back(new field(*tp, par.second));
+    }
+
+    method *m = new method(scp.get_core(), scp, rt, name, args, statements);
+
+    if (core *c = dynamic_cast<core *>(&scp))
+    {
+        if (c->methods.find(name) == c->methods.end())
+            c->methods.insert({name, *new std::vector<const method *>()});
+        c->methods.at(name).push_back(m);
+    }
+    else if (type *t = dynamic_cast<type *>(&scp))
+    {
+        if (t->methods.find(name) == t->methods.end())
+            t->methods.insert({name, *new std::vector<const method *>()});
+        t->methods.at(name).push_back(m);
+    }
+}
+
+predicate_declaration::predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::predicate_declaration(n, pars, pl, stmnts) {}
+predicate_declaration::~predicate_declaration() {}
+void predicate_declaration::refine(scope &scp) const
+{
+    std::vector<const field *> args;
+    for (const auto &par : parameters)
+    {
+        scope *s = &scp;
+        for (const auto &id : par.first)
+            s = &s->get_type(id);
+        type *tp = static_cast<type *>(s);
+        args.push_back(new field(*tp, par.second));
+    }
+
+    predicate *p = new predicate(scp.get_core(), scp, name, args, statements);
+
+    // we add the supertypes.. notice that we do not support forward declaration for predicate supertypes!!
+    for (const auto &sp : predicate_list)
+    {
+        scope *s = &scp;
+        for (const auto &id : sp)
+            s = &s->get_predicate(id);
+        p->supertypes.push_back(static_cast<predicate *>(s));
+    }
+
+    if (core *c = dynamic_cast<core *>(&scp))
+        c->predicates.insert({name, p});
+    else if (type *t = dynamic_cast<type *>(&scp))
+    {
+        t->predicates.insert({name, p});
+        std::queue<type *> q;
+        q.push(t);
+        while (!q.empty())
+        {
+            q.front()->new_predicate(*p);
+            for (const auto &st : q.front()->supertypes)
+                q.push(st);
+            q.pop();
+        }
+    }
+}
+
+typedef_declaration::typedef_declaration(const std::string &n, const std::string &pt, const riddle::ast::expression *const e) : riddle::ast::typedef_declaration(n, pt, e) {}
+typedef_declaration::~typedef_declaration() {}
+void typedef_declaration::declare(scope &scp) const
+{
+    // A new typedef type has been declared..
+    typedef_type *td = new typedef_type(scp.get_core(), scp, name, scp.get_type(primitive_type), xpr);
+
+    if (core *c = dynamic_cast<core *>(&scp))
+        c->types.insert({name, td});
+    else if (type *t = dynamic_cast<type *>(&scp))
+        t->types.insert({name, td});
+}
+
+enum_declaration::enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs) : riddle::ast::enum_declaration(n, es, trs) {}
+enum_declaration::~enum_declaration() {}
+void enum_declaration::declare(scope &scp) const
+{
+    // A new enum type has been declared..
+    enum_type *et = new enum_type(scp.get_core(), scp, name);
+
+    // We add the enum values..
+    for (const auto &e : enums)
+        et->instances.push_back(scp.get_core().new_string(e));
+
+    if (core *c = dynamic_cast<core *>(&scp))
+        c->types.insert({name, et});
+    else if (type *t = dynamic_cast<type *>(&scp))
+        t->types.insert({name, et});
+}
+void enum_declaration::refine(scope &scp) const
+{
+    if (!type_refs.empty())
+    {
+        enum_type *et = static_cast<enum_type *>(&scp.get_type(name));
+        for (const auto &tr : type_refs)
+        {
+            scope *s = &scp;
+            for (const auto &id : tr)
+                s = &s->get_type(id);
+            et->enums.push_back(static_cast<enum_type *>(s));
+        }
+    }
+}
+
+field_declaration::field_declaration(const std::vector<std::string> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds) : riddle::ast::field_declaration(tp, ds) {}
+field_declaration::~field_declaration() {}
+void field_declaration::refine(scope &scp) const
+{
+    // we add fields to the current scope..
+    scope *s = &scp;
+    for (const auto &id : field_type)
+        s = &s->get_type(id);
+    type *tp = static_cast<type *>(s);
+
+    for (const auto &vd : declarations)
+        scp.fields.insert({static_cast<const ast::variable_declaration *>(vd)->name, new field(*tp, static_cast<const ast::variable_declaration *>(vd)->name, static_cast<const ast::variable_declaration *>(vd)->xpr)});
+}
+
+constructor_declaration::constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::constructor_declaration(pars, il, stmnts) {}
+constructor_declaration::~constructor_declaration() {}
+void constructor_declaration::refine(scope &scp) const
+{
+    std::vector<const field *> args;
+    for (const auto &par : parameters)
+    {
+        scope *s = &scp;
+        for (const auto &id : par.first)
+            s = &s->get_type(id);
+        type *tp = static_cast<type *>(s);
+        args.push_back(new field(*tp, par.second));
+    }
+
+    static_cast<type &>(scp).constructors.push_back(new constructor(scp.get_core(), scp, args, init_list, statements));
+}
+
+class_declaration::class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts) : riddle::ast::class_declaration(n, bcs, fs, cs, ms, ps, ts) {}
+class_declaration::~class_declaration() {}
+void class_declaration::declare(scope &scp) const
+{
+    // A new type has been declared..
+    type *tp = new type(scp.get_core(), scp, name);
+
+    if (core *c = dynamic_cast<core *>(&scp))
+        c->types.insert({name, tp});
+    else if (type *t = dynamic_cast<type *>(&scp))
+        t->types.insert({name, tp});
+
+    for (const auto &c_tp : types)
+        static_cast<const ast::type_declaration *>(c_tp)->declare(*tp);
+}
+void class_declaration::refine(scope &scp) const
+{
+    type &tp = scp.get_type(name);
+    for (const auto &bc : base_classes)
+    {
+        scope *s = &scp;
+        for (const auto &id : bc)
+            s = &s->get_type(id);
+        tp.supertypes.push_back(static_cast<type *>(s));
+    }
+
+    for (const auto &f : fields)
+        static_cast<const ast::field_declaration *>(f)->refine(tp);
+
+    if (constructors.empty())
+        tp.constructors.push_back(new constructor(scp.get_core(), tp, {}, {}, {})); // we add a default constructor..
+    else
+        for (const auto &c : constructors)
+            static_cast<const ast::constructor_declaration *>(c)->refine(tp);
+
+    for (const auto &m : methods)
+        static_cast<const ast::method_declaration *>(m)->refine(tp);
+    for (const auto &p : predicates)
+        static_cast<const ast::predicate_declaration *>(p)->refine(tp);
+    for (const auto &t : types)
+        static_cast<const ast::type_declaration *>(t)->refine(tp);
+}
+
+compilation_unit::compilation_unit(const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::compilation_unit(ms, ps, ts, stmnts) {}
+compilation_unit::~compilation_unit() {}
+void compilation_unit::declare(scope &scp) const
+{
+    for (const auto &t : types)
+        static_cast<const ast::type_declaration *>(t)->declare(scp);
+}
+void compilation_unit::refine(scope &scp) const
+{
+    for (const auto &t : types)
+        static_cast<const ast::type_declaration *>(t)->refine(scp);
+    for (const auto &m : methods)
+        static_cast<const ast::method_declaration *>(m)->refine(scp);
+    for (const auto &p : predicates)
+        static_cast<const ast::predicate_declaration *>(p)->refine(scp);
+}
+void compilation_unit::execute(const scope &scp, context &ctx) const
+{
+    for (const auto &stmnt : statements)
+        static_cast<const ast::statement *>(stmnt)->execute(scp, ctx);
+}
 } // namespace ast
 
 riddle_parser::riddle_parser(std::istream &is) : parser(is) {}

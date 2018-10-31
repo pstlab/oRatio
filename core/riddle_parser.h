@@ -361,6 +361,111 @@ public:
 
   void execute(const scope &scp, context &ctx) const override;
 };
+
+class type_declaration : public riddle::ast::type_declaration
+{
+public:
+  type_declaration();
+  type_declaration(const type_declaration &orig) = delete;
+  virtual ~type_declaration();
+
+  virtual void declare(scope &) const {}
+  virtual void refine(scope &) const {}
+};
+
+class method_declaration : public riddle::ast::method_declaration
+{
+public:
+  method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<const riddle::ast::statement *> &stmnts);
+  method_declaration(const method_declaration &orig) = delete;
+  virtual ~method_declaration();
+
+  void refine(scope &scp) const;
+};
+
+class predicate_declaration : public riddle::ast::predicate_declaration
+{
+public:
+  predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const riddle::ast::statement *> &stmnts);
+  predicate_declaration(const predicate_declaration &orig) = delete;
+  virtual ~predicate_declaration();
+
+  void refine(scope &scp) const;
+};
+
+class typedef_declaration : public riddle::ast::typedef_declaration, public type_declaration
+{
+public:
+  typedef_declaration(const std::string &n, const std::string &pt, const riddle::ast::expression *const e);
+  typedef_declaration(const typedef_declaration &orig) = delete;
+  virtual ~typedef_declaration();
+
+  void declare(scope &scp) const override;
+};
+
+class enum_declaration : public riddle::ast::enum_declaration, public type_declaration
+{
+public:
+  enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs);
+  enum_declaration(const enum_declaration &orig) = delete;
+  virtual ~enum_declaration();
+
+  void declare(scope &scp) const override;
+  void refine(scope &scp) const override;
+};
+
+class variable_declaration : public riddle::ast::variable_declaration
+{
+  friend class field_declaration;
+
+public:
+  variable_declaration(const std::string &n, const riddle::ast::expression *const e = nullptr) : riddle::ast::variable_declaration(n, e) {}
+  variable_declaration(const variable_declaration &orig) = delete;
+  virtual ~variable_declaration() {}
+};
+
+class field_declaration : public riddle::ast::field_declaration
+{
+public:
+  field_declaration(const std::vector<std::string> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds);
+  field_declaration(const field_declaration &orig) = delete;
+  virtual ~field_declaration();
+
+  void refine(scope &scp) const;
+};
+
+class constructor_declaration : public riddle::ast::constructor_declaration
+{
+public:
+  constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts);
+  constructor_declaration(const constructor_declaration &orig) = delete;
+  virtual ~constructor_declaration();
+
+  void refine(scope &scp) const;
+};
+
+class class_declaration : public riddle::ast::class_declaration, public type_declaration
+{
+public:
+  class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts);
+  class_declaration(const class_declaration &orig) = delete;
+  virtual ~class_declaration();
+
+  void declare(scope &scp) const override;
+  void refine(scope &scp) const override;
+};
+
+class compilation_unit : public riddle::ast::compilation_unit
+{
+public:
+  compilation_unit(const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts, const std::vector<const riddle::ast::statement *> &stmnts);
+  compilation_unit(const compilation_unit &orig) = delete;
+  virtual ~compilation_unit();
+
+  void declare(scope &scp) const;
+  void refine(scope &scp) const;
+  void execute(const scope &scp, context &ctx) const;
+};
 } // namespace ast
 
 class riddle_parser : public riddle::parser
@@ -374,15 +479,15 @@ private:
   /**
    * The declarations.
    */
-  riddle::ast::method_declaration *new_method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<const riddle::ast::statement *> &stmnts) override { return new riddle::ast::method_declaration(rt, n, pars, stmnts); }
-  riddle::ast::predicate_declaration *new_predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const riddle::ast::statement *> &stmnts) override { return new riddle::ast::predicate_declaration(n, pars, pl, stmnts); }
-  riddle::ast::typedef_declaration *new_typedef_declaration(const std::string &n, const std::string &pt, const riddle::ast::expression *const e) override { return new riddle::ast::typedef_declaration(n, pt, e); }
-  riddle::ast::enum_declaration *new_enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs) override { return new riddle::ast::enum_declaration(n, es, trs); }
-  riddle::ast::class_declaration *new_class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts) override { return new riddle::ast::class_declaration(n, bcs, fs, cs, ms, ps, ts); }
-  riddle::ast::variable_declaration *new_variable_declaration(const std::string &n, const riddle::ast::expression *const e = nullptr) override { return new riddle::ast::variable_declaration(n, e); }
-  riddle::ast::field_declaration *new_field_declaration(const std::vector<std::string> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds) override { return new riddle::ast::field_declaration(tp, ds); }
-  riddle::ast::constructor_declaration *new_constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) override { return new riddle::ast::constructor_declaration(pars, il, stmnts); }
-  riddle::ast::compilation_unit *new_compilation_unit(const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts, const std::vector<const riddle::ast::statement *> &stmnts) override { return new riddle::ast::compilation_unit(ms, ps, ts, stmnts); }
+  ast::method_declaration *new_method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::method_declaration(rt, n, pars, stmnts); }
+  ast::predicate_declaration *new_predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::predicate_declaration(n, pars, pl, stmnts); }
+  ast::typedef_declaration *new_typedef_declaration(const std::string &n, const std::string &pt, const riddle::ast::expression *const e) override { return new ast::typedef_declaration(n, pt, e); }
+  ast::enum_declaration *new_enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs) override { return new ast::enum_declaration(n, es, trs); }
+  ast::class_declaration *new_class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts) override { return new ast::class_declaration(n, bcs, fs, cs, ms, ps, ts); }
+  ast::variable_declaration *new_variable_declaration(const std::string &n, const riddle::ast::expression *const e = nullptr) override { return new ast::variable_declaration(n, e); }
+  ast::field_declaration *new_field_declaration(const std::vector<std::string> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds) override { return new ast::field_declaration(tp, ds); }
+  ast::constructor_declaration *new_constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::constructor_declaration(pars, il, stmnts); }
+  ast::compilation_unit *new_compilation_unit(const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::compilation_unit(ms, ps, ts, stmnts); }
 
   /**
    * The statements.

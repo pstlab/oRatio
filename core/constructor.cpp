@@ -8,7 +8,7 @@
 namespace ratio
 {
 
-constructor::constructor(core &cr, scope &scp, const std::vector<field *> &args, const std::vector<std::pair<std::string, std::vector<riddle::ast::expression *>>> &il, const std::vector<riddle::ast::statement *> &stmnts) : scope(cr, scp), args(args), init_list(il), statements(stmnts)
+constructor::constructor(core &cr, scope &scp, const std::vector<const field *> &args, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) : scope(cr, scp), args(args), init_list(il), statements(stmnts)
 {
     new_fields({new field(static_cast<type &>(scp), THIS_KEYWORD, nullptr, true)});
     new_fields(args);
@@ -44,7 +44,7 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
             std::vector<const type *> par_types;
             for (const auto &ex : init_list.at(il_idx).second)
             {
-                expr c_expr = static_cast<ast::expression *>(ex)->evaluate(*this, ctx);
+                expr c_expr = static_cast<const ast::expression *>(ex)->evaluate(*this, ctx);
                 c_exprs.push_back(c_expr);
                 par_types.push_back(&c_expr->get_type());
             }

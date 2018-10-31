@@ -125,7 +125,7 @@ const constructor &type::get_constructor(const std::vector<const type *> &ts) co
     throw std::out_of_range(name);
 }
 
-field &type::get_field(const std::string &f_name) const
+const field &type::get_field(const std::string &f_name) const
 {
     const auto at_f = fields.find(f_name);
     if (at_f != fields.end())

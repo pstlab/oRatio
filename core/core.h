@@ -21,6 +21,11 @@ namespace ast
 {
 class formula_statement;
 class disjunction_statement;
+class method_declaration;
+class predicate_declaration;
+class typedef_declaration;
+class enum_declaration;
+class class_declaration;
 } // namespace ast
 
 class core : public scope, public env
@@ -28,6 +33,11 @@ class core : public scope, public env
   friend class var_item;
   friend class ast::formula_statement;
   friend class ast::disjunction_statement;
+  friend class ast::method_declaration;
+  friend class ast::predicate_declaration;
+  friend class ast::typedef_declaration;
+  friend class ast::enum_declaration;
+  friend class ast::class_declaration;
 
 public:
   core();
@@ -79,7 +89,7 @@ protected:
   void new_predicates(const std::vector<predicate *> &ps);
 
 public:
-  field &get_field(const std::string &name) const override; // returns the field having the given name..
+  const field &get_field(const std::string &name) const override; // returns the field having the given name..
 
   const method &get_method(const std::string &name, const std::vector<const type *> &ts) const override;
   std::vector<const method *> get_methods() const noexcept override

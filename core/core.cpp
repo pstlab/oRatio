@@ -200,7 +200,7 @@ void core::new_predicates(const std::vector<predicate *> &ps)
         predicates.insert({p->get_name(), p});
 }
 
-field &core::get_field(const std::string &name) const
+const field &core::get_field(const std::string &name) const
 {
     const auto at_f = fields.find(name);
     if (at_f != fields.end())
