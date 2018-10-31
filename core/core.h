@@ -11,6 +11,11 @@
 #define REAL_KEYWORD "real"
 #define STRING_KEYWORD "string"
 
+namespace riddle::ast
+{
+class compilation_unit;
+} // namespace riddle::ast
+
 namespace ratio
 {
 
@@ -47,6 +52,9 @@ public:
   smt::sat_core &get_sat_core() { return sat_cr; }     // returns the sat core..
   smt::lra_theory &get_lra_theory() { return lra_th; } // returns the linear-real-arithmetic theory..
   smt::ov_theory &get_ov_theory() { return ov_th; }    // returns the object-variable theory..
+
+  void read(const std::string &script);
+  void read(const std::vector<std::string> &files);
 
   bool_expr new_bool();
   bool_expr new_bool(const bool &val);
@@ -135,6 +143,8 @@ private:
   smt::sat_core sat_cr;   // the sat core..
   smt::lra_theory lra_th; // the linear-real-arithmetic theory..
   smt::ov_theory ov_th;   // the object-variable theory..
+
+  std::vector<riddle::ast::compilation_unit *> cus; // the compilation units..
 
   std::map<std::string, std::vector<const method *>> methods; // the methods, indexed by their name, defined within this type..
   std::map<std::string, type *> types;                        // the types, indexed by their name, defined within this core..

@@ -3,6 +3,10 @@
 #include "atom.h"
 #include "field.h"
 #include "method.h"
+#include "riddle_parser.h"
+#include <iostream>
+#include <sstream>
+#include <fstream>
 #include <cassert>
 
 using namespace smt;
@@ -26,6 +30,56 @@ core::~core()
     for (const auto &ms : methods)
         for (const auto &m : ms.second)
             delete m;
+
+    // we delete the compilation units..
+    for (const auto &cu : cus)
+        delete cu;
+}
+
+void core::read(const std::string &script)
+{
+    std::stringstream ss(script);
+    riddle_parser prs(ss);
+    ast::compilation_unit *cu = static_cast<ast::compilation_unit *>(prs.parse());
+    cus.push_back(cu);
+
+    cu->declare(*this);
+    cu->refine(*this);
+    context c_ctx(this);
+    cu->execute(*this, c_ctx);
+
+    if (!sat_cr.check())
+        throw std::runtime_error("the input problem is inconsistent");
+}
+
+void core::read(const std::vector<std::string> &files)
+{
+    std::vector<ast::compilation_unit *> c_cus;
+    for (const auto &f : files)
+    {
+        std::ifstream ifs(f);
+        if (ifs)
+        {
+            riddle_parser prs(ifs);
+            ast::compilation_unit *cu = static_cast<ast::compilation_unit *>(prs.parse());
+            ifs.close();
+            c_cus.push_back(cu);
+            cus.push_back(cu);
+        }
+        else
+            throw std::invalid_argument("file not found: " + f);
+    }
+
+    for (const auto &cu : c_cus)
+        cu->declare(*this);
+    for (const auto &cu : c_cus)
+        cu->refine(*this);
+    context c_ctx(this);
+    for (const auto &cu : c_cus)
+        cu->execute(*this, c_ctx);
+
+    if (!sat_cr.check())
+        throw std::runtime_error("the input problem is inconsistent");
 }
 
 bool_expr core::new_bool() { return new bool_item(*this, sat_cr.new_var()); }
