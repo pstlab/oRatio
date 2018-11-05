@@ -101,6 +101,8 @@ public:
   bool_type(core &cr);
   bool_type(const bool_type &that) = delete;
   virtual ~bool_type();
+
+  expr new_instance(context &ctx) override;
 };
 
 class int_type : public type
@@ -109,6 +111,8 @@ public:
   int_type(core &cr);
   int_type(const int_type &that) = delete;
   virtual ~int_type();
+
+  expr new_instance(context &ctx) override;
 };
 
 class real_type : public type
@@ -117,6 +121,8 @@ public:
   real_type(core &cr);
   real_type(const real_type &that) = delete;
   virtual ~real_type();
+
+  expr new_instance(context &ctx) override;
 };
 
 class string_type : public type
@@ -125,5 +131,7 @@ public:
   string_type(core &cr);
   string_type(const string_type &that) = delete;
   virtual ~string_type();
+
+  expr new_instance(context &ctx) override;
 };
 } // namespace ratio
