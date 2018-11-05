@@ -41,6 +41,6 @@ void predicate::apply_rule(atom &a) const
     context ctx(new env(get_core(), &a));
     ctx->exprs.insert({THIS_KEYWORD, &a});
     for (const auto &s : statements)
-        static_cast<const ast::statement *>(s)->execute(*this, ctx);
+        dynamic_cast<const ast::statement *>(s)->execute(*this, ctx);
 }
 } // namespace ratio

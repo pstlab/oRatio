@@ -27,7 +27,7 @@ item *method::invoke(context &ctx, const std::vector<expr> &exprs) const
         c_ctx->exprs.insert({args.at(i)->get_name(), exprs.at(i)});
 
     for (const auto &s : statements)
-        static_cast<const ast::statement *>(s)->execute(*this, c_ctx);
+        dynamic_cast<const ast::statement *>(s)->execute(*this, c_ctx);
 
     if (return_type)
         return &*c_ctx->exprs.at(RETURN_KEYWORD);

@@ -44,7 +44,7 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
             std::vector<const type *> par_types;
             for (const auto &ex : init_list.at(il_idx).second)
             {
-                expr c_expr = static_cast<const ast::expression *>(ex)->evaluate(*this, ctx);
+                expr c_expr = dynamic_cast<const ast::expression *>(ex)->evaluate(*this, ctx);
                 c_exprs.push_back(c_expr);
                 par_types.push_back(&c_expr->get_type());
             }
@@ -63,7 +63,7 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
     for (; il_idx < init_list.size(); il_idx++)
     {
         assert(init_list[il_idx].second.size() == 1);
-        itm.exprs.insert({init_list[il_idx].first, static_cast<const ast::expression *>(init_list[il_idx].second[0])->evaluate(*this, ctx)});
+        itm.exprs.insert({init_list[il_idx].first, dynamic_cast<const ast::expression *>(init_list[il_idx].second[0])->evaluate(*this, ctx)});
     }
 
     // we instantiate the uninstantiated fields..
@@ -72,7 +72,7 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
         {
             // the field is uninstantiated..
             if (f.second->get_expression())
-                itm.exprs.insert({f.second->get_name(), static_cast<const ast::expression *>(f.second->get_expression())->evaluate(*this, ctx)});
+                itm.exprs.insert({f.second->get_name(), dynamic_cast<const ast::expression *>(f.second->get_expression())->evaluate(*this, ctx)});
             else
             {
                 type &tp = const_cast<type &>(f.second->get_type());
@@ -85,6 +85,6 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
 
     // finally, we execute the constructor body..
     for (const auto &s : statements)
-        static_cast<const ast::statement *>(s)->execute(*this, ctx);
+        dynamic_cast<const ast::statement *>(s)->execute(*this, ctx);
 }
 } // namespace ratio

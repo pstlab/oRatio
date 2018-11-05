@@ -200,7 +200,7 @@ bool var_item::equates(const item &i) const noexcept
     else
     {
         std::unordered_set<var_value *> c_vals = get_core().get_ov_theory().value(ev);
-        return c_vals.find(const_cast<var_value *>(static_cast<const var_value *>(&i))) != c_vals.end();
+        return c_vals.find(const_cast<var_value *>(dynamic_cast<const var_value *>(&i))) != c_vals.end();
     }
 }
 
