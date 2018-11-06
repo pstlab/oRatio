@@ -54,6 +54,32 @@ void test_basic_core_1()
     assert(core.value(b2) == True);
 }
 
+void test_basic_core_2()
+{
+    sat_core core;
+    var b0 = core.new_var();
+    var b1 = core.new_var();
+    var b2 = core.new_var();
+
+    // b0 -> (b1 AND b2)
+    bool ch = core.conj({b1, b2}, b0) && core.check();
+    assert(ch);
+
+    // (!b1, !b2)
+    bool nc = core.new_clause({!lit(b1), !lit(b2)});
+    assert(nc);
+    ch = core.check();
+    assert(ch);
+
+    // propagation, in this case, does not work!
+    assert(core.value(b0) == Undefined);
+
+    // yet it works through learning..
+    bool assm = core.assume(b0) && core.check();
+    assert(assm);
+    assert(core.value(b0) == False);
+}
+
 void test_no_good()
 {
     sat_core core;
@@ -95,6 +121,7 @@ int main(int, char **)
 {
     test_basic_core_0();
     test_basic_core_1();
+    test_basic_core_2();
 
     test_no_good();
 }
