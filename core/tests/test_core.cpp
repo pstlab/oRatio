@@ -4,33 +4,41 @@
 
 using namespace ratio;
 
+class test_solver : public core
+{
+    virtual void solve() override {}
+    virtual void new_fact(atom &atm) override {}
+    virtual void new_goal(atom &atm) override {}
+    virtual void new_disjunction(context &ctx, const disjunction &disj) override {}
+};
+
 void test_core_0()
 {
-    core c;
-    bool_expr b0 = c.new_bool();
-    arith_expr i0 = c.new_int();
-    arith_expr r0 = c.new_real();
+    test_solver s;
+    bool_expr b0 = s.new_bool();
+    arith_expr i0 = s.new_int();
+    arith_expr r0 = s.new_real();
 
-    smt::lbool b_val = c.bool_value(b0);
+    smt::lbool b_val = s.bool_value(b0);
     assert(b_val == smt::Undefined);
 
-    c.assert_facts({b0->l});
-    b_val = c.bool_value(b0);
+    s.assert_facts({b0->l});
+    b_val = s.bool_value(b0);
     assert(b_val == smt::True);
 }
 
 void test_core_1()
 {
-    core c;
-    c.read("bool b0; int i0; real r0;");
+    test_solver s;
+    s.read("bool b0; int i0; real r0;");
 
-    bool_expr b0 = c.get("b0");
+    bool_expr b0 = s.get("b0");
 
-    smt::lbool b_val = c.bool_value(b0);
+    smt::lbool b_val = s.bool_value(b0);
     assert(b_val == smt::Undefined);
 
-    c.assert_facts({b0->l});
-    b_val = c.bool_value(b0);
+    s.assert_facts({b0->l});
+    b_val = s.bool_value(b0);
     assert(b_val == smt::True);
 }
 

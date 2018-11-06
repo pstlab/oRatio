@@ -122,12 +122,12 @@ public:
   smt::inf_rational arith_value(const arith_expr &x) const noexcept;                 // the current value of the given arith expression..
   std::unordered_set<smt::var_value *> enum_value(const var_expr &x) const noexcept; // the current allowed values of the given enum expression..
 
-  virtual void solve() {}
+  virtual void solve() = 0;
 
 protected:
-  virtual void new_fact(atom &atm) {}
-  virtual void new_goal(atom &atm) {}
-  virtual void new_disjunction(context &ctx, const disjunction &disj) {}
+  virtual void new_fact(atom &atm) = 0;
+  virtual void new_goal(atom &atm) = 0;
+  virtual void new_disjunction(context &ctx, const disjunction &disj) = 0;
 
 protected:
   smt::var get_ni() { return ni; }
