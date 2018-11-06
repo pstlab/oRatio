@@ -5,8 +5,14 @@
 namespace ratio
 {
 
+class flaw;
+class resolver;
+
 class solver : public core, private smt::theory
 {
+  friend class flaw;
+  friend class resolver;
+
 public:
   solver();
   solver(const solver &orig) = delete;
