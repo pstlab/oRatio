@@ -108,9 +108,33 @@ bool solver::check(std::vector<lit> &cnfl)
     return true;
 }
 
-void solver::push() {}
+void solver::push()
+{
+    // we push the given resolver into the trail..
+    trail.push_back(layer(res));
+    if (res)
+    { // we just solved the resolver's effect..
+        trail.back().solved_flaws.insert(&res->effect);
+        flaws.erase(&res->effect);
+    }
+}
 
-void solver::pop() {}
+void solver::pop()
+{
+    // we reintroduce the solved flaw..
+    for (const auto &f : trail.back().solved_flaws)
+        flaws.insert(f);
+
+    // we erase the new flaws..
+    for (const auto &f : trail.back().new_flaws)
+        flaws.erase(f);
+
+    // we restore the resolvers' estimated costs..
+    for (const auto &r : trail.back().old_costs)
+        r.first->est_cost = r.second;
+
+    trail.pop_back();
+}
 
 void solver::new_flaw(flaw &f)
 {
