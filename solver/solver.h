@@ -37,10 +37,11 @@ private:
   void new_causal_link(flaw &f, resolver &r);
 
   void set_estimated_cost(resolver &r, const smt::rational &cst);     // sets the estimated cost of the given resolver, propagating it to other resolvers..
-  static const smt::rational evaluate(const std::vector<flaw *> &fs); // evaluates, together, the current vector of flaws..
+  static const smt::rational evaluate(const std::vector<flaw *> &fs); // evaluates, together, the given vector of flaws..
   flaw *select_flaw();                                                // selects the most promising (i.e. the most expensive one) flaw from the 'flaws' set, returns a nullptr if there are no more active flaws..
 
 private:
+  resolver *res = nullptr;                                    // the current resolver (will go straight into the trail)..
   std::unordered_set<flaw *> flaws;                           // the current active flaws..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..

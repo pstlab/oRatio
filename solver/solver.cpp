@@ -1,5 +1,10 @@
 #include "solver.h"
 #include "graph.h"
+#include "var_flaw.h"
+#include "atom_flaw.h"
+#include "disjunction_flaw.h"
+#include "smart_type.h"
+#include "atom.h"
 #include <cassert>
 
 using namespace smt;
@@ -16,23 +21,62 @@ expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_
 {
     // we create a new enum expression..
     var_expr xp = core::new_enum(tp, allowed_vals);
-    // TODO: create a new enum flaw..
+    if (allowed_vals.size() > 1)
+    {
+        // we create a new var flaw..
+        var_flaw *ef = new var_flaw(*this, res, *xp);
+        new_flaw(*ef);
+    }
     return xp;
 }
 
 void solver::new_fact(atom &atm)
 {
-    // TODO: create a new fact flaw..
+    // we create a new atom flaw representing a fact..
+    atom_flaw *af = new atom_flaw(*this, res, atm, true);
+    new_flaw(*af);
+
+    if (&atm.get_type().get_scope() != this)
+    { // we check if we need to notify the new fact to any smart types..
+        std::queue<type *> q;
+        q.push(static_cast<type *>(&atm.get_type().get_scope()));
+        while (!q.empty())
+        {
+            if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
+                st->new_fact(*af);
+            for (const auto &st : q.front()->get_supertypes())
+                q.push(st);
+            q.pop();
+        }
+    }
 }
 
 void solver::new_goal(atom &atm)
 {
-    // TODO: create a new goal flaw..
+    // we create a new atom flaw representing a goal..
+    atom_flaw *af = new atom_flaw(*this, res, atm, false);
+    new_flaw(*af);
+
+    if (&atm.get_type().get_scope() != this)
+    { // we check if we need to notify the new goal to any smart types..
+        std::queue<type *> q;
+        q.push(static_cast<type *>(&atm.get_type().get_scope()));
+        while (!q.empty())
+        {
+            if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
+                st->new_goal(*af);
+            for (const auto &st : q.front()->get_supertypes())
+                q.push(st);
+            q.pop();
+        }
+    }
 }
 
 void solver::new_disjunction(context &d_ctx, const disjunction &disj)
 {
-    // TODO: create a new disjunction flaw..
+    // we create a new disjunction flaw..
+    disjunction_flaw *df = new disjunction_flaw(*this, res, d_ctx, disj);
+    new_flaw(*df);
 }
 
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
