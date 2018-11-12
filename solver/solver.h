@@ -12,6 +12,7 @@ class solver : public core, private smt::theory
 {
   friend class flaw;
   friend class resolver;
+  friend class atom_flaw;
 
 public:
   solver();
@@ -33,6 +34,7 @@ private:
 
   void new_flaw(flaw &f);
   void new_resolver(resolver &r);
+  void new_causal_link(flaw &f, resolver &r);
 
   void set_estimated_cost(resolver &r, const smt::rational &cst);     // sets the estimated cost of the given resolver, propagating it to other resolvers..
   static const smt::rational evaluate(const std::vector<flaw *> &fs); // evaluates, together, the current vector of flaws..

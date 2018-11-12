@@ -97,6 +97,14 @@ void solver::new_resolver(resolver &r)
     }
 }
 
+void solver::new_causal_link(flaw &f, resolver &r)
+{
+    r.preconditions.push_back(&f);
+    f.supports.push_back(&r);
+    bool new_clause = sat.new_clause({lit(r.rho, false), f.phi});
+    assert(new_clause);
+}
+
 void solver::set_estimated_cost(resolver &r, const rational &cst)
 {
     if (r.est_cost != cst)

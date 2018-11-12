@@ -6,7 +6,7 @@
 namespace smt
 {
 typedef size_t var;
-}
+} // namespace smt
 
 namespace ratio
 {
@@ -27,6 +27,7 @@ public:
   std::vector<resolver *> get_resolvers() const { return resolvers; }
   std::vector<resolver *> get_causes() const { return causes; }
   std::vector<resolver *> get_supports() const { return supports; }
+  bool is_expanded() const { return expanded; }
 
   smt::rational get_estimated_cost() const;
   resolver *get_best_resolver() const;
@@ -49,6 +50,7 @@ private:
   std::vector<resolver *> supports;  // the resolvers supported by this flaw..
   const bool exclusive;              // a boolean indicating whether the flaw is exclusive (i.e. exactly one of its resolver can be applied)..
   const bool structural;             // a boolean indicating whether the flaw is structural (i.e. it is not an inconsistency raised from types' consistency checking procedures)..
+  bool expanded = false;             // a boolean indicating whether the flaw has been expanded..
 };
 
 class resolver
