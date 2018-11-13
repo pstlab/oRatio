@@ -9,6 +9,8 @@ enable_testing()
 file(GLOB SOURCES main.cpp smt/*.cpp smt/lra/*.cpp smt/ov/*.cpp riddle/*.cpp core/*.cpp solver/*.cpp)
 include_directories(smt smt/lra smt/ov riddle core solver)
 
+configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
+
 set(HEURISTIC_TYPE "h_max" CACHE STRING "Heuristic type")
 set_property(CACHE HEURISTIC_TYPE PROPERTY STRINGS "h_max" "h_add")
 

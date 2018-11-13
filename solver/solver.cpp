@@ -15,6 +15,11 @@ namespace ratio
 solver::solver() : core(), theory(get_sat_core()) {}
 solver::~solver() {}
 
+void solver::init()
+{
+    read(std::vector<std::string>({"init.rddl"}));
+}
+
 void solver::solve() {}
 
 expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals)

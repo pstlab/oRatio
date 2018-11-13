@@ -19,6 +19,8 @@ public:
   solver(const solver &orig) = delete;
   virtual ~solver();
 
+  void init(); // initializes the solver..
+
   expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals) override;
   void solve() override; // solves the given problem..
 

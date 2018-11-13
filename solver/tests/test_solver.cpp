@@ -7,6 +7,7 @@ using namespace ratio;
 void test_solver_0()
 {
     solver s;
+    s.init();
     s.read("bool b0; int i0; real r0;");
 
     bool_expr b0 = s.get("b0");
