@@ -16,6 +16,13 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
 var_flaw::var_flaw(solver &slv, resolver *const cause, var_item &v_itm) : flaw(slv, get_cause(cause), true, true), v_itm(v_itm) {}
 var_flaw::~var_flaw() {}
 
+#ifdef BUILD_GUI
+std::string var_flaw::get_label() const
+{
+    return "φ" + std::to_string(get_phi()) + " enum";
+}
+#endif
+
 void var_flaw::compute_resolvers()
 {
     std::unordered_set<smt::var_value *> vals = slv.get_ov_theory().value(v_itm.ev);
@@ -25,5 +32,15 @@ void var_flaw::compute_resolvers()
 
 var_flaw::choose_value::choose_value(solver &slv, smt::rational cst, var_flaw &enm_flaw, smt::var_value &val) : resolver(slv, slv.get_ov_theory().allows(enm_flaw.v_itm.ev, val), cst, enm_flaw), v(enm_flaw.v_itm.ev), val(val) {}
 var_flaw::choose_value::~choose_value() {}
-void var_flaw::choose_value::apply() {}
+
+#ifdef BUILD_GUI
+std::string var_flaw::choose_value::get_label() const
+{
+    return "ρ" + std::to_string(get_rho()) + " val";
 }
+#endif
+
+void var_flaw::choose_value::apply()
+{
+}
+} // namespace ratio

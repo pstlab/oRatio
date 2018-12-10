@@ -16,6 +16,10 @@ public:
   disjunction_flaw(const disjunction_flaw &orig) = delete;
   virtual ~disjunction_flaw();
 
+#ifdef BUILD_GUI
+  std::string get_label() const override;
+#endif
+
 private:
   void compute_resolvers() override;
 
@@ -25,6 +29,10 @@ private:
     choose_conjunction(solver &slv, disjunction_flaw &disj_flaw, const context &ctx, const conjunction &conj);
     choose_conjunction(const choose_conjunction &that) = delete;
     virtual ~choose_conjunction();
+
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
 
   private:
     void apply() override;

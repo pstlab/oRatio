@@ -7,12 +7,18 @@ namespace ratio
 
 class flaw;
 class resolver;
+#ifdef BUILD_GUI
+class solver_listener;
+#endif
 
 class solver : public core, private smt::theory
 {
   friend class flaw;
   friend class resolver;
   friend class atom_flaw;
+#ifdef BUILD_GUI
+  friend class solver_listener;
+#endif
 
 public:
   solver();
@@ -60,5 +66,9 @@ private:
     std::unordered_set<flaw *> solved_flaws;                 // the just solved flaws..
   };
   std::vector<layer> trail; // the list of applied resolvers, with the associated changes made, in chronological order..
+#ifdef BUILD_GUI
+private:
+  std::vector<solver_listener *> listeners; // the causal-graph listeners..
+#endif
 };
 } // namespace ratio

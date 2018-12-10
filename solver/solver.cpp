@@ -5,6 +5,9 @@
 #include "disjunction_flaw.h"
 #include "smart_type.h"
 #include "atom.h"
+#ifdef BUILD_GUI
+#include "solver_listener.h"
+#endif
 #include <cassert>
 
 using namespace smt;
@@ -95,6 +98,11 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                 flaws.insert(f);
                 if (!trail.empty())
                     trail.back().new_flaws.insert(f);
+#ifdef BUILD_GUI
+                // we notify the listeners that the state of the flaw has changed..
+                for (const auto &l : listeners)
+                    l->flaw_state_changed(*f);
+#endif
             }
             else // this flaw has been removed from the current partial solution..
                 assert(flaws.find(f) == flaws.end());
@@ -138,13 +146,24 @@ void solver::pop()
     for (const auto &r : trail.back().old_costs)
         r.first->est_cost = r.second;
 
+#ifdef BUILD_GUI
+    // we notify the listeners that the cost of some resolvers has been restored..
+    for (const auto &l : listeners)
+        for (const auto &c : trail.back().old_costs)
+            l->resolver_cost_changed(*c.first);
+#endif
+
     trail.pop_back();
 }
 
 void solver::new_flaw(flaw &f)
 {
     f.init(); // flaws' initialization requires being at root-level..
-
+#ifdef BUILD_GUI
+    // we notify the listeners that a new flaw has been created..
+    for (const auto &l : listeners)
+        l->new_flaw(f);
+#endif
     switch (sat.value(f.phi))
     {
     case True: // we have a top-level (a landmark) flaw..
@@ -162,6 +181,11 @@ void solver::new_flaw(flaw &f)
 
 void solver::new_resolver(resolver &r)
 {
+#ifdef BUILD_GUI
+    // we notify the listeners that a new resolver has been created..
+    for (const auto &l : listeners)
+        l->new_resolver(r);
+#endif
     if (sat.value(r.rho) == Undefined) // we do not have a top-level (a landmark) resolver..
     {
         // we listen for the resolver to become active..
@@ -172,6 +196,11 @@ void solver::new_resolver(resolver &r)
 
 void solver::new_causal_link(flaw &f, resolver &r)
 {
+#ifdef BUILD_GUI
+    // we notify the listeners that a new causal link has been created..
+    for (const auto &l : listeners)
+        l->causal_link_added(f, r);
+#endif
     r.preconditions.push_back(&f);
     f.supports.push_back(&r);
     bool new_clause = sat.new_clause({lit(r.rho, false), f.phi});
@@ -188,6 +217,11 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
         rational f_cost = r.effect.get_estimated_cost();
         // we update the resolver's estimated cost..
         r.est_cost = cst;
+#ifdef BUILD_GUI
+        // we notify the listeners that a resolver cost has changed..
+        for (const auto &l : listeners)
+            l->resolver_cost_changed(r);
+#endif
 
         if (f_cost != r.effect.get_estimated_cost()) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
         {
@@ -208,6 +242,11 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
                     f_cost = c_res.effect.get_estimated_cost();
                     // we update the resolver's estimated cost..
                     c_res.est_cost = r_cost;
+#ifdef BUILD_GUI
+                    // we notify the listeners that a resolver cost has changed..
+                    for (const auto &l : listeners)
+                        l->resolver_cost_changed(c_res);
+#endif
 
                     if (f_cost != c_res.effect.get_estimated_cost())  // the cost of the resolver's effect has changed as a consequence of the resolver's cost update..
                         for (const auto &c_r : c_res.effect.supports) // hence, we propagate the update to all the supports of the resolver's effect..

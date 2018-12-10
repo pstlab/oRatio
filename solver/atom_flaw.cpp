@@ -21,6 +21,13 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
 atom_flaw::atom_flaw(solver &slv, resolver *const cause, atom &atm, const bool is_fact) : flaw(slv, get_cause(cause), true, true), atm(atm), is_fact(is_fact) {}
 atom_flaw::~atom_flaw() {}
 
+#ifdef BUILD_GUI
+std::string atom_flaw::get_label() const
+{
+    return "φ" + std::to_string(get_phi()) + (is_fact ? " fact σ" : " goal σ") + std::to_string(atm.get_sigma()) + " " + atm.get_type().get_name();
+}
+#endif
+
 void atom_flaw::compute_resolvers()
 {
     assert(slv.get_sat_core().value(get_phi()) != False);
@@ -84,10 +91,27 @@ void atom_flaw::compute_resolvers()
 atom_flaw::activate_fact::activate_fact(solver &slv, atom_flaw &f, atom &a) : resolver(slv, 0, f), atm(a) {}
 atom_flaw::activate_fact::~activate_fact() {}
 
-void atom_flaw::activate_fact::apply() { slv.get_sat_core().new_clause({lit(get_rho(), false), atm.get_sigma()}); }
+#ifdef BUILD_GUI
+std::string atom_flaw::activate_fact::get_label() const
+{
+    return "ρ" + std::to_string(get_rho()) + " add fact";
+}
+#endif
+
+void atom_flaw::activate_fact::apply()
+{
+    slv.get_sat_core().new_clause({lit(get_rho(), false), atm.get_sigma()});
+}
 
 atom_flaw::activate_goal::activate_goal(solver &slv, atom_flaw &f, atom &a) : resolver(slv, 1, f), atm(a) {}
 atom_flaw::activate_goal::~activate_goal() {}
+
+#ifdef BUILD_GUI
+std::string atom_flaw::activate_goal::get_label() const
+{
+    return "ρ" + std::to_string(get_rho()) + " expand goal";
+}
+#endif
 
 void atom_flaw::activate_goal::apply()
 {
@@ -97,6 +121,13 @@ void atom_flaw::activate_goal::apply()
 
 atom_flaw::unify_atom::unify_atom(solver &slv, atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(slv, 1, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}
 atom_flaw::unify_atom::~unify_atom() {}
+
+#ifdef BUILD_GUI
+std::string atom_flaw::unify_atom::get_label() const
+{
+    return "ρ" + std::to_string(get_rho()) + " unify";
+}
+#endif
 
 void atom_flaw::unify_atom::apply()
 {

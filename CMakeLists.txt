@@ -7,7 +7,7 @@ include(CTest)
 enable_testing()
 
 file(GLOB SOURCES main.cpp smt/*.cpp smt/lra/*.cpp smt/ov/*.cpp riddle/*.cpp core/*.cpp solver/*.cpp)
-include_directories(smt smt/lra smt/ov riddle core solver)
+include_directories(smt smt/lra smt/ov riddle core solver solver/listeners)
 
 configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
@@ -27,9 +27,14 @@ endif()
 
 if(BUILD_GUI)
     add_definitions(-DBUILD_GUI)
+    list(APPEND SOURCES solver/listeners/solver_listener.cpp solver/listeners/socket_listener.cpp)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+
+if(BUILD_GUI AND WIN32)
+    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 #[[-PROFILE]])
+endif()
 
 add_subdirectory(smt/tests)
 add_subdirectory(riddle/tests)

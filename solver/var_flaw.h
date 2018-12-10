@@ -19,6 +19,10 @@ public:
   var_flaw(const var_flaw &orig) = delete;
   virtual ~var_flaw();
 
+#ifdef BUILD_GUI
+  std::string get_label() const override;
+#endif
+
 private:
   void compute_resolvers() override;
 
@@ -28,6 +32,10 @@ private:
     choose_value(solver &slv, smt::rational cst, var_flaw &enm_flaw, smt::var_value &val);
     choose_value(const choose_value &that) = delete;
     virtual ~choose_value();
+
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
 
   private:
     void apply() override;

@@ -32,6 +32,10 @@ public:
   smt::rational get_estimated_cost() const;
   resolver *get_best_resolver() const;
 
+#ifdef BUILD_GUI
+  virtual std::string get_label() const = 0;
+#endif
+
 private:
   void init();
   void expand();
@@ -69,6 +73,10 @@ public:
   smt::rational get_estimated_cost() const { return est_cost + intrinsic_cost; }
   flaw &get_effect() const { return effect; }
   std::vector<flaw *> get_preconditions() const { return preconditions; }
+
+#ifdef BUILD_GUI
+  virtual std::string get_label() const = 0;
+#endif
 
 private:
   virtual void apply() = 0;

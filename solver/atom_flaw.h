@@ -19,6 +19,10 @@ public:
 
   atom &get_atom() const { return atm; }
 
+#ifdef BUILD_GUI
+  std::string get_label() const override;
+#endif
+
 private:
   void compute_resolvers() override;
 
@@ -28,6 +32,10 @@ private:
     activate_fact(solver &slv, atom_flaw &f, atom &a);
     activate_fact(const activate_fact &that) = delete;
     virtual ~activate_fact();
+
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
 
   private:
     void apply() override;
@@ -43,6 +51,10 @@ private:
     activate_goal(const activate_goal &that) = delete;
     virtual ~activate_goal();
 
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
+
   private:
     void apply() override;
 
@@ -56,6 +68,10 @@ private:
     unify_atom(solver &slv, atom_flaw &atm_flaw, atom &atm, atom &trgt, const std::vector<smt::lit> &unif_lits);
     unify_atom(const unify_atom &that) = delete;
     virtual ~unify_atom();
+
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
 
   private:
     void apply() override;
