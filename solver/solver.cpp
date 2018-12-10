@@ -8,6 +8,7 @@
 #ifdef BUILD_GUI
 #include "solver_listener.h"
 #endif
+#include <algorithm>
 #include <cassert>
 
 using namespace smt;
