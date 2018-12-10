@@ -324,4 +324,162 @@ inf_rational core::arith_lb(const arith_expr &x) const noexcept { return lra_th.
 inf_rational core::arith_ub(const arith_expr &x) const noexcept { return lra_th.ub(x->l); }
 inf_rational core::arith_value(const arith_expr &x) const noexcept { return lra_th.value(x->l); }
 std::unordered_set<var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th.value(x->ev); }
+
+std::string core::to_string(const std::map<std::string, expr> &c_items) const noexcept
+{
+    std::string iss;
+    for (std::map<std::string, expr>::const_iterator is_it = c_items.cbegin(); is_it != c_items.cend(); ++is_it)
+    {
+        if (is_it != c_items.cbegin())
+            iss += ", ";
+        iss += "{ \"name\" : \"" + is_it->first + "\", \"type\" : \"" + is_it->second->get_type().get_name() + "\", \"value\" : ";
+        if (bool_item *bi = dynamic_cast<bool_item *>(&*is_it->second))
+        {
+            std::string sign_s = bi->l.get_sign() ? "b" : "!b";
+            iss += "{ \"lit\" : \"" + sign_s + std::to_string(bi->l.get_var()) + "\", \"val\" : ";
+            switch (sat_cr.value(bi->l))
+            {
+            case True:
+                iss += "\"True\"";
+                break;
+            case False:
+                iss += "\"False\"";
+                break;
+            case Undefined:
+                iss += "\"Undefined\"";
+                break;
+            }
+            iss += " }";
+        }
+        else if (arith_item *ai = dynamic_cast<arith_item *>(&*is_it->second))
+        {
+            const auto val = lra_th.value(ai->l);
+            iss += "{ \"lin\" : \"" + ai->l.to_string() + "\", \"val\" : ";
+            iss += "{ \"num\" : " + std::to_string(val.get_rational().numerator()) + ", \"den\" : " + std::to_string(val.get_rational().denominator());
+            if (val.get_infinitesimal() != rational::ZERO)
+                iss += ", \"inf\" : { \"num\" : " + std::to_string(val.get_infinitesimal().numerator()) + ", \"den\" : " + std::to_string(val.get_infinitesimal().denominator()) + " }";
+            iss += " }";
+            const auto lb = lra_th.lb(ai->l);
+            if (!lb.is_negative_infinite())
+            {
+                iss += ", \"lb\" : { \"num\" : " + std::to_string(lb.get_rational().numerator()) + ", \"den\" : " + std::to_string(lb.get_rational().denominator());
+                if (val.get_infinitesimal() != rational::ZERO)
+                    iss += ", \"inf\" : { \"num\" : " + std::to_string(lb.get_infinitesimal().numerator()) + ", \"den\" : " + std::to_string(lb.get_infinitesimal().denominator()) + " }";
+                iss += " }";
+            }
+            const auto ub = lra_th.ub(ai->l);
+            if (!ub.is_positive_infinite())
+            {
+                iss += ", \"ub\" : { \"num\" : " + std::to_string(ub.get_rational().numerator()) + ", \"den\" : " + std::to_string(ub.get_rational().denominator());
+                if (val.get_infinitesimal() != rational::ZERO)
+                    iss += ", \"inf\" : { \"num\" : " + std::to_string(ub.get_infinitesimal().numerator()) + ", \"den\" : " + std::to_string(ub.get_infinitesimal().denominator()) + " }";
+                iss += " }";
+            }
+            iss += " }";
+        }
+        else if (var_item *ei = dynamic_cast<var_item *>(&*is_it->second))
+        {
+            iss += "{ \"var\" : \"e" + std::to_string(ei->ev) + "\", \"vals\" : [ ";
+            std::unordered_set<var_value *> vals = ov_th.value(ei->ev);
+            for (std::unordered_set<var_value *>::iterator vals_it = vals.begin(); vals_it != vals.end(); ++vals_it)
+            {
+                if (vals_it != vals.begin())
+                    iss += ", ";
+                iss += "\"" + std::to_string(reinterpret_cast<uintptr_t>(static_cast<item *>(*vals_it))) + "\"";
+            }
+            iss += " ] }";
+        }
+        else
+            iss += "\"" + std::to_string(reinterpret_cast<uintptr_t>(&*is_it->second)) + "\"";
+        iss += " }";
+    }
+    return iss;
+}
+
+std::string core::to_string(const item *const i) const noexcept
+{
+    std::string is;
+    is += "{ \"id\" : \"" + std::to_string(reinterpret_cast<uintptr_t>(i)) + "\", \"type\" : \"" + i->get_type().get_name() + "\"";
+    std::map<std::string, expr> c_is = i->get_exprs();
+    if (!c_is.empty())
+        is += ", \"items\" : [ " + to_string(c_is) + " ]";
+    is += "}";
+    return is;
+}
+
+std::string core::to_string(const atom *const a) const noexcept
+{
+    std::string as;
+    as += "{ \"id\" : \"" + std::to_string(reinterpret_cast<uintptr_t>(a)) + "\", \"predicate\" : \"" + a->get_type().get_name() + "\", \"state\" : ";
+    switch (sat_cr.value(a->get_sigma()))
+    {
+    case True:
+        as += "\"Active\"";
+        break;
+    case False:
+        as += "\"Unified\"";
+        break;
+    case Undefined:
+        as += "\"Inactive\"";
+        break;
+    }
+    std::map<std::string, expr> is = a->get_exprs();
+    if (!is.empty())
+        as += ", \"pars\" : [ " + to_string(is) + " ]";
+    as += "}";
+    return as;
+}
+
+std::string core::to_string() const noexcept
+{
+    std::set<item *> all_items;
+    std::set<atom *> all_atoms;
+    for (const auto &p : get_predicates())
+        for (const auto &a : p.second->get_instances())
+            all_atoms.insert(static_cast<atom *>(&*a));
+    std::queue<type *> q;
+    for (const auto &t : get_types())
+        if (!t.second->is_primitive())
+            q.push(t.second);
+    while (!q.empty())
+    {
+        for (const auto &i : q.front()->get_instances())
+            all_items.insert(&*i);
+        for (const auto &p : q.front()->get_predicates())
+            for (const auto &a : p.second->get_instances())
+                all_atoms.insert(static_cast<atom *>(&*a));
+        q.pop();
+    }
+
+    std::string cr;
+    cr += "{ ";
+    if (!all_items.empty())
+    {
+        cr += "\"items\" : [";
+        for (std::set<item *>::iterator is_it = all_items.begin(); is_it != all_items.end(); ++is_it)
+        {
+            if (is_it != all_items.begin())
+                cr += ", ";
+            cr += to_string(*is_it);
+        }
+        cr += "]";
+    }
+    if (!all_atoms.empty())
+    {
+        if (!all_items.empty())
+            cr += ", ";
+        cr += "\"atoms\" : [";
+        for (std::set<atom *>::iterator as_it = all_atoms.begin(); as_it != all_atoms.end(); ++as_it)
+        {
+            if (as_it != all_atoms.begin())
+                cr += ", ";
+            cr += to_string(*as_it);
+        }
+        cr += "]";
+    }
+    if (!all_items.empty() || !all_atoms.empty())
+        cr += ", ";
+    cr += "\"refs\" : [" + to_string(get_exprs()) + "] }";
+    return cr;
+}
 } // namespace ratio

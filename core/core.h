@@ -139,6 +139,14 @@ protected:
 
   void restore_ni() { ni = tmp_ni; }
 
+public:
+  std::string to_string() const noexcept;
+
+private:
+  std::string to_string(const item *const i) const noexcept;
+  std::string to_string(const atom *const i) const noexcept;
+  std::string to_string(const std::map<std::string, expr> &items) const noexcept;
+
 private:
   smt::sat_core sat_cr;   // the sat core..
   smt::lra_theory lra_th; // the linear-real-arithmetic theory..
