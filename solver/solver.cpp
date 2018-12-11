@@ -7,6 +7,7 @@
 #include "atom.h"
 #ifdef BUILD_GUI
 #include "solver_listener.h"
+#include <iostream>
 #endif
 #include <algorithm>
 #include <cassert>
@@ -24,7 +25,230 @@ void solver::init()
     read(std::vector<std::string>({"init.rddl"}));
 }
 
-void solver::solve() {}
+void solver::solve()
+{
+    build_graph(); // we build the causal graph..
+
+    while (true)
+    {
+        // this is the next flaw to be solved..
+        flaw *f_next = select_flaw();
+
+        if (f_next)
+        {
+            assert(!f_next->get_estimated_cost().is_infinite());
+#ifdef BUILD_GUI
+            std::cout << "(" << std::to_string(trail.size()) << "): " << f_next->get_label();
+            // we notify the listeners that we have selected a flaw..
+            for (const auto &l : listeners)
+                l->current_flaw(*f_next);
+#endif
+            if (!f_next->structural || !has_inconsistencies()) // we run out of inconsistencies, thus, we renew them..
+            {
+                // this is the next resolver to be assumed..
+                res = f_next->get_best_resolver();
+#ifdef BUILD_GUI
+                std::cout << " " << res->get_label() << std::endl;
+                // we notify the listeners that we have selected a resolver..
+                for (const auto &l : listeners)
+                    l->current_resolver(*res);
+#endif
+
+                // we apply the resolver..
+                if (!get_sat_core().assume(res->rho) || !get_sat_core().check())
+                    throw std::runtime_error("the input problem is unsolvable");
+
+                res = nullptr;
+
+#ifdef GRAPH_PRUNING
+                check_graph(); // we check whether the planning graph can be used for the search..
+#endif
+            }
+        }
+        else if (!has_inconsistencies()) // we run out of flaws, we check for inconsistencies one last time..
+            // Hurray!! we have found a solution..
+            return;
+    }
+}
+
+void solver::build_graph()
+{
+    assert(get_sat_core().root_level());
+#ifdef BUILD_GUI
+    std::cout << "building the causal graph.." << std::endl;
+#endif
+
+    while (std::any_of(flaws.begin(), flaws.end(), [&](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
+    {
+        if (flaw_q.empty())
+            throw std::runtime_error("the input problem is unsolvable");
+#ifdef DEFERRABLES
+        assert(!flaw_q.front()->expanded);
+        if (get_sat_core().value(flaw_q.front()->phi) != False)
+            if (is_deferrable(*flaw_q.front())) // we postpone the expansion..
+                flaw_q.push_back(flaw_q.front());
+            else
+                expand_flaw(*flaw_q.front()); // we expand the flaw..
+        flaw_q.pop_front();
+#else
+        std::deque<flaw *> c_q = std::move(flaw_q);
+        for (const auto &f : c_q)
+            expand_flaw(*f); // we expand the flaw..
+#endif
+    }
+
+#ifdef GRAPH_PRUNING
+    // we create a new graph var..
+    gamma = get_sat_core().new_var();
+#ifdef BUILD_GUI
+    std::cout << "graph var is: γ" << std::to_string(gamma) << std::endl;
+#endif
+    // these flaws have not been expanded, hence, cannot have a solution..
+    for (const auto &f : flaw_q)
+        get_sat_core().new_clause({lit(gamma, false), lit(f->phi, false)});
+    // we use the new graph var to allow search within the current graph..
+    if (!get_sat_core().assume(gamma) || !get_sat_core().check())
+        throw std::runtime_error("the input problem is unsolvable");
+#endif
+}
+
+bool solver::has_inconsistencies()
+{
+#ifdef BUILD_GUI
+    std::cout << " (checking for inconsistencies..)";
+#endif
+    std::vector<flaw *> incs;
+    std::queue<type *> q;
+    for (const auto &t : get_types())
+        if (!t.second->is_primitive())
+            q.push(t.second);
+
+    while (!q.empty())
+    {
+        if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
+        {
+            std::vector<flaw *> c_incs = st->get_flaws();
+            incs.insert(incs.end(), c_incs.begin(), c_incs.end());
+        }
+        for (const auto &st : q.front()->get_types())
+            q.push(st.second);
+        q.pop();
+    }
+
+    assert(std::none_of(incs.begin(), incs.end(), [&](flaw *f) { return f->structural; }));
+    if (!incs.empty())
+    {
+#ifdef BUILD_GUI
+        std::cout << ": " << std::to_string(incs.size()) << std::endl;
+#endif
+        // we go back to root level..
+        while (!get_sat_core().root_level())
+            get_sat_core().pop();
+
+        // we initialize the new flaws..
+        for (const auto &f : incs)
+        {
+            f->init();
+#ifdef BUILD_GUI
+            // we notify the listeners that a new flaw has arised..
+            for (const auto &l : listeners)
+                l->new_flaw(*f);
+#endif
+            expand_flaw(*f);
+        }
+
+#ifdef GRAPH_PRUNING
+        // we re-assume the current graph var to allow search within the current graph..
+        check_graph();
+#endif
+        return true;
+    }
+    else
+    {
+#ifdef BUILD_GUI
+        std::cout << std::endl;
+#endif
+        return false;
+    }
+}
+
+void solver::expand_flaw(flaw &f)
+{
+#ifdef BUILD_GUI
+    for (const auto &l : listeners)
+        l->current_flaw(f);
+#endif
+    assert(!f.expanded);
+    // we expand the flaw..
+    f.expand();
+
+    for (const auto &r : f.resolvers)
+        apply_resolver(*r);
+
+    if (!get_sat_core().check())
+        throw std::runtime_error("the input problem is unsolvable");
+}
+
+void solver::apply_resolver(resolver &r)
+{
+    res = &r;
+    set_ni(r.rho);
+    try
+    {
+        r.apply();
+    }
+    catch (const std::runtime_error &)
+    {
+        if (!get_sat_core().new_clause({lit(r.rho, false)}))
+            throw std::runtime_error("the input problem is unsolvable");
+    }
+
+    restore_ni();
+    res = nullptr;
+    if (r.preconditions.empty() && get_sat_core().value(r.rho) != False) // there are no requirements for this resolver..
+        set_estimated_cost(r, 0);
+}
+
+#ifdef DEFERRABLES
+bool solver::is_deferrable(flaw &f)
+{
+    std::queue<flaw *> q;
+    q.push(&f);
+    while (!q.empty())
+    {
+        assert(get_sat_core().value(q.front()->phi) != False);
+        if (q.front()->get_estimated_cost() < rational::POSITIVE_INFINITY) // we already have a possible solution for this flaw, thus we defer..
+            return true;
+        for (const auto &r : q.front()->causes)
+            q.push(&r->effect);
+        q.pop();
+    }
+    // we cannot defer this flaw..
+    return false;
+}
+#endif
+
+#ifdef GRAPH_PRUNING
+void solver::check_graph()
+{
+    while (get_sat_core().root_level())
+        if (get_sat_core().value(gamma) == Undefined)
+        {
+            // we have learnt a unit clause! thus, we reassume the graph var..
+            if (!get_sat_core().assume(gamma) || !get_sat_core().check())
+                throw unsolvable_exception();
+        }
+        else
+        {
+            assert(get_sat_core().value(gamma) == False);
+            // we have exhausted the search within the graph: we extend the graph..
+            if (accuracy < max_accuracy)
+                increase_accuracy();
+            else
+                add_layer();
+        }
+}
+#endif
 
 expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals)
 {

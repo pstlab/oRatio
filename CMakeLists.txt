@@ -14,15 +14,21 @@ configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 set(HEURISTIC_TYPE "h_max" CACHE STRING "Heuristic type")
 set_property(CACHE HEURISTIC_TYPE PROPERTY STRINGS "h_max" "h_add")
 
+option(GRAPH_PRUNING "Graph pruning" OFF)
 option(BUILD_GUI "Build GUI" OFF)
 
 message(STATUS "Heuristic type: ${HEURISTIC_TYPE}")
+message(STATUS "Graph pruning:  ${GRAPH_PRUNING}")
 message(STATUS "Build GUI:      ${BUILD_GUI}")
 
 if(HEURISTIC_TYPE MATCHES "h_max")
     add_definitions(-DH_MAX)
 elseif(HEURISTIC_TYPE MATCHES "h_add")
     add_definitions(-DH_ADD)
+endif()
+
+if(GRAPH_PRUNING)
+    add_definitions(-DGRAPH_PRUNING)
 endif()
 
 if(BUILD_GUI)

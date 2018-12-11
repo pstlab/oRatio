@@ -31,6 +31,18 @@ public:
   void solve() override; // solves the given problem..
 
 private:
+  void build_graph();               // builds the planning graph..
+  bool has_inconsistencies();       // checks whether the types have some inconsistency..
+  void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
+  void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
+
+#ifdef DEFERRABLES
+  bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
+#endif
+#ifdef GRAPH_PRUNING
+  void check_graph(); // checks whether the planning graph can be used for the search..
+#endif
+
   void new_fact(atom &atm) override;                                      // creates a new fact token..
   void new_goal(atom &atm) override;                                      // creates a new goal token..
   void new_disjunction(context &d_ctx, const disjunction &disj) override; // creates a new disjunction..
@@ -66,6 +78,9 @@ private:
     std::unordered_set<flaw *> solved_flaws;                 // the just solved flaws..
   };
   std::vector<layer> trail; // the list of applied resolvers, with the associated changes made, in chronological order..
+#ifdef GRAPH_PRUNING
+  smt::var gamma; // this variable represents the validity of the current graph..
+#endif
 #ifdef BUILD_GUI
 private:
   std::vector<solver_listener *> listeners; // the causal-graph listeners..

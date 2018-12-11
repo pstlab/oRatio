@@ -1,26 +1,57 @@
 #include "solver.h"
-#include "atom.h"
-#include <cassert>
+#ifdef BUILD_GUI
+#include "socket_listener.h"
+#endif
+#include <iostream>
+#include <fstream>
 
-using namespace ratio;
-
-void test_solver_0()
+int main(int argc, char *argv[])
 {
+    using namespace ratio;
+
+    if (argc < 3)
+    {
+        std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>" << std::endl;
+        return -1;
+    }
+
+    // the problem files..
+    std::vector<std::string> prob_names;
+    for (int i = 1; i < argc - 1; i++)
+        prob_names.push_back(argv[i]);
+
+    // the solution file..
+    std::string sol_name = argv[argc - 1];
+
+    std::cout << "starting oRatio";
+#ifdef BUILD_GUI
+    std::cout << " in debug mode";
+#endif
+    std::cout << ".." << std::endl;
+
     solver s;
+#ifdef BUILD_GUI
+    socket_listener l(s);
+#endif
+
     s.init();
-    s.read("bool b0; int i0; real r0;");
+    try
+    {
+        std::cout << "parsing input files.." << std::endl;
+        s.read(prob_names);
 
-    bool_expr b0 = s.get("b0");
+        std::cout << "solving the problem.." << std::endl;
+        s.solve();
+        std::cout << "hurray!! we have found a solution.." << std::endl;
 
-    smt::lbool b_val = s.bool_value(b0);
-    assert(b_val == smt::Undefined);
-
-    s.assert_facts({b0->l});
-    b_val = s.bool_value(b0);
-    assert(b_val == smt::True);
-}
-
-int main(int, char **)
-{
-    test_solver_0();
+        std::ofstream sol_file;
+        sol_file.open(sol_name);
+        sol_file << s.to_string();
+        sol_file.close();
+    }
+    catch (const std::exception &ex)
+    {
+        std::cout << ex.what() << std::endl;
+        return 1;
+    }
 }

@@ -10,4 +10,6 @@ if(BUILD_GUI AND WIN32)
     target_link_libraries(solver_tests wsock32 ws2_32 #[[-PROFILE]])
 endif()
 
-add_test(NAME SolverTest COMMAND solver_tests WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SolverTest00 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/example_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SolverTest01 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/example_1.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SolverTest02 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/example_2.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
