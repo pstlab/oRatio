@@ -269,6 +269,8 @@ void solver::new_fact(atom &atm)
     atom_flaw *af = new atom_flaw(*this, res, atm, true);
     new_flaw(*af);
 
+    // we associate the flaw to the atom..
+    reason.insert({&atm, af});
     if (&atm.get_type().get_scope() != this)
     { // we check if we need to notify the new fact to any smart types..
         std::queue<type *> q;
@@ -290,6 +292,8 @@ void solver::new_goal(atom &atm)
     atom_flaw *af = new atom_flaw(*this, res, atm, false);
     new_flaw(*af);
 
+    // we associate the flaw to the atom..
+    reason.insert({&atm, af});
     if (&atm.get_type().get_scope() != this)
     { // we check if we need to notify the new goal to any smart types..
         std::queue<type *> q;

@@ -28,6 +28,8 @@ public:
   void init(); // initializes the solver..
 
   expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals) override;
+  atom_flaw &get_reason(const atom &atm) const { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
+
   void solve() override; // solves the given problem..
 
 private:
@@ -66,6 +68,7 @@ private:
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
+  std::unordered_map<const atom *, atom_flaw *> reason;       // the reason for having introduced an atom..
 
   struct layer
   {

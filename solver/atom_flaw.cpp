@@ -50,8 +50,8 @@ void atom_flaw::compute_resolvers()
             q.pop();
         }
 
-        const smart_type *tp = static_cast<const smart_type *>(&atm.get_type());
-        for (const auto &i : tp->get_instances())
+        // we check for possible unifications (i.e. all the instances of the atom's type)..
+        for (const auto &i : atm.get_type().get_instances())
         {
             if (&*i == &atm) // the current atom cannot unify with itself..
                 continue;
@@ -60,7 +60,7 @@ void atom_flaw::compute_resolvers()
             atom &t_atm = static_cast<atom &>(*i);
 
             // this is the target flaw (i.e. the one we are checking for unification) and cannot be in the current flaw's causes' effects..
-            atom_flaw &target = tp->get_reason(t_atm);
+            atom_flaw &target = slv.get_reason(t_atm);
 
             if (!target.is_expanded() ||                                // the target flaw must hav been already expanded..
                 ancestors.find(&target) != ancestors.end() ||           // unifying with the target atom would introduce cyclic causality..

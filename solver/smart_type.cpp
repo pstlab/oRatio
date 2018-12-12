@@ -9,14 +9,14 @@ namespace ratio
 smart_type::smart_type(solver &slv, scope &scp, const std::string &name) : type(slv, scp, name, false), slv(slv) {}
 smart_type::~smart_type() {}
 
-void smart_type::new_fact(atom_flaw &af) { reason.insert({&af.get_atom(), &af}); }
-void smart_type::new_goal(atom_flaw &af) { reason.insert({&af.get_atom(), &af}); }
+void smart_type::new_fact(atom_flaw &af) {}
+void smart_type::new_goal(atom_flaw &af) {}
 
 std::vector<resolver *> smart_type::get_resolvers(const std::set<atom *> &atms)
 {
     std::unordered_set<resolver *> ress;
     for (const auto &atm : atms)
-        for (const auto &r : reason.at(atm)->get_resolvers())
+        for (const auto &r : slv.get_reason(*atm).get_resolvers())
             if (resolver *af = dynamic_cast<atom_flaw::activate_fact *>(r))
                 ress.insert(af);
             else if (resolver *ag = dynamic_cast<atom_flaw::activate_goal *>(r))
