@@ -7,6 +7,7 @@ namespace ratio
 
 class flaw;
 class resolver;
+class atom_flaw;
 #ifdef BUILD_GUI
 class solver_listener;
 #endif
