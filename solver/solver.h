@@ -90,8 +90,8 @@ private:
 #ifdef GRAPH_PRUNING
   smt::var gamma; // this variable represents the validity of the current graph..
 #endif
-  unsigned short accuracy = 1;                  // the current heuristic accuracy..
-  static const unsigned short max_accuracy = 1; // the maximum heuristic accuracy..
+  unsigned short accuracy = MIN_ACCURACY;                  // the current heuristic accuracy..
+  static const unsigned short max_accuracy = MAX_ACCURACY; // the maximum heuristic accuracy..
 #ifdef BUILD_GUI
 private:
   std::vector<solver_listener *> listeners; // the causal-graph listeners..
