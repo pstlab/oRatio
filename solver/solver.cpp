@@ -3,8 +3,10 @@
 #include "var_flaw.h"
 #include "atom_flaw.h"
 #include "disjunction_flaw.h"
+#include "hyper_flaw.h"
 #include "smart_type.h"
 #include "atom.h"
+#include "combinations.h"
 #ifdef BUILD_GUI
 #include "solver_listener.h"
 #include <iostream>
@@ -174,19 +176,37 @@ bool solver::has_inconsistencies()
 
 void solver::expand_flaw(flaw &f)
 {
-#ifdef BUILD_GUI
-    for (const auto &l : listeners)
-        l->current_flaw(f);
-#endif
     assert(!f.expanded);
+
     // we expand the flaw..
+    if (hyper_flaw *sf = dynamic_cast<hyper_flaw *>(&f))
+        // we expand the unexpanded enclosing flaws..
+        for (const auto &c_f : sf->flaws)
+            if (!c_f->expanded)
+            {
+#ifdef BUILD_GUI
+                for (const auto &l : listeners)
+                    l->current_flaw(*c_f);
+#endif
+                assert(!c_f->expanded);
+                // we expand the enclosing flaw..
+                c_f->expand();
+                // ..and remove it from the flaw queue..
+                auto f_it = std::find(flaw_q.begin(), flaw_q.end(), c_f);
+                if (f_it != flaw_q.end())
+                    flaw_q.erase(f_it);
+
+                // we apply the enclosing flaw's resolvers..
+                for (const auto &r : c_f->resolvers)
+                    apply_resolver(*r);
+            }
     f.expand();
 
     for (const auto &r : f.resolvers)
         apply_resolver(*r);
 
     if (!get_sat_core().check())
-        throw std::runtime_error("the input problem is unsolvable");
+        throw std::runtime_error("the problem is unsolvable");
 }
 
 void solver::apply_resolver(resolver &r)
@@ -200,13 +220,83 @@ void solver::apply_resolver(resolver &r)
     catch (const std::runtime_error &)
     {
         if (!get_sat_core().new_clause({lit(r.rho, false)}))
-            throw std::runtime_error("the input problem is unsolvable");
+            throw std::runtime_error("the problem is unsolvable");
     }
 
     restore_ni();
     res = nullptr;
     if (r.preconditions.empty() && get_sat_core().value(r.rho) != False) // there are no requirements for this resolver..
         set_estimated_cost(r, 0);
+}
+
+void solver::add_layer()
+{
+    assert(get_sat_core().root_level());
+#ifdef BUILD_GUI
+    std::cout << "adding a layer to the causal graph.." << std::endl;
+#endif
+
+    std::deque<flaw *> f_q(flaw_q);
+    while (std::all_of(f_q.begin(), f_q.end(), [&](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
+    {
+        if (flaw_q.empty())
+            throw std::runtime_error("the problem is unsolvable");
+        std::deque<flaw *> c_q = std::move(flaw_q);
+        for (const auto &f : c_q)
+            if (get_sat_core().value(f->phi) != False) // we expand the flaw..
+                expand_flaw(*f);
+    }
+
+#ifdef GRAPH_PRUNING
+    // we create a new graph var..
+    gamma = get_sat_core().new_var();
+#ifdef BUILD_GUI
+    std::cout << "graph var is: γ" << std::to_string(gamma) << std::endl;
+#endif
+    // these flaws have not been expanded, hence, cannot have a solution..
+    for (const auto &f : flaw_q)
+        get_sat_core().new_clause({lit(gamma, false), lit(f->phi, false)});
+    // we use the new graph var to allow search within the new graph..
+    if (!get_sat_core().assume(gamma) || !get_sat_core().check())
+        throw std::runtime_error("the problem is unsolvable");
+#endif
+}
+
+void solver::increase_accuracy()
+{
+#ifdef BUILD_GUI
+    std::cout << "heuristic accuracy is: " + std::to_string(accuracy + 1) << std::endl;
+#endif
+    accuracy++;
+    assert(get_sat_core().root_level());
+
+    // we clean up super-flaws trivial flaws and already solved flaws..
+    for (auto it = flaws.begin(); it != flaws.end();)
+        if (hyper_flaw *sf = dynamic_cast<hyper_flaw *>(*it))
+            // we remove the super-flaw from the current flaws..
+            flaws.erase(it++);
+        else if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return get_sat_core().value(r->rho) == True; }))
+        {
+            // we have either a trivial (i.e. has only one resolver) or an already solved flaw..
+            assert(get_sat_core().value((*std::find_if((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return get_sat_core().value(r->rho) != False; }))->rho) == True);
+            // we remove the flaw from the current flaws..
+            flaws.erase(it++);
+        }
+        else
+            ++it;
+
+    flaw_q.clear();
+    if (flaws.size() >= accuracy)
+    {
+        std::vector<std::vector<flaw *>> fss = combinations(std::vector<flaw *>(flaws.begin(), flaws.end()), accuracy);
+        for (const auto &fs : fss) // we create a new super flaw..
+            new_flaw(*new hyper_flaw(*this, res, fs));
+    }
+    else // we create a new super flaw..
+        new_flaw(*new hyper_flaw(*this, res, std::vector<flaw *>(flaws.begin(), flaws.end())));
+
+    // we restart the building graph procedure..
+    build_graph();
 }
 
 #ifdef DEFERRABLES

@@ -8,6 +8,7 @@ namespace ratio
 class flaw;
 class resolver;
 class atom_flaw;
+class hyper_flaw;
 #ifdef BUILD_GUI
 class solver_listener;
 #endif
@@ -17,6 +18,7 @@ class solver : public core, private smt::theory
   friend class flaw;
   friend class resolver;
   friend class atom_flaw;
+  friend class hyper_flaw;
 #ifdef BUILD_GUI
   friend class solver_listener;
 #endif
@@ -38,6 +40,9 @@ private:
   bool has_inconsistencies();       // checks whether the types have some inconsistency..
   void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
   void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
+
+  void add_layer();         // adds a layer to the current planning graph..
+  void increase_accuracy(); // increases the heuristic accuracy by one..
 
 #ifdef DEFERRABLES
   bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
@@ -85,6 +90,8 @@ private:
 #ifdef GRAPH_PRUNING
   smt::var gamma; // this variable represents the validity of the current graph..
 #endif
+  unsigned short accuracy = 1;                  // the current heuristic accuracy..
+  static const unsigned short max_accuracy = 1; // the maximum heuristic accuracy..
 #ifdef BUILD_GUI
 private:
   std::vector<solver_listener *> listeners; // the causal-graph listeners..
