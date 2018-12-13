@@ -14,17 +14,29 @@ configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 set(HEURISTIC_TYPE "h_max" CACHE STRING "Heuristic type")
 set_property(CACHE HEURISTIC_TYPE PROPERTY STRINGS "h_max" "h_add")
 
+option(CHECK_UNIFICATIONS "Check unifications when building the planning graph" OFF)
+option(CHECK_HYPER_FLAWS "Check hyper-flaws when building the planning graph" OFF)
 option(GRAPH_PRUNING "Graph pruning" OFF)
 option(BUILD_GUI "Build GUI" OFF)
 
-message(STATUS "Heuristic type: ${HEURISTIC_TYPE}")
-message(STATUS "Graph pruning:  ${GRAPH_PRUNING}")
-message(STATUS "Build GUI:      ${BUILD_GUI}")
+message(STATUS "Heuristic type:     ${HEURISTIC_TYPE}")
+message(STATUS "Check unifications: ${CHECK_UNIFICATIONS}" )
+message(STATUS "Check hyper-flaws:  ${CHECK_HYPER_FLAWS}" )
+message(STATUS "Graph pruning:      ${GRAPH_PRUNING}")
+message(STATUS "Build GUI:          ${BUILD_GUI}")
 
 if(HEURISTIC_TYPE MATCHES "h_max")
     add_definitions(-DH_MAX)
 elseif(HEURISTIC_TYPE MATCHES "h_add")
     add_definitions(-DH_ADD)
+endif()
+
+if(CHECK_UNIFICATIONS)
+  add_definitions(-DCHECK_UNIFICATIONS)
+endif()
+
+if(CHECK_HYPER_FLAWS)
+  add_definitions(-DCHECK_HYPER_FLAWS)
 endif()
 
 if(GRAPH_PRUNING)

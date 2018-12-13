@@ -56,14 +56,14 @@ void atom_flaw::compute_resolvers()
             if (&*i == &atm) // the current atom cannot unify with itself..
                 continue;
 
-            // this is the atom we are checking for unification..
+            // this is the target (i.e. the atom we are checking for unification)..
             atom &t_atm = static_cast<atom &>(*i);
 
             // this is the target flaw (i.e. the one we are checking for unification) and cannot be in the current flaw's causes' effects..
-            atom_flaw &target = slv.get_reason(t_atm);
+            atom_flaw &t_flaw = slv.get_reason(t_atm);
 
-            if (!target.is_expanded() ||                                // the target flaw must hav been already expanded..
-                ancestors.find(&target) != ancestors.end() ||           // unifying with the target atom would introduce cyclic causality..
+            if (!t_flaw.is_expanded() ||                                // the target flaw must hav been already expanded..
+                ancestors.find(&t_flaw) != ancestors.end() ||           // unifying with the target atom would introduce cyclic causality..
                 slv.get_sat_core().value(t_atm.get_sigma()) == False || // the target atom is unified with some other atom..
                 !atm.equates(t_atm))                                    // the atom does not equate with the target target..
                 continue;
@@ -74,11 +74,45 @@ void atom_flaw::compute_resolvers()
             if (slv.get_sat_core().value(eq_v) == False) // the two atoms cannot unify, hence, we skip this instance..
                 continue;
 
+#ifdef CHECK_UNIFICATIONS
+            // since atom 'c_atm' is a good candidate for unification, we build the unification literals..
+            std::vector<lit> unif_lits;
+            q.push(this);
+            q.push(&t_flaw);
+            unif_lits.push_back(lit(atm.get_sigma(), false)); // we force the state of this atom to be 'unified' within the unification literals..
+            unif_lits.push_back(t_atm.get_sigma());           // we force the state of the target atom to be 'active' within the unification literals..
+            std::unordered_set<const flaw *> seen;
+            while (!q.empty())
+            {
+                if (seen.find(q.front()) == seen.end())
+                {
+                    seen.insert(q.front()); // we avoid some repetition of literals..
+                    for (const auto &cause : q.front()->get_causes())
+                        if (slv.get_sat_core().value(cause->get_rho()) != True)
+                        {
+                            unif_lits.push_back(cause->get_rho()); // we add the resolver's variable to the unification literals..
+                            q.push(&cause->get_effect());          // we push its effect..
+                        }
+                }
+                q.pop();
+            }
+
+            if (slv.get_sat_core().value(eq_v) != True)
+                unif_lits.push_back(eq_v);
+
+            if (unif_lits.empty() || slv.sat_cr.check(unif_lits))
+            {
+                unify_atom *u_res = new unify_atom(slv, *this, atm, c_atm, unif_lits);
+#else
             unify_atom *u_res = new unify_atom(slv, *this, atm, t_atm, {lit(atm.get_sigma(), false), t_atm.get_sigma(), eq_v});
-            assert(slv.get_sat_core().value(u_res->get_rho()) != False);
-            add_resolver(*u_res);
-            slv.new_causal_link(target, *u_res);
-            slv.set_estimated_cost(*u_res, target.get_estimated_cost());
+#endif
+                assert(slv.get_sat_core().value(u_res->get_rho()) != False);
+                add_resolver(*u_res);
+                slv.new_causal_link(t_flaw, *u_res);
+                slv.set_estimated_cost(*u_res, t_flaw.get_estimated_cost());
+#ifdef CHECK_UNIFICATIONS
+            }
+#endif
         }
     }
 
