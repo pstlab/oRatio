@@ -12,7 +12,10 @@ smart_type::~smart_type() {}
 void smart_type::new_fact(atom_flaw &af) {}
 void smart_type::new_goal(atom_flaw &af) {}
 
-std::vector<resolver *> smart_type::get_resolvers(const std::set<atom *> &atms)
+void smart_type::set_ni(const smt::var &v) { get_solver().set_ni(v); }
+void smart_type::restore_ni() { get_solver().restore_ni(); }
+
+std::vector<resolver *> smart_type::get_resolvers(solver &slv, const std::set<atom *> &atms)
 {
     std::unordered_set<resolver *> ress;
     for (const auto &atm : atms)

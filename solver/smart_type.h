@@ -31,7 +31,10 @@ private:
   virtual void new_goal(atom_flaw &);
 
 protected:
-  std::vector<resolver *> get_resolvers(const std::set<atom *> &atms); // returns the vector of resolvers which has given rise to the given atoms..
+  void set_ni(const smt::var &v); // temporally sets the solver's 'ni' variable..
+  void restore_ni();              // restores the solver's 'ni' variable..
+
+  static std::vector<resolver *> get_resolvers(solver &slv, const std::set<atom *> &atms); // returns the vector of resolvers which has given rise to the given atoms..
 
 private:
   solver &slv;

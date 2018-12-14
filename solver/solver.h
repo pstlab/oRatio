@@ -9,6 +9,7 @@ class flaw;
 class resolver;
 class atom_flaw;
 class hyper_flaw;
+class smart_type;
 #ifdef BUILD_GUI
 class solver_listener;
 #endif
@@ -19,6 +20,7 @@ class solver : public core, private smt::theory
   friend class resolver;
   friend class atom_flaw;
   friend class hyper_flaw;
+  friend class smart_type;
 #ifdef BUILD_GUI
   friend class solver_listener;
 #endif
