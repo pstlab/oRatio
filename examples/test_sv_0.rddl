@@ -1,0 +1,25 @@
+class TestSV : StateVariable {
+
+    predicate P0() {
+        duration >= 10.0;
+    }
+
+    predicate P1() {
+        duration >= 10.0;
+        goal p0 = new P0(end:start);
+    }
+
+    predicate P2() {
+        duration >= 10.0;
+        goal p1 = new P1(end:start);
+    }
+}
+
+TestSV test = new TestSV();
+
+// we create a fact on the 'test' state variable
+fact f0 = new test.P0(start:origin);
+f0.duration >= 10.0;
+
+// we create a goal on the 'test' state variable
+goal g0 = new test.P2(end:horizon);
