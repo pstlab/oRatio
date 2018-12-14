@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 include(CTest)
 enable_testing()
 
-file(GLOB SOURCES main.cpp smt/*.cpp smt/lra/*.cpp smt/ov/*.cpp riddle/*.cpp core/*.cpp solver/*.cpp)
-include_directories(smt smt/lra smt/ov riddle core solver solver/listeners)
+file(GLOB SOURCES main.cpp smt/*.cpp smt/lra/*.cpp smt/ov/*.cpp riddle/*.cpp core/*.cpp solver/*.cpp solver/types/*.cpp)
+include_directories(smt smt/lra smt/ov riddle core solver solver/types solver/listeners)
 
 configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
@@ -20,6 +20,7 @@ add_definitions(-DMAX_ACCURACY=${MAX_ACCURACY})
 
 option(CHECK_UNIFICATIONS "Check unifications when building the planning graph" OFF)
 option(CHECK_HYPER_FLAWS "Check hyper-flaws when building the planning graph" OFF)
+option(RESOLVERS_LOOKUP "Resolvers lookup" OFF)
 option(GRAPH_PRUNING "Graph pruning" OFF)
 option(BUILD_GUI "Build GUI" OFF)
 
@@ -28,6 +29,7 @@ message(STATUS "Min heuristic accuracy: ${MIN_ACCURACY}")
 message(STATUS "Max heuristic accuracy: ${MAX_ACCURACY}")
 message(STATUS "Check unifications:     ${CHECK_UNIFICATIONS}" )
 message(STATUS "Check hyper-flaws:      ${CHECK_HYPER_FLAWS}" )
+message(STATUS "Resolvers lookup:       ${RESOLVERS_LOOKUP}" )
 message(STATUS "Graph pruning:          ${GRAPH_PRUNING}")
 message(STATUS "Build GUI:              ${BUILD_GUI}")
 
@@ -43,6 +45,10 @@ endif()
 
 if(CHECK_HYPER_FLAWS)
   add_definitions(-DCHECK_HYPER_FLAWS)
+endif()
+
+if(RESOLVERS_LOOKUP)
+  add_definitions(-DRESOLVERS_LOOKUP)
 endif()
 
 if(GRAPH_PRUNING)

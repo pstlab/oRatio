@@ -5,6 +5,8 @@
 #include "disjunction_flaw.h"
 #include "hyper_flaw.h"
 #include "smart_type.h"
+#include "state_variable.h"
+#include "reusable_resource.h"
 #include "atom.h"
 #include "combinations.h"
 #ifdef BUILD_GUI
@@ -25,6 +27,7 @@ solver::~solver() {}
 void solver::init()
 {
     read(std::vector<std::string>({"init.rddl"}));
+    new_types({new state_variable(*this), new reusable_resource(*this)});
 }
 
 void solver::solve()

@@ -173,7 +173,6 @@ void state_variable::sv_flaw::compute_resolvers()
 
 state_variable::order_resolver::order_resolver(solver &slv, const var &r, sv_flaw &f, const atom &before, const atom &after) : resolver(slv, r, 0, f), before(before), after(after) {}
 state_variable::order_resolver::~order_resolver() {}
-void state_variable::order_resolver::apply() {}
 
 #ifdef BUILD_GUI
 std::string state_variable::order_resolver::get_label() const
@@ -182,11 +181,12 @@ std::string state_variable::order_resolver::get_label() const
 }
 #endif
 
-state_variable::displace_resolver::displace_resolver(solver &slv, sv_flaw &f, const atom &a0, const atom &a1, const lit &neq_lit) : resolver(slv, 0, f), a0(a0), a1(a1), neq_lit(neq_lit)
+void state_variable::order_resolver::apply()
 {
 }
+
+state_variable::displace_resolver::displace_resolver(solver &slv, sv_flaw &f, const atom &a0, const atom &a1, const lit &neq_lit) : resolver(slv, 0, f), a0(a0), a1(a1), neq_lit(neq_lit) {}
 state_variable::displace_resolver::~displace_resolver() {}
-void state_variable::displace_resolver::apply() { slv.get_sat_core().new_clause({lit(get_rho(), false), neq_lit}); }
 
 #ifdef BUILD_GUI
 std::string state_variable::displace_resolver::get_label() const
@@ -194,4 +194,9 @@ std::string state_variable::displace_resolver::get_label() const
     return "ρ" + std::to_string(get_rho()) + " displ σ" + std::to_string(a0.get_sigma()) + ".τ != σ" + std::to_string(a1.get_sigma()) + ".τ";
 }
 #endif
+
+void state_variable::displace_resolver::apply()
+{
+    slv.get_sat_core().new_clause({lit(get_rho(), false), neq_lit});
+}
 } // namespace ratio
