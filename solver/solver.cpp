@@ -61,7 +61,7 @@ void solver::solve()
 
                 // we apply the resolver..
                 if (!get_sat_core().assume(res->rho) || !get_sat_core().check())
-                    throw std::runtime_error("the input problem is unsolvable");
+                    throw std::runtime_error("the problem is unsolvable");
 
                 res = nullptr;
 
@@ -86,7 +86,7 @@ void solver::build_graph()
     while (std::any_of(flaws.begin(), flaws.end(), [&](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
     {
         if (flaw_q.empty())
-            throw std::runtime_error("the input problem is unsolvable");
+            throw std::runtime_error("the problem is unsolvable");
 #ifdef DEFERRABLES
         assert(!flaw_q.front()->expanded);
         if (get_sat_core().value(flaw_q.front()->phi) != False)
@@ -113,7 +113,7 @@ void solver::build_graph()
         get_sat_core().new_clause({lit(gamma, false), lit(f->phi, false)});
     // we use the new graph var to allow search within the current graph..
     if (!get_sat_core().assume(gamma) || !get_sat_core().check())
-        throw std::runtime_error("the input problem is unsolvable");
+        throw std::runtime_error("the problem is unsolvable");
 #endif
 }
 

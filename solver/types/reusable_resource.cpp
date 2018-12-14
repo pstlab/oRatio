@@ -30,12 +30,12 @@ std::vector<flaw *> reusable_resource::get_flaws()
         // we partition atoms for each reusable-resource they might insist on..
         std::unordered_map<item *, std::vector<atom *>> rr_instances;
         for (const auto &a : atoms)
-            if (get_solver().get_sat_core().value(a.first->get_sigma()) == True) // we filter out those which are not strictly active..
+            if (get_core().get_sat_core().value(a.first->get_sigma()) == True) // we filter out those atoms which are not strictly active..
             {
                 expr c_scope = a.first->get(TAU);
                 if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
                 {
-                    for (const auto &val : get_solver().get_ov_theory().value(enum_scope->ev))
+                    for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
                         if (to_check.find(static_cast<item *>(val)) != to_check.end())
                             rr_instances[static_cast<item *>(val)].push_back(a.first);
                 }
@@ -54,14 +54,14 @@ std::vector<flaw *> reusable_resource::get_flaws()
             std::set<inf_rational> pulses;
             // the resource capacity..
             arith_expr capacity = rr.first->get(REUSABLE_RESOURCE_CAPACITY);
-            inf_rational c_capacity = get_solver().arith_value(capacity);
+            inf_rational c_capacity = get_core().arith_value(capacity);
 
             for (const auto &a : rr.second)
             {
                 arith_expr s_expr = a->get("start");
                 arith_expr e_expr = a->get("end");
-                inf_rational start = get_solver().arith_value(s_expr);
-                inf_rational end = get_solver().arith_value(e_expr);
+                inf_rational start = get_core().arith_value(s_expr);
+                inf_rational end = get_core().arith_value(e_expr);
                 starting_atoms[start].insert(a);
                 ending_atoms[end].insert(a);
                 pulses.insert(start);
@@ -82,7 +82,7 @@ std::vector<flaw *> reusable_resource::get_flaws()
                 for (const auto &a : overlapping_atoms)
                 {
                     arith_expr amount = a->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
-                    c_usage += get_solver().arith_value(amount);
+                    c_usage += get_core().arith_value(amount);
                 }
 
                 if (c_usage > c_capacity) // we have a 'peak'..
@@ -104,24 +104,29 @@ void reusable_resource::new_fact(atom_flaw &f)
     restore_ni();
 
     // we avoid unification..
-    if (!get_solver().get_sat_core().new_clause({lit(f.get_phi(), false), atm.get_sigma()}))
+    if (!get_core().get_sat_core().new_clause({lit(f.get_phi(), false), atm.get_sigma()}))
         throw std::runtime_error("the problem is unsolvable");
 
     atoms.push_back({&atm, new rr_atom_listener(*this, atm)});
-    expr c_scope = atm.get(TAU);
-    if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
-        for (const auto &val : get_solver().get_ov_theory().value(enum_scope->ev))
-            to_check.insert(static_cast<item *>(val));
-    else
-        to_check.insert(&*c_scope);
+
+    // we filter out those atoms which are not strictly active..
+    if (get_core().get_sat_core().value(atm.get_sigma()) == True)
+    {
+        expr c_scope = atm.get(TAU);
+        if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))              // the 'tau' parameter is a variable..
+            for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev)) // we check for all its allowed values..
+                to_check.insert(static_cast<item *>(val));
+        else // the 'tau' parameter is a constant..
+            to_check.insert(&*c_scope);
+    }
 }
 
 void reusable_resource::new_goal(atom_flaw &) { throw std::logic_error("it is not possible to define goals on a reusable resource.."); }
 
-reusable_resource::rr_constructor::rr_constructor(reusable_resource &rr) : constructor(rr.get_solver(), rr, {new field(rr.get_solver().get_type(REAL_KEYWORD), REUSABLE_RESOURCE_CAPACITY)}, {{REUSABLE_RESOURCE_CAPACITY, {new riddle::ast::id_expression({REUSABLE_RESOURCE_CAPACITY})}}}, {new riddle::ast::expression_statement(new riddle::ast::geq_expression(new riddle::ast::id_expression({REUSABLE_RESOURCE_CAPACITY}), new riddle::ast::real_literal_expression(0)))}) {}
+reusable_resource::rr_constructor::rr_constructor(reusable_resource &rr) : constructor(rr.get_core(), rr, {new field(rr.get_core().get_type(REAL_KEYWORD), REUSABLE_RESOURCE_CAPACITY)}, {{REUSABLE_RESOURCE_CAPACITY, {new riddle::ast::id_expression({REUSABLE_RESOURCE_CAPACITY})}}}, {new riddle::ast::expression_statement(new riddle::ast::geq_expression(new riddle::ast::id_expression({REUSABLE_RESOURCE_CAPACITY}), new riddle::ast::real_literal_expression(0)))}) {}
 reusable_resource::rr_constructor::~rr_constructor() {}
 
-reusable_resource::use_predicate::use_predicate(reusable_resource &rr) : predicate(rr.get_solver(), rr, REUSABLE_RESOURCE_USE_PREDICATE_NAME, {new field(rr.get_solver().get_type(REAL_KEYWORD), REUSABLE_RESOURCE_USE_AMOUNT_NAME), new field(rr, TAU)}, {new riddle::ast::expression_statement(new riddle::ast::geq_expression(new riddle::ast::id_expression({REUSABLE_RESOURCE_USE_AMOUNT_NAME}), new riddle::ast::real_literal_expression(0)))}) { new_supertypes(*this, {&rr.get_solver().get_predicate("IntervalPredicate")}); }
+reusable_resource::use_predicate::use_predicate(reusable_resource &rr) : predicate(rr.get_core(), rr, REUSABLE_RESOURCE_USE_PREDICATE_NAME, {new field(rr.get_core().get_type(REAL_KEYWORD), REUSABLE_RESOURCE_USE_AMOUNT_NAME), new field(rr, TAU)}, {new riddle::ast::expression_statement(new riddle::ast::geq_expression(new riddle::ast::id_expression({REUSABLE_RESOURCE_USE_AMOUNT_NAME}), new riddle::ast::real_literal_expression(0)))}) { new_supertypes(*this, {&rr.get_core().get_predicate("IntervalPredicate")}); }
 reusable_resource::use_predicate::~use_predicate() {}
 
 reusable_resource::rr_atom_listener::rr_atom_listener(reusable_resource &rr, atom &atm) : atom_listener(atm), rr(rr) {}
@@ -129,12 +134,16 @@ reusable_resource::rr_atom_listener::~rr_atom_listener() {}
 
 void reusable_resource::rr_atom_listener::something_changed()
 {
-    expr c_scope = atm.get(TAU);
-    if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
-        for (const auto &val : atm.get_core().get_ov_theory().value(enum_scope->ev))
-            rr.to_check.insert(static_cast<item *>(val));
-    else
-        rr.to_check.insert(&*c_scope);
+    // we filter out those atoms which are not strictly active..
+    if (atm.get_core().get_sat_core().value(atm.get_sigma()) == True)
+    {
+        expr c_scope = atm.get(TAU);
+        if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))                  // the 'tau' parameter is a variable..
+            for (const auto &val : atm.get_core().get_ov_theory().value(enum_scope->ev)) // we check for all its allowed values..
+                rr.to_check.insert(static_cast<item *>(val));
+        else // the 'tau' parameter is a constant..
+            rr.to_check.insert(&*c_scope);
+    }
 }
 
 reusable_resource::rr_flaw::rr_flaw(solver &slv, const std::set<atom *> &atms) : flaw(slv, smart_type::get_resolvers(slv, atms)), overlapping_atoms(atms) {}
