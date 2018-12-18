@@ -693,7 +693,7 @@ std::string lra_theory::to_string()
         if (it != v_asrts.cbegin())
             la += ", ";
         la += "[";
-        for (std::vector<assertion *>::const_iterator a_it = it->second.cbegin(); a_it != it->second.cend(); ++it)
+        for (std::vector<assertion *>::const_iterator a_it = it->second.cbegin(); a_it != it->second.cend(); ++a_it)
         {
             if (a_it != it->second.cbegin())
                 la += ", ";
