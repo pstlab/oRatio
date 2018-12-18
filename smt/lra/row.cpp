@@ -29,7 +29,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                 else
                 {
                     lb += term.second * th.lb(term.first);
-                    cnfl.push_back(!*th.assigns.at(lra_theory::lb_index(term.first)).reason);
+                    cnfl.push_back(!*th.bounds.at(lra_theory::lb_index(term.first)).reason);
                 }
             else if (term.second.is_negative())
                 if (th.ub(term.first).is_positive_infinite())
@@ -41,7 +41,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                 else
                 {
                     lb += term.second * th.ub(term.first);
-                    cnfl.push_back(!*th.assigns.at(lra_theory::ub_index(term.first)).reason);
+                    cnfl.push_back(!*th.bounds.at(lra_theory::ub_index(term.first)).reason);
                 }
 
         if (lb > th.lb(x))
@@ -85,7 +85,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                 else
                 {
                     ub += term.second * th.ub(term.first);
-                    cnfl.push_back(!*th.assigns.at(lra_theory::ub_index(term.first)).reason);
+                    cnfl.push_back(!*th.bounds.at(lra_theory::ub_index(term.first)).reason);
                 }
             else if (term.second.is_negative())
                 if (th.lb(term.first).is_negative_infinite())
@@ -97,7 +97,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                 else
                 {
                     ub += term.second * th.lb(term.first);
-                    cnfl.push_back(!*th.assigns.at(lra_theory::lb_index(term.first)).reason);
+                    cnfl.push_back(!*th.bounds.at(lra_theory::lb_index(term.first)).reason);
                 }
 
         if (ub < th.ub(x))
@@ -151,7 +151,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                 else
                 {
                     ub += term.second * th.ub(term.first);
-                    cnfl.push_back(!*th.assigns.at(lra_theory::ub_index(term.first)).reason);
+                    cnfl.push_back(!*th.bounds.at(lra_theory::ub_index(term.first)).reason);
                 }
             else if (term.second.is_negative())
                 if (th.lb(term.first).is_negative_infinite())
@@ -163,7 +163,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                 else
                 {
                     ub += term.second * th.lb(term.first);
-                    cnfl.push_back(!*th.assigns.at(lra_theory::lb_index(term.first)).reason);
+                    cnfl.push_back(!*th.bounds.at(lra_theory::lb_index(term.first)).reason);
                 }
 
         if (ub < th.ub(x))
@@ -207,7 +207,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                 else
                 {
                     lb += term.second * th.lb(term.first);
-                    cnfl.push_back(!*th.assigns.at(lra_theory::lb_index(term.first)).reason);
+                    cnfl.push_back(!*th.bounds.at(lra_theory::lb_index(term.first)).reason);
                 }
             else if (term.second.is_negative())
                 if (th.ub(term.first).is_positive_infinite())
@@ -219,7 +219,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                 else
                 {
                     lb += term.second * th.ub(term.first);
-                    cnfl.push_back(!*th.assigns.at(lra_theory::ub_index(term.first)).reason);
+                    cnfl.push_back(!*th.bounds.at(lra_theory::ub_index(term.first)).reason);
                 }
 
         if (lb > th.lb(x))

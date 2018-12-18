@@ -18,23 +18,23 @@ bool assertion::propagate_lb(const var &x_i, std::vector<lit> &cnfl)
         case leq: // the assertion is unsatisfable: [x_i >= lb(x_i)] -> ![x_i <= v]..
             switch (th.sat.value(b))
             {
-            case True:                                                             // we have a propositional inconsistency..
-                cnfl.push_back(lit(b, false));                                     // either the literal 'b' is false ..
-                cnfl.push_back(!*th.assigns.at(lra_theory::lb_index(x_i)).reason); // or what asserted the lower bound is false..
+            case True:                                                            // we have a propositional inconsistency..
+                cnfl.push_back(lit(b, false));                                    // either the literal 'b' is false ..
+                cnfl.push_back(!*th.bounds.at(lra_theory::lb_index(x_i)).reason); // or what asserted the lower bound is false..
                 return false;
             case Undefined: // we propagate information to the sat core..
-                th.record({lit(b, false), !*th.assigns.at(lra_theory::lb_index(x_i)).reason});
+                th.record({lit(b, false), !*th.bounds.at(lra_theory::lb_index(x_i)).reason});
             }
             break;
         case geq: // the assertion is satisfied; [x_i >= lb(x_i)] -> [x_i >= v]..
             switch (th.sat.value(b))
             {
-            case False:                                                            // we have a propositional inconsistency..
-                cnfl.push_back(b);                                                 // either the literal 'b' is true ..
-                cnfl.push_back(!*th.assigns.at(lra_theory::lb_index(x_i)).reason); // or what asserted the lower bound is false..
+            case False:                                                           // we have a propositional inconsistency..
+                cnfl.push_back(b);                                                // either the literal 'b' is true ..
+                cnfl.push_back(!*th.bounds.at(lra_theory::lb_index(x_i)).reason); // or what asserted the lower bound is false..
                 return false;
             case Undefined: // we propagate information to the sat core..
-                th.record({b, !*th.assigns.at(lra_theory::lb_index(x_i)).reason});
+                th.record({b, !*th.bounds.at(lra_theory::lb_index(x_i)).reason});
             }
             break;
         }
@@ -51,23 +51,23 @@ bool assertion::propagate_ub(const var &x_i, std::vector<lit> &cnfl)
         case leq: // the assertion is satisfied: [x_i <= ub(x_i)] -> [x_i <= v]..
             switch (th.sat.value(b))
             {
-            case False:                                                            // we have a propositional inconsistency..
-                cnfl.push_back(b);                                                 // either the literal 'b' is true ..
-                cnfl.push_back(!*th.assigns.at(lra_theory::ub_index(x_i)).reason); // or what asserted the upper bound is false..
+            case False:                                                           // we have a propositional inconsistency..
+                cnfl.push_back(b);                                                // either the literal 'b' is true ..
+                cnfl.push_back(!*th.bounds.at(lra_theory::ub_index(x_i)).reason); // or what asserted the upper bound is false..
                 return false;
             case Undefined: // we propagate information to the sat core..
-                th.record({b, !*th.assigns.at(lra_theory::ub_index(x_i)).reason});
+                th.record({b, !*th.bounds.at(lra_theory::ub_index(x_i)).reason});
             }
             break;
         case geq: // the assertion is unsatisfable; [x_i <= ub(x_i)] -> ![x_i >= v]..
             switch (th.sat.value(b))
             {
-            case True:                                                             // we have a propositional inconsistency..
-                cnfl.push_back(lit(b, false));                                     // either the literal 'b' is false ..
-                cnfl.push_back(!*th.assigns.at(lra_theory::ub_index(x_i)).reason); // or what asserted the upper bound is false..
+            case True:                                                            // we have a propositional inconsistency..
+                cnfl.push_back(lit(b, false));                                    // either the literal 'b' is false ..
+                cnfl.push_back(!*th.bounds.at(lra_theory::ub_index(x_i)).reason); // or what asserted the upper bound is false..
                 return false;
             case Undefined: // we propagate information to the sat core..
-                th.record({lit(b, false), !*th.assigns.at(lra_theory::ub_index(x_i)).reason});
+                th.record({lit(b, false), !*th.bounds.at(lra_theory::ub_index(x_i)).reason});
             }
             break;
         }

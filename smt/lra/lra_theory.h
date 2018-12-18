@@ -40,9 +40,9 @@ class lra_theory : public theory
     bool geq(const lin &left, const lin &right, const var &p = TRUE_var);
     bool gt(const lin &left, const lin &right, const var &p = TRUE_var);
 
-    inf_rational lb(const var &v) const { return assigns.at(lb_index(v)).value; } // the current lower bound of variable 'v'..
-    inf_rational ub(const var &v) const { return assigns.at(ub_index(v)).value; } // the current upper bound of variable 'v'..
-    inf_rational value(const var &v) const { return vals.at(v); }                 // the current value of variable 'v'..
+    inf_rational lb(const var &v) const { return bounds.at(lb_index(v)).value; } // the current lower bound of variable 'v'..
+    inf_rational ub(const var &v) const { return bounds.at(ub_index(v)).value; } // the current upper bound of variable 'v'..
+    inf_rational value(const var &v) const { return vals.at(v); }                // the current value of variable 'v'..
 
     inf_rational lb(const lin &l) const // returns the current lower bound of linear expression 'l'..
     {
@@ -97,7 +97,7 @@ class lra_theory : public theory
         lit *reason;        // the reason for the value..
     };
 
-    std::vector<bound> assigns;                                // the current assignments..
+    std::vector<bound> bounds;                                 // the current bounds..
     std::vector<inf_rational> vals;                            // the current values..
     std::map<const var, row *> tableau;                        // the sparse matrix..
     std::unordered_map<std::string, var> exprs;                // the expressions (string to numeric variable) for which already exist slack variables..
