@@ -152,7 +152,7 @@ reusable_resource::rr_flaw::~rr_flaw() {}
 #ifdef BUILD_GUI
 std::string reusable_resource::rr_flaw::get_label() const
 {
-    return "φ" + std::to_string(get_phi()) + "rr-flaw";
+    return "φ" + std::to_string(get_phi()) + " rr-flaw";
 }
 #endif
 

@@ -161,7 +161,7 @@ state_variable::sv_flaw::~sv_flaw() {}
 #ifdef BUILD_GUI
 std::string state_variable::sv_flaw::get_label() const
 {
-    return "φ" + std::to_string(get_phi()) + "sv-flaw";
+    return "φ" + std::to_string(get_phi()) + " sv-flaw";
 }
 #endif
 
