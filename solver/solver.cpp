@@ -132,7 +132,7 @@ bool solver::has_inconsistencies()
     {
         if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
         {
-            std::vector<flaw *> c_incs = st->get_flaws();
+            std::vector<flaw *> c_incs = st->get_flaws(); // we collect flaws from the smart-types..
             incs.insert(incs.end(), c_incs.begin(), c_incs.end());
         }
         for (const auto &st : q.front()->get_types())
@@ -150,15 +150,10 @@ bool solver::has_inconsistencies()
         while (!get_sat_core().root_level())
             get_sat_core().pop();
 
-        // we initialize the new flaws..
+        // we initialize and expand the new flaws..
         for (const auto &f : incs)
         {
-            f->init();
-#ifdef BUILD_GUI
-            // we notify the listeners that a new flaw has arised..
-            for (const auto &l : listeners)
-                l->new_flaw(*f);
-#endif
+            new_flaw(*f);
             expand_flaw(*f);
         }
 
@@ -171,7 +166,7 @@ bool solver::has_inconsistencies()
     else
     {
 #ifdef BUILD_GUI
-        std::cout << std::endl;
+        std::cout << ": 0" << std::endl;
 #endif
         return false;
     }
@@ -347,12 +342,8 @@ expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_
 {
     // we create a new enum expression..
     var_expr xp = core::new_enum(tp, allowed_vals);
-    if (allowed_vals.size() > 1)
-    {
-        // we create a new var flaw..
-        var_flaw *ef = new var_flaw(*this, res, *xp);
-        new_flaw(*ef);
-    }
+    if (allowed_vals.size() > 1) // we create a new var flaw..
+        new_flaw(*new var_flaw(*this, res, *xp));
     return xp;
 }
 
