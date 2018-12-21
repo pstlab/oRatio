@@ -14,21 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.cnr.istc.oratio;
+package it.cnr.istc.oratio.gui.riddle;
 
 /**
  *
  * @author Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
  */
-public class Rational {
+public class Typedef extends Type {
 
-    private long num, den;
+    final Type primitive_type;
 
-    public long getNumerator() {
-        return num;
+    Typedef(final Core core, final Scope scope, final Type primitive_type, final String name) {
+        super(core, scope, name);
+        this.primitive_type = primitive_type;
     }
 
-    public long getDenominator() {
-        return den;
+    public Type getPrimitiveType() {
+        return primitive_type;
     }
 }

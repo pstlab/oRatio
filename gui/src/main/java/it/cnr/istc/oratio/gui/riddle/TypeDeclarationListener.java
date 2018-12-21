@@ -14,21 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.cnr.istc.oratio;
+package it.cnr.istc.oratio.gui.riddle;
 
 /**
  *
  * @author Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
  */
-public class Rational {
+class TypeDeclarationListener extends riddleBaseListener {
 
-    private long num, den;
+    private final Core core;
 
-    public long getNumerator() {
-        return num;
-    }
-
-    public long getDenominator() {
-        return den;
+    TypeDeclarationListener(final Core core) {
+        this.core = core;
     }
 }

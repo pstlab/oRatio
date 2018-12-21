@@ -14,21 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.cnr.istc.oratio;
+package it.cnr.istc.oratio.gui.riddle;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
  * @author Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
  */
-public class Rational {
+public class EnumType extends Type {
 
-    private long num, den;
+    Collection<EnumType> enums = new ArrayList<>();
+    Collection<String> vals = new ArrayList<>();
 
-    public long getNumerator() {
-        return num;
+    EnumType(final Core core, final Scope scope, final String name) {
+        super(core, scope, name);
     }
 
-    public long getDenominator() {
-        return den;
+    public Collection<String> getAllowedValues() {
+        Set<String> items = new HashSet<>(vals);
+        for (EnumType c_enum : enums) {
+            items.addAll(c_enum.getAllowedValues());
+        }
+        return Collections.unmodifiableCollection(items);
     }
 }

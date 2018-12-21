@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
-            <version>4.7.1</version>
+            <version>4.7.2</version>
         </dependency>
     </dependencies>
 
@@ -42,10 +42,14 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
-                <version>4.7.1</version>
+                <version>4.7.2</version>
                 <configuration>
                     <listener>true</listener>
                     <visitor>true</visitor>
+                    <arguments>
+                        <argument>-package</argument>
+                        <argument>it.cnr.istc.oratio.gui.riddle</argument>
+                    </arguments>
                 </configuration>
                 <executions>
                     <execution>

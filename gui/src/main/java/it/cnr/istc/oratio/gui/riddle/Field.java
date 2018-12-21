@@ -14,21 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.cnr.istc.oratio;
+package it.cnr.istc.oratio.gui.riddle;
 
 /**
  *
  * @author Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
  */
-public class Rational {
+public class Field {
 
-    private long num, den;
+    final Type type;
+    final String name;
 
-    public long getNumerator() {
-        return num;
+    Field(final Type type, final String name) {
+        this.type = type;
+        this.name = name;
     }
 
-    public long getDenominator() {
-        return den;
+    public Type getType() {
+        return type;
+    }
+
+    public String getName() {
+        return name;
     }
 }

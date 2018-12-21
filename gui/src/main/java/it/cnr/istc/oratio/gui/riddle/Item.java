@@ -14,21 +14,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.cnr.istc.oratio;
+package it.cnr.istc.oratio.gui.riddle;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
  * @author Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
  */
-public class Rational {
+public class Item {
 
-    private long num, den;
+    final Type type;
+    final Map<String, Item> items = new HashMap<>();
 
-    public long getNumerator() {
-        return num;
+    public Item(final Type type) {
+        this.type = type;
     }
 
-    public long getDenominator() {
-        return den;
+    /**
+     * @return the type.
+     */
+    public Type getType() {
+        return type;
+    }
+
+    /**
+     * @return the items.
+     */
+    public Map<String, Item> getItems() {
+        return Collections.unmodifiableMap(items);
+    }
+
+    /**
+     * @param name the name of the field identifying the desired item.
+     * @return the item having the given name
+     */
+    public Item getItem(final String name) {
+        return items.get(name);
     }
 }

@@ -14,21 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.cnr.istc.oratio;
+package it.cnr.istc.oratio.gui.riddle;
 
 /**
  *
  * @author Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
  */
-public class Rational {
+public class Constructor extends BaseScope {
 
-    private long num, den;
+    final Field[] pars;
 
-    public long getNumerator() {
-        return num;
+    Constructor(final Core core, final Scope scope, final Field... parameters) {
+        super(core, scope);
+        this.pars = parameters;
+
+        for (Field par : parameters) {
+            fields.put(par.getName(), par);
+        }
     }
 
-    public long getDenominator() {
-        return den;
+    public Field[] getParemeters() {
+        return pars;
     }
 }

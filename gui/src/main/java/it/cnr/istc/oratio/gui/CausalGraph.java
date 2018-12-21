@@ -16,6 +16,7 @@
  */
 package it.cnr.istc.oratio.gui;
 
+import it.cnr.istc.oratio.Rational;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -187,26 +188,26 @@ public class CausalGraph extends Display {
                     Node nodeData = (Node) vi.getSourceTuple();
                     String t_text = "";
                     switch ((String) nodeData.get(NODE_TYPE)) {
-                    case "flaw":
-                        t_text += Character.toString('\u03C6');
-                        break;
-                    case "resolver":
-                        t_text += Character.toString('\u03C1');
-                        break;
+                        case "flaw":
+                            t_text += Character.toString('\u03C6');
+                            break;
+                        case "resolver":
+                            t_text += Character.toString('\u03C1');
+                            break;
                     }
                     t_text += ": ";
                     switch ((int) nodeData.get(NODE_STATE)) {
-                    case 0:
-                        t_text += "False";
-                        break;
-                    case 1:
-                        t_text += "True";
-                        break;
-                    case 2:
-                        t_text += "Undefined";
-                        break;
-                    default:
-                        break;
+                        case 0:
+                            t_text += "False";
+                            break;
+                        case 1:
+                            t_text += "True";
+                            break;
+                        case 2:
+                            t_text += "Undefined";
+                            break;
+                        default:
+                            break;
                     }
                     t_text += ", cost: " + (-(Double) nodeData.get(NODE_COST));
                     d.setToolTipText(t_text);
@@ -224,10 +225,10 @@ public class CausalGraph extends Display {
                 if (vi.getSourceTuple() instanceof Node) {
                     Node nodeData = (Node) vi.getSourceTuple();
                     switch ((String) nodeData.get(NODE_TYPE)) {
-                    case "flaw":
-                        break;
-                    case "resolver":
-                        break;
+                        case "flaw":
+                            break;
+                        case "resolver":
+                            break;
                     }
                 }
             }
@@ -242,7 +243,7 @@ public class CausalGraph extends Display {
             assert !flaws.containsKey(fc.flaw) : "the flaw already exists..";
             assert Arrays.stream(fc.causes)
                     .allMatch(c -> resolvers.containsKey(c)) : "the flaw's cause does not exist: "
-                            + Arrays.toString(fc.causes) + resolvers;
+                    + Arrays.toString(fc.causes) + resolvers;
             Node flaw_node = g.addNode();
             flaw_node.set(VisualItem.LABEL, fc.label);
             flaw_node.set(NODE_TYPE, "flaw");
@@ -346,9 +347,9 @@ public class CausalGraph extends Display {
 
     /**
      * Set label positions. Labels are assumed to be DecoratorItem instances,
-     * decorating their respective nodes. The layout simply gets the bounds of the
-     * decorated node and assigns the label coordinates to the center of those
-     * bounds.
+     * decorating their respective nodes. The layout simply gets the bounds of
+     * the decorated node and assigns the label coordinates to the center of
+     * those bounds.
      */
     private static class LabelLayout2 extends Layout {
 
