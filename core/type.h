@@ -48,6 +48,8 @@ public:
   std::vector<expr> get_instances() const noexcept { return instances; } // returns the instances of this type..
 
 protected:
+  static void new_supertypes(type &t, const std::vector<type *> &sts);
+  void new_supertypes(const std::vector<type *> &sts);
   void new_constructors(const std::vector<const constructor *> &cs);
   void new_methods(const std::vector<const method *> &ms);
   void new_types(const std::vector<type *> &ts);
@@ -73,13 +75,6 @@ public:
 
   predicate &get_predicate(const std::string &p_name) const override;
   std::map<std::string, predicate *> get_predicates() const noexcept override { return predicates; }
-
-protected:
-  static void new_supertypes(type &t, const std::vector<type *> &sts)
-  {
-    for (const auto &st : sts)
-      t.supertypes.push_back(st);
-  }
 
 private:
   virtual void new_predicate(predicate &) {}

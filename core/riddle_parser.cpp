@@ -456,17 +456,9 @@ void method_declaration::refine(scope &scp) const
     method *m = new method(scp.get_core(), scp, rt, name, args, statements);
 
     if (core *c = dynamic_cast<core *>(&scp))
-    {
-        if (c->methods.find(name) == c->methods.end())
-            c->methods.insert({name, *new std::vector<const method *>()});
-        c->methods.at(name).push_back(m);
-    }
+        c->new_methods({m});
     else if (type *t = dynamic_cast<type *>(&scp))
-    {
-        if (t->methods.find(name) == t->methods.end())
-            t->methods.insert({name, *new std::vector<const method *>()});
-        t->methods.at(name).push_back(m);
-    }
+        t->new_methods({m});
 }
 
 predicate_declaration::predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::predicate_declaration(n, pars, pl, stmnts) {}
@@ -491,24 +483,13 @@ void predicate_declaration::refine(scope &scp) const
         scope *s = &scp;
         for (const auto &id : sp)
             s = &s->get_predicate(id);
-        p->supertypes.push_back(static_cast<predicate *>(s));
+        p->new_supertypes({static_cast<predicate *>(s)});
     }
 
     if (core *c = dynamic_cast<core *>(&scp))
-        c->predicates.insert({name, p});
+        c->new_predicates({p});
     else if (type *t = dynamic_cast<type *>(&scp))
-    {
-        t->predicates.insert({name, p});
-        std::queue<type *> q;
-        q.push(t);
-        while (!q.empty())
-        {
-            q.front()->new_predicate(*p);
-            for (const auto &st : q.front()->supertypes)
-                q.push(st);
-            q.pop();
-        }
-    }
+        t->new_predicates({p});
 }
 
 typedef_declaration::typedef_declaration(const std::string &n, const std::string &pt, const riddle::ast::expression *const e) : riddle::ast::typedef_declaration(n, pt, e) {}
@@ -519,9 +500,9 @@ void typedef_declaration::declare(scope &scp) const
     typedef_type *td = new typedef_type(scp.get_core(), scp, name, scp.get_type(primitive_type), xpr);
 
     if (core *c = dynamic_cast<core *>(&scp))
-        c->types.insert({name, td});
+        c->new_types({td});
     else if (type *t = dynamic_cast<type *>(&scp))
-        t->types.insert({name, td});
+        t->new_types({td});
 }
 
 enum_declaration::enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs) : riddle::ast::enum_declaration(n, es, trs) {}
@@ -536,9 +517,9 @@ void enum_declaration::declare(scope &scp) const
         et->instances.push_back(scp.get_core().new_string(e));
 
     if (core *c = dynamic_cast<core *>(&scp))
-        c->types.insert({name, et});
+        c->new_types({et});
     else if (type *t = dynamic_cast<type *>(&scp))
-        t->types.insert({name, et});
+        t->new_types({et});
 }
 void enum_declaration::refine(scope &scp) const
 {
@@ -566,7 +547,7 @@ void field_declaration::refine(scope &scp) const
     type *tp = static_cast<type *>(s);
 
     for (const auto &vd : declarations)
-        scp.fields.insert({dynamic_cast<const ast::variable_declaration *>(vd)->name, new field(*tp, dynamic_cast<const ast::variable_declaration *>(vd)->name, dynamic_cast<const ast::variable_declaration *>(vd)->xpr)});
+        scp.new_fields({new field(*tp, dynamic_cast<const ast::variable_declaration *>(vd)->name, dynamic_cast<const ast::variable_declaration *>(vd)->xpr)});
 }
 
 constructor_declaration::constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::constructor_declaration(pars, il, stmnts) {}
@@ -583,7 +564,7 @@ void constructor_declaration::refine(scope &scp) const
         args.push_back(new field(*tp, par.second));
     }
 
-    static_cast<type &>(scp).constructors.push_back(new constructor(scp.get_core(), scp, args, init_list, statements));
+    static_cast<type &>(scp).new_constructors({new constructor(scp.get_core(), scp, args, init_list, statements)});
 }
 
 class_declaration::class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts) : riddle::ast::class_declaration(n, bcs, fs, cs, ms, ps, ts) {}
@@ -594,9 +575,9 @@ void class_declaration::declare(scope &scp) const
     type *tp = new type(scp.get_core(), scp, name);
 
     if (core *c = dynamic_cast<core *>(&scp))
-        c->types.insert({name, tp});
+        c->new_types({tp});
     else if (type *t = dynamic_cast<type *>(&scp))
-        t->types.insert({name, tp});
+        t->new_types({tp});
 
     for (const auto &c_tp : types)
         dynamic_cast<const ast::type_declaration *>(c_tp)->declare(*tp);
@@ -609,14 +590,14 @@ void class_declaration::refine(scope &scp) const
         scope *s = &scp;
         for (const auto &id : bc)
             s = &s->get_type(id);
-        tp.supertypes.push_back(static_cast<type *>(s));
+        tp.new_supertypes({static_cast<type *>(s)});
     }
 
     for (const auto &f : fields)
         dynamic_cast<const ast::field_declaration *>(f)->refine(tp);
 
     if (constructors.empty())
-        tp.constructors.push_back(new constructor(scp.get_core(), tp, {}, {}, {})); // we add a default constructor..
+        tp.new_constructors({new constructor(scp.get_core(), tp, {}, {}, {})}); // we add a default constructor..
     else
         for (const auto &c : constructors)
             dynamic_cast<const ast::constructor_declaration *>(c)->refine(tp);

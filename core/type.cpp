@@ -80,6 +80,17 @@ expr type::new_existential()
     }
 }
 
+void type::new_supertypes(type &t, const std::vector<type *> &sts)
+{
+    for (const auto &st : sts)
+        t.supertypes.push_back(st);
+}
+void type::new_supertypes(const std::vector<type *> &sts)
+{
+    for (const auto &st : sts)
+        supertypes.push_back(st);
+}
+
 void type::new_constructors(const std::vector<const constructor *> &cs)
 {
     for (const auto &c : cs)
@@ -101,7 +112,20 @@ void type::new_types(const std::vector<type *> &ts)
 void type::new_predicates(const std::vector<predicate *> &ps)
 {
     for (const auto &p : ps)
+    {
         predicates.insert({p->get_name(), p});
+
+        // we notify all the supertypes that a new predicate has been created..
+        std::queue<type *> q;
+        q.push(this);
+        while (!q.empty())
+        {
+            q.front()->new_predicate(*p);
+            for (const auto &st : q.front()->supertypes)
+                q.push(st);
+            q.pop();
+        }
+    }
 }
 
 const constructor &type::get_constructor(const std::vector<const type *> &ts) const
