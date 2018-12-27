@@ -53,7 +53,7 @@ protected:
   void new_constructors(const std::vector<const constructor *> &cs);
   void new_methods(const std::vector<const method *> &ms);
   void new_types(const std::vector<type *> &ts);
-  void new_predicates(const std::vector<predicate *> &ps);
+  void new_predicates(const std::vector<predicate *> &ps, bool notify = true);
 
 public:
   const constructor &get_constructor(const std::vector<const type *> &ts) const;

@@ -109,21 +109,24 @@ void type::new_types(const std::vector<type *> &ts)
         types.insert({t->name, t});
 }
 
-void type::new_predicates(const std::vector<predicate *> &ps)
+void type::new_predicates(const std::vector<predicate *> &ps, bool notify)
 {
     for (const auto &p : ps)
     {
         predicates.insert({p->get_name(), p});
 
-        // we notify all the supertypes that a new predicate has been created..
-        std::queue<type *> q;
-        q.push(this);
-        while (!q.empty())
+        if (notify)
         {
-            q.front()->new_predicate(*p);
-            for (const auto &st : q.front()->supertypes)
-                q.push(st);
-            q.pop();
+            // we notify all the supertypes that a new predicate has been created..
+            std::queue<type *> q;
+            q.push(this);
+            while (!q.empty())
+            {
+                q.front()->new_predicate(*p);
+                for (const auto &st : q.front()->supertypes)
+                    q.push(st);
+                q.pop();
+            }
         }
     }
 }
