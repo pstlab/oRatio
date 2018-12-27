@@ -24,10 +24,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  */
 class TypeVisitor extends riddleBaseVisitor<Type> {
 
-    final Core core;
+    private final Core core;
+    private final riddleParser parser;
 
-    TypeVisitor(final Core core) {
+    TypeVisitor(final Core core, final riddleParser parser) {
         this.core = core;
+        this.parser = parser;
     }
 
     @Override
@@ -62,5 +64,14 @@ class TypeVisitor extends riddleBaseVisitor<Type> {
             }
         }
         return (Type) c_scope;
+    }
+
+    @Override
+    public Type visitQualified_predicate(riddleParser.Qualified_predicateContext ctx) {
+        try {
+            return new TypeVisitor(core, parser).visit(ctx.class_type()).getPredicate(ctx.ID().getText());
+        } catch (ClassNotFoundException ex) {
+            return null;
+        }
     }
 }

@@ -127,24 +127,27 @@ public class Core extends BaseScope {
     }
 
     public void read(final String script) {
-        CodeSnippet snippet = new CodeSnippet(null, new riddleParser(new CommonTokenStream(new riddleLexer(CharStreams.fromString(script)))));
-        ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this), snippet.cu);
-        ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this), snippet.cu);
+        CodeSnippet snippet = new CodeSnippet(null,
+                new riddleParser(new CommonTokenStream(new riddleLexer(CharStreams.fromString(script)))));
+        ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this, snippet.parser), snippet.cu);
+        ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this, snippet.parser), snippet.cu);
     }
 
     public void read(final File... files) throws IOException {
         List<File> fs = new ArrayList<>(files.length);
         for (File file : files) {
-            fs.addAll(Files.walk(Paths.get(file.toURI())).filter(Files::isRegularFile).map(path -> path.toFile()).collect(Collectors.toList()));
+            fs.addAll(Files.walk(Paths.get(file.toURI())).filter(Files::isRegularFile).map(path -> path.toFile())
+                    .collect(Collectors.toList()));
         }
 
         Collection<CodeSnippet> snippets = new ArrayList<>(fs.size());
         for (File f : fs) {
-            snippets.add(new CodeSnippet(f, new riddleParser(new CommonTokenStream(new riddleLexer(CharStreams.fromPath(f.toPath()))))));
+            snippets.add(new CodeSnippet(f,
+                    new riddleParser(new CommonTokenStream(new riddleLexer(CharStreams.fromPath(f.toPath()))))));
         }
         for (CodeSnippet snippet : snippets) {
-            ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this), snippet.cu);
-            ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this), snippet.cu);
+            ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this, snippet.parser), snippet.cu);
+            ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this, snippet.parser), snippet.cu);
         }
     }
 
@@ -162,20 +165,24 @@ public class Core extends BaseScope {
         }
 
         @Override
-        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
+                String msg, RecognitionException e) {
             LOG.severe(msg);
         }
 
         @Override
-        public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, ATNConfigSet configs) {
+        public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact,
+                BitSet ambigAlts, ATNConfigSet configs) {
         }
 
         @Override
-        public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, ATNConfigSet configs) {
+        public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex,
+                BitSet conflictingAlts, ATNConfigSet configs) {
         }
 
         @Override
-        public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int prediction, ATNConfigSet configs) {
+        public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int prediction,
+                ATNConfigSet configs) {
         }
     }
 }
