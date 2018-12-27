@@ -45,20 +45,27 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
  *
  * @author Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
  */
-public class Core extends BaseScope {
+public class Core implements Scope {
 
     private static final Logger LOG = Logger.getLogger(Core.class.getName());
     public static final String BOOL = "bool";
     public static final String REAL = "real";
     public static final String STRING = "string";
+    final Map<String, Field> fields = new LinkedHashMap<>();
     final Map<String, Collection<Method>> methods = new HashMap<>();
     final Map<String, Type> types = new LinkedHashMap<>();
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
     final Map<String, Item> items = new LinkedHashMap<>();
     final ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
 
-    public Core() {
-        super(null, null);
+    @Override
+    public Core getCore() {
+        return this;
+    }
+
+    @Override
+    public Scope getScope() {
+        return this;
     }
 
     @Override
