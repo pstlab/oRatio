@@ -332,8 +332,18 @@ std::string core::to_string(const std::map<std::string, expr> &c_items) const no
     {
         if (is_it != c_items.cbegin())
             iss += ", ";
-        iss += "{ \"name\" : \"" + is_it->first + "\", \"type\" : \"" + is_it->second->get_type().get_name() + "\", \"value\" : ";
-        if (bool_item *bi = dynamic_cast<bool_item *>(&*is_it->second))
+        iss += "{ \"name\" : \"" + is_it->first + "\", \"type\" : \"";
+
+        std::string i_type = is_it->second->get_type().get_name();
+        const type *t = &is_it->second->get_type();
+        while (const type *sc = dynamic_cast<const type *>((&t->get_scope())))
+        {
+            i_type.insert(0, sc->get_name() + ":");
+            t = sc;
+        }
+        iss += i_type + "\", \"value\" : ";
+
+        if (bool_item *bi = dynamic_cast<bool_item *>(&*is_it->second)) // the expression represents a primitive bool type..
         {
             std::string sign_s = bi->l.get_sign() ? "b" : "!b";
             iss += "{ \"lit\" : \"" + sign_s + std::to_string(bi->l.get_var()) + "\", \"val\" : ";
@@ -351,7 +361,7 @@ std::string core::to_string(const std::map<std::string, expr> &c_items) const no
             }
             iss += " }";
         }
-        else if (arith_item *ai = dynamic_cast<arith_item *>(&*is_it->second))
+        else if (arith_item *ai = dynamic_cast<arith_item *>(&*is_it->second)) // the expression represents a primitive arithmetic type..
         {
             const auto val = lra_th.value(ai->l);
             iss += "{ \"lin\" : \"" + ai->l.to_string() + "\", \"val\" : ";
@@ -377,7 +387,7 @@ std::string core::to_string(const std::map<std::string, expr> &c_items) const no
             }
             iss += " }";
         }
-        else if (var_item *ei = dynamic_cast<var_item *>(&*is_it->second))
+        else if (var_item *ei = dynamic_cast<var_item *>(&*is_it->second)) // the expression represents an enum type..
         {
             iss += "{ \"var\" : \"e" + std::to_string(ei->ev) + "\", \"vals\" : [ ";
             std::unordered_set<var_value *> vals = ov_th.value(ei->ev);
@@ -389,7 +399,9 @@ std::string core::to_string(const std::map<std::string, expr> &c_items) const no
             }
             iss += " ] }";
         }
-        else
+        else if (string_item *si = dynamic_cast<string_item *>(&*is_it->second)) // the expression represents a primitive string type..
+            iss += "\"" + si->get_value() + "\"";
+        else // the expression represents an item..
             iss += "\"" + std::to_string(reinterpret_cast<uintptr_t>(&*is_it->second)) + "\"";
         iss += " }";
     }
@@ -399,10 +411,20 @@ std::string core::to_string(const std::map<std::string, expr> &c_items) const no
 std::string core::to_string(const item *const i) const noexcept
 {
     std::string is;
-    is += "{ \"id\" : \"" + std::to_string(reinterpret_cast<uintptr_t>(i)) + "\", \"type\" : \"" + i->get_type().get_name() + "\"";
+    is += "{ \"id\" : \"" + std::to_string(reinterpret_cast<uintptr_t>(i)) + "\", \"type\" : \"";
+
+    std::string i_type = i->get_type().get_name();
+    const type *t = &i->get_type();
+    while (const type *sc = dynamic_cast<const type *>((&t->get_scope())))
+    {
+        i_type.insert(0, sc->get_name() + ":");
+        t = sc;
+    }
+    is += i_type + "\"";
+
     std::map<std::string, expr> c_is = i->get_exprs();
     if (!c_is.empty())
-        is += ", \"items\" : [ " + to_string(c_is) + " ]";
+        is += ", \"exprs\" : [ " + to_string(c_is) + " ]";
     is += "}";
     return is;
 }
@@ -479,7 +501,7 @@ std::string core::to_string() const noexcept
     }
     if (!all_items.empty() || !all_atoms.empty())
         cr += ", ";
-    cr += "\"refs\" : [" + to_string(get_exprs()) + "] }";
+    cr += "\"exprs\" : [" + to_string(get_exprs()) + "] }";
     return cr;
 }
 } // namespace ratio
