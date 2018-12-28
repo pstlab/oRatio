@@ -89,7 +89,7 @@ public class CausalGraph extends Display {
     private String current_flaw;
     private String current_resolver;
 
-    CausalGraph() {
+    public CausalGraph() {
         // initialize display and data
         super(new Visualization());
 

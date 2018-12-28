@@ -432,7 +432,17 @@ std::string core::to_string(const item *const i) const noexcept
 std::string core::to_string(const atom *const a) const noexcept
 {
     std::string as;
-    as += "{ \"id\" : \"" + std::to_string(reinterpret_cast<uintptr_t>(a)) + "\", \"predicate\" : \"" + a->get_type().get_name() + "\", \"state\" : ";
+    as += "{ \"id\" : \"" + std::to_string(reinterpret_cast<uintptr_t>(a)) + "\", \"predicate\" : \"";
+
+    std::string a_type = a->get_type().get_name();
+    const type *t = &a->get_type();
+    while (const type *sc = dynamic_cast<const type *>((&t->get_scope())))
+    {
+        a_type.insert(0, sc->get_name() + ":");
+        t = sc;
+    }
+    as += a_type + "\", \"state\" : ";
+
     switch (sat_cr.value(a->get_sigma()))
     {
     case True:

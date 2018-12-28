@@ -71,8 +71,15 @@ void solver::solve()
             }
         }
         else if (!has_inconsistencies()) // we run out of flaws, we check for inconsistencies one last time..
+        {
             // Hurray!! we have found a solution..
+#ifdef BUILD_GUI
+            // we notify the listeners that the state of the core has changed..
+            for (const auto &l : listeners)
+                l->state_changed();
+#endif
             return;
+        }
     }
 }
 

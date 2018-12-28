@@ -49,14 +49,36 @@ public class Core implements Scope {
 
     private static final Logger LOG = Logger.getLogger(Core.class.getName());
     public static final String BOOL = "bool";
+    public static final String INT = "int";
     public static final String REAL = "real";
     public static final String STRING = "string";
     final Map<String, Field> fields = new LinkedHashMap<>();
     final Map<String, Collection<Method>> methods = new HashMap<>();
     final Map<String, Type> types = new LinkedHashMap<>();
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
-    final Map<String, Item> items = new LinkedHashMap<>();
+    final Map<String, Item> exprs = new LinkedHashMap<>();
     final ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
+
+    public Core() {
+        // we add the primitive types..
+        types.put(BOOL, new Type(this, this, BOOL));
+        types.put(INT, new Type(this, this, INT));
+        types.put(REAL, new Type(this, this, REAL));
+        types.put(STRING, new Type(this, this, STRING));
+
+        predicates.put("ImpulsivePredicate", new Predicate(this, this, "ImpulsivePredicate", new Field(types.get(REAL), "at")));
+        predicates.put("IntervalPredicate", new Predicate(this, this, "IntervalPredicate", new Field(types.get(REAL), "start"), new Field(types.get(REAL), "end"), new Field(types.get(REAL), "duration")));
+
+        // we add some complex types..
+        Type sv = new Type(this, this, "StateVariable");
+        types.put(sv.name, sv);
+
+        Type rr = new Type(this, this, "ReusableResource");
+        Predicate rr_use = new Predicate(this, this, "Use", new Field(types.get(REAL), "amount"));
+        rr_use.superclasses.add(predicates.get("IntervalPredicate"));
+        rr.predicates.put(rr_use.name, rr_use);
+        types.put(rr.name, rr);
+    }
 
     @Override
     public Core getCore() {
@@ -131,6 +153,10 @@ public class Core implements Scope {
     @Override
     public Map<String, Predicate> getPredicates() {
         return Collections.unmodifiableMap(predicates);
+    }
+
+    public Map<String, Item> getExprs() {
+        return Collections.unmodifiableMap(exprs);
     }
 
     public void read(final String script) {
