@@ -106,6 +106,13 @@ void socket_listener::causal_link_added(const flaw &f, const resolver &r)
     send_message(ss.str());
 }
 
+void socket_listener::state_changed()
+{
+    std::stringstream ss;
+    ss << "state_changed " << slv.to_string() << "\n";
+    send_message(ss.str());
+}
+
 void socket_listener::send_message(const std::string &msg)
 {
     int total = 0;

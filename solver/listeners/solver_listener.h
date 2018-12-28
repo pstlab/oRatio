@@ -34,6 +34,8 @@ private:
 
   virtual void causal_link_added(const flaw &f, const resolver &r);
 
+  virtual void state_changed();
+
   class flaw_listener : public smt::sat_value_listener
   {
   public:

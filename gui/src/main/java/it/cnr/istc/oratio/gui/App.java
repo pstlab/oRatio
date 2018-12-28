@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 ricde
+ * Copyright (C) 2018 Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ public class App {
     private static final String RESOLVER_COST_CHANGED = "resolver_cost_changed ";
     private static final String CURRENT_RESOLVER = "current_resolver ";
     private static final String CAUSAL_LINK_ADDED = "causal_link_added ";
+    private static final String STATE_CHANGED = "state_changed ";
 
     /**
      * @param args the command line arguments
@@ -63,29 +64,23 @@ public class App {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 if (inputLine.startsWith(FLAW_CREATED)) {
-                    cg.flaw_created(
-                            gson.fromJson(inputLine.substring(FLAW_CREATED.length()), CausalGraph.FlawCreated.class));
+                    cg.flaw_created(gson.fromJson(inputLine.substring(FLAW_CREATED.length()), CausalGraph.FlawCreated.class));
                 } else if (inputLine.startsWith(FLAW_STATE_CHANGED)) {
-                    cg.flaw_state_changed(gson.fromJson(inputLine.substring(FLAW_STATE_CHANGED.length()),
-                            CausalGraph.FlawStateChanged.class));
+                    cg.flaw_state_changed(gson.fromJson(inputLine.substring(FLAW_STATE_CHANGED.length()), CausalGraph.FlawStateChanged.class));
                 } else if (inputLine.startsWith(CURRENT_FLAW)) {
-                    cg.current_flaw(
-                            gson.fromJson(inputLine.substring(CURRENT_FLAW.length()), CausalGraph.CurrentFlaw.class));
+                    cg.current_flaw(gson.fromJson(inputLine.substring(CURRENT_FLAW.length()), CausalGraph.CurrentFlaw.class));
                 } else if (inputLine.startsWith(RESOLVER_CREATED)) {
-                    cg.resolver_created(gson.fromJson(inputLine.substring(RESOLVER_CREATED.length()),
-                            CausalGraph.ResolverCreated.class));
+                    cg.resolver_created(gson.fromJson(inputLine.substring(RESOLVER_CREATED.length()), CausalGraph.ResolverCreated.class));
                 } else if (inputLine.startsWith(RESOLVER_STATE_CHANGED)) {
-                    cg.resolver_state_changed(gson.fromJson(inputLine.substring(RESOLVER_STATE_CHANGED.length()),
-                            CausalGraph.ResolverStateChanged.class));
+                    cg.resolver_state_changed(gson.fromJson(inputLine.substring(RESOLVER_STATE_CHANGED.length()), CausalGraph.ResolverStateChanged.class));
                 } else if (inputLine.startsWith(RESOLVER_COST_CHANGED)) {
-                    cg.resolver_cost_changed(gson.fromJson(inputLine.substring(RESOLVER_COST_CHANGED.length()),
-                            CausalGraph.ResolverCostChanged.class));
+                    cg.resolver_cost_changed(gson.fromJson(inputLine.substring(RESOLVER_COST_CHANGED.length()), CausalGraph.ResolverCostChanged.class));
                 } else if (inputLine.startsWith(CURRENT_RESOLVER)) {
-                    cg.current_resolver(gson.fromJson(inputLine.substring(CURRENT_RESOLVER.length()),
-                            CausalGraph.CurrentResolver.class));
+                    cg.current_resolver(gson.fromJson(inputLine.substring(CURRENT_RESOLVER.length()), CausalGraph.CurrentResolver.class));
                 } else if (inputLine.startsWith(CAUSAL_LINK_ADDED)) {
-                    cg.causal_link_added(gson.fromJson(inputLine.substring(CAUSAL_LINK_ADDED.length()),
-                            CausalGraph.CausalLinkAdded.class));
+                    cg.causal_link_added(gson.fromJson(inputLine.substring(CAUSAL_LINK_ADDED.length()), CausalGraph.CausalLinkAdded.class));
+                } else if (inputLine.startsWith(STATE_CHANGED)) {
+                    State state = gson.fromJson(inputLine.substring(CAUSAL_LINK_ADDED.length()), State.class);
                 }
             }
             serverSocket.close();

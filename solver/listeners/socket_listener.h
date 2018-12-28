@@ -36,6 +36,8 @@ class socket_listener : public solver_listener
 
     void send_message(const std::string &msg);
 
+    void state_changed();
+
 #ifdef _WIN32
     SOCKET skt;
 #else
