@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package it.cnr.istc.oratio.gui;
+package it.cnr.istc.oratio.gui.graph;
 
 import it.cnr.istc.oratio.Rational;
 import java.awt.event.MouseEvent;
@@ -238,35 +238,35 @@ public class CausalGraph extends Display {
         m_vis.run("layout");
     }
 
-    void flaw_created(final FlawCreated fc) {
+    public void flaw_created(final String flaw, final String[] causes, final String label, final int state) {
         synchronized (m_vis) {
-            assert !flaws.containsKey(fc.flaw) : "the flaw already exists..";
-            assert Arrays.stream(fc.causes)
+            assert !flaws.containsKey(flaw) : "the flaw already exists..";
+            assert Arrays.stream(causes)
                     .allMatch(c -> resolvers.containsKey(c)) : "the flaw's cause does not exist: "
-                    + Arrays.toString(fc.causes) + resolvers;
+                    + Arrays.toString(causes) + resolvers;
             Node flaw_node = g.addNode();
-            flaw_node.set(VisualItem.LABEL, fc.label);
+            flaw_node.set(VisualItem.LABEL, label);
             flaw_node.set(NODE_TYPE, "flaw");
             flaw_node.set(NODE_COST, Double.NEGATIVE_INFINITY);
-            flaw_node.set(NODE_STATE, fc.state);
-            flaws.put(fc.flaw, flaw_node);
-            for (String c : fc.causes) {
+            flaw_node.set(NODE_STATE, state);
+            flaws.put(flaw, flaw_node);
+            for (String c : causes) {
                 Edge c_edge = g.addEdge(flaw_node, resolvers.get(c));
                 c_edge.set(EDGE_STATE, resolvers.get(c).get(NODE_STATE));
             }
         }
     }
 
-    void flaw_state_changed(final FlawStateChanged fsc) {
+    public void flaw_state_changed(final String flaw, final int state) {
         synchronized (m_vis) {
-            assert flaws.containsKey(fsc.flaw) : "the flaw does not exist..";
-            Node flaw_node = flaws.get(fsc.flaw);
-            flaw_node.set(NODE_STATE, fsc.state);
+            assert flaws.containsKey(flaw) : "the flaw does not exist..";
+            Node flaw_node = flaws.get(flaw);
+            flaw_node.set(NODE_STATE, state);
         }
     }
 
-    void current_flaw(final CurrentFlaw cf) {
-        assert flaws.containsKey(cf.flaw) : "the flaw does not exist..";
+    public void current_flaw(final String flaw) {
+        assert flaws.containsKey(flaw) : "the flaw does not exist..";
         synchronized (m_vis) {
             if (current_flaw != null) {
                 m_vis.getVisualItem(NODES, flaws.get(current_flaw)).setHighlighted(false);
@@ -275,72 +275,72 @@ public class CausalGraph extends Display {
                 m_vis.getVisualItem(NODES, resolvers.get(current_resolver)).setHighlighted(false);
             }
 
-            current_flaw = cf.flaw;
-            m_vis.getVisualItem(NODES, flaws.get(cf.flaw)).setHighlighted(true);
+            current_flaw = flaw;
+            m_vis.getVisualItem(NODES, flaws.get(flaw)).setHighlighted(true);
         }
     }
 
-    void resolver_created(final ResolverCreated rc) {
+    public void resolver_created(final String resolver, final String effect, final Rational cost, final String label, final int state) {
         synchronized (m_vis) {
-            assert !resolvers.containsKey(rc.resolver) : "the resolver already exists..";
-            assert flaws.containsKey(rc.effect) : "the resolver's solved flaw does not exist..";
-            effects.put(rc.resolver, rc.effect);
-            if (!flaw_resolvers.containsKey(rc.effect)) {
-                flaw_resolvers.put(rc.effect, new ArrayList<>());
+            assert !resolvers.containsKey(resolver) : "the resolver already exists..";
+            assert flaws.containsKey(effect) : "the resolver's solved flaw does not exist..";
+            effects.put(resolver, effect);
+            if (!flaw_resolvers.containsKey(effect)) {
+                flaw_resolvers.put(effect, new ArrayList<>());
             }
-            flaw_resolvers.get(rc.effect).add(rc.resolver);
+            flaw_resolvers.get(effect).add(resolver);
             Node resolver_node = g.addNode();
-            resolver_node.set(VisualItem.LABEL, rc.label);
+            resolver_node.set(VisualItem.LABEL, label);
             resolver_node.set(NODE_TYPE, "resolver");
-            resolver_node.set(NODE_COST, -(double) rc.cost.getNumerator() / rc.cost.getDenominator());
-            resolver_node.set(NODE_STATE, rc.state);
-            resolvers.put(rc.resolver, resolver_node);
-            Edge c_edge = g.addEdge(resolver_node, flaws.get(rc.effect));
-            c_edge.set(EDGE_STATE, rc.state);
-            flaws.get(rc.effect).set(NODE_COST, flaw_resolvers.get(rc.effect).stream()
+            resolver_node.set(NODE_COST, -(double) cost.getNumerator() / cost.getDenominator());
+            resolver_node.set(NODE_STATE, state);
+            resolvers.put(resolver, resolver_node);
+            Edge c_edge = g.addEdge(resolver_node, flaws.get(effect));
+            c_edge.set(EDGE_STATE, state);
+            flaws.get(effect).set(NODE_COST, flaw_resolvers.get(effect).stream()
                     .mapToDouble(res -> (Double) resolvers.get(res).get(NODE_COST)).max().getAsDouble());
         }
     }
 
     @SuppressWarnings("unchecked")
-    void resolver_state_changed(final ResolverStateChanged rsc) {
+    public void resolver_state_changed(final String resolver, final int state) {
         synchronized (m_vis) {
-            assert resolvers.containsKey(rsc.resolver) : "the resolver does not exist..";
-            Node resolver_node = resolvers.get(rsc.resolver);
-            resolver_node.set(NODE_STATE, rsc.state);
+            assert resolvers.containsKey(resolver) : "the resolver does not exist..";
+            Node resolver_node = resolvers.get(resolver);
+            resolver_node.set(NODE_STATE, state);
             Iterator<Edge> c_edges = resolver_node.edges();
             while (c_edges.hasNext()) {
-                c_edges.next().set(EDGE_STATE, rsc.state);
+                c_edges.next().set(EDGE_STATE, state);
             }
         }
     }
 
-    void resolver_cost_changed(final ResolverCostChanged rcc) {
+    public void resolver_cost_changed(final String resolver, final Rational cost) {
         synchronized (m_vis) {
-            assert resolvers.containsKey(rcc.resolver) : "the resolver does not exist..";
-            assert flaws.containsKey(effects.get(rcc.resolver)) : "the resolver's effect does not exist..";
-            Node resolver_node = resolvers.get(rcc.resolver);
-            resolver_node.set(NODE_COST, -(double) rcc.cost.getNumerator() / rcc.cost.getDenominator());
-            flaws.get(effects.get(rcc.resolver)).set(NODE_COST, flaw_resolvers.get(effects.get(rcc.resolver)).stream()
+            assert resolvers.containsKey(resolver) : "the resolver does not exist..";
+            assert flaws.containsKey(effects.get(resolver)) : "the resolver's effect does not exist..";
+            Node resolver_node = resolvers.get(resolver);
+            resolver_node.set(NODE_COST, -(double) cost.getNumerator() / cost.getDenominator());
+            flaws.get(effects.get(resolver)).set(NODE_COST, flaw_resolvers.get(effects.get(resolver)).stream()
                     .mapToDouble(res -> (Double) resolvers.get(res).get(NODE_COST)).max().getAsDouble());
         }
     }
 
-    void current_resolver(final CurrentResolver cr) {
-        assert resolvers.containsKey(cr.resolver) : "the resolver does not exist..";
+    public void current_resolver(final String resolver) {
+        assert resolvers.containsKey(resolver) : "the resolver does not exist..";
         synchronized (m_vis) {
-            current_resolver = cr.resolver;
-            m_vis.getVisualItem(NODES, resolvers.get(cr.resolver)).setHighlighted(true);
+            current_resolver = resolver;
+            m_vis.getVisualItem(NODES, resolvers.get(resolver)).setHighlighted(true);
         }
     }
 
-    void causal_link_added(final CausalLinkAdded cla) {
+    public void causal_link_added(final String flaw, final String resolver) {
         synchronized (m_vis) {
-            assert flaws.containsKey(cla.flaw) : "the flaw does not exist..";
-            assert resolvers.containsKey(cla.resolver) : "the resolver does not exist..";
-            Edge c_edge = g.addEdge(flaws.get(cla.flaw), resolvers.get(cla.resolver));
-            c_edge.set(EDGE_STATE, resolvers.get(cla.resolver).get(NODE_STATE));
-            flaws.get(effects.get(cla.resolver)).set(NODE_COST, flaw_resolvers.get(effects.get(cla.resolver)).stream()
+            assert flaws.containsKey(flaw) : "the flaw does not exist..";
+            assert resolvers.containsKey(resolver) : "the resolver does not exist..";
+            Edge c_edge = g.addEdge(flaws.get(flaw), resolvers.get(resolver));
+            c_edge.set(EDGE_STATE, resolvers.get(resolver).get(NODE_STATE));
+            flaws.get(effects.get(resolver)).set(NODE_COST, flaw_resolvers.get(effects.get(resolver)).stream()
                     .mapToDouble(res -> (Double) resolvers.get(res).get(NODE_COST)).max().getAsDouble());
         }
     }
@@ -372,56 +372,5 @@ public class CausalGraph extends Display {
                 setY(decorator, null, y);
             }
         }
-    }
-
-    static class FlawCreated {
-
-        private String flaw;
-        private String[] causes;
-        private String label;
-        private int state;
-    }
-
-    static class FlawStateChanged {
-
-        private String flaw;
-        private int state;
-    }
-
-    static class CurrentFlaw {
-
-        private String flaw;
-    }
-
-    static class ResolverCreated {
-
-        private String resolver;
-        private String effect;
-        private Rational cost;
-        private String label;
-        private int state;
-    }
-
-    static class ResolverStateChanged {
-
-        private String resolver;
-        private int state;
-    }
-
-    static class ResolverCostChanged {
-
-        private String resolver;
-        private Rational cost;
-    }
-
-    static class CurrentResolver {
-
-        private String resolver;
-    }
-
-    static class CausalLinkAdded {
-
-        private String flaw;
-        private String resolver;
     }
 }

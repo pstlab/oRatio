@@ -16,7 +16,9 @@
  */
 package it.cnr.istc.oratio.gui;
 
+import it.cnr.istc.oratio.Rational;
 import it.cnr.istc.oratio.gui.riddle.Core;
+import it.cnr.istc.oratio.gui.state.StateTreeNode;
 import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,6 +30,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 import javax.swing.UIManager;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
+import javax.swing.event.TreeWillExpandListener;
+import javax.swing.tree.ExpandVetoException;
 
 /**
  *
@@ -53,6 +60,44 @@ public class ORatioJFrame extends javax.swing.JFrame {
     public ORatioJFrame(String[] args) {
         initComponents();
 
+        mainDesktopPane.add(state_frame);
+        mainDesktopPane.add(graph_frame);
+
+        state_frame.setBounds(50, 50, 300, 250);
+        graph_frame.setBounds(400, 50, 300, 250);
+
+        state_tree_model.addTreeModelListener(new TreeModelListener() {
+            @Override
+            public void treeNodesChanged(TreeModelEvent e) {
+            }
+
+            @Override
+            public void treeNodesInserted(TreeModelEvent e) {
+            }
+
+            @Override
+            public void treeNodesRemoved(TreeModelEvent e) {
+            }
+
+            @Override
+            public void treeStructureChanged(TreeModelEvent e) {
+                stateTree.expandRow(0);
+            }
+        });
+        stateTree.addTreeWillExpandListener(new TreeWillExpandListener() {
+            @Override
+            public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
+                StateTreeNode etn = (StateTreeNode) event.getPath().getLastPathComponent();
+                if (!etn.hasLoadedChildren()) {
+                    etn.loadChildren();
+                }
+            }
+
+            @Override
+            public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {
+            }
+        });
+
         if (args.length > 0) {
             System.out.println("reading riddle files..");
             try {
@@ -77,47 +122,64 @@ public class ORatioJFrame extends javax.swing.JFrame {
         builder = new com.google.gson.GsonBuilder();
         builder.registerTypeAdapter(Core.class, deserializer);
         gson = builder.create();
+        state_tree_model = new it.cnr.istc.oratio.gui.state.StateTreeModel();
+        graph_frame = new javax.swing.JInternalFrame();
+        graph = new it.cnr.istc.oratio.gui.graph.CausalGraph();
+        state_frame = new javax.swing.JInternalFrame();
+        stateTreeScrollPane = new javax.swing.JScrollPane();
+        stateTree = new javax.swing.JTree();
         mainDesktopPane = new javax.swing.JDesktopPane();
-        graphInternalFrame = new javax.swing.JInternalFrame();
-        graph = new it.cnr.istc.oratio.gui.CausalGraph();
+
+        graph_frame.setIconifiable(true);
+        graph_frame.setMaximizable(true);
+        graph_frame.setResizable(true);
+        graph_frame.setTitle("Causal graph");
+        graph_frame.setVisible(true);
+
+        javax.swing.GroupLayout graph_frameLayout = new javax.swing.GroupLayout(graph_frame.getContentPane());
+        graph_frame.getContentPane().setLayout(graph_frameLayout);
+        graph_frameLayout.setHorizontalGroup(
+            graph_frameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(graph, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        graph_frameLayout.setVerticalGroup(
+            graph_frameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(graph, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        state_frame.setIconifiable(true);
+        state_frame.setMaximizable(true);
+        state_frame.setResizable(true);
+        state_frame.setTitle("State");
+        state_frame.setVisible(true);
+
+        stateTree.setModel(state_tree_model);
+        stateTree.setRootVisible(false);
+        stateTreeScrollPane.setViewportView(stateTree);
+
+        javax.swing.GroupLayout state_frameLayout = new javax.swing.GroupLayout(state_frame.getContentPane());
+        state_frame.getContentPane().setLayout(state_frameLayout);
+        state_frameLayout.setHorizontalGroup(
+            state_frameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(stateTreeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 293, Short.MAX_VALUE)
+        );
+        state_frameLayout.setVerticalGroup(
+            state_frameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(stateTreeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("oRatio");
-
-        graphInternalFrame.setIconifiable(true);
-        graphInternalFrame.setMaximizable(true);
-        graphInternalFrame.setResizable(true);
-        graphInternalFrame.setTitle("Causal graph");
-        graphInternalFrame.setVisible(true);
-
-        javax.swing.GroupLayout graphInternalFrameLayout = new javax.swing.GroupLayout(graphInternalFrame.getContentPane());
-        graphInternalFrame.getContentPane().setLayout(graphInternalFrameLayout);
-        graphInternalFrameLayout.setHorizontalGroup(
-            graphInternalFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(graph, javax.swing.GroupLayout.DEFAULT_SIZE, 341, Short.MAX_VALUE)
-        );
-        graphInternalFrameLayout.setVerticalGroup(
-            graphInternalFrameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(graph, javax.swing.GroupLayout.DEFAULT_SIZE, 279, Short.MAX_VALUE)
-        );
-
-        mainDesktopPane.setLayer(graphInternalFrame, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
         javax.swing.GroupLayout mainDesktopPaneLayout = new javax.swing.GroupLayout(mainDesktopPane);
         mainDesktopPane.setLayout(mainDesktopPaneLayout);
         mainDesktopPaneLayout.setHorizontalGroup(
             mainDesktopPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainDesktopPaneLayout.createSequentialGroup()
-                .addContainerGap(416, Short.MAX_VALUE)
-                .addComponent(graphInternalFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(31, 31, 31))
+            .addGap(0, 800, Short.MAX_VALUE)
         );
         mainDesktopPaneLayout.setVerticalGroup(
             mainDesktopPaneLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mainDesktopPaneLayout.createSequentialGroup()
-                .addGap(53, 53, 53)
-                .addComponent(graphInternalFrame, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(239, Short.MAX_VALUE))
+            .addGap(0, 604, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -165,38 +227,101 @@ public class ORatioJFrame extends javax.swing.JFrame {
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 if (inputLine.startsWith(FLAW_CREATED)) {
-                    frame.graph.flaw_created(frame.gson.fromJson(inputLine.substring(FLAW_CREATED.length()), CausalGraph.FlawCreated.class));
+                    FlawCreated fc = frame.gson.fromJson(inputLine.substring(FLAW_CREATED.length()), FlawCreated.class);
+                    frame.graph.flaw_created(fc.flaw, fc.causes, fc.label, fc.state);
                 } else if (inputLine.startsWith(FLAW_STATE_CHANGED)) {
-                    frame.graph.flaw_state_changed(frame.gson.fromJson(inputLine.substring(FLAW_STATE_CHANGED.length()), CausalGraph.FlawStateChanged.class));
+                    FlawStateChanged fsc = frame.gson.fromJson(inputLine.substring(FLAW_STATE_CHANGED.length()), FlawStateChanged.class);
+                    frame.graph.flaw_state_changed(fsc.flaw, fsc.state);
                 } else if (inputLine.startsWith(CURRENT_FLAW)) {
-                    frame.graph.current_flaw(frame.gson.fromJson(inputLine.substring(CURRENT_FLAW.length()), CausalGraph.CurrentFlaw.class));
+                    CurrentFlaw cf = frame.gson.fromJson(inputLine.substring(CURRENT_FLAW.length()), CurrentFlaw.class);
+                    frame.graph.current_flaw(cf.flaw);
                 } else if (inputLine.startsWith(RESOLVER_CREATED)) {
-                    frame.graph.resolver_created(frame.gson.fromJson(inputLine.substring(RESOLVER_CREATED.length()), CausalGraph.ResolverCreated.class));
+                    ResolverCreated rc = frame.gson.fromJson(inputLine.substring(RESOLVER_CREATED.length()), ResolverCreated.class);
+                    frame.graph.resolver_created(rc.resolver, rc.effect, rc.cost, rc.label, rc.state);
                 } else if (inputLine.startsWith(RESOLVER_STATE_CHANGED)) {
-                    frame.graph.resolver_state_changed(frame.gson.fromJson(inputLine.substring(RESOLVER_STATE_CHANGED.length()), CausalGraph.ResolverStateChanged.class));
+                    ResolverStateChanged rsc = frame.gson.fromJson(inputLine.substring(RESOLVER_STATE_CHANGED.length()), ResolverStateChanged.class);
+                    frame.graph.resolver_state_changed(rsc.resolver, rsc.state);
                 } else if (inputLine.startsWith(RESOLVER_COST_CHANGED)) {
-                    frame.graph.resolver_cost_changed(frame.gson.fromJson(inputLine.substring(RESOLVER_COST_CHANGED.length()), CausalGraph.ResolverCostChanged.class));
+                    ResolverCostChanged rcc = frame.gson.fromJson(inputLine.substring(RESOLVER_COST_CHANGED.length()), ResolverCostChanged.class);
+                    frame.graph.resolver_cost_changed(rcc.resolver, rcc.cost);
                 } else if (inputLine.startsWith(CURRENT_RESOLVER)) {
-                    frame.graph.current_resolver(frame.gson.fromJson(inputLine.substring(CURRENT_RESOLVER.length()), CausalGraph.CurrentResolver.class));
+                    CurrentResolver cr = frame.gson.fromJson(inputLine.substring(CURRENT_RESOLVER.length()), CurrentResolver.class);
+                    frame.graph.current_resolver(cr.resolver);
                 } else if (inputLine.startsWith(CAUSAL_LINK_ADDED)) {
-                    frame.graph.causal_link_added(frame.gson.fromJson(inputLine.substring(CAUSAL_LINK_ADDED.length()), CausalGraph.CausalLinkAdded.class));
+                    CausalLinkAdded cla = frame.gson.fromJson(inputLine.substring(CAUSAL_LINK_ADDED.length()), CausalLinkAdded.class);
+                    frame.graph.causal_link_added(cla.flaw, cla.resolver);
                 } else if (inputLine.startsWith(STATE_CHANGED)) {
                     frame.deserializer.setCore(frame.core);
                     frame.core = frame.gson.fromJson(inputLine.substring(STATE_CHANGED.length()), Core.class);
+                    frame.state_tree_model.setCore(frame.core);
                 }
             }
         } catch (IOException ex) {
             Logger.getLogger(ORatioJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private com.google.gson.GsonBuilder builder;
     private it.cnr.istc.oratio.gui.riddle.Core core;
     private it.cnr.istc.oratio.gui.riddle.CoreDeserializer deserializer;
-    private it.cnr.istc.oratio.gui.CausalGraph graph;
-    private javax.swing.JInternalFrame graphInternalFrame;
+    private it.cnr.istc.oratio.gui.graph.CausalGraph graph;
+    private javax.swing.JInternalFrame graph_frame;
     private com.google.gson.Gson gson;
     private javax.swing.JDesktopPane mainDesktopPane;
+    private javax.swing.JTree stateTree;
+    private javax.swing.JScrollPane stateTreeScrollPane;
+    private javax.swing.JInternalFrame state_frame;
+    private it.cnr.istc.oratio.gui.state.StateTreeModel state_tree_model;
     // End of variables declaration//GEN-END:variables
+
+    static class FlawCreated {
+
+        private String flaw;
+        private String[] causes;
+        private String label;
+        private int state;
+    }
+
+    static class FlawStateChanged {
+
+        private String flaw;
+        private int state;
+    }
+
+    static class CurrentFlaw {
+
+        private String flaw;
+    }
+
+    static class ResolverCreated {
+
+        private String resolver;
+        private String effect;
+        private Rational cost;
+        private String label;
+        private int state;
+    }
+
+    static class ResolverStateChanged {
+
+        private String resolver;
+        private int state;
+    }
+
+    static class ResolverCostChanged {
+
+        private String resolver;
+        private Rational cost;
+    }
+
+    static class CurrentResolver {
+
+        private String resolver;
+    }
+
+    static class CausalLinkAdded {
+
+        private String flaw;
+        private String resolver;
+    }
 }
