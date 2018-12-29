@@ -26,9 +26,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
+import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeModelEvent;
@@ -98,6 +100,8 @@ public class ORatioJFrame extends javax.swing.JFrame {
             }
         });
 
+        javax.swing.ToolTipManager.sharedInstance().registerComponent(stateTree);
+
         if (args.length > 0) {
             System.out.println("reading riddle files..");
             try {
@@ -123,12 +127,15 @@ public class ORatioJFrame extends javax.swing.JFrame {
         builder.registerTypeAdapter(Core.class, deserializer);
         gson = builder.create();
         state_tree_model = new it.cnr.istc.oratio.gui.state.StateTreeModel();
+        state_tree_cell_renderer = new it.cnr.istc.oratio.gui.state.StateTreeCellRenderer();
         graph_frame = new javax.swing.JInternalFrame();
         graph = new it.cnr.istc.oratio.gui.graph.CausalGraph();
         state_frame = new javax.swing.JInternalFrame();
         stateTreeScrollPane = new javax.swing.JScrollPane();
         stateTree = new javax.swing.JTree();
         mainDesktopPane = new javax.swing.JDesktopPane();
+
+        state_tree_cell_renderer.setText("stateTreeCellRenderer1");
 
         graph_frame.setIconifiable(true);
         graph_frame.setMaximizable(true);
@@ -154,6 +161,7 @@ public class ORatioJFrame extends javax.swing.JFrame {
         state_frame.setVisible(true);
 
         stateTree.setModel(state_tree_model);
+        stateTree.setCellRenderer(state_tree_cell_renderer);
         stateTree.setRootVisible(false);
         stateTreeScrollPane.setViewportView(stateTree);
 
@@ -170,6 +178,7 @@ public class ORatioJFrame extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("oRatio");
+        setIconImages(Arrays.asList(new ImageIcon(getClass().getResource("/oRatio16.png")).getImage(), new ImageIcon(getClass().getResource("/oRatio32.png")).getImage()));
 
         javax.swing.GroupLayout mainDesktopPaneLayout = new javax.swing.GroupLayout(mainDesktopPane);
         mainDesktopPane.setLayout(mainDesktopPaneLayout);
@@ -271,6 +280,7 @@ public class ORatioJFrame extends javax.swing.JFrame {
     private javax.swing.JTree stateTree;
     private javax.swing.JScrollPane stateTreeScrollPane;
     private javax.swing.JInternalFrame state_frame;
+    private it.cnr.istc.oratio.gui.state.StateTreeCellRenderer state_tree_cell_renderer;
     private it.cnr.istc.oratio.gui.state.StateTreeModel state_tree_model;
     // End of variables declaration//GEN-END:variables
 

@@ -49,6 +49,10 @@ public class Type extends BaseScope {
         return name;
     }
 
+    public Collection<Item> getInstances() {
+        return Collections.unmodifiableCollection(instances);
+    }
+
     public boolean isAssignableFrom(final Type type) {
         LinkedList<Type> queue = new LinkedList<>();
         queue.add(type);

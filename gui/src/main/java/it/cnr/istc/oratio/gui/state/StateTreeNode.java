@@ -16,8 +16,10 @@
  */
 package it.cnr.istc.oratio.gui.state;
 
+import it.cnr.istc.oratio.gui.riddle.Atom;
 import it.cnr.istc.oratio.gui.riddle.Core;
 import it.cnr.istc.oratio.gui.riddle.Item;
+import java.util.Arrays;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
@@ -64,6 +66,7 @@ public class StateTreeNode extends DefaultMutableTreeNode {
         if (!hasLoadedChildren) {
             hasLoadedChildren = true;
             ((Item) userObject).getExprs().entrySet().forEach(xpr -> add(new StateTreeNode(xpr.getKey(), xpr.getValue())));
+            ((Item) userObject).getType().getPredicates().values().forEach(p -> p.getInstances().stream().filter(i -> (((Atom) i).getTau() == userObject || (((Atom) i).getTau() instanceof Item.EnumItem && Arrays.asList(((Item.EnumItem) ((Atom) i).getTau()).getVals()).contains((Item) userObject)))).forEachOrdered(i -> add(new StateTreeNode(((Atom) i).getType().getName(), i))));
         }
     }
 }

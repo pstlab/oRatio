@@ -18,6 +18,11 @@
     </Component>
     <Component class="it.cnr.istc.oratio.gui.state.StateTreeModel" name="state_tree_model">
     </Component>
+    <Component class="it.cnr.istc.oratio.gui.state.StateTreeCellRenderer" name="state_tree_cell_renderer">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="stateTreeCellRenderer1"/>
+      </Properties>
+    </Component>
     <Container class="javax.swing.JInternalFrame" name="graph_frame">
       <Properties>
         <Property name="iconifiable" type="boolean" value="true"/>
@@ -78,6 +83,9 @@
                 <Property name="model" type="javax.swing.tree.TreeModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                   <Connection component="state_tree_model" type="bean"/>
                 </Property>
+                <Property name="cellRenderer" type="javax.swing.tree.TreeCellRenderer" editor="org.netbeans.modules.form.ComponentChooserEditor">
+                  <ComponentRef name="state_tree_cell_renderer"/>
+                </Property>
                 <Property name="rootVisible" type="boolean" value="false"/>
               </Properties>
             </Component>
@@ -89,6 +97,9 @@
   <Properties>
     <Property name="defaultCloseOperation" type="int" value="3"/>
     <Property name="title" type="java.lang.String" value="oRatio"/>
+    <Property name="iconImages" type="java.util.List" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+      <Connection code="Arrays.asList(new ImageIcon(getClass().getResource(&quot;/oRatio16.png&quot;)).getImage(), new ImageIcon(getClass().getResource(&quot;/oRatio32.png&quot;)).getImage())" type="code"/>
+    </Property>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
