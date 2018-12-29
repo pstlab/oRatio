@@ -16,6 +16,8 @@
  */
 package it.cnr.istc.oratio.gui.riddle;
 
+import java.util.Map;
+
 /**
  *
  * @author Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
@@ -23,12 +25,11 @@ package it.cnr.istc.oratio.gui.riddle;
 public class Atom extends Item {
 
     private final AtomState state;
-    private final Item tau;
 
-    Atom(Core core, Predicate predicate, final AtomState state, final Item tau) {
+    Atom(Core core, Predicate predicate, final AtomState state, final Map<String, Item> pars) {
         super(core, predicate);
+        exprs.putAll(pars);
         this.state = state;
-        this.tau = tau;
     }
 
     @Override
@@ -41,7 +42,7 @@ public class Atom extends Item {
     }
 
     public Item getTau() {
-        return tau;
+        return exprs.get("tau");
     }
 
     public enum AtomState {
