@@ -96,7 +96,7 @@ private:
   static const unsigned short max_accuracy = MAX_ACCURACY; // the maximum heuristic accuracy..
 #ifdef BUILD_GUI
 private:
-  std::vector<solver_listener *> listeners; // the causal-graph listeners..
+  std::vector<solver_listener *> listeners; // the solver listeners..
 #endif
 };
 } // namespace ratio

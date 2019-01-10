@@ -7,7 +7,7 @@ include(CTest)
 enable_testing()
 
 file(GLOB SOURCES main.cpp smt/*.cpp smt/lra/*.cpp smt/ov/*.cpp riddle/*.cpp core/*.cpp solver/*.cpp solver/types/*.cpp)
-include_directories(smt smt/lra smt/ov riddle core solver solver/types solver/listeners)
+include_directories(smt smt/lra smt/ov riddle core core/listeners solver solver/types solver/listeners)
 
 configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
@@ -57,7 +57,7 @@ endif()
 
 if(BUILD_GUI)
     add_definitions(-DBUILD_GUI)
-    list(APPEND SOURCES solver/listeners/solver_listener.cpp solver/listeners/socket_listener.cpp)
+    list(APPEND SOURCES core/listeners/core_listener.cpp solver/listeners/solver_listener.cpp solver/listeners/socket_listener.cpp)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})

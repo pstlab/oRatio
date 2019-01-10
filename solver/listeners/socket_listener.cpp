@@ -1,4 +1,6 @@
 #include "socket_listener.h"
+#include "core.h"
+#include "type.h"
 #include "graph.h"
 #include "solver.h"
 #include <sstream>
@@ -6,7 +8,7 @@
 
 namespace ratio
 {
-socket_listener::socket_listener(solver &slv) : solver_listener(slv)
+socket_listener::socket_listener(solver &slv) : core_listener(slv), solver_listener(slv)
 {
 #ifdef _WIN32
     WSADATA wsa_data;
@@ -40,6 +42,13 @@ socket_listener::~socket_listener()
 #else
     close(skt);
 #endif
+}
+
+void socket_listener::type_created(const type &t)
+{
+    std::stringstream ss;
+    ss << "type_created {\"name\":\"" << t.get_name() << "\", \"name\":" << std::to_string(t.is_primitive()) << "}\n";
+    send_message(ss.str());
 }
 
 void socket_listener::flaw_created(const flaw &f)

@@ -21,6 +21,9 @@ namespace ratio
 
 class atom;
 class disjunction;
+#ifdef BUILD_GUI
+class core_listener;
+#endif
 
 namespace ast
 {
@@ -43,6 +46,9 @@ class core : public scope, public env
   friend class ast::typedef_declaration;
   friend class ast::enum_declaration;
   friend class ast::class_declaration;
+#ifdef BUILD_GUI
+  friend class core_listener;
+#endif
 
 public:
   core();
@@ -160,5 +166,9 @@ private:
 
   smt::var tmp_ni;             // the temporary controlling variable, used for restoring the controlling variable..
   smt::var ni = smt::TRUE_var; // the controlling variable..
+#ifdef BUILD_GUI
+private:
+  std::vector<core_listener *> listeners; // the core listeners..
+#endif
 };
 } // namespace ratio
