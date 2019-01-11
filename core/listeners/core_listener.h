@@ -17,6 +17,7 @@ public:
 
 private:
   virtual void type_created(const type &t);
+  virtual void type_created(const type &et, const type &t);
   virtual void type_inherited(const type &st, const type &t);
 
 protected:

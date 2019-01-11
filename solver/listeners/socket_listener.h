@@ -25,6 +25,7 @@ public:
 
 private:
   void type_created(const type &t) override;
+  void type_created(const type &et, const type &t) override;
   void type_inherited(const type &st, const type &t) override;
 
 private:
