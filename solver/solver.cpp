@@ -9,10 +9,6 @@
 #include "reusable_resource.h"
 #include "atom.h"
 #include "combinations.h"
-#ifdef BUILD_GUI
-#include "solver_listener.h"
-#include <iostream>
-#endif
 #include <algorithm>
 #include <cassert>
 
@@ -42,22 +38,14 @@ void solver::solve()
         if (f_next)
         {
             assert(!f_next->get_estimated_cost().is_infinite());
-#ifdef BUILD_GUI
-            std::cout << "(" << std::to_string(trail.size()) << "): " << f_next->get_label();
-            // we notify the listeners that we have selected a flaw..
-            for (const auto &l : listeners)
-                l->current_flaw(*f_next);
-#endif
+            LOG("(" << std::to_string(trail.size()) << "): " << f_next->get_label());
+            FIRE_CURRENT_FLAW(*f_next);
             if (!f_next->structural || !has_inconsistencies()) // we run out of inconsistencies, thus, we renew them..
             {
                 // this is the next resolver to be assumed..
                 res = f_next->get_best_resolver();
-#ifdef BUILD_GUI
-                std::cout << " " << res->get_label() << std::endl;
-                // we notify the listeners that we have selected a resolver..
-                for (const auto &l : listeners)
-                    l->current_resolver(*res);
-#endif
+                LOG(res->get_label());
+                FIRE_CURRENT_RESOLVER(*res);
 
                 // we apply the resolver..
                 if (!get_sat_core().assume(res->rho) || !get_sat_core().check())
@@ -86,9 +74,7 @@ void solver::solve()
 void solver::build_graph()
 {
     assert(get_sat_core().root_level());
-#ifdef BUILD_GUI
-    std::cout << "building the causal graph.." << std::endl;
-#endif
+    LOG("building the causal graph..");
 
     while (std::any_of(flaws.begin(), flaws.end(), [&](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
     {
@@ -126,9 +112,7 @@ void solver::build_graph()
 
 bool solver::has_inconsistencies()
 {
-#ifdef BUILD_GUI
-    std::cout << " (checking for inconsistencies..)";
-#endif
+    LOG("checking for inconsistencies..");
     std::vector<flaw *> incs;
     std::queue<type *> q;
     for (const auto &t : get_types())
@@ -150,9 +134,7 @@ bool solver::has_inconsistencies()
     assert(std::none_of(incs.begin(), incs.end(), [&](flaw *f) { return f->structural; }));
     if (!incs.empty())
     {
-#ifdef BUILD_GUI
-        std::cout << ": " << std::to_string(incs.size()) << std::endl;
-#endif
+        LOG("found " << std::to_string(incs.size()) << " inconsistencies..");
         // we go back to root level..
         while (!get_sat_core().root_level())
             get_sat_core().pop();
@@ -172,9 +154,7 @@ bool solver::has_inconsistencies()
     }
     else
     {
-#ifdef BUILD_GUI
-        std::cout << ": 0" << std::endl;
-#endif
+        LOG("no inconsistencies found..");
         return false;
     }
 }
@@ -189,11 +169,8 @@ void solver::expand_flaw(flaw &f)
         for (const auto &c_f : sf->flaws)
             if (!c_f->expanded)
             {
-#ifdef BUILD_GUI
-                for (const auto &l : listeners)
-                    l->current_flaw(*c_f);
-#endif
                 assert(!c_f->expanded);
+                FIRE_CURRENT_FLAW(*c_f);
                 // we expand the enclosing flaw..
                 c_f->expand();
                 // ..and remove it from the flaw queue..
@@ -237,9 +214,7 @@ void solver::apply_resolver(resolver &r)
 void solver::add_layer()
 {
     assert(get_sat_core().root_level());
-#ifdef BUILD_GUI
-    std::cout << "adding a layer to the causal graph.." << std::endl;
-#endif
+    LOG("adding a layer to the causal graph..");
 
     std::deque<flaw *> f_q(flaw_q);
     while (std::all_of(f_q.begin(), f_q.end(), [&](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
@@ -255,9 +230,7 @@ void solver::add_layer()
 #ifdef GRAPH_PRUNING
     // we create a new graph var..
     gamma = get_sat_core().new_var();
-#ifdef BUILD_GUI
-    std::cout << "graph var is: γ" << std::to_string(gamma) << std::endl;
-#endif
+    LOG("graph var is: γ" << std::to_string(gamma));
     // these flaws have not been expanded, hence, cannot have a solution..
     for (const auto &f : flaw_q)
         get_sat_core().new_clause({lit(gamma, false), lit(f->phi, false)});
@@ -269,11 +242,9 @@ void solver::add_layer()
 
 void solver::increase_accuracy()
 {
-#ifdef BUILD_GUI
-    std::cout << "heuristic accuracy is: " + std::to_string(accuracy + 1) << std::endl;
-#endif
     accuracy++;
     assert(get_sat_core().root_level());
+    LOG("current heuristic accuracy: " + std::to_string(accuracy));
 
     // we clean up super-flaws trivial flaws and already solved flaws..
     for (auto it = flaws.begin(); it != flaws.end();)
@@ -418,11 +389,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                 flaws.insert(f);
                 if (!trail.empty())
                     trail.back().new_flaws.insert(f);
-#ifdef BUILD_GUI
-                // we notify the listeners that the state of the flaw has changed..
-                for (const auto &l : listeners)
-                    l->flaw_state_changed(*f);
-#endif
+                FIRE_FLAW_STATE_CHANGED(*f);
             }
             else // this flaw has been removed from the current partial solution..
                 assert(flaws.find(f) == flaws.end());
@@ -467,10 +434,8 @@ void solver::pop()
         r.first->est_cost = r.second;
 
 #ifdef BUILD_GUI
-    // we notify the listeners that the cost of some resolvers has been restored..
-    for (const auto &l : listeners)
-        for (const auto &c : trail.back().old_costs)
-            l->resolver_cost_changed(*c.first);
+    for (const auto &c : trail.back().old_costs)
+        FIRE_RESOLVER_COST_CHANGED(*c.first);
 #endif
 
     trail.pop_back();
@@ -479,11 +444,7 @@ void solver::pop()
 void solver::new_flaw(flaw &f)
 {
     f.init(); // flaws' initialization requires being at root-level..
-#ifdef BUILD_GUI
-    // we notify the listeners that a new flaw has been created..
-    for (const auto &l : listeners)
-        l->new_flaw(f);
-#endif
+    FIRE_NEW_FLAW(f);
     switch (sat.value(f.phi))
     {
     case True: // we have a top-level (a landmark) flaw..
@@ -501,11 +462,7 @@ void solver::new_flaw(flaw &f)
 
 void solver::new_resolver(resolver &r)
 {
-#ifdef BUILD_GUI
-    // we notify the listeners that a new resolver has been created..
-    for (const auto &l : listeners)
-        l->new_resolver(r);
-#endif
+    FIRE_NEW_RESOLVER(r);
     if (sat.value(r.rho) == Undefined) // we do not have a top-level (a landmark) resolver..
     {
         // we listen for the resolver to become active..
@@ -516,11 +473,7 @@ void solver::new_resolver(resolver &r)
 
 void solver::new_causal_link(flaw &f, resolver &r)
 {
-#ifdef BUILD_GUI
-    // we notify the listeners that a new causal link has been created..
-    for (const auto &l : listeners)
-        l->causal_link_added(f, r);
-#endif
+    FIRE_CAUSAL_LINK_ADDED(f, r);
     r.preconditions.push_back(&f);
     f.supports.push_back(&r);
     bool new_clause = sat.new_clause({lit(r.rho, false), f.phi});
@@ -537,11 +490,7 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
         rational f_cost = r.effect.get_estimated_cost();
         // we update the resolver's estimated cost..
         r.est_cost = cst;
-#ifdef BUILD_GUI
-        // we notify the listeners that a resolver cost has changed..
-        for (const auto &l : listeners)
-            l->resolver_cost_changed(r);
-#endif
+        FIRE_RESOLVER_COST_CHANGED(r);
 
         if (f_cost != r.effect.get_estimated_cost()) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
         {
@@ -562,11 +511,7 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
                     f_cost = c_res.effect.get_estimated_cost();
                     // we update the resolver's estimated cost..
                     c_res.est_cost = r_cost;
-#ifdef BUILD_GUI
-                    // we notify the listeners that a resolver cost has changed..
-                    for (const auto &l : listeners)
-                        l->resolver_cost_changed(c_res);
-#endif
+                    FIRE_RESOLVER_COST_CHANGED(c_res);
 
                     if (f_cost != c_res.effect.get_estimated_cost())  // the cost of the resolver's effect has changed as a consequence of the resolver's cost update..
                         for (const auto &c_r : c_res.effect.supports) // hence, we propagate the update to all the supports of the resolver's effect..

@@ -1,6 +1,26 @@
 #pragma once
 
 #include "core.h"
+#ifdef BUILD_GUI
+#include "solver_listener.h"
+#define FIRE_NEW_FLAW(f) fire_new_flaw(f)
+#define FIRE_FLAW_STATE_CHANGED(f) fire_flaw_state_changed(f)
+#define FIRE_CURRENT_FLAW(f) fire_current_flaw(f)
+#define FIRE_NEW_RESOLVER(r) fire_new_resolver(r)
+#define FIRE_RESOLVER_STATE_CHANGED(r) fire_resolver_state_changed(r)
+#define FIRE_RESOLVER_COST_CHANGED(r) fire_resolver_cost_changed(r)
+#define FIRE_CURRENT_RESOLVER(r) fire_current_resolver(r)
+#define FIRE_CAUSAL_LINK_ADDED(f, r) fire_causal_link_added(f, r)
+#else
+#define FIRE_NEW_FLAW(f)
+#define FIRE_FLAW_STATE_CHANGED(f)
+#define FIRE_CURRENT_FLAW(f)
+#define FIRE_NEW_RESOLVER(r)
+#define FIRE_RESOLVER_STATE_CHANGED(r)
+#define FIRE_RESOLVER_COST_CHANGED(r)
+#define FIRE_CURRENT_RESOLVER(r)
+#define FIRE_CAUSAL_LINK_ADDED(f, r)
+#endif
 
 namespace ratio
 {
@@ -10,9 +30,6 @@ class resolver;
 class atom_flaw;
 class hyper_flaw;
 class smart_type;
-#ifdef BUILD_GUI
-class solver_listener;
-#endif
 
 class solver : public core, private smt::theory
 {
@@ -97,6 +114,47 @@ private:
 #ifdef BUILD_GUI
 private:
   std::vector<solver_listener *> listeners; // the solver listeners..
+
+  void fire_new_flaw(const flaw &f)
+  {
+    for (const auto &l : listeners)
+      l->new_flaw(f);
+  }
+  void fire_flaw_state_changed(const flaw &f)
+  {
+    for (const auto &l : listeners)
+      l->flaw_state_changed(f);
+  }
+  void fire_current_flaw(const flaw &f)
+  {
+    for (const auto &l : listeners)
+      l->current_flaw(f);
+  }
+  void fire_new_resolver(const resolver &r)
+  {
+    for (const auto &l : listeners)
+      l->new_resolver(r);
+  }
+  void fire_resolver_state_changed(const resolver &r)
+  {
+    for (const auto &l : listeners)
+      l->resolver_state_changed(r);
+  }
+  void fire_resolver_cost_changed(const resolver &r)
+  {
+    for (const auto &l : listeners)
+      l->resolver_cost_changed(r);
+  }
+  void fire_current_resolver(const resolver &r)
+  {
+    for (const auto &l : listeners)
+      l->current_resolver(r);
+  }
+  void fire_causal_link_added(const flaw &f, const resolver &r)
+  {
+    for (const auto &l : listeners)
+      l->causal_link_added(f, r);
+  }
 #endif
 };
 } // namespace ratio

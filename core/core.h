@@ -5,6 +5,12 @@
 #include "sat_core.h"
 #include "lra_theory.h"
 #include "ov_theory.h"
+#ifdef BUILD_GUI
+#include <iostream>
+#define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << std::endl
+#else
+#define LOG(msg)
+#endif
 
 #define BOOL_KEYWORD "bool"
 #define INT_KEYWORD "int"
