@@ -64,7 +64,7 @@ void solver::solve()
         else if (!has_inconsistencies()) // we run out of flaws, we check for inconsistencies one last time..
         {
             // Hurray!! we have found a solution..
-            FIRE_SOLUTION_FOUND();
+            FIRE_STATE_CHANGED();
             return;
         }
     }
@@ -610,10 +610,10 @@ void solver::fire_causal_link_added(const flaw &f, const resolver &r) const
     for (const auto &l : listeners)
         l->causal_link_added(f, r);
 }
-void solver::fire_solution_found() const
+void solver::fire_state_changed() const
 {
     for (const auto &l : listeners)
-        l->solution_found();
+        l->state_changed();
 }
 #endif
 } // namespace ratio

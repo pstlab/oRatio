@@ -10,7 +10,7 @@
 #define FIRE_RESOLVER_COST_CHANGED(r) fire_resolver_cost_changed(r)
 #define FIRE_CURRENT_RESOLVER(r) fire_current_resolver(r)
 #define FIRE_CAUSAL_LINK_ADDED(f, r) fire_causal_link_added(f, r)
-#define FIRE_SOLUTION_FOUND() fire_solution_found()
+#define FIRE_STATE_CHANGED() fire_state_changed()
 #else
 #define FIRE_NEW_FLAW(f)
 #define FIRE_FLAW_STATE_CHANGED(f)
@@ -124,7 +124,7 @@ private:
   void fire_resolver_cost_changed(const resolver &r) const;
   void fire_current_resolver(const resolver &r) const;
   void fire_causal_link_added(const flaw &f, const resolver &r) const;
-  void fire_solution_found() const;
+  void fire_state_changed() const;
 #endif
 };
 } // namespace ratio

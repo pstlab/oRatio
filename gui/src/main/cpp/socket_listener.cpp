@@ -111,10 +111,10 @@ void socket_listener::causal_link_added(const flaw &f, const resolver &r)
     send_message(ss.str());
 }
 
-void socket_listener::solution_found()
+void socket_listener::state_changed()
 {
     std::stringstream ss;
-    ss << "solution_found " << slv.to_string() << "\n";
+    ss << "state_changed " << slv.to_string() << "\n";
     send_message(ss.str());
 }
 

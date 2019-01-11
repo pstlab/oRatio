@@ -34,7 +34,7 @@ private:
 
   void causal_link_added(const flaw &f, const resolver &r) override;
 
-  void solution_found();
+  void state_changed() override;
 
   void send_message(const std::string &msg);
 
