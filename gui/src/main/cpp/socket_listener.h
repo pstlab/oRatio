@@ -1,7 +1,6 @@
 #pragma once
 
 #include "solver_listener.h"
-#include "core_listener.h"
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
@@ -16,27 +15,12 @@
 namespace ratio
 {
 
-class socket_listener : public core_listener, public solver_listener
+class socket_listener : public solver_listener
 {
 public:
   socket_listener(solver &slv);
   socket_listener(const socket_listener &orig) = delete;
   virtual ~socket_listener();
-
-private:
-  void method_created(const method &m) override;
-  void method_created(const type &t, const method &m) override;
-
-  void type_created(const type &t) override;
-  void type_created(const type &et, const type &t) override;
-  void type_inherited(const type &st, const type &t) override;
-
-  void predicate_created(const predicate &p) override;
-  void predicate_created(const type &t, const predicate &p) override;
-
-  void constructor_created(const type &et, const constructor &c) override;
-
-  void field_created(const scope &sc, const field &f) override;
 
 private:
   void flaw_created(const flaw &f) override;

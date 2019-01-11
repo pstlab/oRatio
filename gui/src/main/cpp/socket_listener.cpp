@@ -11,7 +11,7 @@
 
 namespace ratio
 {
-socket_listener::socket_listener(solver &slv) : core_listener(slv), solver_listener(slv)
+socket_listener::socket_listener(solver &slv) : solver_listener(slv)
 {
 #ifdef _WIN32
     WSADATA wsa_data;
@@ -45,75 +45,6 @@ socket_listener::~socket_listener()
 #else
     close(skt);
 #endif
-}
-
-void socket_listener::method_created(const method &m)
-{
-    std::stringstream ss;
-    ss << "method_created {\"name\":\"" << m.get_name() << "\"";
-    if (m.get_return_type())
-        ss << "\", \"return_type\":\"" << static_cast<const void *>(m.get_return_type()) << "\"";
-    ss << "}\n";
-    send_message(ss.str());
-}
-
-void socket_listener::method_created(const type &t, const method &m)
-{
-    std::stringstream ss;
-    ss << "method_created {\"type\":\"" << static_cast<const void *>(&t) << "\", \"name\":\"" << m.get_name() << "\"";
-    if (m.get_return_type())
-        ss << "\", \"return_type\":\"" << static_cast<const void *>(m.get_return_type()) << "\"";
-    ss << "}\n";
-    send_message(ss.str());
-}
-
-void socket_listener::type_created(const type &t)
-{
-    std::stringstream ss;
-    ss << "type_created {\"type\":\"" << static_cast<const void *>(&t) << "\", \"name\":\"" << t.get_name() << "\", \"primitive\":" << std::to_string(t.is_primitive()) << "}\n";
-    send_message(ss.str());
-}
-
-void socket_listener::type_created(const type &et, const type &t)
-{
-    std::stringstream ss;
-    ss << "type_created {\"enclosing_type\":\"" << static_cast<const void *>(&et) << "\", \"type\":\"" << static_cast<const void *>(&t) << "\", \"name\":\"" << t.get_name() << "\", \"primitive\":" << std::to_string(t.is_primitive()) << "}\n";
-    send_message(ss.str());
-}
-
-void socket_listener::type_inherited(const type &st, const type &t)
-{
-    std::stringstream ss;
-    ss << "type_inherited {\"supertype\":\"" << static_cast<const void *>(&st) << "\", \"type\":\"" << static_cast<const void *>(&t) << "\"}\n";
-    send_message(ss.str());
-}
-
-void socket_listener::predicate_created(const predicate &p)
-{
-    std::stringstream ss;
-    ss << "predicate_created {\"predicate\":\"" << static_cast<const void *>(&p) << "\", \"name\":\"" << p.get_name() << "\"}\n";
-    send_message(ss.str());
-}
-
-void socket_listener::predicate_created(const type &t, const predicate &p)
-{
-    std::stringstream ss;
-    ss << "predicate_created {\"type\":\"" << static_cast<const void *>(&t) << "\", \"predicate\":\"" << static_cast<const void *>(&p) << "\", \"name\":\"" << t.get_name() << "\"}\n";
-    send_message(ss.str());
-}
-
-void socket_listener::constructor_created(const type &t, const constructor &c)
-{
-    std::stringstream ss;
-    ss << "constructor_created {\"type\":\"" << static_cast<const void *>(&t) << "\", \"constructor\":\"" << static_cast<const void *>(&c) << "}\n";
-    send_message(ss.str());
-}
-
-void socket_listener::field_created(const scope &sc, const field &f)
-{
-    std::stringstream ss;
-    ss << "field_created {\"scope\":\"" << static_cast<const void *>(&sc) << "\", \"type\":\"" << static_cast<const void *>(&f.get_type()) << "\", \"name\":\"" << f.get_name() << "\"}\n";
-    send_message(ss.str());
 }
 
 void socket_listener::flaw_created(const flaw &f)
