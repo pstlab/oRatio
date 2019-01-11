@@ -16,6 +16,7 @@
 #define FIRE_NEW_PREDICATE(p) fire_new_predicate(p)
 #define FIRE_NEW_NESTED_PREDICATE(t, p) (t).get_core().fire_new_predicate(t, p)
 #define FIRE_NEW_CONSTRUCTOR(t, c) (t).get_core().fire_new_constructor(t, c)
+#define FIRE_NEW_FIELD(s, f) (f).get_type().get_core().fire_new_field(s, f)
 #else
 #define LOG(msg)
 #define FIRE_NEW_METHOD(m)
@@ -26,6 +27,7 @@
 #define FIRE_NEW_PREDICATE(p)
 #define FIRE_NEW_NESTED_PREDICATE(et, p)
 #define FIRE_NEW_CONSTRUCTOR(t, c)
+#define FIRE_NEW_FIELD(s, f)
 #endif
 
 #define BOOL_KEYWORD "bool"
@@ -70,6 +72,8 @@ class core : public scope, public env
   friend class ast::class_declaration;
 #ifdef BUILD_GUI
   friend class core_listener;
+  friend class type;
+  friend class scope;
 #endif
 
 public:
@@ -190,8 +194,6 @@ private:
   smt::var ni = smt::TRUE_var; // the controlling variable..
 
 #ifdef BUILD_GUI
-  friend class type;
-
 private:
   std::vector<core_listener *> listeners; // the core listeners..
 
@@ -203,6 +205,7 @@ private:
   void fire_new_predicate(const predicate &p) const;
   void fire_new_predicate(const type &et, const predicate &p) const;
   void fire_new_constructor(const type &t, const constructor &ctr) const;
+  void fire_new_field(const scope &s, const field &f) const;
 #endif
 };
 } // namespace ratio

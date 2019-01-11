@@ -3,6 +3,7 @@
 #include "method.h"
 #include "type.h"
 #include "predicate.h"
+#include "field.h"
 #include "graph.h"
 #include "solver.h"
 #include <sstream>
@@ -105,6 +106,13 @@ void socket_listener::constructor_created(const type &t, const constructor &c)
 {
     std::stringstream ss;
     ss << "constructor_created {\"type\":\"" << static_cast<const void *>(&t) << "\", \"constructor\":\"" << static_cast<const void *>(&c) << "}\n";
+    send_message(ss.str());
+}
+
+void socket_listener::field_created(const scope &sc, const field &f)
+{
+    std::stringstream ss;
+    ss << "field_created {\"scope\":\"" << static_cast<const void *>(&sc) << "\", \"type\":\"" << static_cast<const void *>(&f.get_type()) << "\", \"name\":\"" << f.get_name() << "\"}\n";
     send_message(ss.str());
 }
 

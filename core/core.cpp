@@ -568,5 +568,10 @@ void core::fire_new_constructor(const type &t, const constructor &ctr) const
     for (const auto &l : listeners)
         l->constructor_created(t, ctr);
 }
+void core::fire_new_field(const scope &sc, const field &f) const
+{
+    for (const auto &l : listeners)
+        l->field_created(sc, f);
+}
 #endif
 } // namespace ratio

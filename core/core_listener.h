@@ -27,6 +27,8 @@ private:
 
   virtual void constructor_created(const type &et, const constructor &c) {}
 
+  virtual void field_created(const scope &sc, const field &f) {}
+
 protected:
   core &cr;
 };

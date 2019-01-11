@@ -36,6 +36,8 @@ private:
 
   void constructor_created(const type &et, const constructor &c) override;
 
+  void field_created(const scope &sc, const field &f) override;
+
 private:
   void flaw_created(const flaw &f) override;
   void flaw_state_changed(const flaw &f) override;
