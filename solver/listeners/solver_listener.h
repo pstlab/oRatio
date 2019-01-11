@@ -11,15 +11,7 @@ class resolver;
 
 class solver_listener
 {
-  friend void fire_new_flaw(const solver &s, const flaw &f);
-  friend void fire_flaw_state_changed(const solver &s, const flaw &f);
-  friend void fire_current_flaw(const solver &s, const flaw &f);
-  friend void fire_new_resolver(const solver &s, const resolver &r);
-  friend void fire_resolver_state_changed(const solver &s, const resolver &r);
-  friend void fire_resolver_cost_changed(const solver &s, const resolver &r);
-  friend void fire_current_resolver(const solver &s, const resolver &r);
-  friend void fire_causal_link_added(const solver &s, const flaw &f, const resolver &r);
-  friend void fire_solution_found(const solver &s);
+  friend class solver;
 
 public:
   solver_listener(solver &s);

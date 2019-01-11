@@ -567,49 +567,49 @@ flaw *solver::select_flaw()
 }
 
 #ifdef BUILD_GUI
-void fire_new_flaw(const solver &s, const flaw &f)
+void solver::fire_new_flaw(const flaw &f) const
 {
-    for (const auto &l : s.listeners)
+    for (const auto &l : listeners)
         l->new_flaw(f);
 }
-void fire_flaw_state_changed(const solver &s, const flaw &f)
+void solver::fire_flaw_state_changed(const flaw &f) const
 {
-    for (const auto &l : s.listeners)
+    for (const auto &l : listeners)
         l->flaw_state_changed(f);
 }
-void fire_current_flaw(const solver &s, const flaw &f)
+void solver::fire_current_flaw(const flaw &f) const
 {
-    for (const auto &l : s.listeners)
+    for (const auto &l : listeners)
         l->current_flaw(f);
 }
-void fire_new_resolver(const solver &s, const resolver &r)
+void solver::fire_new_resolver(const resolver &r) const
 {
-    for (const auto &l : s.listeners)
+    for (const auto &l : listeners)
         l->new_resolver(r);
 }
-void fire_resolver_state_changed(const solver &s, const resolver &r)
+void solver::fire_resolver_state_changed(const resolver &r) const
 {
-    for (const auto &l : s.listeners)
+    for (const auto &l : listeners)
         l->resolver_state_changed(r);
 }
-void fire_resolver_cost_changed(const solver &s, const resolver &r)
+void solver::fire_resolver_cost_changed(const resolver &r) const
 {
-    for (const auto &l : s.listeners)
+    for (const auto &l : listeners)
         l->resolver_cost_changed(r);
 }
-void fire_current_resolver(const solver &s, const resolver &r)
+void solver::fire_current_resolver(const resolver &r) const
 {
-    for (const auto &l : s.listeners)
+    for (const auto &l : listeners)
         l->current_resolver(r);
 }
-void fire_causal_link_added(const solver &s, const flaw &f, const resolver &r)
+void solver::fire_causal_link_added(const flaw &f, const resolver &r) const
 {
-    for (const auto &l : s.listeners)
+    for (const auto &l : listeners)
         l->causal_link_added(f, r);
 }
-void fire_solution_found(const solver &s)
+void solver::fire_solution_found() const
 {
-    for (const auto &l : s.listeners)
+    for (const auto &l : listeners)
         l->solution_found();
 }
 #endif

@@ -24,9 +24,17 @@ public:
   virtual ~socket_listener();
 
 private:
+  void method_created(const method &m) override;
+  void method_created(const type &t, const method &m) override;
+
   void type_created(const type &t) override;
   void type_created(const type &et, const type &t) override;
   void type_inherited(const type &st, const type &t) override;
+
+  void predicate_created(const predicate &p) override;
+  void predicate_created(const type &t, const predicate &p) override;
+
+  void constructor_created(const type &et, const constructor &c) override;
 
 private:
   void flaw_created(const flaw &f) override;

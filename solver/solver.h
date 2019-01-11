@@ -3,15 +3,15 @@
 #include "core.h"
 #ifdef BUILD_GUI
 #include "solver_listener.h"
-#define FIRE_NEW_FLAW(f) fire_new_flaw(*this, f)
-#define FIRE_FLAW_STATE_CHANGED(f) fire_flaw_state_changed(*this, f)
-#define FIRE_CURRENT_FLAW(f) fire_current_flaw(*this, f)
-#define FIRE_NEW_RESOLVER(r) fire_new_resolver(*this, r)
-#define FIRE_RESOLVER_STATE_CHANGED(r) fire_resolver_state_changed(*this, r)
-#define FIRE_RESOLVER_COST_CHANGED(r) fire_resolver_cost_changed(*this, r)
-#define FIRE_CURRENT_RESOLVER(r) fire_current_resolver(*this, r)
-#define FIRE_CAUSAL_LINK_ADDED(f, r) fire_causal_link_added(*this, f, r)
-#define FIRE_SOLUTION_FOUND() fire_solution_found(*this)
+#define FIRE_NEW_FLAW(f) fire_new_flaw(f)
+#define FIRE_FLAW_STATE_CHANGED(f) fire_flaw_state_changed(f)
+#define FIRE_CURRENT_FLAW(f) fire_current_flaw(f)
+#define FIRE_NEW_RESOLVER(r) fire_new_resolver(r)
+#define FIRE_RESOLVER_STATE_CHANGED(r) fire_resolver_state_changed(r)
+#define FIRE_RESOLVER_COST_CHANGED(r) fire_resolver_cost_changed(r)
+#define FIRE_CURRENT_RESOLVER(r) fire_current_resolver(r)
+#define FIRE_CAUSAL_LINK_ADDED(f, r) fire_causal_link_added(f, r)
+#define FIRE_SOLUTION_FOUND() fire_solution_found()
 #else
 #define FIRE_NEW_FLAW(f)
 #define FIRE_FLAW_STATE_CHANGED(f)
@@ -117,15 +117,15 @@ private:
 private:
   std::vector<solver_listener *> listeners; // the solver listeners..
 
-  friend void fire_new_flaw(const solver &s, const flaw &f);
-  friend void fire_flaw_state_changed(const solver &s, const flaw &f);
-  friend void fire_current_flaw(const solver &s, const flaw &f);
-  friend void fire_new_resolver(const solver &s, const resolver &r);
-  friend void fire_resolver_state_changed(const solver &s, const resolver &r);
-  friend void fire_resolver_cost_changed(const solver &s, const resolver &r);
-  friend void fire_current_resolver(const solver &s, const resolver &r);
-  friend void fire_causal_link_added(const solver &s, const flaw &f, const resolver &r);
-  friend void fire_solution_found(const solver &s);
+  void fire_new_flaw(const flaw &f) const;
+  void fire_flaw_state_changed(const flaw &f) const;
+  void fire_current_flaw(const flaw &f) const;
+  void fire_new_resolver(const resolver &r) const;
+  void fire_resolver_state_changed(const resolver &r) const;
+  void fire_resolver_cost_changed(const resolver &r) const;
+  void fire_current_resolver(const resolver &r) const;
+  void fire_causal_link_added(const flaw &f, const resolver &r) const;
+  void fire_solution_found() const;
 #endif
 };
 } // namespace ratio

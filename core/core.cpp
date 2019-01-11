@@ -240,7 +240,10 @@ void core::assert_facts(const std::vector<lit> &facts)
 void core::new_methods(const std::vector<const method *> &ms)
 {
     for (const auto &m : ms)
+    {
         methods[m->get_name()].push_back(m);
+        FIRE_NEW_METHOD(*m);
+    }
 }
 
 void core::new_types(const std::vector<type *> &ts)
@@ -255,7 +258,10 @@ void core::new_types(const std::vector<type *> &ts)
 void core::new_predicates(const std::vector<predicate *> &ps)
 {
     for (const auto &p : ps)
+    {
         predicates.insert({p->get_name(), p});
+        FIRE_NEW_PREDICATE(*p);
+    }
 }
 
 const field &core::get_field(const std::string &name) const
@@ -519,10 +525,45 @@ std::string core::to_string() const noexcept
 }
 
 #ifdef BUILD_GUI
-void fire_new_type(const core &c, const type &t)
+void core::fire_new_method(const method &m) const
 {
-    for (const auto &l : c.listeners)
+    for (const auto &l : listeners)
+        l->method_created(m);
+}
+void core::fire_new_method(const type &t, const method &m) const
+{
+    for (const auto &l : listeners)
+        l->method_created(t, m);
+}
+void core::fire_new_type(const type &t) const
+{
+    for (const auto &l : listeners)
         l->type_created(t);
+}
+void core::fire_new_type(const type &et, const type &t) const
+{
+    for (const auto &l : listeners)
+        l->type_created(et, t);
+}
+void core::fire_type_inherited(const type &st, const type &t) const
+{
+    for (const auto &l : listeners)
+        l->type_inherited(st, t);
+}
+void core::fire_new_predicate(const predicate &p) const
+{
+    for (const auto &l : listeners)
+        l->predicate_created(p);
+}
+void core::fire_new_predicate(const type &t, const predicate &p) const
+{
+    for (const auto &l : listeners)
+        l->predicate_created(t, p);
+}
+void core::fire_new_constructor(const type &t, const constructor &ctr) const
+{
+    for (const auto &l : listeners)
+        l->constructor_created(t, ctr);
 }
 #endif
 } // namespace ratio

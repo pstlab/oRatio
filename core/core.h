@@ -9,10 +9,24 @@
 #include "core_listener.h"
 #include <iostream>
 #define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << std::endl
-#define FIRE_NEW_TYPE(t) fire_new_type(*this, t)
+#define FIRE_NEW_METHOD(m) fire_new_method(m)
+#define FIRE_NEW_NESTED_METHOD(t, m) (t).get_core().fire_new_method(t, m)
+#define FIRE_NEW_TYPE(t) fire_new_type(t)
+#define FIRE_NEW_NESTED_TYPE(et, nt) (et).get_core().fire_new_type(et, nt)
+#define FIRE_TYPE_INHERITED(st, t) (st).get_core().fire_type_inherited(st, t)
+#define FIRE_NEW_PREDICATE(p) fire_new_predicate(p)
+#define FIRE_NEW_NESTED_PREDICATE(t, p) (t).get_core().fire_new_predicate(t, p)
+#define FIRE_NEW_CONSTRUCTOR(t, c) (t).get_core().fire_new_constructor(t, c)
 #else
 #define LOG(msg)
+#define FIRE_NEW_METHOD(m)
+#define FIRE_NEW_NESTED_METHOD(et, m)
 #define FIRE_NEW_TYPE(t)
+#define FIRE_NEW_NESTED_TYPE(et, nt)
+#define FIRE_TYPE_INHERITED(st, t)
+#define FIRE_NEW_PREDICATE(p)
+#define FIRE_NEW_NESTED_PREDICATE(et, p)
+#define FIRE_NEW_CONSTRUCTOR(t, c)
 #endif
 
 #define BOOL_KEYWORD "bool"
@@ -177,10 +191,19 @@ private:
   smt::var ni = smt::TRUE_var; // the controlling variable..
 
 #ifdef BUILD_GUI
+  friend class type;
+
 private:
   std::vector<core_listener *> listeners; // the core listeners..
 
-  friend void fire_new_type(const core &c, const type &t);
+  void fire_new_method(const method &m) const;
+  void fire_new_method(const type &et, const method &m) const;
+  void fire_new_type(const type &t) const;
+  void fire_new_type(const type &et, const type &nt) const;
+  void fire_type_inherited(const type &st, const type &t) const;
+  void fire_new_predicate(const predicate &p) const;
+  void fire_new_predicate(const type &et, const predicate &p) const;
+  void fire_new_constructor(const type &t, const constructor &ctr) const;
 #endif
 };
 } // namespace ratio

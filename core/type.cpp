@@ -83,30 +83,45 @@ expr type::new_existential()
 void type::new_supertypes(type &t, const std::vector<type *> &sts)
 {
     for (const auto &st : sts)
+    {
         t.supertypes.push_back(st);
+        FIRE_TYPE_INHERITED(*st, t);
+    }
 }
 void type::new_supertypes(const std::vector<type *> &sts)
 {
     for (const auto &st : sts)
+    {
         supertypes.push_back(st);
+        FIRE_TYPE_INHERITED(*st, *this);
+    }
 }
 
 void type::new_constructors(const std::vector<const constructor *> &cs)
 {
     for (const auto &c : cs)
+    {
         constructors.push_back(c);
+        FIRE_NEW_CONSTRUCTOR(*this, *c);
+    }
 }
 
 void type::new_methods(const std::vector<const method *> &ms)
 {
     for (const auto &m : ms)
+    {
         methods[m->get_name()].push_back(m);
+        FIRE_NEW_NESTED_METHOD(*this, *m);
+    }
 }
 
 void type::new_types(const std::vector<type *> &ts)
 {
     for (const auto &t : ts)
+    {
         types.insert({t->name, t});
+        FIRE_NEW_NESTED_TYPE(*this, *t);
+    }
 }
 
 void type::new_predicates(const std::vector<predicate *> &ps, bool notify)
