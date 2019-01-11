@@ -8,4 +8,5 @@ core_listener::core_listener(core &cr) : cr(cr) { cr.listeners.push_back(this); 
 core_listener::~core_listener() { cr.listeners.erase(std::find(cr.listeners.begin(), cr.listeners.end(), this)); }
 
 void core_listener::type_created(const type &t) {}
+void core_listener::type_inherited(const type &st, const type &t) {}
 } // namespace ratio

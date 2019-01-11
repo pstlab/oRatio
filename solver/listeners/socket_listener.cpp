@@ -47,7 +47,14 @@ socket_listener::~socket_listener()
 void socket_listener::type_created(const type &t)
 {
     std::stringstream ss;
-    ss << "type_created {\"name\":\"" << t.get_name() << "\", \"name\":" << std::to_string(t.is_primitive()) << "}\n";
+    ss << "type_created {\"type\":\"" << static_cast<const void *>(&t) << "\", \"name\":\"" << t.get_name() << "\", \"primitive\":" << std::to_string(t.is_primitive()) << "}\n";
+    send_message(ss.str());
+}
+
+void socket_listener::type_inherited(const type &st, const type &t)
+{
+    std::stringstream ss;
+    ss << "type_inherited {\"supertype\":\"" << static_cast<const void *>(&st) << "\", \"type\":\"" << static_cast<const void *>(&t) << "\"}\n";
     send_message(ss.str());
 }
 

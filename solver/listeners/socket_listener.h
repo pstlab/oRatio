@@ -18,34 +18,35 @@ namespace ratio
 
 class socket_listener : public core_listener, public solver_listener
 {
-  public:
-    socket_listener(solver &slv);
-    socket_listener(const socket_listener &orig) = delete;
-    virtual ~socket_listener();
+public:
+  socket_listener(solver &slv);
+  socket_listener(const socket_listener &orig) = delete;
+  virtual ~socket_listener();
 
-  private:
-    void type_created(const type &t) override;
+private:
+  void type_created(const type &t) override;
+  void type_inherited(const type &st, const type &t) override;
 
-  private:
-    void flaw_created(const flaw &f) override;
-    void flaw_state_changed(const flaw &f) override;
-    void current_flaw(const flaw &f) override;
+private:
+  void flaw_created(const flaw &f) override;
+  void flaw_state_changed(const flaw &f) override;
+  void current_flaw(const flaw &f) override;
 
-    void resolver_created(const resolver &r) override;
-    void resolver_state_changed(const resolver &r) override;
-    void resolver_cost_changed(const resolver &r) override;
-    void current_resolver(const resolver &r) override;
+  void resolver_created(const resolver &r) override;
+  void resolver_state_changed(const resolver &r) override;
+  void resolver_cost_changed(const resolver &r) override;
+  void current_resolver(const resolver &r) override;
 
-    void causal_link_added(const flaw &f, const resolver &r) override;
+  void causal_link_added(const flaw &f, const resolver &r) override;
 
-    void send_message(const std::string &msg);
+  void send_message(const std::string &msg);
 
-    void state_changed();
+  void state_changed();
 
 #ifdef _WIN32
-    SOCKET skt;
+  SOCKET skt;
 #else
-    int skt;
+  int skt;
 #endif
 };
 } // namespace ratio
