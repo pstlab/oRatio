@@ -40,9 +40,9 @@ private:
 
   void causal_link_added(const flaw &f, const resolver &r) override;
 
-  void send_message(const std::string &msg);
+  void solution_found();
 
-  void state_changed();
+  void send_message(const std::string &msg);
 
 #ifdef _WIN32
   SOCKET skt;

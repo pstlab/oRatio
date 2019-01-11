@@ -6,10 +6,13 @@
 #include "lra_theory.h"
 #include "ov_theory.h"
 #ifdef BUILD_GUI
+#include "core_listener.h"
 #include <iostream>
 #define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << std::endl
+#define FIRE_NEW_TYPE(t) fire_new_type(*this, t)
 #else
 #define LOG(msg)
+#define FIRE_NEW_TYPE(t)
 #endif
 
 #define BOOL_KEYWORD "bool"
@@ -172,9 +175,12 @@ private:
 
   smt::var tmp_ni;             // the temporary controlling variable, used for restoring the controlling variable..
   smt::var ni = smt::TRUE_var; // the controlling variable..
+
 #ifdef BUILD_GUI
 private:
   std::vector<core_listener *> listeners; // the core listeners..
+
+  friend void fire_new_type(const core &c, const type &t);
 #endif
 };
 } // namespace ratio

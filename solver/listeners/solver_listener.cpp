@@ -32,7 +32,7 @@ void solver_listener::current_resolver(const resolver &) {}
 
 void solver_listener::causal_link_added(const flaw &, const resolver &) {}
 
-void solver_listener::state_changed() {}
+void solver_listener::solution_found() {}
 
 solver_listener::flaw_listener::flaw_listener(solver_listener &listener, const flaw &f) : sat_value_listener(listener.slv.get_sat_core()), listener(listener), f(f) { listen_sat(f.get_phi()); }
 solver_listener::flaw_listener::~flaw_listener() {}

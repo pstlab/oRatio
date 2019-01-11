@@ -246,7 +246,10 @@ void core::new_methods(const std::vector<const method *> &ms)
 void core::new_types(const std::vector<type *> &ts)
 {
     for (const auto &t : ts)
+    {
         types.insert({t->get_name(), t});
+        FIRE_NEW_TYPE(*t);
+    }
 }
 
 void core::new_predicates(const std::vector<predicate *> &ps)
@@ -514,4 +517,12 @@ std::string core::to_string() const noexcept
     cr += "\"exprs\" : [" + to_string(get_exprs()) + "] }";
     return cr;
 }
+
+#ifdef BUILD_GUI
+void fire_new_type(const core &c, const type &t)
+{
+    for (const auto &l : c.listeners)
+        l->type_created(t);
+}
+#endif
 } // namespace ratio

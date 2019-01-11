@@ -61,11 +61,7 @@ void solver::solve()
         else if (!has_inconsistencies()) // we run out of flaws, we check for inconsistencies one last time..
         {
             // Hurray!! we have found a solution..
-#ifdef BUILD_GUI
-            // we notify the listeners that the state of the core has changed..
-            for (const auto &l : listeners)
-                l->state_changed();
-#endif
+            FIRE_SOLUTION_FOUND();
             return;
         }
     }
@@ -569,4 +565,52 @@ flaw *solver::select_flaw()
 
     return f_next;
 }
+
+#ifdef BUILD_GUI
+void fire_new_flaw(const solver &s, const flaw &f)
+{
+    for (const auto &l : s.listeners)
+        l->new_flaw(f);
+}
+void fire_flaw_state_changed(const solver &s, const flaw &f)
+{
+    for (const auto &l : s.listeners)
+        l->flaw_state_changed(f);
+}
+void fire_current_flaw(const solver &s, const flaw &f)
+{
+    for (const auto &l : s.listeners)
+        l->current_flaw(f);
+}
+void fire_new_resolver(const solver &s, const resolver &r)
+{
+    for (const auto &l : s.listeners)
+        l->new_resolver(r);
+}
+void fire_resolver_state_changed(const solver &s, const resolver &r)
+{
+    for (const auto &l : s.listeners)
+        l->resolver_state_changed(r);
+}
+void fire_resolver_cost_changed(const solver &s, const resolver &r)
+{
+    for (const auto &l : s.listeners)
+        l->resolver_cost_changed(r);
+}
+void fire_current_resolver(const solver &s, const resolver &r)
+{
+    for (const auto &l : s.listeners)
+        l->current_resolver(r);
+}
+void fire_causal_link_added(const solver &s, const flaw &f, const resolver &r)
+{
+    for (const auto &l : s.listeners)
+        l->causal_link_added(f, r);
+}
+void fire_solution_found(const solver &s)
+{
+    for (const auto &l : s.listeners)
+        l->solution_found();
+}
+#endif
 } // namespace ratio

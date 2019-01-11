@@ -8,7 +8,7 @@ class type;
 
 class core_listener
 {
-  friend class core;
+  friend void fire_new_type(const core &c, const type &t);
 
 public:
   core_listener(core &cr);

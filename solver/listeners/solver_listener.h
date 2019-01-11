@@ -11,7 +11,15 @@ class resolver;
 
 class solver_listener
 {
-  friend class solver;
+  friend void fire_new_flaw(const solver &s, const flaw &f);
+  friend void fire_flaw_state_changed(const solver &s, const flaw &f);
+  friend void fire_current_flaw(const solver &s, const flaw &f);
+  friend void fire_new_resolver(const solver &s, const resolver &r);
+  friend void fire_resolver_state_changed(const solver &s, const resolver &r);
+  friend void fire_resolver_cost_changed(const solver &s, const resolver &r);
+  friend void fire_current_resolver(const solver &s, const resolver &r);
+  friend void fire_causal_link_added(const solver &s, const flaw &f, const resolver &r);
+  friend void fire_solution_found(const solver &s);
 
 public:
   solver_listener(solver &s);
@@ -34,7 +42,7 @@ private:
 
   virtual void causal_link_added(const flaw &f, const resolver &r);
 
-  virtual void state_changed();
+  virtual void solution_found();
 
   class flaw_listener : public smt::sat_value_listener
   {
