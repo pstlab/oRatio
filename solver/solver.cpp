@@ -9,6 +9,9 @@
 #include "reusable_resource.h"
 #include "atom.h"
 #include "combinations.h"
+#ifdef BUILD_GUI
+#include "solver_listener.h"
+#endif
 #include <algorithm>
 #include <cassert>
 

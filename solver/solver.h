@@ -2,7 +2,6 @@
 
 #include "core.h"
 #ifdef BUILD_GUI
-#include "solver_listener.h"
 #define FIRE_NEW_FLAW(f) fire_new_flaw(f)
 #define FIRE_FLAW_STATE_CHANGED(f) fire_flaw_state_changed(f)
 #define FIRE_CURRENT_FLAW(f) fire_current_flaw(f)

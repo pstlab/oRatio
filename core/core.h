@@ -6,7 +6,6 @@
 #include "lra_theory.h"
 #include "ov_theory.h"
 #ifdef BUILD_GUI
-#include "core_listener.h"
 #include <iostream>
 #define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << std::endl
 #define FIRE_NEW_METHOD(m) fire_new_method(m)

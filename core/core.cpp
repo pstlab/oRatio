@@ -4,6 +4,9 @@
 #include "field.h"
 #include "method.h"
 #include "riddle_parser.h"
+#ifdef BUILD_GUI
+#include "core_listener.h"
+#endif
 #include <algorithm>
 #include <iostream>
 #include <sstream>
