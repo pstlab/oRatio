@@ -22,7 +22,7 @@ import java.util.Objects;
  *
  * @author Riccardo De Benedictis <riccardo.debenedictis@istc.cnr.it>
  */
-public class InfRational implements Comparable<InfRational> {
+public class InfRational extends Number implements Comparable<InfRational> {
 
     Rational rat; // the rational part..
     Rational inf; // the infinitesimal part..
@@ -249,6 +249,26 @@ public class InfRational implements Comparable<InfRational> {
         }
         final InfRational other = (InfRational) obj;
         return Objects.equals(this.rat, other.rat) && Objects.equals(this.inf, other.inf);
+    }
+
+    @Override
+    public int intValue() {
+        return rat.intValue();
+    }
+
+    @Override
+    public long longValue() {
+        return rat.longValue();
+    }
+
+    @Override
+    public float floatValue() {
+        return rat.floatValue();
+    }
+
+    @Override
+    public double doubleValue() {
+        return rat.doubleValue();
     }
 
     @Override

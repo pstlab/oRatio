@@ -64,9 +64,11 @@ public class ORatioJFrame extends javax.swing.JFrame {
 
         mainDesktopPane.add(state_frame);
         mainDesktopPane.add(graph_frame);
+        mainDesktopPane.add(timelines_frame);
 
         state_frame.setBounds(50, 50, 300, 250);
         graph_frame.setBounds(400, 50, 300, 250);
+        timelines_frame.setBounds(50, 350, 300, 250);
 
         state_tree_model.addTreeModelListener(new TreeModelListener() {
             @Override
@@ -133,6 +135,8 @@ public class ORatioJFrame extends javax.swing.JFrame {
         state_frame = new javax.swing.JInternalFrame();
         stateTreeScrollPane = new javax.swing.JScrollPane();
         stateTree = new javax.swing.JTree();
+        timelines_frame = new javax.swing.JInternalFrame();
+        timelinesChart = new it.cnr.istc.oratio.gui.timelines.TimelinesChart();
         mainDesktopPane = new javax.swing.JDesktopPane();
 
         state_tree_cell_renderer.setText("stateTreeCellRenderer1");
@@ -174,6 +178,34 @@ public class ORatioJFrame extends javax.swing.JFrame {
         state_frameLayout.setVerticalGroup(
             state_frameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(stateTreeScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 152, Short.MAX_VALUE)
+        );
+
+        timelines_frame.setIconifiable(true);
+        timelines_frame.setMaximizable(true);
+        timelines_frame.setResizable(true);
+        timelines_frame.setTitle("Timelines");
+        timelines_frame.setVisible(true);
+
+        javax.swing.GroupLayout timelinesChartLayout = new javax.swing.GroupLayout(timelinesChart);
+        timelinesChart.setLayout(timelinesChartLayout);
+        timelinesChartLayout.setHorizontalGroup(
+            timelinesChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 1024, Short.MAX_VALUE)
+        );
+        timelinesChartLayout.setVerticalGroup(
+            timelinesChartLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 768, Short.MAX_VALUE)
+        );
+
+        javax.swing.GroupLayout timelines_frameLayout = new javax.swing.GroupLayout(timelines_frame.getContentPane());
+        timelines_frame.getContentPane().setLayout(timelines_frameLayout);
+        timelines_frameLayout.setHorizontalGroup(
+            timelines_frameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(timelinesChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        timelines_frameLayout.setVerticalGroup(
+            timelines_frameLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(timelinesChart, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -263,6 +295,7 @@ public class ORatioJFrame extends javax.swing.JFrame {
                     frame.deserializer.setCore(frame.core);
                     frame.core = frame.gson.fromJson(inputLine.substring(STATE_CHANGED.length()), Core.class);
                     frame.state_tree_model.setCore(frame.core);
+                    frame.timelinesChart.setCore(frame.core);
                 }
             }
         } catch (IOException ex) {
@@ -282,6 +315,8 @@ public class ORatioJFrame extends javax.swing.JFrame {
     private javax.swing.JInternalFrame state_frame;
     private it.cnr.istc.oratio.gui.state.StateTreeCellRenderer state_tree_cell_renderer;
     private it.cnr.istc.oratio.gui.state.StateTreeModel state_tree_model;
+    private it.cnr.istc.oratio.gui.timelines.TimelinesChart timelinesChart;
+    private javax.swing.JInternalFrame timelines_frame;
     // End of variables declaration//GEN-END:variables
 
     static class FlawCreated {

@@ -159,6 +159,14 @@ public class Core implements Scope {
         return Collections.unmodifiableMap(exprs);
     }
 
+    /**
+     * @param name the name of the field identifying the desired item.
+     * @return the item having the given name
+     */
+    public Item getExpr(final String name) {
+        return exprs.get(name);
+    }
+
     public void read(final String script) {
         CodeSnippet snippet = new CodeSnippet(null,
                 new riddleParser(new CommonTokenStream(new riddleLexer(CharStreams.fromString(script)))));
