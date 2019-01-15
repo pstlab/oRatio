@@ -263,6 +263,7 @@ public class ORatioJFrame extends javax.swing.JFrame {
         ORatioJFrame frame = new ORatioJFrame(args);
         EventQueue.invokeLater(() -> frame.setVisible(true));
 
+        System.out.println("Java version: " + System.getProperty("java.version"));
         System.out.println("starting GUI server..");
         try (ServerSocket ss = new ServerSocket(1100); Socket client = ss.accept(); BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"))) {
             String inputLine;
