@@ -12,7 +12,7 @@ class solver_listener
   friend class solver;
 
 public:
-  solver_listener(solver &s) : slv(slv) { slv.listeners.push_back(this); }
+  solver_listener(solver &s) : slv(s) { slv.listeners.push_back(this); }
   solver_listener(const solver_listener &orig) = delete;
   virtual ~solver_listener() { slv.listeners.erase(std::find(slv.listeners.begin(), slv.listeners.end(), this)); }
 
