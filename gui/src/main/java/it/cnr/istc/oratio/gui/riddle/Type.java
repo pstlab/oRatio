@@ -171,6 +171,34 @@ public class Type extends BaseScope {
     }
 
     @Override
+    public Type getType(String name) throws ClassNotFoundException {
+        Type type = types.get(name);
+        if (type != null) {
+            return type;
+        }
+
+        // if not here, check any enclosing scope
+        try {
+            return scope.getType(name);
+        } catch (ClassNotFoundException e) {
+            for (Type superclass : superclasses) {
+                try {
+                    return superclass.getType(name);
+                } catch (ClassNotFoundException ex) {
+                }
+            }
+        }
+
+        // not found
+        throw new ClassNotFoundException(name);
+    }
+
+    @Override
+    public Map<String, Type> getTypes() {
+        return Collections.unmodifiableMap(types);
+    }
+
+    @Override
     public Predicate getPredicate(final String name) throws ClassNotFoundException {
         Predicate predicate = predicates.get(name);
         if (predicate != null) {

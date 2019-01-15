@@ -45,7 +45,7 @@ private:
   class flaw_listener : public smt::sat_value_listener
   {
   public:
-    flaw_listener(solver_listener &l, const flaw &f) : sat_value_listener(listener.slv.get_sat_core()), listener(listener), f(f) { listen_sat(f.get_phi()); }
+    flaw_listener(solver_listener &l, const flaw &f) : sat_value_listener(l.slv.get_sat_core()), listener(l), f(f) { listen_sat(f.get_phi()); }
     flaw_listener(const flaw_listener &orig) = delete;
     virtual ~flaw_listener() {}
 
@@ -60,7 +60,7 @@ private:
   class resolver_listener : public smt::sat_value_listener
   {
   public:
-    resolver_listener(solver_listener &l, const resolver &r) : sat_value_listener(listener.slv.get_sat_core()), listener(listener), r(r) { listen_sat(r.get_rho()); }
+    resolver_listener(solver_listener &l, const resolver &r) : sat_value_listener(l.slv.get_sat_core()), listener(l), r(r) { listen_sat(r.get_rho()); }
     resolver_listener(const resolver_listener &orig) = delete;
     virtual ~resolver_listener() {}
 

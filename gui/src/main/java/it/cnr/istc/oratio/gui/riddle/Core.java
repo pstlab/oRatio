@@ -146,6 +146,22 @@ public class Core implements Scope {
     }
 
     @Override
+    public Type getType(String name) throws ClassNotFoundException {
+        Type type = types.get(name);
+        if (type != null) {
+            return type;
+        }
+
+        // not found
+        throw new ClassNotFoundException(name);
+    }
+
+    @Override
+    public Map<String, Type> getTypes() {
+        return Collections.unmodifiableMap(types);
+    }
+
+    @Override
     public Predicate getPredicate(final String name) {
         return predicates.get(name);
     }

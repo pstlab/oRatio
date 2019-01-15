@@ -66,9 +66,9 @@ public class ORatioJFrame extends javax.swing.JFrame {
         mainDesktopPane.add(graph_frame);
         mainDesktopPane.add(timelines_frame);
 
-        state_frame.setBounds(50, 50, 300, 250);
-        graph_frame.setBounds(400, 50, 300, 250);
-        timelines_frame.setBounds(50, 350, 300, 250);
+        state_frame.setBounds(20, 10, 350, 280);
+        graph_frame.setBounds(380, 10, 400, 280);
+        timelines_frame.setBounds(20, 300, 760, 300);
 
         state_tree_model.addTreeModelListener(new TreeModelListener() {
             @Override
