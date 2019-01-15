@@ -21,6 +21,7 @@
 #define FIRE_CURRENT_RESOLVER(r)
 #define FIRE_CAUSAL_LINK_ADDED(f, r)
 #define FIRE_SOLUTION_FOUND()
+#define FIRE_STATE_CHANGED()
 #endif
 
 namespace ratio
