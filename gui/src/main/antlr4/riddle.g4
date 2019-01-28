@@ -1,298 +1,238 @@
 grammar riddle;
 
-compilation_unit
-    :   (type_declaration | method_declaration | predicate_declaration | statement)* EOF;
-
-type_declaration
-    :   typedef_declaration
-    |   enum_declaration
-    |   class_declaration;
-
-typedef_declaration
-    :   'typedef' primitive_type expr name=ID ';';
-
-enum_declaration
-    :   'enum' name=ID enum_constants ('|' enum_constants)* ';';
-
-enum_constants
-    :   '{' StringLiteral (',' StringLiteral)* '}'
-    |   type;
-
-class_declaration
-    :   'class' name=ID (':' type_list)? '{' member* '}';
-
-member
-    :   field_declaration
-    |   method_declaration
-    |   constructor_declaration
-    |   predicate_declaration
-    |   type_declaration;
-
-field_declaration
-    :   type variable_dec (',' variable_dec)* ';';
-
-variable_dec
-    :   name=ID ('=' expr)?;
-
-method_declaration
-    :   'void' name=ID '(' typed_list? ')' '{' block '}'                #void_method_declaration
-    |   type name=ID '(' typed_list? ')' '{' block '}'                  #type_method_declaration;
-
-constructor_declaration
-    :   name=ID '(' typed_list? ')' (':' initializer_element (',' initializer_element)*)? '{' block '}';
-
-initializer_element
-    :   name=ID '(' expr_list? ')';
-
-predicate_declaration
-    :   'predicate' name=ID '(' typed_list? ')' (':' predicate_list)? '{' block '}';
-
-statement
-    :   assignment_statement
-    |   local_variable_statement
-    |   expression_statement
-    |   disjunction_statement
-    |   formula_statement
-    |   return_statement
-    |   '{' block '}';
-
-block
-    :   statement*;
-
-assignment_statement
-    :   (object=qualified_id '.')? field=ID '=' value=expr ';';
-
-local_variable_statement
-    :   type variable_dec (',' variable_dec)* ';';
-
-expression_statement
-    :   expr ';';
-
-disjunction_statement
-    :	conjunction ('or' conjunction)+;
-
-conjunction
-    :   '{' block '}' ('[' cost=expr ']')?;
-
-formula_statement
-    :   (goal='goal' | fact='fact') name=ID '=' 'new' (object=qualified_id '.')? predicate=ID '(' assignment_list? ')' ';';
+compilation_unit: (
+		type_declaration
+		| method_declaration
+		| predicate_declaration
+		| statement
+	)* EOF;
+
+type_declaration:
+	typedef_declaration
+	| enum_declaration
+	| class_declaration;
+
+typedef_declaration:
+	'typedef' primitive_type expr name = ID ';';
+
+enum_declaration:
+	'enum' name = ID enum_constants ('|' enum_constants)* ';';
+
+enum_constants:
+	'{' StringLiteral (',' StringLiteral)* '}'
+	| type;
+
+class_declaration:
+	'class' name = ID (':' type_list)? '{' member* '}';
+
+member:
+	field_declaration
+	| method_declaration
+	| constructor_declaration
+	| predicate_declaration
+	| type_declaration;
 
-return_statement
-    :   'return' expr ';';
+field_declaration: type variable_dec (',' variable_dec)* ';';
 
-assignment_list
-    :   assignment (',' assignment)*;
+variable_dec: name = ID ('=' expr)?;
 
-assignment
-    :   field=ID ':' value=expr;
+method_declaration:
+	'void' name = ID '(' typed_list? ')' '{' block '}'	# void_method_declaration
+	| type name = ID '(' typed_list? ')' '{' block '}'	# type_method_declaration;
 
-expr
-    :   literal                                                         # literal_expression
-    |   '(' expr ')'                                                    # parentheses_expression
-    |   expr ('*' expr)+                                                # multiplication_expression
-    |   expr '/' expr                                                   # division_expression
-    |   expr ('+' expr)+                                                # addition_expression
-    |   expr ('-' expr)+                                                # subtraction_expression
-    |   '+' expr                                                        # plus_expression
-    |   '-' expr                                                        # minus_expression
-    |   '!' expr                                                        # not_expression
-    |   qualified_id                                                    # qualified_id_expression
-    |   (object=qualified_id '.')? function_name=ID '(' expr_list? ')'  # function_expression
-    |   '(' type ')' expr                                               # cast_expression
-    |   '[' min=expr ',' max=expr ']'                                   # range_expression
-    |   'new' type '(' expr_list? ')'                                   # constructor_expression
-    |   expr '==' expr                                                  # eq_expression
-    |   expr '>=' expr                                                  # geq_expression
-    |   expr '<=' expr                                                  # leq_expression
-    |   expr '>' expr                                                   # gt_expression
-    |   expr '<' expr                                                   # lt_expression
-    |   expr '!=' expr                                                  # neq_expression
-    |   expr '->' expr                                                  # implication_expression
-    |   expr ('|' expr)+                                                # disjunction_expression
-    |   expr ('&' expr)+                                                # conjunction_expression
-    |   expr ('^' expr)+                                                # extc_one_expression;
+constructor_declaration:
+	name = ID '(' typed_list? ')' (
+		':' initializer_element (',' initializer_element)*
+	)? '{' block '}';
 
-expr_list
-    :   expr (',' expr)*;
+initializer_element: name = ID '(' expr_list? ')';
 
-literal
-    :   numeric=NumericLiteral
-    |   string=StringLiteral
-    |   t='true'
-    |   f='false';
+predicate_declaration:
+	'predicate' name = ID '(' typed_list? ')' (
+		':' predicate_list
+	)? '{' block '}';
 
-qualified_id
-    :   (t='this' | ID) ('.' ID)*;
+statement:
+	assignment_statement
+	| local_variable_statement
+	| expression_statement
+	| disjunction_statement
+	| formula_statement
+	| return_statement
+	| '{' block '}';
 
-type
-    :	class_type
-    |   primitive_type;
+block: statement*;
 
-class_type
-    :   ID ('.' ID)*;
+assignment_statement: (object = qualified_id '.')? field = ID '=' value = expr ';';
 
-primitive_type
-    :   'real'
-    |   'bool'
-    |   'string';
+local_variable_statement:
+	type variable_dec (',' variable_dec)* ';';
 
-type_list
-    :   type (',' type)*;
+expression_statement: expr ';';
 
-typed_list
-    :   type ID (',' type ID)*;
+disjunction_statement: conjunction ('or' conjunction)+;
 
-qualified_predicate
-    :   (class_type '.')? ID;
+conjunction: '{' block '}' ('[' cost = expr ']')?;
 
-predicate_list
-    :   qualified_predicate (',' qualified_predicate)*;
+formula_statement: (goal = 'goal' | fact = 'fact') name = ID '=' 'new' (
+		object = qualified_id '.'
+	)? predicate = ID '(' assignment_list? ')' ';';
 
-TYPE_DEF
-    :   'typedef';
+return_statement: 'return' expr ';';
 
-REAL
-    :	'real';
+assignment_list: assignment (',' assignment)*;
 
-BOOL
-    :	'bool';
+assignment: field = ID ':' value = expr;
 
-STRING
-    :	'string';
+expr:
+	literal																	# literal_expression
+	| '(' expr ')'															# parentheses_expression
+	| expr ('*' expr)+														# multiplication_expression
+	| expr '/' expr															# division_expression
+	| expr ('+' expr)+														# addition_expression
+	| expr ('-' expr)+														# subtraction_expression
+	| '+' expr																# plus_expression
+	| '-' expr																# minus_expression
+	| '!' expr																# not_expression
+	| qualified_id															# qualified_id_expression
+	| (object = qualified_id '.')? function_name = ID '(' expr_list? ')'	# function_expression
+	| '(' type ')' expr														# cast_expression
+	| '[' min = expr ',' max = expr ']'										# range_expression
+	| 'new' type '(' expr_list? ')'											# constructor_expression
+	| expr '==' expr														# eq_expression
+	| expr '>=' expr														# geq_expression
+	| expr '<=' expr														# leq_expression
+	| expr '>' expr															# gt_expression
+	| expr '<' expr															# lt_expression
+	| expr '!=' expr														# neq_expression
+	| expr '->' expr														# implication_expression
+	| expr ('|' expr)+														# disjunction_expression
+	| expr ('&' expr)+														# conjunction_expression
+	| expr ('^' expr)+														# extc_one_expression;
 
-ENUM
-    :   'enum';
+expr_list: expr (',' expr)*;
 
-CLASS
-    :   'class';
+literal:
+	numeric = NumericLiteral
+	| string = StringLiteral
+	| t = 'true'
+	| f = 'false';
 
-GOAL
-    :   'goal';
+qualified_id: (t = 'this' | ID) ('.' ID)*;
 
-FACT
-    :   'fact';
+type: class_type | primitive_type;
 
-PREDICATE
-    :   'predicate';
+class_type: ID ('.' ID)*;
 
-NEW
-    :	'new';
+primitive_type: 'real' | 'bool' | 'string';
 
-OR
-    :   'or';
+type_list: type (',' type)*;
 
-THIS
-    :	'this';
+typed_list: type ID (',' type ID)*;
 
-VOID
-    :   'void';
+qualified_predicate: (class_type '.')? ID;
 
-TRUE
-    :   'true';
+predicate_list: qualified_predicate (',' qualified_predicate)*;
 
-FALSE
-    :   'false';
+TYPE_DEF: 'typedef';
 
-RETURN
-    :   'return';
+REAL: 'real';
 
-DOT
-    :	'.';
+BOOL: 'bool';
 
-COMMA
-    :	',';
+STRING: 'string';
 
-COLON
-    :	':';
+ENUM: 'enum';
 
-SEMICOLON
-    :	';';
+CLASS: 'class';
 
-LPAREN
-    :	'(';
+GOAL: 'goal';
 
-RPAREN
-    :	')';
+FACT: 'fact';
 
-LBRACKET
-    :	'[';
+PREDICATE: 'predicate';
 
-RBRACKET
-    :	']';
+NEW: 'new';
 
-LBRACE
-    :	'{';
+OR: 'or';
 
-RBRACE
-    :	'}';
+THIS: 'this';
 
-PLUS
-    :	'+';
+VOID: 'void';
 
-MINUS
-    :	'-';
+TRUE: 'true';
 
-STAR
-    :	'*';
+FALSE: 'false';
 
-SLASH
-    :	'/';
+RETURN: 'return';
 
-AMP
-    :   '&';
+DOT: '.';
 
-BAR
-    :   '|';
+COMMA: ',';
 
-EQUAL
-    :   '=';
+COLON: ':';
 
-GT
-    :   '>';
+SEMICOLON: ';';
 
-LT
-    :   '<';
+LPAREN: '(';
 
-BANG
-    :   '!';
+RPAREN: ')';
 
-EQEQ
-    :   '==';
+LBRACKET: '[';
 
-LTEQ
-    :   '<=';
+RBRACKET: ']';
 
-GTEQ
-    :   '>=';
+LBRACE: '{';
 
-BANGEQ
-    :   '!=';
+RBRACE: '}';
 
-IMPLICATION
-    :   '->';
+PLUS: '+';
 
-CARET
-    :   '^';
+MINUS: '-';
 
-ID
-    :    ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
+STAR: '*';
 
-NumericLiteral
-    :   [0-9]+ ('.' [0-9]+)?
-    |   '.' [0-9]+;
+SLASH: '/';
 
-StringLiteral
-    :   '"' (ESC|.)*? '"' ;
+AMP: '&';
 
-fragment
-ESC
-    : '\\"' | '\\\\' ;
+BAR: '|';
 
-LINE_COMMENT
-    : '//' .*? '\r'? '\n' -> skip ;
+EQUAL: '=';
 
-COMMENT
-    : '/*' .*? '*/' -> skip ;
+GT: '>';
 
-WS
-    :  [ \r\t\u000C\n]+ -> skip;
+LT: '<';
+
+BANG: '!';
+
+EQEQ: '==';
+
+LTEQ: '<=';
+
+GTEQ: '>=';
+
+BANGEQ: '!=';
+
+IMPLICATION: '->';
+
+CARET: '^';
+
+ID: ('a' ..'z' | 'A' ..'Z' | '_') (
+		'a' ..'z'
+		| 'A' ..'Z'
+		| '0' ..'9'
+		| '_'
+	)*;
+
+NumericLiteral: [0-9]+ ('.' [0-9]+)? | '.' [0-9]+;
+
+StringLiteral: '"' (ESC | .)*? '"';
+
+fragment ESC: '\\"' | '\\\\';
+
+LINE_COMMENT: '//' .*? '\r'? '\n' -> skip;
+
+COMMENT: '/*' .*? '*/' -> skip;
+
+WS: [ \r\t\u000C\n]+ -> skip;

@@ -1,6 +1,8 @@
 .vscode
 /build
 /gui/.settings
+/gui/src/main/antlr4/.antlr
 /gui/target/
 /gui/.classpath
+/gui/dependency-reduced-pom.xml
 /gui/.project
