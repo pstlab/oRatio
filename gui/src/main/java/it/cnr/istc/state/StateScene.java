@@ -136,7 +136,10 @@ public class StateScene extends Scene implements StateListener {
             };
             return cell;
         });
+        ((TreeView<StateNode>) getRoot()).setShowRoot(false);
         root.setExpanded(true);
+
+        stateChanged(core);
     }
 
     @Override

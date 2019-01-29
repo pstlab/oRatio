@@ -18,14 +18,20 @@ import it.cnr.istc.graph.CurrentResolver;
 import it.cnr.istc.graph.FlawCreated;
 import it.cnr.istc.graph.FlawStateChanged;
 import it.cnr.istc.graph.GraphListener;
+import it.cnr.istc.graph.GraphScene;
 import it.cnr.istc.graph.ResolverCostChanged;
 import it.cnr.istc.graph.ResolverCreated;
 import it.cnr.istc.graph.ResolverStateChanged;
 import it.cnr.istc.riddle.Core;
 import it.cnr.istc.riddle.CoreDeserializer;
 import it.cnr.istc.state.StateListener;
+import it.cnr.istc.state.StateScene;
+import it.cnr.istc.timelines.TimelinesListener;
+import it.cnr.istc.timelines.TimelinesScene;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  * Context
@@ -62,6 +68,36 @@ public class Context {
         return service;
     }
 
+    public void showState() {
+        Stage stage = new Stage();
+        stage.setTitle("State");
+        StateScene state_scene = new StateScene(service.getCore());
+        service.addStateListener(state_scene);
+        stage.setScene(state_scene);
+        stage.setOnCloseRequest((WindowEvent event) -> service.removeStateListener(state_scene));
+        stage.show();
+    }
+
+    public void showTimelines() {
+        Stage stage = new Stage();
+        stage.setTitle("Timelines");
+        TimelinesScene timelines_scene = new TimelinesScene(service.getCore());
+        service.addTimelinesListener(timelines_scene);
+        stage.setScene(timelines_scene);
+        stage.setOnCloseRequest((WindowEvent event) -> service.removeTimelinesListener(timelines_scene));
+        stage.show();
+    }
+
+    public void showCausalGraph() {
+        Stage stage = new Stage();
+        stage.setTitle("Causal graph");
+        GraphScene graph_scene = new GraphScene(service.getCore());
+        service.addGraphListener(graph_scene);
+        stage.setScene(graph_scene);
+        stage.setOnCloseRequest((WindowEvent event) -> service.removeGraphListener(graph_scene));
+        stage.show();
+    }
+
     public static class ServerService extends Service<Boolean> {
 
         private final Core core = new Core();
@@ -69,6 +105,7 @@ public class Context {
         private final Gson gson;
         private final Collection<GraphListener> graph_listeners = new ArrayList<>();
         private final Collection<StateListener> state_listeners = new ArrayList<>();
+        private final Collection<TimelinesListener> timelines_listeners = new ArrayList<>();
 
         private ServerService() {
             final GsonBuilder builder = new GsonBuilder();
@@ -97,6 +134,14 @@ public class Context {
 
         public void removeStateListener(StateListener l) {
             state_listeners.remove(l);
+        }
+
+        public void addTimelinesListener(TimelinesListener l) {
+            timelines_listeners.add(l);
+        }
+
+        public void removeTimelinesListener(TimelinesListener l) {
+            timelines_listeners.remove(l);
         }
 
         @Override
@@ -156,6 +201,10 @@ public class Context {
                             } else if (inputLine.startsWith(STATE_CHANGED)) {
                                 deserializer.setCore(core);
                                 gson.fromJson(inputLine.substring(STATE_CHANGED.length()), Core.class);
+                                for (StateListener l : state_listeners)
+                                    l.stateChanged(core);
+                                for (TimelinesListener l : timelines_listeners)
+                                    l.timelinesChanged(core);
                             }
                         }
                     } catch (Exception ex) {

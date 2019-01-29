@@ -44,6 +44,7 @@ public class TimelinesScene extends Scene implements TimelinesListener {
         } catch (ClassNotFoundException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }
+        timelinesChanged(core);
     }
 
     @Override

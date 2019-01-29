@@ -189,7 +189,7 @@ public class StateVariableVisualizer implements TimelineVisualizer {
         }
     }
 
-    @SuppressWarnings({ "serial", "CloneableImplementsClone" })
+    @SuppressWarnings("serial")
     private static class SVValueXYIntervalSeries extends XYIntervalSeries {
 
         private SVValueXYIntervalSeries(Comparable<?> key) {
@@ -201,7 +201,7 @@ public class StateVariableVisualizer implements TimelineVisualizer {
         }
     }
 
-    @SuppressWarnings({ "serial", "CloneableImplementsClone" })
+    @SuppressWarnings("serial")
     private static class SVValueXYIntervalDataItem extends XYIntervalDataItem {
 
         private final SVValue value;

@@ -221,7 +221,9 @@ public class GraphScene extends Scene implements GraphListener {
             }
         });
 
-        // set things running
+        // TODO: create nodes and edges according to the current core..
+
+        // set things running..
         vis.run("layout");
 
         ((SwingNode) getRoot().getChildrenUnmodifiable().get(0)).setContent(display);
