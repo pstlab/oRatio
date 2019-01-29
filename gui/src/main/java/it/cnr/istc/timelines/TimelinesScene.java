@@ -5,7 +5,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Level;
@@ -55,7 +54,7 @@ public class TimelinesScene extends Scene implements TimelinesListener {
 
         Map<Item, Collection<Atom>> atoms = new IdentityHashMap<>();
         for (Type t : core.getTypes().values()) {
-            if (isTimeline(t)) {
+            if (getTimeline(t) != null) {
                 t.getInstances().forEach(i -> atoms.put(i, new ArrayList<>()));
                 for (Predicate p : t.getPredicates().values()) {
                     p.getInstances().stream().map(atm -> (Atom) atm)
@@ -74,9 +73,10 @@ public class TimelinesScene extends Scene implements TimelinesListener {
         }
 
         for (Map.Entry<String, Item> entry : core.getExprs().entrySet()) {
-            if (isTimeline(entry.getValue().getType())) {
-                combined_plot.add(timeline_visualizers.get(entry.getValue().getType()).getPlot(entry.getValue(),
-                        atoms.get(entry.getValue())));
+            Type timeline = getTimeline(entry.getValue().getType());
+            if (timeline != null) {
+                combined_plot
+                        .add(timeline_visualizers.get(timeline).getPlot(entry.getValue(), atoms.get(entry.getValue())));
             }
         }
 
@@ -84,16 +84,15 @@ public class TimelinesScene extends Scene implements TimelinesListener {
                 .setChart(new JFreeChart("", new Font("SansSerif", Font.BOLD, 14), combined_plot, false));
     }
 
-    private boolean isTimeline(Type t) {
+    private Type getTimeline(Type t) {
         Queue<Type> q = new ArrayDeque<>();
         q.add(t);
         while (!q.isEmpty()) {
             Type c_type = q.poll();
-            if (timeline_visualizers.containsKey(c_type)) {
-                return true;
-            }
+            if (timeline_visualizers.containsKey(c_type))
+                return c_type;
             q.addAll(c_type.getSuperclasses());
         }
-        return false;
+        return null;
     }
 }
