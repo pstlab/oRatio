@@ -2,9 +2,6 @@ package it.cnr.istc;
 
 import java.io.File;
 
-import it.cnr.istc.graph.GraphScene;
-import it.cnr.istc.state.StateScene;
-import it.cnr.istc.timelines.TimelinesScene;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
