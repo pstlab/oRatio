@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import it.cnr.istc.riddle.Atom;
 import it.cnr.istc.riddle.Core;
 import it.cnr.istc.riddle.Item;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Tooltip;
@@ -22,26 +23,19 @@ import javafx.scene.image.ImageView;
  */
 public class StateScene extends Scene implements StateListener {
 
-    private static final ImageView CORE_ICON = new ImageView(
-            new Image(StateScene.class.getResourceAsStream("/oRatio16.png")));
-    private static final ImageView ACTIVE_FORMULA_ICON = new ImageView(
-            new Image(StateScene.class.getResourceAsStream("/formula.png")));
-    private static final ImageView INACTIVE_FORMULA_ICON = new ImageView(
-            new Image(StateScene.class.getResourceAsStream("/inactive_formula.png")));
-    private static final ImageView UNIFIED_FORMULA_ICON = new ImageView(
-            new Image(StateScene.class.getResourceAsStream("/unified_formula.png")));
-    private static final ImageView BOOL_ICON = new ImageView(
-            new Image(StateScene.class.getResourceAsStream("/bool.png")));
-    private static final ImageView ARITH_ICON = new ImageView(
-            new Image(StateScene.class.getResourceAsStream("/number.png")));
-    private static final ImageView STRING_ICON = new ImageView(
-            new Image(StateScene.class.getResourceAsStream("/string.png")));
-    private static final ImageView ENUM_ICON = new ImageView(
-            new Image(StateScene.class.getResourceAsStream("/enum.png")));
-    private static final ImageView ITEM_ICON = new ImageView(
-            new Image(StateScene.class.getResourceAsStream("/object.png")));
+    private static final Image CORE_ICON = new Image(StateScene.class.getResourceAsStream("/oRatio16.png"));
+    private static final Image ACTIVE_FORMULA_ICON = new Image(StateScene.class.getResourceAsStream("/formula.png"));
+    private static final Image INACTIVE_FORMULA_ICON = new Image(
+            StateScene.class.getResourceAsStream("/inactive_formula.png"));
+    private static final Image UNIFIED_FORMULA_ICON = new Image(
+            StateScene.class.getResourceAsStream("/unified_formula.png"));
+    private static final Image BOOL_ICON = new Image(StateScene.class.getResourceAsStream("/bool.png"));
+    private static final Image ARITH_ICON = new Image(StateScene.class.getResourceAsStream("/number.png"));
+    private static final Image STRING_ICON = new Image(StateScene.class.getResourceAsStream("/string.png"));
+    private static final Image ENUM_ICON = new Image(StateScene.class.getResourceAsStream("/enum.png"));
+    private static final Image ITEM_ICON = new Image(StateScene.class.getResourceAsStream("/object.png"));
     private final Core core;
-    private final TreeItem<StateNode> root = new TreeItem<StateNode>(null, CORE_ICON);
+    private final TreeItem<StateNode> root = new TreeItem<>(null, new ImageView(CORE_ICON));
 
     @SuppressWarnings("unchecked")
     public StateScene(final Core core) {
@@ -57,22 +51,23 @@ public class StateScene extends Scene implements StateListener {
                     super.updateItem(item, empty);
                     if (empty) {
                         setText(null);
+                        setGraphic(null);
                         setTooltip(null);
                     } else if (getTreeItem() == root) {
                         setText("Core");
-                        setGraphic(CORE_ICON);
+                        setGraphic(new ImageView(CORE_ICON));
                         setTooltip(null);
                     } else if (item.item instanceof Atom) {
                         setText(item.name);
                         switch (((Atom) item.item).getState()) {
                         case Active:
-                            setGraphic(ACTIVE_FORMULA_ICON);
+                            setGraphic(new ImageView(ACTIVE_FORMULA_ICON));
                             break;
                         case Inactive:
-                            setGraphic(INACTIVE_FORMULA_ICON);
+                            setGraphic(new ImageView(INACTIVE_FORMULA_ICON));
                             break;
                         case Unified:
-                            setGraphic(UNIFIED_FORMULA_ICON);
+                            setGraphic(new ImageView(UNIFIED_FORMULA_ICON));
                             break;
                         default:
                             throw new AssertionError(((Atom) item.item).getState().name());
@@ -105,31 +100,32 @@ public class StateScene extends Scene implements StateListener {
                     } else {
                         switch (item.item.getType().getName()) {
                         case Core.BOOL:
-                            setGraphic(BOOL_ICON);
                             setText(item.name + " = " + ((Item.BoolItem) item.item).getValue());
                             tooltip.setText(((Item.BoolItem) item.item).getLit());
+                            setGraphic(new ImageView(BOOL_ICON));
                             setTooltip(tooltip);
                             break;
                         case Core.INT:
                         case Core.REAL:
-                            setGraphic(ARITH_ICON);
                             setText(item.name + " = " + ((Item.ArithItem) item.item).getValue());
+                            setGraphic(new ImageView(ARITH_ICON));
                             tooltip.setText(((Item.ArithItem) item.item).getLin() + " = ["
                                     + ((Item.ArithItem) item.item).getLb() + ", " + ((Item.ArithItem) item.item).getUb()
                                     + "]");
                             setTooltip(tooltip);
                             break;
                         case Core.STRING:
-                            setGraphic(STRING_ICON);
                             setText(item.name + " = " + ((Item.StringItem) item.item).getValue());
+                            setGraphic(new ImageView(STRING_ICON));
+                            setTooltip(null);
                             break;
                         default:
                             setText(item.name);
-                            if (item.item instanceof Item.EnumItem) {
-                                setGraphic(ENUM_ICON);
-                            } else {
-                                setGraphic(ITEM_ICON);
-                            }
+                            if (item.item instanceof Item.EnumItem)
+                                setGraphic(new ImageView(ENUM_ICON));
+                            else
+                                setGraphic(new ImageView(ITEM_ICON));
+                            setTooltip(null);
                         }
                     }
                 }
@@ -145,10 +141,12 @@ public class StateScene extends Scene implements StateListener {
     @Override
     public void stateChanged(Core core) {
         // TODO: update nodes instead of replacing..
-        root.getChildren()
-                .setAll(core.getExprs().entrySet().stream()
-                        .map(xpr -> new StateTreeItem(new StateNode(xpr.getKey(), xpr.getValue())))
-                        .collect(Collectors.toList()));
+        Platform.runLater(() -> {
+            root.getChildren()
+                    .setAll(core.getExprs().entrySet().stream()
+                            .map(xpr -> new StateTreeItem(new StateNode(xpr.getKey(), xpr.getValue())))
+                            .collect(Collectors.toList()));
+        });
     }
 
     private static class StateNode {
