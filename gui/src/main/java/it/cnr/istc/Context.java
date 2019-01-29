@@ -23,6 +23,7 @@ import it.cnr.istc.graph.ResolverCreated;
 import it.cnr.istc.graph.ResolverStateChanged;
 import it.cnr.istc.riddle.Core;
 import it.cnr.istc.riddle.CoreDeserializer;
+import it.cnr.istc.state.StateListener;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
@@ -67,6 +68,7 @@ public class Context {
         private final CoreDeserializer deserializer = new CoreDeserializer();
         private final Gson gson;
         private final Collection<GraphListener> graph_listeners = new ArrayList<>();
+        private final Collection<StateListener> state_listeners = new ArrayList<>();
 
         private ServerService() {
             final GsonBuilder builder = new GsonBuilder();
@@ -83,6 +85,18 @@ public class Context {
 
         public void addGraphListener(GraphListener l) {
             graph_listeners.add(l);
+        }
+
+        public void removeGraphListener(GraphListener l) {
+            graph_listeners.remove(l);
+        }
+
+        public void addStateListener(StateListener l) {
+            state_listeners.add(l);
+        }
+
+        public void removeStateListener(StateListener l) {
+            state_listeners.remove(l);
         }
 
         @Override

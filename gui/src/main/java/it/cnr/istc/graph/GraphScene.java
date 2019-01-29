@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import it.cnr.istc.riddle.Core;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -66,6 +67,7 @@ public class GraphScene extends Scene implements GraphListener {
         DECORATOR_SCHEMA.setDefault(VisualItem.TEXTCOLOR, ColorLib.gray(128));
         DECORATOR_SCHEMA.setDefault(VisualItem.FONT, FontLib.getFont("Tahoma", 7));
     }
+    private final Core core;
     private final Visualization vis = new Visualization();
     private final Graph g = new Graph(true);
     private final VisualGraph vg = vis.addGraph(GRAPH, g);
@@ -77,8 +79,9 @@ public class GraphScene extends Scene implements GraphListener {
     private String current_flaw;
     private String current_resolver;
 
-    public GraphScene() {
+    public GraphScene(final Core core) {
         super(new StackPane(new SwingNode()));
+        this.core = core;
 
         Logger.getLogger("prefuse").setLevel(Level.OFF);
 

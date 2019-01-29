@@ -11,12 +11,14 @@ import javafx.scene.control.TreeView;
  */
 public class StateScene extends Scene implements StateListener {
 
+    private final Core core;
     private final TreeView<String> tree;
     private final StateNode rootItem = new StateNode("Core", null);
 
     @SuppressWarnings("unchecked")
-    public StateScene() {
+    public StateScene(final Core core) {
         super(new TreeView<String>());
+        this.core = core;
         tree = (TreeView<String>) getRoot();
         tree.setRoot(rootItem);
         rootItem.setExpanded(true);

@@ -6,6 +6,6 @@ package it.cnr.istc;
 public class Launcher {
 
     public static void main(String[] args) {
-        App.main(args);
+        App.launch(args);
     }
 }
