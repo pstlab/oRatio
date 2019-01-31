@@ -66,18 +66,31 @@ public class Core implements Scope {
         types.put(REAL, new Type(this, this, REAL));
         types.put(STRING, new Type(this, this, STRING));
 
-        predicates.put("ImpulsivePredicate", new Predicate(this, this, "ImpulsivePredicate", new Field(types.get(REAL), "at")));
-        predicates.put("IntervalPredicate", new Predicate(this, this, "IntervalPredicate", new Field(types.get(REAL), "start"), new Field(types.get(REAL), "end"), new Field(types.get(REAL), "duration")));
+        predicates.put("ImpulsivePredicate",
+                new Predicate(this, this, "ImpulsivePredicate", new Field(types.get(REAL), "at")));
+        predicates.put("IntervalPredicate",
+                new Predicate(this, this, "IntervalPredicate", new Field(types.get(REAL), "start"),
+                        new Field(types.get(REAL), "end"), new Field(types.get(REAL), "duration")));
 
         // we add some complex types..
         Type sv = new Type(this, this, "StateVariable");
         types.put(sv.name, sv);
 
         Type rr = new Type(this, this, "ReusableResource");
-        Predicate rr_use = new Predicate(this, this, "Use", new Field(types.get(REAL), "amount"));
+        Predicate rr_use = new Predicate(this, rr, "Use", new Field(types.get(REAL), "amount"));
         rr_use.superclasses.add(predicates.get("IntervalPredicate"));
         rr.predicates.put(rr_use.name, rr_use);
         types.put(rr.name, rr);
+
+        Type ps = new Type(this, this, "PropositionalState");
+        Predicate ps_use = new Predicate(this, ps, "PropositionalStatePredicate",
+                new Field(types.get(BOOL), "polarity"));
+        ps_use.superclasses.add(predicates.get("IntervalPredicate"));
+        ps.predicates.put(ps_use.name, ps_use);
+        types.put(ps.name, ps);
+
+        Type pa = new Type(this, this, "PropositionalAgent");
+        types.put(pa.name, pa);
     }
 
     @Override
@@ -93,11 +106,10 @@ public class Core implements Scope {
     @Override
     public Field getField(final String name) throws NoSuchFieldException {
         Field field = fields.get(name);
-        if (field != null) {
+        if (field != null)
             return field;
-        } else {
+        else
             throw new NoSuchFieldException(name);
-        }
     }
 
     @Override
@@ -108,22 +120,18 @@ public class Core implements Scope {
     @Override
     public Method getMethod(final String name, final Type... parameterTypes) throws NoSuchMethodException {
         boolean is_correct;
-        if (methods.containsKey(name)) {
-            for (Method m : methods.get(name)) {
+        if (methods.containsKey(name))
+            for (Method m : methods.get(name))
                 if (m.pars.length == parameterTypes.length) {
                     is_correct = true;
-                    for (int i = 0; i < m.pars.length; i++) {
+                    for (int i = 0; i < m.pars.length; i++)
                         if (!m.pars[i].type.isAssignableFrom(parameterTypes[i])) {
                             is_correct = false;
                             break;
                         }
-                    }
-                    if (is_correct) {
+                    if (is_correct)
                         return m;
-                    }
                 }
-            }
-        }
 
         // not found
         throw new NoSuchMethodException(name);
@@ -132,25 +140,21 @@ public class Core implements Scope {
     @Override
     public Collection<Method> getMethods() {
         Collection<Method> c_methods = new ArrayList<>(methods.size());
-        methods.values().forEach((ms) -> {
-            c_methods.addAll(ms);
-        });
+        methods.values().forEach(ms -> c_methods.addAll(ms));
         return Collections.unmodifiableCollection(c_methods);
     }
 
     void defineMethod(final Method method) {
-        if (!methods.containsKey(method.name)) {
+        if (!methods.containsKey(method.name))
             methods.put(method.name, new ArrayList<>());
-        }
         methods.get(method.name).add(method);
     }
 
     @Override
     public Type getType(String name) throws ClassNotFoundException {
         Type type = types.get(name);
-        if (type != null) {
+        if (type != null)
             return type;
-        }
 
         // not found
         throw new ClassNotFoundException(name);
@@ -192,16 +196,14 @@ public class Core implements Scope {
 
     public void read(final File... files) throws IOException {
         List<File> fs = new ArrayList<>(files.length);
-        for (File file : files) {
+        for (File file : files)
             fs.addAll(Files.walk(Paths.get(file.toURI())).filter(Files::isRegularFile).map(path -> path.toFile())
                     .collect(Collectors.toList()));
-        }
 
         Collection<CodeSnippet> snippets = new ArrayList<>(fs.size());
-        for (File f : fs) {
+        for (File f : fs)
             snippets.add(new CodeSnippet(f,
                     new riddleParser(new CommonTokenStream(new riddleLexer(CharStreams.fromPath(f.toPath()))))));
-        }
         for (CodeSnippet snippet : snippets) {
             ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this, snippet.parser), snippet.cu);
             ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this, snippet.parser), snippet.cu);

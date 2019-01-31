@@ -16,7 +16,7 @@
  */
 package it.cnr.istc.riddle;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
+import it.cnr.istc.riddle.riddleParser.Predicate_declarationContext;
 
 /**
  *
@@ -36,7 +36,8 @@ class TypeDeclarationListener extends riddleBaseListener {
 
     @Override
     public void enterTypedef_declaration(riddleParser.Typedef_declarationContext ctx) {
-        defineType(new Typedef(core, scope, new TypeVisitor(core, parser).visit(ctx.primitive_type()), ctx.name.getText()));
+        defineType(new Typedef(core, scope, new TypeVisitor(core, parser).visit(ctx.primitive_type()),
+                ctx.name.getText()));
     }
 
     @Override
@@ -45,7 +46,8 @@ class TypeDeclarationListener extends riddleBaseListener {
         EnumType c_type = new EnumType(core, scope, ctx.name.getText());
         core.scopes.put(ctx, c_type);
         // We add the enum values..
-        ctx.enum_constants().forEach(enum_constant -> enum_constant.StringLiteral().forEach(tn -> c_type.vals.add(tn.getSymbol().getText())));
+        ctx.enum_constants().forEach(enum_constant -> enum_constant.StringLiteral()
+                .forEach(tn -> c_type.vals.add(tn.getSymbol().getText())));
         defineType(c_type);
     }
 
@@ -64,11 +66,10 @@ class TypeDeclarationListener extends riddleBaseListener {
     }
 
     private void defineType(Type type) {
-        if (scope instanceof Core) {
+        if (scope instanceof Core)
             ((Core) scope).types.put(type.name, type);
-        } else if (scope instanceof Type) {
+        else if (scope instanceof Type)
             ((Type) scope).types.put(type.name, type);
-        }
     }
 
     @Override

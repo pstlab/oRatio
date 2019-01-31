@@ -18,7 +18,11 @@ package it.cnr.istc.riddle;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.antlr.v4.runtime.tree.TerminalNode;
+
+import it.cnr.istc.riddle.riddleParser.Predicate_listContext;
+import it.cnr.istc.riddle.riddleParser.Qualified_predicateContext;
 
 /**
  *
@@ -39,27 +43,25 @@ class TypeRefinementListener extends riddleBaseListener {
     @Override
     public void enterEnum_declaration(riddleParser.Enum_declarationContext ctx) {
         EnumType c_type = (EnumType) core.scopes.get(ctx);
-        ctx.enum_constants().stream().filter(enum_constant -> (enum_constant.type() != null)).forEach(enum_constant -> c_type.enums.add((EnumType) new TypeVisitor(core, parser).visit(enum_constant.type())));
+        ctx.enum_constants().stream().filter(enum_constant -> (enum_constant.type() != null))
+                .forEach(enum_constant -> c_type.enums
+                        .add((EnumType) new TypeVisitor(core, parser).visit(enum_constant.type())));
     }
 
     @Override
     public void enterClass_declaration(riddleParser.Class_declarationContext ctx) {
         // we set the type superclasses..
         scope = core.scopes.get(ctx);
-        if (ctx.type_list() != null) {
-            for (riddleParser.TypeContext type : ctx.type_list().type()) {
+        if (ctx.type_list() != null)
+            for (riddleParser.TypeContext type : ctx.type_list().type())
                 ((Type) scope).superclasses.add(new TypeVisitor(core, parser).visit(type));
-            }
-        }
     }
 
     @Override
     public void exitClass_declaration(riddleParser.Class_declarationContext ctx) {
         // if the current type has no constructor..
-        if (((Type) scope).constructors.isEmpty()) {
-            // .. we define a default empty constructor..
+        if (((Type) scope).constructors.isEmpty()) // .. we define a default empty constructor..
             ((Type) scope).constructors.add(new Constructor(core, scope));
-        }
         scope = scope.getScope();
     }
 
@@ -79,12 +81,10 @@ class TypeRefinementListener extends riddleBaseListener {
             List<riddleParser.TypeContext> typed_list = ctx.typed_list().type();
             List<TerminalNode> ids = ctx.typed_list().ID();
             parameters = new Field[typed_list.size()];
-            for (int i = 0; i < typed_list.size(); i++) {
+            for (int i = 0; i < typed_list.size(); i++)
                 parameters[i] = new Field(new TypeVisitor(core, parser).visit(typed_list.get(i)), ids.get(i).getText());
-            }
-        } else {
+        } else
             parameters = new Field[0];
-        }
 
         Constructor constructor = new Constructor(core, scope, parameters);
 
@@ -108,12 +108,10 @@ class TypeRefinementListener extends riddleBaseListener {
             List<riddleParser.TypeContext> typed_list = ctx.typed_list().type();
             List<TerminalNode> ids = ctx.typed_list().ID();
             parameters = new Field[typed_list.size()];
-            for (int i = 0; i < typed_list.size(); i++) {
+            for (int i = 0; i < typed_list.size(); i++)
                 parameters[i] = new Field(new TypeVisitor(core, parser).visit(typed_list.get(i)), ids.get(i).getText());
-            }
-        } else {
+        } else
             parameters = new Field[0];
-        }
         Method method = new Method(core, scope, ctx.name.getText(), null, parameters);
         defineMethod(method);
         core.scopes.put(ctx, method);
@@ -135,13 +133,12 @@ class TypeRefinementListener extends riddleBaseListener {
             List<riddleParser.TypeContext> typed_list = ctx.typed_list().type();
             List<TerminalNode> ids = ctx.typed_list().ID();
             parameters = new Field[typed_list.size()];
-            for (int i = 0; i < typed_list.size(); i++) {
+            for (int i = 0; i < typed_list.size(); i++)
                 parameters[i] = new Field(new TypeVisitor(core, parser).visit(typed_list.get(i)), ids.get(i).getText());
-            }
-        } else {
+        } else
             parameters = new Field[0];
-        }
-        Method method = new Method(core, scope, ctx.name.getText(), new TypeVisitor(core, parser).visit(ctx.type()), parameters);
+        Method method = new Method(core, scope, ctx.name.getText(), new TypeVisitor(core, parser).visit(ctx.type()),
+                parameters);
         defineMethod(method);
         core.scopes.put(ctx, method);
         scope = method;
@@ -162,19 +159,20 @@ class TypeRefinementListener extends riddleBaseListener {
             List<riddleParser.TypeContext> typed_list = ctx.typed_list().type();
             List<TerminalNode> ids = ctx.typed_list().ID();
             parameters = new Field[typed_list.size()];
-            for (int i = 0; i < typed_list.size(); i++) {
+            for (int i = 0; i < typed_list.size(); i++)
                 parameters[i] = new Field(new TypeVisitor(core, parser).visit(typed_list.get(i)), ids.get(i).getText());
-            }
-        } else {
+        } else
             parameters = new Field[0];
-        }
         Predicate predicate = new Predicate(core, scope, ctx.name.getText(), parameters);
-        if (ctx.predicate_list() != null) {
-            ctx.predicate_list().qualified_predicate().forEach(type -> predicate.superclasses.add(new TypeVisitor(core, parser).visit(type)));
-        }
         definePredicate(predicate);
         core.scopes.put(ctx, predicate);
         scope = predicate;
+    }
+
+    @Override
+    public void enterQualified_predicate(Qualified_predicateContext ctx) {
+        core.scopes.put(ctx, scope);
+        ((Predicate) scope).superclasses.add(new TypeVisitor(core, parser).visit(ctx));
     }
 
     @Override
@@ -184,26 +182,23 @@ class TypeRefinementListener extends riddleBaseListener {
     }
 
     private void defineField(Field field) {
-        if (scope instanceof Core) {
+        if (scope instanceof Core)
             ((Core) scope).fields.put(field.name, field);
-        } else if (scope instanceof Type) {
+        else if (scope instanceof Type)
             ((Type) scope).fields.put(field.name, field);
-        }
     }
 
     public void defineMethod(Method method) {
-        if (scope instanceof Core) {
+        if (scope instanceof Core)
             ((Core) scope).methods.putIfAbsent(method.name, new ArrayList<>()).add(method);
-        } else if (scope instanceof Type) {
+        else if (scope instanceof Type)
             ((Type) scope).methods.putIfAbsent(method.name, new ArrayList<>()).add(method);
-        }
     }
 
     public void definePredicate(Predicate predicate) {
-        if (scope instanceof Core) {
+        if (scope instanceof Core)
             ((Core) scope).predicates.put(predicate.name, predicate);
-        } else if (scope instanceof Type) {
+        else if (scope instanceof Type)
             ((Type) scope).predicates.put(predicate.name, predicate);
-        }
     }
 }

@@ -44,32 +44,38 @@ class TypeVisitor extends riddleBaseVisitor<Type> {
     @Override
     public Type visitClass_type(final riddleParser.Class_typeContext ctx) {
         Scope c_scope = core.scopes.get(ctx);
-        for (TerminalNode id : ctx.ID()) {
+        for (TerminalNode id : ctx.ID())
             try {
                 c_scope = c_scope.getType(id.getText());
             } catch (ClassNotFoundException ex) {
             }
-        }
         return (Type) c_scope;
     }
 
     @Override
     public Type visitQualified_id(final riddleParser.Qualified_idContext ctx) {
         Scope c_scope = core.scopes.get(ctx);
-        for (TerminalNode id : ctx.ID()) {
+        for (TerminalNode id : ctx.ID())
             try {
                 c_scope = c_scope.getField(id.getText()).type;
             } catch (NoSuchFieldException ex) {
                 return null;
             }
-        }
         return (Type) c_scope;
     }
 
     @Override
     public Type visitQualified_predicate(riddleParser.Qualified_predicateContext ctx) {
+        Scope c_scope = core.scopes.get(ctx);
+        if (ctx.class_type() != null)
+            for (TerminalNode id : ctx.class_type().ID())
+                try {
+                    c_scope = c_scope.getType(id.getText());
+                } catch (ClassNotFoundException ex) {
+                    return null;
+                }
         try {
-            return new TypeVisitor(core, parser).visit(ctx.class_type()).getPredicate(ctx.ID().getText());
+            return c_scope.getPredicate(ctx.ID().getText());
         } catch (ClassNotFoundException ex) {
             return null;
         }
