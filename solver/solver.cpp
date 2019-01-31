@@ -7,6 +7,8 @@
 #include "smart_type.h"
 #include "state_variable.h"
 #include "reusable_resource.h"
+#include "propositional_state.h"
+#include "propositional_agent.h"
 #include "atom.h"
 #include "combinations.h"
 #ifdef BUILD_GUI
@@ -26,7 +28,10 @@ solver::~solver() {}
 void solver::init()
 {
     read(std::vector<std::string>({"init.rddl"}));
-    new_types({new state_variable(*this), new reusable_resource(*this)});
+    new_types({new state_variable(*this),
+               new reusable_resource(*this),
+               new propositional_state(*this),
+               new propositional_agent(*this)});
 }
 
 void solver::solve()

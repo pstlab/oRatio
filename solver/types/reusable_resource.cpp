@@ -17,7 +17,6 @@ reusable_resource::reusable_resource(solver &slv) : smart_type(slv, slv, REUSABL
     new_constructors({new rr_constructor(*this)});                                    // we add a constructor..
     new_predicates({new use_predicate(*this)}, false);                                // we add the 'Use' predicate, without notifying neither the resource nor its supertypes..
 }
-
 reusable_resource::~reusable_resource() {}
 
 std::vector<flaw *> reusable_resource::get_flaws()
