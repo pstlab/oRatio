@@ -1,0 +1,45 @@
+/**
+* Domain: Blocks
+* Problem: Blocks
+*/
+
+Block a = new Block(1.0);
+Block b = new Block(2.0);
+Block c = new Block(3.0);
+Block d = new Block(4.0);
+Block e = new Block(5.0);
+Block f = new Block(6.0);
+Block g = new Block(7.0);
+Block h = new Block(8.0);
+Block i = new Block(9.0);
+
+BlocksAgent agent = new BlocksAgent();
+
+fact clear_a = new agent.propositional_state.Clear(polarity:true, x:a, start:origin);  clear_a.duration >= 1.0;
+fact clear_b = new agent.propositional_state.Clear(polarity:true, x:b, start:origin);  clear_b.duration >= 1.0;
+fact clear_c = new agent.propositional_state.Clear(polarity:true, x:c, start:origin);  clear_c.duration >= 1.0;
+fact clear_d = new agent.propositional_state.Clear(polarity:true, x:d, start:origin);  clear_d.duration >= 1.0;
+fact clear_e = new agent.propositional_state.Clear(polarity:true, x:e, start:origin);  clear_e.duration >= 1.0;
+fact clear_f = new agent.propositional_state.Clear(polarity:true, x:f, start:origin);  clear_f.duration >= 1.0;
+fact clear_g = new agent.propositional_state.Clear(polarity:true, x:g, start:origin);  clear_g.duration >= 1.0;
+fact clear_h = new agent.propositional_state.Clear(polarity:true, x:h, start:origin);  clear_h.duration >= 1.0;
+fact clear_i = new agent.propositional_state.Clear(polarity:true, x:i, start:origin);  clear_i.duration >= 1.0;
+fact ontable_a = new agent.propositional_state.Ontable(polarity:true, x:a, start:origin);  ontable_a.duration >= 1.0;
+fact ontable_b = new agent.propositional_state.Ontable(polarity:true, x:b, start:origin);  ontable_b.duration >= 1.0;
+fact ontable_c = new agent.propositional_state.Ontable(polarity:true, x:c, start:origin);  ontable_c.duration >= 1.0;
+fact ontable_d = new agent.propositional_state.Ontable(polarity:true, x:d, start:origin);  ontable_d.duration >= 1.0;
+fact ontable_e = new agent.propositional_state.Ontable(polarity:true, x:e, start:origin);  ontable_e.duration >= 1.0;
+fact ontable_f = new agent.propositional_state.Ontable(polarity:true, x:f, start:origin);  ontable_f.duration >= 1.0;
+fact ontable_g = new agent.propositional_state.Ontable(polarity:true, x:g, start:origin);  ontable_g.duration >= 1.0;
+fact ontable_h = new agent.propositional_state.Ontable(polarity:true, x:h, start:origin);  ontable_h.duration >= 1.0;
+fact ontable_i = new agent.propositional_state.Ontable(polarity:true, x:i, start:origin);  ontable_i.duration >= 1.0;
+fact handempty = new agent.propositional_state.Handempty(polarity:true, start:origin);  handempty.duration >= 1.0;
+
+goal on_i_h = new agent.propositional_state.On(polarity:true, x:i, y:h, end:horizon);
+goal on_h_g = new agent.propositional_state.On(polarity:true, x:h, y:g, end:horizon);
+goal on_g_f = new agent.propositional_state.On(polarity:true, x:g, y:f, end:horizon);
+goal on_f_e = new agent.propositional_state.On(polarity:true, x:f, y:e, end:horizon);
+goal on_e_d = new agent.propositional_state.On(polarity:true, x:e, y:d, end:horizon);
+goal on_d_c = new agent.propositional_state.On(polarity:true, x:d, y:c, end:horizon);
+goal on_c_b = new agent.propositional_state.On(polarity:true, x:c, y:b, end:horizon);
+goal on_b_a = new agent.propositional_state.On(polarity:true, x:b, y:a, end:horizon);
