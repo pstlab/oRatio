@@ -65,7 +65,7 @@ private:
   void add_layer();         // adds a layer to the current planning graph..
   void increase_accuracy(); // increases the heuristic accuracy by one..
 
-#ifdef DEFERRABLES
+#ifdef DEFERRABLE_FLAWS
   bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
 #endif
 #ifdef GRAPH_PRUNING
