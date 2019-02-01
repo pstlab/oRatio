@@ -10,7 +10,7 @@ ov_theory::ov_theory(sat_core &sat) : theory(sat) {}
 
 ov_theory::~ov_theory() {}
 
-var ov_theory::new_var(const std::unordered_set<var_value *> &items)
+var ov_theory::new_var(const std::unordered_set<var_value *> &items, const bool enforce_exct_one)
 {
     assert(!items.empty());
     const var id = assigns.size();
@@ -29,8 +29,11 @@ var ov_theory::new_var(const std::unordered_set<var_value *> &items)
             bind(bv);
             is_contained_in[bv].insert(id);
         }
-        bool exct_one = sat.exct_one(lits);
-        assert(exct_one);
+        if (enforce_exct_one)
+        {
+            bool exct_one = sat.exct_one(lits);
+            assert(exct_one);
+        }
     }
     return id;
 }

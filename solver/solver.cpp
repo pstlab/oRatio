@@ -321,8 +321,13 @@ void solver::check_graph()
 
 expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals)
 {
+    assert(allowed_vals.size() > 1);
+    assert(tp.get_name().compare(BOOL_KEYWORD) != 0);
+    assert(tp.get_name().compare(INT_KEYWORD) != 0);
+    assert(tp.get_name().compare(REAL_KEYWORD) != 0);
     // we create a new enum expression..
-    var_expr xp = core::new_enum(tp, allowed_vals);
+    // notice that we do not enforce the exct_one constraint!
+    var_expr xp = new var_item(*this, tp, get_ov_theory().new_var(std::unordered_set<var_value *>(allowed_vals.begin(), allowed_vals.end()), false));
     if (allowed_vals.size() > 1) // we create a new var flaw..
         new_flaw(*new var_flaw(*this, res, *xp));
     return xp;
