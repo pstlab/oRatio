@@ -48,7 +48,7 @@ void solver::solve()
 #ifndef GRAPH_PRUNING
             if (f_next->get_estimated_cost().is_infinite())
             {
-                if (accuracy < MAX_ACCURACY) // we have room for increasing the heuristic accuracy..
+                if (accuracy < max_accuracy) // we have room for increasing the heuristic accuracy..
                 {
                     // we go back to root level..
                     while (!get_sat_core().root_level())
