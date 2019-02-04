@@ -45,6 +45,21 @@ void solver::solve()
 
         if (f_next)
         {
+#ifndef GRAPH_PRUNING
+            if (f_next->get_estimated_cost().is_infinite())
+            {
+                if (accuracy < MAX_ACCURACY) // we have room for increasing the heuristic accuracy..
+                {
+                    // we go back to root level..
+                    while (!get_sat_core().root_level())
+                        get_sat_core().pop();
+                    increase_accuracy(); // .. and increase the heuristic accuracy..
+                }
+                else
+                    add_layer(); // we add a layer to the current graph..
+                continue;
+            }
+#endif
             assert(!f_next->get_estimated_cost().is_infinite());
             LOG("(" << std::to_string(trail.size()) << "): " << f_next->get_label());
             FIRE_CURRENT_FLAW(*f_next);
