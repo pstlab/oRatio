@@ -2,9 +2,7 @@ package it.cnr.istc.graph;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -74,8 +72,6 @@ public class GraphScene extends Scene implements GraphListener {
     private final Display display = new Display(vis);
     private final Map<String, Node> flaws = new HashMap<>();
     private final Map<String, Node> resolvers = new HashMap<>();
-    private final Map<String, String> effects = new HashMap<>();
-    private final Map<String, Collection<String>> flaw_resolvers = new HashMap<>();
     private String current_flaw;
     private String current_resolver;
 
@@ -288,6 +284,15 @@ public class GraphScene extends Scene implements GraphListener {
     }
 
     @Override
+    public void flaw_cost_changed(FlawCostChanged flaw) {
+        synchronized (vis) {
+            assert flaws.containsKey(flaw.flaw) : "the flaw does not exist..";
+            Node flaw_node = flaws.get(flaw.flaw);
+            flaw_node.set(NODE_COST, -(double) flaw.cost.getNumerator() / flaw.cost.getDenominator());
+        }
+    }
+
+    @Override
     public void current_flaw(CurrentFlaw flaw) {
         synchronized (vis) {
             assert flaws.containsKey(flaw.flaw) : "the flaw does not exist..";
@@ -306,10 +311,6 @@ public class GraphScene extends Scene implements GraphListener {
         synchronized (vis) {
             assert !resolvers.containsKey(resolver.resolver) : "the resolver already exists..";
             assert flaws.containsKey(resolver.effect) : "the resolver's solved flaw does not exist..";
-            effects.put(resolver.resolver, resolver.effect);
-            if (!flaw_resolvers.containsKey(resolver.effect))
-                flaw_resolvers.put(resolver.effect, new ArrayList<>());
-            flaw_resolvers.get(resolver.effect).add(resolver.resolver);
             Node resolver_node = g.addNode();
             resolver_node.set(VisualItem.LABEL, resolver.label);
             resolver_node.set(NODE_TYPE, "resolver");
@@ -318,8 +319,6 @@ public class GraphScene extends Scene implements GraphListener {
             resolvers.put(resolver.resolver, resolver_node);
             Edge c_edge = g.addEdge(resolver_node, flaws.get(resolver.effect));
             c_edge.set(EDGE_STATE, resolver.state);
-            flaws.get(resolver.effect).set(NODE_COST, flaw_resolvers.get(resolver.effect).stream()
-                    .mapToDouble(res -> (Double) resolvers.get(res).get(NODE_COST)).max().getAsDouble());
         }
     }
 
@@ -340,11 +339,8 @@ public class GraphScene extends Scene implements GraphListener {
     public void resolver_cost_changed(ResolverCostChanged resolver) {
         synchronized (vis) {
             assert resolvers.containsKey(resolver.resolver) : "the resolver does not exist..";
-            assert flaws.containsKey(effects.get(resolver.resolver)) : "the resolver's effect does not exist..";
             Node resolver_node = resolvers.get(resolver.resolver);
             resolver_node.set(NODE_COST, -(double) resolver.cost.getNumerator() / resolver.cost.getDenominator());
-            flaws.get(effects.get(resolver.resolver)).set(NODE_COST, flaw_resolvers.get(effects.get(resolver.resolver))
-                    .stream().mapToDouble(res -> (Double) resolvers.get(res).get(NODE_COST)).max().getAsDouble());
         }
     }
 
@@ -364,9 +360,6 @@ public class GraphScene extends Scene implements GraphListener {
             assert resolvers.containsKey(causal_link.resolver) : "the resolver does not exist..";
             Edge c_edge = g.addEdge(flaws.get(causal_link.flaw), resolvers.get(causal_link.resolver));
             c_edge.set(EDGE_STATE, resolvers.get(causal_link.resolver).get(NODE_STATE));
-            flaws.get(effects.get(causal_link.resolver)).set(NODE_COST,
-                    flaw_resolvers.get(effects.get(causal_link.resolver)).stream()
-                            .mapToDouble(res -> (Double) resolvers.get(res).get(NODE_COST)).max().getAsDouble());
         }
     }
 }

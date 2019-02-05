@@ -9,6 +9,8 @@ public interface GraphListener {
 
     public void flaw_state_changed(final FlawStateChanged flaw);
 
+    public void flaw_cost_changed(final FlawCostChanged flaw);
+
     public void current_flaw(final CurrentFlaw flaw);
 
     public void resolver_created(final ResolverCreated resolver);
