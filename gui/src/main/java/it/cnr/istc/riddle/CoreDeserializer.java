@@ -54,7 +54,8 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
     }
 
     @Override
-    public Core deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    public Core deserialize(JsonElement json, java.lang.reflect.Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
         final JsonObject object = json.getAsJsonObject();
 
         final Map<String, Item> items = new HashMap<>();
@@ -67,9 +68,8 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
                 JsonObject itm_obj = itm_el.getAsJsonObject();
                 String[] c_type = itm_obj.getAsJsonPrimitive("type").getAsString().split(":");
                 Type t = core.types.get(c_type[0]);
-                for (int i = 1; i < c_type.length; i++) {
+                for (int i = 1; i < c_type.length; i++)
                     t = t.types.get(c_type[i]);
-                }
 
                 final Item item = new Item(core, t);
                 t.instances.add(item);
@@ -91,21 +91,21 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
                 JsonObject atm_obj = atm_el.getAsJsonObject();
                 String[] c_predicate = atm_obj.getAsJsonPrimitive("predicate").getAsString().split(":");
                 Predicate p = null;
-                if (c_predicate.length == 1) {
+                if (c_predicate.length == 1)
                     p = core.predicates.get(c_predicate[0]);
-                } else {
+                else {
                     Type t = core.types.get(c_predicate[0]);
-                    for (int i = 1; i < c_predicate.length - 1; i++) {
+                    for (int i = 1; i < c_predicate.length - 1; i++)
                         t = t.types.get(c_predicate[i]);
-                    }
                     p = t.predicates.get(c_predicate[c_predicate.length - 1]);
                 }
 
                 final Map<String, Item> pars = new HashMap<>();
-                for (JsonElement par_el : atm_obj.getAsJsonArray("pars")) {
-                    JsonObject par_obj = par_el.getAsJsonObject();
-                    pars.put(par_obj.getAsJsonPrimitive("name").getAsString(), toItem(items, atoms, par_obj));
-                }
+                if (atm_obj.has("pars"))
+                    for (JsonElement par_el : atm_obj.getAsJsonArray("pars")) {
+                        JsonObject par_obj = par_el.getAsJsonObject();
+                        pars.put(par_obj.getAsJsonPrimitive("name").getAsString(), toItem(items, atoms, par_obj));
+                    }
                 final Atom atom = new Atom(core, p, Atom.AtomState.valueOf(atm_obj.get("state").getAsString()), pars);
                 p.instances.add(atom);
 
@@ -120,7 +120,7 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
             }
         }
 
-        if (object.has("items")) {
+        if (object.has("items"))
             for (JsonElement itm_el : itms_array) {
                 JsonObject itm_obj = itm_el.getAsJsonObject();
                 if (itm_obj.has("exprs")) {
@@ -131,14 +131,12 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
                     }
                 }
             }
-        }
 
-        if (object.has("exprs")) {
+        if (object.has("exprs"))
             for (JsonElement xpr_el : object.getAsJsonArray("exprs")) {
                 JsonObject xpr_obj = xpr_el.getAsJsonObject();
                 core.exprs.put(xpr_obj.getAsJsonPrimitive("name").getAsString(), toItem(items, atoms, xpr_obj));
             }
-        }
         return core;
     }
 
@@ -147,43 +145,48 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
         if (value.isJsonPrimitive()) {
             String val = value.getAsString();
             Item item = items.get(val);
-            if (item != null) {
+            if (item != null)
                 return item;
-            }
             Atom atom = atoms.get(val);
-            if (atom != null) {
+            if (atom != null)
                 return atom;
-            }
             return new Item.StringItem(core, val);
         } else {
             JsonObject val = value.getAsJsonObject();
             String[] c_type = obj.getAsJsonPrimitive("type").getAsString().split(":");
             Type t = core.types.get(c_type[0]);
-            for (int i = 1; i < c_type.length; i++) {
+            for (int i = 1; i < c_type.length; i++)
                 t = t.types.get(c_type[i]);
-            }
             switch (t.name) {
-                case Core.BOOL:
-                    return new Item.BoolItem(core, val.getAsJsonPrimitive("lit").getAsString(), Item.BoolItem.LBool.valueOf(val.getAsJsonPrimitive("val").getAsString()));
-                case Core.INT:
-                case Core.REAL:
-                    return new Item.ArithItem(core, t, val.getAsJsonPrimitive("lin").getAsString(), val.has("lb") ? toInfRational(val.getAsJsonObject("lb")) : new InfRational(Rational.NEGATIVE_INFINITY), val.has("ub") ? toInfRational(val.getAsJsonObject("ub")) : new InfRational(Rational.POSITIVE_INFINITY), toInfRational(val.getAsJsonObject("val")));
-                default:
-                    JsonArray vals_array = val.getAsJsonArray("vals");
-                    Collection<Item> vals = new ArrayList<>();
-                    for (JsonElement val_el : vals_array) {
-                        vals.add(items.get(val_el.getAsString()));
-                    }
-                    return new Item.EnumItem(core, t, val.getAsJsonPrimitive("var").getAsString(), vals.toArray(new Item[vals.size()]));
+            case Core.BOOL:
+                return new Item.BoolItem(core, val.getAsJsonPrimitive("lit").getAsString(),
+                        Item.BoolItem.LBool.valueOf(val.getAsJsonPrimitive("val").getAsString()));
+            case Core.INT:
+            case Core.REAL:
+                return new Item.ArithItem(core, t, val.getAsJsonPrimitive("lin").getAsString(),
+                        val.has("lb") ? toInfRational(val.getAsJsonObject("lb"))
+                                : new InfRational(Rational.NEGATIVE_INFINITY),
+                        val.has("ub") ? toInfRational(val.getAsJsonObject("ub"))
+                                : new InfRational(Rational.POSITIVE_INFINITY),
+                        toInfRational(val.getAsJsonObject("val")));
+            default:
+                JsonArray vals_array = val.getAsJsonArray("vals");
+                Collection<Item> vals = new ArrayList<>();
+                for (JsonElement val_el : vals_array)
+                    vals.add(items.get(val_el.getAsString()));
+                return new Item.EnumItem(core, t, val.getAsJsonPrimitive("var").getAsString(),
+                        vals.toArray(new Item[vals.size()]));
             }
         }
     }
 
     private InfRational toInfRational(JsonObject obj) {
-        return obj.has("inf") ? new InfRational(toRational(obj), toRational(obj.getAsJsonObject("inf"))) : new InfRational(toRational(obj));
+        return obj.has("inf") ? new InfRational(toRational(obj), toRational(obj.getAsJsonObject("inf")))
+                : new InfRational(toRational(obj));
     }
 
     private Rational toRational(JsonObject obj) {
-        return new Rational(Long.parseLong(obj.getAsJsonPrimitive("num").getAsString()), Long.parseLong(obj.getAsJsonPrimitive("den").getAsString()));
+        return new Rational(Long.parseLong(obj.getAsJsonPrimitive("num").getAsString()),
+                Long.parseLong(obj.getAsJsonPrimitive("den").getAsString()));
     }
 }
