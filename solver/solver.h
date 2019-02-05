@@ -104,10 +104,11 @@ private:
 
     layer(resolver *const r) : r(r) {}
 
-    resolver *const r;                                       // the resolver which introduced the new layer..
-    std::unordered_map<resolver *, smt::rational> old_costs; // the old estimated resolvers' costs..
-    std::unordered_set<flaw *> new_flaws;                    // the just activated flaws..
-    std::unordered_set<flaw *> solved_flaws;                 // the just solved flaws..
+    resolver *const r;                                         // the resolver which introduced the new layer..
+    std::unordered_map<resolver *, smt::rational> old_r_costs; // the old estimated resolvers' costs..
+    std::unordered_map<flaw *, smt::rational> old_f_costs;     // the old estimated flaws' costs..
+    std::unordered_set<flaw *> new_flaws;                      // the just activated flaws..
+    std::unordered_set<flaw *> solved_flaws;                   // the just solved flaws..
   };
   std::vector<layer> trail; // the list of applied resolvers, with the associated changes made, in chronological order..
 #ifdef GRAPH_PRUNING

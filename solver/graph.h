@@ -29,7 +29,7 @@ public:
   std::vector<resolver *> get_supports() const { return supports; }
   bool is_expanded() const { return expanded; }
 
-  smt::rational get_estimated_cost() const;
+  smt::rational get_estimated_cost() const { return est_cost; }
   resolver *get_best_resolver() const;
 
 #ifdef BUILD_GUI
@@ -48,13 +48,14 @@ protected:
   solver &slv; // the solver this flaw belongs to..
 
 private:
-  smt::var phi;                      // the propositional variable indicating whether the flaw is active or not..
-  std::vector<resolver *> resolvers; // the resolvers for this flaw..
-  std::vector<resolver *> causes;    // the causes for having this flaw..
-  std::vector<resolver *> supports;  // the resolvers supported by this flaw..
-  const bool exclusive;              // a boolean indicating whether the flaw is exclusive (i.e. exactly one of its resolver can be applied)..
-  const bool structural;             // a boolean indicating whether the flaw is structural (i.e. it is not an inconsistency raised from types' consistency checking procedures)..
-  bool expanded = false;             // a boolean indicating whether the flaw has been expanded..
+  smt::var phi;                                              // the propositional variable indicating whether the flaw is active or not..
+  smt::rational est_cost = smt::rational::POSITIVE_INFINITY; // the estimated cost of the flaw..
+  std::vector<resolver *> resolvers;                         // the resolvers for this flaw..
+  std::vector<resolver *> causes;                            // the causes for having this flaw..
+  std::vector<resolver *> supports;                          // the resolvers supported by this flaw..
+  const bool exclusive;                                      // a boolean indicating whether the flaw is exclusive (i.e. exactly one of its resolver can be applied)..
+  const bool structural;                                     // a boolean indicating whether the flaw is structural (i.e. it is not an inconsistency raised from types' consistency checking procedures)..
+  bool expanded = false;                                     // a boolean indicating whether the flaw has been expanded..
 };
 
 class resolver

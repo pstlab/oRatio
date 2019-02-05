@@ -14,15 +14,6 @@ flaw::flaw(solver &slv, const std::vector<resolver *> &causes, const bool &exclu
 }
 flaw::~flaw() {}
 
-rational flaw::get_estimated_cost() const
-{
-    resolver *c_res = get_best_resolver();
-    if (c_res)
-        return c_res->get_estimated_cost();
-    else
-        return rational::POSITIVE_INFINITY;
-}
-
 resolver *flaw::get_best_resolver() const
 {
     resolver *c_res = nullptr;

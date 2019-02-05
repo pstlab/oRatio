@@ -407,20 +407,25 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
     const auto at_phis_p = phis.find(p.get_var());
     if (at_phis_p != phis.end()) // a decision has been taken about the presence of some flaws within the current partial solution..
         for (const auto &f : at_phis_p->second)
+        {
+            FIRE_FLAW_STATE_CHANGED(*f);
             if (p.get_sign()) // this flaw has been added to the current partial solution..
             {
                 flaws.insert(f);
                 if (!trail.empty())
                     trail.back().new_flaws.insert(f);
-                FIRE_FLAW_STATE_CHANGED(*f);
             }
             else // this flaw has been removed from the current partial solution..
                 assert(flaws.find(f) == flaws.end());
+        }
 
     const auto at_rhos_p = rhos.find(p.get_var());
     if (at_rhos_p != rhos.end() && !p.get_sign()) // a decision has been taken about the removal of some resolvers within the current partial solution..
         for (const auto &r : at_rhos_p->second)
+        {
+            FIRE_RESOLVER_STATE_CHANGED(*r);
             set_estimated_cost(*r, rational::POSITIVE_INFINITY);
+        }
 
     return true;
 }
@@ -453,12 +458,18 @@ void solver::pop()
         flaws.erase(f);
 
     // we restore the resolvers' estimated costs..
-    for (const auto &r : trail.back().old_costs)
+    for (const auto &r : trail.back().old_r_costs)
         r.first->est_cost = r.second;
 
+    // we restore the flaws' estimated costs..
+    for (const auto &f : trail.back().old_f_costs)
+        f.first->est_cost = f.second;
+
 #ifdef BUILD_GUI
-    for (const auto &c : trail.back().old_costs)
-        FIRE_RESOLVER_COST_CHANGED(*c.first);
+    for (const auto &r : trail.back().old_r_costs)
+        FIRE_RESOLVER_COST_CHANGED(*r.first);
+    for (const auto &f : trail.back().old_f_costs)
+        FIRE_FLAW_COST_CHANGED(*f.first);
 #endif
 
     trail.pop_back();
@@ -507,16 +518,23 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
 {
     if (r.est_cost != cst)
     {
-        if (!trail.empty()) // we store the current cost for allowing backtracking..
-            trail.back().old_costs.insert({&r, r.est_cost});
-        // this is the current cost of the resolver's effect..
-        rational f_cost = r.effect.get_estimated_cost();
+        if (!trail.empty()) // we store the current resolver's estimated cost for allowing backtracking..
+            trail.back().old_r_costs.insert({&r, r.est_cost});
         // we update the resolver's estimated cost..
         r.est_cost = cst;
         FIRE_RESOLVER_COST_CHANGED(r);
 
-        if (f_cost != r.effect.get_estimated_cost()) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
+        resolver *bst_res = r.effect.get_best_resolver();
+        // this is the new cost of the resolver's effect..
+        rational effct_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
+        if (r.effect.est_cost != effct_cost) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
         {
+            if (!trail.empty()) // we store the current resolver's effect's estimated cost for allowing backtracking..
+                trail.back().old_f_costs.insert({&r.effect, r.effect.est_cost});
+            // we update the resolver's effect's estimated cost..
+            r.effect.est_cost = effct_cost;
+            FIRE_FLAW_COST_CHANGED(r.effect);
+
             // the resolver costs queue (for resolver cost propagation)..
             std::queue<resolver *> resolver_q;
             for (const auto &c_r : r.effect.supports)
@@ -529,16 +547,26 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
                 if (c_res.est_cost != r_cost)
                 {
                     if (!trail.empty())
-                        trail.back().old_costs.insert({&c_res, c_res.est_cost});
-                    // this is the current cost of the resolver's effect..
-                    f_cost = c_res.effect.get_estimated_cost();
+                        trail.back().old_r_costs.insert({&c_res, c_res.est_cost});
                     // we update the resolver's estimated cost..
                     c_res.est_cost = r_cost;
                     FIRE_RESOLVER_COST_CHANGED(c_res);
 
-                    if (f_cost != c_res.effect.get_estimated_cost())  // the cost of the resolver's effect has changed as a consequence of the resolver's cost update..
-                        for (const auto &c_r : c_res.effect.supports) // hence, we propagate the update to all the supports of the resolver's effect..
-                            resolver_q.push(c_r);
+                    bst_res = c_res.effect.get_best_resolver();
+                    // this is the new cost of the resolver's effect..
+                    effct_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
+
+                    if (c_res.effect.est_cost != effct_cost) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update..
+                    {
+                        if (!trail.empty()) // we store the current resolver's effect's estimated cost for allowing backtracking..
+                            trail.back().old_f_costs.insert({&c_res.effect, c_res.effect.est_cost});
+                        // we update the resolver's effect's estimated cost..
+                        c_res.effect.est_cost = effct_cost;
+                        FIRE_FLAW_COST_CHANGED(c_res.effect);
+
+                        for (const auto &sup_r : c_res.effect.supports) // we propagate the update to all the supports of the resolver's effect..
+                            resolver_q.push(sup_r);
+                    }
                 }
                 resolver_q.pop();
             }
