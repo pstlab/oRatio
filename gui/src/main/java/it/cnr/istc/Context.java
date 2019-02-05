@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 import it.cnr.istc.graph.CausalLinkAdded;
 import it.cnr.istc.graph.CurrentFlaw;
 import it.cnr.istc.graph.CurrentResolver;
+import it.cnr.istc.graph.FlawCostChanged;
 import it.cnr.istc.graph.FlawCreated;
 import it.cnr.istc.graph.FlawStateChanged;
 import it.cnr.istc.graph.GraphListener;
@@ -42,6 +43,7 @@ public class Context {
 
     private static final String FLAW_CREATED = "flaw_created ";
     private static final String FLAW_STATE_CHANGED = "flaw_state_changed ";
+    private static final String FLAW_COST_CHANGED = "flaw_cost_changed ";
     private static final String CURRENT_FLAW = "current_flaw ";
     private static final String RESOLVER_CREATED = "resolver_created ";
     private static final String RESOLVER_STATE_CHANGED = "resolver_state_changed ";
@@ -167,6 +169,11 @@ public class Context {
                                         FlawStateChanged.class);
                                 for (GraphListener l : graph_listeners)
                                     l.flaw_state_changed(fsc);
+                            } else if (inputLine.startsWith(FLAW_COST_CHANGED)) {
+                                FlawCostChanged fsc = gson.fromJson(inputLine.substring(FLAW_COST_CHANGED.length()),
+                                        FlawCostChanged.class);
+                                for (GraphListener l : graph_listeners)
+                                    l.flaw_cost_changed(fsc);
                             } else if (inputLine.startsWith(CURRENT_FLAW)) {
                                 CurrentFlaw cf = gson.fromJson(inputLine.substring(CURRENT_FLAW.length()),
                                         CurrentFlaw.class);
