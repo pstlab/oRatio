@@ -25,6 +25,7 @@ public:
 private:
   void flaw_created(const flaw &f) override;
   void flaw_state_changed(const flaw &f) override;
+  void flaw_cost_changed(const flaw &f) override;
   void current_flaw(const flaw &f) override;
 
   void resolver_created(const resolver &r) override;

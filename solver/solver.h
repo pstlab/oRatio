@@ -4,6 +4,7 @@
 #ifdef BUILD_GUI
 #define FIRE_NEW_FLAW(f) fire_new_flaw(f)
 #define FIRE_FLAW_STATE_CHANGED(f) fire_flaw_state_changed(f)
+#define FIRE_FLAW_COST_CHANGED(f) fire_flaw_cost_changed(f)
 #define FIRE_CURRENT_FLAW(f) fire_current_flaw(f)
 #define FIRE_NEW_RESOLVER(r) fire_new_resolver(r)
 #define FIRE_RESOLVER_STATE_CHANGED(r) fire_resolver_state_changed(r)
@@ -14,6 +15,7 @@
 #else
 #define FIRE_NEW_FLAW(f)
 #define FIRE_FLAW_STATE_CHANGED(f)
+#define FIRE_FLAW_COST_CHANGED(f)
 #define FIRE_CURRENT_FLAW(f)
 #define FIRE_NEW_RESOLVER(r)
 #define FIRE_RESOLVER_STATE_CHANGED(r)
@@ -119,6 +121,7 @@ private:
 
   void fire_new_flaw(const flaw &f) const;
   void fire_flaw_state_changed(const flaw &f) const;
+  void fire_flaw_cost_changed(const flaw &f) const;
   void fire_current_flaw(const flaw &f) const;
   void fire_new_resolver(const resolver &r) const;
   void fire_resolver_state_changed(const resolver &r) const;

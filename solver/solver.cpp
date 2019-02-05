@@ -604,6 +604,11 @@ void solver::fire_flaw_state_changed(const flaw &f) const
     for (const auto &l : listeners)
         l->flaw_state_changed(f);
 }
+void solver::fire_flaw_cost_changed(const flaw &f) const
+{
+    for (const auto &l : listeners)
+        l->flaw_cost_changed(f);
+}
 void solver::fire_current_flaw(const flaw &f) const
 {
     for (const auto &l : listeners)

@@ -67,6 +67,14 @@ void socket_listener::flaw_state_changed(const flaw &f)
     ss << "flaw_state_changed {\"flaw\":\"" << static_cast<const void *>(&f) << "\", \"state\":" << std::to_string(slv.get_sat_core().value(f.get_phi())) << "}\n";
     send_message(ss.str());
 }
+void socket_listener::flaw_cost_changed(const flaw &f)
+{
+    smt::rational est_cost = f.get_estimated_cost();
+    std::stringstream ss;
+    ss << "flaw_cost_changed {\"flaw\":\"" << static_cast<const void *>(&f) << "\", \"cost\":{"
+       << "\"num\":" << std::to_string(est_cost.numerator()) << ", \"den\":" << std::to_string(est_cost.denominator()) << "}}\n";
+    send_message(ss.str());
+}
 void socket_listener::current_flaw(const flaw &f)
 {
     std::stringstream ss;
