@@ -17,6 +17,8 @@
 package it.cnr.istc.riddle;
 
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -47,5 +49,31 @@ public class Atom extends Item {
 
     public enum AtomState {
         Active, Inactive, Unified
+    }
+
+    @Override
+    public String toString() {
+        return type.getName() + "(" + exprs.entrySet().stream().map(expr -> {
+            switch (expr.getValue().getType().getName()) {
+            case Core.BOOL:
+                return expr.getKey() + " = " + ((Item.BoolItem) expr.getValue()).getValue();
+            case Core.INT:
+            case Core.REAL:
+                return expr.getKey() + " = " + ((Item.ArithItem) expr.getValue()).getValue();
+            case Core.STRING:
+                return expr.getKey() + " = " + ((Item.StringItem) expr.getValue()).getValue();
+            default:
+                String val = expr.getKey() + " = ";
+                if (expr.getValue() instanceof EnumItem) {
+                    if (((EnumItem) expr.getValue()).getVals().length == 1)
+                        val += core.guessName(((EnumItem) expr.getValue()).getVals()[0]);
+                    else
+                        val += Stream.of(((EnumItem) expr.getValue()).getVals()).map(itm -> core.guessName(itm))
+                                .collect(Collectors.joining(", "));
+                } else
+                    val += core.guessName(expr.getValue());
+                return val;
+            }
+        }).collect(Collectors.joining(", ")) + ")";
     }
 }

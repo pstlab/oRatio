@@ -41,6 +41,7 @@ public class TimelinesScene extends Scene implements TimelinesListener {
             timeline_visualizers.put(core.getType("StateVariable"), new StateVariableVisualizer(core));
             timeline_visualizers.put(core.getType("ReusableResource"), new ReusableResourceVisualizer(core));
             timeline_visualizers.put(core.getType("PropositionalAgent"), new PropositionalAgentVisualizer(core));
+            timeline_visualizers.put(core.getType("PropositionalState"), new PropositionalStateVisualizer(core));
         } catch (ClassNotFoundException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }

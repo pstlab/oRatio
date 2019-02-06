@@ -60,8 +60,6 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
 
         XYBarRenderer renderer = new XYBarRenderer();
         renderer.setSeriesPaint(0, Color.lightGray);
-        renderer.setSeriesPaint(1, new Color(100, 250, 100));
-        renderer.setSeriesPaint(2, Color.pink);
         renderer.setBarPainter(new ReverseGradientXYBarPainter());
         renderer.setDrawBarOutline(true);
         renderer.setShadowXOffset(2);
@@ -74,7 +72,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
         // renderer.setBaseItemLabelFont(font);
         XYItemLabelGenerator generator = (XYDataset dataset, int series,
                 int item) -> ((ActionValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset).getSeries(series)
-                        .getDataItem(item)).toString();
+                        .getDataItem(item)).atom.toString();
         ItemLabelPosition itLabPos = new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER);
         // renderer.setBasePositiveItemLabelPosition(itLabPos);
         for (int i = 0; i < collection.getSeriesCount(); i++) {
@@ -86,7 +84,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
             renderer.setSeriesToolTipGenerator(i,
                     (XYDataset dataset, int series,
                             int item) -> ((ActionValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset)
-                                    .getSeries(series).getDataItem(item)).toString());
+                                    .getSeries(series).getDataItem(item)).atom.toString());
         }
 
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
@@ -117,31 +115,6 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
                 Atom atom) {
             super(x, xLow, xHigh, y, yLow, yHigh);
             this.atom = atom;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder sb = new StringBuilder();
-            sb.append(atom.getType().getName()).append("(");
-            for (Map.Entry<String, Item> expr : atom.getExprs().entrySet()) {
-                sb.append(", ");
-                switch (expr.getValue().getType().getName()) {
-                case Core.BOOL:
-                    sb.append(expr.getKey()).append(" = ").append(((Item.BoolItem) expr.getValue()).getValue());
-                    break;
-                case Core.INT:
-                case Core.REAL:
-                    sb.append(expr.getKey()).append(" = ").append(((Item.ArithItem) expr.getValue()).getValue());
-                    break;
-                case Core.STRING:
-                    sb.append(expr.getKey()).append(" = ").append(((Item.StringItem) expr.getValue()).getValue());
-                    break;
-                default:
-                    sb.append(expr.getKey());
-                }
-            }
-            sb.append(")");
-            return sb.toString().replace("(, ", "(");
         }
     }
 

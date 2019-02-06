@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.ItemLabelAnchor;
@@ -28,6 +29,7 @@ import org.jfree.data.xy.XYIntervalSeriesCollection;
 import it.cnr.istc.riddle.Atom;
 import it.cnr.istc.riddle.Core;
 import it.cnr.istc.riddle.Item;
+import it.cnr.istc.riddle.Item.EnumItem;
 
 /**
  * StateVariableVisualizer
@@ -58,15 +60,11 @@ public class StateVariableVisualizer implements TimelineVisualizer {
 
         for (Atom atom : atoms) {
             double start_pulse = ((Item.ArithItem) atom.getExpr("start")).getValue().doubleValue();
-            c_pulses.add(start_pulse);
-            if (!starting_values.containsKey(start_pulse))
-                starting_values.put(start_pulse, new ArrayList<>(atoms.size()));
-            starting_values.get(start_pulse).add(atom);
             double end_pulse = ((Item.ArithItem) atom.getExpr("end")).getValue().doubleValue();
+            c_pulses.add(start_pulse);
             c_pulses.add(end_pulse);
-            if (!ending_values.containsKey(end_pulse))
-                ending_values.put(end_pulse, new ArrayList<>(atoms.size()));
-            ending_values.get(end_pulse).add(atom);
+            starting_values.putIfAbsent(start_pulse, new ArrayList<>(atoms.size())).add(atom);
+            ending_values.putIfAbsent(end_pulse, new ArrayList<>(atoms.size())).add(atom);
         }
 
         Double[] c_pulses_array = c_pulses.toArray(new Double[c_pulses.size()]);
@@ -81,15 +79,15 @@ public class StateVariableVisualizer implements TimelineVisualizer {
             switch (overlapping_formulas.size()) {
             case 0:
                 undefined.add(c_pulses_array[i - 1], c_pulses_array[i - 1], c_pulses_array[i], 0, 0, 1,
-                        new SVValue(overlapping_formulas));
+                        new SVValue(core, overlapping_formulas));
                 break;
             case 1:
                 sv_values.add(c_pulses_array[i - 1], c_pulses_array[i - 1], c_pulses_array[i], 0, 0, 1,
-                        new SVValue(overlapping_formulas));
+                        new SVValue(core, overlapping_formulas));
                 break;
             default:
                 conflicts.add(c_pulses_array[i - 1], c_pulses_array[i - 1], c_pulses_array[i], 0, 0, 1,
-                        new SVValue(overlapping_formulas));
+                        new SVValue(core, overlapping_formulas));
                 break;
             }
             if (starting_values.containsKey(c_pulses_array[i]))
@@ -141,34 +139,12 @@ public class StateVariableVisualizer implements TimelineVisualizer {
 
     private static class SVValue {
 
-        final List<Atom> atoms;
+        private final Core core;
+        private final List<Atom> atoms;
 
-        SVValue(List<Atom> atoms) {
+        SVValue(final Core core, final List<Atom> atoms) {
+            this.core = core;
             this.atoms = new ArrayList<>(atoms);
-        }
-
-        private String toString(Atom atom) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(atom.getType().getName()).append("(");
-            for (Map.Entry<String, Item> expr : atom.getExprs().entrySet()) {
-                sb.append(", ");
-                switch (expr.getValue().getType().getName()) {
-                case Core.BOOL:
-                    sb.append(expr.getKey()).append(" = ").append(((Item.BoolItem) expr.getValue()).getValue());
-                    break;
-                case Core.INT:
-                case Core.REAL:
-                    sb.append(expr.getKey()).append(" = ").append(((Item.ArithItem) expr.getValue()).getValue());
-                    break;
-                case Core.STRING:
-                    sb.append(expr.getKey()).append(" = ").append(((Item.StringItem) expr.getValue()).getValue());
-                    break;
-                default:
-                    sb.append(expr.getKey());
-                }
-            }
-            sb.append(")");
-            return sb.toString().replace("(, ", "(");
         }
 
         @Override
@@ -177,9 +153,9 @@ public class StateVariableVisualizer implements TimelineVisualizer {
             case 0:
                 return "";
             case 1:
-                return toString(atoms.get(0));
+                return atoms.get(0).toString();
             default:
-                return "{" + atoms.stream().map(atom -> toString(atom)).collect(Collectors.joining(", ")) + "}";
+                return "{" + atoms.stream().map(atom -> atom.toString()).collect(Collectors.joining(", ")) + "}";
             }
         }
     }

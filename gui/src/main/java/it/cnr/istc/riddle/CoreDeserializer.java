@@ -42,6 +42,7 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
 
         // we clear all the instances..
         core.exprs.clear();
+        core.expr_names.clear();
         Queue<Type> q = new ArrayDeque<>();
         q.addAll(core.types.values());
         q.addAll(core.predicates.values());
@@ -135,7 +136,10 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
         if (object.has("exprs"))
             for (JsonElement xpr_el : object.getAsJsonArray("exprs")) {
                 JsonObject xpr_obj = xpr_el.getAsJsonObject();
-                core.exprs.put(xpr_obj.getAsJsonPrimitive("name").getAsString(), toItem(items, atoms, xpr_obj));
+                String name = xpr_obj.getAsJsonPrimitive("name").getAsString();
+                Item itm = toItem(items, atoms, xpr_obj);
+                core.exprs.put(name, itm);
+                core.expr_names.put(itm, name);
             }
         return core;
     }

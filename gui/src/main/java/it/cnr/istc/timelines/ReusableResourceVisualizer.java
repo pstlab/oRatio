@@ -52,15 +52,11 @@ public class ReusableResourceVisualizer implements TimelineVisualizer {
 
         for (Atom atom : atoms) {
             double start_pulse = ((Item.ArithItem) atom.getExpr("start")).getValue().doubleValue();
-            c_pulses.add(start_pulse);
-            if (!starting_values.containsKey(start_pulse))
-                starting_values.put(start_pulse, new ArrayList<>(atoms.size()));
-            starting_values.get(start_pulse).add(atom);
             double end_pulse = ((Item.ArithItem) atom.getExpr("end")).getValue().doubleValue();
+            c_pulses.add(start_pulse);
             c_pulses.add(end_pulse);
-            if (!ending_values.containsKey(end_pulse))
-                ending_values.put(end_pulse, new ArrayList<>(atoms.size()));
-            ending_values.get(end_pulse).add(atom);
+            starting_values.putIfAbsent(start_pulse, new ArrayList<>(atoms.size())).add(atom);
+            ending_values.putIfAbsent(end_pulse, new ArrayList<>(atoms.size())).add(atom);
         }
 
         Double[] c_pulses_array = c_pulses.toArray(new Double[c_pulses.size()]);

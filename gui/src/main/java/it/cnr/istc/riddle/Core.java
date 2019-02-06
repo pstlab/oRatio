@@ -25,6 +25,7 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,7 @@ public class Core implements Scope {
     final Map<String, Type> types = new LinkedHashMap<>();
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
     final Map<String, Item> exprs = new LinkedHashMap<>();
+    final Map<Item, String> expr_names = new IdentityHashMap<>();
     final ParseTreeProperty<Scope> scopes = new ParseTreeProperty<>();
 
     public Core() {
@@ -185,6 +187,10 @@ public class Core implements Scope {
      */
     public Item getExpr(final String name) {
         return exprs.get(name);
+    }
+
+    public String guessName(final Item itm) {
+        return expr_names.get(itm);
     }
 
     public void read(final String script) {
