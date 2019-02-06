@@ -48,13 +48,11 @@ void solver::solve()
 #ifndef GRAPH_PRUNING
             if (f_next->get_estimated_cost().is_infinite())
             {
+                // we go back to root level..
+                while (!get_sat_core().root_level())
+                    get_sat_core().pop();
                 if (accuracy < max_accuracy) // we have room for increasing the heuristic accuracy..
-                {
-                    // we go back to root level..
-                    while (!get_sat_core().root_level())
-                        get_sat_core().pop();
-                    increase_accuracy(); // .. and increase the heuristic accuracy..
-                }
+                    increase_accuracy();     // so we increase the heuristic accuracy..
                 else
                     add_layer(); // we add a layer to the current graph..
                 continue;
@@ -264,10 +262,10 @@ void solver::increase_accuracy()
     assert(get_sat_core().root_level());
     LOG("current heuristic accuracy: " + std::to_string(accuracy));
 
-    // we clean up super-flaws trivial flaws and already solved flaws..
+    // we clean up composite flaws trivial flaws and already solved flaws..
     for (auto it = flaws.begin(); it != flaws.end();)
         if (composite_flaw *sf = dynamic_cast<composite_flaw *>(*it))
-            // we remove the super-flaw from the current flaws..
+            // we remove the composite flaw from the current flaws..
             flaws.erase(it++);
         else if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return get_sat_core().value(r->rho) == True; }))
         {
@@ -283,10 +281,10 @@ void solver::increase_accuracy()
     if (flaws.size() >= accuracy)
     {
         std::vector<std::vector<flaw *>> fss = combinations(std::vector<flaw *>(flaws.begin(), flaws.end()), accuracy);
-        for (const auto &fs : fss) // we create a new super flaw..
+        for (const auto &fs : fss) // we create a new composite flaw..
             new_flaw(*new composite_flaw(*this, res, fs));
     }
-    else // we create a new super flaw..
+    else // we create a new composite flaw..
         new_flaw(*new composite_flaw(*this, res, std::vector<flaw *>(flaws.begin(), flaws.end())));
 
     // we restart the building graph procedure..
@@ -356,8 +354,10 @@ void solver::new_fact(atom &atm)
 
     // we associate the flaw to the atom..
     reason.insert({&atm, af});
+
+    // we check if we need to notify the new fact to any smart types..
     if (&atm.get_type().get_scope() != this)
-    { // we check if we need to notify the new fact to any smart types..
+    {
         std::queue<type *> q;
         q.push(static_cast<type *>(&atm.get_type().get_scope()));
         while (!q.empty())
@@ -379,8 +379,10 @@ void solver::new_goal(atom &atm)
 
     // we associate the flaw to the atom..
     reason.insert({&atm, af});
+
+    // we check if we need to notify the new goal to any smart types..
     if (&atm.get_type().get_scope() != this)
-    { // we check if we need to notify the new goal to any smart types..
+    {
         std::queue<type *> q;
         q.push(static_cast<type *>(&atm.get_type().get_scope()));
         while (!q.empty())
