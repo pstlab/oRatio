@@ -32,7 +32,7 @@ namespace ratio
 class flaw;
 class resolver;
 class atom_flaw;
-class hyper_flaw;
+class composite_flaw;
 class smart_type;
 
 class solver : public core, private smt::theory
@@ -40,7 +40,7 @@ class solver : public core, private smt::theory
   friend class flaw;
   friend class resolver;
   friend class atom_flaw;
-  friend class hyper_flaw;
+  friend class composite_flaw;
   friend class smart_type;
 #ifdef BUILD_GUI
   friend class solver_listener;

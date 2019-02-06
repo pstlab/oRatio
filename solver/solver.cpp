@@ -3,7 +3,7 @@
 #include "var_flaw.h"
 #include "atom_flaw.h"
 #include "disjunction_flaw.h"
-#include "hyper_flaw.h"
+#include "composite_flaw.h"
 #include "smart_type.h"
 #include "state_variable.h"
 #include "reusable_resource.h"
@@ -182,7 +182,7 @@ void solver::expand_flaw(flaw &f)
     assert(!f.expanded);
 
     // we expand the flaw..
-    if (hyper_flaw *sf = dynamic_cast<hyper_flaw *>(&f))
+    if (composite_flaw *sf = dynamic_cast<composite_flaw *>(&f))
         // we expand the unexpanded enclosing flaws..
         for (const auto &c_f : sf->flaws)
             if (!c_f->expanded)
@@ -266,7 +266,7 @@ void solver::increase_accuracy()
 
     // we clean up super-flaws trivial flaws and already solved flaws..
     for (auto it = flaws.begin(); it != flaws.end();)
-        if (hyper_flaw *sf = dynamic_cast<hyper_flaw *>(*it))
+        if (composite_flaw *sf = dynamic_cast<composite_flaw *>(*it))
             // we remove the super-flaw from the current flaws..
             flaws.erase(it++);
         else if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return get_sat_core().value(r->rho) == True; }))
@@ -284,10 +284,10 @@ void solver::increase_accuracy()
     {
         std::vector<std::vector<flaw *>> fss = combinations(std::vector<flaw *>(flaws.begin(), flaws.end()), accuracy);
         for (const auto &fs : fss) // we create a new super flaw..
-            new_flaw(*new hyper_flaw(*this, res, fs));
+            new_flaw(*new composite_flaw(*this, res, fs));
     }
     else // we create a new super flaw..
-        new_flaw(*new hyper_flaw(*this, res, std::vector<flaw *>(flaws.begin(), flaws.end())));
+        new_flaw(*new composite_flaw(*this, res, std::vector<flaw *>(flaws.begin(), flaws.end())));
 
     // we restart the building graph procedure..
     build_graph();

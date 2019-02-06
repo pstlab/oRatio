@@ -1,4 +1,4 @@
-#include "hyper_flaw.h"
+#include "composite_flaw.h"
 #include "cartesian_product.h"
 #include "combinations.h"
 #include "solver.h"
@@ -14,11 +14,11 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
         return {};
 }
 
-hyper_flaw::hyper_flaw(solver &slv, resolver *const cause, const std::vector<flaw *> &fs) : flaw(slv, get_cause(cause)), flaws(fs) {}
-hyper_flaw::~hyper_flaw() {}
+composite_flaw::composite_flaw(solver &slv, resolver *const cause, const std::vector<flaw *> &fs) : flaw(slv, get_cause(cause)), flaws(fs) {}
+composite_flaw::~composite_flaw() {}
 
 #ifdef BUILD_GUI
-std::string hyper_flaw::get_label() const
+std::string composite_flaw::get_label() const
 {
     std::string f_str = "φ" + std::to_string(get_phi()) + " {";
     for (std::vector<flaw *>::const_iterator f_it = flaws.cbegin(); f_it != flaws.cend(); ++f_it)
@@ -32,13 +32,13 @@ std::string hyper_flaw::get_label() const
 }
 #endif
 
-void hyper_flaw::compute_resolvers()
+void composite_flaw::compute_resolvers()
 {
     std::vector<std::vector<resolver *>> rs;
     for (const auto &f : flaws)
         rs.push_back(f->get_resolvers());
 
-#ifdef CHECK_HYPER_FLAWS
+#ifdef CHECK_COMPOSITE_FLAWS
     std::vector<smt::lit> check_lits;
     std::queue<const flaw *> q;
     q.push(this);
@@ -63,30 +63,29 @@ void hyper_flaw::compute_resolvers()
 
     for (const auto &rp : cartesian_product(rs))
     {
-        // the resolver's cost is given by the maximum of the enclosing resolvers' costs..
-        smt::rational cst(smt::rational::NEGATIVE_INFINITY);
+        // the resolver's cost is given by the sum of the enclosing resolvers' costs..
+        smt::rational cst;
         std::vector<smt::lit> cnj;
         for (const auto &r : rp)
         {
-            if (cst < r->get_intrinsic_cost())
-                cst = r->get_intrinsic_cost();
+            cst += r->get_intrinsic_cost();
             cnj.push_back(r->get_rho());
         }
         smt::var cnj_var = slv.get_sat_core().new_conj(cnj);
-#ifdef CHECK_HYPER_FLAWS
+#ifdef CHECK_COMPOSITE_FLAWS
         if (slv.get_sat_core().check(check_lits))
 #else
         if (slv.get_sat_core().value(cnj_var) != smt::False)
 #endif
-            add_resolver(*new hyper_resolver(slv, *this, cnj_var, cst, rp));
+            add_resolver(*new composite_resolver(slv, *this, cnj_var, cst, rp));
     }
 }
 
-hyper_flaw::hyper_resolver::hyper_resolver(solver &slv, hyper_flaw &s_flaw, const smt::var &app_r, const smt::rational &cst, const std::vector<resolver *> &rs) : resolver(slv, app_r, cst, s_flaw), resolvers(rs) {}
-hyper_flaw::hyper_resolver::~hyper_resolver() {}
+composite_flaw::composite_resolver::composite_resolver(solver &slv, composite_flaw &s_flaw, const smt::var &app_r, const smt::rational &cst, const std::vector<resolver *> &rs) : resolver(slv, app_r, cst, s_flaw), resolvers(rs) {}
+composite_flaw::composite_resolver::~composite_resolver() {}
 
 #ifdef BUILD_GUI
-std::string hyper_flaw::hyper_resolver::get_label() const
+std::string composite_flaw::composite_resolver::get_label() const
 {
     std::string r_str = "ρ" + std::to_string(get_rho()) + " {";
     for (std::vector<resolver *>::const_iterator r_it = resolvers.cbegin(); r_it != resolvers.cend(); ++r_it)
@@ -100,7 +99,7 @@ std::string hyper_flaw::hyper_resolver::get_label() const
 }
 #endif
 
-void hyper_flaw::hyper_resolver::apply()
+void composite_flaw::composite_resolver::apply()
 {
     // all the resolver's preconditions..
     std::vector<flaw *> precs;
@@ -112,9 +111,9 @@ void hyper_flaw::hyper_resolver::apply()
     {
         std::vector<std::vector<flaw *>> fss = combinations(std::vector<flaw *>(precs.begin(), precs.end()), slv.accuracy);
         for (const auto &fs : fss) // we create a new super flaw for each of the possible combinations..
-            slv.new_flaw(*new hyper_flaw(slv, this, fs));
+            slv.new_flaw(*new composite_flaw(slv, this, fs));
     }
     else if (!precs.empty()) // we create a new super flaw including all the preconditions of this resolver..
-        slv.new_flaw(*new hyper_flaw(slv, this, precs));
+        slv.new_flaw(*new composite_flaw(slv, this, precs));
 }
 } // namespace ratio
