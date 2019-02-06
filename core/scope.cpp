@@ -41,11 +41,11 @@ std::map<std::string, predicate *> scope::get_predicates() const noexcept { retu
 void scope::new_fields(scope &s, const std::vector<const field *> &fs)
 {
     for (const auto &f : fs)
-        s.fields.insert({f->get_name(), f});
+        s.fields.emplace(f->get_name(), f);
 }
 void scope::new_fields(const std::vector<const field *> &fs)
 {
     for (const auto &f : fs)
-        fields.insert({f->get_name(), f});
+        fields.emplace(f->get_name(), f);
 }
 } // namespace ratio

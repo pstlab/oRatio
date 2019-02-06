@@ -39,7 +39,7 @@ void predicate::apply_rule(atom &a) const
         static_cast<predicate *>(sp)->apply_rule(a);
 
     context ctx(new env(get_core(), &a));
-    ctx->exprs.insert({THIS_KEYWORD, &a});
+    ctx->exprs.emplace(THIS_KEYWORD, &a);
     for (const auto &s : statements)
         dynamic_cast<const ast::statement *>(s)->execute(*this, ctx);
 }

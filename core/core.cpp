@@ -246,13 +246,13 @@ void core::new_methods(const std::vector<const method *> &ms)
 void core::new_types(const std::vector<type *> &ts)
 {
     for (const auto &t : ts)
-        types.insert({t->get_name(), t});
+        types.emplace(t->get_name(), t);
 }
 
 void core::new_predicates(const std::vector<predicate *> &ps)
 {
     for (const auto &p : ps)
-        predicates.insert({p->get_name(), p});
+        predicates.emplace(p->get_name(), p);
 }
 
 const field &core::get_field(const std::string &name) const

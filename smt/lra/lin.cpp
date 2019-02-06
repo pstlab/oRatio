@@ -7,7 +7,7 @@ namespace smt
 
 lin::lin() {}
 lin::lin(const rational &known_term) : known_term(known_term) {}
-lin::lin(const var v, const rational &c) { vars.insert({v, c}); }
+lin::lin(const var v, const rational &c) { vars.emplace(v, c); }
 
 lin lin::operator+(const lin &right) const
 {
@@ -49,7 +49,7 @@ lin lin::operator-(const lin &right) const
     {
         const auto trm_it = res.vars.find(term.first);
         if (trm_it == res.vars.end())
-            res.vars.insert({term.first, -term.second});
+            res.vars.emplace(term.first, -term.second);
         else
         {
             trm_it->second -= term.second;
@@ -132,7 +132,7 @@ lin lin::operator-=(const lin &right)
     {
         const auto trm_it = vars.find(term.first);
         if (trm_it == vars.end())
-            vars.insert({term.first, -term.second});
+            vars.emplace(term.first, -term.second);
         else
         {
             trm_it->second -= term.second;

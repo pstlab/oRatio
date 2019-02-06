@@ -106,14 +106,14 @@ void type::new_methods(const std::vector<const method *> &ms)
 void type::new_types(const std::vector<type *> &ts)
 {
     for (const auto &t : ts)
-        types.insert({t->name, t});
+        types.emplace(t->name, t);
 }
 
 void type::new_predicates(const std::vector<predicate *> &ps, bool notify)
 {
     for (const auto &p : ps)
     {
-        predicates.insert({p->get_name(), p});
+        predicates.emplace(p->get_name(), p);
 
         if (notify)
         {

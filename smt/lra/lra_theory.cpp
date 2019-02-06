@@ -19,7 +19,7 @@ var lra_theory::new_var()
     bounds.push_back({rational::NEGATIVE_INFINITY, nullptr}); // we set the lower bound at -inf..
     bounds.push_back({rational::POSITIVE_INFINITY, nullptr}); // we set the upper bound at +inf..
     vals.push_back(rational::ZERO);                           // we set the current value at 0..
-    exprs.insert({"x" + std::to_string(id), id});
+    exprs.emplace("x" + std::to_string(id), id);
     a_watches.push_back(std::vector<assertion *>());
     t_watches.push_back(std::unordered_set<row *>());
     return id;
@@ -36,7 +36,7 @@ var lra_theory::new_var(const lin &l)
     else // we need to create a new slack variable..
     {
         const var slack = new_var();
-        exprs.insert({s_expr, slack});
+        exprs.emplace(s_expr, slack);
         vals[slack] = value(l); // we set the initial value of the new slack variable..
         new_row(slack, l);      // we add a new row into the tableau..
         return slack;
@@ -78,7 +78,7 @@ var lra_theory::new_lt(const lin &left, const lin &right)
     {
         const var ctr = sat.new_var();
         bind(ctr);
-        s_asrts.insert({s_assertion, ctr});
+        s_asrts.emplace(s_assertion, ctr);
         v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr, slack, c_right));
         return ctr;
     }
@@ -119,7 +119,7 @@ var lra_theory::new_leq(const lin &left, const lin &right)
     {
         const var ctr = sat.new_var();
         bind(ctr);
-        s_asrts.insert({s_assertion, ctr});
+        s_asrts.emplace(s_assertion, ctr);
         v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr, slack, c_right));
         return ctr;
     }
@@ -160,7 +160,7 @@ var lra_theory::new_geq(const lin &left, const lin &right)
     {
         const var ctr = sat.new_var();
         bind(ctr);
-        s_asrts.insert({s_assertion, ctr});
+        s_asrts.emplace(s_assertion, ctr);
         v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr, slack, c_right));
         return ctr;
     }
@@ -201,7 +201,7 @@ var lra_theory::new_gt(const lin &left, const lin &right)
     {
         const var ctr = sat.new_var();
         bind(ctr);
-        s_asrts.insert({s_assertion, ctr});
+        s_asrts.emplace(s_assertion, ctr);
         v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr, slack, c_right));
         return ctr;
     }
@@ -254,7 +254,7 @@ bool lra_theory::lt(const lin &left, const lin &right, const var &p)
         default:
         {
             bind(p);
-            s_asrts.insert({s_assertion, p});
+            s_asrts.emplace(s_assertion, p);
             v_asrts[p].push_back(new assertion(*this, op::leq, p, slack, c_right));
             return true;
         }
@@ -308,7 +308,7 @@ bool lra_theory::leq(const lin &left, const lin &right, const var &p)
         default:
         {
             bind(p);
-            s_asrts.insert({s_assertion, p});
+            s_asrts.emplace(s_assertion, p);
             v_asrts[p].push_back(new assertion(*this, op::leq, p, slack, c_right));
             return true;
         }
@@ -362,7 +362,7 @@ bool lra_theory::geq(const lin &left, const lin &right, const var &p)
         default:
         {
             bind(p);
-            s_asrts.insert({s_assertion, p});
+            s_asrts.emplace(s_assertion, p);
             v_asrts[p].push_back(new assertion(*this, op::geq, p, slack, c_right));
             return true;
         }
@@ -416,7 +416,7 @@ bool lra_theory::gt(const lin &left, const lin &right, const var &p)
         default:
         {
             bind(p);
-            s_asrts.insert({s_assertion, p});
+            s_asrts.emplace(s_assertion, p);
             v_asrts[p].push_back(new assertion(*this, op::geq, p, slack, c_right));
             return true;
         }
@@ -630,7 +630,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
     const rational c = expr.vars.at(x_j);
     expr.vars.erase(x_j);
     expr /= -c;
-    expr.vars.insert({x_i, rational::ONE / c});
+    expr.vars.emplace(x_i, rational::ONE / c);
 
     // these are the rows in which x_j appears..
     std::unordered_set<row *> x_j_watches = std::move(t_watches.at(x_j));
@@ -643,8 +643,8 @@ void lra_theory::pivot(const var x_i, const var x_j)
             const auto trm_it = r->l.vars.find(term.first);
             if (trm_it == r->l.vars.end())
             {
-                r->l.vars.insert({term.first, term.second * cc});
-                t_watches.at(term.first).insert(r);
+                r->l.vars.emplace(term.first, term.second * cc);
+                t_watches.at(term.first).emplace(r);
             }
             else
             {
@@ -667,9 +667,9 @@ void lra_theory::pivot(const var x_i, const var x_j)
 void lra_theory::new_row(const var &x, const lin &l)
 {
     row *r = new row(*this, x, l);
-    tableau.insert({x, r});
+    tableau.emplace(x, r);
     for (const auto &term : l.vars)
-        t_watches.at(term.first).insert(r);
+        t_watches.at(term.first).emplace(r);
 }
 
 std::string lra_theory::to_string()

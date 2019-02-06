@@ -19,7 +19,7 @@ public:
 private:
   void new_flaw(const flaw &f)
   {
-    flaw_listeners.insert({&f, new flaw_listener(*this, f)});
+    flaw_listeners.emplace(&f, new flaw_listener(*this, f));
     flaw_created(f);
   }
 
@@ -30,7 +30,7 @@ private:
 
   void new_resolver(const resolver &r)
   {
-    resolver_listeners.insert({&r, new resolver_listener(*this, r)});
+    resolver_listeners.emplace(&r, new resolver_listener(*this, r));
     resolver_created(r);
   }
 

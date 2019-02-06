@@ -31,9 +31,9 @@ expr constructor::new_instance(context &ctx, const std::vector<expr> &exprs) con
 void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
 {
     context ctx(new env(get_core(), &itm));
-    ctx->exprs.insert({THIS_KEYWORD, expr(&itm)});
+    ctx->exprs.emplace(THIS_KEYWORD, expr(&itm));
     for (size_t i = 0; i < args.size(); i++)
-        ctx->exprs.insert({args.at(i)->get_name(), exprs.at(i)});
+        ctx->exprs.emplace(args.at(i)->get_name(), exprs.at(i));
 
     // we initialize the supertypes..
     size_t il_idx = 0;
@@ -63,7 +63,7 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
     for (; il_idx < init_list.size(); il_idx++)
     {
         assert(init_list[il_idx].second.size() == 1);
-        itm.exprs.insert({init_list[il_idx].first, dynamic_cast<const ast::expression *>(init_list[il_idx].second[0])->evaluate(*this, ctx)});
+        itm.exprs.emplace(init_list[il_idx].first, dynamic_cast<const ast::expression *>(init_list[il_idx].second[0])->evaluate(*this, ctx));
     }
 
     // we instantiate the uninstantiated fields..
@@ -72,14 +72,14 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
         {
             // the field is uninstantiated..
             if (f.second->get_expression())
-                itm.exprs.insert({f.second->get_name(), dynamic_cast<const ast::expression *>(f.second->get_expression())->evaluate(*this, ctx)});
+                itm.exprs.emplace(f.second->get_name(), dynamic_cast<const ast::expression *>(f.second->get_expression())->evaluate(*this, ctx));
             else
             {
                 type &tp = const_cast<type &>(f.second->get_type());
                 if (tp.is_primitive())
-                    itm.exprs.insert({f.second->get_name(), tp.new_instance(ctx)});
+                    itm.exprs.emplace(f.second->get_name(), tp.new_instance(ctx));
                 else
-                    itm.exprs.insert({f.second->get_name(), tp.new_existential()});
+                    itm.exprs.emplace(f.second->get_name(), tp.new_existential());
             }
         }
 

@@ -353,7 +353,7 @@ void solver::new_fact(atom &atm)
     new_flaw(*af);
 
     // we associate the flaw to the atom..
-    reason.insert({&atm, af});
+    reason.emplace(&atm, af);
 
     // we check if we need to notify the new fact to any smart types..
     if (&atm.get_type().get_scope() != this)
@@ -378,7 +378,7 @@ void solver::new_goal(atom &atm)
     new_flaw(*af);
 
     // we associate the flaw to the atom..
-    reason.insert({&atm, af});
+    reason.emplace(&atm, af);
 
     // we check if we need to notify the new goal to any smart types..
     if (&atm.get_type().get_scope() != this)

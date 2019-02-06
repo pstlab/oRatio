@@ -133,8 +133,8 @@ expr var_item::get(const std::string &name) const
     q.push(&get_type());
     while (!q.empty())
     {
-        for (const auto &f : q.front()->get_fields())
-            accessible_fields.insert(f);
+        const auto flds = q.front()->get_fields();
+        accessible_fields.insert(flds.cbegin(), flds.cend());
         for (const auto &st : q.front()->get_supertypes())
             q.push(st);
         q.pop();

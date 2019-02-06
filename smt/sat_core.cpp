@@ -32,7 +32,7 @@ var sat_core::new_var()
     watches.push_back(std::vector<clause *>());
     watches.push_back(std::vector<clause *>());
     assigns.push_back(Undefined);
-    exprs.insert({"b" + std::to_string(id), id});
+    exprs.emplace("b" + std::to_string(id), id);
     level.push_back(0);
     reason.push_back(nullptr);
     return id;
@@ -97,7 +97,7 @@ var sat_core::new_eq(const lit &left, const lit &right)
         assert(nc);
         nc = new_clause({e, !left, !right});
         assert(nc);
-        exprs.insert({s_expr, e});
+        exprs.emplace(s_expr, e);
         return e;
     }
 }
@@ -133,7 +133,7 @@ var sat_core::new_conj(const std::vector<lit> &ls)
         }
         nc = new_clause(lits);
         assert(nc);
-        exprs.insert({s_expr, c});
+        exprs.emplace(s_expr, c);
         return c;
     }
 }
@@ -168,7 +168,7 @@ var sat_core::new_disj(const std::vector<lit> &ls)
         }
         nc = new_clause(lits);
         assert(nc);
-        exprs.insert({s_expr, d});
+        exprs.emplace(s_expr, d);
         return d;
     }
 }
@@ -206,7 +206,7 @@ var sat_core::new_exct_one(const std::vector<lit> &ls)
         }
         nc = new_clause(lits);
         assert(nc);
-        exprs.insert({s_expr, eo});
+        exprs.emplace(s_expr, eo);
         return eo;
     }
 }
@@ -230,7 +230,7 @@ bool sat_core::eq(const lit &left, const lit &right, const var &p)
             return false;
         if (!new_clause({p, !left, !right}))
             return false;
-        exprs.insert({s_expr, p});
+        exprs.emplace(s_expr, p);
         return true;
     }
 }
@@ -263,7 +263,7 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
         }
         if (!new_clause(lits))
             return false;
-        exprs.insert({s_expr, p});
+        exprs.emplace(s_expr, p);
         return true;
     }
 }
@@ -295,7 +295,7 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
         }
         if (!new_clause(lits))
             return false;
-        exprs.insert({s_expr, p});
+        exprs.emplace(s_expr, p);
         return true;
     }
 }
@@ -328,7 +328,7 @@ bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
         }
         if (!new_clause(lits))
             return false;
-        exprs.insert({s_expr, p});
+        exprs.emplace(s_expr, p);
         return true;
     }
 }
