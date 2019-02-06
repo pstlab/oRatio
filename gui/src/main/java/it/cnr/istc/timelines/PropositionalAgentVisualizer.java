@@ -54,7 +54,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
                 end_pulse = ((Item.ArithItem) atom.getExpr("end")).getValue().doubleValue();
             }
             double y = getYValue(start_pulse, end_pulse, ends);
-            actions.add(start_pulse, start_pulse, end_pulse, y, y - 1, y, new Action(atom));
+            actions.add(start_pulse, start_pulse, end_pulse, y, y - 1, y, atom);
         }
         collection.addSeries(actions);
 
@@ -74,7 +74,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
         // renderer.setBaseItemLabelFont(font);
         XYItemLabelGenerator generator = (XYDataset dataset, int series,
                 int item) -> ((ActionValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset).getSeries(series)
-                        .getDataItem(item)).action.toString();
+                        .getDataItem(item)).toString();
         ItemLabelPosition itLabPos = new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER);
         // renderer.setBasePositiveItemLabelPosition(itLabPos);
         for (int i = 0; i < collection.getSeriesCount(); i++) {
@@ -86,7 +86,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
             renderer.setSeriesToolTipGenerator(i,
                     (XYDataset dataset, int series,
                             int item) -> ((ActionValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset)
-                                    .getSeries(series).getDataItem(item)).action.toString());
+                                    .getSeries(series).getDataItem(item)).toString());
         }
 
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
@@ -96,11 +96,26 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
         return Arrays.asList(plot);
     }
 
-    private static class Action {
+    @SuppressWarnings("serial")
+    private static class ActionValueXYIntervalSeries extends XYIntervalSeries {
 
-        final Atom atom;
+        private ActionValueXYIntervalSeries(Comparable<?> key) {
+            super(key);
+        }
 
-        Action(Atom atom) {
+        public void add(double x, double xLow, double xHigh, double y, double yLow, double yHigh, Atom atom) {
+            super.add(new ActionValueXYIntervalDataItem(x, xLow, xHigh, y, yLow, yHigh, atom), true);
+        }
+    }
+
+    @SuppressWarnings("serial")
+    private static class ActionValueXYIntervalDataItem extends XYIntervalDataItem {
+
+        private final Atom atom;
+
+        private ActionValueXYIntervalDataItem(double x, double xLow, double xHigh, double y, double yLow, double yHigh,
+                Atom atom) {
+            super(x, xLow, xHigh, y, yLow, yHigh);
             this.atom = atom;
         }
 
@@ -127,30 +142,6 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
             }
             sb.append(")");
             return sb.toString().replace("(, ", "(");
-        }
-    }
-
-    @SuppressWarnings("serial")
-    private static class ActionValueXYIntervalSeries extends XYIntervalSeries {
-
-        private ActionValueXYIntervalSeries(Comparable<?> key) {
-            super(key);
-        }
-
-        public void add(double x, double xLow, double xHigh, double y, double yLow, double yHigh, Action action) {
-            super.add(new ActionValueXYIntervalDataItem(x, xLow, xHigh, y, yLow, yHigh, action), true);
-        }
-    }
-
-    @SuppressWarnings("serial")
-    private static class ActionValueXYIntervalDataItem extends XYIntervalDataItem {
-
-        private final Action action;
-
-        private ActionValueXYIntervalDataItem(double x, double xLow, double xHigh, double y, double yLow, double yHigh,
-                Action action) {
-            super(x, xLow, xHigh, y, yLow, yHigh);
-            this.action = action;
         }
     }
 
