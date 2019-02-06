@@ -141,12 +141,13 @@ public class StateScene extends Scene implements StateListener {
     @Override
     public void stateChanged(Core core) {
         // TODO: update nodes instead of replacing..
-        Platform.runLater(() -> {
-            root.getChildren()
-                    .setAll(core.getExprs().entrySet().stream()
-                            .map(xpr -> new StateTreeItem(new StateNode(xpr.getKey(), xpr.getValue())))
-                            .collect(Collectors.toList()));
-        });
+        Platform.runLater(() -> root.getChildren().setAll(Stream
+                .concat(core.getExprs().entrySet().stream()
+                        .map(xpr -> new StateTreeItem(new StateNode(xpr.getKey(), xpr.getValue()))),
+                        core.getPredicates().values().stream()
+                                .flatMap(p -> p.getInstances().stream()
+                                        .map(i -> new StateTreeItem(new StateNode(((Atom) i).getType().getName(), i)))))
+                .collect(Collectors.toList())));
     }
 
     private static class StateNode {
