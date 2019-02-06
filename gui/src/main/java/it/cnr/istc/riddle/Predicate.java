@@ -28,9 +28,10 @@ public class Predicate extends Type {
         super(core, scope, name);
         this.pars = parameters;
 
-        for (Field par : parameters) {
+        if (scope instanceof Type)
+            fields.put("tau", new Field((Type) scope, "tau"));
+        for (Field par : parameters)
             fields.put(par.name, par);
-        }
     }
 
     public Field[] getParemeters() {

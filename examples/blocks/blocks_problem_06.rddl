@@ -11,6 +11,7 @@ Block e = new Block(5.0);
 Block f = new Block(6.0);
 
 BlocksAgent agent = new BlocksAgent();
+BlocksState state = agent.propositional_state;
 
 fact clear_a = new agent.propositional_state.Clear(polarity:true, x:a, start:origin);  clear_a.duration >= 1.0;
 fact clear_b = new agent.propositional_state.Clear(polarity:true, x:b, start:origin);  clear_b.duration >= 1.0;

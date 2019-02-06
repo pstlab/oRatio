@@ -48,7 +48,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
             if (atom.getType().getSuperclasses().stream().filter(t -> t.getName().equals("ImpulsivePredicate"))
                     .findAny().isPresent()) {
                 start_pulse = ((Item.ArithItem) atom.getExpr("at")).getValue().doubleValue();
-                end_pulse = start_pulse + 0.5;
+                end_pulse = start_pulse + 1;
             } else {
                 start_pulse = ((Item.ArithItem) atom.getExpr("start")).getValue().doubleValue();
                 end_pulse = ((Item.ArithItem) atom.getExpr("end")).getValue().doubleValue();

@@ -1,7 +1,6 @@
 package it.cnr.istc.state;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,30 +71,7 @@ public class StateScene extends Scene implements StateListener {
                         default:
                             throw new AssertionError(((Atom) item.item).getState().name());
                         }
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(item.item.getType().getName()).append("(");
-                        for (Map.Entry<String, Item> expr : item.item.getExprs().entrySet()) {
-                            sb.append(", ");
-                            switch (expr.getValue().getType().getName()) {
-                            case Core.BOOL:
-                                sb.append(expr.getKey()).append(" = ")
-                                        .append(((Item.BoolItem) expr.getValue()).getValue());
-                                break;
-                            case Core.INT:
-                            case Core.REAL:
-                                sb.append(expr.getKey()).append(" = ")
-                                        .append(((Item.ArithItem) expr.getValue()).getValue());
-                                break;
-                            case Core.STRING:
-                                sb.append(expr.getKey()).append(" = ")
-                                        .append(((Item.StringItem) expr.getValue()).getValue());
-                                break;
-                            default:
-                                sb.append(expr.getKey());
-                            }
-                        }
-                        sb.append(")");
-                        tooltip.setText(sb.toString().replace("(, ", "("));
+                        tooltip.setText(((Atom) item.item).toString());
                         setTooltip(tooltip);
                     } else {
                         switch (item.item.getType().getName()) {
