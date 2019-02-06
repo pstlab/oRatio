@@ -58,15 +58,13 @@ public class StateVariableVisualizer implements TimelineVisualizer {
         for (Atom atom : atoms) {
             double start_pulse = ((Item.ArithItem) atom.getExpr("start")).getValue().doubleValue();
             c_pulses.add(start_pulse);
-            if (!starting_values.containsKey(start_pulse)) {
+            if (!starting_values.containsKey(start_pulse))
                 starting_values.put(start_pulse, new ArrayList<>(atoms.size()));
-            }
             starting_values.get(start_pulse).add(atom);
             double end_pulse = ((Item.ArithItem) atom.getExpr("end")).getValue().doubleValue();
             c_pulses.add(end_pulse);
-            if (!ending_values.containsKey(end_pulse)) {
+            if (!ending_values.containsKey(end_pulse))
                 ending_values.put(end_pulse, new ArrayList<>(atoms.size()));
-            }
             ending_values.get(end_pulse).add(atom);
         }
 
@@ -74,12 +72,10 @@ public class StateVariableVisualizer implements TimelineVisualizer {
 
         // Push values to timeline according to pulses...
         List<Atom> overlapping_formulas = new ArrayList<>(atoms.size());
-        if (starting_values.containsKey(c_pulses_array[0])) {
+        if (starting_values.containsKey(c_pulses_array[0]))
             overlapping_formulas.addAll(starting_values.get(c_pulses_array[0]));
-        }
-        if (ending_values.containsKey(c_pulses_array[0])) {
+        if (ending_values.containsKey(c_pulses_array[0]))
             overlapping_formulas.removeAll(ending_values.get(c_pulses_array[0]));
-        }
         for (int i = 1; i < c_pulses_array.length; i++) {
             switch (overlapping_formulas.size()) {
             case 0:
@@ -95,12 +91,10 @@ public class StateVariableVisualizer implements TimelineVisualizer {
                         new SVValue(overlapping_formulas));
                 break;
             }
-            if (starting_values.containsKey(c_pulses_array[i])) {
+            if (starting_values.containsKey(c_pulses_array[i]))
                 overlapping_formulas.addAll(starting_values.get(c_pulses_array[i]));
-            }
-            if (ending_values.containsKey(c_pulses_array[i])) {
+            if (ending_values.containsKey(c_pulses_array[i]))
                 overlapping_formulas.removeAll(ending_values.get(c_pulses_array[i]));
-            }
         }
         collection.addSeries(undefined);
         collection.addSeries(sv_values);

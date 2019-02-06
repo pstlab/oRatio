@@ -57,28 +57,24 @@ public class TimelinesScene extends Scene implements TimelinesListener {
         for (Type t : core.getTypes().values()) {
             if (getTimeline(t) != null) {
                 t.getInstances().forEach(i -> atoms.put(i, new ArrayList<>()));
-                for (Predicate p : t.getPredicates().values()) {
+                for (Predicate p : t.getPredicates().values())
                     p.getInstances().stream().map(atm -> (Atom) atm)
                             .filter(atm -> (atm.getState() == Atom.AtomState.Active)).forEach(atm -> {
                                 Item tau = atm.getTau();
-                                if (tau instanceof Item.EnumItem) {
-                                    for (Item val : ((Item.EnumItem) tau).getVals()) {
+                                if (tau instanceof Item.EnumItem)
+                                    for (Item val : ((Item.EnumItem) tau).getVals())
                                         atoms.get(val).add(atm);
-                                    }
-                                } else {
+                                else
                                     atoms.get(tau).add(atm);
-                                }
                             });
-                }
             }
         }
 
         for (Map.Entry<String, Item> entry : core.getExprs().entrySet()) {
             Type timeline = getTimeline(entry.getValue().getType());
-            if (timeline != null) {
+            if (timeline != null)
                 combined_plot
                         .add(timeline_visualizers.get(timeline).getPlot(entry.getValue(), atoms.get(entry.getValue())));
-            }
         }
 
         ((ChartViewer) getRoot())
