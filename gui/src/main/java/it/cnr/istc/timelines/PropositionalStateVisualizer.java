@@ -2,16 +2,17 @@ package it.cnr.istc.timelines;
 
 import java.awt.Color;
 import java.util.Collection;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
@@ -19,9 +20,9 @@ import it.cnr.istc.riddle.Atom;
 import it.cnr.istc.riddle.Core;
 import it.cnr.istc.riddle.Field;
 import it.cnr.istc.riddle.Item;
-import it.cnr.istc.riddle.Predicate;
-import it.cnr.istc.riddle.Item.EnumItem;
 import it.cnr.istc.riddle.Item.BoolItem.LBool;
+import it.cnr.istc.riddle.Item.EnumItem;
+import it.cnr.istc.riddle.Predicate;
 import it.cnr.istc.utils.CartesianProductGenerator;
 
 /**
@@ -54,17 +55,36 @@ public class PropositionalStateVisualizer implements TimelineVisualizer {
             for (Field fld : p.getFields().values())
                 itms[i++] = fld.getType().getInstances().toArray(Item[]::new);
 
-            for (Item[] c_itms : new CartesianProductGenerator<>(itms)) {
+            if (itms.length > 0)
+                for (Item[] c_itms : new CartesianProductGenerator<>(itms)) {
+                    XYIntervalSeriesCollection collection = new XYIntervalSeriesCollection();
+                    collection.addSeries(new XYIntervalSeries("True"));
+                    collection.addSeries(new XYIntervalSeries("False"));
+
+                    String name = p.getName() + "("
+                            + Stream.of(c_itms).map(c_itm -> core.guessName(c_itm)).collect(Collectors.joining(", "))
+                            + ")";
+                    XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
+                    plot.getRangeAxis().setVisible(false);
+                    plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+                    XYTextAnnotation annotation = new XYTextAnnotation(name, 0, 1);
+                    annotation.setTextAnchor(TextAnchor.TOP_LEFT);
+                    plot.addAnnotation(annotation);
+                    plots.put(name, plot);
+                }
+            else {
                 XYIntervalSeriesCollection collection = new XYIntervalSeriesCollection();
                 collection.addSeries(new XYIntervalSeries("True"));
                 collection.addSeries(new XYIntervalSeries("False"));
 
+                String name = p.getName() + "()";
                 XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
                 plot.getRangeAxis().setVisible(false);
                 plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-                plots.put(p.getName() + "("
-                        + Stream.of(c_itms).map(c_itm -> core.guessName(c_itm)).collect(Collectors.joining(", ")) + ")",
-                        plot);
+                XYTextAnnotation annotation = new XYTextAnnotation(name, 0, 1);
+                annotation.setTextAnchor(TextAnchor.TOP_LEFT);
+                plot.addAnnotation(annotation);
+                plots.put(name, plot);
             }
         }
 
@@ -73,7 +93,7 @@ public class PropositionalStateVisualizer implements TimelineVisualizer {
             double end_pulse = ((Item.ArithItem) atom.getExpr("end")).getValue().doubleValue();
 
             String name = atom.getType().getName() + "(" + atom.getType().getFields().values().stream()
-                    .map(fld -> atom.getExpr(fld.getName())).map(c_itm -> {
+                    .filter(fld -> !fld.getName().equals("tau")).map(fld -> atom.getExpr(fld.getName())).map(c_itm -> {
                         if (c_itm instanceof EnumItem) {
                             if (((EnumItem) c_itm).getVals().length == 1)
                                 return core.guessName(((EnumItem) c_itm).getVals()[0]);

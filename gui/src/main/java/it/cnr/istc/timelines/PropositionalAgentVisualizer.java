@@ -5,8 +5,8 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
@@ -54,7 +54,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
                 end_pulse = ((Item.ArithItem) atom.getExpr("end")).getValue().doubleValue();
             }
             double y = getYValue(start_pulse, end_pulse, ends);
-            actions.add(start_pulse, start_pulse, end_pulse, y, y - 1, y, atom);
+            actions.add(start_pulse, start_pulse, end_pulse, y - 1, y - 1, y, atom);
         }
         collection.addSeries(actions);
 
@@ -66,15 +66,11 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
         renderer.setShadowYOffset(2);
         renderer.setUseYInterval(true);
 
-        // renderer.setBaseItemLabelsVisible(true);
-        // renderer.setBaseItemLabelPaint(Color.black);
         Font font = new Font("SansSerif", Font.PLAIN, 9);
-        // renderer.setBaseItemLabelFont(font);
         XYItemLabelGenerator generator = (XYDataset dataset, int series,
                 int item) -> ((ActionValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset).getSeries(series)
                         .getDataItem(item)).atom.toString();
         ItemLabelPosition itLabPos = new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER);
-        // renderer.setBasePositiveItemLabelPosition(itLabPos);
         for (int i = 0; i < collection.getSeriesCount(); i++) {
             renderer.setSeriesItemLabelGenerator(i, generator);
             renderer.setSeriesItemLabelsVisible(i, true);
@@ -90,6 +86,9 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
         plot.getRangeAxis().setVisible(false);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+        XYTextAnnotation annotation = new XYTextAnnotation(core.guessName(itm), 0, 1);
+        annotation.setTextAnchor(TextAnchor.TOP_LEFT);
+        plot.addAnnotation(annotation);
 
         return Arrays.asList(plot);
     }
@@ -122,9 +121,9 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
         for (int i = 0; i < ends.size(); i++)
             if (ends.get(i) <= start) {
                 ends.set(i, end);
-                return (i * 2) + 1;
+                return (i * 2);
             }
         ends.add(end);
-        return ((ends.size() - 1) * 2) + 1;
+        return ((ends.size() - 1) * 2);
     }
 }

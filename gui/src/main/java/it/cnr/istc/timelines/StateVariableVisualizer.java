@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
@@ -29,7 +29,6 @@ import org.jfree.data.xy.XYIntervalSeriesCollection;
 import it.cnr.istc.riddle.Atom;
 import it.cnr.istc.riddle.Core;
 import it.cnr.istc.riddle.Item;
-import it.cnr.istc.riddle.Item.EnumItem;
 
 /**
  * StateVariableVisualizer
@@ -109,15 +108,11 @@ public class StateVariableVisualizer implements TimelineVisualizer {
         renderer.setShadowYOffset(2);
         renderer.setUseYInterval(true);
 
-        // renderer.setBaseItemLabelsVisible(true);
-        // renderer.setBaseItemLabelPaint(Color.black);
         Font font = new Font("SansSerif", Font.PLAIN, 9);
-        // renderer.setBaseItemLabelFont(font);
         XYItemLabelGenerator generator = (XYDataset dataset, int series,
                 int item) -> ((SVValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset).getSeries(series)
                         .getDataItem(item)).value.toString();
         ItemLabelPosition itLabPos = new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER);
-        // renderer.setBasePositiveItemLabelPosition(itLabPos);
         for (int i = 0; i < collection.getSeriesCount(); i++) {
             renderer.setSeriesItemLabelGenerator(i, generator);
             renderer.setSeriesItemLabelsVisible(i, true);
@@ -133,6 +128,7 @@ public class StateVariableVisualizer implements TimelineVisualizer {
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
         plot.getRangeAxis().setVisible(false);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+        plot.addAnnotation(new XYTextAnnotation(core.guessName(itm), 0, 1));
 
         return Arrays.asList(plot);
     }

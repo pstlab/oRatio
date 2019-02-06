@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
@@ -94,6 +95,7 @@ public class ReusableResourceVisualizer implements TimelineVisualizer {
 
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+        plot.addAnnotation(new XYTextAnnotation(core.guessName(itm), 0, 1));
 
         return Arrays.asList(plot);
     }
