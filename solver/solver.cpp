@@ -520,27 +520,23 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
 {
     if (r.est_cost != cst)
     {
-        if (!trail.empty()) // we store the current resolver's estimated cost for allowing backtracking..
-        {
-            assert(trail.back().old_r_costs.find(&r) == trail.back().old_r_costs.end());
-            trail.back().old_r_costs.insert({&r, r.est_cost});
-        }
+        if (!trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
+            trail.back().old_r_costs.try_emplace(&r, r.est_cost);
+
         // we update the resolver's estimated cost..
         r.est_cost = cst;
         FIRE_RESOLVER_COST_CHANGED(r);
 
         resolver *bst_res = r.effect.get_best_resolver();
         // this is the new cost of the resolver's effect..
-        rational effct_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
-        if (r.effect.est_cost != effct_cost) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
+        rational efct_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
+        if (r.effect.est_cost != efct_cost) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
         {
-            if (!trail.empty()) // we store the current resolver's effect's estimated cost for allowing backtracking..
-            {
-                assert(trail.back().old_f_costs.find(&r.effect) == trail.back().old_f_costs.end());
-                trail.back().old_f_costs.insert({&r.effect, r.effect.est_cost});
-            }
+            if (!trail.empty()) // we store the current resolver's effect's estimated cost, if not already stored, for allowing backtracking..
+                trail.back().old_f_costs.try_emplace(&r.effect, r.effect.est_cost);
+
             // we update the resolver's effect's estimated cost..
-            r.effect.est_cost = effct_cost;
+            r.effect.est_cost = efct_cost;
             FIRE_FLAW_COST_CHANGED(r.effect);
 
             // the resolver costs queue (for resolver cost propagation)..
@@ -554,28 +550,24 @@ void solver::set_estimated_cost(resolver &r, const rational &cst)
                 rational r_cost = evaluate(c_res.preconditions);
                 if (c_res.est_cost != r_cost)
                 {
-                    if (!trail.empty())
-                    {
-                        assert(trail.back().old_r_costs.find(&c_res) == trail.back().old_r_costs.end());
-                        trail.back().old_r_costs.insert({&c_res, c_res.est_cost});
-                    }
+                    if (!trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
+                        trail.back().old_r_costs.try_emplace(&c_res, c_res.est_cost);
+
                     // we update the resolver's estimated cost..
                     c_res.est_cost = r_cost;
                     FIRE_RESOLVER_COST_CHANGED(c_res);
 
                     bst_res = c_res.effect.get_best_resolver();
                     // this is the new cost of the resolver's effect..
-                    effct_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
+                    efct_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
 
-                    if (c_res.effect.est_cost != effct_cost) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update..
+                    if (c_res.effect.est_cost != efct_cost) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update..
                     {
-                        if (!trail.empty()) // we store the current resolver's effect's estimated cost for allowing backtracking..
-                        {
-                            assert(trail.back().old_f_costs.find(&c_res.effect) == trail.back().old_f_costs.end());
-                            trail.back().old_f_costs.insert({&c_res.effect, c_res.effect.est_cost});
-                        }
+                        if (!trail.empty()) // we store the current resolver's effect's estimated cost, if not already stored, for allowing backtracking..
+                            trail.back().old_f_costs.try_emplace(&c_res.effect, c_res.effect.est_cost);
+
                         // we update the resolver's effect's estimated cost..
-                        c_res.effect.est_cost = effct_cost;
+                        c_res.effect.est_cost = efct_cost;
                         FIRE_FLAW_COST_CHANGED(c_res.effect);
 
                         for (const auto &sup_r : c_res.effect.supports) // we propagate the update to all the supports of the resolver's effect..
