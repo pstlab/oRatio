@@ -3,6 +3,7 @@ package it.cnr.istc.timelines;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,7 @@ public class ReusableResourceVisualizer implements TimelineVisualizer {
     }
 
     @Override
-    public XYPlot getPlot(Item itm, Collection<Atom> atoms) {
+    public Collection<XYPlot> getPlots(Item itm, Collection<Atom> atoms) {
         XYSeriesCollection collection = new XYSeriesCollection();
         XYSeries profile = new XYSeries("Profile");
         XYSeries capacity_series = new XYSeries("Capacity");
@@ -98,6 +99,6 @@ public class ReusableResourceVisualizer implements TimelineVisualizer {
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
 
-        return plot;
+        return Arrays.asList(plot);
     }
 }

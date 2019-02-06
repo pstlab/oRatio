@@ -3,6 +3,7 @@ package it.cnr.istc.timelines;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ public class StateVariableVisualizer implements TimelineVisualizer {
     }
 
     @Override
-    public XYPlot getPlot(Item itm, Collection<Atom> atoms) {
+    public Collection<XYPlot> getPlots(Item itm, Collection<Atom> atoms) {
         XYIntervalSeriesCollection collection = new XYIntervalSeriesCollection();
         SVValueXYIntervalSeries undefined = new SVValueXYIntervalSeries("Undefined");
         SVValueXYIntervalSeries sv_values = new SVValueXYIntervalSeries("Values");
@@ -135,7 +136,7 @@ public class StateVariableVisualizer implements TimelineVisualizer {
         plot.getRangeAxis().setVisible(false);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
 
-        return plot;
+        return Arrays.asList(plot);
     }
 
     private static class SVValue {

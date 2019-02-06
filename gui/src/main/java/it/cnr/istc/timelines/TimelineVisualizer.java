@@ -12,5 +12,5 @@ import it.cnr.istc.riddle.Item;
  */
 public interface TimelineVisualizer {
 
-    public XYPlot getPlot(Item itm, Collection<Atom> atoms);
+    public Collection<XYPlot> getPlots(Item itm, Collection<Atom> atoms);
 }

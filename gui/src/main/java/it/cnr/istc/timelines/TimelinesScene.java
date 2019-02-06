@@ -73,8 +73,9 @@ public class TimelinesScene extends Scene implements TimelinesListener {
         for (Map.Entry<String, Item> entry : core.getExprs().entrySet()) {
             Type timeline = getTimeline(entry.getValue().getType());
             if (timeline != null)
-                combined_plot
-                        .add(timeline_visualizers.get(timeline).getPlot(entry.getValue(), atoms.get(entry.getValue())));
+                for (XYPlot plot : timeline_visualizers.get(timeline).getPlots(entry.getValue(),
+                        atoms.get(entry.getValue())))
+                    combined_plot.add(plot);
         }
 
         ((ChartViewer) getRoot())

@@ -3,6 +3,7 @@ package it.cnr.istc.timelines;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
     }
 
     @Override
-    public XYPlot getPlot(Item itm, Collection<Atom> atoms) {
+    public Collection<XYPlot> getPlots(Item itm, Collection<Atom> atoms) {
         XYIntervalSeriesCollection collection = new XYIntervalSeriesCollection();
 
         ActionValueXYIntervalSeries actions = new ActionValueXYIntervalSeries("Actions");
@@ -92,7 +93,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
         plot.getRangeAxis().setVisible(false);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
 
-        return plot;
+        return Arrays.asList(plot);
     }
 
     private static class Action {
