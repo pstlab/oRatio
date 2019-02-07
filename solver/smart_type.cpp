@@ -15,6 +15,14 @@ void smart_type::new_goal(atom_flaw &af) {}
 void smart_type::set_ni(const smt::var &v) { get_solver().set_ni(v); }
 void smart_type::restore_ni() { get_solver().restore_ni(); }
 
+std::vector<smt::lit> smart_type::get_trail()
+{
+    std::vector<smt::lit> trail(get_solver().trail.size());
+    for (auto i = get_solver().trail.begin(); i != get_solver().trail.end(); ++i)
+        trail.push_back(i->r->get_rho());
+    return trail;
+}
+
 std::vector<resolver *> smart_type::get_resolvers(solver &slv, const std::set<atom *> &atms)
 {
     std::unordered_set<resolver *> ress;

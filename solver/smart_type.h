@@ -34,6 +34,8 @@ protected:
   void set_ni(const smt::var &v); // temporally sets the solver's 'ni' variable..
   void restore_ni();              // restores the solver's 'ni' variable..
 
+  std::vector<smt::lit> get_trail(); // returns the current trail: a vector of literals representing the decisions, in chronological order, that have been taken so far..
+
   static std::vector<resolver *> get_resolvers(solver &slv, const std::set<atom *> &atms); // returns the vector of resolvers which has given rise to the given atoms..
 
 private:
