@@ -22,6 +22,7 @@ std::vector<smt::lit> smart_type::get_trail()
         trail.push_back(i->r->get_rho());
     return trail;
 }
+void smart_type::record(const std::vector<smt::lit> &clause) { get_solver().record(clause); }
 
 std::vector<resolver *> smart_type::get_resolvers(solver &slv, const std::set<atom *> &atms)
 {
