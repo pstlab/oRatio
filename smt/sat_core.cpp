@@ -106,7 +106,7 @@ var sat_core::new_conj(const std::vector<lit> &ls)
 {
     assert(root_level());
     std::vector<lit> c_lits = ls;
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() > l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -141,7 +141,7 @@ var sat_core::new_conj(const std::vector<lit> &ls)
 var sat_core::new_disj(const std::vector<lit> &ls)
 {
     std::vector<lit> c_lits = ls;
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() > l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -176,7 +176,7 @@ var sat_core::new_disj(const std::vector<lit> &ls)
 var sat_core::new_exct_one(const std::vector<lit> &ls)
 {
     std::vector<lit> c_lits = ls;
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() > l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -239,7 +239,7 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
 {
     assert(root_level());
     std::vector<lit> c_lits = ls;
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() > l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -271,7 +271,7 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
 bool sat_core::disj(const std::vector<lit> &ls, const var &p)
 {
     std::vector<lit> c_lits = ls;
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() > l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -303,7 +303,7 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
 bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
 {
     std::vector<lit> c_lits = ls;
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() > l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
