@@ -57,8 +57,8 @@ std::vector<flaw *> reusable_resource::get_flaws()
 
             for (const auto &a : rr.second)
             {
-                arith_expr s_expr = a->get("start");
-                arith_expr e_expr = a->get("end");
+                arith_expr s_expr = a->get(START);
+                arith_expr e_expr = a->get(END);
                 inf_rational start = get_core().arith_value(s_expr);
                 inf_rational end = get_core().arith_value(e_expr);
                 starting_atoms[start].insert(a);
@@ -160,10 +160,10 @@ void reusable_resource::rr_flaw::compute_resolvers()
     std::vector<std::vector<atom *>> cs = combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2);
     for (const auto &as : cs)
     {
-        arith_expr a0_start = as[0]->get("start");
-        arith_expr a0_end = as[0]->get("end");
-        arith_expr a1_start = as[1]->get("start");
-        arith_expr a1_end = as[1]->get("end");
+        arith_expr a0_start = as[0]->get(START);
+        arith_expr a0_end = as[0]->get(END);
+        arith_expr a1_start = as[1]->get(START);
+        arith_expr a1_end = as[1]->get(END);
 
         bool_expr a0_before_a1 = slv.leq(a0_end, a1_start);
         if (slv.bool_value(a0_before_a1) != False)

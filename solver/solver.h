@@ -26,6 +26,9 @@
 #define FIRE_STATE_CHANGED()
 #endif
 
+#define START "start"
+#define END "end"
+
 namespace ratio
 {
 
