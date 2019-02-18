@@ -32,6 +32,7 @@ void atom_flaw::compute_resolvers()
 {
     assert(slv.get_sat_core().value(get_phi()) != False);
     assert(slv.get_sat_core().value(atm.get_sigma()) != False);
+    bool unify = false;
     if (slv.get_sat_core().value(atm.get_sigma()) == Undefined) // we check if the atom can unify..
     {
         // we collect the ancestors of this flaw, so as to avoid cyclic causality..
@@ -107,6 +108,7 @@ void atom_flaw::compute_resolvers()
             unify_atom *u_res = new unify_atom(slv, *this, atm, t_atm, {lit(atm.get_sigma(), false), t_atm.get_sigma(), eq_v});
 #endif
                 assert(slv.get_sat_core().value(u_res->get_rho()) != False);
+                unify = true;
                 add_resolver(*u_res);
                 slv.new_causal_link(t_flaw, *u_res);
                 slv.set_estimated_cost(*u_res, t_flaw.get_estimated_cost());
@@ -117,12 +119,18 @@ void atom_flaw::compute_resolvers()
     }
 
     if (is_fact)
-        add_resolver(*new activate_fact(slv, *this, atm));
-    else
+        if (unify)
+            add_resolver(*new activate_fact(slv, *this, atm));
+        else
+            add_resolver(*new activate_fact(slv, get_phi(), *this, atm));
+    else if (unify)
         add_resolver(*new activate_goal(slv, *this, atm));
+    else
+        add_resolver(*new activate_goal(slv, get_phi(), *this, atm));
 }
 
 atom_flaw::activate_fact::activate_fact(solver &slv, atom_flaw &f, atom &a) : resolver(slv, 0, f), atm(a) {}
+atom_flaw::activate_fact::activate_fact(solver &slv, const smt::var &r, atom_flaw &f, atom &a) : resolver(slv, r, 0, f), atm(a) {}
 atom_flaw::activate_fact::~activate_fact() {}
 
 #ifdef BUILD_GUI
@@ -138,6 +146,7 @@ void atom_flaw::activate_fact::apply()
 }
 
 atom_flaw::activate_goal::activate_goal(solver &slv, atom_flaw &f, atom &a) : resolver(slv, 1, f), atm(a) {}
+atom_flaw::activate_goal::activate_goal(solver &slv, const smt::var &r, atom_flaw &f, atom &a) : resolver(slv, r, 1, f), atm(a) {}
 atom_flaw::activate_goal::~activate_goal() {}
 
 #ifdef BUILD_GUI

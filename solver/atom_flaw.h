@@ -30,6 +30,7 @@ private:
   {
   public:
     activate_fact(solver &slv, atom_flaw &f, atom &a);
+    activate_fact(solver &slv, const smt::var &r, atom_flaw &f, atom &a);
     activate_fact(const activate_fact &that) = delete;
     virtual ~activate_fact();
 
@@ -48,6 +49,7 @@ private:
   {
   public:
     activate_goal(solver &slv, atom_flaw &f, atom &a);
+    activate_goal(solver &slv, const smt::var &r, atom_flaw &f, atom &a);
     activate_goal(const activate_goal &that) = delete;
     virtual ~activate_goal();
 
