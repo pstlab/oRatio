@@ -427,8 +427,16 @@ bool lra_theory::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
     for (const auto &a : v_asrts.at(p.get_var()))
-        if (!((p.get_sign() == (a->o == op::leq)) ? assert_upper(a->x, a->v, p, cnfl) : assert_lower(a->x, a->v, p, cnfl)))
-            return false;
+        if (p.get_sign()) // the assertion is direct..
+        {
+            if (!((a->o == op::leq) ? assert_upper(a->x, a->v, p, cnfl) : assert_lower(a->x, a->v, p, cnfl)))
+                return false;
+        }
+        else // the assertion is negated..
+        {
+            if (!((a->o == op::leq) ? assert_lower(a->x, a->v + inf_rational(rational::ZERO, rational::ONE), p, cnfl) : assert_upper(a->x, a->v - inf_rational(rational::ZERO, rational::ONE), p, cnfl)))
+                return false;
+        }
 
     return true;
 }

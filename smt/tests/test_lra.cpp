@@ -153,7 +153,7 @@ void test_inequalities_1()
     assert(y_val == rational::ONE);
 }
 
-void test_strict_inequalities()
+void test_strict_inequalities_0()
 {
     sat_core core;
     lra_theory lra(core);
@@ -182,6 +182,36 @@ void test_strict_inequalities()
     assert(y_val == rational::ONE);
 }
 
+void test_strict_inequalities_1()
+{
+    sat_core core;
+    lra_theory lra(core);
+
+    var x = lra.new_var();
+    var y = lra.new_var();
+
+    // x >= y
+    var geq = lra.new_geq(lin(x, 1), lin(y, 1));
+    bool nc = core.new_clause({lit(geq, false)}) && core.check();
+    assert(nc);
+
+    inf_rational x_val = lra.value(x);
+    assert(x_val == inf_rational(rational::ZERO, -rational::ONE));
+
+    inf_rational y_val = lra.value(y);
+    assert(y_val == rational::ZERO);
+
+    // x >= 1
+    nc = core.new_clause({lra.new_geq(lin(x, 1), lin(1))}) && core.check();
+    assert(nc);
+
+    x_val = lra.value(x);
+    assert(x_val == rational::ONE);
+
+    y_val = lra.value(y);
+    assert(y_val == inf_rational(rational::ONE, rational::ONE));
+}
+
 int main(int, char **)
 {
     test_rationals_0();
@@ -191,5 +221,7 @@ int main(int, char **)
     test_lra_theory();
     test_inequalities_0();
     test_inequalities_1();
-    test_strict_inequalities();
+
+    test_strict_inequalities_0();
+    test_strict_inequalities_1();
 }
