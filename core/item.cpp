@@ -179,7 +179,7 @@ var var_item::eq(item &i) noexcept
     if (this == &i)
         return TRUE_var;
     else if (var_item *ee = dynamic_cast<var_item *>(&i))
-        return get_core().get_ov_theory().eq(ev, ee->ev);
+        return get_core().get_ov_theory().new_eq(ev, ee->ev);
     else
         return get_core().get_ov_theory().allows(ev, i);
 }
