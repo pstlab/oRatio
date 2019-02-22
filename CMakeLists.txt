@@ -63,7 +63,7 @@ endif()
 
 if(BUILD_GUI)
     add_definitions(-DBUILD_GUI)
-    list(APPEND SOURCES gui/src/main/cpp/socket_listener.cpp)
+    list(APPEND SOURCES java-api/src/main/cpp/socket_listener.cpp)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
