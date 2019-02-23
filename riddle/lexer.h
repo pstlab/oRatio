@@ -4,8 +4,6 @@
 #include <cstddef>
 #include <string>
 #include <istream>
-#include <cmath>
-#include <vector>
 
 namespace riddle
 {
