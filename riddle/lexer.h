@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <string>
 #include <istream>
+#include <math.h>
 
 namespace riddle
 {
