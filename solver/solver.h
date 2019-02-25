@@ -37,6 +37,9 @@ class resolver;
 class atom_flaw;
 class composite_flaw;
 class smart_type;
+#ifdef BUILD_GUI
+class solver_listener;
+#endif
 
 class solver : public core, private smt::theory
 {

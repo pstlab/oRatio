@@ -3,6 +3,7 @@
 #include "solver.h"
 #include "graph.h"
 #include "sat_value_listener.h"
+#include <algorithm>
 
 namespace ratio
 {
