@@ -8,6 +8,8 @@ import it.cnr.istc.state.StateScene;
 import it.cnr.istc.timelines.TimelinesScene;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -15,6 +17,8 @@ import javafx.stage.WindowEvent;
  * App
  */
 public class App extends Application {
+
+    private final ServerService service = new ServerService();
 
     public static void main(String[] args) {
         launch(args);
@@ -26,7 +30,9 @@ public class App extends Application {
                 .read(getParameters().getUnnamed().stream().map(arg -> new File(arg)).toArray(File[]::new));
 
         stage.setTitle("oRatio");
-        stage.setScene(new MainScene());
+        MainScene main_scene = new MainScene();
+        Context.getContext().addStateListener(main_scene);
+        stage.setScene(main_scene);
         stage.setOnCloseRequest((WindowEvent event) -> Platform.exit());
         stage.show();
 
@@ -34,7 +40,7 @@ public class App extends Application {
         showTimelines();
         showCausalGraph();
 
-        Context.getContext().startServer();
+        service.start();
     }
 
     private void showState() {
@@ -65,5 +71,20 @@ public class App extends Application {
         stage.setScene(graph_scene);
         stage.setOnCloseRequest((WindowEvent event) -> Context.getContext().removeGraphListener(graph_scene));
         stage.show();
+    }
+
+    private static class ServerService extends Service<Boolean> {
+
+        @Override
+        protected Task<Boolean> createTask() {
+            return new Task<Boolean>() {
+
+                @Override
+                protected Boolean call() throws Exception {
+                    Context.getContext().startServer();
+                    return false;
+                }
+            };
+        }
     }
 }
