@@ -17,12 +17,21 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
 
     public static TimelineBuilder BUILDER = new PropositionalAgentBuilder();
 
+    private final String name;
     private final InfRational origin, horizon;
     private final List<Action> values = new ArrayList<>();
 
-    private PropositionalAgent(final InfRational origin, final InfRational horizon) {
+    private PropositionalAgent(final String name, final InfRational origin, final InfRational horizon) {
+        this.name = name;
         this.origin = origin;
         this.horizon = horizon;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -61,6 +70,10 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
             this.atom = atom;
         }
 
+        public boolean isImpulsive() {
+            return from == to;
+        }
+
         @Override
         public InfRational getFrom() {
             return from;
@@ -83,7 +96,7 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
 
         @Override
         public PropositionalAgent build(Item itm, Collection<Atom> atoms) {
-            PropositionalAgent pa = new PropositionalAgent(
+            PropositionalAgent pa = new PropositionalAgent(itm.getCore().guessName(itm),
                     ((Item.ArithItem) itm.getCore().getExpr("origin")).getValue(),
                     ((Item.ArithItem) itm.getCore().getExpr("horizon")).getValue());
 
@@ -92,8 +105,13 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
                     .compareTo(((Item.ArithItem) a1.getExpr("start")).getValue()));
 
             for (Atom atm : c_atoms)
-                pa.addValue(((Item.ArithItem) atm.getExpr("start")).getValue(),
-                        ((Item.ArithItem) atm.getExpr("end")).getValue(), atm);
+                if (atm.getType().getSuperclasses().stream().filter(t -> t.getName().equals("ImpulsivePredicate"))
+                        .findAny().isPresent())
+                    pa.addValue(((Item.ArithItem) atm.getExpr("at")).getValue(),
+                            ((Item.ArithItem) atm.getExpr("at")).getValue(), atm);
+                else
+                    pa.addValue(((Item.ArithItem) atm.getExpr("start")).getValue(),
+                            ((Item.ArithItem) atm.getExpr("end")).getValue(), atm);
             return pa;
         }
     }

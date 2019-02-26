@@ -30,8 +30,7 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
             BUILDERS.put(core.getType("StateVariable"), StateVariable.BUILDER);
             BUILDERS.put(core.getType("ReusableResource"), ReusableResource.BUILDER);
             BUILDERS.put(core.getType("PropositionalAgent"), PropositionalAgent.BUILDER);
-            // timeline_builders.put(core.getType("PropositionalState"), new
-            // PropositionalStateBuilder(core));
+            BUILDERS.put(core.getType("PropositionalState"), PropositionalState.BUILDER);
         } catch (ClassNotFoundException ex) {
             LOG.log(Level.SEVERE, null, ex);
         }

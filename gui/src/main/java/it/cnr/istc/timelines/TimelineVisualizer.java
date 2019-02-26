@@ -4,13 +4,12 @@ import java.util.Collection;
 
 import org.jfree.chart.plot.XYPlot;
 
-import it.cnr.istc.riddle.Atom;
-import it.cnr.istc.riddle.Item;
+import it.cnr.istc.oratio.timelines.Timeline;
 
 /**
  * TimelineVisualizer
  */
 public interface TimelineVisualizer {
 
-    public Collection<XYPlot> getPlots(Item itm, Collection<Atom> atoms);
+    public Collection<XYPlot> getPlots(Timeline<?> timeline);
 }

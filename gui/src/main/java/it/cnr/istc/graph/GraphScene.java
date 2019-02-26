@@ -9,7 +9,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import it.cnr.istc.riddle.Core;
+import it.cnr.istc.oratio.GraphListener;
+import it.cnr.istc.oratio.riddle.Core;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
@@ -255,7 +256,7 @@ public class GraphScene extends Scene implements GraphListener {
     }
 
     @Override
-    public void flaw_created(FlawCreated flaw) {
+    public void flawCreated(FlawCreated flaw) {
         synchronized (vis) {
             assert !flaws.containsKey(flaw.flaw) : "the flaw already exists..";
             assert Arrays.stream(flaw.causes)
@@ -275,7 +276,7 @@ public class GraphScene extends Scene implements GraphListener {
     }
 
     @Override
-    public void flaw_state_changed(FlawStateChanged flaw) {
+    public void flawStateChanged(FlawStateChanged flaw) {
         synchronized (vis) {
             assert flaws.containsKey(flaw.flaw) : "the flaw does not exist..";
             Node flaw_node = flaws.get(flaw.flaw);
@@ -284,7 +285,7 @@ public class GraphScene extends Scene implements GraphListener {
     }
 
     @Override
-    public void flaw_cost_changed(FlawCostChanged flaw) {
+    public void flawCostChanged(FlawCostChanged flaw) {
         synchronized (vis) {
             assert flaws.containsKey(flaw.flaw) : "the flaw does not exist..";
             Node flaw_node = flaws.get(flaw.flaw);
@@ -293,7 +294,7 @@ public class GraphScene extends Scene implements GraphListener {
     }
 
     @Override
-    public void current_flaw(CurrentFlaw flaw) {
+    public void currentFlaw(CurrentFlaw flaw) {
         synchronized (vis) {
             assert flaws.containsKey(flaw.flaw) : "the flaw does not exist..";
             if (current_flaw != null)
@@ -307,7 +308,7 @@ public class GraphScene extends Scene implements GraphListener {
     }
 
     @Override
-    public void resolver_created(ResolverCreated resolver) {
+    public void resolverCreated(ResolverCreated resolver) {
         synchronized (vis) {
             assert !resolvers.containsKey(resolver.resolver) : "the resolver already exists..";
             assert flaws.containsKey(resolver.effect) : "the resolver's solved flaw does not exist..";
@@ -324,7 +325,7 @@ public class GraphScene extends Scene implements GraphListener {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void resolver_state_changed(ResolverStateChanged resolver) {
+    public void resolverStateChanged(ResolverStateChanged resolver) {
         synchronized (vis) {
             assert resolvers.containsKey(resolver.resolver) : "the resolver does not exist..";
             Node resolver_node = resolvers.get(resolver.resolver);
@@ -336,7 +337,7 @@ public class GraphScene extends Scene implements GraphListener {
     }
 
     @Override
-    public void resolver_cost_changed(ResolverCostChanged resolver) {
+    public void resolverCostChanged(ResolverCostChanged resolver) {
         synchronized (vis) {
             assert resolvers.containsKey(resolver.resolver) : "the resolver does not exist..";
             Node resolver_node = resolvers.get(resolver.resolver);
@@ -345,7 +346,7 @@ public class GraphScene extends Scene implements GraphListener {
     }
 
     @Override
-    public void current_resolver(CurrentResolver resolver) {
+    public void currentResolver(CurrentResolver resolver) {
         assert resolvers.containsKey(resolver.resolver) : "the resolver does not exist..";
         synchronized (vis) {
             current_resolver = resolver.resolver;
@@ -354,12 +355,16 @@ public class GraphScene extends Scene implements GraphListener {
     }
 
     @Override
-    public void causal_link_added(CausalLinkAdded causal_link) {
+    public void causalLinkAdded(CausalLinkAdded causal_link) {
         synchronized (vis) {
             assert flaws.containsKey(causal_link.flaw) : "the flaw does not exist..";
             assert resolvers.containsKey(causal_link.resolver) : "the resolver does not exist..";
             Edge c_edge = g.addEdge(flaws.get(causal_link.flaw), resolvers.get(causal_link.resolver));
             c_edge.set(EDGE_STATE, resolvers.get(causal_link.resolver).get(NODE_STATE));
         }
+    }
+
+    @Override
+    public void poke() {
     }
 }

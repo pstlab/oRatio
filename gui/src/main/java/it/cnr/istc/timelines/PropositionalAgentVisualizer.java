@@ -20,41 +20,37 @@ import org.jfree.data.xy.XYIntervalDataItem;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
-import it.cnr.istc.riddle.Atom;
-import it.cnr.istc.riddle.Core;
-import it.cnr.istc.riddle.Item;
+import it.cnr.istc.oratio.timelines.PropositionalAgent;
+import it.cnr.istc.oratio.timelines.Timeline;
+import it.cnr.istc.oratio.timelines.PropositionalAgent.Action;
 
 /**
  * PropositionalAgentVisualizer
  */
 public class PropositionalAgentVisualizer implements TimelineVisualizer {
 
-    private final Core core;
-
-    PropositionalAgentVisualizer(Core core) {
-        this.core = core;
-    }
-
     @Override
-    public Collection<XYPlot> getPlots(Item itm, Collection<Atom> atoms) {
+    public Collection<XYPlot> getPlots(Timeline<?> timeline) {
+        assert timeline instanceof PropositionalAgent;
+        PropositionalAgent pa = (PropositionalAgent) timeline;
+
         XYIntervalSeriesCollection collection = new XYIntervalSeriesCollection();
 
         ActionValueXYIntervalSeries actions = new ActionValueXYIntervalSeries("Actions");
 
         ArrayList<Double> ends = new ArrayList<>(10);
         ends.add(0d);
-        for (Atom atom : atoms) {
+        for (Action action : pa.getValues()) {
             double start_pulse, end_pulse;
-            if (atom.getType().getSuperclasses().stream().filter(t -> t.getName().equals("ImpulsivePredicate"))
-                    .findAny().isPresent()) {
-                start_pulse = ((Item.ArithItem) atom.getExpr("at")).getValue().doubleValue();
+            if (action.isImpulsive()) {
+                start_pulse = action.getFrom().doubleValue();
                 end_pulse = start_pulse + 1;
             } else {
-                start_pulse = ((Item.ArithItem) atom.getExpr("start")).getValue().doubleValue();
-                end_pulse = ((Item.ArithItem) atom.getExpr("end")).getValue().doubleValue();
+                start_pulse = action.getFrom().doubleValue();
+                end_pulse = action.getTo().doubleValue();
             }
             double y = getYValue(start_pulse, end_pulse, ends);
-            actions.add(start_pulse, start_pulse, end_pulse, y - 1, y - 1, y, atom);
+            actions.add(start_pulse, start_pulse, end_pulse, y - 1, y - 1, y, action);
         }
         collection.addSeries(actions);
 
@@ -69,7 +65,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
         Font font = new Font("SansSerif", Font.PLAIN, 9);
         XYItemLabelGenerator generator = (XYDataset dataset, int series,
                 int item) -> ((ActionValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset).getSeries(series)
-                        .getDataItem(item)).atom.toString();
+                        .getDataItem(item)).action.toString();
         ItemLabelPosition itLabPos = new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER);
         for (int i = 0; i < collection.getSeriesCount(); i++) {
             renderer.setSeriesItemLabelGenerator(i, generator);
@@ -80,13 +76,13 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
             renderer.setSeriesToolTipGenerator(i,
                     (XYDataset dataset, int series,
                             int item) -> ((ActionValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset)
-                                    .getSeries(series).getDataItem(item)).atom.toString());
+                                    .getSeries(series).getDataItem(item)).action.toString());
         }
 
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
         plot.getRangeAxis().setVisible(false);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-        XYTextAnnotation annotation = new XYTextAnnotation(core.guessName(itm), 0, 1);
+        XYTextAnnotation annotation = new XYTextAnnotation(pa.getName(), 0, 1);
         annotation.setTextAnchor(TextAnchor.TOP_LEFT);
         plot.addAnnotation(annotation);
 
@@ -100,20 +96,20 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
             super(key);
         }
 
-        public void add(double x, double xLow, double xHigh, double y, double yLow, double yHigh, Atom atom) {
-            super.add(new ActionValueXYIntervalDataItem(x, xLow, xHigh, y, yLow, yHigh, atom), true);
+        public void add(double x, double xLow, double xHigh, double y, double yLow, double yHigh, Action action) {
+            super.add(new ActionValueXYIntervalDataItem(x, xLow, xHigh, y, yLow, yHigh, action), true);
         }
     }
 
     @SuppressWarnings("serial")
     private static class ActionValueXYIntervalDataItem extends XYIntervalDataItem {
 
-        private final Atom atom;
+        private final Action action;
 
         private ActionValueXYIntervalDataItem(double x, double xLow, double xHigh, double y, double yLow, double yHigh,
-                Atom atom) {
+                Action action) {
             super(x, xLow, xHigh, y, yLow, yHigh);
-            this.atom = atom;
+            this.action = action;
         }
     }
 

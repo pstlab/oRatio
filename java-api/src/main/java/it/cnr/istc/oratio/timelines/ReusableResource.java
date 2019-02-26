@@ -21,12 +21,31 @@ public class ReusableResource implements Timeline<ReusableResource.RRValue> {
 
     public static TimelineBuilder BUILDER = new ReusableResourceBuilder();
 
+    private final String name;
+    private final InfRational capacity;
     private final InfRational origin, horizon;
     private final List<RRValue> values = new ArrayList<>();
 
-    private ReusableResource(final InfRational origin, final InfRational horizon) {
+    private ReusableResource(final String name, final InfRational capacity, final InfRational origin,
+            final InfRational horizon) {
+        this.name = name;
+        this.capacity = capacity;
         this.origin = origin;
         this.horizon = horizon;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @return the capacity
+     */
+    public InfRational getCapacity() {
+        return capacity;
     }
 
     /**
@@ -97,7 +116,9 @@ public class ReusableResource implements Timeline<ReusableResource.RRValue> {
 
         @Override
         public ReusableResource build(Item itm, Collection<Atom> atoms) {
-            ReusableResource rr = new ReusableResource(((Item.ArithItem) itm.getCore().getExpr("origin")).getValue(),
+            ReusableResource rr = new ReusableResource(itm.getCore().guessName(itm),
+                    ((Item.ArithItem) itm.getExpr("capacity")).getValue(),
+                    ((Item.ArithItem) itm.getCore().getExpr("origin")).getValue(),
                     ((Item.ArithItem) itm.getCore().getExpr("horizon")).getValue());
 
             // For each pulse the atoms starting at that pulse

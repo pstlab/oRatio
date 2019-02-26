@@ -4,9 +4,10 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import it.cnr.istc.riddle.Atom;
-import it.cnr.istc.riddle.Core;
-import it.cnr.istc.riddle.Item;
+import it.cnr.istc.oratio.StateListener;
+import it.cnr.istc.oratio.riddle.Atom;
+import it.cnr.istc.oratio.riddle.Core;
+import it.cnr.istc.oratio.riddle.Item;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
@@ -124,6 +125,10 @@ public class StateScene extends Scene implements StateListener {
                                 .flatMap(p -> p.getInstances().stream()
                                         .map(i -> new StateTreeItem(new StateNode(((Atom) i).getType().getName(), i)))))
                 .collect(Collectors.toList())));
+    }
+
+    @Override
+    public void log(String log) {
     }
 
     private static class StateNode {

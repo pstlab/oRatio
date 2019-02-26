@@ -20,12 +20,21 @@ public class StateVariable implements Timeline<StateVariable.SVValue> {
 
     public static TimelineBuilder BUILDER = new StateVariableBuilder();
 
+    private final String name;
     private final InfRational origin, horizon;
     private final List<SVValue> values = new ArrayList<>();
 
-    private StateVariable(final InfRational origin, final InfRational horizon) {
+    private StateVariable(final String name, final InfRational origin, final InfRational horizon) {
+        this.name = name;
         this.origin = origin;
         this.horizon = horizon;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
     }
 
     /**
@@ -86,7 +95,8 @@ public class StateVariable implements Timeline<StateVariable.SVValue> {
 
         @Override
         public StateVariable build(Item itm, Collection<Atom> atoms) {
-            StateVariable sv = new StateVariable(((Item.ArithItem) itm.getCore().getExpr("origin")).getValue(),
+            StateVariable sv = new StateVariable(itm.getCore().guessName(itm),
+                    ((Item.ArithItem) itm.getCore().getExpr("origin")).getValue(),
                     ((Item.ArithItem) itm.getCore().getExpr("horizon")).getValue());
 
             // For each pulse the atoms starting at that pulse
