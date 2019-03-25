@@ -710,7 +710,7 @@ std::string lra_theory::to_string()
         la += "]";
     }
     la += "], \"tableau\" : [";
-    for (std::map<var, row *>::const_iterator it = tableau.cbegin(); it != tableau.cend(); ++it)
+    for (std::map<const var, row *>::const_iterator it = tableau.cbegin(); it != tableau.cend(); ++it)
     {
         if (it != tableau.cbegin())
             la += ", ";

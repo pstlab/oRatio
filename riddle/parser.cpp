@@ -534,6 +534,8 @@ constructor_declaration *parser::_constructor_declaration()
                 p_ids.push_back("string");
                 tk = next();
                 break;
+            default:
+                error("expected either 'bool' or 'int' or 'real' or 'string' or an identifier..");
             }
             if (!match(ID_ID))
                 error("expected identifier..");
@@ -631,6 +633,8 @@ predicate_declaration *parser::_predicate_declaration()
                     p_ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
                 }
                 break;
+            default:
+                error("expected either 'bool' or 'int' or 'real' or 'string' or an identifier..");
             }
             if (!match(ID_ID))
                 error("expected identifier..");
@@ -690,6 +694,8 @@ statement *parser::_statement()
         case STRING_ID:
             ft.push_back("string");
             break;
+        default:
+            error("expected either 'bool' or 'int' or 'real' or 'string'..");
         }
         tk = next();
 
@@ -1194,6 +1200,8 @@ expression *parser::_expression(const size_t &pr)
             e = new_division_expression(xprs);
             break;
         }
+        default:
+            error("expected either '==' or '!=' or '<' or '<=' or '>' or '>=' or '->' or '|' or '&' or '^' or '+' or '-' or '*' or '/'..");
         }
     }
 
