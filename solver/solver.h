@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core.h"
+#include "graph.h"
 
 namespace ratio
 {
@@ -31,5 +32,8 @@ private:
   bool check(std::vector<smt::lit> &cnfl) override;
   void push() override;
   void pop() override;
+
+private:
+  graph gr;
 };
 } // namespace ratio
