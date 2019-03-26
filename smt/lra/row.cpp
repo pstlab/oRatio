@@ -55,14 +55,18 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                         {
                         case True: // we have a propositional inconsistency..
                             return false;
+                        case False: // nothing to propagate..
+                            break;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
+                            break;
                         }
-                        break;
                     case geq: // the assertion is satisfied..
                         cnfl[0] = c->b;
                         switch (th.sat.value(c->b))
                         {
+                        case True: // nothing to propagate..
+                            break;
                         case False: // we have a propositional inconsistency..
                             return false;
                         case Undefined: // we propagate information to the sat core..
@@ -109,6 +113,8 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                         cnfl[0] = c->b;
                         switch (th.sat.value(c->b))
                         {
+                        case True: // nothing to propagate..
+                            break;
                         case False: // we have a propositional inconsistency..
                             return false;
                         case Undefined: // we propagate information to the sat core..
@@ -121,6 +127,8 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                         {
                         case True: // we have a propositional inconsistency..
                             return false;
+                        case False: // nothing to propagate..
+                            break;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
                         }
@@ -175,6 +183,8 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                         cnfl[0] = c->b;
                         switch (th.sat.value(c->b))
                         {
+                        case True: // nothing to propagate..
+                            break;
                         case False: // we have a propositional inconsistency..
                             return false;
                         case Undefined: // we propagate information to the sat core..
@@ -187,6 +197,8 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                         {
                         case True: // we have a propositional inconsistency..
                             return false;
+                        case False: // nothing to propagate..
+                            break;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
                         }
@@ -233,6 +245,8 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                         {
                         case True: // we have a propositional inconsistency..
                             return false;
+                        case False: // nothing to propagate..
+                            break;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
                         }
@@ -241,6 +255,8 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                         cnfl[0] = c->b;
                         switch (th.sat.value(c->b))
                         {
+                        case True: // nothing to propagate..
+                            break;
                         case False: // we have a propositional inconsistency..
                             return false;
                         case Undefined: // we propagate information to the sat core..

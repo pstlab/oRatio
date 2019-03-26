@@ -49,6 +49,8 @@ bool sat_core::new_clause(const std::vector<lit> &lits)
         {
         case True:
             return true; // the clause is already satisfied..
+        case False:
+            break; // we skip false literals..
         case Undefined:
             bool found = false;
             for (const auto &c_l : c_lits)

@@ -28,4 +28,4 @@ private:
   var v;     // this is the variable of the propositional literal..
   bool sign; // this is the sign of the propositional literal..
 };
-} // namespace sat
+} // namespace smt

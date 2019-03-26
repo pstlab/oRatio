@@ -486,6 +486,9 @@ void solver::new_flaw(flaw &f)
     case True: // we have a top-level (a landmark) flaw..
         flaws.insert(&f);
         break;
+    case False:
+        assert(sat.value(f.phi) != False);
+        break;
     case Undefined: // we listen for the flaw to become active..
         phis[f.phi].push_back(&f);
         bind(f.phi);
