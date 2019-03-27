@@ -1,8 +1,9 @@
 #pragma once
 
 #include "rational.h"
-#include <vector>
 #include <deque>
+#include <unordered_map>
+#include <vector>
 
 namespace smt
 {
@@ -26,12 +27,21 @@ public:
   graph(const graph &that) = delete;
   ~graph();
 
-  solver &get_solver() { return slv; }
+  solver &get_solver() const { return slv; }
+
+  void new_flaw(flaw &f);
+  void new_resolver(resolver &r);
+  void new_causal_link(flaw &f, resolver &r);
+
+  void set_estimated_cost(resolver &r, const smt::rational &cst);     // sets the estimated cost of the given resolver, propagating it to other resolvers..
+  static const smt::rational evaluate(const std::vector<flaw *> &fs); // evaluates, together, the given vector of flaws..
 
 private:
   solver &slv;
-  smt::var gamma;            // this variable represents the validity of the current graph..
-  std::deque<flaw *> flaw_q; // the flaw queue (for the graph building procedure)..
+  smt::var gamma;                                             // this variable represents the validity of the current graph..
+  std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
+  std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
+  std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
 };
 
 class flaw
@@ -41,7 +51,33 @@ public:
   flaw(const flaw &that) = delete;
   ~flaw();
 
-  graph &get_graph() { return gr; }
+  graph &get_graph() const { return gr; }
+  smt::var get_phi() const { return phi; }
+  std::vector<resolver *> get_resolvers() const { return resolvers; }
+  std::vector<resolver *> get_causes() const { return causes; }
+  std::vector<resolver *> get_supports() const { return supports; }
+  bool is_expanded() const { return expanded; }
+
+  smt::rational get_estimated_cost() const { return est_cost; }
+  resolver *get_best_resolver() const;
+
+private:
+  /**
+   * Initializes this flaw.
+   * 
+   * @pre the solver must be at root-level.
+   */
+  void init();
+  /**
+   * Expands this flaw, invoking the compute_resolvers procedure.
+   * 
+   * @pre the solver must be at root-level.
+   */
+  void expand();
+  virtual void compute_resolvers() = 0;
+
+protected:
+  void add_resolver(resolver &r);
 
 private:
   graph &gr;
@@ -56,13 +92,23 @@ private:
 
 class resolver
 {
+  friend class flaw;
+
 public:
   resolver(graph &gr, const smt::rational &cost, flaw &eff);
   resolver(graph &gr, const smt::var &r, const smt::rational &cost, flaw &eff);
   resolver(const resolver &that) = delete;
   ~resolver();
 
-  graph &get_graph() { return gr; }
+  graph &get_graph() const { return gr; }
+  smt::var get_rho() const { return rho; }
+  smt::rational get_intrinsic_cost() const { return intrinsic_cost; }
+  smt::rational get_estimated_cost() const { return est_cost + intrinsic_cost; }
+  flaw &get_effect() const { return effect; }
+  std::vector<flaw *> get_preconditions() const { return preconditions; }
+
+private:
+  virtual void apply() = 0;
 
 private:
   graph &gr;
