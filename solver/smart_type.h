@@ -10,6 +10,9 @@ namespace ratio
 
 class solver;
 class atom;
+class flaw;
+class atom_flaw;
+class resolver;
 
 class smart_type : public type
 {
@@ -23,7 +26,29 @@ public:
   solver &get_solver() const { return slv; }
 
 private:
+  /**
+   * Retrieves, and removes, all the flaws found so far.
+   * 
+   * @return a vector containing pointers to the flaws found so far.
+   * @pre the solver must be at root-level.
+   */
+  std::vector<flaw *> get_flaws();
+  /**
+   * Returns all the decisions to take for solving the current inconsistencies with their estimated cost.
+   * 
+   * @return a vector of pairs containing the literals representing the decisions to take and their estimated cost.
+   */
+  virtual std::vector<std::pair<smt::lit, double>> get_current_incs() = 0;
+
+  virtual void new_fact(atom_flaw &);
+  virtual void new_goal(atom_flaw &);
+
+protected:
+  void add_flaw(flaw &fl) { flaws.push_back(&fl); }
+
+private:
   solver &slv;
+  std::vector<flaw *> flaws;
 };
 
 class atom_listener : public smt::sat_value_listener, public smt::lra_value_listener, public smt::ov_value_listener

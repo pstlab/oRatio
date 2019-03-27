@@ -2,12 +2,22 @@
 #include "solver.h"
 #include "atom.h"
 #include "field.h"
+#include <cassert>
 
 namespace ratio
 {
 
 smart_type::smart_type(solver &slv, scope &scp, const std::string &name) : type(slv, scp, name, false), slv(slv) {}
 smart_type::~smart_type() {}
+
+std::vector<flaw *> smart_type::get_flaws()
+{
+    assert(slv.get_sat_core().root_level());
+    return std::move(flaws);
+}
+
+void smart_type::new_fact(atom_flaw &af) {}
+void smart_type::new_goal(atom_flaw &af) {}
 
 atom_listener::atom_listener(atom &atm) : smt::sat_value_listener(atm.get_core().get_sat_core()), smt::lra_value_listener(atm.get_core().get_lra_theory()), smt::ov_value_listener(atm.get_core().get_ov_theory()), atm(atm)
 {
