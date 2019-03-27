@@ -19,6 +19,7 @@ class resolver;
 
 class graph
 {
+  friend class solver;
   friend class flaw;
   friend class resolver;
 
@@ -29,6 +30,7 @@ public:
 
   solver &get_solver() const { return slv; }
 
+private:
   void new_flaw(flaw &f);
   void new_resolver(resolver &r);
   void new_causal_link(flaw &f, resolver &r);
@@ -36,9 +38,19 @@ public:
   void set_estimated_cost(resolver &r, const smt::rational &cst);     // sets the estimated cost of the given resolver, propagating it to other resolvers..
   static const smt::rational evaluate(const std::vector<flaw *> &fs); // evaluates, together, the given vector of flaws..
 
+  void build();             // builds the planning graph..
+  void add_layer();         // adds a layer to the current planning graph..
+  void increase_accuracy(); // increases the heuristic accuracy by one..
+
+  void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
+  void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
+
 private:
-  solver &slv;
+  unsigned short accuracy = MIN_ACCURACY;                     // the current heuristic accuracy..
+  static const unsigned short max_accuracy = MAX_ACCURACY;    // the maximum heuristic accuracy..
+  solver &slv;                                                // the solver this graph belongs to..
   smt::var gamma;                                             // this variable represents the validity of the current graph..
+  resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
@@ -80,7 +92,7 @@ protected:
   void add_resolver(resolver &r);
 
 private:
-  graph &gr;
+  graph &gr;                                                 // the graph this flaw belongs to..
   smt::var phi;                                              // the propositional variable indicating whether the flaw is active or not..
   smt::rational est_cost = smt::rational::POSITIVE_INFINITY; // the estimated cost of the flaw..
   std::vector<resolver *> resolvers;                         // the resolvers for this flaw..
@@ -111,7 +123,7 @@ private:
   virtual void apply() = 0;
 
 private:
-  graph &gr;
+  graph &gr;                                                 // the graph this resolver belongs to..
   const smt::var rho;                                        // the propositional variable indicating whether the resolver is active or not..
   const smt::rational intrinsic_cost;                        // the intrinsic cost of the resolver..
   smt::rational est_cost = smt::rational::POSITIVE_INFINITY; // the estimated cost of the resolver, computed by the heuristic, except for the intrinsic cost..

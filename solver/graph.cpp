@@ -48,6 +48,16 @@ const smt::rational graph::evaluate(const std::vector<flaw *> &fs)
     return c_cost;
 }
 
+void graph::build() {}
+
+void graph::add_layer() {}
+
+void graph::increase_accuracy() {}
+
+void graph::expand_flaw(flaw &f) {}
+
+void graph::apply_resolver(resolver &r) {}
+
 flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), causes(causes), supports(causes), exclusive(exclusive) {}
 flaw::~flaw() {}
 

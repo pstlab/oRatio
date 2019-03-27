@@ -34,6 +34,19 @@ private:
   void pop() override;
 
 private:
-  graph gr;
+  struct layer
+  {
+
+    layer(const smt::lit &dec) : decision(dec) {}
+
+    const smt::lit decision;                                   // the decision which introduced the new layer..
+    std::unordered_map<resolver *, smt::rational> old_r_costs; // the old estimated resolvers' costs..
+    std::unordered_map<flaw *, smt::rational> old_f_costs;     // the old estimated flaws' costs..
+    std::unordered_set<flaw *> new_flaws;                      // the just activated flaws..
+    std::unordered_set<flaw *> solved_flaws;                   // the just solved flaws..
+  };
+  graph gr;                         // the causal graph..
+  std::unordered_set<flaw *> flaws; // the currently active flaws..
+  std::vector<layer> trail;         // the list of applied resolvers, with the associated changes made, in chronological order..
 };
 } // namespace ratio
