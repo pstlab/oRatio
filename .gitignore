@@ -1,9 +1,12 @@
 .vscode
+.DS_Store
 /build
-/gui/.settings
-/gui/src/main/antlr4/.antlr
-/gui/target/
 /gui/.classpath
 /gui/dependency-reduced-pom.xml
+/gui/.settings
+/gui/target/
 /gui/.project
+/java-api/.classpath
+/java-api/.settings
 /java-api/target/
+/java-api/.project
