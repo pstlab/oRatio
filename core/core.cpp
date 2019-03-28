@@ -4,6 +4,9 @@
 #include "field.h"
 #include "method.h"
 #include "riddle_parser.h"
+#ifdef BUILD_GUI
+#include "core_listener.h"
+#endif
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -514,4 +517,12 @@ std::string core::to_string() const noexcept
     cr += "\"exprs\" : [" + to_string(get_exprs()) + "] }";
     return cr;
 }
+
+#ifdef BUILD_GUI
+void core::fire_log(const std::string msg) const
+{
+    for (const auto &l : listeners)
+        l->log(msg);
+}
+#endif
 } // namespace ratio

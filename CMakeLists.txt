@@ -7,7 +7,7 @@ include(CTest)
 enable_testing()
 
 file(GLOB SOURCES main.cpp smt/*.cpp smt/lra/*.cpp smt/ov/*.cpp riddle/*.cpp core/*.cpp solver/*.cpp solver/types/*.cpp)
-include_directories(smt smt/lra smt/ov riddle core solver solver/types gui/src/main/cpp)
+include_directories(smt smt/lra smt/ov riddle core solver solver/types java-api/src/main/cpp)
 
 configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
@@ -23,7 +23,7 @@ option(CHECK_UNIFICATIONS "Check unifications when building the planning graph" 
 option(CHECK_COMPOSITE_FLAWS "Check composite flaws when building the planning graph" OFF)
 option(RESOLVERS_LOOKUP "Resolvers lookup" OFF)
 option(GRAPH_PRUNING "Graph pruning" OFF)
-option(BUILD_GUI "Build GUI" OFF)
+option(BUILD_GUI "Build GUI" ON)
 
 message(STATUS "Heuristic type:         ${HEURISTIC_TYPE}")
 message(STATUS "Min heuristic accuracy: ${MIN_ACCURACY}")

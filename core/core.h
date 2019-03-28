@@ -174,5 +174,12 @@ private:
 
   smt::var tmp_ni;             // the temporary controlling variable, used for restoring the controlling variable..
   smt::var ni = smt::TRUE_var; // the controlling variable..
+
+#ifdef BUILD_GUI
+private:
+  std::vector<core_listener *> listeners; // the core listeners..
+
+  void fire_log(const std::string msg) const;
+#endif
 };
 } // namespace ratio

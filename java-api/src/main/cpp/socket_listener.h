@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core_listener.h"
 #include "solver_listener.h"
 #ifdef _WIN32
 #include <winsock2.h>
@@ -15,7 +16,7 @@
 namespace ratio
 {
 
-class socket_listener : public solver_listener
+class socket_listener : public core_listener, public solver_listener
 {
 public:
   socket_listener(solver &slv);
@@ -23,6 +24,8 @@ public:
   virtual ~socket_listener();
 
 private:
+  void log(const std::string &msg) override;
+
   void flaw_created(const flaw &f) override;
   void flaw_state_changed(const flaw &f) override;
   void flaw_cost_changed(const flaw &f) override;

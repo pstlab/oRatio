@@ -6,8 +6,15 @@
 namespace ratio
 {
 
+#ifdef BUILD_GUI
+class solver_listener;
+#endif
+
 class solver : public core, private smt::theory
 {
+#ifdef BUILD_GUI
+  friend class solver_listener;
+#endif
 public:
   solver();
   solver(const solver &orig) = delete;
@@ -48,5 +55,21 @@ private:
   graph gr;                         // the causal graph..
   std::unordered_set<flaw *> flaws; // the currently active flaws..
   std::vector<layer> trail;         // the list of applied resolvers, with the associated changes made, in chronological order..
+
+#ifdef BUILD_GUI
+private:
+  std::vector<solver_listener *> listeners; // the solver listeners..
+
+  void fire_new_flaw(const flaw &f) const;
+  void fire_flaw_state_changed(const flaw &f) const;
+  void fire_flaw_cost_changed(const flaw &f) const;
+  void fire_current_flaw(const flaw &f) const;
+  void fire_new_resolver(const resolver &r) const;
+  void fire_resolver_state_changed(const resolver &r) const;
+  void fire_resolver_cost_changed(const resolver &r) const;
+  void fire_current_resolver(const resolver &r) const;
+  void fire_causal_link_added(const flaw &f, const resolver &r) const;
+  void fire_state_changed() const;
+#endif
 };
 } // namespace ratio

@@ -11,7 +11,7 @@
 
 namespace ratio
 {
-socket_listener::socket_listener(solver &slv) : solver_listener(slv)
+socket_listener::socket_listener(solver &slv) : core_listener(slv), solver_listener(slv)
 {
 #ifdef _WIN32
     WSADATA wsa_data;
@@ -45,6 +45,13 @@ socket_listener::~socket_listener()
 #else
     close(skt);
 #endif
+}
+
+void socket_listener::log(const std::string &msg)
+{
+    std::stringstream ss;
+    ss << msg << '\n';
+    send_message(ss.str());
 }
 
 void socket_listener::flaw_created(const flaw &f)
