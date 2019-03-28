@@ -15,13 +15,14 @@ namespace ratio
 
 class solver;
 class flaw;
+class composite_flaw;
 class resolver;
 
 class graph
 {
   friend class solver;
   friend class flaw;
-  friend class resolver;
+  friend class composite_flaw;
 
 public:
   graph(solver &slv);
@@ -29,6 +30,7 @@ public:
   ~graph();
 
   solver &get_solver() const { return slv; }
+  unsigned short get_accuracy() const { return accuracy; }
 
 private:
   void new_flaw(flaw &f);
@@ -46,14 +48,17 @@ private:
   void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
 
 private:
+  solver &slv;                                                // the solver this graph belongs to..
   unsigned short accuracy = MIN_ACCURACY;                     // the current heuristic accuracy..
   static const unsigned short max_accuracy = MAX_ACCURACY;    // the maximum heuristic accuracy..
-  solver &slv;                                                // the solver this graph belongs to..
   smt::var gamma;                                             // this variable represents the validity of the current graph..
   resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
+#if defined CHECK_UNIFICATIONS || defined CHECK_COMPOSITE_FLAWS
+  bool checking = false;
+#endif
 };
 
 class flaw

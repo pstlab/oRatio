@@ -23,7 +23,7 @@ option(CHECK_UNIFICATIONS "Check unifications when building the planning graph" 
 option(CHECK_COMPOSITE_FLAWS "Check composite flaws when building the planning graph" OFF)
 option(RESOLVERS_LOOKUP "Resolvers lookup" OFF)
 option(GRAPH_PRUNING "Graph pruning" OFF)
-option(BUILD_GUI "Build GUI" ON)
+option(BUILD_GUI "Build GUI" OFF)
 
 message(STATUS "Heuristic type:         ${HEURISTIC_TYPE}")
 message(STATUS "Min heuristic accuracy: ${MIN_ACCURACY}")
