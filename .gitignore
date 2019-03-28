@@ -6,4 +6,6 @@
 /gui/.classpath
 /gui/dependency-reduced-pom.xml
 /gui/.project
+/java-api/.classpath
+/java-api/.settings
 /java-api/target/
