@@ -54,6 +54,9 @@ void core::read(const std::string &script)
 
     if (!sat_cr.check())
         throw std::runtime_error("the input problem is inconsistent");
+#ifdef BUILD_GUI
+    fire_read(script);
+#endif
 }
 
 void core::read(const std::vector<std::string> &files)
@@ -84,6 +87,9 @@ void core::read(const std::vector<std::string> &files)
 
     if (!sat_cr.check())
         throw std::runtime_error("the input problem is inconsistent");
+#ifdef BUILD_GUI
+    fire_read(files);
+#endif
 }
 
 bool_expr core::new_bool() { return new bool_item(*this, sat_cr.new_var()); }
@@ -523,6 +529,16 @@ void core::fire_log(const std::string msg) const
 {
     for (const auto &l : listeners)
         l->log(msg);
+}
+void core::fire_read(const std::string &script) const
+{
+    for (const auto &l : listeners)
+        l->read(script);
+}
+void core::fire_read(const std::vector<std::string> &files) const
+{
+    for (const auto &l : listeners)
+        l->read(files);
 }
 #endif
 } // namespace ratio

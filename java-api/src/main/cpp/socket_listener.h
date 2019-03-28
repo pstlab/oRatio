@@ -25,6 +25,8 @@ public:
 
 private:
   void log(const std::string &msg) override;
+  void read(const std::string &script) override;
+  void read(const std::vector<std::string> &files) override;
 
   void flaw_created(const flaw &f) override;
   void flaw_state_changed(const flaw &f) override;

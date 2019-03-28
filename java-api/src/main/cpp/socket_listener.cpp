@@ -7,6 +7,7 @@
 #include "graph.h"
 #include "solver.h"
 #include <sstream>
+#include <fstream>
 #include <iostream>
 
 namespace ratio
@@ -50,7 +51,28 @@ socket_listener::~socket_listener()
 void socket_listener::log(const std::string &msg)
 {
     std::stringstream ss;
-    ss << msg << '\n';
+    ss << "log " << msg << '\n';
+    send_message(ss.str());
+}
+
+void socket_listener::read(const std::string &script)
+{
+    std::stringstream ss;
+    ss << "read0 " << script << '\n';
+    send_message(ss.str());
+}
+
+void socket_listener::read(const std::vector<std::string> &files)
+{
+    std::stringstream ss;
+    ss << "read1 {";
+    for (std::vector<std::string>::const_iterator f_it = files.cbegin(); f_it != files.cend(); ++f_it)
+    {
+        if (f_it != files.begin())
+            ss << ", ";
+        ss << *f_it;
+    }
+    ss << "}\n";
     send_message(ss.str());
 }
 

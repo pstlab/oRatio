@@ -16,6 +16,8 @@ public:
 
 private:
   virtual void log(const std::string &msg) {}
+  virtual void read(const std::string &script) {}
+  virtual void read(const std::vector<std::string> &files) {}
 
 protected:
   core &cr;
