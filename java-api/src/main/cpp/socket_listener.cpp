@@ -58,7 +58,7 @@ void socket_listener::log(const std::string &msg)
 void socket_listener::read(const std::string &script)
 {
     std::stringstream ss;
-    ss << "read0 " << script << '\n';
+    ss << "read0 " << script << '\n' << "EOS" << '\n';
     send_message(ss.str());
 }
 

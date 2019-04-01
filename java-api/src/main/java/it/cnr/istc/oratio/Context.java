@@ -111,19 +111,24 @@ public class Context {
                         l.log(inputLine.substring(LOG_MESSAGE.length()));
                 } else if (inputLine.startsWith(STATE_CHANGED)) {
                     deserializer.setCore(core);
-                    List<String> files = gson.fromJson(inputLine.substring(STATE_CHANGED.length()),
-                            new TypeToken<List<String>>() {
-                            }.getType());
-                    core.read(files.toArray(String[]::new));
+                    gson.fromJson(inputLine.substring(STATE_CHANGED.length()), Core.class);
                     for (StateListener l : state_listeners)
                         l.stateChanged(core);
                 } else if (inputLine.startsWith(READ_0)) {
-                    core.read(inputLine.substring(READ_0.length()));
+                    StringBuilder script = new StringBuilder();
+                    script.append(inputLine.substring(READ_0.length()));
+                    while ((inputLine = in.readLine()) != null && inputLine.equals("EOS")) {
+                        script.append('\n').append(inputLine);
+                    }
+                    core.read(script.toString());
                     for (StateListener l : state_listeners)
                         l.stateChanged(core);
                 } else if (inputLine.startsWith(READ_1)) {
                     deserializer.setCore(core);
-                    gson.fromJson(inputLine.substring(READ_1.length()), Core.class);
+                    List<String> files = gson.fromJson(inputLine.substring(STATE_CHANGED.length()),
+                            new TypeToken<List<String>>() {
+                            }.getType());
+                    core.read(files.toArray(String[]::new));
                     for (StateListener l : state_listeners)
                         l.stateChanged(core);
                 } else if (inputLine.startsWith(FLAW_CREATED)) {
