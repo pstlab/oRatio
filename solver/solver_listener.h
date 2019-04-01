@@ -2,6 +2,7 @@
 
 #include "solver.h"
 #include "sat_value_listener.h"
+#include <algorithm>
 
 namespace ratio
 {

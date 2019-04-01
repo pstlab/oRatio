@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core.h"
+#include <algorithm>
 
 namespace ratio
 {
