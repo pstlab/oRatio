@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import it.cnr.istc.oratio.GraphListener.*;
 import it.cnr.istc.oratio.riddle.Core;
@@ -30,6 +31,8 @@ public class Context {
 
     private static final String LOG_MESSAGE = "log ";
     private static final String STATE_CHANGED = "state_changed ";
+    private static final String READ_0 = "read0 ";
+    private static final String READ_1 = "read1 ";
 
     private static final String FLAW_CREATED = "flaw_created ";
     private static final String FLAW_STATE_CHANGED = "flaw_state_changed ";
@@ -108,7 +111,19 @@ public class Context {
                         l.log(inputLine.substring(LOG_MESSAGE.length()));
                 } else if (inputLine.startsWith(STATE_CHANGED)) {
                     deserializer.setCore(core);
-                    gson.fromJson(inputLine.substring(STATE_CHANGED.length()), Core.class);
+                    List<String> files = gson.fromJson(inputLine.substring(STATE_CHANGED.length()),
+                            new TypeToken<List<String>>() {
+                            }.getType());
+                    core.read(files.toArray(String[]::new));
+                    for (StateListener l : state_listeners)
+                        l.stateChanged(core);
+                } else if (inputLine.startsWith(READ_0)) {
+                    core.read(inputLine.substring(READ_0.length()));
+                    for (StateListener l : state_listeners)
+                        l.stateChanged(core);
+                } else if (inputLine.startsWith(READ_1)) {
+                    deserializer.setCore(core);
+                    gson.fromJson(inputLine.substring(READ_1.length()), Core.class);
                     for (StateListener l : state_listeners)
                         l.stateChanged(core);
                 } else if (inputLine.startsWith(FLAW_CREATED)) {

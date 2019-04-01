@@ -65,14 +65,14 @@ void socket_listener::read(const std::string &script)
 void socket_listener::read(const std::vector<std::string> &files)
 {
     std::stringstream ss;
-    ss << "read1 {";
+    ss << "read1 [";
     for (std::vector<std::string>::const_iterator f_it = files.cbegin(); f_it != files.cend(); ++f_it)
     {
         if (f_it != files.begin())
             ss << ", ";
-        ss << *f_it;
+        ss << "\"" << *f_it << "\"";
     }
-    ss << "}\n";
+    ss << "]\n";
     send_message(ss.str());
 }
 
