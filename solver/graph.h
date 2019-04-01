@@ -47,6 +47,12 @@ private:
   void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
   void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
 
+#ifdef DEFERRABLE_FLAWS
+  bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
+#endif
+
+  void set_new_gamma();
+
 private:
   solver &slv;                                                // the solver this graph belongs to..
   unsigned short accuracy = MIN_ACCURACY;                     // the current heuristic accuracy..
@@ -63,6 +69,8 @@ private:
 
 class flaw
 {
+  friend class graph;
+
 public:
   flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive = false);
   flaw(const flaw &that) = delete;
@@ -113,6 +121,7 @@ private:
 
 class resolver
 {
+  friend class graph;
   friend class flaw;
 
 public:

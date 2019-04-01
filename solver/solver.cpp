@@ -37,6 +37,16 @@ void solver::new_disjunction(context &d_ctx, const disjunction &disj)
     // TODO: add code for creating a new disjunction flaw..
 }
 
+void solver::take_decision(const smt::lit &ch)
+{
+    // TODO: add code for taking a decision..
+}
+
+void solver::next()
+{
+    // TODO: add code for moving to the next solution..
+}
+
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     return true;

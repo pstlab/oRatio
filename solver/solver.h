@@ -12,6 +12,7 @@ class solver_listener;
 
 class solver : public core, private smt::theory
 {
+  friend class graph;
 #ifdef BUILD_GUI
   friend class solver_listener;
 #endif
@@ -34,6 +35,9 @@ private:
   void new_fact(atom &atm) override;                                      // creates a new fact token..
   void new_goal(atom &atm) override;                                      // creates a new goal token..
   void new_disjunction(context &d_ctx, const disjunction &disj) override; // creates a new disjunction..
+
+  void take_decision(const smt::lit &ch);
+  void next();
 
   bool propagate(const smt::lit &p, std::vector<smt::lit> &cnfl) override;
   bool check(std::vector<smt::lit> &cnfl) override;
