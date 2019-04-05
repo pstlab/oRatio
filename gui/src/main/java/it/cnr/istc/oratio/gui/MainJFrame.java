@@ -40,9 +40,14 @@ public class MainJFrame extends JFrame {
         Context.getContext().addGraphListener(graph_frame);
         graph_frame.setVisible(true);
 
+        LogJInternalFrame log_frame = new LogJInternalFrame(Context.getContext().getCore());
+        Context.getContext().addStateListener(log_frame);
+        log_frame.setVisible(true);
+
         mainJDesktopPane.add(state_frame);
         mainJDesktopPane.add(timelines_frame);
         mainJDesktopPane.add(graph_frame);
+        mainJDesktopPane.add(log_frame);
 
         add(mainJDesktopPane);
 

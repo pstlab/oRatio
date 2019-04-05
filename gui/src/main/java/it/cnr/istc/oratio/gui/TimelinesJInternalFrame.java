@@ -47,11 +47,11 @@ public class TimelinesJInternalFrame extends JInternalFrame implements StateList
     }
 
     @Override
-    public void log(String arg0) {
+    public void log(String log) {
     }
 
     @Override
-    public void stateChanged(Core arg0) {
+    public void stateChanged(Core core) {
         final CombinedDomainXYPlot combined_plot = new CombinedDomainXYPlot(new DateAxis("Time"));
         combined_plot.setGap(3.0);
         combined_plot.setOrientation(PlotOrientation.VERTICAL);
