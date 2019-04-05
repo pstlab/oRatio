@@ -2,7 +2,6 @@ package it.cnr.istc.oratio.gui;
 
 import java.awt.Component;
 import java.util.Arrays;
-import java.util.Map;
 
 import javax.swing.ImageIcon;
 import javax.swing.JInternalFrame;

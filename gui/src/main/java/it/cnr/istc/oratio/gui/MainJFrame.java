@@ -5,14 +5,17 @@ import java.awt.Frame;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.beans.PropertyVetoException;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
+import javax.swing.ImageIcon;
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.WindowConstants;
 
 import it.cnr.istc.oratio.Context;
+import it.cnr.istc.oratio.gui.timelines.StateVariableVisualizer;
 
 /**
  * MainJFrame
@@ -28,11 +31,17 @@ public class MainJFrame extends JFrame {
         Context.getContext().addStateListener(state_frame);
         state_frame.setVisible(true);
 
+        TimelinesJInternalFrame timelines_frame = new TimelinesJInternalFrame(Context.getContext().getCore());
+        timelines_frame.addVisualizer(new StateVariableVisualizer());
+        Context.getContext().addStateListener(timelines_frame);
+        timelines_frame.setVisible(true);
+
         GraphJInternalFrame graph_frame = new GraphJInternalFrame(Context.getContext().getCore());
         Context.getContext().addGraphListener(graph_frame);
         graph_frame.setVisible(true);
 
         mainJDesktopPane.add(state_frame);
+        mainJDesktopPane.add(timelines_frame);
         mainJDesktopPane.add(graph_frame);
 
         add(mainJDesktopPane);
@@ -90,6 +99,8 @@ public class MainJFrame extends JFrame {
         });
 
         setExtendedState(Frame.MAXIMIZED_BOTH);
+        setIconImages(Arrays.asList(new ImageIcon(getClass().getResource("/oRatio16.png")).getImage(),
+                new ImageIcon(getClass().getResource("/oRatio32.png")).getImage()));
         setPreferredSize(new Dimension(800, 600));
         pack();
         setLocationRelativeTo(null);
