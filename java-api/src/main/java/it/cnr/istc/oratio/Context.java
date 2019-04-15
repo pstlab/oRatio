@@ -1,7 +1,9 @@
 package it.cnr.istc.oratio;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -115,21 +117,34 @@ public class Context {
                     gson.fromJson(inputLine.substring(STATE_CHANGED.length()), Core.class);
                     for (StateListener l : state_listeners)
                         l.stateChanged(core);
-                } else if (inputLine.startsWith(READ_0)) {
+                } else if (inputLine.equals(READ_0)) {
                     StringBuilder script = new StringBuilder();
-                    script.append(inputLine.substring(READ_0.length()));
-                    while ((inputLine = in.readLine()) != null && inputLine.equals("EOS")) {
-                        script.append('\n').append(inputLine);
+                    while ((inputLine = in.readLine()) != null && !inputLine.equals("EOS")) {
+                        script.append(inputLine).append('\n');
                     }
+                    if (inputLine == null)
+                        throw new RuntimeException("Connection lost..");
                     core.read(script.toString());
                     for (StateListener l : state_listeners)
                         l.stateChanged(core);
-                } else if (inputLine.startsWith(READ_1)) {
+                } else if (inputLine.equals(READ_1)) {
                     deserializer.setCore(core);
-                    List<String> files = gson.fromJson(inputLine.substring(STATE_CHANGED.length()),
-                            new TypeToken<List<String>>() {
-                            }.getType());
-                    core.read(files.stream().map(file -> new File(file)).toArray(File[]::new));
+                    List<File> files = new ArrayList<>();
+                    while (true) {
+                        File file = File.createTempFile("script_" + System.currentTimeMillis(), ".tmp");
+                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                            while ((inputLine = in.readLine()) != null && !inputLine.equals("EOF")
+                                    && !inputLine.equals("EOS")) {
+                                writer.write(inputLine + '\n');
+                            }
+                            if (inputLine == null)
+                                throw new RuntimeException("Connection lost..");
+                        }
+                        files.add(file);
+                        if (inputLine.equals("EOS"))
+                            break;
+                    }
+                    core.read(files.toArray(File[]::new));
                     for (StateListener l : state_listeners)
                         l.stateChanged(core);
                 } else if (inputLine.startsWith(FLAW_CREATED)) {
