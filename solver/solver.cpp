@@ -6,6 +6,10 @@
 #include "composite_flaw.h"
 #include "smart_type.h"
 #include "atom.h"
+#include "state_variable.h"
+#include "reusable_resource.h"
+#include "propositional_state.h"
+#include "propositional_agent.h"
 #ifdef BUILD_GUI
 #include "solver_listener.h"
 #endif
@@ -22,11 +26,16 @@ solver::~solver() {}
 void solver::init()
 {
     read(std::vector<std::string>({"init.rddl"}));
-    // TODO: add custom types..
+    new_types({new state_variable(*this),
+               new reusable_resource(*this),
+               new propositional_state(*this),
+               new propositional_agent(*this)});
 }
 
 void solver::solve()
 {
+    // we build the causal graph..
+    gr.build();
     // TODO: add solving code here..
 }
 

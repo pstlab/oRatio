@@ -44,6 +44,9 @@ private:
   virtual void new_goal(atom_flaw &);
 
 protected:
+  void set_ni(const smt::var &v); // temporally sets the solver's 'ni' variable..
+  void restore_ni();              // restores the solver's 'ni' variable..
+
   void add_flaw(flaw &fl) { flaws.push_back(&fl); }
 
 private:

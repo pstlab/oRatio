@@ -19,6 +19,9 @@ std::vector<flaw *> smart_type::get_flaws()
 void smart_type::new_fact(atom_flaw &af) {}
 void smart_type::new_goal(atom_flaw &af) {}
 
+void smart_type::set_ni(const smt::var &v) { get_solver().set_ni(v); }
+void smart_type::restore_ni() { get_solver().restore_ni(); }
+
 atom_listener::atom_listener(atom &atm) : smt::sat_value_listener(atm.get_core().get_sat_core()), smt::lra_value_listener(atm.get_core().get_lra_theory()), smt::ov_value_listener(atm.get_core().get_ov_theory()), atm(atm)
 {
     std::queue<const type *> q;
