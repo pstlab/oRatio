@@ -1,6 +1,7 @@
 package it.cnr.istc.oratio;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -128,7 +129,7 @@ public class Context {
                     List<String> files = gson.fromJson(inputLine.substring(STATE_CHANGED.length()),
                             new TypeToken<List<String>>() {
                             }.getType());
-                    core.read(files.toArray(String[]::new));
+                    core.read(files.stream().map(file -> new File(file)).toArray(File[]::new));
                     for (StateListener l : state_listeners)
                         l.stateChanged(core);
                 } else if (inputLine.startsWith(FLAW_CREATED)) {
