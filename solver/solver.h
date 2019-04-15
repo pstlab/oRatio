@@ -31,6 +31,9 @@ public:
    */
   void solve() override;
 
+  expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals) override;
+  atom_flaw &get_reason(const atom &atm) const { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
+
 private:
   void new_fact(atom &atm) override;                                      // creates a new fact token..
   void new_goal(atom &atm) override;                                      // creates a new goal token..
@@ -56,9 +59,10 @@ private:
     std::unordered_set<flaw *> new_flaws;                      // the just activated flaws..
     std::unordered_set<flaw *> solved_flaws;                   // the just solved flaws..
   };
-  graph gr;                         // the causal graph..
-  std::unordered_set<flaw *> flaws; // the currently active flaws..
-  std::vector<layer> trail;         // the list of applied resolvers, with the associated changes made, in chronological order..
+  graph gr;                                             // the causal graph..
+  std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
+  std::unordered_set<flaw *> flaws;                     // the currently active flaws..
+  std::vector<layer> trail;                             // the list of applied resolvers, with the associated changes made, in chronological order..
 
 #ifdef BUILD_GUI
 private:

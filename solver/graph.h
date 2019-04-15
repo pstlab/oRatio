@@ -17,12 +17,14 @@ class solver;
 class flaw;
 class composite_flaw;
 class resolver;
+class atom_flaw;
 
 class graph
 {
   friend class solver;
   friend class flaw;
   friend class composite_flaw;
+  friend class atom_flaw;
 
 public:
   graph(solver &slv);

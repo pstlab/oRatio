@@ -1,7 +1,15 @@
 #include "solver.h"
+#include "graph.h"
+#include "var_flaw.h"
+#include "atom_flaw.h"
+#include "disjunction_flaw.h"
+#include "composite_flaw.h"
+#include "smart_type.h"
+#include "atom.h"
 #ifdef BUILD_GUI
 #include "solver_listener.h"
 #endif
+#include <cassert>
 
 using namespace smt;
 
@@ -22,19 +30,75 @@ void solver::solve()
     // TODO: add solving code here..
 }
 
+expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals)
+{
+    assert(allowed_vals.size() > 1);
+    assert(tp.get_name().compare(BOOL_KEYWORD) != 0);
+    assert(tp.get_name().compare(INT_KEYWORD) != 0);
+    assert(tp.get_name().compare(REAL_KEYWORD) != 0);
+    // we create a new enum expression..
+    // notice that we do not enforce the exct_one constraint!
+    var_expr xp = new var_item(*this, tp, get_ov_theory().new_var(std::unordered_set<var_value *>(allowed_vals.begin(), allowed_vals.end()), false));
+    if (allowed_vals.size() > 1) // we create a new var flaw..
+        gr.new_flaw(*new var_flaw(gr, gr.res, *xp));
+    return xp;
+}
+
 void solver::new_fact(atom &atm)
 {
-    // TODO: add code for creating a new fact flaw..
+    // we create a new atom flaw representing a fact..
+    atom_flaw *af = new atom_flaw(gr, gr.res, atm, true);
+    gr.new_flaw(*af);
+
+    // we associate the flaw to the atom..
+    reason.emplace(&atm, af);
+
+    // we check if we need to notify the new fact to any smart types..
+    if (&atm.get_type().get_scope() != this)
+    {
+        std::queue<type *> q;
+        q.push(static_cast<type *>(&atm.get_type().get_scope()));
+        while (!q.empty())
+        {
+            if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
+                st->new_fact(*af);
+            for (const auto &st : q.front()->get_supertypes())
+                q.push(st);
+            q.pop();
+        }
+    }
 }
 
 void solver::new_goal(atom &atm)
 {
-    // TODO: add code for creating a new goal flaw..
+    // we create a new atom flaw representing a goal..
+    atom_flaw *af = new atom_flaw(gr, gr.res, atm, false);
+    gr.new_flaw(*af);
+
+    // we associate the flaw to the atom..
+    reason.emplace(&atm, af);
+
+    // we check if we need to notify the new goal to any smart types..
+    if (&atm.get_type().get_scope() != this)
+    {
+        std::queue<type *> q;
+        q.push(static_cast<type *>(&atm.get_type().get_scope()));
+        while (!q.empty())
+        {
+            if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
+                st->new_goal(*af);
+            for (const auto &st : q.front()->get_supertypes())
+                q.push(st);
+            q.pop();
+        }
+    }
 }
 
 void solver::new_disjunction(context &d_ctx, const disjunction &disj)
 {
-    // TODO: add code for creating a new disjunction flaw..
+    // we create a new disjunction flaw..
+    disjunction_flaw *df = new disjunction_flaw(gr, gr.res, d_ctx, disj);
+    gr.new_flaw(*df);
 }
 
 void solver::take_decision(const smt::lit &ch)

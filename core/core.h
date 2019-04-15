@@ -138,7 +138,7 @@ public:
 
   virtual void solve() = 0;
 
-protected:
+private:
   virtual void new_fact(atom &atm) = 0;
   virtual void new_goal(atom &atm) = 0;
   virtual void new_disjunction(context &ctx, const disjunction &disj) = 0;
