@@ -126,7 +126,7 @@ public class Context {
                         l.stateChanged(core);
                 } else if (inputLine.startsWith(READ_1)) {
                     deserializer.setCore(core);
-                    List<String> files = gson.fromJson(inputLine.substring(STATE_CHANGED.length()),
+                    List<String> files = gson.fromJson(inputLine.substring(READ_1.length()),
                             new TypeToken<List<String>>() {
                             }.getType());
                     core.read(files.stream().map(file -> new File(file)).toArray(File[]::new));

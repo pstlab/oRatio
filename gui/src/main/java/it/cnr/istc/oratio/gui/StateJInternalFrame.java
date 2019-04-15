@@ -157,6 +157,7 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
     @Override
     public void stateChanged(Core core) {
         root.removeAllChildren();
+        root.hasLoadedChildren = false;
         root.loadChildren();
     }
 

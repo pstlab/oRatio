@@ -3,6 +3,8 @@ package it.cnr.istc.oratio.gui;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import it.cnr.istc.oratio.Context;
+
 /**
  * Hello world!
  *
@@ -22,5 +24,7 @@ public class App {
 
         MainJFrame frame = new MainJFrame();
         frame.setVisible(true);
+
+        Context.getContext().startServer();
     }
 }
