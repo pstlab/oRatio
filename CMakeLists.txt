@@ -13,9 +13,9 @@ configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
 set(HEURISTIC_TYPE "h_max" CACHE STRING "Heuristic type")
 set_property(CACHE HEURISTIC_TYPE PROPERTY STRINGS "h_max" "h_add")
-set(MIN_ACCURACY 1 CACHE INTEGER "Min heuristic accuracy")
+set(MIN_ACCURACY 1 CACHE STRING "Min heuristic accuracy")
 add_definitions(-DMIN_ACCURACY=${MIN_ACCURACY})
-set(MAX_ACCURACY 2 CACHE INTEGER "Max heuristic accuracy")
+set(MAX_ACCURACY 2 CACHE STRING "Max heuristic accuracy")
 add_definitions(-DMAX_ACCURACY=${MAX_ACCURACY})
 
 option(DEFERRABLE_FLAWS "Deferrable flaws" ON)
