@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 
 import it.cnr.istc.oratio.GraphListener.*;
 import it.cnr.istc.oratio.riddle.Core;
@@ -34,8 +33,8 @@ public class Context {
 
     private static final String LOG_MESSAGE = "log ";
     private static final String STATE_CHANGED = "state_changed ";
-    private static final String READ_0 = "read0 ";
-    private static final String READ_1 = "read1 ";
+    private static final String READ_0 = "read0";
+    private static final String READ_1 = "read1";
 
     private static final String FLAW_CREATED = "flaw_created ";
     private static final String FLAW_STATE_CHANGED = "flaw_state_changed ";
