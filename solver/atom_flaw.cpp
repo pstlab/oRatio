@@ -103,7 +103,7 @@ void atom_flaw::compute_resolvers()
 
             if (unif_lits.empty() || get_graph().get_solver().get_sat_core().check(unif_lits))
             {
-                unify_atom *u_res = new unify_atom(get_graph(), *this, atm, c_atm, unif_lits);
+                unify_atom *u_res = new unify_atom(get_graph(), *this, atm, t_atm, unif_lits);
 #else
             unify_atom *u_res = new unify_atom(get_graph(), *this, atm, t_atm, {lit(atm.get_sigma(), false), t_atm.get_sigma(), eq_v});
 #endif

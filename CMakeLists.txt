@@ -21,7 +21,6 @@ add_definitions(-DMAX_ACCURACY=${MAX_ACCURACY})
 option(DEFERRABLE_FLAWS "Deferrable flaws" ON)
 option(CHECK_UNIFICATIONS "Check unifications when building the planning graph" OFF)
 option(CHECK_COMPOSITE_FLAWS "Check composite flaws when building the planning graph" OFF)
-option(RESOLVERS_LOOKUP "Resolvers lookup" OFF)
 option(GRAPH_PRUNING "Graph pruning" OFF)
 option(BUILD_GUI "Build GUI" OFF)
 
@@ -31,7 +30,6 @@ message(STATUS "Max heuristic accuracy: ${MAX_ACCURACY}")
 message(STATUS "Deferrable flaws:       ${DEFERRABLE_FLAWS}")
 message(STATUS "Check unifications:     ${CHECK_UNIFICATIONS}" )
 message(STATUS "Check composite flaws:  ${CHECK_COMPOSITE_FLAWS}" )
-message(STATUS "Resolvers lookup:       ${RESOLVERS_LOOKUP}" )
 message(STATUS "Graph pruning:          ${GRAPH_PRUNING}")
 message(STATUS "Build GUI:              ${BUILD_GUI}")
 
@@ -51,10 +49,6 @@ endif()
 
 if(CHECK_COMPOSITE_FLAWS)
   add_definitions(-DCHECK_COMPOSITE_FLAWS)
-endif()
-
-if(RESOLVERS_LOOKUP)
-  add_definitions(-DRESOLVERS_LOOKUP)
 endif()
 
 if(GRAPH_PRUNING)
