@@ -2,6 +2,7 @@
 #include "solver.h"
 #include "combinations.h"
 #include "composite_flaw.h"
+#include <stdexcept>
 #include <cassert>
 
 using namespace smt;
