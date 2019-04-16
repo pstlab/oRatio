@@ -10,6 +10,9 @@
 #include <fstream>
 #include <iostream>
 
+#define HOST "127.0.0.1"
+#define PORT 1100
+
 namespace ratio
 {
 socket_listener::socket_listener(solver &slv) : core_listener(slv), solver_listener(slv)
@@ -32,8 +35,8 @@ socket_listener::socket_listener(solver &slv) : core_listener(slv), solver_liste
 
     struct sockaddr_in sa;
     sa.sin_family = AF_INET;
-    sa.sin_port = htons(1100);
-    inet_pton(AF_INET, "127.0.0.1", &sa.sin_addr);
+    sa.sin_port = htons(PORT);
+    inet_pton(AF_INET, HOST, &sa.sin_addr);
 
     if (connect(skt, (struct sockaddr *)&sa, sizeof(sa)) < 0)
         std::cerr << "unable to connect to server.." << std::endl;
