@@ -51,11 +51,14 @@ void core::read(const std::string &script)
     cu->refine(*this);
     context c_ctx(this);
     cu->execute(*this, c_ctx);
+#ifdef BUILD_GUI
+    fire_read(script);
+#endif
 
     if (!sat_cr.check())
         throw std::runtime_error("the input problem is inconsistent");
 #ifdef BUILD_GUI
-    fire_read(script);
+    fire_state_changed();
 #endif
 }
 
@@ -84,11 +87,14 @@ void core::read(const std::vector<std::string> &files)
     context c_ctx(this);
     for (const auto &cu : c_cus)
         cu->execute(*this, c_ctx);
+#ifdef BUILD_GUI
+    fire_read(files);
+#endif
 
     if (!sat_cr.check())
         throw std::runtime_error("the input problem is inconsistent");
 #ifdef BUILD_GUI
-    fire_read(files);
+    fire_state_changed();
 #endif
 }
 
