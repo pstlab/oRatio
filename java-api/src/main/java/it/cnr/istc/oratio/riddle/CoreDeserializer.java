@@ -180,7 +180,7 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
                 for (JsonElement val_el : vals_array)
                     vals.add(items.get(val_el.getAsString()));
                 return new Item.EnumItem(core, t, val.getAsJsonPrimitive("var").getAsString(),
-                        vals.toArray(Item[]::new));
+                        vals.toArray(new Item[vals.size()]));
             }
         }
     }

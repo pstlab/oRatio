@@ -121,7 +121,7 @@ public class StateVariable implements Timeline<StateVariable.SVValue> {
                 ending_values.get(end_pulse).add(atom);
             }
 
-            InfRational[] c_pulses_array = c_pulses.toArray(InfRational[]::new);
+            InfRational[] c_pulses_array = c_pulses.toArray(new InfRational[c_pulses.size()]);
 
             // Push values to timeline according to pulses...
             List<Atom> overlapping_formulas = new ArrayList<>(atoms.size());

@@ -155,7 +155,7 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
                 Item[][] itms = new Item[p.getFields().size()][];
                 int i = 0;
                 for (Field fld : p.getFields().values())
-                    itms[i++] = fld.getType().getInstances().toArray(Item[]::new);
+                    itms[i++] = fld.getType().getInstances().toArray(new Item[fld.getType().getInstances().size()]);
 
                 if (itms.length > 0)
                     for (Item[] c_itms : new CartesianProductGenerator<>(itms))
