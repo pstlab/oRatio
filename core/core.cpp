@@ -456,7 +456,7 @@ std::string core::to_string(const atom *const a) const noexcept
         a_type.insert(0, sc->get_name() + ":");
         t = sc;
     }
-    as += a_type + "\", \"state\" : ";
+    as += a_type + "\", \"sigma\" : " + std::to_string(a->get_sigma()) + ", \"state\" : ";
 
     switch (sat_cr.value(a->get_sigma()))
     {
