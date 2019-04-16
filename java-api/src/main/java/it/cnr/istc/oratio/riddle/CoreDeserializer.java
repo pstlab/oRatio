@@ -64,6 +64,8 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
 
         JsonArray itms_array = null;
         if (object.has("items")) {
+            // we add all the items: we need all of them before setting their nested
+            // expressions and atoms' parameters..
             itms_array = object.getAsJsonArray("items");
             for (JsonElement itm_el : itms_array) {
                 JsonObject itm_obj = itm_el.getAsJsonObject();
@@ -87,6 +89,7 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
         }
 
         if (object.has("atoms")) {
+            // we add all the atoms..
             JsonArray atms_array = object.getAsJsonArray("atoms");
             for (JsonElement atm_el : atms_array) {
                 JsonObject atm_obj = atm_el.getAsJsonObject();
@@ -101,6 +104,7 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
                     p = t.predicates.get(c_predicate[c_predicate.length - 1]);
                 }
 
+                // we refine the atom's parameters..
                 final Map<String, Item> pars = new HashMap<>();
                 if (atm_obj.has("pars"))
                     for (JsonElement par_el : atm_obj.getAsJsonArray("pars")) {
@@ -123,6 +127,7 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
         }
 
         if (object.has("items"))
+            // we refine the items' parameters..
             for (JsonElement itm_el : itms_array) {
                 JsonObject itm_obj = itm_el.getAsJsonObject();
                 if (itm_obj.has("exprs")) {
@@ -134,14 +139,14 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
                 }
             }
 
-        if (object.has("exprs"))
-            for (JsonElement xpr_el : object.getAsJsonArray("exprs")) {
-                JsonObject xpr_obj = xpr_el.getAsJsonObject();
-                String name = xpr_obj.getAsJsonPrimitive("name").getAsString();
-                Item itm = toItem(items, atoms, xpr_obj);
-                core.exprs.put(name, itm);
-                core.expr_names.put(itm, name);
-            }
+        // we set the expressions..
+        for (JsonElement xpr_el : object.getAsJsonArray("exprs")) {
+            JsonObject xpr_obj = xpr_el.getAsJsonObject();
+            String name = xpr_obj.getAsJsonPrimitive("name").getAsString();
+            Item itm = toItem(items, atoms, xpr_obj);
+            core.exprs.put(name, itm);
+            core.expr_names.put(itm, name);
+        }
         return core;
     }
 
