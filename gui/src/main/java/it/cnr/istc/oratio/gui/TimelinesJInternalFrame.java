@@ -6,6 +6,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 import javax.swing.JInternalFrame;
+import javax.swing.SwingUtilities;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -52,16 +53,18 @@ public class TimelinesJInternalFrame extends JInternalFrame implements StateList
 
     @Override
     public void stateChanged(Core core) {
-        final CombinedDomainXYPlot combined_plot = new CombinedDomainXYPlot(new DateAxis("Time"));
-        combined_plot.setGap(3.0);
-        combined_plot.setOrientation(PlotOrientation.VERTICAL);
-        for (Timeline<?> tl : Context.getContext().getTimelines()) {
-            TimelineVisualizer vis = visualizers.get(tl.getClass());
-            if (vis != null)
-                for (XYPlot plot : vis.getPlots(tl))
-                    combined_plot.add(plot);
-        }
-        panel.setChart(new JFreeChart("", new Font("SansSerif", Font.BOLD, 14), combined_plot, false));
+        SwingUtilities.invokeLater(() -> {
+            final CombinedDomainXYPlot combined_plot = new CombinedDomainXYPlot(new DateAxis("Time"));
+            combined_plot.setGap(3.0);
+            combined_plot.setOrientation(PlotOrientation.VERTICAL);
+            for (Timeline<?> tl : Context.getContext().getTimelines()) {
+                TimelineVisualizer vis = visualizers.get(tl.getClass());
+                if (vis != null)
+                    for (XYPlot plot : vis.getPlots(tl))
+                        combined_plot.add(plot);
+            }
+            panel.setChart(new JFreeChart("", new Font("SansSerif", Font.BOLD, 14), combined_plot, false));
+        });
     }
 
     public interface TimelineVisualizer {

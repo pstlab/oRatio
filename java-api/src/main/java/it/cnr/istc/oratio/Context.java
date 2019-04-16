@@ -101,9 +101,9 @@ public class Context {
         state_listeners.remove(l);
     }
 
-    public void startServer() {
+    public void startServer(int port) {
         LOG.info("Starting server..");
-        try (ServerSocket ss = new ServerSocket(1100);
+        try (ServerSocket ss = new ServerSocket(port);
                 Socket client = ss.accept();
                 BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"))) {
             String inputLine;
