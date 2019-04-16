@@ -161,7 +161,7 @@ void graph::build()
     while (std::any_of(slv.flaws.begin(), slv.flaws.end(), [&](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
     {
         if (flaw_q.empty())
-            throw std::runtime_error("the problem is unsolvable");
+            throw std::runtime_error("the problem is inconsistent..");
 #ifdef DEFERRABLE_FLAWS
         assert(!flaw_q.front()->expanded);
         if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
@@ -189,7 +189,7 @@ void graph::add_layer()
     while (std::all_of(f_q.begin(), f_q.end(), [&](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
     {
         if (flaw_q.empty())
-            throw std::runtime_error("the problem is unsolvable");
+            throw std::runtime_error("the problem is inconsistent..");
         std::deque<flaw *> c_q = std::move(flaw_q);
         for (const auto &f : c_q)
             if (slv.get_sat_core().value(f->phi) != False) // we expand the flaw..
@@ -266,7 +266,7 @@ void graph::expand_flaw(flaw &f)
         apply_resolver(*r);
 
     if (!slv.get_sat_core().check())
-        throw std::runtime_error("the problem is unsolvable");
+        throw std::runtime_error("the problem is inconsistent..");
 }
 
 void graph::apply_resolver(resolver &r)
@@ -280,7 +280,7 @@ void graph::apply_resolver(resolver &r)
     catch (const std::runtime_error &)
     {
         if (!slv.get_sat_core().new_clause({lit(r.rho, false)}))
-            throw std::runtime_error("the problem is unsolvable");
+            throw std::runtime_error("the problem is inconsistent..");
     }
 
     slv.restore_ni();
@@ -317,7 +317,7 @@ void graph::set_new_gamma()
     // these flaws have not been expanded, hence, cannot have a solution..
     for (const auto &f : flaw_q)
         if (!slv.get_sat_core().new_clause({lit(gamma, false), lit(f->phi, false)}))
-            throw std::runtime_error("the problem is unsolvable");
+            throw std::runtime_error("the problem is inconsistent..");
 #endif
     // we use the new graph var to allow search within the new graph..
     LOG("assuming γ " << std::to_string(gamma));
@@ -380,7 +380,7 @@ void flaw::expand()
     {
         // there is no way for solving this flaw..
         if (!gr.get_solver().get_sat_core().new_clause({lit(phi, false)})) // we force the phi variable at false..
-            throw std::runtime_error("the problem is unsolvable");
+            throw std::runtime_error("the problem is inconsistent..");
     }
     else
     {
@@ -390,7 +390,7 @@ void flaw::expand()
             r_chs.push_back(r->rho);
         // we link the phi variable to the resolvers' rho variables..
         if (!(exclusive ? gr.get_solver().get_sat_core().exct_one(r_chs, phi) : gr.get_solver().get_sat_core().disj(r_chs, phi)))
-            throw std::runtime_error("the problem is unsolvable");
+            throw std::runtime_error("the problem is inconsistent..");
     }
 }
 

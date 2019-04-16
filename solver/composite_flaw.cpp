@@ -89,7 +89,7 @@ void composite_flaw::compute_resolvers()
             for (const auto &l : check_lits)
                 no_good.push_back(!l);
             if (!get_graph().get_solver().get_sat_core().new_clause(no_good))
-                throw std::runtime_error("the problem is unsolvable");
+                throw std::runtime_error("the problem is inconsistent..");
         }
         check_lits.pop_back();
 #else
