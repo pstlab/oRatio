@@ -41,7 +41,7 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
 
     private final Core core;
     private final StateNode root;
-    private final TreeModel tree_model;
+    private final DefaultTreeModel tree_model;
     private final JTree state_tree;
 
     public StateJInternalFrame(final Core core) {
@@ -159,6 +159,7 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
         root.removeAllChildren();
         root.hasLoadedChildren = false;
         root.loadChildren();
+        tree_model.setRoot(root);
     }
 
     private static class StateNode extends DefaultMutableTreeNode {
