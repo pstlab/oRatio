@@ -58,21 +58,24 @@ void socket_listener::log(const std::string &msg)
 void socket_listener::read(const std::string &script)
 {
     std::stringstream ss;
-    ss << "read0 " << script << '\n' << "EOS" << '\n';
+    ss << "read0" << '\n'
+       << script << '\n'
+       << "EOS" << '\n';
     send_message(ss.str());
 }
 
 void socket_listener::read(const std::vector<std::string> &files)
 {
     std::stringstream ss;
-    ss << "read1 [";
+    ss << "read1" << '\n';
     for (std::vector<std::string>::const_iterator f_it = files.cbegin(); f_it != files.cend(); ++f_it)
     {
         if (f_it != files.begin())
-            ss << ", ";
-        ss << "\"" << *f_it << "\"";
+            ss << '\n'
+               << "EOF" << '\n';
+        ss << std::ifstream(*f_it).rdbuf() << '\n';
     }
-    ss << "]\n";
+    ss << "EOS" << '\n';
     send_message(ss.str());
 }
 
