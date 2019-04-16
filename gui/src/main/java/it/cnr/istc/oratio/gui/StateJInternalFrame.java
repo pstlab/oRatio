@@ -1,12 +1,14 @@
 package it.cnr.istc.oratio.gui;
 
 import java.awt.Component;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
 import javax.swing.ImageIcon;
 import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -15,7 +17,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
-import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 import it.cnr.istc.oratio.StateListener;
 import it.cnr.istc.oratio.riddle.Atom;
@@ -69,7 +71,16 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
                 state_tree.expandRow(0);
             }
         });
-        state_tree = new JTree(tree_model);
+        state_tree = new JTree(tree_model) {
+            @Override
+            public String getToolTipText(MouseEvent evt) {
+                if (getRowForLocation(evt.getX(), evt.getY()) == -1)
+                    return null;
+                TreePath curPath = getPathForLocation(evt.getX(), evt.getY());
+                return ((StateNode) curPath.getLastPathComponent()).tooltip;
+            }
+        };
+        ToolTipManager.sharedInstance().registerComponent(state_tree);
         state_tree.setCellRenderer(new DefaultTreeCellRenderer() {
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
@@ -93,26 +104,20 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
                     default:
                         throw new AssertionError(((Atom) node.getUserObject()).getState().name());
                     }
-                    setToolTipText(((Atom) node.getUserObject()).toString());
                 } else {
                     switch (((Item) node.getUserObject()).getType().getName()) {
                     case "bool":
                         setText(node.name + " = " + ((Item.BoolItem) node.getUserObject()).getValue());
                         setIcon(BOOL_ICON);
-                        setToolTipText(((Item.BoolItem) node.getUserObject()).getLit());
                         break;
                     case "int":
                     case "real":
                         setText(node.name + " = " + ((Item.ArithItem) node.getUserObject()).getValue());
                         setIcon(ARITH_ICON);
-                        setToolTipText(((Item.ArithItem) node.getUserObject()).getLin() + " = ["
-                                + ((Item.ArithItem) node.getUserObject()).getLb() + ", "
-                                + ((Item.ArithItem) node.getUserObject()).getUb() + "]");
                         break;
                     case "string":
                         setText(node.name + " = " + ((Item.StringItem) node.getUserObject()).getValue());
                         setIcon(STRING_ICON);
-                        setToolTipText(null);
                         break;
                     default:
                         setText(node.name);
@@ -120,7 +125,6 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
                             setIcon(ENUM_ICON);
                         else
                             setIcon(ITEM_ICON);
-                        setToolTipText(null);
                     }
                 }
                 return this;
@@ -165,11 +169,33 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
     private static class StateNode extends DefaultMutableTreeNode {
 
         private final String name;
+        private final String tooltip;
         private boolean hasLoadedChildren = false;
 
         private StateNode(final String name, final Object item) {
             super(item);
             this.name = name;
+            if (item instanceof Core) {
+                tooltip = null;
+            } else if (item instanceof Atom) {
+                tooltip = item.toString();
+            } else {
+                switch (((Item) item).getType().getName()) {
+                case "bool":
+                    tooltip = ((Item.BoolItem) item).getLit();
+                    break;
+                case "int":
+                case "real":
+                    tooltip = ((Item.ArithItem) item).getLin() + " = [" + ((Item.ArithItem) item).getLb() + ", "
+                            + ((Item.ArithItem) item).getUb() + "]";
+                    break;
+                case "string":
+                    tooltip = null;
+                    break;
+                default:
+                    tooltip = null;
+                }
+            }
         }
 
         @Override
@@ -198,7 +224,7 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
                         .values().stream().flatMap(pred -> pred.getInstances().stream()).count() > 0);
         }
 
-        void loadChildren() {
+        private void loadChildren() {
             if (!hasLoadedChildren) {
                 if (userObject instanceof Core) {
                     ((Core) userObject).getExprs().entrySet()
