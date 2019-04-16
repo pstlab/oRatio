@@ -4,6 +4,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JInternalFrame;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import it.cnr.istc.oratio.StateListener;
 import it.cnr.istc.oratio.riddle.Core;
@@ -31,7 +32,7 @@ public class LogJInternalFrame extends JInternalFrame implements StateListener {
 
     @Override
     public void log(String log) {
-        logs_model.addElement(log);
+        SwingUtilities.invokeLater(() -> logs_model.addElement(log));
     }
 
     @Override

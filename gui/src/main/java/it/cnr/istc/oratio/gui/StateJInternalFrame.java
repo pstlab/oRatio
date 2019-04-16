@@ -8,6 +8,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeModelEvent;
@@ -160,10 +161,12 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
 
     @Override
     public void stateChanged(Core core) {
-        root.removeAllChildren();
-        root.hasLoadedChildren = false;
-        root.loadChildren();
-        tree_model.setRoot(root);
+        SwingUtilities.invokeLater(() -> {
+            root.removeAllChildren();
+            root.hasLoadedChildren = false;
+            root.loadChildren();
+            tree_model.setRoot(root);
+        });
     }
 
     private static class StateNode extends DefaultMutableTreeNode {

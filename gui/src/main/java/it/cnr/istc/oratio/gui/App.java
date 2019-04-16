@@ -1,5 +1,8 @@
 package it.cnr.istc.oratio.gui;
 
+import java.io.IOException;
+import java.util.Properties;
+
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
@@ -22,9 +25,16 @@ public class App {
             // If Nimbus is not available, you can set the GUI to another look and feel.
         }
 
+        Properties properties = new Properties();
+        try {
+            properties.load(App.class.getResourceAsStream("/config.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         MainJFrame frame = new MainJFrame();
         frame.setVisible(true);
 
-        Context.getContext().startServer();
+        Context.getContext().startServer(Integer.parseInt(properties.getProperty("server.port", "1100")));
     }
 }
