@@ -1,6 +1,9 @@
 #include "solver.h"
 #ifdef BUILD_GUI
 #include "socket_listener.h"
+
+#define HOST "127.0.0.1"
+#define PORT 1100
 #endif
 #include <iostream>
 #include <fstream>
@@ -31,7 +34,7 @@ int main(int argc, char *argv[])
 
     solver s;
 #ifdef BUILD_GUI
-    socket_listener l(s);
+    socket_listener l(s, HOST, PORT);
 #endif
 
     s.init();

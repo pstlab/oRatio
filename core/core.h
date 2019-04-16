@@ -182,6 +182,7 @@ private:
   void fire_log(const std::string msg) const;
   void fire_read(const std::string &script) const;
   void fire_read(const std::vector<std::string> &files) const;
+  void fire_state_changed() const;
 #endif
 };
 } // namespace ratio

@@ -19,7 +19,7 @@ namespace ratio
 class socket_listener : public core_listener, public solver_listener
 {
 public:
-  socket_listener(solver &slv);
+  socket_listener(solver &slv, const std::string &host, const unsigned short &port);
   socket_listener(const socket_listener &orig) = delete;
   virtual ~socket_listener();
 

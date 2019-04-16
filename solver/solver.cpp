@@ -184,10 +184,5 @@ void solver::fire_causal_link_added(const flaw &f, const resolver &r) const
     for (const auto &l : listeners)
         l->causal_link_added(f, r);
 }
-void solver::fire_state_changed() const
-{
-    for (const auto &l : listeners)
-        l->state_changed();
-}
 #endif
 } // namespace ratio

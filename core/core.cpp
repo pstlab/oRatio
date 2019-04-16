@@ -540,5 +540,10 @@ void core::fire_read(const std::vector<std::string> &files) const
     for (const auto &l : listeners)
         l->read(files);
 }
+void core::fire_state_changed() const
+{
+    for (const auto &l : listeners)
+        l->state_changed();
+}
 #endif
 } // namespace ratio

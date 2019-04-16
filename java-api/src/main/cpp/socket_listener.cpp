@@ -10,12 +10,9 @@
 #include <fstream>
 #include <iostream>
 
-#define HOST "127.0.0.1"
-#define PORT 1100
-
 namespace ratio
 {
-socket_listener::socket_listener(solver &slv) : core_listener(slv), solver_listener(slv)
+socket_listener::socket_listener(solver &slv, const std::string &host, const unsigned short &port) : core_listener(slv), solver_listener(slv)
 {
 #ifdef _WIN32
     WSADATA wsa_data;
@@ -35,8 +32,8 @@ socket_listener::socket_listener(solver &slv) : core_listener(slv), solver_liste
 
     struct sockaddr_in sa;
     sa.sin_family = AF_INET;
-    sa.sin_port = htons(PORT);
-    inet_pton(AF_INET, HOST, &sa.sin_addr);
+    sa.sin_port = htons(port);
+    inet_pton(AF_INET, host.c_str(), &sa.sin_addr);
 
     if (connect(skt, (struct sockaddr *)&sa, sizeof(sa)) < 0)
         std::cerr << "unable to connect to server.." << std::endl;

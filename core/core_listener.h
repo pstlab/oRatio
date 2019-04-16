@@ -20,6 +20,8 @@ private:
   virtual void read(const std::string &script) {}
   virtual void read(const std::vector<std::string> &files) {}
 
+  virtual void state_changed() {}
+
 protected:
   core &cr;
 };

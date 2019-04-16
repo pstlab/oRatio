@@ -79,7 +79,6 @@ private:
   void fire_resolver_cost_changed(const resolver &r) const;
   void fire_current_resolver(const resolver &r) const;
   void fire_causal_link_added(const flaw &f, const resolver &r) const;
-  void fire_state_changed() const;
 #endif
 };
 } // namespace ratio

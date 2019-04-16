@@ -195,8 +195,10 @@ public class Context {
                 } else
                     LOG.warning("Cannot handle message: " + inputLine);
             }
+            if (inputLine == null)
+                throw new RuntimeException("Connection lost..");
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.WARNING, null, ex);
         }
     }
 }
