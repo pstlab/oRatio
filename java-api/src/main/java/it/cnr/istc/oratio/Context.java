@@ -143,7 +143,7 @@ public class Context {
                         if (inputLine.equals("EOS"))
                             break;
                     }
-                    core.read(files.toArray(File[]::new));
+                    core.read(files.toArray(new File[files.size()]));
                     for (StateListener l : state_listeners)
                         l.stateChanged(core);
                 } else if (inputLine.startsWith(FLAW_CREATED)) {
