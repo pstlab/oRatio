@@ -56,7 +56,7 @@ void core::read(const std::string &script)
 #endif
 
     if (!sat_cr.check())
-        throw std::runtime_error("the input problem is inconsistent");
+        throw std::runtime_error("the input problem is inconsistent..");
 #ifdef BUILD_GUI
     fire_state_changed();
 #endif
@@ -92,7 +92,7 @@ void core::read(const std::vector<std::string> &files)
 #endif
 
     if (!sat_cr.check())
-        throw std::runtime_error("the input problem is inconsistent");
+        throw std::runtime_error("the input problem is inconsistent..");
 #ifdef BUILD_GUI
     fire_state_changed();
 #endif
