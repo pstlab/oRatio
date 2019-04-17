@@ -49,6 +49,8 @@ private:
   void push() override;
   void pop() override;
 
+  flaw *select_flaw(); // selects the most promising (i.e. the most expensive one) flaw from the 'flaws' set, returns a nullptr if there are no more active flaws..
+
 private:
   struct layer
   {

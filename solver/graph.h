@@ -72,6 +72,7 @@ private:
 class flaw
 {
   friend class graph;
+  friend class solver;
 
 public:
   flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive = false);
@@ -124,6 +125,7 @@ private:
 class resolver
 {
   friend class graph;
+  friend class solver;
   friend class flaw;
 
 public:

@@ -138,6 +138,33 @@ void solver::pop()
 {
 }
 
+flaw *solver::select_flaw()
+{
+    assert(std::all_of(flaws.begin(), flaws.end(), [&](flaw *const f) { return sat.value(f->phi) == True; }));
+    // this is the next flaw to be solved (i.e. the most expensive one)..
+    flaw *f_next = nullptr;
+    for (auto it = flaws.begin(); it != flaws.end();)
+        if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat.value(r->rho) == True; }))
+        {
+            // this flaw has an active resolver, hence it is already solved!
+            // we remove the flaw from the current set of flaws..
+            if (!trail.empty())
+                trail.back().solved_flaws.insert((*it));
+            flaws.erase(it++);
+        }
+        else
+        {
+            // the current flaw is not trivial nor already solved: let's see if it's better than the previous one..
+            if (!f_next) // this is the first flaw we see..
+                f_next = *it;
+            else if (f_next->get_estimated_cost() < (*it)->get_estimated_cost()) // this flaw is actually better than the previous one..
+                f_next = *it;
+            ++it;
+        }
+
+    return f_next;
+}
+
 #ifdef BUILD_GUI
 void solver::fire_new_flaw(const flaw &f) const
 {
