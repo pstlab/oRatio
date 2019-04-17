@@ -20,9 +20,9 @@ state_variable::~state_variable()
         delete a.second;
 }
 
-std::vector<std::pair<lit, double>> state_variable::get_current_incs()
+std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_incs()
 {
-    std::vector<std::pair<lit, double>> incs;
+    std::vector<std::vector<std::pair<lit, double>>> incs;
     // TODO: add code for finding inconsistencies here..
     return incs;
 }

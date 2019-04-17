@@ -21,9 +21,9 @@ propositional_state::~propositional_state()
         delete a.second;
 }
 
-std::vector<std::pair<lit, double>> propositional_state::get_current_incs()
+std::vector<std::vector<std::pair<lit, double>>> propositional_state::get_current_incs()
 {
-    std::vector<std::pair<lit, double>> incs;
+    std::vector<std::vector<std::pair<lit, double>>> incs;
     // TODO: add code for finding inconsistencies here..
     return incs;
 }

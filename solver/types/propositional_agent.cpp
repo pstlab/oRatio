@@ -12,9 +12,9 @@ namespace ratio
 propositional_agent::propositional_agent(solver &slv) : smart_type(slv, slv, PROPOSITIONAL_AGENT_NAME) { new_constructors({new agnt_constructor(*this)}); }
 propositional_agent::~propositional_agent() {}
 
-std::vector<std::pair<lit, double>> propositional_agent::get_current_incs()
+std::vector<std::vector<std::pair<lit, double>>> propositional_agent::get_current_incs()
 {
-    std::vector<std::pair<lit, double>> incs;
+    std::vector<std::vector<std::pair<lit, double>>> incs;
     // TODO: add code for finding inconsistencies here..
     return incs;
 }

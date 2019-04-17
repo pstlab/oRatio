@@ -20,9 +20,9 @@ reusable_resource::reusable_resource(solver &slv) : smart_type(slv, slv, REUSABL
 }
 reusable_resource::~reusable_resource() {}
 
-std::vector<std::pair<lit, double>> reusable_resource::get_current_incs()
+std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_incs()
 {
-    std::vector<std::pair<lit, double>> incs;
+    std::vector<std::vector<std::pair<lit, double>>> incs;
     // TODO: add code for finding inconsistencies here..
     return incs;
 }

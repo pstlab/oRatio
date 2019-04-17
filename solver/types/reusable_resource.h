@@ -21,7 +21,7 @@ public:
   virtual ~reusable_resource();
 
 private:
-  std::vector<std::pair<smt::lit, double>> get_current_incs() override;
+  std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;
 
   void new_predicate(predicate &) override;
   void new_fact(atom_flaw &f) override;

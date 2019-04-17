@@ -38,7 +38,7 @@ private:
    * 
    * @return a vector of pairs containing the literals representing the decisions to take and their estimated cost.
    */
-  virtual std::vector<std::pair<smt::lit, double>> get_current_incs() = 0;
+  virtual std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() = 0;
 
   virtual void new_fact(atom_flaw &);
   virtual void new_goal(atom_flaw &);

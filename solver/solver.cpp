@@ -165,6 +165,84 @@ flaw *solver::select_flaw()
     return f_next;
 }
 
+void solver::solve_inconsistencies()
+{
+    LOG("checking for inconsistencies..");
+    std::vector<smart_type *> sts;
+    std::queue<type *> q;
+    for (const auto &t : get_types())
+        if (!t.second->is_primitive())
+            q.push(t.second);
+    while (!q.empty())
+    {
+        if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
+            sts.push_back(st);
+        for (const auto &st : q.front()->get_types())
+            q.push(st.second);
+        q.pop();
+    }
+
+    if (trail.empty()) // since we are at root-level, we can reason about flaws..
+        // we collect the flaws from the smart-types and add them to the planning graph..
+        for (const auto &st : sts)
+            for (const auto &f : st->get_flaws())
+                gr.new_flaw(*f); // we add the flaws to the planning graph..
+    else
+    { // since we are not at root-level, we need to reason about inconsistencies..
+        std::vector<std::vector<std::pair<lit, double>>> incs;
+        // we collect all the inconsistencies from all the smart-types..
+        for (const auto &st : sts)
+        {
+            std::vector<std::vector<std::pair<lit, double>>> c_incs = st->get_current_incs();
+            incs.insert(incs.end(), c_incs.begin(), c_incs.end());
+        }
+
+        if (incs.empty())
+            return;
+        else
+        {
+            std::vector<std::pair<lit, double>> bst_inc;
+            double k_inv = std::numeric_limits<double>::infinity();
+            for (const auto &inc : incs)
+            {
+                switch (inc.size())
+                {
+                case 0: // we have an unsolvable flaw: we backtrack..
+                    next();
+                    return;
+                case 1: // we have a deterministic flaw: we learn something from it..
+                {
+                    std::vector<smt::lit> learnt;
+                    learnt.reserve(trail.size() + 1);
+                    learnt.push_back(inc.at(0).first);
+                    for (const auto &l : trail)
+                        learnt.push_back(!l.decision);
+                    record(learnt);
+                    break; // we check for further flaws..
+                }
+                default: // we have to take a decision..
+                    double bst_commit = std::numeric_limits<double>::infinity();
+                    for (const auto &ch : inc)
+                        if (ch.second < bst_commit)
+                            bst_commit = ch.second;
+                    double c_k_inv = 0;
+                    for (const auto &ch : inc)
+                        c_k_inv += 1l / (1l + ch.second - bst_commit);
+                    if (c_k_inv < k_inv)
+                    {
+                        k_inv = c_k_inv;
+                        bst_inc = inc;
+                    }
+                    break;
+                }
+            }
+
+            // we select the best choice (i.e. the least committing one) from those available for the best flaw..
+            take_decision(std::min_element(bst_inc.begin(), bst_inc.end(), [](std::pair<lit, double> const &ch0, std::pair<lit, double> const &ch1) { return ch0.second < ch1.second; })->first);
+        }
+    }
+}
+
 #ifdef BUILD_GUI
 void solver::fire_new_flaw(const flaw &f) const
 {
