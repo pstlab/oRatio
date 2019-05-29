@@ -26,6 +26,8 @@ public:
   solver(const solver &orig) = delete;
   ~solver();
 
+  graph &get_graph() { return gr; }
+
   /**
    * Initializes the solver.
    */

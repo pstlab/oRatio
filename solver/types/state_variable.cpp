@@ -4,7 +4,6 @@
 #include "predicate.h"
 #include "field.h"
 #include "atom_flaw.h"
-#include "combinations.h"
 
 using namespace smt;
 
@@ -97,6 +96,8 @@ void state_variable::new_fact(atom_flaw &f)
     get_core().get_predicate("IntervalPredicate").apply_rule(atm);
     restore_ni();
 
+    // TODO: add code for storing variables (for solving flaws)..
+
     // we store, for the fact, its atom listener..
     atoms.push_back({&atm, new sv_atom_listener(*this, atm)});
 
@@ -115,6 +116,8 @@ void state_variable::new_fact(atom_flaw &f)
 void state_variable::new_goal(atom_flaw &f)
 {
     atom &atm = f.get_atom();
+
+    // TODO: add code for storing variables (for solving flaws)..
 
     // we store, for the goal, its atom listener..
     atoms.push_back({&atm, new sv_atom_listener(*this, atm)});

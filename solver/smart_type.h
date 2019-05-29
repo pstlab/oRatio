@@ -1,6 +1,7 @@
 #pragma once
 
 #include "type.h"
+#include "graph.h"
 #include "sat_value_listener.h"
 #include "lra_value_listener.h"
 #include "ov_value_listener.h"
@@ -43,15 +44,66 @@ private:
   virtual void new_fact(atom_flaw &);
   virtual void new_goal(atom_flaw &);
 
+  // the flaw (i.e. two or more inconsistent atoms) that can arise from a smart-type..
+  class smart_flaw : public flaw
+  {
+  public:
+    smart_flaw(smart_type &st, const std::set<atom *> &atms);
+    smart_flaw(smart_flaw &&) = delete;
+    virtual ~smart_flaw();
+
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
+
+  private:
+    void compute_resolvers() override;
+
+  private:
+    smart_type &st;
+    const std::set<atom *> atms;
+  };
+
+  // a resolver for solving smart-flaws..
+  class smart_resolver : public resolver
+  {
+  public:
+#ifdef BUILD_GUI
+    smart_resolver(smart_flaw &flw, const smt::var &r, const std::string &lbl);
+#else
+    smart_resolver(smart_flaw &flw, const smt::var &r);
+#endif
+    smart_resolver(const smart_resolver &that) = delete;
+    virtual ~smart_resolver();
+
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
+
+  private:
+    void apply() override;
+
+#ifdef BUILD_GUI
+    const std::string &lbl;
+#endif
+  };
+
 protected:
   void set_ni(const smt::var &v); // temporally sets the solver's 'ni' variable..
   void restore_ni();              // restores the solver's 'ni' variable..
 
-  void add_flaw(flaw &fl) { flaws.push_back(&fl); }
+  static std::vector<resolver *> get_resolvers(solver &slv, const std::set<atom *> &atms); // returns the vector of resolvers which has given rise to the given atoms..
 
 private:
   solver &slv;
   std::vector<flaw *> flaws;
+
+  std::map< std::set<atom *>, smart_flaw *> smart_flaws; // the smart-flaws found so far..
+#ifdef BUILD_GUI
+  std::map<std::set<atom *>, std::vector<std::pair<smt::lit, std::string>>> choices; // all the possible choices for solving a flaw with a string for describing the choice..
+#else
+  std::map<std::set<atom *>, std::vector<smt::lit>> choices; // all the possible choices for solving a flaw..
+#endif
 };
 
 class atom_listener : public smt::sat_value_listener, public smt::lra_value_listener, public smt::ov_value_listener
