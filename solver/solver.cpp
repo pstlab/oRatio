@@ -36,7 +36,41 @@ void solver::solve()
 {
     // we build the causal graph..
     gr.build();
-    // TODO: add solving code here..
+
+    // we enter into the main solving loop..
+    while (true)
+    {
+        // we solve all the current inconsistencies..
+        solve_inconsistencies();
+
+        // this is the next flaw to be solved..
+        flaw *f_next = select_flaw();
+
+        if (f_next)
+        {
+            if (f_next->get_estimated_cost().is_infinite())
+            {
+                // we don't know how to solve this flaw: we search..
+                next();
+                continue;
+            }
+
+            // this is the next resolver to be applied..
+            resolver *res = f_next->get_best_resolver();
+            assert(!res->get_estimated_cost().is_infinite());
+
+            // we apply the resolver..
+            take_decision(res->get_rho());
+        }
+        else
+        {
+            // Hurray!! we have found a solution..
+#ifdef BUILD_GUI
+            fire_state_changed();
+#endif
+            return;
+        }
+    }
 }
 
 expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals)

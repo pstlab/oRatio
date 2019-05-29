@@ -179,6 +179,7 @@ private:
 private:
   std::vector<core_listener *> listeners; // the core listeners..
 
+protected:
   void fire_log(const std::string msg) const;
   void fire_read(const std::string &script) const;
   void fire_read(const std::vector<std::string> &files) const;
