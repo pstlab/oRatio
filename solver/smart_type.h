@@ -34,9 +34,9 @@ private:
    */
   std::vector<flaw *> get_flaws();
   /**
-   * Returns all the decisions to take for solving the current inconsistencies with their estimated cost.
+   * Returns all the decisions to take for solving the current inconsistencies with their choices' estimated costs.
    * 
-   * @return a vector of pairs containing the literals representing the decisions to take and their estimated cost.
+   * @return a vector of decisions, each represented by a vector of pairs containing the literals representing the choice and its estimated cost.
    */
   virtual std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() = 0;
 
