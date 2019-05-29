@@ -3,6 +3,9 @@
 #include "core.h"
 #include "graph.h"
 
+#define START "start"
+#define END "end"
+
 namespace ratio
 {
 

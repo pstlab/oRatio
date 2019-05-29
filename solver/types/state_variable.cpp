@@ -23,7 +23,61 @@ state_variable::~state_variable()
 std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_incs()
 {
     std::vector<std::vector<std::pair<lit, double>>> incs;
-    // TODO: add code for finding inconsistencies here..
+    // we partition atoms for each state-variable they might insist on..
+    std::unordered_map<item *, std::vector<atom *>> sv_instances;
+    for (const auto &atm : atoms)
+        if (get_core().get_sat_core().value(atm.first->get_sigma()) == True) // we filter out those which are not strictly active..
+        {
+            expr c_scope = atm.first->get(TAU);
+            if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
+            {
+                for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
+                    if (to_check.find(static_cast<item *>(val)) != to_check.end())
+                        sv_instances[static_cast<item *>(val)].push_back(atm.first);
+            }
+            else if (to_check.find(static_cast<item *>(&*c_scope)) != to_check.end())
+                sv_instances[static_cast<item *>(&*c_scope)].push_back(atm.first);
+        }
+
+    // we detect inconsistencies for each of the instances..
+    for (const auto &sv : sv_instances)
+    {
+        // for each pulse, the atoms starting at that pulse..
+        std::map<inf_rational, std::set<atom *>> starting_atoms;
+        // for each pulse, the atoms ending at that pulse..
+        std::map<inf_rational, std::set<atom *>> ending_atoms;
+        // all the pulses of the timeline..
+        std::set<inf_rational> pulses;
+
+        for (const auto &atm : sv.second)
+        {
+            arith_expr s_expr = atm->get(START);
+            arith_expr e_expr = atm->get(END);
+            inf_rational start = get_core().arith_value(s_expr);
+            inf_rational end = get_core().arith_value(e_expr);
+            starting_atoms[start].insert(atm);
+            ending_atoms[end].insert(atm);
+            pulses.insert(start);
+            pulses.insert(end);
+        }
+
+        std::set<atom *> overlapping_atoms;
+        for (const auto &p : pulses)
+        {
+            const auto at_start_p = starting_atoms.find(p);
+            if (at_start_p != starting_atoms.end())
+                overlapping_atoms.insert(at_start_p->second.begin(), at_start_p->second.end());
+            const auto at_end_p = ending_atoms.find(p);
+            if (at_end_p != ending_atoms.end())
+                for (const auto &a : at_end_p->second)
+                    overlapping_atoms.erase(a);
+
+            if (overlapping_atoms.size() > 1) // we have a 'peak'..
+            {
+                // TODO: add code for managing peaks..
+            }
+        }
+    }
     return incs;
 }
 
