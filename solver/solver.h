@@ -67,7 +67,7 @@ private:
   graph gr;                                             // the causal graph..
   std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
   std::unordered_set<flaw *> flaws;                     // the currently active flaws..
-  std::vector<layer> trail;                             // the list of applied resolvers, with the associated changes made, in chronological order..
+  std::vector<layer> trail;                             // the list of taken decisions, with the associated changes made, in chronological order..
 
 #ifdef BUILD_GUI
 private:

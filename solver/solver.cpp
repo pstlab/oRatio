@@ -13,6 +13,7 @@
 #ifdef BUILD_GUI
 #include "solver_listener.h"
 #endif
+#include <stdexcept>
 #include <cassert>
 
 using namespace smt;
@@ -146,12 +147,53 @@ void solver::new_disjunction(context &d_ctx, const disjunction &disj)
 
 void solver::take_decision(const smt::lit &ch)
 {
-    // TODO: add code for taking a decision..
+    LOG("taking decision " << (ch.get_sign() ? std::to_string(ch.get_var()) : "!" + std::to_string(ch.get_var())));
+
+    // we push the given resolver into the trail..
+    trail.push_back(layer(ch));
+    LOG("level " << std::to_string(trail.size()));
+
+    // we take the decision..
+    if (!get_sat_core().assume(ch) || !get_sat_core().check())
+        throw std::runtime_error("the problem is unsolvable");
+
+#ifdef BUILD_GUI
+    fire_state_changed();
+#endif
 }
 
 void solver::next()
 {
-    // TODO: add code for moving to the next solution..
+    LOG("next..");
+
+    if (get_sat_core().root_level())
+        throw std::runtime_error("the problem is unsolvable");
+
+    std::vector<smt::lit> no_good;
+    no_good.reserve(trail.size());
+    for (const auto &l : trail)
+        no_good.push_back(!l.decision);
+    get_sat_core().pop();
+
+    assert(!no_good.empty());
+    assert(get_sat_core().value(no_good.back()) == Undefined);
+    record(no_good);
+    if (!get_sat_core().check())
+        throw std::runtime_error("the problem is unsolvable");
+
+#ifdef BUILD_GUI
+    fire_state_changed();
+#endif
+
+    // we check if we need to change the graph..
+    if (get_sat_core().value(gr.gamma) == False)
+    { // we do need to change the graph..
+        assert(get_sat_core().root_level());
+        if (gr.accuracy < gr.max_accuracy) // we have room for increasing the heuristic accuracy..
+            gr.increase_accuracy();        // so we increase the heuristic accuracy..
+        else
+            gr.add_layer(); // we add a layer to the current graph..
+    }
 }
 
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
@@ -193,9 +235,7 @@ bool solver::check(std::vector<lit> &cnfl)
     return true;
 }
 
-void solver::push()
-{
-}
+void solver::push() {}
 
 void solver::pop()
 {
