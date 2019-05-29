@@ -92,17 +92,19 @@ protected:
   void set_ni(const smt::var &v); // temporally sets the solver's 'ni' variable..
   void restore_ni();              // restores the solver's 'ni' variable..
 
+  void new_inc(const std::set<atom *> &atms);
+
   static std::vector<resolver *> get_resolvers(solver &slv, const std::set<atom *> &atms); // returns the vector of resolvers which has given rise to the given atoms..
 
 private:
   solver &slv;
   std::vector<flaw *> flaws;
 
-  std::map< std::set<atom *>, smart_flaw *> smart_flaws; // the smart-flaws found so far..
+  std::map<const std::set<atom *>, smart_flaw *> smart_flaws; // the smart-flaws found so far..
 #ifdef BUILD_GUI
-  std::map<std::set<atom *>, std::vector<std::pair<smt::lit, std::string>>> choices; // all the possible choices for solving a flaw with a string for describing the choice..
+  std::map<const std::set<atom *>, std::vector<std::pair<smt::lit, std::string>>> choices; // all the possible choices for solving a flaw with a string for describing the choice..
 #else
-  std::map<std::set<atom *>, std::vector<smt::lit>> choices; // all the possible choices for solving a flaw..
+  std::map<const std::set<atom *>, std::vector<smt::lit>> choices; // all the possible choices for solving a flaw..
 #endif
 };
 

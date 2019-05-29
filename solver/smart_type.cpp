@@ -73,6 +73,16 @@ void smart_type::smart_resolver::apply()
 void smart_type::set_ni(const smt::var &v) { get_solver().set_ni(v); }
 void smart_type::restore_ni() { get_solver().restore_ni(); }
 
+void smart_type::new_inc(const std::set<atom *> &atms)
+{
+    if (smart_flaws.find(atms) == smart_flaws.end())
+    {
+        smart_flaw *sf = new smart_flaw(*this, atms);
+        smart_flaws.insert({atms, sf});
+        flaws.push_back(sf);
+    }
+}
+
 std::vector<resolver *> smart_type::get_resolvers(solver &slv, const std::set<atom *> &atms)
 {
     std::unordered_set<resolver *> ress;
