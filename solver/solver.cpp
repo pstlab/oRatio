@@ -156,11 +156,40 @@ void solver::next()
 
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 {
+    assert(cnfl.empty());
+    const auto at_phis_p = gr.phis.find(p.get_var());
+    if (at_phis_p != gr.phis.end()) // a decision has been taken about the presence of some flaws within the current partial solution..
+        for (const auto &f : at_phis_p->second)
+        {
+#ifdef BUILD_GUI
+            fire_flaw_state_changed(*f);
+#endif
+            if (p.get_sign()) // this flaw has been added to the current partial solution..
+            {
+                flaws.insert(f);
+                if (!trail.empty())
+                    trail.back().new_flaws.insert(f);
+            }
+            else // this flaw has been removed from the current partial solution..
+                assert(flaws.find(f) == flaws.end());
+        }
+
+    const auto at_rhos_p = gr.rhos.find(p.get_var());
+    if (at_rhos_p != gr.rhos.end() && !p.get_sign()) // a decision has been taken about the removal of some resolvers within the current partial solution..
+        for (const auto &r : at_rhos_p->second)
+        {
+#ifdef BUILD_GUI
+            fire_resolver_state_changed(*r);
+#endif
+            gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY);
+        }
+
     return true;
 }
 
 bool solver::check(std::vector<lit> &cnfl)
 {
+    assert(cnfl.empty());
     return true;
 }
 
