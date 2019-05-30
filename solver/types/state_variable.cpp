@@ -73,6 +73,7 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
 
             if (overlapping_atoms.size() > 1) // we have a 'peak'..
             {
+                new_inc(overlapping_atoms);
                 // TODO: add code for managing peaks..
             }
         }
@@ -96,7 +97,9 @@ void state_variable::new_fact(atom_flaw &f)
     get_core().get_predicate("IntervalPredicate").apply_rule(atm);
     restore_ni();
 
-    // TODO: add code for storing variables (for solving flaws)..
+    // we store the variables for on-line flaw resolution..
+    for (const auto &c_atm : atoms)
+        store_variables(atm, *c_atm.first);
 
     // we store, for the fact, its atom listener..
     atoms.push_back({&atm, new sv_atom_listener(*this, atm)});
@@ -117,7 +120,9 @@ void state_variable::new_goal(atom_flaw &f)
 {
     atom &atm = f.get_atom();
 
-    // TODO: add code for storing variables (for solving flaws)..
+    // we store the variables for on-line flaw resolution..
+    for (const auto &c_atm : atoms)
+        store_variables(atm, *c_atm.first);
 
     // we store, for the goal, its atom listener..
     atoms.push_back({&atm, new sv_atom_listener(*this, atm)});
@@ -132,6 +137,76 @@ void state_variable::new_goal(atom_flaw &f)
         else // the 'tau' parameter is a constant..
             to_check.insert(&*c_scope);
     }
+}
+
+void state_variable::store_variables(atom &atm0, atom &atm1)
+{
+    expr a0_tau = atm0.get(TAU);
+    expr a1_tau = atm1.get(TAU);
+    item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
+    item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
+    if (a0_tau_itm || a1_tau_itm)
+    {
+        if (a0_tau_itm && a1_tau_itm)
+        {
+            // we have two non-singleton variables..
+            var_item *a0_var_itm = static_cast<var_item *>(a0_tau_itm);
+            var_item *a1_var_itm = static_cast<var_item *>(a1_tau_itm);
+            std::unordered_set<var_value *> a0_vals = get_solver().enum_value(a0_var_itm);
+            std::unordered_set<var_value *> a1_vals = get_solver().enum_value(a1_var_itm);
+
+            bool found = false;
+            for (const auto &v0 : a0_vals)
+                if (a1_vals.find(v0) != a1_vals.end())
+                {
+                    found = true;
+                    break;
+                }
+            if (found) // we store the ordering variables..
+            {
+#ifdef BUILD_GUI
+                std::vector<std::pair<smt::lit, std::string>> chs({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}});
+                for (const auto &v0 : a0_vals)
+                    if (a1_vals.find(v0) != a1_vals.end())
+                        chs.push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_var_itm->ev, *v0), smt::lit(get_solver().get_ov_theory().allows(a1_var_itm->ev, *v0), false)}), "σ" + std::to_string(atm0.get_sigma()) + ".τ ≠ σ" + std::to_string(atm1.get_sigma())});
+#else
+                std::vector<smt::lit> chs({get_solver().leq(atm0.get(END), atm1.get(START))->l, get_solver().leq(atm1.get(END), atm0.get(START))->l});
+                for (const auto &v0 : a0_vals)
+                    if (a1_vals.find(v0) != a1_vals.end())
+                        chs.push_back(get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_var_itm->ev, *v0), smt::lit(get_solver().get_ov_theory().allows(a1_var_itm->ev, *v0), false)}));
+#endif
+                set_choices(atm0, atm1, chs);
+            }
+        }
+        else if (!a0_tau_itm)
+        {
+            var_item *a1_var_itm = static_cast<var_item *>(a1_tau_itm);
+            std::unordered_set<var_value *> a1_vals = get_solver().enum_value(a1_var_itm);
+            if (a1_vals.find(&*a0_tau) != a1_vals.end()) // we store the ordering variables..
+#ifdef BUILD_GUI
+                set_choices(atm0, atm1, std::vector<std::pair<smt::lit, std::string>>({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}, {smt::lit(get_solver().get_ov_theory().allows(a1_var_itm->ev, *a0_tau), false), "σ" + std::to_string(atm0.get_sigma()) + ".τ ≠ σ" + std::to_string(atm1.get_sigma())}}));
+#else
+                set_choices(atm0, atm1, std::vector<smt::lit>({get_solver().leq(atm0.get(END), atm1.get(START))->l, get_solver().leq(atm1.get(END), atm0.get(START))->l, smt::lit(get_solver().get_ov_theory().allows(a1_var_itm->ev, *a0_tau), false)}));
+#endif
+        }
+        else if (!a1_tau_itm)
+        {
+            var_item *a0_var_itm = static_cast<var_item *>(a0_tau_itm);
+            std::unordered_set<var_value *> a0_vals = get_solver().enum_value(a0_var_itm);
+            if (a0_vals.find(&*a1_tau) != a0_vals.end()) // we store the ordering variables..
+#ifdef BUILD_GUI
+                set_choices(atm0, atm1, std::vector<std::pair<smt::lit, std::string>>({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}, {get_solver().get_ov_theory().allows(a0_var_itm->ev, *a1_tau), "σ" + std::to_string(atm0.get_sigma()) + ".τ ≠ σ" + std::to_string(atm1.get_sigma())}}));
+#else
+                set_choices(atm0, atm1, std::vector<smt::lit>({get_solver().leq(atm0.get(END), atm1.get(START))->l, get_solver().leq(atm1.get(END), atm0.get(START))->l, smt::lit(get_solver().get_ov_theory().allows(a0_var_itm->ev, *a1_tau), false)}));
+#endif
+        }
+    }
+    else if (&*a0_tau == &*a1_tau) // the two atoms are on the same state-variable: we store the ordering variables..
+#ifdef BUILD_GUI
+        set_choices(atm0, atm1, std::vector<std::pair<smt::lit, std::string>>({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}}));
+#else
+        set_choices(atm0, atm1, std::vector<smt::lit>({get_solver().leq(atm0.get(END), atm1.get(START))->l, get_solver().leq(atm1.get(END), atm0.get(START))->l}));
+#endif
 }
 
 state_variable::sv_constructor::sv_constructor(state_variable &sv) : constructor(sv.get_solver(), sv, {}, {}, {}) {}

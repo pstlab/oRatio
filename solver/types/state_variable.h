@@ -21,6 +21,7 @@ private:
   void new_predicate(predicate &pred) override;
   void new_fact(atom_flaw &f) override;
   void new_goal(atom_flaw &f) override;
+  void store_variables(atom &atm0, atom &atm1);
 
   // the state-variable constructor..
   class sv_constructor : public constructor
