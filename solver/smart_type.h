@@ -92,7 +92,12 @@ protected:
   void set_ni(const smt::var &v); // temporally sets the solver's 'ni' variable..
   void restore_ni();              // restores the solver's 'ni' variable..
 
-  void new_inc(const std::set<atom *> &atms);
+#ifdef BUILD_GUI
+  void set_choices(atom &atm0, atom &atm1, const std::vector<std::pair<smt::lit, std::string>> &chs); // sets the choices for solving an inconsistency between the two atoms..
+#else
+  void set_choices(atom &atm0, atom &atm1, const std::vector<smt::lit> &chs); // sets the choices for solving an inconsistency between the two atoms..
+#endif
+  void new_inc(const std::set<atom *> &atms); // a new inconsistency among the given atoms has been found..
 
   static std::vector<resolver *> get_resolvers(solver &slv, const std::set<atom *> &atms); // returns the vector of resolvers which has given rise to the given atoms..
 
@@ -102,9 +107,9 @@ private:
 
   std::map<const std::set<atom *>, smart_flaw *> smart_flaws; // the smart-flaws found so far..
 #ifdef BUILD_GUI
-  std::map<const std::set<atom *>, std::vector<std::pair<smt::lit, std::string>>> choices; // all the possible choices for solving a flaw with a string for describing the choice..
+  std::map<const std::set<atom *>, const std::vector<std::pair<smt::lit, std::string>>> choices; // all the possible choices for solving a flaw with a string for describing the choice..
 #else
-  std::map<const std::set<atom *>, std::vector<smt::lit>> choices; // all the possible choices for solving a flaw..
+  std::map<const std::set<atom *>, const std::vector<smt::lit>> choices;      // all the possible choices for solving a flaw..
 #endif
 };
 

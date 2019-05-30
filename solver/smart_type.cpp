@@ -73,6 +73,17 @@ void smart_type::smart_resolver::apply()
 void smart_type::set_ni(const smt::var &v) { get_solver().set_ni(v); }
 void smart_type::restore_ni() { get_solver().restore_ni(); }
 
+#ifdef BUILD_GUI
+void smart_type::set_choices(atom &atm0, atom &atm1, const std::vector<std::pair<smt::lit, std::string>> &chs)
+{
+    choices.insert({std::set<atom *>({&atm0, &atm1}), chs});
+}
+#else
+void smart_type::set_choices(atom &atm0, atom &atm1, const std::vector<smt::lit> &chs)
+{
+    choices.insert({std::set<atom *>({&atm0, &atm1}), chs});
+}
+#endif
 void smart_type::new_inc(const std::set<atom *> &atms)
 {
     if (smart_flaws.find(atms) == smart_flaws.end())
