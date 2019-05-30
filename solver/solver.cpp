@@ -200,6 +200,9 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
     const auto at_phis_p = gr.phis.find(p.get_var());
+    const auto at_rhos_p = gr.rhos.find(p.get_var());
+    assert(at_phis_p != gr.phis.end() || at_rhos_p != gr.rhos.end());
+
     if (at_phis_p != gr.phis.end()) // a decision has been taken about the presence of some flaws within the current partial solution..
         for (const auto &f : at_phis_p->second)
         {
@@ -216,14 +219,19 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                 assert(flaws.find(f) == flaws.end());
         }
 
-    const auto at_rhos_p = gr.rhos.find(p.get_var());
-    if (at_rhos_p != gr.rhos.end() && !p.get_sign()) // a decision has been taken about the removal of some resolvers within the current partial solution..
+    if (at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..
         for (const auto &r : at_rhos_p->second)
         {
 #ifdef BUILD_GUI
             fire_resolver_state_changed(*r);
 #endif
-            gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY);
+            if (p.get_sign()) // this resolver has been applied hence its effect has been resolved..
+            {
+                if (flaws.erase(&r->effect))
+                    trail.back().solved_flaws.insert(&r->effect);
+            }
+            else // since this resolver cannot be applied its cost is set to +inf..
+                gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY);
         }
 
     return true;
@@ -239,6 +247,35 @@ void solver::push() {}
 
 void solver::pop()
 {
+    // we reintroduce the solved flaw..
+    for (const auto &f : trail.back().solved_flaws)
+        flaws.insert(f);
+
+    // we erase the new flaws..
+    for (const auto &f : trail.back().new_flaws)
+        flaws.erase(f);
+
+    // we restore the resolvers' estimated costs..
+    for (const auto &r : trail.back().old_r_costs)
+    {
+        r.first->est_cost = r.second;
+#ifdef BUILD_GUI
+        fire_resolver_cost_changed(*r.first);
+#endif
+    }
+
+    // we restore the flaws' estimated costs..
+    for (const auto &f : trail.back().old_f_costs)
+    {
+        f.first->est_cost = f.second;
+#ifdef BUILD_GUI
+        fire_flaw_cost_changed(*f.first);
+#endif
+    }
+
+    trail.pop_back();
+
+    LOG("level " << std::to_string(trail.size()));
 }
 
 flaw *solver::select_flaw()
