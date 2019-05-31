@@ -194,7 +194,11 @@ void solver::next()
 
     assert(!no_good.empty());
     assert(get_sat_core().value(no_good.back()) == Undefined);
+
+    // we reverse the no-good and store it..
+    std::reverse(no_good.begin(), no_good.end());
     record(no_good);
+
     if (!get_sat_core().check())
         throw std::runtime_error("the problem is unsolvable");
 
