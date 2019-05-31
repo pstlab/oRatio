@@ -38,12 +38,15 @@ void solver::solve()
     // we build the causal graph..
     gr.build();
 
+    // we solve all the current inconsistencies..
+    solve_inconsistencies();
+
+    // we create and set a new graph var..
+    gr.set_new_gamma();
+
     // we enter into the main solving loop..
     while (true)
     {
-        // we solve all the current inconsistencies..
-        solve_inconsistencies();
-
         // this is the next flaw to be solved..
         flaw *f_next = select_flaw();
 
@@ -62,6 +65,9 @@ void solver::solve()
 
             // we apply the resolver..
             take_decision(res->get_rho());
+
+            // we solve all the current inconsistencies..
+            solve_inconsistencies();
         }
         else
         {
@@ -190,9 +196,15 @@ void solver::next()
     { // we do need to change the graph..
         assert(get_sat_core().root_level());
         if (gr.accuracy < gr.max_accuracy) // we have room for increasing the heuristic accuracy..
-            gr.increase_accuracy();        // so we increase the heuristic accuracy..
+        {
+            gr.increase_accuracy(); // so we increase the heuristic accuracy..
+            gr.set_new_gamma();     // we create and set a new graph var..
+        }
         else
-            gr.add_layer(); // we add a layer to the current graph..
+        {
+            gr.add_layer();     // we add a layer to the current graph..
+            gr.set_new_gamma(); // we create and set a new graph var..
+        }
     }
 }
 

@@ -175,9 +175,6 @@ void graph::build()
             expand_flaw(*f); // we expand the flaw..
 #endif
     }
-
-    // we create and set a new graph var..
-    set_new_gamma();
 }
 
 void graph::add_layer()
@@ -195,9 +192,6 @@ void graph::add_layer()
             if (slv.get_sat_core().value(f->phi) != False) // we expand the flaw..
                 expand_flaw(*f);
     }
-
-    // we create and set a new graph var..
-    set_new_gamma();
 }
 
 void graph::increase_accuracy()

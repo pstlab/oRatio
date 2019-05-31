@@ -35,9 +35,9 @@ public:
   unsigned short get_accuracy() const { return accuracy; }
 
 private:
-  void new_flaw(flaw &f);
-  void new_resolver(resolver &r);
-  void new_causal_link(flaw &f, resolver &r);
+  void new_flaw(flaw &f);                     // notifies the graph that a new flaw 'f' has been created..
+  void new_resolver(resolver &r);             // notifies the graph that a new resolver 'r' has been created..
+  void new_causal_link(flaw &f, resolver &r); // notifies the graph that a new causal link between a flaw 'f' and a resolver 'r' has been created..
 
   void set_estimated_cost(resolver &r, const smt::rational &cst);     // sets the estimated cost of the given resolver, propagating it to other resolvers..
   static const smt::rational evaluate(const std::vector<flaw *> &fs); // evaluates, together, the given vector of flaws..
@@ -53,7 +53,7 @@ private:
   bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
 #endif
 
-  void set_new_gamma();
+  void set_new_gamma(); //creates and sets a new graph var..
 
 private:
   solver &slv;                                                // the solver this graph belongs to..
