@@ -38,6 +38,10 @@ void solver::solve()
     // we build the causal graph..
     gr.build();
 
+#ifdef BUILD_GUI
+    fire_state_changed();
+#endif
+
     // we solve all the current inconsistencies..
     solve_inconsistencies();
 
@@ -49,6 +53,10 @@ void solver::solve()
     {
         // this is the next flaw to be solved..
         flaw *f_next = select_flaw();
+#ifdef BUILD_GUI
+        if (f_next)
+            fire_current_flaw(*f_next);
+#endif
 
         if (f_next)
         {
@@ -61,6 +69,9 @@ void solver::solve()
 
             // this is the next resolver to be applied..
             resolver *res = f_next->get_best_resolver();
+#ifdef BUILD_GUI
+            fire_current_resolver(*res);
+#endif
             assert(!res->get_estimated_cost().is_infinite());
 
             // we apply the resolver..
@@ -205,6 +216,10 @@ void solver::next()
             gr.add_layer();     // we add a layer to the current graph..
             gr.set_new_gamma(); // we create and set a new graph var..
         }
+
+#ifdef BUILD_GUI
+        fire_state_changed();
+#endif
     }
 }
 
