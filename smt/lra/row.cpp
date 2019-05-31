@@ -61,6 +61,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                             th.record(cnfl);
                             break;
                         }
+                        break;
                     case geq: // the assertion is satisfied..
                         cnfl[0] = c->b;
                         switch (th.sat.value(c->b))
@@ -71,6 +72,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                             return false;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
+                            break;
                         }
                         break;
                     }
@@ -119,6 +121,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                             return false;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
+                            break;
                         }
                         break;
                     case geq: // the assertion is unsatisfable..
@@ -131,6 +134,7 @@ bool row::propagate_lb(const var &v, std::vector<lit> &cnfl)
                             break;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
+                            break;
                         }
                         break;
                     }
@@ -189,6 +193,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                             return false;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
+                            break;
                         }
                         break;
                     case geq: // the assertion is unsatisfable..
@@ -201,6 +206,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                             break;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
+                            break;
                         }
                         break;
                     }
@@ -249,6 +255,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                             break;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
+                            break;
                         }
                         break;
                     case geq: // the assertion is satisfied..
@@ -261,6 +268,7 @@ bool row::propagate_ub(const var &v, std::vector<lit> &cnfl)
                             return false;
                         case Undefined: // we propagate information to the sat core..
                             th.record(cnfl);
+                            break;
                         }
                         break;
                     }

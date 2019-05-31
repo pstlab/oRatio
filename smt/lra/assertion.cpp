@@ -28,6 +28,7 @@ bool assertion::propagate_lb(const var &x_i, std::vector<lit> &cnfl)
                 th.record({lit(b, false), !*th.bounds.at(lra_theory::lb_index(x_i)).reason});
                 break;
             }
+            break;
         case geq: // the assertion is satisfied; [x_i >= lb(x_i)] -> [x_i >= v]..
             switch (th.sat.value(b))
             {
@@ -41,6 +42,7 @@ bool assertion::propagate_lb(const var &x_i, std::vector<lit> &cnfl)
                 th.record({b, !*th.bounds.at(lra_theory::lb_index(x_i)).reason});
                 break;
             }
+            break;
         }
 
     return true;
@@ -65,6 +67,7 @@ bool assertion::propagate_ub(const var &x_i, std::vector<lit> &cnfl)
                 th.record({b, !*th.bounds.at(lra_theory::ub_index(x_i)).reason});
                 break;
             }
+            break;
         case geq: // the assertion is unsatisfable; [x_i <= ub(x_i)] -> ![x_i >= v]..
             switch (th.sat.value(b))
             {
@@ -78,6 +81,7 @@ bool assertion::propagate_ub(const var &x_i, std::vector<lit> &cnfl)
                 th.record({lit(b, false), !*th.bounds.at(lra_theory::ub_index(x_i)).reason});
                 break;
             }
+            break;
         }
 
     return true;
