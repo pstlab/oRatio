@@ -227,17 +227,13 @@ token *lexer::next()
     case 'b':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'o')
+        if (str += ch; (ch = next_char()) != 'o')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'o')
+        if (str += ch; (ch = next_char()) != 'o')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'l')
+        if (str += ch; (ch = next_char()) != 'l')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(BOOL_ID);
@@ -245,20 +241,15 @@ token *lexer::next()
     case 'c':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'l')
+        if (str += ch; (ch = next_char()) != 'l')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'a')
+        if (str += ch; (ch = next_char()) != 'a')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 's')
+        if (str += ch; (ch = next_char()) != 's')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 's')
+        if (str += ch; (ch = next_char()) != 's')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(CLASS_ID);
@@ -266,17 +257,13 @@ token *lexer::next()
     case 'e':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'n')
+        if (str += ch; (ch = next_char()) != 'n')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'u')
+        if (str += ch; (ch = next_char()) != 'u')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'm')
+        if (str += ch; (ch = next_char()) != 'm')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(ENUM_ID);
@@ -284,30 +271,23 @@ token *lexer::next()
     case 'f':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'a')
+        if (str += ch; (ch = next_char()) != 'a')
             return finish_id(str);
-        str += ch;
-        switch (ch = next_char())
+        switch (str += ch; ch = next_char())
         {
         case 'c':
-            str += ch;
-            if ((ch = next_char()) != 't')
+            if (str += ch; (ch = next_char()) != 't')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != -1 && is_id_part(ch))
+            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
                 return mk_token(FACT_ID);
         case 'l':
-            str += ch;
-            if ((ch = next_char()) != 's')
+            if (str += ch; (ch = next_char()) != 's')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != 'e')
+            if (str += ch; (ch = next_char()) != 'e')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != -1 && is_id_part(ch))
+            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
                 return mk_token(FALSE_ID);
@@ -318,17 +298,13 @@ token *lexer::next()
     case 'g':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'o')
+        if (str += ch; (ch = next_char()) != 'o')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'a')
+        if (str += ch; (ch = next_char()) != 'a')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'l')
+        if (str += ch; (ch = next_char()) != 'l')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(GOAL_ID);
@@ -336,14 +312,11 @@ token *lexer::next()
     case 'i':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'n')
+        if (str += ch; (ch = next_char()) != 'n')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 't')
+        if (str += ch; (ch = next_char()) != 't')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(INT_ID);
@@ -351,14 +324,11 @@ token *lexer::next()
     case 'n':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'e')
+        if (str += ch; (ch = next_char()) != 'e')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'w')
+        if (str += ch; (ch = next_char()) != 'w')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(NEW_ID);
@@ -366,11 +336,9 @@ token *lexer::next()
     case 'o':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'r')
+        if (str += ch; (ch = next_char()) != 'r')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(OR_ID);
@@ -378,32 +346,23 @@ token *lexer::next()
     case 'p':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'r')
+        if (str += ch; (ch = next_char()) != 'r')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'e')
+        if (str += ch; (ch = next_char()) != 'e')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'd')
+        if (str += ch; (ch = next_char()) != 'd')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'i')
+        if (str += ch; (ch = next_char()) != 'i')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'c')
+        if (str += ch; (ch = next_char()) != 'c')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'a')
+        if (str += ch; (ch = next_char()) != 'a')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 't')
+        if (str += ch; (ch = next_char()) != 't')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'e')
+        if (str += ch; (ch = next_char()) != 'e')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(PREDICATE_ID);
@@ -411,33 +370,25 @@ token *lexer::next()
     case 'r':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'e')
+        if (str += ch; (ch = next_char()) != 'e')
             return finish_id(str);
-        str += ch;
-        switch (ch = next_char())
+        switch (str += ch; ch = next_char())
         {
         case 'a':
-            str += ch;
-            if ((ch = next_char()) != 'l')
+            if (str += ch; (ch = next_char()) != 'l')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != -1 && is_id_part(ch))
+            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
                 return mk_token(REAL_ID);
         case 't':
-            str += ch;
-            if ((ch = next_char()) != 'u')
+            if (str += ch; (ch = next_char()) != 'u')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != 'r')
+            if (str += ch; (ch = next_char()) != 'r')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != 'n')
+            if (str += ch; (ch = next_char()) != 'n')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != -1 && is_id_part(ch))
+            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
                 return mk_token(RETURN_ID);
@@ -448,23 +399,17 @@ token *lexer::next()
     case 's':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 't')
+        if (str += ch; (ch = next_char()) != 't')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'r')
+        if (str += ch; (ch = next_char()) != 'r')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'i')
+        if (str += ch; (ch = next_char()) != 'i')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'n')
+        if (str += ch; (ch = next_char()) != 'n')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'g')
+        if (str += ch; (ch = next_char()) != 'g')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(STRING_ID);
@@ -472,39 +417,29 @@ token *lexer::next()
     case 't':
     {
         std::string str;
-        str += ch;
-        switch (ch = next_char())
+        switch (str += ch; ch = next_char())
         {
         case 'r':
-            str += ch;
-            if ((ch = next_char()) != 'u')
+            if (str += ch; (ch = next_char()) != 'u')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != 'e')
+            if (str += ch; (ch = next_char()) != 'e')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != -1 && is_id_part(ch))
+            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
                 return mk_token(TRUE_ID);
         case 'y':
-            str += ch;
-            if ((ch = next_char()) != 'p')
+            if (str += ch; (ch = next_char()) != 'p')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != 'e')
+            if (str += ch; (ch = next_char()) != 'e')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != 'd')
+            if (str += ch; (ch = next_char()) != 'd')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != 'e')
+            if (str += ch; (ch = next_char()) != 'e')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != 'f')
+            if (str += ch; (ch = next_char()) != 'f')
                 return finish_id(str);
-            str += ch;
-            if ((ch = next_char()) != -1 && is_id_part(ch))
+            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
                 return mk_token(TYPEDEF_ID);
@@ -515,17 +450,13 @@ token *lexer::next()
     case 'v':
     {
         std::string str;
-        str += ch;
-        if ((ch = next_char()) != 'o')
+        if (str += ch; (ch = next_char()) != 'o')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'i')
+        if (str += ch; (ch = next_char()) != 'i')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != 'd')
+        if (str += ch; (ch = next_char()) != 'd')
             return finish_id(str);
-        str += ch;
-        if ((ch = next_char()) != -1 && is_id_part(ch))
+        if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
             return finish_id(str);
         else
             return mk_token(OR_ID);

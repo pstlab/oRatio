@@ -153,8 +153,7 @@ expr function_expression::evaluate(const scope &scp, context &ctx) const
         par_types.push_back(&i->get_type());
     }
 
-    const method &m = s->get_method(function_name, par_types);
-    if (m.get_return_type())
+    if (const method &m = s->get_method(function_name, par_types); m.get_return_type())
     {
         if (m.get_return_type() == &scp.get_core().get_type(BOOL_KEYWORD))
             return bool_expr(static_cast<bool_item *>(m.invoke(ctx, exprs)));
@@ -453,9 +452,7 @@ void method_declaration::refine(scope &scp) const
         args.push_back(new field(*tp, par.second));
     }
 
-    method *m = new method(scp.get_core(), scp, rt, name, args, statements);
-
-    if (core *c = dynamic_cast<core *>(&scp))
+    if (method *m = new method(scp.get_core(), scp, rt, name, args, statements); core *c = dynamic_cast<core *>(&scp))
         c->new_methods({m});
     else if (type *t = dynamic_cast<type *>(&scp))
         t->new_methods({m});

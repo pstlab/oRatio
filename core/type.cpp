@@ -155,8 +155,7 @@ const constructor &type::get_constructor(const std::vector<const type *> &ts) co
 
 const field &type::get_field(const std::string &f_name) const
 {
-    const auto at_f = fields.find(f_name);
-    if (at_f != fields.end())
+    if (const auto at_f = fields.find(f_name); at_f != fields.end())
         return *at_f->second;
 
     // if not here, check any enclosing scope
@@ -228,8 +227,7 @@ const method &type::get_method(const std::string &m_name, const std::vector<cons
 
 type &type::get_type(const std::string &t_name) const
 {
-    const auto at_tp = types.find(t_name);
-    if (at_tp != types.end())
+    if (const auto at_tp = types.find(t_name); at_tp != types.end())
         return *at_tp->second;
 
     // if not here, check any enclosing scope
@@ -258,8 +256,7 @@ type &type::get_type(const std::string &t_name) const
 
 predicate &type::get_predicate(const std::string &p_name) const
 {
-    const auto at_p = predicates.find(p_name);
-    if (at_p != predicates.end())
+    if (const auto at_p = predicates.find(p_name); at_p != predicates.end())
         return *at_p->second;
 
     // if not here, check any enclosing scope

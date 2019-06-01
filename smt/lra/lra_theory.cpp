@@ -377,15 +377,12 @@ bool lra_theory::gt(const lin &left, const lin &right, const var &p)
     for (const auto &term : expr.vars)
         vars.push_back(term.first);
     for (const auto &v : vars)
-    {
-        const auto at_v = tableau.find(v);
-        if (at_v != tableau.end())
+        if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
             rational c = expr.vars.at(v);
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
-    }
 
     const inf_rational c_right = inf_rational(-expr.known_term, 1);
     expr.known_term = 0;

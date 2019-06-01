@@ -46,9 +46,7 @@ lin lin::operator-(const lin &right) const
 {
     lin res = *this;
     for (auto &term : right.vars)
-    {
-        const auto trm_it = res.vars.find(term.first);
-        if (trm_it == res.vars.end())
+        if (const auto trm_it = res.vars.find(term.first); trm_it == res.vars.end())
             res.vars.emplace(term.first, -term.second);
         else
         {
@@ -56,7 +54,6 @@ lin lin::operator-(const lin &right) const
             if (trm_it->second == rational::ZERO)
                 res.vars.erase(trm_it);
         }
-    }
     res.known_term -= right.known_term;
     return res;
 }
@@ -105,9 +102,7 @@ lin lin::operator/(const rational &right) const
 lin lin::operator+=(const lin &right)
 {
     for (auto &term : right.vars)
-    {
-        const auto trm_it = vars.find(term.first);
-        if (trm_it == vars.end())
+        if (const auto trm_it = vars.find(term.first); trm_it == vars.end())
             vars.insert(term);
         else
         {
@@ -115,7 +110,6 @@ lin lin::operator+=(const lin &right)
             if (trm_it->second == rational::ZERO)
                 vars.erase(trm_it);
         }
-    }
     known_term += right.known_term;
     return *this;
 }
@@ -129,9 +123,7 @@ lin lin::operator+=(const rational &right)
 lin lin::operator-=(const lin &right)
 {
     for (auto &term : right.vars)
-    {
-        const auto trm_it = vars.find(term.first);
-        if (trm_it == vars.end())
+        if (const auto trm_it = vars.find(term.first); trm_it == vars.end())
             vars.emplace(term.first, -term.second);
         else
         {
@@ -139,7 +131,6 @@ lin lin::operator-=(const lin &right)
             if (trm_it->second == rational::ZERO)
                 vars.erase(trm_it);
         }
-    }
     known_term -= right.known_term;
     return *this;
 }

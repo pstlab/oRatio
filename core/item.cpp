@@ -139,17 +139,15 @@ expr var_item::get(const std::string &name) const
             q.push(st);
         q.pop();
     }
-    const auto &f_it = accessible_fields.find(name);
-    if (f_it == accessible_fields.end())
+    if (const auto &f_it = accessible_fields.find(name); f_it == accessible_fields.end())
         return item::get(name);
     else
     {
         const auto &it_it = exprs.find(name);
         if (it_it == exprs.end())
         {
-            std::unordered_set<var_value *> vs = get_core().get_ov_theory().value(ev);
-            assert(!vs.empty());
-            if (vs.size() == 1)
+            assert(!get_core().get_ov_theory().value(ev).empty());
+            if (std::unordered_set<var_value *> vs = get_core().get_ov_theory().value(ev); vs.size() == 1)
                 return (static_cast<item *>(*vs.begin()))->get(name);
             else
             {

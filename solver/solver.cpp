@@ -230,11 +230,9 @@ void solver::next()
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
-    const auto at_phis_p = gr.phis.find(p.get_var());
-    const auto at_rhos_p = gr.rhos.find(p.get_var());
-    assert(at_phis_p != gr.phis.end() || at_rhos_p != gr.rhos.end());
+    assert(gr.phis.find(p.get_var()) != gr.phis.end() || gr.rhos.find(p.get_var()) != gr.rhos.end());
 
-    if (at_phis_p != gr.phis.end()) // a decision has been taken about the presence of some flaws within the current partial solution..
+    if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end()) // a decision has been taken about the presence of some flaws within the current partial solution..
         for (const auto &f : at_phis_p->second)
         {
 #ifdef BUILD_GUI
@@ -250,7 +248,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                 assert(flaws.find(f) == flaws.end());
         }
 
-    if (at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..
+    if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..
         for (const auto &r : at_rhos_p->second)
         {
 #ifdef BUILD_GUI

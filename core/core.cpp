@@ -66,9 +66,7 @@ void core::read(const std::vector<std::string> &files)
 {
     std::vector<ast::compilation_unit *> c_cus;
     for (const auto &f : files)
-    {
-        std::ifstream ifs(f);
-        if (ifs)
+        if (std::ifstream ifs(f); ifs)
         {
             riddle_parser prs(ifs);
             ast::compilation_unit *cu = static_cast<ast::compilation_unit *>(prs.parse());
@@ -78,7 +76,6 @@ void core::read(const std::vector<std::string> &files)
         }
         else
             throw std::invalid_argument("file not found: " + f);
-    }
 
     for (const auto &cu : c_cus)
         cu->declare(*this);
@@ -272,8 +269,7 @@ void core::new_predicates(const std::vector<predicate *> &ps)
 
 const field &core::get_field(const std::string &name) const
 {
-    const auto at_f = fields.find(name);
-    if (at_f != fields.end())
+    if (const auto at_f = fields.find(name); at_f != fields.end())
         return *at_f->second;
 
     // not found
@@ -282,8 +278,7 @@ const field &core::get_field(const std::string &name) const
 
 const method &core::get_method(const std::string &name, const std::vector<const type *> &ts) const
 {
-    const auto at_m = methods.find(name);
-    if (at_m != methods.end())
+    if (const auto at_m = methods.find(name); at_m != methods.end())
     {
         bool found = false;
         for (const auto &mthd : at_m->second)
@@ -307,8 +302,7 @@ const method &core::get_method(const std::string &name, const std::vector<const 
 
 type &core::get_type(const std::string &name) const
 {
-    const auto at_tp = types.find(name);
-    if (at_tp != types.end())
+    if (const auto at_tp = types.find(name); at_tp != types.end())
         return *at_tp->second;
 
     // not found
@@ -317,8 +311,7 @@ type &core::get_type(const std::string &name) const
 
 predicate &core::get_predicate(const std::string &name) const
 {
-    const auto at_p = predicates.find(name);
-    if (at_p != predicates.end())
+    if (const auto at_p = predicates.find(name); at_p != predicates.end())
         return *at_p->second;
 
     // not found
@@ -327,8 +320,7 @@ predicate &core::get_predicate(const std::string &name) const
 
 expr core::get(const std::string &name) const
 {
-    const auto at_xpr = exprs.find(name);
-    if (at_xpr != exprs.end())
+    if (const auto at_xpr = exprs.find(name); at_xpr != exprs.end())
         return at_xpr->second;
 
     throw std::out_of_range(name);
@@ -437,8 +429,7 @@ std::string core::to_string(const item *const i) const noexcept
     }
     is += i_type + "\"";
 
-    std::map<std::string, expr> c_is = i->get_exprs();
-    if (!c_is.empty())
+    if (std::map<std::string, expr> c_is = i->get_exprs(); !c_is.empty())
         is += ", \"exprs\" : [ " + to_string(c_is) + " ]";
     is += "}";
     return is;
@@ -470,8 +461,8 @@ std::string core::to_string(const atom *const a) const noexcept
         as += "\"Inactive\"";
         break;
     }
-    std::map<std::string, expr> is = a->get_exprs();
-    if (!is.empty())
+
+    if (std::map<std::string, expr> is = a->get_exprs(); !is.empty())
         as += ", \"pars\" : [ " + to_string(is) + " ]";
     as += "}";
     return as;

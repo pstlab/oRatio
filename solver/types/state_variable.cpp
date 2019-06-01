@@ -63,11 +63,9 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
         std::set<atom *> overlapping_atoms;
         for (const auto &p : pulses)
         {
-            const auto at_start_p = starting_atoms.find(p);
-            if (at_start_p != starting_atoms.end())
+            if (const auto at_start_p = starting_atoms.find(p); at_start_p != starting_atoms.end())
                 overlapping_atoms.insert(at_start_p->second.begin(), at_start_p->second.end());
-            const auto at_end_p = ending_atoms.find(p);
-            if (at_end_p != ending_atoms.end())
+            if (const auto at_end_p = ending_atoms.find(p); at_end_p != ending_atoms.end())
                 for (const auto &a : at_end_p->second)
                     overlapping_atoms.erase(a);
 
@@ -181,8 +179,7 @@ void state_variable::store_variables(atom &atm0, atom &atm1)
         else if (!a0_tau_itm)
         {
             var_item *a1_var_itm = static_cast<var_item *>(a1_tau_itm);
-            std::unordered_set<var_value *> a1_vals = get_solver().enum_value(a1_var_itm);
-            if (a1_vals.find(&*a0_tau) != a1_vals.end()) // we store the ordering variables..
+            if (std::unordered_set<var_value *> a1_vals = get_solver().enum_value(a1_var_itm); a1_vals.find(&*a0_tau) != a1_vals.end()) // we store the ordering variables..
 #ifdef BUILD_GUI
                 set_choices(atm0, atm1, std::vector<std::pair<smt::lit, std::string>>({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}, {smt::lit(get_solver().get_ov_theory().allows(a1_var_itm->ev, *a0_tau), false), "σ" + std::to_string(atm0.get_sigma()) + ".τ ≠ σ" + std::to_string(atm1.get_sigma())}}));
 #else
@@ -192,8 +189,7 @@ void state_variable::store_variables(atom &atm0, atom &atm1)
         else if (!a1_tau_itm)
         {
             var_item *a0_var_itm = static_cast<var_item *>(a0_tau_itm);
-            std::unordered_set<var_value *> a0_vals = get_solver().enum_value(a0_var_itm);
-            if (a0_vals.find(&*a1_tau) != a0_vals.end()) // we store the ordering variables..
+            if (std::unordered_set<var_value *> a0_vals = get_solver().enum_value(a0_var_itm); a0_vals.find(&*a1_tau) != a0_vals.end()) // we store the ordering variables..
 #ifdef BUILD_GUI
                 set_choices(atm0, atm1, std::vector<std::pair<smt::lit, std::string>>({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}, {get_solver().get_ov_theory().allows(a0_var_itm->ev, *a1_tau), "σ" + std::to_string(atm0.get_sigma()) + ".τ ≠ σ" + std::to_string(atm1.get_sigma())}}));
 #else

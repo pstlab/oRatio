@@ -19,8 +19,7 @@ scope::~scope()
 
 const field &scope::get_field(const std::string &name) const
 {
-    const auto at_f = fields.find(name);
-    if (at_f != fields.end())
+    if (const auto at_f = fields.find(name); at_f != fields.end())
         return *at_f->second;
 
     // if not here, check any enclosing scope

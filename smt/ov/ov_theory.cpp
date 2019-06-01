@@ -70,8 +70,7 @@ var ov_theory::new_eq(const var &left, const var &right)
         return new_eq(right, left);
 
     std::string s_expr = "e" + std::to_string(left) + " == " + "e" + std::to_string(right);
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
     {
@@ -121,8 +120,7 @@ bool ov_theory::eq(const var &left, const var &right, const var &p)
         return eq(right, left, p);
 
     std::string s_expr = "e" + std::to_string(left) + " == " + "e" + std::to_string(right);
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return sat.eq(p, at_expr->second);
     else
     {
@@ -170,12 +168,9 @@ bool ov_theory::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
     for (const auto &v : is_contained_in.at(p.get_var()))
-    {
-        const auto at_v = listening.find(v);
-        if (at_v != listening.end())
+        if (const auto at_v = listening.find(v); at_v != listening.end())
             for (const auto &l : at_v->second)
                 l->ov_value_change(v);
-    }
     return true;
 }
 
@@ -190,12 +185,9 @@ void ov_theory::push() { layers.push_back(layer()); }
 void ov_theory::pop()
 {
     for (const auto &v : layers.back().vars)
-    {
-        const auto at_v = listening.find(v);
-        if (at_v != listening.end())
+        if (const auto at_v = listening.find(v); at_v != listening.end())
             for (const auto &l : at_v->second)
                 l->ov_value_change(v);
-    }
     layers.pop_back();
 }
 

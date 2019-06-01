@@ -246,8 +246,7 @@ void graph::expand_flaw(flaw &f)
                 // we expand the enclosing flaw..
                 c_f->expand();
                 // ..and remove it from the flaw queue..
-                auto f_it = std::find(flaw_q.begin(), flaw_q.end(), c_f);
-                if (f_it != flaw_q.end())
+                if (auto f_it = std::find(flaw_q.begin(), flaw_q.end(), c_f); f_it != flaw_q.end())
                     flaw_q.erase(f_it);
 
                 // we apply the enclosing flaw's resolvers..

@@ -116,8 +116,7 @@ var sat_core::new_conj(const std::vector<lit> &ls)
             s_expr += " & ";
         s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
     }
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
     {
@@ -151,8 +150,7 @@ var sat_core::new_disj(const std::vector<lit> &ls)
             s_expr += " | ";
         s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
     }
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
     {
@@ -186,8 +184,7 @@ var sat_core::new_exct_one(const std::vector<lit> &ls)
             s_expr += " ^ ";
         s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
     }
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
     {
@@ -221,8 +218,7 @@ bool sat_core::eq(const lit &left, const lit &right, const var &p)
     if (left.get_var() > right.get_var())
         return eq(right, left);
     const std::string s_expr = (left.get_sign() ? "b" : "!b") + std::to_string(left.get_var()) + " == " + (right.get_sign() ? "b" : "!b") + std::to_string(right.get_var());
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
     {
@@ -249,8 +245,7 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
             s_expr += " & ";
         s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
     }
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
     {
@@ -281,8 +276,7 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
             s_expr += " | ";
         s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
     }
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
     {
@@ -313,8 +307,7 @@ bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
             s_expr += " ^ ";
         s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
     }
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
     {
@@ -390,8 +383,7 @@ bool sat_core::check(const std::vector<lit> &lits)
         }
     for (const auto &th : theories)
         th->push();
-    std::vector<lit> cnfl;
-    if (!propagate(cnfl))
+    if (std::vector<lit> cnfl; !propagate(cnfl))
     {
         pop();
         return false;
@@ -423,8 +415,7 @@ bool sat_core::propagate(std::vector<lit> &cnfl)
         }
 
         // we perform theory propagation..
-        const auto bnds_it = bounds.find(prop_q.front().get_var());
-        if (bnds_it != bounds.end())
+        if (const auto bnds_it = bounds.find(prop_q.front().get_var()); bnds_it != bounds.end())
             for (const auto &th : bnds_it->second)
                 if (!th->propagate(prop_q.front(), cnfl))
                 {
@@ -554,8 +545,7 @@ void sat_core::pop_one()
     level[v] = 0;
     reason[v] = nullptr;
     trail.pop_back();
-    const auto at_v = listening.find(v);
-    if (at_v != listening.end())
+    if (const auto at_v = listening.find(v); at_v != listening.end())
         for (const auto &l : at_v->second)
             l->sat_value_change(v);
 }
