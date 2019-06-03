@@ -60,10 +60,34 @@ void solver::solve()
 
         if (f_next)
         {
-            if (f_next->get_estimated_cost().is_infinite())
+            if (f_next->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw..
             {
-                // we don't know how to solve this flaw: we search..
-                next();
+                if (get_sat_core().root_level()) // we expand the graph..
+                {
+                    switch (get_sat_core().value(gr.gamma))
+                    {
+                    case True: // the search procedure excluded those parts of the graph that could have led to a solution..
+                        gr.build();
+                        break;
+                    case False: // the graph has been invalidated..
+                        // do we have room for increasing the heuristic accuracy?
+                        if (gr.accuracy < gr.max_accuracy)
+                            gr.increase_accuracy(); // we increase the heuristic accuracy..
+                        else
+                            gr.add_layer(); // we add a layer to the current graph..
+                        gr.set_new_gamma(); // we create and set a new graph var..
+                        break;
+                    case Undefined: // a unit clause, not gamma, has been deduced..
+                        gr.build();
+                        take_decision(gr.gamma); // we set gamma again..
+                        break;
+                    }
+#ifdef BUILD_GUI
+                    fire_state_changed();
+#endif
+                }
+                else // we search..
+                    next();
                 continue;
             }
 
@@ -206,24 +230,27 @@ void solver::next()
     fire_state_changed();
 #endif
 
-    // we check if we need to change the graph..
-    if (get_sat_core().value(gr.gamma) == False)
-    { // we do need to change the graph..
+    // we check if we need to expand the graph..
+    switch (get_sat_core().value(gr.gamma))
+    {
+    case True: // we do not need to expand the graph..
+        break;
+    case False: // the graph has been invalidated..
         assert(get_sat_core().root_level());
-        if (gr.accuracy < gr.max_accuracy) // we have room for increasing the heuristic accuracy..
-        {
-            gr.increase_accuracy(); // so we increase the heuristic accuracy..
-            gr.set_new_gamma();     // we create and set a new graph var..
-        }
+        // do we have room for increasing the heuristic accuracy?
+        if (gr.accuracy < gr.max_accuracy)
+            gr.increase_accuracy(); // we increase the heuristic accuracy..
         else
-        {
-            gr.add_layer();     // we add a layer to the current graph..
-            gr.set_new_gamma(); // we create and set a new graph var..
-        }
+            gr.add_layer(); // we add a layer to the current graph..
+        gr.set_new_gamma(); // we create and set a new graph var..
 
 #ifdef BUILD_GUI
         fire_state_changed();
 #endif
+        break;
+    case Undefined:              // a unit clause, not gamma, has been deduced..
+        take_decision(gr.gamma); // we set gamma again..
+        break;
     }
 }
 
