@@ -13,6 +13,7 @@
 #ifdef BUILD_GUI
 #include "solver_listener.h"
 #endif
+#include <algorithm>
 #include <stdexcept>
 #include <cassert>
 
