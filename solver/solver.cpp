@@ -284,7 +284,8 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
             if (p.get_sign()) // this resolver has been applied hence its effect has been resolved..
             {
                 if (flaws.erase(&r->effect))
-                    trail.back().solved_flaws.insert(&r->effect);
+                    if (!trail.empty())
+                        trail.back().solved_flaws.insert(&r->effect);
             }
             else // since this resolver cannot be applied its cost is set to +inf..
                 gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY);
