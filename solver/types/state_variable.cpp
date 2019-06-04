@@ -4,6 +4,7 @@
 #include "predicate.h"
 #include "field.h"
 #include "atom_flaw.h"
+#include "combinations.h"
 
 using namespace smt;
 
@@ -71,7 +72,11 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
 
             if (overlapping_atoms.size() > 1) // we have a 'peak'..
             {
-                new_inc(overlapping_atoms);
+                if (sv_flaws.count(overlapping_atoms))
+                {
+                    sv_flaw *flw = new sv_flaw(*this, overlapping_atoms);
+                    sv_flaws.insert({overlapping_atoms, flw});
+                }
                 // TODO: add code for managing peaks..
             }
         }
@@ -139,70 +144,54 @@ void state_variable::new_goal(atom_flaw &f)
 
 void state_variable::store_variables(atom &atm0, atom &atm1)
 {
+    arith_expr a0_start = atm0.get(START);
+    arith_expr a0_end = atm0.get(END);
+    arith_expr a1_start = atm1.get(START);
+    arith_expr a1_end = atm1.get(END);
+
     expr a0_tau = atm0.get(TAU);
     expr a1_tau = atm1.get(TAU);
-    item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
-    item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
-    if (a0_tau_itm || a1_tau_itm)
+    var_item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
+    var_item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
+    if (a0_tau_itm && a1_tau_itm) // we have two non-singleton variables..
     {
-        if (a0_tau_itm && a1_tau_itm)
-        {
-            // we have two non-singleton variables..
-            var_item *a0_var_itm = static_cast<var_item *>(a0_tau_itm);
-            var_item *a1_var_itm = static_cast<var_item *>(a1_tau_itm);
-            std::unordered_set<var_value *> a0_vals = get_solver().enum_value(a0_var_itm);
-            std::unordered_set<var_value *> a1_vals = get_solver().enum_value(a1_var_itm);
+        auto a0_vals = get_solver().enum_value(a0_tau_itm);
+        auto a1_vals = get_solver().enum_value(a1_tau_itm);
 
-            bool found = false;
-            for (const auto &v0 : a0_vals)
-                if (a1_vals.find(v0) != a1_vals.end())
-                {
-                    found = true;
-                    break;
-                }
-            if (found) // we store the ordering variables..
+        bool found = false;
+        for (const auto &v0 : a0_vals)
+            if (a1_vals.count(v0)) // we store the ordering variables..
             {
-#ifdef BUILD_GUI
-                std::vector<std::pair<smt::lit, std::string>> chs({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}});
-                for (const auto &v0 : a0_vals)
-                    if (a1_vals.find(v0) != a1_vals.end())
-                        chs.push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_var_itm->ev, *v0), smt::lit(get_solver().get_ov_theory().allows(a1_var_itm->ev, *v0), false)}), "σ" + std::to_string(atm0.get_sigma()) + ".τ ≠ σ" + std::to_string(atm1.get_sigma())});
-#else
-                std::vector<smt::lit> chs({get_solver().leq(atm0.get(END), atm1.get(START))->l, get_solver().leq(atm1.get(END), atm0.get(START))->l});
-                for (const auto &v0 : a0_vals)
-                    if (a1_vals.find(v0) != a1_vals.end())
-                        chs.push_back(get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_var_itm->ev, *v0), smt::lit(get_solver().get_ov_theory().allows(a1_var_itm->ev, *v0), false)}));
-#endif
-                set_choices(atm0, atm1, chs);
+                if (!found)
+                {
+                    leqs[&atm0][&atm1] = get_solver().get_lra_theory().leq(a0_end->l, a1_start->l);
+                    leqs[&atm1][&atm0] = get_solver().get_lra_theory().leq(a1_end->l, a0_start->l);
+                    found = true;
+                }
+                plcs[{&atm0, &atm1}].push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_tau_itm->ev, *v0), smt::lit(get_solver().get_ov_theory().allows(a1_tau_itm->ev, *v0), false)}), static_cast<item *>(v0)});
             }
-        }
-        else if (!a0_tau_itm)
+    }
+    else if (a0_tau_itm) // only 'a1_tau' is a singleton variable..
+    {
+        if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau)) // we store the ordering variables..
         {
-            var_item *a1_var_itm = static_cast<var_item *>(a1_tau_itm);
-            if (std::unordered_set<var_value *> a1_vals = get_solver().enum_value(a1_var_itm); a1_vals.find(&*a0_tau) != a1_vals.end()) // we store the ordering variables..
-#ifdef BUILD_GUI
-                set_choices(atm0, atm1, std::vector<std::pair<smt::lit, std::string>>({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}, {smt::lit(get_solver().get_ov_theory().allows(a1_var_itm->ev, *a0_tau), false), "σ" + std::to_string(atm0.get_sigma()) + ".τ ≠ σ" + std::to_string(atm1.get_sigma())}}));
-#else
-                set_choices(atm0, atm1, std::vector<smt::lit>({get_solver().leq(atm0.get(END), atm1.get(START))->l, get_solver().leq(atm1.get(END), atm0.get(START))->l, smt::lit(get_solver().get_ov_theory().allows(a1_var_itm->ev, *a0_tau), false)}));
-#endif
+            leqs[&atm0][&atm1] = get_solver().get_lra_theory().leq(a0_end->l, a1_start->l);
+            leqs[&atm1][&atm0] = get_solver().get_lra_theory().leq(a1_end->l, a0_start->l);
         }
-        else if (!a1_tau_itm)
+    }
+    else if (a1_tau_itm) // only 'a0_tau' is a singleton variable..
+    {
+        if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau)) // we store the ordering variables..
         {
-            var_item *a0_var_itm = static_cast<var_item *>(a0_tau_itm);
-            if (std::unordered_set<var_value *> a0_vals = get_solver().enum_value(a0_var_itm); a0_vals.find(&*a1_tau) != a0_vals.end()) // we store the ordering variables..
-#ifdef BUILD_GUI
-                set_choices(atm0, atm1, std::vector<std::pair<smt::lit, std::string>>({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}, {get_solver().get_ov_theory().allows(a0_var_itm->ev, *a1_tau), "σ" + std::to_string(atm0.get_sigma()) + ".τ ≠ σ" + std::to_string(atm1.get_sigma())}}));
-#else
-                set_choices(atm0, atm1, std::vector<smt::lit>({get_solver().leq(atm0.get(END), atm1.get(START))->l, get_solver().leq(atm1.get(END), atm0.get(START))->l, smt::lit(get_solver().get_ov_theory().allows(a0_var_itm->ev, *a1_tau), false)}));
-#endif
+            leqs[&atm0][&atm1] = get_solver().get_lra_theory().leq(a0_end->l, a1_start->l);
+            leqs[&atm1][&atm0] = get_solver().get_lra_theory().leq(a1_end->l, a0_start->l);
         }
     }
     else if (&*a0_tau == &*a1_tau) // the two atoms are on the same state-variable: we store the ordering variables..
-#ifdef BUILD_GUI
-        set_choices(atm0, atm1, std::vector<std::pair<smt::lit, std::string>>({{get_solver().leq(atm0.get(END), atm1.get(START))->l, "σ" + std::to_string(atm0.get_sigma()) + " <= σ" + std::to_string(atm1.get_sigma())}, {get_solver().leq(atm1.get(END), atm0.get(START))->l, "σ" + std::to_string(atm1.get_sigma()) + " <= σ" + std::to_string(atm0.get_sigma())}}));
-#else
-        set_choices(atm0, atm1, std::vector<smt::lit>({get_solver().leq(atm0.get(END), atm1.get(START))->l, get_solver().leq(atm1.get(END), atm0.get(START))->l}));
-#endif
+    {
+        leqs[&atm0][&atm1] = get_solver().get_lra_theory().leq(a0_end->l, a1_start->l);
+        leqs[&atm1][&atm0] = get_solver().get_lra_theory().leq(a1_end->l, a0_start->l);
+    }
 }
 
 state_variable::sv_constructor::sv_constructor(state_variable &sv) : constructor(sv.get_solver(), sv, {}, {}, {}) {}
@@ -223,5 +212,87 @@ void state_variable::sv_atom_listener::something_changed()
         else // the 'tau' parameter is a constant..
             sv.to_check.insert(&*c_scope);
     }
+}
+
+state_variable::sv_flaw::sv_flaw(state_variable &sv, const std::set<atom *> &atms) : flaw(sv.get_solver().get_graph(), smart_type::get_resolvers(sv.get_solver(), atms)), sv(sv), overlapping_atoms(atms) {}
+state_variable::sv_flaw::~sv_flaw() {}
+
+#ifdef BUILD_GUI
+std::string state_variable::sv_flaw::get_label() const
+{
+    return "φ" + std::to_string(get_phi()) + " sv-flaw";
+}
+#endif
+
+void state_variable::sv_flaw::compute_resolvers()
+{
+    std::vector<std::vector<atom *>> cs = combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2);
+    for (const auto &as : cs)
+    {
+        if (auto a0_it = sv.leqs.find(as[0]); a0_it != sv.leqs.end())
+            if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.end())
+                if (get_graph().get_solver().get_sat_core().value(a0_a1_it->second) != False)
+                    add_resolver(*new order_resolver(*this, a0_a1_it->second, *as[0], *as[1]));
+
+        if (auto a1_it = sv.leqs.find(as[1]); a1_it != sv.leqs.end())
+            if (auto a1_a0_it = a1_it->second.find(as[0]); a1_a0_it != a1_it->second.end())
+                if (get_graph().get_solver().get_sat_core().value(a1_a0_it->second) != False)
+                    add_resolver(*new order_resolver(*this, a1_a0_it->second, *as[1], *as[0]));
+
+        expr a0_tau = as[0]->get(TAU);
+        expr a1_tau = as[1]->get(TAU);
+        var_item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
+        var_item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
+        if (a0_tau_itm && !a1_tau_itm)
+            add_resolver(*new forbid_resolver(*this, get_graph().get_solver().get_ov_theory().allows(a0_tau_itm->ev, *a1_tau), *as[0], *a1_tau));
+        else if (!a0_tau_itm && a1_tau_itm)
+            add_resolver(*new forbid_resolver(*this, get_graph().get_solver().get_ov_theory().allows(a1_tau_itm->ev, *a0_tau), *as[1], *a0_tau));
+        else if (auto a0_a1_it = sv.plcs.find({as[0], as[1]}); a0_a1_it != sv.plcs.end())
+            for (const auto &a0_a1_disp : a0_a1_it->second)
+                if (get_graph().get_solver().get_sat_core().value(a0_a1_disp.first) != False)
+                    add_resolver(*new place_resolver(*this, a0_a1_disp.first, *as[0], *a0_a1_disp.second, *as[1]));
+    }
+}
+
+state_variable::order_resolver::order_resolver(sv_flaw &flw, const smt::var &r, const atom &before, const atom &after) : resolver(flw.get_graph(), r, 0, flw), before(before), after(after) {}
+state_variable::order_resolver::~order_resolver() {}
+
+#ifdef BUILD_GUI
+std::string state_variable::order_resolver::get_label() const
+{
+    return "ρ" + std::to_string(get_rho()) + " σ" + std::to_string(before.get_sigma()) + " <= σ" + std::to_string(after.get_sigma());
+}
+#endif
+
+void state_variable::order_resolver::apply()
+{
+}
+
+state_variable::place_resolver::place_resolver(sv_flaw &flw, const smt::var &r, atom &plc_atm, item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 0, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
+state_variable::place_resolver::~place_resolver() {}
+
+#ifdef BUILD_GUI
+std::string state_variable::place_resolver::get_label() const
+{
+    return "ρ" + std::to_string(get_rho()) + " pl σ" + std::to_string(plc_atm.get_sigma()) + ".τ ≠ σ" + std::to_string(frbd_atm.get_sigma());
+}
+#endif
+
+void state_variable::place_resolver::apply()
+{
+}
+
+state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, const smt::var &r, atom &atm, item &itm) : resolver(flw.get_graph(), r, 0, flw), atm(atm), itm(itm) {}
+state_variable::forbid_resolver::~forbid_resolver() {}
+
+#ifdef BUILD_GUI
+std::string state_variable::forbid_resolver::get_label() const
+{
+    return "ρ" + std::to_string(get_rho()) + " frbd σ" + std::to_string(atm.get_sigma()) + ".τ";
+}
+#endif
+
+void state_variable::forbid_resolver::apply()
+{
 }
 } // namespace ratio
