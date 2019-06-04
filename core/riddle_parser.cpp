@@ -263,7 +263,7 @@ local_field_statement::~local_field_statement() {}
 void local_field_statement::execute(const scope &scp, context &ctx) const
 {
     if (xpr)
-        ctx->exprs.insert({name, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)});
+        ctx->exprs.emplace(name, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx));
     else
     {
         scope *s = const_cast<scope *>(&scp);
@@ -271,12 +271,12 @@ void local_field_statement::execute(const scope &scp, context &ctx) const
             s = &s->get_type(tp);
         type *t = static_cast<type *>(s);
         if (t->is_primitive())
-            ctx->exprs.insert({name, t->new_instance(ctx)});
+            ctx->exprs.emplace(name, t->new_instance(ctx));
         else
-            ctx->exprs.insert({name, t->new_existential()});
+            ctx->exprs.emplace(name, t->new_existential());
     }
     if (const core *c = dynamic_cast<const core *>(&scp)) // we create fields for root items..
-        const_cast<core *>(c)->fields.insert({name, new field(ctx->exprs.at(name)->get_type(), name)});
+        const_cast<core *>(c)->fields.emplace(name, new field(ctx->exprs.at(name)->get_type(), name));
 }
 
 assignment_statement::assignment_statement(const std::vector<std::string> &is, const std::string &i, const riddle::ast::expression *const e) : riddle::ast::assignment_statement(is, i, e) {}
@@ -286,7 +286,7 @@ void assignment_statement::execute(const scope &scp, context &ctx) const
     env *c_e = &*ctx;
     for (const auto &c_id : ids)
         c_e = &*c_e->get(c_id);
-    c_e->exprs.insert({id, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)});
+    c_e->exprs.emplace(id, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx));
 }
 
 expression_statement::expression_statement(const riddle::ast::expression *const e) : riddle::ast::expression_statement(e) {}
@@ -341,15 +341,15 @@ void formula_statement::execute(const scope &scp, context &ctx) const
         p = &static_cast<item *>(c_scope)->get_type().get_predicate(predicate_name);
 
         if (var_item *ee = dynamic_cast<var_item *>(c_scope)) // the scope is an enumerative expression..
-            assgnments.insert({TAU, ee});
+            assgnments.emplace(TAU, ee);
         else // the scope is a single item..
-            assgnments.insert({TAU, context(c_scope)});
+            assgnments.emplace(TAU, context(c_scope));
     }
     else
     {
         p = &scp.get_predicate(predicate_name);
         if (&p->get_scope() != &scp.get_core()) // we inherit the scope..
-            assgnments.insert({TAU, ctx->get(TAU)});
+            assgnments.emplace(TAU, ctx->get(TAU));
     }
 
     for (const auto &a : assignments)
@@ -357,7 +357,7 @@ void formula_statement::execute(const scope &scp, context &ctx) const
         expr e = dynamic_cast<const ast::expression *>(a.second)->evaluate(scp, ctx);
         const type &tt = p->get_field(a.first).get_type(); // the target type..
         if (tt.is_assignable_from(e->get_type()))          // the target type is a superclass of the assignment..
-            assgnments.insert({a.first, e});
+            assgnments.emplace(a.first, e);
         else if (e->get_type().is_assignable_from(tt))        // the target type is a subclass of the assignment..
             if (var_item *ae = dynamic_cast<var_item *>(&*e)) // some of the allowed values might be inhibited..
             {
@@ -405,9 +405,9 @@ void formula_statement::execute(const scope &scp, context &ctx) const
                 // the field is uninstantiated..
                 type &tp = const_cast<type &>(arg->get_type());
                 if (tp.is_primitive())
-                    a->exprs.insert({arg->get_name(), tp.new_instance(ctx)});
+                    a->exprs.emplace(arg->get_name(), tp.new_instance(ctx));
                 else
-                    a->exprs.insert({arg->get_name(), tp.new_existential()});
+                    a->exprs.emplace(arg->get_name(), tp.new_existential());
             }
         for (const auto &sp : q.front()->get_supertypes())
             q.push(static_cast<predicate *>(sp));
@@ -419,12 +419,12 @@ void formula_statement::execute(const scope &scp, context &ctx) const
     else
         scp.get_core().new_goal(*a);
 
-    ctx->exprs.insert({formula_name, expr(a)});
+    ctx->exprs.emplace(formula_name, expr(a));
 }
 
 return_statement::return_statement(const riddle::ast::expression *const e) : riddle::ast::return_statement(e) {}
 return_statement::~return_statement() {}
-void return_statement::execute(const scope &scp, context &ctx) const { ctx->exprs.insert({RETURN_KEYWORD, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)}); }
+void return_statement::execute(const scope &scp, context &ctx) const { ctx->exprs.emplace(RETURN_KEYWORD, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)); }
 
 type_declaration::type_declaration() {}
 type_declaration::~type_declaration() {}
