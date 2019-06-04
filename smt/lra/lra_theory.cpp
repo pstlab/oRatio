@@ -242,22 +242,14 @@ bool lra_theory::lt(const lin &left, const lin &right, const var &p)
         switch (sat.value(p))
         {
         case True:
-        {
-            std::vector<lit> cnfl;
-            return assert_upper(slack, c_right, p, cnfl);
-        }
+            return assert_upper(slack, c_right, p, std::vector<lit>());
         case False:
-        {
-            std::vector<lit> cnfl;
-            return assert_lower(slack, c_right, lit(p, false), cnfl);
-        }
+            return assert_lower(slack, c_right, lit(p, false), std::vector<lit>());
         default:
-        {
             bind(p);
             s_asrts.emplace(s_assertion, p);
             v_asrts[p].push_back(new assertion(*this, op::leq, p, slack, c_right));
             return true;
-        }
         }
 }
 
@@ -296,22 +288,14 @@ bool lra_theory::leq(const lin &left, const lin &right, const var &p)
         switch (sat.value(p))
         {
         case True:
-        {
-            std::vector<lit> cnfl;
-            return assert_upper(slack, c_right, p, cnfl);
-        }
+            return assert_upper(slack, c_right, p, std::vector<lit>());
         case False:
-        {
-            std::vector<lit> cnfl;
-            return assert_lower(slack, c_right, lit(p, false), cnfl);
-        }
+            return assert_lower(slack, c_right, lit(p, false), std::vector<lit>());
         default:
-        {
             bind(p);
             s_asrts.emplace(s_assertion, p);
             v_asrts[p].push_back(new assertion(*this, op::leq, p, slack, c_right));
             return true;
-        }
         }
 }
 
@@ -350,22 +334,14 @@ bool lra_theory::geq(const lin &left, const lin &right, const var &p)
         switch (sat.value(p))
         {
         case True:
-        {
-            std::vector<lit> cnfl;
-            return assert_lower(slack, c_right, p, cnfl);
-        }
+            return assert_lower(slack, c_right, p, std::vector<lit>());
         case False:
-        {
-            std::vector<lit> cnfl;
-            return assert_upper(slack, c_right, lit(p, false), cnfl);
-        }
+            return assert_upper(slack, c_right, lit(p, false), std::vector<lit>());
         default:
-        {
             bind(p);
             s_asrts.emplace(s_assertion, p);
             v_asrts[p].push_back(new assertion(*this, op::geq, p, slack, c_right));
             return true;
-        }
         }
 }
 
@@ -401,22 +377,14 @@ bool lra_theory::gt(const lin &left, const lin &right, const var &p)
         switch (sat.value(p))
         {
         case True:
-        {
-            std::vector<lit> cnfl;
-            return assert_lower(slack, c_right, p, cnfl);
-        }
+            return assert_lower(slack, c_right, p, std::vector<lit>());
         case False:
-        {
-            std::vector<lit> cnfl;
-            return assert_upper(slack, c_right, lit(p, false), cnfl);
-        }
+            return assert_upper(slack, c_right, lit(p, false), std::vector<lit>());
         default:
-        {
             bind(p);
             s_asrts.emplace(s_assertion, p);
             v_asrts[p].push_back(new assertion(*this, op::geq, p, slack, c_right));
             return true;
-        }
         }
 }
 
@@ -595,15 +563,13 @@ void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rati
 
     // x_i = v
     vals.at(x_i) = v;
-    const auto at_x_i = listening.find(x_i);
-    if (at_x_i != listening.end())
+    if (const auto at_x_i = listening.find(x_i); at_x_i != listening.end())
         for (const auto &l : at_x_i->second)
             l->lra_value_change(x_i);
 
     // x_j += theta
     vals.at(x_j) += theta;
-    const auto at_x_j = listening.find(x_j);
-    if (at_x_j != listening.end())
+    if (const auto at_x_j = listening.find(x_j); at_x_j != listening.end())
         for (const auto &l : at_x_j->second)
             l->lra_value_change(x_j);
 
@@ -612,8 +578,7 @@ void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rati
         {
             // x_k += a_kj * theta..
             vals.at(c->x) += c->l.vars.at(x_j) * theta;
-            const auto at_x_c = listening.find(c->x);
-            if (at_x_c != listening.end())
+            if (const auto at_x_c = listening.find(c->x); at_x_c != listening.end())
                 for (const auto &l : at_x_c->second)
                     l->lra_value_change(c->x);
         }
@@ -643,9 +608,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
         rational cc = r->l.vars.at(x_j);
         r->l.vars.erase(x_j);
         for (auto &term : expr.vars)
-        {
-            const auto trm_it = r->l.vars.find(term.first);
-            if (trm_it == r->l.vars.end())
+            if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
             {
                 r->l.vars.emplace(term.first, term.second * cc);
                 t_watches.at(term.first).emplace(r);
@@ -660,7 +623,6 @@ void lra_theory::pivot(const var x_i, const var x_j)
                     t_watches.at(term.first).erase(r);
                 }
             }
-        }
         r->l.known_term += expr.known_term * cc;
     }
 
