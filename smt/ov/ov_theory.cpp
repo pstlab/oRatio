@@ -86,13 +86,13 @@ var ov_theory::new_eq(const var &left, const var &right)
         const var e = sat.new_var();
         bool nc;
         for (const auto &v : assigns[left])
-            if (intersection.count(v.first))
+            if (!intersection.count(v.first))
             {
                 nc = sat.new_clause({lit(e, false), lit(v.second, false)});
                 assert(nc);
             }
         for (const auto &v : assigns[right])
-            if (intersection.count(v.first))
+            if (!intersection.count(v.first))
             {
                 nc = sat.new_clause({lit(e, false), lit(v.second, false)});
                 assert(nc);
@@ -134,11 +134,11 @@ bool ov_theory::eq(const var &left, const var &right, const var &p)
 
         // we need to create a new variable..
         for (const auto &v : assigns[left])
-            if (intersection.count(v.first))
+            if (!intersection.count(v.first))
                 if (!sat.new_clause({lit(p, false), lit(v.second, false)}))
                     return false;
         for (const auto &v : assigns[right])
-            if (intersection.count(v.first))
+            if (!intersection.count(v.first))
                 if (!sat.new_clause({lit(p, false), lit(v.second, false)}))
                     return false;
         for (const auto &v : intersection)
