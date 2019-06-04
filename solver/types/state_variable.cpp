@@ -106,19 +106,24 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
                     expr a1_tau = as[1]->get(TAU);
                     var_item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
                     var_item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
-                    if (a0_tau_itm && a1_tau_itm)
+                    if (a0_tau_itm && a1_tau_itm) // we have two non-singleton variables..
                     {
                         auto a0_vals = get_solver().enum_value(a0_tau_itm);
                         auto a1_vals = get_solver().enum_value(a1_tau_itm);
                         for (const auto &plc : plcs.at({&as[0], &as[1]}))
                             choices.push_back({plc.first, 1l - 2l / static_cast<double>(a0_vals.size() + a1_vals.size())});
                     }
-                    else if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau))
-                        choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau), false), 1l - 1l / static_cast<double>(a0_vals.size())});
-                    else if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau))
-                        choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau), false), 1l - 1l / static_cast<double>(a1_vals.size())});
+                    else if (a0_tau_itm) // only 'a1_tau' is a singleton variable..
+                    {
+                        if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau))
+                            choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau), false), 1l - 1l / static_cast<double>(a0_vals.size())});
+                    }
+                    else if (a1_tau_itm) // only 'a0_tau' is a singleton variable..
+                    {
+                        if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau))
+                            choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau), false), 1l - 1l / static_cast<double>(a1_vals.size())});
+                    }
                 }
-                assert(!choices.empty());
                 incs.push_back(choices);
             }
         }
@@ -206,8 +211,8 @@ void state_variable::store_variables(atom &atm0, atom &atm1)
             {
                 if (!found)
                 {
-                    leqs[&atm0][&atm1] = get_solver().get_lra_theory().leq(a0_end->l, a1_start->l);
-                    leqs[&atm1][&atm0] = get_solver().get_lra_theory().leq(a1_end->l, a0_start->l);
+                    leqs[&atm0][&atm1] = get_solver().get_lra_theory().new_leq(a0_end->l, a1_start->l);
+                    leqs[&atm1][&atm0] = get_solver().get_lra_theory().new_leq(a1_end->l, a0_start->l);
                     found = true;
                 }
                 plcs[{&atm0, &atm1}].push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_tau_itm->ev, *v0), lit(get_solver().get_ov_theory().allows(a1_tau_itm->ev, *v0), false)}), static_cast<item *>(v0)});
@@ -217,22 +222,22 @@ void state_variable::store_variables(atom &atm0, atom &atm1)
     {
         if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau)) // we store the ordering variables..
         {
-            leqs[&atm0][&atm1] = get_solver().get_lra_theory().leq(a0_end->l, a1_start->l);
-            leqs[&atm1][&atm0] = get_solver().get_lra_theory().leq(a1_end->l, a0_start->l);
+            leqs[&atm0][&atm1] = get_solver().get_lra_theory().new_leq(a0_end->l, a1_start->l);
+            leqs[&atm1][&atm0] = get_solver().get_lra_theory().new_leq(a1_end->l, a0_start->l);
         }
     }
     else if (a1_tau_itm) // only 'a0_tau' is a singleton variable..
     {
         if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau)) // we store the ordering variables..
         {
-            leqs[&atm0][&atm1] = get_solver().get_lra_theory().leq(a0_end->l, a1_start->l);
-            leqs[&atm1][&atm0] = get_solver().get_lra_theory().leq(a1_end->l, a0_start->l);
+            leqs[&atm0][&atm1] = get_solver().get_lra_theory().new_leq(a0_end->l, a1_start->l);
+            leqs[&atm1][&atm0] = get_solver().get_lra_theory().new_leq(a1_end->l, a0_start->l);
         }
     }
     else if (&*a0_tau == &*a1_tau) // the two atoms are on the same state-variable: we store the ordering variables..
     {
-        leqs[&atm0][&atm1] = get_solver().get_lra_theory().leq(a0_end->l, a1_start->l);
-        leqs[&atm1][&atm0] = get_solver().get_lra_theory().leq(a1_end->l, a0_start->l);
+        leqs[&atm0][&atm1] = get_solver().get_lra_theory().new_leq(a0_end->l, a1_start->l);
+        leqs[&atm1][&atm0] = get_solver().get_lra_theory().new_leq(a1_end->l, a0_start->l);
     }
 }
 
