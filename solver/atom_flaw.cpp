@@ -61,7 +61,7 @@ void atom_flaw::compute_resolvers()
             atom_flaw &t_flaw = get_graph().get_solver().get_reason(t_atm);
 
             if (!t_flaw.is_expanded() ||                                                     // the target flaw must hav been already expanded..
-                !ancestors.count(&t_flaw) ||                                                 // unifying with the target atom would introduce cyclic causality..
+                ancestors.count(&t_flaw) ||                                                  // unifying with the target atom would introduce cyclic causality..
                 get_graph().get_solver().get_sat_core().value(t_atm.get_sigma()) == False || // the target atom is unified with some other atom..
                 !atm.equates(t_atm))                                                         // the atom does not equate with the target target..
                 continue;
