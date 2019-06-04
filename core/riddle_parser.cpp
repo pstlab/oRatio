@@ -378,7 +378,7 @@ void formula_statement::execute(const scope &scp, context &ctx) const
     }
 
     atom *a;
-    if (assgnments.find(TAU) == assgnments.end())
+    if (!assgnments.count(TAU))
     {
         // the new atom's scope is the core..
         context c_scope = &scp.get_core();
@@ -400,7 +400,7 @@ void formula_statement::execute(const scope &scp, context &ctx) const
     while (!q.empty())
     {
         for (const auto &arg : q.front()->get_args())
-            if (a->exprs.find(arg->get_name()) == a->exprs.end())
+            if (!a->exprs.count(arg->get_name()))
             {
                 // the field is uninstantiated..
                 type &tp = const_cast<type &>(arg->get_type());

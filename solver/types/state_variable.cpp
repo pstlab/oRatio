@@ -31,10 +31,10 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
             if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
             {
                 for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
-                    if (to_check.find(static_cast<item *>(val)) != to_check.end())
+                    if (to_check.count(static_cast<item *>(val)))
                         sv_instances[static_cast<item *>(val)].push_back(atm.first);
             }
-            else if (to_check.find(static_cast<item *>(&*c_scope)) != to_check.end())
+            else if (to_check.count(static_cast<item *>(&*c_scope)))
                 sv_instances[static_cast<item *>(&*c_scope)].push_back(atm.first);
         }
 

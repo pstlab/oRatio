@@ -41,7 +41,7 @@ var ov_theory::new_var(const std::unordered_set<var_value *> &items, const bool 
 var ov_theory::new_var(const std::vector<var> &vars, const std::vector<var_value *> &vals)
 {
     assert(!vars.empty());
-    assert(std::all_of(vars.begin(), vars.end(), [&](var v) { return is_contained_in.find(v) != is_contained_in.end(); }));
+    assert(std::all_of(vars.begin(), vars.end(), [&](var v) { return is_contained_in.count(v); }));
     const var id = assigns.size();
     assigns.push_back(std::unordered_map<var_value *, var>());
     for (size_t i = 0; i < vars.size(); ++i)
@@ -76,7 +76,7 @@ var ov_theory::new_eq(const var &left, const var &right)
     {
         std::unordered_set<var_value *> intersection;
         for (const auto &v : assigns.at(left))
-            if (assigns.at(right).find(v.first) != assigns.at(right).end())
+            if (assigns.at(right).count(v.first))
                 intersection.insert(v.first);
 
         if (intersection.empty())
@@ -86,13 +86,13 @@ var ov_theory::new_eq(const var &left, const var &right)
         const var e = sat.new_var();
         bool nc;
         for (const auto &v : assigns[left])
-            if (intersection.find(v.first) == intersection.end())
+            if (intersection.count(v.first))
             {
                 nc = sat.new_clause({lit(e, false), lit(v.second, false)});
                 assert(nc);
             }
         for (const auto &v : assigns[right])
-            if (intersection.find(v.first) == intersection.end())
+            if (intersection.count(v.first))
             {
                 nc = sat.new_clause({lit(e, false), lit(v.second, false)});
                 assert(nc);
@@ -126,7 +126,7 @@ bool ov_theory::eq(const var &left, const var &right, const var &p)
     {
         std::unordered_set<var_value *> intersection;
         for (const auto &v : assigns.at(left))
-            if (assigns.at(right).find(v.first) != assigns.at(right).end())
+            if (assigns.at(right).count(v.first))
                 intersection.insert(v.first);
 
         if (intersection.empty())
@@ -134,11 +134,11 @@ bool ov_theory::eq(const var &left, const var &right, const var &p)
 
         // we need to create a new variable..
         for (const auto &v : assigns[left])
-            if (intersection.find(v.first) == intersection.end())
+            if (intersection.count(v.first))
                 if (!sat.new_clause({lit(p, false), lit(v.second, false)}))
                     return false;
         for (const auto &v : assigns[right])
-            if (intersection.find(v.first) == intersection.end())
+            if (intersection.count(v.first))
                 if (!sat.new_clause({lit(p, false), lit(v.second, false)}))
                     return false;
         for (const auto &v : intersection)

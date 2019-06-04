@@ -68,7 +68,7 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
 
     // we instantiate the uninstantiated fields..
     for (const auto &f : get_scope().get_fields())
-        if (!f.second->is_synthetic() && itm.exprs.find((f.second->get_name())) == itm.exprs.end())
+        if (!f.second->is_synthetic() && !itm.exprs.count((f.second->get_name())))
         {
             // the field is uninstantiated..
             if (f.second->get_expression())

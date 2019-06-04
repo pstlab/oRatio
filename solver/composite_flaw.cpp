@@ -45,11 +45,10 @@ void composite_flaw::compute_resolvers()
     std::unordered_set<const flaw *> seen;
     while (!q.empty())
     {
-        if (seen.find(q.front()) == seen.end())
+        if (seen.insert(q.front()).second) // we avoid some repetition of literals..
         {
             if (get_graph().get_solver().get_sat_core().value(q.front()->get_phi() == smt::False))
                 return;
-            seen.insert(q.front()); // we avoid some repetition of literals..
             for (const auto &cause : q.front()->get_causes())
                 if (get_graph().get_solver().get_sat_core().value(cause->get_rho()) != smt::True)
                 {

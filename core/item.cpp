@@ -139,7 +139,7 @@ expr var_item::get(const std::string &name) const
             q.push(st);
         q.pop();
     }
-    if (const auto &f_it = accessible_fields.find(name); f_it == accessible_fields.end())
+    if (!accessible_fields.count(name))
         return item::get(name);
     else
     {
@@ -147,7 +147,7 @@ expr var_item::get(const std::string &name) const
         if (it_it == exprs.end())
         {
             assert(!get_core().get_ov_theory().value(ev).empty());
-            if (std::unordered_set<var_value *> vs = get_core().get_ov_theory().value(ev); vs.size() == 1)
+            if (auto vs = get_core().get_ov_theory().value(ev); vs.size() == 1)
                 return (static_cast<item *>(*vs.begin()))->get(name);
             else
             {
@@ -191,14 +191,14 @@ bool var_item::equates(const item &i) const noexcept
         std::unordered_set<var_value *> c_vals = get_core().get_ov_theory().value(ev);
         std::unordered_set<var_value *> i_vals = get_core().get_ov_theory().value(ei->ev);
         for (const auto &c_v : c_vals)
-            if (i_vals.find(c_v) != i_vals.end())
+            if (i_vals.count(c_v))
                 return true;
         return false;
     }
     else
     {
         std::unordered_set<var_value *> c_vals = get_core().get_ov_theory().value(ev);
-        return c_vals.find(const_cast<var_value *>(dynamic_cast<const var_value *>(&i))) != c_vals.end();
+        return c_vals.count(const_cast<var_value *>(dynamic_cast<const var_value *>(&i)));
     }
 }
 

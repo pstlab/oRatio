@@ -452,10 +452,9 @@ void sat_core::analyze(const std::vector<lit> &cnfl, std::vector<lit> &out_learn
     {
         // trace reason for 'p'..
         for (const auto &q : p_reason) // the order in which these literals are visited is not relevant..
-            if (seen.find(q.get_var()) == seen.end())
+            if (seen.insert(q.get_var()).second)
             {
                 assert(value(q) == False); // this literal should have propagated the clause..
-                seen.insert(q.get_var());
                 if (level.at(q.get_var()) == decision_level())
                     counter++;
                 else if (level.at(q.get_var()) > 0) // exclude variables from decision level 0..
@@ -478,7 +477,7 @@ void sat_core::analyze(const std::vector<lit> &cnfl, std::vector<lit> &out_learn
                 p_reason.insert(p_reason.end(), reason.at(p.get_var())->lits.begin() + 1, reason.at(p.get_var())->lits.end());
             }
             pop_one();
-        } while (seen.find(p.get_var()) == seen.end());
+        } while (!seen.count(p.get_var()));
         counter--;
     } while (counter > 0);
     // 'p' is now the first Unique Implication Point (UIP), possibly the asserting literal, that led to the conflict..
@@ -526,8 +525,7 @@ bool sat_core::enqueue(const lit &p, clause *const c)
         reason[p.get_var()] = c;
         trail.push_back(p);
         prop_q.push(p);
-        const auto at_p = listening.find(p.get_var());
-        if (at_p != listening.end())
+        if (const auto at_p = listening.find(p.get_var()); at_p != listening.end())
             for (const auto &l : at_p->second)
                 l->sat_value_change(p.get_var());
         return true;

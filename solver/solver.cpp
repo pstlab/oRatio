@@ -258,7 +258,7 @@ void solver::next()
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
-    assert(gr.phis.find(p.get_var()) != gr.phis.end() || gr.rhos.find(p.get_var()) != gr.rhos.end());
+    assert(gr.phis.count(p.get_var()) || gr.rhos.count(p.get_var()));
 
     if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end()) // a decision has been taken about the presence of some flaws within the current partial solution..
         for (const auto &f : at_phis_p->second)
@@ -273,7 +273,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                     trail.back().new_flaws.insert(f);
             }
             else // this flaw has been removed from the current partial solution..
-                assert(flaws.find(f) == flaws.end());
+                assert(!flaws.count(f));
         }
 
     if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..

@@ -41,7 +41,7 @@ void atom_flaw::compute_resolvers()
         q.push(this);
         while (!q.empty())
         {
-            if (ancestors.find(q.front()) == ancestors.end())
+            if (!ancestors.count(q.front()))
             {
                 ancestors.insert(q.front());
                 for (const auto &supp : q.front()->get_causes())
@@ -64,7 +64,7 @@ void atom_flaw::compute_resolvers()
             atom_flaw &t_flaw = get_graph().get_solver().get_reason(t_atm);
 
             if (!t_flaw.is_expanded() ||                                                     // the target flaw must hav been already expanded..
-                ancestors.find(&t_flaw) != ancestors.end() ||                                // unifying with the target atom would introduce cyclic causality..
+                !ancestors.count(&t_flaw) ||                                                 // unifying with the target atom would introduce cyclic causality..
                 get_graph().get_solver().get_sat_core().value(t_atm.get_sigma()) == False || // the target atom is unified with some other atom..
                 !atm.equates(t_atm))                                                         // the atom does not equate with the target target..
                 continue;
@@ -85,16 +85,13 @@ void atom_flaw::compute_resolvers()
             std::unordered_set<const flaw *> seen;
             while (!q.empty())
             {
-                if (seen.find(q.front()) == seen.end())
-                {
-                    seen.insert(q.front()); // we avoid some repetition of literals..
+                if (seen.insert(q.front()).second) // we avoid some repetition of literals..
                     for (const auto &cause : q.front()->get_causes())
                         if (get_graph().get_solver().get_sat_core().value(cause->get_rho()) != True)
                         {
                             unif_lits.push_back(cause->get_rho()); // we add the resolver's variable to the unification literals..
                             q.push(&cause->get_effect());          // we push its effect..
                         }
-                }
                 q.pop();
             }
 

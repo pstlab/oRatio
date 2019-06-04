@@ -511,7 +511,7 @@ bool lra_theory::assert_lower(const var &x_i, const inf_rational &val, const lit
     }
     else
     {
-        if (!layers.empty() && layers.back().find(lb_index(x_i)) == layers.back().end())
+        if (!layers.empty() && !layers.back().count(lb_index(x_i)))
             layers.back().insert({lb_index(x_i), {lb(x_i), bounds.at(lb_index(x_i)).reason}});
         bounds[lb_index(x_i)] = {val, new lit(p.get_var(), p.get_sign())};
 
@@ -544,7 +544,7 @@ bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit
     }
     else
     {
-        if (!layers.empty() && layers.back().find(ub_index(x_i)) == layers.back().end())
+        if (!layers.empty() && !layers.back().count(ub_index(x_i)))
             layers.back().insert({ub_index(x_i), {ub(x_i), bounds.at(ub_index(x_i)).reason}});
         bounds[ub_index(x_i)] = {val, new lit(p.get_var(), p.get_sign())};
 
@@ -588,7 +588,7 @@ void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rati
 {
     assert(is_basic(x_i) && "x_i should be a basic variable..");
     assert(!is_basic(x_j) && "x_j should be a non-basic variable..");
-    assert(tableau.at(x_i)->l.vars.find(x_j) != tableau.at(x_i)->l.vars.end());
+    assert(tableau.at(x_i)->l.vars.count(x_j));
 
     const inf_rational theta = (v - vals.at(x_i)) / tableau.at(x_i)->l.vars.at(x_j);
     assert(!theta.is_infinite());
