@@ -85,8 +85,7 @@ var sat_core::new_eq(const lit &left, const lit &right)
     if (left.get_var() > right.get_var())
         return new_eq(right, left);
     const std::string s_expr = (left.get_sign() ? "b" : "!b") + std::to_string(left.get_var()) + " == " + (right.get_sign() ? "b" : "!b") + std::to_string(right.get_var());
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
     {

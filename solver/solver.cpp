@@ -386,7 +386,7 @@ void solver::solve_inconsistencies()
     // we collect all the inconsistencies from all the smart-types..
     for (const auto &st : sts)
     {
-        std::vector<std::vector<std::pair<lit, double>>> c_incs = st->get_current_incs();
+        const auto c_incs = st->get_current_incs();
         incs.insert(incs.end(), c_incs.begin(), c_incs.end());
 
         if (trail.empty())
@@ -443,7 +443,7 @@ void solver::solve_inconsistencies()
         // we re-collect all the inconsistencies from all the smart-types..
         for (const auto &st : sts)
         {
-            std::vector<std::vector<std::pair<lit, double>>> c_incs = st->get_current_incs();
+            const auto c_incs = st->get_current_incs();
             incs.insert(incs.end(), c_incs.begin(), c_incs.end());
 
             if (trail.empty())

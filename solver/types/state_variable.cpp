@@ -78,7 +78,7 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
                 }
 
                 std::vector<std::pair<lit, double>> choices;
-                std::vector<std::vector<atom *>> cs = combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2);
+                const auto cs = combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2);
                 for (const auto &as : cs)
                 {
                     arith_expr a0_start = as[0]->get(START);
@@ -268,7 +268,7 @@ std::string state_variable::sv_flaw::get_label() const
 
 void state_variable::sv_flaw::compute_resolvers()
 {
-    std::vector<std::vector<atom *>> cs = combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2);
+    const auto cs = combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2);
     for (const auto &as : cs)
     {
         if (auto a0_it = sv.leqs.find(as[0]); a0_it != sv.leqs.end())

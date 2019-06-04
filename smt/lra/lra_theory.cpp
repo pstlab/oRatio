@@ -638,8 +638,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
     expr.vars.emplace(x_i, rational::ONE / c);
 
     // these are the rows in which x_j appears..
-    std::unordered_set<row *> x_j_watches = std::move(t_watches.at(x_j));
-    for (const auto &r : x_j_watches)
+    for (const auto &r : std::move(t_watches.at(x_j)))
     {
         rational cc = r->l.vars.at(x_j);
         r->l.vars.erase(x_j);
@@ -693,12 +692,12 @@ std::string lra_theory::to_string()
         la += "}";
     }
     la += "], \"asrts\" : [";
-    for (std::unordered_map<var, std::vector<assertion *>>::const_iterator it = v_asrts.cbegin(); it != v_asrts.cend(); ++it)
+    for (auto it = v_asrts.cbegin(); it != v_asrts.cend(); ++it)
     {
         if (it != v_asrts.cbegin())
             la += ", ";
         la += "[";
-        for (std::vector<assertion *>::const_iterator a_it = it->second.cbegin(); a_it != it->second.cend(); ++a_it)
+        for (auto a_it = it->second.cbegin(); a_it != it->second.cend(); ++a_it)
         {
             if (a_it != it->second.cbegin())
                 la += ", ";
@@ -707,7 +706,7 @@ std::string lra_theory::to_string()
         la += "]";
     }
     la += "], \"tableau\" : [";
-    for (std::map<const var, row *>::const_iterator it = tableau.cbegin(); it != tableau.cend(); ++it)
+    for (auto it = tableau.cbegin(); it != tableau.cend(); ++it)
     {
         if (it != tableau.cbegin())
             la += ", ";

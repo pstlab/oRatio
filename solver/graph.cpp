@@ -218,7 +218,7 @@ void graph::increase_accuracy()
     flaw_q.clear();
     if (slv.flaws.size() >= accuracy)
     {
-        std::vector<std::vector<flaw *>> fss = combinations(std::vector<flaw *>(slv.flaws.begin(), slv.flaws.end()), accuracy);
+        const auto fss = combinations(std::vector<flaw *>(slv.flaws.begin(), slv.flaws.end()), accuracy);
         for (const auto &fs : fss) // we create a new composite flaw..
             new_flaw(*new composite_flaw(*this, res, fs));
     }

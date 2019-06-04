@@ -41,13 +41,10 @@ void atom_flaw::compute_resolvers()
         q.push(this);
         while (!q.empty())
         {
-            if (!ancestors.count(q.front()))
-            {
-                ancestors.insert(q.front());
+            if (ancestors.insert(q.front()).second)
                 for (const auto &supp : q.front()->get_causes())
                     if (get_graph().get_solver().get_sat_core().value(supp->get_rho()) != False) // if false, the edge is broken..
                         q.push(&supp->get_effect());                                             // we push its effect..
-            }
             q.pop();
         }
 

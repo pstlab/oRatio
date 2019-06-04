@@ -46,7 +46,7 @@ void test_core_1()
 
 void test_combinations()
 {
-    std::vector<std::vector<char>> combs = combinations(std::vector<char>({'a', 'b', 'c', 'd'}), 3);
+    auto combs = combinations(std::vector<char>({'a', 'b', 'c', 'd'}), 3);
     assert(combs.size() == 4);
     assert(combs.at(0) == std::vector<char>({'a', 'b', 'c'}));
     assert(combs.at(1) == std::vector<char>({'a', 'b', 'd'}));
@@ -56,7 +56,7 @@ void test_combinations()
 
 void test_cartesian_product()
 {
-    std::vector<std::vector<char>> prod = cartesian_product(std::vector<std::vector<char>>({{'a', 'b'}, {'c', 'd'}}));
+    auto prod = cartesian_product(std::vector<std::vector<char>>({{'a', 'b'}, {'c', 'd'}}));
     assert(prod.size() == 4);
     assert(prod.at(0) == std::vector<char>({'a', 'c'}));
     assert(prod.at(1) == std::vector<char>({'a', 'd'}));

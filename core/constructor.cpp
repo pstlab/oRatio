@@ -53,11 +53,8 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
             st->get_constructor(par_types).invoke(itm, c_exprs);
             il_idx++;
         }
-        else // implicit supertype (default) constructor invocation..
-        {
-            // we assume that the default constructor exists..
-            st->get_constructor({}).invoke(itm, {});
-        }
+        else                                         // implicit supertype (default) constructor invocation..
+            st->get_constructor({}).invoke(itm, {}); // we assume that the default constructor exists..
 
     // we procede with the assignment list..
     for (; il_idx < init_list.size(); il_idx++)

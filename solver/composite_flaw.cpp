@@ -127,7 +127,7 @@ void composite_flaw::composite_resolver::apply()
 
     if (precs.size() > get_graph().get_accuracy()) // we create sets having the size of the accuracy..
     {
-        std::vector<std::vector<flaw *>> fss = combinations(std::vector<flaw *>(precs.begin(), precs.end()), get_graph().get_accuracy());
+        const auto fss = combinations(std::vector<flaw *>(precs.begin(), precs.end()), get_graph().get_accuracy());
         for (const auto &fs : fss) // we create a new composite flaw for each of the possible combinations..
             get_graph().new_flaw(*new composite_flaw(get_graph(), this, fs));
     }
