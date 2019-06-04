@@ -122,7 +122,7 @@ private:
   class forbid_resolver : public resolver
   {
   public:
-    forbid_resolver(sv_flaw &flw, const smt::var &r, atom &atm, item &itm);
+    forbid_resolver(sv_flaw &flw, atom &atm, item &itm);
     forbid_resolver(const forbid_resolver &that) = delete;
     virtual ~forbid_resolver();
 

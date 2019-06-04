@@ -12,7 +12,6 @@ namespace ratio
 {
 
 state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME) { new_constructors({new sv_constructor(*this)}); }
-
 state_variable::~state_variable()
 {
     // we clear the atom listeners..
@@ -77,7 +76,50 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
                     sv_flaw *flw = new sv_flaw(*this, overlapping_atoms);
                     sv_flaws.insert({overlapping_atoms, flw});
                 }
-                // TODO: add code for managing peaks..
+
+                std::vector<std::pair<lit, double>> choices;
+                std::vector<std::vector<atom *>> cs = combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2);
+                for (const auto &as : cs)
+                {
+                    arith_expr a0_start = as[0]->get(START);
+                    arith_expr a0_end = as[0]->get(END);
+                    arith_expr a1_start = as[1]->get(START);
+                    arith_expr a1_end = as[1]->get(END);
+
+                    if (auto a0_it = leqs.find(as[0]); a0_it != leqs.end())
+                        if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.end())
+                            if (get_solver().get_sat_core().value(a0_a1_it->second) != False)
+                            {
+                                rational work = (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a1_start).get_rational()) * (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a1_start).get_rational());
+                                choices.push_back({a0_a1_it->second, 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
+                            }
+
+                    if (auto a1_it = leqs.find(as[1]); a1_it != leqs.end())
+                        if (auto a1_a0_it = a1_it->second.find(as[0]); a1_a0_it != a1_it->second.end())
+                            if (get_solver().get_sat_core().value(a1_a0_it->second) != False)
+                            {
+                                rational work = (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a0_start).get_rational()) * (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a0_start).get_rational());
+                                choices.push_back({a1_a0_it->second, 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
+                            }
+
+                    expr a0_tau = as[0]->get(TAU);
+                    expr a1_tau = as[1]->get(TAU);
+                    var_item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
+                    var_item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
+                    if (a0_tau_itm && a1_tau_itm)
+                    {
+                        auto a0_vals = get_solver().enum_value(a0_tau_itm);
+                        auto a1_vals = get_solver().enum_value(a1_tau_itm);
+                        for (const auto &plc : plcs.at({&as[0], &as[1]}))
+                            choices.push_back({plc.first, 1l - 2l / static_cast<double>(a0_vals.size() + a1_vals.size())});
+                    }
+                    else if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau))
+                        choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau), false), 1l - 1l / static_cast<double>(a0_vals.size())});
+                    else if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau))
+                        choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau), false), 1l - 1l / static_cast<double>(a1_vals.size())});
+                }
+                assert(!choices.empty());
+                incs.push_back(choices);
             }
         }
     }
@@ -168,7 +210,7 @@ void state_variable::store_variables(atom &atm0, atom &atm1)
                     leqs[&atm1][&atm0] = get_solver().get_lra_theory().leq(a1_end->l, a0_start->l);
                     found = true;
                 }
-                plcs[{&atm0, &atm1}].push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_tau_itm->ev, *v0), smt::lit(get_solver().get_ov_theory().allows(a1_tau_itm->ev, *v0), false)}), static_cast<item *>(v0)});
+                plcs[{&atm0, &atm1}].push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_tau_itm->ev, *v0), lit(get_solver().get_ov_theory().allows(a1_tau_itm->ev, *v0), false)}), static_cast<item *>(v0)});
             }
     }
     else if (a0_tau_itm) // only 'a1_tau' is a singleton variable..
@@ -244,9 +286,9 @@ void state_variable::sv_flaw::compute_resolvers()
         var_item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
         var_item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
         if (a0_tau_itm && !a1_tau_itm)
-            add_resolver(*new forbid_resolver(*this, get_graph().get_solver().get_ov_theory().allows(a0_tau_itm->ev, *a1_tau), *as[0], *a1_tau));
+            add_resolver(*new forbid_resolver(*this, *as[0], *a1_tau));
         else if (!a0_tau_itm && a1_tau_itm)
-            add_resolver(*new forbid_resolver(*this, get_graph().get_solver().get_ov_theory().allows(a1_tau_itm->ev, *a0_tau), *as[1], *a0_tau));
+            add_resolver(*new forbid_resolver(*this, *as[1], *a0_tau));
         else if (auto a0_a1_it = sv.plcs.find({as[0], as[1]}); a0_a1_it != sv.plcs.end())
             for (const auto &a0_a1_disp : a0_a1_it->second)
                 if (get_graph().get_solver().get_sat_core().value(a0_a1_disp.first) != False)
@@ -254,7 +296,7 @@ void state_variable::sv_flaw::compute_resolvers()
     }
 }
 
-state_variable::order_resolver::order_resolver(sv_flaw &flw, const smt::var &r, const atom &before, const atom &after) : resolver(flw.get_graph(), r, 0, flw), before(before), after(after) {}
+state_variable::order_resolver::order_resolver(sv_flaw &flw, const var &r, const atom &before, const atom &after) : resolver(flw.get_graph(), r, 0, flw), before(before), after(after) {}
 state_variable::order_resolver::~order_resolver() {}
 
 #ifdef BUILD_GUI
@@ -268,7 +310,7 @@ void state_variable::order_resolver::apply()
 {
 }
 
-state_variable::place_resolver::place_resolver(sv_flaw &flw, const smt::var &r, atom &plc_atm, item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 0, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
+state_variable::place_resolver::place_resolver(sv_flaw &flw, const var &r, atom &plc_atm, item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 0, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
 state_variable::place_resolver::~place_resolver() {}
 
 #ifdef BUILD_GUI
@@ -282,7 +324,7 @@ void state_variable::place_resolver::apply()
 {
 }
 
-state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, const smt::var &r, atom &atm, item &itm) : resolver(flw.get_graph(), r, 0, flw), atm(atm), itm(itm) {}
+state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, atom &atm, item &itm) : resolver(flw.get_graph(), 0, flw), atm(atm), itm(itm) {}
 state_variable::forbid_resolver::~forbid_resolver() {}
 
 #ifdef BUILD_GUI
@@ -294,5 +336,6 @@ std::string state_variable::forbid_resolver::get_label() const
 
 void state_variable::forbid_resolver::apply()
 {
+    get_graph().get_solver().get_sat_core().new_clause({lit(get_rho(), false), lit(get_graph().get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm), false)});
 }
 } // namespace ratio
