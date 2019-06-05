@@ -82,7 +82,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
             renderer.setSeriesToolTipGenerator(i,
                     (XYDataset dataset, int series,
                             int item) -> ((ActionValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset)
-                                    .getSeries(series).getDataItem(item)).action.toString());
+                                    .getSeries(series).getDataItem(item)).action.getAtom().toString());
         }
 
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);

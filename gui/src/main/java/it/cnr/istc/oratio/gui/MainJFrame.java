@@ -15,6 +15,9 @@ import javax.swing.JInternalFrame;
 import javax.swing.WindowConstants;
 
 import it.cnr.istc.oratio.Context;
+import it.cnr.istc.oratio.gui.timelines.PropositionalAgentVisualizer;
+import it.cnr.istc.oratio.gui.timelines.PropositionalStateVisualizer;
+import it.cnr.istc.oratio.gui.timelines.ReusableResourceVisualizer;
 import it.cnr.istc.oratio.gui.timelines.StateVariableVisualizer;
 
 /**
@@ -32,7 +35,8 @@ public class MainJFrame extends JFrame {
         state_frame.setVisible(true);
 
         TimelinesJInternalFrame timelines_frame = new TimelinesJInternalFrame(Context.getContext().getCore());
-        timelines_frame.addVisualizer(new StateVariableVisualizer());
+        timelines_frame.addVisualizers(new StateVariableVisualizer(), new ReusableResourceVisualizer(),
+                new PropositionalStateVisualizer(), new PropositionalAgentVisualizer());
         Context.getContext().addStateListener(timelines_frame);
         timelines_frame.setVisible(true);
 

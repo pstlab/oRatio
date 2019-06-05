@@ -43,8 +43,9 @@ public class TimelinesJInternalFrame extends JInternalFrame implements StateList
         pack();
     }
 
-    public void addVisualizer(TimelineVisualizer vis) {
-        visualizers.put(vis.getType(), vis);
+    public void addVisualizers(TimelineVisualizer... viss) {
+        for (TimelineVisualizer vis : viss)
+            visualizers.put(vis.getType(), vis);
     }
 
     @Override

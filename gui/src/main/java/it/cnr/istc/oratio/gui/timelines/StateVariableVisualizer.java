@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.NumberAxis;
@@ -78,7 +79,8 @@ public class StateVariableVisualizer implements TimelineVisualizer {
         Font font = new Font("SansSerif", Font.PLAIN, 9);
         XYItemLabelGenerator generator = (XYDataset dataset, int series,
                 int item) -> ((SVValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset).getSeries(series)
-                        .getDataItem(item)).value.toString();
+                        .getDataItem(item)).value.getAtoms().stream().map(atm -> atm.toString())
+                                .collect(Collectors.joining(", "));
         ItemLabelPosition itLabPos = new ItemLabelPosition(ItemLabelAnchor.CENTER, TextAnchor.CENTER);
         for (int i = 0; i < collection.getSeriesCount(); i++) {
             renderer.setSeriesItemLabelGenerator(i, generator);
@@ -89,7 +91,8 @@ public class StateVariableVisualizer implements TimelineVisualizer {
             renderer.setSeriesToolTipGenerator(i,
                     (XYDataset dataset, int series,
                             int item) -> ((SVValueXYIntervalDataItem) ((XYIntervalSeriesCollection) dataset)
-                                    .getSeries(series).getDataItem(item)).value.toString());
+                                    .getSeries(series).getDataItem(item)).value.getAtoms().stream()
+                                            .map(atm -> atm.toString()).collect(Collectors.joining(", ")));
         }
 
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);

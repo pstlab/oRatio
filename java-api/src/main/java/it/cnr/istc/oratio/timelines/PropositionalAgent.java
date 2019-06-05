@@ -1,7 +1,6 @@
 package it.cnr.istc.oratio.timelines;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -87,8 +86,8 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
         /**
          * @return the atoms
          */
-        public Collection<Atom> getAtoms() {
-            return Arrays.asList(atom);
+        public Atom getAtom() {
+            return atom;
         }
     }
 
