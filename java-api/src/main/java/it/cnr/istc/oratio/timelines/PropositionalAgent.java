@@ -101,8 +101,14 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
                     ((Item.ArithItem) itm.getCore().getExpr("horizon")).getValue());
 
             List<Atom> c_atoms = new ArrayList<>(atoms);
-            Collections.sort(c_atoms, (Atom a0, Atom a1) -> (((Item.ArithItem) a0.getExpr("start")).getValue())
-                    .compareTo(((Item.ArithItem) a1.getExpr("start")).getValue()));
+            Collections
+                    .sort(c_atoms,
+                            (Atom a0, Atom a1) -> (((Item.ArithItem) a0.getExpr(a0.getType().getSuperclasses().stream()
+                                    .filter(t -> t.getName().equals("ImpulsivePredicate")).findAny().isPresent() ? "at"
+                                            : "start")).getValue()).compareTo(
+                                                    ((Item.ArithItem) a1.getExpr(a1.getType().getSuperclasses().stream()
+                                                            .filter(t -> t.getName().equals("ImpulsivePredicate"))
+                                                            .findAny().isPresent() ? "at" : "start")).getValue()));
 
             for (Atom atm : c_atoms)
                 if (atm.getType().getSuperclasses().stream().filter(t -> t.getName().equals("ImpulsivePredicate"))

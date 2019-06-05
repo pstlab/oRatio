@@ -137,7 +137,9 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
             public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
                 StateNode node = (StateNode) event.getPath().getLastPathComponent();
                 if (!node.hasLoadedChildren) {
-                    node.loadChildren();
+                    SwingUtilities.invokeLater(() -> {
+                        node.loadChildren();
+                    });
                 }
             }
 
@@ -230,7 +232,11 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
         private void loadChildren() {
             if (!hasLoadedChildren) {
                 if (userObject instanceof Core) {
-                    ((Core) userObject).getExprs().entrySet()
+
+                    root.removeAllChildren();
+                    root.hasLoadedChildren = false;
+                    root.loadChildren();
+                    tree_model.setRoot(root);                    ((Core) userObject).getExprs().entrySet()
                             .forEach(expr -> add(new StateNode(expr.getKey(), expr.getValue())));
                     ((Core) userObject).getPredicates().values().stream().flatMap(pred -> pred.getInstances().stream())
                             .filter(atm -> (((Atom) atm).getTau() == userObject
