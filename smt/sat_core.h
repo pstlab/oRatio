@@ -68,7 +68,7 @@ private:
   static size_t index(const lit &p) { return p.get_sign() ? p.get_var() << 1 : (p.get_var() << 1) ^ 1; }
 
   bool propagate(std::vector<lit> &cnfl);
-  void analyze(const std::vector<lit> &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel);
+  void analyze(std::vector<lit> &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel);
   void record(const std::vector<lit> &lits);
 
   bool enqueue(const lit &p, clause *const c = nullptr);

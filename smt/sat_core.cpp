@@ -362,7 +362,6 @@ bool sat_core::check()
                 pop();
             // we record the no-good..
             record(no_good);
-            cnfl.clear();
         }
         else
             return true;
@@ -396,7 +395,8 @@ bool sat_core::propagate(std::vector<lit> &cnfl)
     while (!prop_q.empty())
     {
         // we propagate sat constraints..
-        std::vector<clause *> tmp = std::move(watches.at(index(prop_q.front())));
+        std::vector<clause *> tmp;
+        std::swap(tmp, watches.at(index(prop_q.front())));
         for (size_t i = 0; i < tmp.size(); i++)
         {
             if (!tmp.at(i)->propagate(prop_q.front()))
@@ -438,13 +438,14 @@ bool sat_core::propagate(std::vector<lit> &cnfl)
     return true;
 }
 
-void sat_core::analyze(const std::vector<lit> &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel)
+void sat_core::analyze(std::vector<lit> &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel)
 {
     assert(std::all_of(cnfl.begin(), cnfl.end(), [&](const lit &lt) { return value(lt) != Undefined; })); // all these literals must have been assigned for being a conflict..
     std::set<var> seen;
     int counter = 0; // this is the number of variables of the current decision level that have already been seen..
     lit p;
-    std::vector<lit> p_reason = std::move(cnfl);
+    std::vector<lit> p_reason;
+    std::swap(p_reason, cnfl); // cnfl is now empty..
     out_learnt.push_back(p);
     out_btlevel = 0;
     do

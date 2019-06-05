@@ -627,7 +627,8 @@ void lra_theory::pivot(const var x_i, const var x_j)
     expr.vars.emplace(x_i, rational::ONE / c);
 
     // these are the rows in which x_j appears..
-    std::unordered_set<row *> x_j_watches = std::move(t_watches.at(x_j));
+    std::unordered_set<row *> x_j_watches;
+    std::swap(x_j_watches, t_watches.at(x_j));
     for (const auto &r : x_j_watches)
     {
         rational cc = r->l.vars.at(x_j);

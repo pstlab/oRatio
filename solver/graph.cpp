@@ -171,7 +171,9 @@ void graph::build()
                 expand_flaw(*flaw_q.front()); // we expand the flaw..
         flaw_q.pop_front();
 #else
-        for (const auto &f : std::move(flaw_q))
+        std::deque<flaw *> c_q;
+        std::swap(c_q, flaw_q); // flaw_q is now empty..
+        for (const auto &f : c_q)
             expand_flaw(*f); // we expand the flaw..
 #endif
     }
@@ -187,7 +189,8 @@ void graph::add_layer()
     {
         if (flaw_q.empty())
             throw std::runtime_error("the problem is inconsistent..");
-        std::deque<flaw *> c_q = std::move(flaw_q);
+        std::deque<flaw *> c_q;
+        std::swap(c_q, flaw_q); // flaw_q is now empty..
         for (const auto &f : c_q)
             if (slv.get_sat_core().value(f->phi) != False) // we expand the flaw..
                 expand_flaw(*f);
