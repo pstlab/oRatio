@@ -242,9 +242,15 @@ bool lra_theory::lt(const lin &left, const lin &right, const var &p)
         switch (sat.value(p))
         {
         case True:
-            return assert_upper(slack, c_right, p, std::vector<lit>());
+        {
+            std::vector<lit> cnfl;
+            return assert_upper(slack, c_right, p, cnfl);
+        }
         case False:
-            return assert_lower(slack, c_right, lit(p, false), std::vector<lit>());
+        {
+            std::vector<lit> cnfl;
+            return assert_lower(slack, c_right, lit(p, false), cnfl);
+        }
         default:
             bind(p);
             s_asrts.emplace(s_assertion, p);
@@ -288,9 +294,15 @@ bool lra_theory::leq(const lin &left, const lin &right, const var &p)
         switch (sat.value(p))
         {
         case True:
-            return assert_upper(slack, c_right, p, std::vector<lit>());
+        {
+            std::vector<lit> cnfl;
+            return assert_upper(slack, c_right, p, cnfl);
+        }
         case False:
-            return assert_lower(slack, c_right, lit(p, false), std::vector<lit>());
+        {
+            std::vector<lit> cnfl;
+            return assert_lower(slack, c_right, lit(p, false), cnfl);
+        }
         default:
             bind(p);
             s_asrts.emplace(s_assertion, p);
@@ -334,9 +346,15 @@ bool lra_theory::geq(const lin &left, const lin &right, const var &p)
         switch (sat.value(p))
         {
         case True:
-            return assert_lower(slack, c_right, p, std::vector<lit>());
+        {
+            std::vector<lit> cnfl;
+            return assert_lower(slack, c_right, p, cnfl);
+        }
         case False:
-            return assert_upper(slack, c_right, lit(p, false), std::vector<lit>());
+        {
+            std::vector<lit> cnfl;
+            return assert_upper(slack, c_right, lit(p, false), cnfl);
+        }
         default:
             bind(p);
             s_asrts.emplace(s_assertion, p);
@@ -377,9 +395,15 @@ bool lra_theory::gt(const lin &left, const lin &right, const var &p)
         switch (sat.value(p))
         {
         case True:
-            return assert_lower(slack, c_right, p, std::vector<lit>());
+        {
+            std::vector<lit> cnfl;
+            return assert_lower(slack, c_right, p, cnfl);
+        }
         case False:
-            return assert_upper(slack, c_right, lit(p, false), std::vector<lit>());
+        {
+            std::vector<lit> cnfl;
+            return assert_upper(slack, c_right, lit(p, false), cnfl);
+        }
         default:
             bind(p);
             s_asrts.emplace(s_assertion, p);
@@ -603,7 +627,9 @@ void lra_theory::pivot(const var x_i, const var x_j)
     expr.vars.emplace(x_i, rational::ONE / c);
 
     // these are the rows in which x_j appears..
-    for (const auto &r : std::move(t_watches.at(x_j)))
+    std::unordered_set<row *> x_j_watches;
+    std::swap(x_j_watches, t_watches.at(x_j));
+    for (const auto &r : x_j_watches)
     {
         rational cc = r->l.vars.at(x_j);
         r->l.vars.erase(x_j);

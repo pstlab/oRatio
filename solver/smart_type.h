@@ -48,6 +48,8 @@ protected:
   void set_ni(const smt::var &v); // temporally sets the solver's 'ni' variable..
   void restore_ni();              // restores the solver's 'ni' variable..
 
+  void store_flaw(flaw &f); // stores the flaw for retrieval when at root-level..
+
   static std::vector<resolver *> get_resolvers(solver &slv, const std::set<atom *> &atms); // returns the vector of resolvers which has given rise to the given atoms..
 
 private:

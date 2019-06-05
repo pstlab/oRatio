@@ -14,7 +14,9 @@ smart_type::~smart_type() {}
 std::vector<flaw *> smart_type::get_flaws()
 {
     assert(slv.get_sat_core().root_level());
-    return std::move(flaws);
+    std::vector<flaw *> tmp;
+    std::swap(tmp, flaws); // flaws is now empty..
+    return tmp;
 }
 
 void smart_type::new_fact(atom_flaw &af) {}
@@ -22,6 +24,8 @@ void smart_type::new_goal(atom_flaw &af) {}
 
 void smart_type::set_ni(const smt::var &v) { get_solver().set_ni(v); }
 void smart_type::restore_ni() { get_solver().restore_ni(); }
+
+void smart_type::store_flaw(flaw &f) { flaws.push_back(&f); }
 
 std::vector<resolver *> smart_type::get_resolvers(solver &slv, const std::set<atom *> &atms)
 {

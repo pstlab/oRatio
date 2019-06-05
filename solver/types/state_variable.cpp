@@ -75,11 +75,11 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
                 {
                     sv_flaw *flw = new sv_flaw(*this, overlapping_atoms);
                     sv_flaws.insert({overlapping_atoms, flw});
+                    store_flaw(*flw); // we store the flaw for retrieval when at root-level..
                 }
 
                 std::vector<std::pair<lit, double>> choices;
-                const auto cs = combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2);
-                for (const auto &as : cs)
+                for (const auto &as : combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2))
                 {
                     arith_expr a0_start = as[0]->get(START);
                     arith_expr a0_end = as[0]->get(END);
