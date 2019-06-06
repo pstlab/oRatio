@@ -82,7 +82,7 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
 
             if (c_usage > c_capacity) // we have a 'peak'..
             {
-                if (rr_flaws.count(overlapping_atoms))
+                if (!rr_flaws.count(overlapping_atoms))
                 {
                     rr_flaw *flw = new rr_flaw(*this, overlapping_atoms);
                     rr_flaws.insert({overlapping_atoms, flw});

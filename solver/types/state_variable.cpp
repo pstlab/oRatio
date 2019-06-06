@@ -71,7 +71,7 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
 
             if (overlapping_atoms.size() > 1) // we have a 'peak'..
             {
-                if (sv_flaws.count(overlapping_atoms))
+                if (!sv_flaws.count(overlapping_atoms))
                 {
                     sv_flaw *flw = new sv_flaw(*this, overlapping_atoms);
                     sv_flaws.insert({overlapping_atoms, flw});
