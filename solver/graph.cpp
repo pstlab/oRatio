@@ -132,7 +132,7 @@ void graph::set_estimated_cost(resolver &r, const rational &cst)
     }
 }
 
-const smt::rational graph::evaluate(const std::vector<flaw *> &fs)
+const rational graph::evaluate(const std::vector<flaw *> &fs)
 {
     rational c_cost;
 #ifdef H_MAX
@@ -306,6 +306,26 @@ bool graph::is_deferrable(flaw &f)
 }
 #endif
 
+void graph::check_gamma()
+{
+    assert(slv.root_level());
+    if (slv.get_sat_core().value(gamma) == Undefined) // a unit clause, not gamma, has been deduced or, simply, gamma has never been set..
+    {
+        build();                  // the search procedure may have excluded those parts of the graph that could lead to a solution..
+        slv.take_decision(gamma); // we set gamma again..
+    }
+    else
+    { // the graph has been invalidated..
+        assert(slv.get_sat_core().value(gamma) == False);
+        // do we have room for increasing the heuristic accuracy?
+        if (accuracy < max_accuracy)
+            increase_accuracy(); // we increase the heuristic accuracy..
+        else
+            add_layer(); // we add a layer to the current graph..
+        set_new_gamma(); // we create and set a new graph var..
+    }
+}
+
 void graph::set_new_gamma()
 {
     // we create a new graph var..
@@ -398,7 +418,7 @@ void flaw::add_resolver(resolver &r)
     gr.new_resolver(r);
 }
 
-resolver::resolver(graph &gr, const smt::rational &cost, flaw &eff) : resolver(gr, gr.get_solver().get_sat_core().new_var(), cost, eff) {}
-resolver::resolver(graph &gr, const smt::var &r, const smt::rational &cost, flaw &eff) : gr(gr), rho(r), intrinsic_cost(cost), effect(eff) {}
+resolver::resolver(graph &gr, const rational &cost, flaw &eff) : resolver(gr, gr.get_solver().get_sat_core().new_var(), cost, eff) {}
+resolver::resolver(graph &gr, const var &r, const rational &cost, flaw &eff) : gr(gr), rho(r), intrinsic_cost(cost), effect(eff) {}
 resolver::~resolver() {}
 } // namespace ratio

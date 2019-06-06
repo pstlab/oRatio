@@ -47,70 +47,32 @@ void solver::solve()
     solve_inconsistencies();
 
     // we enter into the main solving loop..
-    while (true)
+    flaw *f_next = nullptr; // this is the next flaw to be solved..
+    while (f_next = select_flaw())
     {
-        // this is the next flaw to be solved..
-        flaw *f_next = select_flaw();
 #ifdef BUILD_GUI
         if (f_next)
             fire_current_flaw(*f_next);
 #endif
+        assert(!f_next->get_estimated_cost().is_infinite());
 
-        if (f_next)
-        {
-            if (f_next->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw..
-            {
-                if (get_sat_core().root_level()) // we expand the graph..
-                {
-                    switch (get_sat_core().value(gr.gamma))
-                    {
-                    case True: // the search procedure excluded those parts of the graph that could have led to a solution..
-                        gr.build();
-                        break;
-                    case False: // the graph has been invalidated..
-                        // do we have room for increasing the heuristic accuracy?
-                        if (gr.accuracy < gr.max_accuracy)
-                            gr.increase_accuracy(); // we increase the heuristic accuracy..
-                        else
-                            gr.add_layer(); // we add a layer to the current graph..
-                        gr.set_new_gamma(); // we create and set a new graph var..
-                        break;
-                    case Undefined: // a unit clause, not gamma, has been deduced..
-                        gr.build();
-                        take_decision(gr.gamma); // we set gamma again..
-                        break;
-                    }
+        // this is the next resolver to be applied..
+        resolver *res = f_next->get_best_resolver();
 #ifdef BUILD_GUI
-                    fire_state_changed();
+        fire_current_resolver(*res);
 #endif
-                }
-                else // we search..
-                    next();
-                continue;
-            }
+        assert(!res->get_estimated_cost().is_infinite());
 
-            // this is the next resolver to be applied..
-            resolver *res = f_next->get_best_resolver();
-#ifdef BUILD_GUI
-            fire_current_resolver(*res);
-#endif
-            assert(!res->get_estimated_cost().is_infinite());
+        // we apply the resolver..
+        take_decision(res->get_rho());
 
-            // we apply the resolver..
-            take_decision(res->get_rho());
-
-            // we solve all the current inconsistencies..
-            solve_inconsistencies();
-        }
-        else
-        {
-            // Hurray!! we have found a solution..
-#ifdef BUILD_GUI
-            fire_state_changed();
-#endif
-            return;
-        }
+        // we solve all the current inconsistencies..
+        solve_inconsistencies();
     }
+    // Hurray!! we have found a solution..
+#ifdef BUILD_GUI
+    fire_state_changed();
+#endif
 }
 
 expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals)
@@ -205,7 +167,7 @@ void solver::next()
 {
     LOG("next..");
 
-    if (get_sat_core().root_level())
+    if (root_level())
         throw std::runtime_error("the problem is unsolvable");
 
     std::vector<smt::lit> no_good;
@@ -229,27 +191,8 @@ void solver::next()
 #endif
 
     // we check if we need to expand the graph..
-    switch (get_sat_core().value(gr.gamma))
-    {
-    case True: // we do not need to expand the graph..
-        break;
-    case False: // the graph has been invalidated..
-        assert(get_sat_core().root_level());
-        // do we have room for increasing the heuristic accuracy?
-        if (gr.accuracy < gr.max_accuracy)
-            gr.increase_accuracy(); // we increase the heuristic accuracy..
-        else
-            gr.add_layer(); // we add a layer to the current graph..
-        gr.set_new_gamma(); // we create and set a new graph var..
-
-#ifdef BUILD_GUI
-        fire_state_changed();
-#endif
-        break;
-    case Undefined:              // a unit clause, not gamma, has been deduced..
-        take_decision(gr.gamma); // we set gamma again..
-        break;
-    }
+    if (root_level())
+        gr.check_gamma();
 }
 
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
@@ -266,7 +209,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
             if (p.get_sign()) // this flaw has been added to the current partial solution..
             {
                 flaws.insert(f);
-                if (!trail.empty())
+                if (!root_level())
                     trail.back().new_flaws.insert(f);
             }
             else // this flaw has been removed from the current partial solution..
@@ -282,7 +225,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
             if (p.get_sign()) // this resolver has been applied hence its effect has been resolved..
             {
                 if (flaws.erase(&r->effect))
-                    if (!trail.empty())
+                    if (!root_level())
                         trail.back().solved_flaws.insert(&r->effect);
             }
             else // since this resolver cannot be applied its cost is set to +inf..
@@ -343,7 +286,7 @@ flaw *solver::select_flaw()
         {
             // this flaw has an active resolver, hence it is already solved!
             // we remove the flaw from the current set of flaws..
-            if (!trail.empty())
+            if (!root_level())
                 trail.back().solved_flaws.insert((*it));
             flaws.erase(it++);
         }
@@ -387,10 +330,14 @@ void solver::solve_inconsistencies()
         incs.insert(incs.end(), c_incs.begin(), c_incs.end());
     }
 
-    if (trail.empty()) // since we are at root-level, we can reason about flaws..
+    if (root_level()) // since we are at root-level, we can reason about flaws..
+    {
         for (const auto &st : sts)
             for (const auto &f : st->get_flaws())
                 gr.new_flaw(*f, false); // we add the flaws to the planning graph..
+
+        gr.check_gamma();
+    }
 
     while (!incs.empty())
     {
@@ -444,10 +391,14 @@ void solver::solve_inconsistencies()
             incs.insert(incs.end(), c_incs.begin(), c_incs.end());
         }
 
-        if (trail.empty()) // since we are at root-level, we can reason about flaws..
+        if (root_level()) // since we are at root-level, we can reason about flaws..
+        {
             for (const auto &st : sts)
                 for (const auto &f : st->get_flaws())
                     gr.new_flaw(*f, false); // we add the flaws to the planning graph..
+
+            gr.check_gamma();
+        }
     }
 }
 

@@ -53,7 +53,8 @@ private:
   bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
 #endif
 
-  void set_new_gamma(); //creates and sets a new graph var..
+  void check_gamma();   // checks and possibly resets the value of gamma..
+  void set_new_gamma(); // creates and sets a new graph var..
 
 private:
   solver &slv;                                                // the solver this graph belongs to..
