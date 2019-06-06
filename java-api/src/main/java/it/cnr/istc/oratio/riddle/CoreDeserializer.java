@@ -134,12 +134,15 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
                     Item item = items.get(itm_obj.getAsJsonPrimitive("id").getAsString());
                     for (JsonElement xpr_el : itm_obj.getAsJsonArray("exprs")) {
                         JsonObject xpr_obj = xpr_el.getAsJsonObject();
-                        item.exprs.put(xpr_obj.getAsJsonPrimitive("name").getAsString(), toItem(items, atoms, xpr_obj));
+                        String name = xpr_obj.getAsJsonPrimitive("name").getAsString();
+                        Item itm = toItem(items, atoms, xpr_obj);
+                        item.exprs.put(name, itm);
+                        core.expr_names.putIfAbsent(itm, name);
                     }
                 }
             }
 
-        // we set the expressions..
+        // we set the core's expressions..
         for (JsonElement xpr_el : object.getAsJsonArray("exprs")) {
             JsonObject xpr_obj = xpr_el.getAsJsonObject();
             String name = xpr_obj.getAsJsonPrimitive("name").getAsString();
@@ -147,6 +150,7 @@ public class CoreDeserializer implements JsonDeserializer<Core> {
             core.exprs.put(name, itm);
             core.expr_names.put(itm, name);
         }
+
         return core;
     }
 

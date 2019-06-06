@@ -99,24 +99,26 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
                     ((Item.ArithItem) itm.getCore().getExpr("origin")).getValue(),
                     ((Item.ArithItem) itm.getCore().getExpr("horizon")).getValue());
 
-            List<Atom> c_atoms = new ArrayList<>(atoms);
-            Collections
-                    .sort(c_atoms,
-                            (Atom a0, Atom a1) -> (((Item.ArithItem) a0.getExpr(a0.getType().getSuperclasses().stream()
-                                    .filter(t -> t.getName().equals("ImpulsivePredicate")).findAny().isPresent() ? "at"
-                                            : "start")).getValue()).compareTo(
-                                                    ((Item.ArithItem) a1.getExpr(a1.getType().getSuperclasses().stream()
-                                                            .filter(t -> t.getName().equals("ImpulsivePredicate"))
-                                                            .findAny().isPresent() ? "at" : "start")).getValue()));
+            atoms.stream().filter(atm -> atm.getType().getSuperclasses().stream()
+                    .filter(t -> t.getName().equals("ImpulsivePredicate") || t.getName().equals("IntervalPredicate"))
+                    .findAny().isPresent()).sorted((Atom a0, Atom a1) -> {
+                        Item.ArithItem a0_start = (Item.ArithItem) a0.getExpr(a0.getType().getSuperclasses().stream()
+                                .filter(t -> t.getName().equals("ImpulsivePredicate")).findAny().isPresent() ? "at"
+                                        : "start");
+                        Item.ArithItem a1_start = (Item.ArithItem) a1.getExpr(a1.getType().getSuperclasses().stream()
+                                .filter(t -> t.getName().equals("ImpulsivePredicate")).findAny().isPresent() ? "at"
+                                        : "start");
+                        return a0_start.getValue().compareTo(a1_start.getValue());
+                    }).forEach(atm -> {
+                        if (atm.getType().getSuperclasses().stream()
+                                .filter(t -> t.getName().equals("ImpulsivePredicate")).findAny().isPresent())
+                            pa.addValue(((Item.ArithItem) atm.getExpr("at")).getValue(),
+                                    ((Item.ArithItem) atm.getExpr("at")).getValue(), atm);
+                        else
+                            pa.addValue(((Item.ArithItem) atm.getExpr("start")).getValue(),
+                                    ((Item.ArithItem) atm.getExpr("end")).getValue(), atm);
+                    });
 
-            for (Atom atm : c_atoms)
-                if (atm.getType().getSuperclasses().stream().filter(t -> t.getName().equals("ImpulsivePredicate"))
-                        .findAny().isPresent())
-                    pa.addValue(((Item.ArithItem) atm.getExpr("at")).getValue(),
-                            ((Item.ArithItem) atm.getExpr("at")).getValue(), atm);
-                else
-                    pa.addValue(((Item.ArithItem) atm.getExpr("start")).getValue(),
-                            ((Item.ArithItem) atm.getExpr("end")).getValue(), atm);
             return pa;
         }
     }

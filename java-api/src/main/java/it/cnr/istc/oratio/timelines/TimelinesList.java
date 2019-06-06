@@ -3,9 +3,11 @@ package it.cnr.istc.oratio.timelines;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,10 +63,18 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
             }
         }
 
-        for (Map.Entry<String, Item> entry : core.getExprs().entrySet()) {
-            Type type = getTimelineType(entry.getValue().getType());
-            if (type != null)
-                add(BUILDERS.get(type).build(entry.getValue(), atoms.get(entry.getValue())));
+        Set<Item> seen = new HashSet<>();
+        Queue<Map.Entry<String, Item>> q = new ArrayDeque<>();
+        q.addAll(core.getExprs().entrySet());
+        while (!q.isEmpty()) {
+            Map.Entry<String, Item> entry = q.poll();
+            if (!seen.contains(entry.getValue())) {
+                seen.add(entry.getValue());
+                Type type = getTimelineType(entry.getValue().getType());
+                if (type != null)
+                    add(BUILDERS.get(type).build(entry.getValue(), atoms.get(entry.getValue())));
+                q.addAll(entry.getValue().getExprs().entrySet());
+            }
         }
     }
 
@@ -75,6 +85,13 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
             Type c_type = q.poll();
             if (BUILDERS.containsKey(c_type))
                 return c_type;
+            if (c_type.getPredicates().values().stream().anyMatch(p -> p.getSuperclasses().stream().anyMatch(
+                    sp -> sp.getName().equals("ImpulsivePredicate") || sp.getName().equals("IntervalPredicate"))))
+                try {
+                    return t.getCore().getType("PropositionalAgent");
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
             q.addAll(c_type.getSuperclasses());
         }
         return null;
