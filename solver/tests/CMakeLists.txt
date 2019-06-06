@@ -22,9 +22,13 @@ add_test(NAME SolverTest08 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/te
 add_test(NAME SolverTest09 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_sv_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME SolverTest10 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_sv_1.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME SolverTest11 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_sv_2.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-#add_test(NAME SolverTest12 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_sv_3.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 set_tests_properties(SolverTest02 SolverTest03 SolverTest04 PROPERTIES WILL_FAIL TRUE)
+
+add_test(NAME SolverTest12 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SolverTest13 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_1.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SolverTest13 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_2.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+#add_test(NAME SolverTest12 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_sv_3.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_test(NAME TestBlocks02 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_02.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME TestBlocks03 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_03.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
