@@ -12,7 +12,7 @@ namespace ratio
 graph::graph(solver &slv) : slv(slv), gamma(slv.get_sat_core().new_var()) {}
 graph::~graph() {}
 
-void graph::new_flaw(flaw &f)
+void graph::new_flaw(flaw &f, const bool &enqueue)
 {
     // we initialize the flaw..
     f.init(); // flaws' initialization requires being at root-level..
@@ -30,8 +30,10 @@ void graph::new_flaw(flaw &f)
         break;
     }
 
-    // we enqueue the flaw..
-    flaw_q.push_back(&f);
+    if (enqueue) // we enqueue the flaw..
+        flaw_q.push_back(&f);
+    else // we directly expand the flaw..
+        expand_flaw(f);
 }
 
 void graph::new_resolver(resolver &r)

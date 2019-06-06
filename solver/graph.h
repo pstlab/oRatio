@@ -35,9 +35,9 @@ public:
   unsigned short get_accuracy() const { return accuracy; }
 
 private:
-  void new_flaw(flaw &f);                     // notifies the graph that a new flaw 'f' has been created..
-  void new_resolver(resolver &r);             // notifies the graph that a new resolver 'r' has been created..
-  void new_causal_link(flaw &f, resolver &r); // notifies the graph that a new causal link between a flaw 'f' and a resolver 'r' has been created..
+  void new_flaw(flaw &f, const bool &enqueue = true); // notifies the graph that a new flaw 'f' has been created..
+  void new_resolver(resolver &r);                     // notifies the graph that a new resolver 'r' has been created..
+  void new_causal_link(flaw &f, resolver &r);         // notifies the graph that a new causal link between a flaw 'f' and a resolver 'r' has been created..
 
   void set_estimated_cost(resolver &r, const smt::rational &cst);     // sets the estimated cost of the given resolver, propagating it to other resolvers..
   static const smt::rational evaluate(const std::vector<flaw *> &fs); // evaluates, together, the given vector of flaws..

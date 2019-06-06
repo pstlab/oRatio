@@ -388,14 +388,9 @@ void solver::solve_inconsistencies()
     }
 
     if (trail.empty()) // since we are at root-level, we can reason about flaws..
-    {
-        bool found = false;
         for (const auto &st : sts)
             for (const auto &f : st->get_flaws())
-                found = true, gr.new_flaw(*f); // we add the flaws to the planning graph..
-        if (found)
-            gr.build();
-    }
+                gr.new_flaw(*f, false); // we add the flaws to the planning graph..
 
     while (!incs.empty())
     {
@@ -450,14 +445,9 @@ void solver::solve_inconsistencies()
         }
 
         if (trail.empty()) // since we are at root-level, we can reason about flaws..
-        {
-            bool found = false;
             for (const auto &st : sts)
                 for (const auto &f : st->get_flaws())
-                    found = true, gr.new_flaw(*f); // we add the flaws to the planning graph..
-            if (found)
-                gr.build();
-        }
+                    gr.new_flaw(*f, false); // we add the flaws to the planning graph..
     }
 }
 
