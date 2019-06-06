@@ -46,6 +46,7 @@ private:
   void new_goal(atom &atm) override;                                      // creates a new goal token..
   void new_disjunction(context &d_ctx, const disjunction &disj) override; // creates a new disjunction..
 
+  bool root_level() const { return trail.empty(); }
   void take_decision(const smt::lit &ch);
   void next();
 
