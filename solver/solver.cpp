@@ -46,9 +46,6 @@ void solver::solve()
     // we solve all the current inconsistencies..
     solve_inconsistencies();
 
-    // we create and set a new graph var..
-    gr.set_new_gamma();
-
     // we enter into the main solving loop..
     while (true)
     {
@@ -388,11 +385,16 @@ void solver::solve_inconsistencies()
     {
         const auto c_incs = st->get_current_incs();
         incs.insert(incs.end(), c_incs.begin(), c_incs.end());
+    }
 
-        if (trail.empty())
-            // since we are at root-level, we can reason about flaws..
+    if (trail.empty()) // since we are at root-level, we can reason about flaws..
+    {
+        bool found = false;
+        for (const auto &st : sts)
             for (const auto &f : st->get_flaws())
-                gr.new_flaw(*f); // we add the flaws to the planning graph..
+                found = true, gr.new_flaw(*f); // we add the flaws to the planning graph..
+        if (found)
+            gr.build();
     }
 
     while (!incs.empty())
@@ -445,11 +447,16 @@ void solver::solve_inconsistencies()
         {
             const auto c_incs = st->get_current_incs();
             incs.insert(incs.end(), c_incs.begin(), c_incs.end());
+        }
 
-            if (trail.empty())
-                // since we are at root-level, we can reason about flaws..
+        if (trail.empty()) // since we are at root-level, we can reason about flaws..
+        {
+            bool found = false;
+            for (const auto &st : sts)
                 for (const auto &f : st->get_flaws())
-                    gr.new_flaw(*f); // we add the flaws to the planning graph..
+                    found = true, gr.new_flaw(*f); // we add the flaws to the planning graph..
+            if (found)
+                gr.build();
         }
     }
 }
