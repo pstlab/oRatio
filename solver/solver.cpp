@@ -36,6 +36,21 @@ void solver::init()
 
 void solver::solve()
 {
+    // some cleanings..
+    sts.clear();
+    std::queue<type *> q;
+    for (const auto &t : get_types())
+        if (!t.second->is_primitive())
+            q.push(t.second);
+    while (!q.empty())
+    {
+        if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
+            sts.push_back(st);
+        for (const auto &st : q.front()->get_types())
+            q.push(st.second);
+        q.pop();
+    }
+
     // we build the causal graph..
     gr.build();
 
@@ -150,7 +165,7 @@ void solver::new_disjunction(context &d_ctx, const disjunction &disj)
     gr.new_flaw(*df);
 }
 
-void solver::take_decision(const smt::lit &ch)
+void solver::take_decision(const lit &ch)
 {
     LOG("taking decision " << (ch.get_sign() ? std::to_string(ch.get_var()) : "!" + std::to_string(ch.get_var())));
 
@@ -174,7 +189,7 @@ void solver::next()
     if (root_level())
         throw std::runtime_error("the problem is unsolvable");
 
-    std::vector<smt::lit> no_good;
+    std::vector<lit> no_good;
     no_good.reserve(trail.size());
     for (const auto &l : trail)
         no_good.push_back(!l.decision);
@@ -309,24 +324,67 @@ flaw *solver::select_flaw()
 
 void solver::solve_inconsistencies()
 {
-    LOG("checking for inconsistencies..");
-    std::vector<smart_type *> sts;
-    std::queue<type *> q;
-    for (const auto &t : get_types())
-        if (!t.second->is_primitive())
-            q.push(t.second);
-    while (!q.empty())
-    {
-        if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
-            sts.push_back(st);
-        for (const auto &st : q.front()->get_types())
-            q.push(st.second);
-        q.pop();
-    }
-
     // all the current inconsistencies..
-    std::vector<std::vector<std::pair<lit, double>>> incs;
+    std::vector<std::vector<std::pair<lit, double>>> incs = get_incs();
 
+    while (!incs.empty())
+        if (const auto uns_flw = std::find_if(incs.begin(), incs.end(), [](const std::vector<std::pair<lit, double>> &v) { return v.empty(); }); uns_flw != incs.end())
+        { // we have an unsolvable flaw..
+            // we backtrack..
+            next();
+            // we re-collect all the inconsistencies from all the smart-types..
+            incs = get_incs();
+        }
+        else if (const auto det_flw = std::find_if(incs.begin(), incs.end(), [](const std::vector<std::pair<lit, double>> &v) { return v.size() == 1; }); det_flw != incs.end())
+        { // we have deterministic flaw..
+            assert(get_sat_core().value(det_flw->at(0).first) != False);
+            if (get_sat_core().value(det_flw->at(0).first) == Undefined)
+            {
+                // we learn something from it..
+                std::vector<lit> learnt;
+                learnt.reserve(trail.size() + 1);
+                learnt.push_back(det_flw->at(0).first);
+                for (const auto &l : trail)
+                    learnt.push_back(!l.decision);
+                record(learnt);
+                if (!get_sat_core().check())
+                    throw std::runtime_error("the problem is unsolvable");
+            }
+
+            // we re-collect all the inconsistencies from all the smart-types..
+            incs = get_incs();
+        }
+        else
+        { // we have to take a decision..
+            std::vector<std::pair<lit, double>> bst_inc;
+            double k_inv = std::numeric_limits<double>::infinity();
+            for (const auto &inc : incs)
+            {
+                double bst_commit = std::numeric_limits<double>::infinity();
+                for (const auto &ch : inc)
+                    if (ch.second < bst_commit)
+                        bst_commit = ch.second;
+                double c_k_inv = 0;
+                for (const auto &ch : inc)
+                    c_k_inv += 1l / (1l + ch.second - bst_commit);
+                if (c_k_inv < k_inv)
+                {
+                    k_inv = c_k_inv;
+                    bst_inc = inc;
+                }
+            }
+
+            // we select the best choice (i.e. the least committing one) from those available for the best flaw..
+            take_decision(std::min_element(bst_inc.begin(), bst_inc.end(), [](std::pair<lit, double> const &ch0, std::pair<lit, double> const &ch1) { return ch0.second < ch1.second; })->first);
+
+            // we re-collect all the inconsistencies from all the smart-types..
+            incs = get_incs();
+        }
+}
+
+std::vector<std::vector<std::pair<lit, double>>> solver::get_incs()
+{
+    std::vector<std::vector<std::pair<lit, double>>> incs;
     // we collect all the inconsistencies from all the smart-types..
     for (const auto &st : sts)
     {
@@ -342,68 +400,7 @@ void solver::solve_inconsistencies()
 
         gr.check_gamma();
     }
-
-    while (!incs.empty())
-    {
-        std::vector<std::pair<lit, double>> bst_inc;
-        double k_inv = std::numeric_limits<double>::infinity();
-        for (const auto &inc : incs)
-        {
-            switch (inc.size())
-            {
-            case 0: // we have an unsolvable flaw: we backtrack..
-                next();
-                return;
-            case 1: // we have a deterministic flaw: we learn something from it..
-            {
-                std::vector<smt::lit> learnt;
-                learnt.reserve(trail.size() + 1);
-                learnt.push_back(inc.at(0).first);
-                for (const auto &l : trail)
-                    learnt.push_back(!l.decision);
-                record(learnt);
-                if (!get_sat_core().check())
-                    throw std::runtime_error("the problem is unsolvable");
-                break; // we check for further flaws..
-            }
-            default: // we have to take a decision..
-                double bst_commit = std::numeric_limits<double>::infinity();
-                for (const auto &ch : inc)
-                    if (ch.second < bst_commit)
-                        bst_commit = ch.second;
-                double c_k_inv = 0;
-                for (const auto &ch : inc)
-                    c_k_inv += 1l / (1l + ch.second - bst_commit);
-                if (c_k_inv < k_inv)
-                {
-                    k_inv = c_k_inv;
-                    bst_inc = inc;
-                }
-                break;
-            }
-        }
-
-        // we select the best choice (i.e. the least committing one) from those available for the best flaw..
-        take_decision(std::min_element(bst_inc.begin(), bst_inc.end(), [](std::pair<lit, double> const &ch0, std::pair<lit, double> const &ch1) { return ch0.second < ch1.second; })->first);
-
-        // we clear the current inconsistencies..
-        incs.clear();
-        // we re-collect all the inconsistencies from all the smart-types..
-        for (const auto &st : sts)
-        {
-            const auto c_incs = st->get_current_incs();
-            incs.insert(incs.end(), c_incs.begin(), c_incs.end());
-        }
-
-        if (root_level()) // since we are at root-level, we can reason about flaws..
-        {
-            for (const auto &st : sts)
-                for (const auto &f : st->get_flaws())
-                    gr.new_flaw(*f, false); // we add the flaws to the planning graph..
-
-            gr.check_gamma();
-        }
-    }
+    return incs;
 }
 
 #ifdef BUILD_GUI

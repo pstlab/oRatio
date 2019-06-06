@@ -55,8 +55,9 @@ private:
   void push() override;
   void pop() override;
 
-  flaw *select_flaw();          // selects the most promising (i.e. the most expensive one) flaw from the 'flaws' set, returns a nullptr if there are no more active flaws..
-  void solve_inconsistencies(); // checks whether the types have any inconsistency and, in case, solve them..
+  flaw *select_flaw();                                              // selects the most promising (i.e. the most expensive one) flaw from the 'flaws' set, returns a nullptr if there are no more active flaws..
+  void solve_inconsistencies();                                     // checks whether the types have any inconsistency and, in case, solve them..
+  std::vector<std::vector<std::pair<smt::lit, double>>> get_incs(); // collects all the current inconsistencies..
 
 private:
   struct layer
@@ -71,6 +72,7 @@ private:
     std::unordered_set<flaw *> solved_flaws;                   // the just solved flaws..
   };
   graph gr;                                             // the causal graph..
+  std::vector<smart_type *> sts;                        // the smart-types..
   std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
   std::unordered_set<flaw *> flaws;                     // the currently active flaws..
   std::vector<layer> trail;                             // the list of taken decisions, with the associated changes made, in chronological order..
