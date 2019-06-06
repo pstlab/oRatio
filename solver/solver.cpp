@@ -54,7 +54,11 @@ void solver::solve()
         if (f_next)
             fire_current_flaw(*f_next);
 #endif
-        assert(!f_next->get_estimated_cost().is_infinite());
+        if (f_next->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw: we search..
+        {
+            next();
+            continue;
+        }
 
         // this is the next resolver to be applied..
         resolver *res = f_next->get_best_resolver();
