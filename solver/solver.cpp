@@ -221,10 +221,6 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 
     if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end()) // a decision has been taken about the presence of some flaws within the current partial solution..
         for (const auto &f : at_phis_p->second)
-        {
-#ifdef BUILD_GUI
-            fire_flaw_state_changed(*f);
-#endif
             if (p.get_sign()) // this flaw has been added to the current partial solution..
             {
                 flaws.insert(f);
@@ -233,14 +229,9 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
             }
             else // this flaw has been removed from the current partial solution..
                 assert(!flaws.count(f));
-        }
 
     if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..
         for (const auto &r : at_rhos_p->second)
-        {
-#ifdef BUILD_GUI
-            fire_resolver_state_changed(*r);
-#endif
             if (p.get_sign()) // this resolver has been applied hence its effect has been resolved..
             {
                 if (flaws.erase(&r->effect))
@@ -249,7 +240,6 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
             }
             else // since this resolver cannot be applied its cost is set to +inf..
                 gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY);
-        }
 
     return true;
 }
@@ -257,6 +247,8 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 bool solver::check(std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
+    assert(std::all_of(gr.phis.begin(), gr.phis.end(), [&](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [&](flaw *f) { return sat.value(f->phi) != False || f->get_estimated_cost().is_positive_infinite(); }); }));
+    assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [&](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [&](resolver *r) { return sat.value(r->rho) != False || r->get_estimated_cost().is_positive_infinite(); }); }));
     return true;
 }
 

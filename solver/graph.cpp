@@ -91,7 +91,8 @@ void graph::set_estimated_cost(resolver &r, const rational &cst)
             // the resolver costs queue (for resolver cost propagation)..
             std::queue<resolver *> resolver_q;
             for (const auto &c_r : r.effect.supports)
-                resolver_q.push(c_r);
+                if (slv.get_sat_core().value(c_r->rho) != False)
+                    resolver_q.push(c_r);
 
             while (!resolver_q.empty())
             {
@@ -125,7 +126,8 @@ void graph::set_estimated_cost(resolver &r, const rational &cst)
 #endif
 
                         for (const auto &sup_r : c_res.effect.supports) // we propagate the update to all the supports of the resolver's effect..
-                            resolver_q.push(sup_r);
+                            if (slv.get_sat_core().value(sup_r->rho) != False)
+                                resolver_q.push(sup_r);
                     }
                 }
                 resolver_q.pop();
