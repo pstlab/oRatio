@@ -130,7 +130,7 @@ atom_flaw::activate_fact::~activate_fact() {}
 #ifdef BUILD_GUI
 std::string atom_flaw::activate_fact::get_label() const
 {
-    return "ρ" + std::to_string(get_rho()) + " add fact";
+    return "ρ" + std::to_string(get_rho()) + " add σ" + std::to_string(atm.get_sigma());
 }
 #endif
 
@@ -146,7 +146,7 @@ atom_flaw::activate_goal::~activate_goal() {}
 #ifdef BUILD_GUI
 std::string atom_flaw::activate_goal::get_label() const
 {
-    return "ρ" + std::to_string(get_rho()) + " expand goal";
+    return "ρ" + std::to_string(get_rho()) + " expand σ" + std::to_string(atm.get_sigma());
 }
 #endif
 
