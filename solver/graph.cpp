@@ -62,6 +62,7 @@ void graph::new_causal_link(flaw &f, resolver &r)
 
 void graph::set_estimated_cost(resolver &r, const rational &cst)
 {
+    assert(slv.get_sat_core().value(r.rho) != False || cst.is_positive_infinite());
     if (r.est_cost != cst)
     {
         if (!slv.trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
@@ -96,6 +97,7 @@ void graph::set_estimated_cost(resolver &r, const rational &cst)
             {
                 resolver &c_res = *resolver_q.front(); // the current resolver whose cost might require an update..
                 rational r_cost = evaluate(c_res.preconditions);
+                assert(slv.get_sat_core().value(c_res.rho) != False || r_cost.is_positive_infinite());
                 if (c_res.est_cost != r_cost)
                 {
                     if (!slv.trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
@@ -140,7 +142,7 @@ const rational graph::evaluate(const std::vector<flaw *> &fs)
     for (const auto &f : fs)
         if (!f->is_expanded())
             return rational::POSITIVE_INFINITY;
-        else
+        else // we compute the maximum of the flaws' estimated costs..
         {
             rational c = f->get_estimated_cost();
             if (c > c_cost)
@@ -149,8 +151,10 @@ const rational graph::evaluate(const std::vector<flaw *> &fs)
 #endif
 #ifdef H_ADD
     for (const auto &f : fs)
-        return rational::POSITIVE_INFINITY;
-    else c_cost += f->get_estimated_cost();
+        if (!f->is_expanded())
+            return rational::POSITIVE_INFINITY;
+        else // we compute the sum of the flaws' estimated costs..
+            c_cost += f->get_estimated_cost();
 #endif
     return c_cost;
 }
