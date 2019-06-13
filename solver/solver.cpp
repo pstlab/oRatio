@@ -228,7 +228,11 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                     trail.back().new_flaws.insert(f);
             }
             else // this flaw has been removed from the current partial solution..
+            {
                 assert(!flaws.count(f));
+                if (!root_level()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking (just for having consistency with resolvers)..
+                    trail.back().old_f_costs.try_emplace(f, f->est_cost);
+            }
 
     if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..
         for (const auto &r : at_rhos_p->second)
