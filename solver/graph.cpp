@@ -65,11 +65,13 @@ void graph::set_estimated_cost(resolver &r, const rational &cst)
     assert(slv.get_sat_core().value(r.rho) != False || cst.is_positive_infinite());
     if (r.est_cost != cst)
     {
+        std::unordered_set<resolver *> seen;
         if (!slv.trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
             slv.trail.back().old_r_costs.try_emplace(&r, r.est_cost);
 
         // we update the resolver's estimated cost..
         r.est_cost = cst;
+        seen.insert(&r);
 #ifdef BUILD_GUI
         slv.fire_resolver_cost_changed(r);
 #endif
@@ -97,7 +99,7 @@ void graph::set_estimated_cost(resolver &r, const rational &cst)
             while (!resolver_q.empty())
             {
                 resolver &c_res = *resolver_q.front(); // the current resolver whose cost might require an update..
-                rational r_cost = evaluate(c_res.preconditions);
+                rational r_cost = seen.insert(&c_res).second ? evaluate(c_res.preconditions) : rational::POSITIVE_INFINITY;
                 assert(slv.get_sat_core().value(c_res.rho) != False || r_cost.is_positive_infinite());
                 if (c_res.est_cost != r_cost)
                 {
