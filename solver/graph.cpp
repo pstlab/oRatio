@@ -9,7 +9,7 @@ using namespace smt;
 
 namespace ratio
 {
-graph::graph(solver &slv) : slv(slv), gamma(slv.get_sat_core().new_var()) {}
+graph::graph(solver &slv) : slv(slv), gamma(slv.get_sat_core().new_var()) { LOG("graph var is γ" << std::to_string(gamma)); }
 graph::~graph() {}
 
 void graph::new_flaw(flaw &f, const bool &enqueue)
@@ -325,6 +325,7 @@ void graph::check_gamma()
     else
     { // the graph has been invalidated..
         assert(slv.get_sat_core().value(gamma) == False);
+        LOG("search has exhausted the graph..");
         // do we have room for increasing the heuristic accuracy?
         if (accuracy < max_accuracy)
             increase_accuracy(); // we increase the heuristic accuracy..
@@ -346,7 +347,7 @@ void graph::set_new_gamma()
             throw std::runtime_error("the problem is inconsistent..");
 #endif
     // we use the new graph var to allow search within the new graph..
-    LOG("assuming γ " << std::to_string(gamma));
+    LOG("assuming γ" << std::to_string(gamma));
     slv.take_decision(gamma);
 }
 
