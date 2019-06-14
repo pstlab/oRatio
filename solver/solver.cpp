@@ -15,6 +15,7 @@
 #endif
 #include <algorithm>
 #include <stdexcept>
+#include <math.h>
 #include <cassert>
 
 using namespace smt;
