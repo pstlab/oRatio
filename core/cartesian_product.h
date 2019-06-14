@@ -10,7 +10,7 @@ namespace ratio
 template <typename T>
 std::vector<std::vector<T>> cartesian_product(const std::vector<std::vector<T>> &vs)
 {
-    assert(std::none_of(vs.begin(), vs.end(), [&](const std::vector<T> v) { return v.empty(); }));
+    assert(std::none_of(vs.begin(), vs.end(), [](const std::vector<T> v) { return v.empty(); }));
     std::vector<typename std::vector<T>::const_iterator> it;
     it.reserve(vs.size());
     for (const auto &v : vs)

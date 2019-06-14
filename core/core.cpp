@@ -206,7 +206,7 @@ arith_expr core::sub(const std::vector<arith_expr> &exprs)
 arith_expr core::mult(const std::vector<arith_expr> &exprs)
 {
     assert(exprs.size() > 1);
-    arith_expr ae = *std::find_if(exprs.begin(), exprs.end(), [&](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); });
+    arith_expr ae = *std::find_if(exprs.begin(), exprs.end(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); });
     lin l = ae->l;
     for (const auto &aex : exprs)
         if (aex != ae)
@@ -221,7 +221,7 @@ arith_expr core::mult(const std::vector<arith_expr> &exprs)
 arith_expr core::div(const std::vector<arith_expr> &exprs)
 {
     assert(exprs.size() > 1);
-    assert(std::all_of(++exprs.begin(), exprs.end(), [&](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
+    assert(std::all_of(++exprs.begin(), exprs.end(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
     assert(lra_th.value(exprs.at(1)->l).get_infinitesimal() == rational::ZERO);
     rational c = lra_th.value(exprs.at(1)->l).get_rational();
     for (size_t i = 2; i < exprs.size(); i++)

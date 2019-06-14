@@ -41,7 +41,7 @@ var ov_theory::new_var(const std::unordered_set<var_value *> &items, const bool 
 var ov_theory::new_var(const std::vector<var> &vars, const std::vector<var_value *> &vals)
 {
     assert(!vars.empty());
-    assert(std::all_of(vars.begin(), vars.end(), [&](var v) { return is_contained_in.count(v); }));
+    assert(std::all_of(vars.begin(), vars.end(), [this](var v) { return is_contained_in.count(v); }));
     const var id = assigns.size();
     assigns.push_back(std::unordered_map<var_value *, var>());
     for (size_t i = 0; i < vars.size(); ++i)

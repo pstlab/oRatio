@@ -251,8 +251,8 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 bool solver::check(std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
-    assert(std::all_of(gr.phis.begin(), gr.phis.end(), [&](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [&](flaw *f) { return sat.value(f->phi) != False || f->get_estimated_cost().is_positive_infinite(); }); }));
-    assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [&](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [&](resolver *r) { return sat.value(r->rho) != False || r->get_estimated_cost().is_positive_infinite(); }); }));
+    assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return sat.value(f->phi) != False || f->get_estimated_cost().is_positive_infinite(); }); }));
+    assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return sat.value(r->rho) != False || r->get_estimated_cost().is_positive_infinite(); }); }));
     return true;
 }
 
@@ -293,11 +293,11 @@ void solver::pop()
 
 flaw *solver::select_flaw()
 {
-    assert(std::all_of(flaws.begin(), flaws.end(), [&](flaw *const f) { return sat.value(f->phi) == True; }));
+    assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return sat.value(f->phi) == True; }));
     // this is the next flaw to be solved (i.e. the most expensive one)..
     flaw *f_next = nullptr;
     for (auto it = flaws.begin(); it != flaws.end();)
-        if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return sat.value(r->rho) == True; }))
+        if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
         {
             // this flaw has an active resolver, hence it is already solved!
             // we remove the flaw from the current set of flaws..

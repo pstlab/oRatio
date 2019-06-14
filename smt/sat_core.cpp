@@ -440,7 +440,7 @@ bool sat_core::propagate(std::vector<lit> &cnfl)
 
 void sat_core::analyze(std::vector<lit> &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel)
 {
-    assert(std::all_of(cnfl.begin(), cnfl.end(), [&](const lit &lt) { return value(lt) != Undefined; })); // all these literals must have been assigned for being a conflict..
+    assert(std::all_of(cnfl.begin(), cnfl.end(), [this](const lit &lt) { return value(lt) != Undefined; })); // all these literals must have been assigned for being a conflict..
     std::set<var> seen;
     int counter = 0; // this is the number of variables of the current decision level that have already been seen..
     lit p;
@@ -470,9 +470,9 @@ void sat_core::analyze(std::vector<lit> &cnfl, std::vector<lit> &out_learnt, siz
             assert(level.at(p.get_var()) == decision_level()); // this variable must have been assigned at the current decision level..
             if (reason.at(p.get_var()))                        // 'p' can be the asserting literal..
             {
-                assert(reason.at(p.get_var())->lits.at(0) == p);                                                                                                      // a consequence of propagating the clause is the assignment of literal 'p'..
-                assert(value(p) == True);                                                                                                                             // 'p' has been propagated as true..
-                assert(std::all_of(reason.at(p.get_var())->lits.begin() + 1, reason.at(p.get_var())->lits.end(), [&](const lit &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
+                assert(reason.at(p.get_var())->lits.at(0) == p);                                                                                                         // a consequence of propagating the clause is the assignment of literal 'p'..
+                assert(value(p) == True);                                                                                                                                // 'p' has been propagated as true..
+                assert(std::all_of(reason.at(p.get_var())->lits.begin() + 1, reason.at(p.get_var())->lits.end(), [this](const lit &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
                 p_reason.clear();
                 p_reason.insert(p_reason.end(), reason.at(p.get_var())->lits.begin() + 1, reason.at(p.get_var())->lits.end());
             }
@@ -482,16 +482,16 @@ void sat_core::analyze(std::vector<lit> &cnfl, std::vector<lit> &out_learnt, siz
     } while (counter > 0);
     // 'p' is now the first Unique Implication Point (UIP), possibly the asserting literal, that led to the conflict..
     assert(value(p) == Undefined);
-    assert(std::all_of(out_learnt.begin() + 1, out_learnt.end(), [&](const lit &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
+    assert(std::all_of(out_learnt.begin() + 1, out_learnt.end(), [this](const lit &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
     out_learnt[0] = !p;
 }
 
 void sat_core::record(const std::vector<lit> &lits)
 {
     assert(value(lits.at(0)) == Undefined);
-    assert(std::count_if(lits.begin(), lits.end(), [&](const lit &p) { return value(p) == True; }) == 0);
-    assert(std::count_if(lits.begin(), lits.end(), [&](const lit &p) { return value(p) == Undefined; }) == 1);
-    assert(std::count_if(lits.begin(), lits.end(), [&](const lit &p) { return value(p) == False; }) == lits.size() - 1);
+    assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == True; }) == 0);
+    assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == Undefined; }) == 1);
+    assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == False; }) == lits.size() - 1);
     if (lits.size() == 1)
     {
         assert(root_level());
@@ -502,7 +502,7 @@ void sat_core::record(const std::vector<lit> &lits)
     {
         std::vector<lit> c_lits(lits.begin(), lits.end());
         // we sort literals according to descending order of variable assignment (except for the first literal which is now unassigned)..
-        std::sort(c_lits.begin() + 1, c_lits.end(), [&](lit &a, lit &b) { return level.at(a.get_var()) > level.at(b.get_var()); });
+        std::sort(c_lits.begin() + 1, c_lits.end(), [this](lit &a, lit &b) { return level.at(a.get_var()) > level.at(b.get_var()); });
         clause *c = new clause(*this, c_lits);
         bool e = enqueue(c_lits.at(0), c);
         assert(e);

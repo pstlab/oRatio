@@ -168,7 +168,7 @@ void graph::build()
     assert(slv.get_sat_core().root_level());
     LOG("building the causal graph..");
 
-    while (std::any_of(slv.flaws.begin(), slv.flaws.end(), [&](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
+    while (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
     {
         if (flaw_q.empty())
             throw std::runtime_error("the problem is inconsistent..");
@@ -195,7 +195,7 @@ void graph::add_layer()
     LOG("adding a layer to the causal graph..");
 
     std::deque<flaw *> f_q(flaw_q);
-    while (std::all_of(f_q.begin(), f_q.end(), [&](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
+    while (std::all_of(f_q.begin(), f_q.end(), [](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
     {
         if (flaw_q.empty())
             throw std::runtime_error("the problem is inconsistent..");
