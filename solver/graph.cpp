@@ -218,10 +218,8 @@ void graph::increase_accuracy()
         if (composite_flaw *sf = dynamic_cast<composite_flaw *>(*it))
             // we remove the composite flaw from the current flaws..
             slv.flaws.erase(it++);
-        else if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return slv.get_sat_core().value(r->rho) == True; }))
-        {
-            // we have either a trivial (i.e. has only one resolver) or an already solved flaw..
-            assert(slv.get_sat_core().value((*std::find_if((*it)->resolvers.begin(), (*it)->resolvers.end(), [&](resolver *r) { return slv.get_sat_core().value(r->rho) != False; }))->rho) == True);
+        else if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [this](resolver *r) { return slv.get_sat_core().value(r->rho) == True; }))
+        { // we have either a trivial (i.e. has only one resolver) or an already solved flaw..
             // we remove the flaw from the current flaws..
             slv.flaws.erase(it++);
         }

@@ -2,7 +2,7 @@
 #ifdef BUILD_GUI
 #include "socket_listener.h"
 
-#define HOST "127.0.0.1"
+#define HOST "150.146.65.22"
 #define PORT 1100
 #endif
 #include <iostream>
