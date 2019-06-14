@@ -362,7 +362,7 @@ void solver::solve_inconsistencies()
                         bst_commit = ch.second;
                 double c_k_inv = 0;
                 for (const auto &ch : inc)
-                    c_k_inv += 1l / (1l + ch.second - bst_commit);
+                    c_k_inv += 1l / (1l + (ch.second - bst_commit));
                 if (c_k_inv < k_inv)
                 {
                     k_inv = c_k_inv;
@@ -387,6 +387,7 @@ std::vector<std::vector<std::pair<lit, double>>> solver::get_incs()
         const auto c_incs = st->get_current_incs();
         incs.insert(incs.end(), c_incs.begin(), c_incs.end());
     }
+    assert(std::all_of(incs.begin(), incs.end(), [](std::vector<std::pair<lit, double>> inc) { return std::all_of(inc.begin(), inc.end(), [](std::pair<lit, double> ch) { return std::isfinite(ch.second); }); }));
 
     if (root_level()) // since we are at root-level, we can reason about flaws..
     {

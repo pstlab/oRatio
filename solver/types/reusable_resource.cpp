@@ -102,7 +102,7 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
                             if (get_solver().get_sat_core().value(a0_a1_it->second) != False)
                             {
                                 rational work = (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a1_start).get_rational()) * (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a1_start).get_rational());
-                                choices.push_back({a0_a1_it->second, 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
+                                choices.push_back({a0_a1_it->second, work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
                             }
 
                     if (auto a1_it = leqs.find(as[1]); a1_it != leqs.end())
@@ -110,7 +110,7 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
                             if (get_solver().get_sat_core().value(a1_a0_it->second) != False)
                             {
                                 rational work = (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a0_start).get_rational()) * (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a0_start).get_rational());
-                                choices.push_back({a1_a0_it->second, 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
+                                choices.push_back({a1_a0_it->second, work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
                             }
 
                     expr a0_tau = as[0]->get(TAU);
