@@ -9,8 +9,9 @@ class Navigator : StateVariable {
 Navigator nav = new Navigator();
 
 fact at_0 = new nav.At(start:origin, l:0.0);
+at_0.duration >= 1;
 goal at_1 = new nav.At(l:1.0);
 goal at_2 = new nav.At(l:2.0);
 goal at_3 = new nav.At(l:3.0);
 goal at_4 = new nav.At(l:4.0);
-//goal at_5 = new nav.At(l:5.0);
+goal at_5 = new nav.At(l:5.0);
