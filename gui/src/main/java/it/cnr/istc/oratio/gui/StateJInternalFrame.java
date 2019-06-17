@@ -2,6 +2,7 @@ package it.cnr.istc.oratio.gui;
 
 import java.awt.Component;
 import java.awt.event.MouseEvent;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import javax.swing.ImageIcon;
@@ -163,12 +164,16 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
 
     @Override
     public void stateChanged(Core core) {
-        SwingUtilities.invokeLater(() -> {
-            root.removeAllChildren();
-            root.hasLoadedChildren = false;
-            root.loadChildren();
-            tree_model.setRoot(root);
-        });
+        try {
+            SwingUtilities.invokeAndWait(() -> {
+                root.removeAllChildren();
+                root.hasLoadedChildren = false;
+                root.loadChildren();
+                tree_model.setRoot(root);
+            });
+        } catch (InvocationTargetException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private static class StateNode extends DefaultMutableTreeNode {

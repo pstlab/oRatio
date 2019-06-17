@@ -40,6 +40,10 @@ import prefuse.util.ColorLib;
 import prefuse.util.FontLib;
 import prefuse.util.PrefuseLib;
 import prefuse.util.StrokeLib;
+import prefuse.util.force.DragForce;
+import prefuse.util.force.ForceSimulator;
+import prefuse.util.force.NBodyForce;
+import prefuse.util.force.SpringForce;
 import prefuse.visual.DecoratorItem;
 import prefuse.visual.VisualGraph;
 import prefuse.visual.VisualItem;
@@ -154,7 +158,11 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
         layout.add(colors);
         layout.add(new LabelLayout2(EDGE_DECORATORS));
         layout.add(new LabelLayout2(NODE_DECORATORS));
-        layout.add(new ForceDirectedLayout(GRAPH, false));
+        ForceSimulator f_sim = new ForceSimulator();
+        f_sim.addForce(new NBodyForce(-5, NBodyForce.DEFAULT_DISTANCE, NBodyForce.DEFAULT_THETA));
+        f_sim.addForce(new SpringForce(SpringForce.DEFAULT_SPRING_COEFF, 150));
+        f_sim.addForce(new DragForce());
+        layout.add(new ForceDirectedLayout(GRAPH, f_sim, false));
         layout.add(new RepaintAction());
         vis.putAction("layout", layout);
 
