@@ -74,7 +74,7 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
                 {
                     std::set<atom *> mcs(as.begin(), as.end()); // state-variable MCSs are made of two atoms..
                     if (!sv_flaws.count(mcs))
-                    {
+                    { // we create a new state-variable flaw..
                         sv_flaw *flw = new sv_flaw(*this, mcs);
                         sv_flaws.insert({mcs, flw});
                         store_flaw(*flw); // we store the flaw for retrieval when at root-level..
