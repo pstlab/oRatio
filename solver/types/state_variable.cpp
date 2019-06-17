@@ -70,21 +70,17 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
                     overlapping_atoms.erase(a);
 
             if (overlapping_atoms.size() > 1) // we have a 'peak'..
-            {
                 for (const auto &as : combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2))
                 {
-                    std::set<atom *> mcs(as.begin(), as.end());
+                    std::set<atom *> mcs(as.begin(), as.end()); // state-variable MCSs are made of two atoms..
                     if (!sv_flaws.count(mcs))
                     {
                         sv_flaw *flw = new sv_flaw(*this, mcs);
                         sv_flaws.insert({mcs, flw});
                         store_flaw(*flw); // we store the flaw for retrieval when at root-level..
                     }
-                }
 
-                std::vector<std::pair<lit, double>> choices;
-                for (const auto &as : combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2))
-                {
+                    std::vector<std::pair<lit, double>> choices;
                     arith_expr a0_start = as[0]->get(START);
                     arith_expr a0_end = as[0]->get(END);
                     arith_expr a1_start = as[1]->get(START);
@@ -127,9 +123,8 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
                         if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau))
                             choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau), false), 1l - 1l / static_cast<double>(a1_vals.size())});
                     }
+                    incs.push_back(choices);
                 }
-                incs.push_back(choices);
-            }
         }
     }
     return incs;
