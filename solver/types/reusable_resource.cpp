@@ -82,60 +82,91 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
 
             if (c_usage > c_capacity) // we have a 'peak'..
             {
-                if (!rr_flaws.count(overlapping_atoms))
-                {
-                    rr_flaw *flw = new rr_flaw(*this, overlapping_atoms);
-                    rr_flaws.insert({overlapping_atoms, flw});
-                    store_flaw(*flw); // we store the flaw for retrieval when at root-level..
-                }
+                // we extract minimal conflict sets (MCSs)..
+                // we sort the overlapping atoms, according to their resource usage, in descending order..
+                std::vector<atom *> inc_atoms(overlapping_atoms.begin(), overlapping_atoms.end());
+                std::sort(inc_atoms.begin(), inc_atoms.end(), [this](atom *atm0, atom *atm1) {
+                    arith_expr amnt0 = atm0->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
+                    arith_expr amnt1 = atm1->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
+                    return get_core().arith_value(amnt0) > get_core().arith_value(amnt1);
+                });
 
-                std::vector<std::pair<lit, double>> choices;
-                for (const auto &as : combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2))
-                {
-                    arith_expr a0_start = as[0]->get(START);
-                    arith_expr a0_end = as[0]->get(END);
-                    arith_expr a1_start = as[1]->get(START);
-                    arith_expr a1_end = as[1]->get(END);
+                inf_rational mcs_usage;  // the concurrent resource usage of the mcs..
+                std::list<atom *> c_mcs; // the current mcs..
+                std::vector<atom *>::iterator mcs_begin = inc_atoms.begin();
+                std::vector<atom *>::iterator mcs_end = inc_atoms.begin();
+                while (mcs_end != inc_atoms.end())
+                    if (mcs_usage < c_capacity)
+                    { // we increase the size of the current mcs..
+                        c_mcs.push_back(*mcs_end);
+                        arith_expr amount = (*mcs_end)->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
+                        c_usage += get_core().arith_value(amount);
+                        ++mcs_end;
+                    }
+                    else
+                    { // we have a new mcs..
+                        std::set<atom *> mcs(c_mcs.begin(), c_mcs.end());
+                        if (!rr_flaws.count(mcs))
+                        { // we create a new reusable-resource flaw..
+                            rr_flaw *flw = new rr_flaw(*this, mcs);
+                            rr_flaws.insert({mcs, flw});
+                            store_flaw(*flw); // we store the flaw for retrieval when at root-level..
+                        }
 
-                    if (auto a0_it = leqs.find(as[0]); a0_it != leqs.end())
-                        if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.end())
-                            if (get_solver().get_sat_core().value(a0_a1_it->second) != False)
+                        std::vector<std::pair<lit, double>> choices;
+                        for (const auto &as : combinations(std::vector<atom *>(c_mcs.begin(), c_mcs.end()), 2))
+                        {
+                            arith_expr a0_start = as[0]->get(START);
+                            arith_expr a0_end = as[0]->get(END);
+                            arith_expr a1_start = as[1]->get(START);
+                            arith_expr a1_end = as[1]->get(END);
+
+                            if (auto a0_it = leqs.find(as[0]); a0_it != leqs.end())
+                                if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.end())
+                                    if (get_solver().get_sat_core().value(a0_a1_it->second) != False)
+                                    {
+                                        rational work = (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a1_start).get_rational()) * (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a1_start).get_rational());
+                                        choices.push_back({a0_a1_it->second, work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
+                                    }
+
+                            if (auto a1_it = leqs.find(as[1]); a1_it != leqs.end())
+                                if (auto a1_a0_it = a1_it->second.find(as[0]); a1_a0_it != a1_it->second.end())
+                                    if (get_solver().get_sat_core().value(a1_a0_it->second) != False)
+                                    {
+                                        rational work = (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a0_start).get_rational()) * (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a0_start).get_rational());
+                                        choices.push_back({a1_a0_it->second, work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
+                                    }
+
+                            expr a0_tau = as[0]->get(TAU);
+                            expr a1_tau = as[1]->get(TAU);
+                            var_item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
+                            var_item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
+                            if (a0_tau_itm && a1_tau_itm) // we have two non-singleton variables..
                             {
-                                rational work = (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a1_start).get_rational()) * (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a1_start).get_rational());
-                                choices.push_back({a0_a1_it->second, work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
+                                auto a0_vals = get_solver().enum_value(a0_tau_itm);
+                                auto a1_vals = get_solver().enum_value(a1_tau_itm);
+                                for (const auto &plc : plcs.at({&as[0], &as[1]}))
+                                    choices.push_back({plc.first, 1l - 2l / static_cast<double>(a0_vals.size() + a1_vals.size())});
                             }
-
-                    if (auto a1_it = leqs.find(as[1]); a1_it != leqs.end())
-                        if (auto a1_a0_it = a1_it->second.find(as[0]); a1_a0_it != a1_it->second.end())
-                            if (get_solver().get_sat_core().value(a1_a0_it->second) != False)
+                            else if (a0_tau_itm) // only 'a1_tau' is a singleton variable..
                             {
-                                rational work = (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a0_start).get_rational()) * (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a0_start).get_rational());
-                                choices.push_back({a1_a0_it->second, work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator())});
+                                if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau))
+                                    choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau), false), 1l - 1l / static_cast<double>(a0_vals.size())});
                             }
+                            else if (a1_tau_itm) // only 'a0_tau' is a singleton variable..
+                            {
+                                if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau))
+                                    choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau), false), 1l - 1l / static_cast<double>(a1_vals.size())});
+                            }
+                        }
+                        incs.push_back(choices);
 
-                    expr a0_tau = as[0]->get(TAU);
-                    expr a1_tau = as[1]->get(TAU);
-                    var_item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
-                    var_item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
-                    if (a0_tau_itm && a1_tau_itm) // we have two non-singleton variables..
-                    {
-                        auto a0_vals = get_solver().enum_value(a0_tau_itm);
-                        auto a1_vals = get_solver().enum_value(a1_tau_itm);
-                        for (const auto &plc : plcs.at({&as[0], &as[1]}))
-                            choices.push_back({plc.first, 1l - 2l / static_cast<double>(a0_vals.size() + a1_vals.size())});
+                        // we decrease the size of the mcs..
+                        arith_expr amount = c_mcs.front()->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
+                        c_usage -= get_core().arith_value(amount);
+                        c_mcs.pop_front();
+                        ++mcs_begin;
                     }
-                    else if (a0_tau_itm) // only 'a1_tau' is a singleton variable..
-                    {
-                        if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau))
-                            choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau), false), 1l - 1l / static_cast<double>(a0_vals.size())});
-                    }
-                    else if (a1_tau_itm) // only 'a0_tau' is a singleton variable..
-                    {
-                        if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau))
-                            choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau), false), 1l - 1l / static_cast<double>(a1_vals.size())});
-                    }
-                }
-                incs.push_back(choices);
             }
         }
     }
