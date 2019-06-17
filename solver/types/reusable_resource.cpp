@@ -6,6 +6,7 @@
 #include "combinations.h"
 #include "riddle_parser.h"
 #include <stdexcept>
+#include <list>
 
 using namespace smt;
 
