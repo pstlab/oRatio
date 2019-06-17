@@ -220,6 +220,17 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
     assert(cnfl.empty());
     assert(gr.phis.count(p.get_var()) || gr.rhos.count(p.get_var()));
 
+    if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..
+        for (const auto &r : at_rhos_p->second)
+            if (p.get_sign()) // this resolver has been applied hence its effect has been resolved..
+            {
+                if (flaws.erase(&r->effect))
+                    if (!root_level())
+                        trail.back().solved_flaws.insert(&r->effect);
+            }
+            else // since this resolver cannot be applied its cost is set to +inf..
+                gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY);
+
     if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end()) // a decision has been taken about the presence of some flaws within the current partial solution..
         for (const auto &f : at_phis_p->second)
             if (p.get_sign()) // this flaw has been added to the current partial solution..
@@ -231,20 +242,16 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
             else // this flaw has been removed from the current partial solution..
             {
                 assert(!flaws.count(f));
-                if (!root_level()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking (just for having consistency with resolvers)..
-                    trail.back().old_f_costs.try_emplace(f, f->est_cost);
+                if (f->est_cost != rational::POSITIVE_INFINITY)
+                {
+                    if (!root_level()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking (just for having consistency with resolvers)..
+                        trail.back().old_f_costs.try_emplace(f, f->est_cost);
+                    f->est_cost = rational::POSITIVE_INFINITY;
+#ifdef BUILD_GUI
+                    fire_flaw_cost_changed(*f);
+#endif
+                }
             }
-
-    if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..
-        for (const auto &r : at_rhos_p->second)
-            if (p.get_sign()) // this resolver has been applied hence its effect has been resolved..
-            {
-                if (flaws.erase(&r->effect))
-                    if (!root_level())
-                        trail.back().solved_flaws.insert(&r->effect);
-            }
-            else // since this resolver cannot be applied its cost is set to +inf..
-                gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY);
 
     return true;
 }
@@ -272,6 +279,7 @@ void solver::pop()
     // we restore the resolvers' estimated costs..
     for (const auto &r : trail.back().old_r_costs)
     {
+        assert(r.first->est_cost != r.second);
         r.first->est_cost = r.second;
 #ifdef BUILD_GUI
         fire_resolver_cost_changed(*r.first);
@@ -281,6 +289,7 @@ void solver::pop()
     // we restore the flaws' estimated costs..
     for (const auto &f : trail.back().old_f_costs)
     {
+        assert(f.first->est_cost != f.second);
         f.first->est_cost = f.second;
 #ifdef BUILD_GUI
         fire_flaw_cost_changed(*f.first);
