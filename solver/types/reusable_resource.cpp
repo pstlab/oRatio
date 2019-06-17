@@ -96,14 +96,17 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
                 std::vector<atom *>::iterator mcs_begin = inc_atoms.begin();
                 std::vector<atom *>::iterator mcs_end = inc_atoms.begin();
                 while (mcs_end != inc_atoms.end())
-                    if (mcs_usage < c_capacity)
-                    { // we increase the size of the current mcs..
+                {
+                    // we increase the size of the current mcs..
+                    while (mcs_usage <= c_capacity && mcs_end != inc_atoms.end())
+                    {
                         c_mcs.push_back(*mcs_end);
                         arith_expr amount = (*mcs_end)->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
-                        c_usage += get_core().arith_value(amount);
+                        mcs_usage += get_core().arith_value(amount);
                         ++mcs_end;
                     }
-                    else
+
+                    if (mcs_usage > c_capacity)
                     { // we have a new mcs..
                         std::set<atom *> mcs(c_mcs.begin(), c_mcs.end());
                         if (!rr_flaws.count(mcs))
@@ -163,10 +166,12 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
 
                         // we decrease the size of the mcs..
                         arith_expr amount = c_mcs.front()->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
-                        c_usage -= get_core().arith_value(amount);
+                        mcs_usage -= get_core().arith_value(amount);
+                        assert(mcs_usage <= c_capacity);
                         c_mcs.pop_front();
                         ++mcs_begin;
                     }
+                }
             }
         }
     }
