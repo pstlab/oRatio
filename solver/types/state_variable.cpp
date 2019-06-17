@@ -71,11 +71,15 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
 
             if (overlapping_atoms.size() > 1) // we have a 'peak'..
             {
-                if (!sv_flaws.count(overlapping_atoms))
+                for (const auto &as : combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2))
                 {
-                    sv_flaw *flw = new sv_flaw(*this, overlapping_atoms);
-                    sv_flaws.insert({overlapping_atoms, flw});
-                    store_flaw(*flw); // we store the flaw for retrieval when at root-level..
+                    std::set<atom *> mcs(as.begin(), as.end());
+                    if (!sv_flaws.count(mcs))
+                    {
+                        sv_flaw *flw = new sv_flaw(*this, mcs);
+                        sv_flaws.insert({mcs, flw});
+                        store_flaw(*flw); // we store the flaw for retrieval when at root-level..
+                    }
                 }
 
                 std::vector<std::pair<lit, double>> choices;
