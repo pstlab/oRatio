@@ -13,8 +13,10 @@ install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90
 
 env:
-  - BUILD_TYPE=Debug
-  - BUILD_TYPE=Release
+  - BUILD_TYPE=Debug GRAPH_PRUNING=ON
+  - BUILD_TYPE=Debug GRAPH_PRUNING=OFF
+  - BUILD_TYPE=Release GRAPH_PRUNING=ON
+  - BUILD_TYPE=Release GRAPH_PRUNING=OFF
 
 script:
-  - mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE .. && make && ctest
+  - mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DGRAPH_PRUNING=$GRAPH_PRUNING .. && make && ctest
