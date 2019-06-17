@@ -233,6 +233,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                 assert(!flaws.count(f));
                 if (!root_level()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking (just for having consistency with resolvers)..
                     trail.back().old_f_costs.try_emplace(f, f->est_cost);
+                f->est_cost = rational::POSITIVE_INFINITY;
             }
 
     if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..
