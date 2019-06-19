@@ -225,41 +225,42 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
     assert(cnfl.empty());
     assert(gr.phis.count(p.get_var()) || gr.rhos.count(p.get_var()));
 
-    if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end()) // a decision has been taken about the removal of some resolvers within the current partial solution..
-        for (const auto &r : at_rhos_p->second)
-            if (p.get_sign()) // this resolver has been applied hence its effect has been resolved..
-            {
-                if (flaws.erase(&r->effect))
+    if (p.get_sign())
+    { // some flaws and/or some resolvers have been activated..
+        if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
+            for (const auto &r : at_rhos_p->second) // these are the activated resolvers..
+                if (flaws.erase(&r->effect))        // this resolver has been activated, hence its effect flaw has been resolved..
                     if (!root_level())
                         trail.back().solved_flaws.insert(&r->effect);
-            }
-            else // since this resolver cannot be applied its cost is set to +inf..
-                gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY);
-
-    if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end()) // a decision has been taken about the presence of some flaws within the current partial solution..
-        for (const auto &f : at_phis_p->second)
-            if (p.get_sign()) // this flaw has been added to the current partial solution..
-            {
+        if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
+            for (const auto &f : at_phis_p->second) // these are the activated flaws..
                 if (std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
-                { // it has not yet already have been accidentally solved..
+                { // this flaw has been activated and not yet accidentally solved..
                     flaws.insert(f);
                     if (!root_level())
                         trail.back().new_flaws.insert(f);
                 }
-            }
-            else // this flaw has been removed from the current partial solution..
-            {
+    }
+    else
+    { // some flaws and/or some resolvers have been forbidden..
+        if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
+            for (const auto &r : at_rhos_p->second)                     // these are the forbidden resolvers..
+                gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY); // since this resolver has been forbidden, its cost is set to +inf..
+        if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
+            for (const auto &f : at_phis_p->second) // these are the forbidden flaws..
+            {                                       // this flaw will never appear in any incoming partial solutions..
                 assert(!flaws.count(f));
                 if (f->est_cost != rational::POSITIVE_INFINITY)
                 {
                     if (!root_level()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking (just for having consistency with resolvers)..
                         trail.back().old_f_costs.try_emplace(f, f->est_cost);
-                    f->est_cost = rational::POSITIVE_INFINITY;
+                    f->est_cost = rational::POSITIVE_INFINITY; // notice that supports' costs will be set to +inf by causal propagation..
 #ifdef BUILD_GUI
                     fire_flaw_cost_changed(*f);
 #endif
                 }
             }
+    }
 
     return true;
 }
