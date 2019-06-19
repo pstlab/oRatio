@@ -267,6 +267,8 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 bool solver::check(std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
+    assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *f) { return sat.value(f->phi) == True; }));
+    assert(std::none_of(flaws.begin(), flaws.end(), [this](flaw *f) { return std::any_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }); }));
     assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return sat.value(f->phi) != False || f->get_estimated_cost().is_positive_infinite(); }); }));
     assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return sat.value(r->rho) != False || r->get_estimated_cost().is_positive_infinite(); }); }));
     return true;
