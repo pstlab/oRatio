@@ -19,21 +19,23 @@ void graph::new_flaw(flaw &f, const bool &enqueue)
 #ifdef BUILD_GUI
     slv.fire_new_flaw(f);
 #endif
+
+    if (enqueue) // we enqueue the flaw..
+        flaw_q.push_back(&f);
+    else // we directly expand the flaw..
+        expand_flaw(f);
+
     switch (slv.sat.value(f.phi))
     {
     case True: // we have a top-level (a landmark) flaw..
-        slv.flaws.insert(&f);
+        if (enqueue || std::none_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
+            slv.flaws.insert(&f); // the flaw has not yet already been solved (e.g. it has a single resolver)..
         break;
     case Undefined: // we listen for the flaw to become active..
         phis[f.phi].push_back(&f);
         slv.bind(f.phi);
         break;
     }
-
-    if (enqueue) // we enqueue the flaw..
-        flaw_q.push_back(&f);
-    else // we directly expand the flaw..
-        expand_flaw(f);
 }
 
 void graph::new_resolver(resolver &r)
@@ -41,7 +43,7 @@ void graph::new_resolver(resolver &r)
 #ifdef BUILD_GUI
     slv.fire_new_resolver(r);
 #endif
-    if (slv.sat.value(r.rho) == Undefined) // we do not have a top-level (a landmark) resolver..
+    if (slv.sat.value(r.rho) == Undefined) // we do not have a top-level (a landmark) resolver, nor an infeasible one..
     {
         // we listen for the resolver to become inactive..
         rhos[r.rho].push_back(&r);
@@ -244,7 +246,6 @@ void graph::expand_flaw(flaw &f)
 {
     assert(!f.expanded);
 
-    // we expand the flaw..
     if (composite_flaw *sf = dynamic_cast<composite_flaw *>(&f))
         // we expand the unexpanded enclosing flaws..
         for (const auto &c_f : sf->flaws)
@@ -264,13 +265,26 @@ void graph::expand_flaw(flaw &f)
                 for (const auto &r : c_f->resolvers)
                     apply_resolver(*r);
             }
+
+    // we expand the flaw..
     f.expand();
 
+    // we apply the flaw's resolvers..
     for (const auto &r : f.resolvers)
         apply_resolver(*r);
 
     if (!slv.get_sat_core().check())
         throw std::runtime_error("the problem is inconsistent..");
+
+    // we clean up already solved flaws..
+    if (composite_flaw *sf = dynamic_cast<composite_flaw *>(&f))
+    {
+        for (const auto &c_f : sf->flaws)
+            if (slv.sat.value(c_f->phi) == True && std::any_of(c_f->resolvers.begin(), c_f->resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
+                slv.flaws.erase(c_f); // this flaw has already been solved..
+    }
+    else if (slv.sat.value(f.phi) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
+        slv.flaws.erase(&f); // this flaw has already been solved..
 }
 
 void graph::apply_resolver(resolver &r)

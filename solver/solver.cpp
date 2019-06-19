@@ -63,21 +63,26 @@ void solver::solve()
     solve_inconsistencies();
 
     // we enter into the main solving loop..
-    flaw *f_next = nullptr; // this is the next flaw to be solved..
-    while (f_next = select_flaw())
+    while (!flaws.empty())
     {
+        assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return sat.value(f->phi) == True; }));                                                                                         // all the current flaws must be active..
+        assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
+
+        // this is the next flaw (i.e. the most expensive one) to be solved..
+        auto f_next = std::min_element(flaws.begin(), flaws.end(), [](flaw *const f0, flaw *const f1) { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+        assert(f_next != flaws.end());
+
 #ifdef BUILD_GUI
-        if (f_next)
-            fire_current_flaw(*f_next);
+        fire_current_flaw(**f_next);
 #endif
-        if (f_next->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw: we search..
+        if ((*f_next)->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw: we search..
         {
             next();
             continue;
         }
 
-        // this is the next resolver to be applied..
-        resolver *res = f_next->get_best_resolver();
+        // this is the next resolver (i.e. the cheapest one) to be applied..
+        auto *res = (*f_next)->get_best_resolver();
 #ifdef BUILD_GUI
         fire_current_resolver(*res);
 #endif
@@ -235,9 +240,12 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
         for (const auto &f : at_phis_p->second)
             if (p.get_sign()) // this flaw has been added to the current partial solution..
             {
-                flaws.insert(f);
-                if (!root_level())
-                    trail.back().new_flaws.insert(f);
+                if (std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
+                { // it has not yet already have been accidentally solved..
+                    flaws.insert(f);
+                    if (!root_level())
+                        trail.back().new_flaws.insert(f);
+                }
             }
             else // this flaw has been removed from the current partial solution..
             {
@@ -299,33 +307,6 @@ void solver::pop()
     trail.pop_back();
 
     LOG("level " << std::to_string(trail.size()));
-}
-
-flaw *solver::select_flaw()
-{
-    assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return sat.value(f->phi) == True; }));
-    // this is the next flaw to be solved (i.e. the most expensive one)..
-    flaw *f_next = nullptr;
-    for (auto it = flaws.begin(); it != flaws.end();)
-        if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
-        {
-            // this flaw has an active resolver, hence it is already solved!
-            // we remove the flaw from the current set of flaws..
-            if (!root_level())
-                trail.back().solved_flaws.insert((*it));
-            flaws.erase(it++);
-        }
-        else
-        {
-            // the current flaw is not trivial nor already solved: let's see if it's better than the previous one..
-            if (!f_next) // this is the first flaw we see..
-                f_next = *it;
-            else if (f_next->get_estimated_cost() < (*it)->get_estimated_cost()) // this flaw is actually better than the previous one..
-                f_next = *it;
-            ++it;
-        }
-
-    return f_next;
 }
 
 void solver::solve_inconsistencies()
