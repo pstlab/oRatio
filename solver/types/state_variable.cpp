@@ -260,7 +260,7 @@ void state_variable::sv_atom_listener::something_changed()
     }
 }
 
-state_variable::sv_flaw::sv_flaw(state_variable &sv, const std::set<atom *> &atms) : flaw(sv.get_solver().get_graph(), smart_type::get_resolvers(sv.get_solver(), atms)), sv(sv), overlapping_atoms(atms) {}
+state_variable::sv_flaw::sv_flaw(state_variable &sv, const std::set<atom *> &atms) : flaw(sv.get_solver().get_graph(), smart_type::get_resolvers(sv.get_solver(), atms), {}), sv(sv), overlapping_atoms(atms) {}
 state_variable::sv_flaw::~sv_flaw() {}
 
 #ifdef BUILD_GUI

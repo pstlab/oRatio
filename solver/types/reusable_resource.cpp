@@ -289,7 +289,7 @@ void reusable_resource::rr_atom_listener::something_changed()
     }
 }
 
-reusable_resource::rr_flaw::rr_flaw(reusable_resource &rr, const std::set<atom *> &atms) : flaw(rr.get_solver().get_graph(), smart_type::get_resolvers(rr.get_solver(), atms)), rr(rr), overlapping_atoms(atms) {}
+reusable_resource::rr_flaw::rr_flaw(reusable_resource &rr, const std::set<atom *> &atms) : flaw(rr.get_solver().get_graph(), smart_type::get_resolvers(rr.get_solver(), atms), {}), rr(rr), overlapping_atoms(atms) {}
 reusable_resource::rr_flaw::~rr_flaw() {}
 
 #ifdef BUILD_GUI

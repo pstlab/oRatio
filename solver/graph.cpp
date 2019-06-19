@@ -363,9 +363,7 @@ void graph::set_new_gamma()
     slv.take_decision(gamma);
 }
 
-flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), causes(causes), supports(causes), exclusive(exclusive)
-{
-}
+flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const std::vector<resolver *> &supports, const bool &exclusive) : gr(gr), causes(causes), supports(supports), exclusive(exclusive) {}
 flaw::~flaw() {}
 
 resolver *flaw::get_best_resolver() const
