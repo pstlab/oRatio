@@ -82,9 +82,9 @@ public:
 
   graph &get_graph() const { return gr; }
   smt::var get_phi() const { return phi; }
-  std::vector<resolver *> get_resolvers() const { return resolvers; }
-  std::vector<resolver *> get_causes() const { return causes; }
-  std::vector<resolver *> get_supports() const { return supports; }
+  const std::vector<resolver *> &get_resolvers() const { return resolvers; }
+  const std::vector<resolver *> &get_causes() const { return causes; }
+  const std::vector<resolver *> &get_supports() const { return supports; }
   bool is_expanded() const { return expanded; }
 
   smt::rational get_estimated_cost() const { return est_cost; }
@@ -117,7 +117,7 @@ private:
   smt::var phi;                                              // the propositional variable indicating whether the flaw is active or not..
   smt::rational est_cost = smt::rational::POSITIVE_INFINITY; // the estimated cost of the flaw..
   std::vector<resolver *> resolvers;                         // the resolvers for this flaw..
-  std::vector<resolver *> causes;                            // the causes for having this flaw..
+  const std::vector<resolver *> causes;                      // the causes for having this flaw..
   std::vector<resolver *> supports;                          // the resolvers supported by this flaw..
   const bool exclusive;                                      // a boolean indicating whether the flaw is exclusive (i.e. exactly one of its resolver can be applied)..
   bool expanded = false;                                     // a boolean indicating whether the flaw has been expanded..
@@ -140,7 +140,7 @@ public:
   smt::rational get_intrinsic_cost() const { return intrinsic_cost; }
   smt::rational get_estimated_cost() const { return est_cost + intrinsic_cost; }
   flaw &get_effect() const { return effect; }
-  std::vector<flaw *> get_preconditions() const { return preconditions; }
+  const std::vector<flaw *> &get_preconditions() const { return preconditions; }
 
 #ifdef BUILD_GUI
   virtual std::string get_label() const = 0;

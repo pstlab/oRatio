@@ -68,7 +68,7 @@ void socket_listener::read(const std::vector<std::string> &files)
 {
     std::stringstream ss;
     ss << "read1" << '\n';
-    for (std::vector<std::string>::const_iterator f_it = files.cbegin(); f_it != files.cend(); ++f_it)
+    for (auto f_it = files.cbegin(); f_it != files.cend(); ++f_it)
     {
         if (f_it != files.begin())
             ss << '\n'
@@ -83,8 +83,8 @@ void socket_listener::flaw_created(const flaw &f)
 {
     std::stringstream ss;
     ss << "flaw_created {\"flaw\":\"" << static_cast<const void *>(&f) << "\", \"causes\":[";
-    std::vector<resolver *> causes = f.get_causes();
-    for (std::vector<resolver *>::iterator causes_it = causes.begin(); causes_it != causes.end(); ++causes_it)
+    const auto causes = f.get_causes();
+    for (auto causes_it = causes.begin(); causes_it != causes.end(); ++causes_it)
     {
         if (causes_it != causes.begin())
             ss << ", ";
