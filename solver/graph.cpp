@@ -95,7 +95,7 @@ void graph::set_estimated_cost(resolver &r, const rational &cst)
             continue; // nothing to propagate..
 
         // this is the best resolver for the resolver's effect (for computing the resolver's effect's estimated cost)..
-        bst_res = r.effect.get_best_resolver();
+        bst_res = c_res->effect.get_best_resolver();
         // this is the new estimated cost of the resolver's effect..
         c_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
         if (c_res->effect.est_cost == c_cost)
