@@ -53,6 +53,45 @@ void solver::solve()
     }
 
     gr.check_gamma();
+
+#ifdef CHECK_INCONSISTENCIES
+    // we solve all the current inconsistencies..
+    solve_inconsistencies();
+
+    while (!flaws.empty())
+    {
+        assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return sat.value(f->phi) == True; }));                                                                                         // all the current flaws must be active..
+        assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
+
+        // this is the next flaw (i.e. the most expensive one) to be solved..
+        auto f_next = std::min_element(flaws.begin(), flaws.end(), [](flaw *const f0, flaw *const f1) { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+        assert(f_next != flaws.end());
+
+#ifdef BUILD_GUI
+        fire_current_flaw(**f_next);
+#endif
+        if ((*f_next)->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw: we search..
+        {
+            next();
+            // we solve all the current inconsistencies..
+            solve_inconsistencies();
+            continue;
+        }
+
+        // this is the next resolver (i.e. the cheapest one) to be applied..
+        auto *res = (*f_next)->get_best_resolver();
+#ifdef BUILD_GUI
+        fire_current_resolver(*res);
+#endif
+        assert(!res->get_estimated_cost().is_infinite());
+
+        // we apply the resolver..
+        take_decision(res->get_rho());
+
+        // we solve all the current inconsistencies..
+        solve_inconsistencies();
+    }
+#else
     do
     {
         while (!flaws.empty())
@@ -87,6 +126,7 @@ void solver::solve()
         // we solve all the current inconsistencies..
         solve_inconsistencies();
     } while (!flaws.empty());
+#endif
     // Hurray!! we have found a solution..
 #ifdef BUILD_GUI
     fire_state_changed();

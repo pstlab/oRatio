@@ -22,6 +22,7 @@ option(DEFERRABLE_FLAWS "Deferrable flaws" ON)
 option(CHECK_UNIFICATIONS "Check unifications when building the planning graph" OFF)
 option(CHECK_COMPOSITE_FLAWS "Check composite flaws when building the planning graph" OFF)
 option(GRAPH_PRUNING "Graph pruning" OFF)
+option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
 option(BUILD_GUI "Build GUI" OFF)
 
 message(STATUS "Heuristic type:         ${HEURISTIC_TYPE}")
@@ -31,6 +32,7 @@ message(STATUS "Deferrable flaws:       ${DEFERRABLE_FLAWS}")
 message(STATUS "Check unifications:     ${CHECK_UNIFICATIONS}" )
 message(STATUS "Check composite flaws:  ${CHECK_COMPOSITE_FLAWS}" )
 message(STATUS "Graph pruning:          ${GRAPH_PRUNING}")
+message(STATUS "Check inconsistencies:  ${CHECK_INCONSISTENCIES}")
 message(STATUS "Build GUI:              ${BUILD_GUI}")
 
 if(HEURISTIC_TYPE MATCHES "h_max")
@@ -53,6 +55,10 @@ endif()
 
 if(GRAPH_PRUNING)
     add_definitions(-DGRAPH_PRUNING)
+endif()
+
+if(CHECK_INCONSISTENCIES)
+    add_definitions(-DCHECK_INCONSISTENCIES)
 endif()
 
 if(BUILD_GUI)
