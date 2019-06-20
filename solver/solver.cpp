@@ -52,6 +52,14 @@ void solver::solve()
         q.pop();
     }
 
+    // we build the initial causal graph..
+    gr.build();
+    // we extract the initial inconsistencies (and translate them into flaws)..
+    std::vector<std::vector<std::pair<lit, double>>> incs = get_incs();
+    for (const auto &st : sts)
+        for (const auto &f : st->get_flaws())
+            gr.new_flaw(*f, false); // we add the flaws to the planning graph..
+    // we set the gamma variable..
     gr.check_gamma();
 
 #ifdef CHECK_INCONSISTENCIES
