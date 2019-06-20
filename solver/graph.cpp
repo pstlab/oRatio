@@ -65,77 +65,71 @@ void graph::new_causal_link(flaw &f, resolver &r)
 void graph::set_estimated_cost(resolver &r, const rational &cst)
 {
     assert(slv.get_sat_core().value(r.rho) != False || cst.is_positive_infinite());
-    if (r.est_cost != cst)
+    if (r.est_cost == cst)
+        return; // nothing to propagate..
+
+    // the resolver costs queue (for resolver cost propagation)..
+    std::queue<resolver *> resolver_q;
+    // the set of already seen resolvers (aimed at spotting cyclic causality)..
+    std::unordered_set<resolver *> seen;
+    if (!slv.trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
+        slv.trail.back().old_r_costs.try_emplace(&r, r.est_cost);
+
+    // we update the resolver's estimated cost..
+    r.est_cost = cst;
+    resolver_q.push(&r);
+    seen.insert(&r);
+#ifdef BUILD_GUI
+    slv.fire_resolver_cost_changed(r);
+#endif
+
+    // we propagate the cost..
+    resolver *c_res;
+    resolver *bst_res;
+    rational c_cost;
+    while (!resolver_q.empty())
     {
-        std::unordered_set<resolver *> seen;
-        if (!slv.trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
-            slv.trail.back().old_r_costs.try_emplace(&r, r.est_cost);
+        c_res = resolver_q.front();
+        resolver_q.pop();
+        if (slv.get_sat_core().value(c_res->effect.phi) == False)
+            continue; // nothing to propagate..
 
-        // we update the resolver's estimated cost..
-        r.est_cost = cst;
-        seen.insert(&r);
+        // this is the best resolver for the resolver's effect (for computing the resolver's effect's estimated cost)..
+        bst_res = r.effect.get_best_resolver();
+        // this is the new estimated cost of the resolver's effect..
+        c_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
+        if (c_res->effect.est_cost == c_cost)
+            continue; // nothing to propagate..
+
+        // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
+        if (!slv.trail.empty()) // we store the current resolver's effect's estimated cost, if not already stored, for allowing backtracking..
+            slv.trail.back().old_f_costs.try_emplace(&c_res->effect, c_res->effect.est_cost);
+
+        // we update the resolver's effect's estimated cost..
+        c_res->effect.est_cost = c_cost;
 #ifdef BUILD_GUI
-        slv.fire_resolver_cost_changed(r);
+        slv.fire_flaw_cost_changed(c_res->effect);
 #endif
 
-        resolver *bst_res = r.effect.get_best_resolver();
-        // this is the new cost of the resolver's effect..
-        rational efct_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
-        if (r.effect.est_cost != efct_cost) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
+        // we (try to) update the estimated costs of the supports and enqueue them for cost propagation..
+        for (const auto &supp : c_res->effect.supports)
         {
-            if (!slv.trail.empty()) // we store the current resolver's effect's estimated cost, if not already stored, for allowing backtracking..
-                slv.trail.back().old_f_costs.try_emplace(&r.effect, r.effect.est_cost);
+            if (slv.get_sat_core().value(supp->rho) == False)
+                continue; // nothing to propagate..
 
-            // we update the resolver's effect's estimated cost..
-            r.effect.est_cost = efct_cost;
+            c_cost = seen.insert(supp).second ? evaluate(supp->preconditions) : rational::POSITIVE_INFINITY;
+            if (supp->est_cost == c_cost)
+                continue; // nothing to propagate..
+
+            if (!slv.trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
+                slv.trail.back().old_r_costs.try_emplace(supp, supp->est_cost);
+
+            // we update the resolver's estimated cost..
+            supp->est_cost = c_cost;
 #ifdef BUILD_GUI
-            slv.fire_flaw_cost_changed(r.effect);
+            slv.fire_resolver_cost_changed(*supp);
 #endif
-
-            // the resolver costs queue (for resolver cost propagation)..
-            std::queue<resolver *> resolver_q;
-            for (const auto &c_r : r.effect.supports)
-                if (slv.get_sat_core().value(c_r->rho) != False)
-                    resolver_q.push(c_r);
-
-            while (!resolver_q.empty())
-            {
-                resolver &c_res = *resolver_q.front(); // the current resolver whose cost might require an update..
-                rational r_cost = seen.insert(&c_res).second ? evaluate(c_res.preconditions) : rational::POSITIVE_INFINITY;
-                assert(slv.get_sat_core().value(c_res.rho) != False || r_cost.is_positive_infinite());
-                if (c_res.est_cost != r_cost)
-                {
-                    if (!slv.trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
-                        slv.trail.back().old_r_costs.try_emplace(&c_res, c_res.est_cost);
-
-                    // we update the resolver's estimated cost..
-                    c_res.est_cost = r_cost;
-#ifdef BUILD_GUI
-                    slv.fire_resolver_cost_changed(c_res);
-#endif
-
-                    bst_res = c_res.effect.get_best_resolver();
-                    // this is the new cost of the resolver's effect..
-                    efct_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
-
-                    if (c_res.effect.est_cost != efct_cost) // the cost of the resolver's effect has changed as a consequence of the resolver's cost update..
-                    {
-                        if (!slv.trail.empty()) // we store the current resolver's effect's estimated cost, if not already stored, for allowing backtracking..
-                            slv.trail.back().old_f_costs.try_emplace(&c_res.effect, c_res.effect.est_cost);
-
-                        // we update the resolver's effect's estimated cost..
-                        c_res.effect.est_cost = efct_cost;
-#ifdef BUILD_GUI
-                        slv.fire_flaw_cost_changed(c_res.effect);
-#endif
-
-                        for (const auto &sup_r : c_res.effect.supports) // we propagate the update to all the supports of the resolver's effect..
-                            if (slv.get_sat_core().value(sup_r->rho) != False)
-                                resolver_q.push(sup_r);
-                    }
-                }
-                resolver_q.pop();
-            }
+            resolver_q.push(supp);
         }
     }
 }

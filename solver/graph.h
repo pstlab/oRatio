@@ -117,8 +117,8 @@ private:
   smt::var phi;                                              // the propositional variable indicating whether the flaw is active or not..
   smt::rational est_cost = smt::rational::POSITIVE_INFINITY; // the estimated cost of the flaw..
   std::vector<resolver *> resolvers;                         // the resolvers for this flaw..
-  const std::vector<resolver *> causes;                      // the causes for having this flaw..
-  std::vector<resolver *> supports;                          // the resolvers supported by this flaw..
+  const std::vector<resolver *> causes;                      // the causes for having this flaw (used for activating the flaw through causal propagation)..
+  std::vector<resolver *> supports;                          // the resolvers supported by this flaw (used for propagating cost estimates)..
   const bool exclusive;                                      // a boolean indicating whether the flaw is exclusive (i.e. exactly one of its resolver can be applied)..
   bool expanded = false;                                     // a boolean indicating whether the flaw has been expanded..
 };
