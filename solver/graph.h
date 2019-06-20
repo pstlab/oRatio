@@ -75,7 +75,7 @@ class flaw
   friend class solver;
 
 public:
-  flaw(graph &gr, const std::vector<resolver *> &causes, const std::vector<resolver *> &supports, const bool &exclusive = false);
+  flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive = false);
   flaw(const flaw &that) = delete;
   ~flaw();
 

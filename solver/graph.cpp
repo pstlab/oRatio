@@ -348,7 +348,7 @@ void graph::check_gamma()
     slv.take_decision(gamma);
 }
 
-flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const std::vector<resolver *> &supports, const bool &exclusive) : gr(gr), causes(causes), supports(supports), exclusive(exclusive) {}
+flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), causes(causes), exclusive(exclusive) {}
 flaw::~flaw() {}
 
 resolver *flaw::get_best_resolver() const
@@ -368,10 +368,6 @@ void flaw::init()
 {
     assert(!expanded);
     assert(gr.get_solver().get_sat_core().root_level());
-
-    // we add this flaw to the preconditions of its causes..
-    for (const auto &r : causes)
-        r->preconditions.push_back(this);
 
     if (causes.empty())
         // this flaw is necessarily active..
