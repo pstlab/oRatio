@@ -418,6 +418,12 @@ void flaw::add_resolver(resolver &r)
     gr.new_resolver(r);
 }
 
+void flaw::add_precondition(resolver &r)
+{
+    r.preconditions.push_back(this);
+    supports.push_back(&r);
+}
+
 resolver::resolver(graph &gr, const rational &cost, flaw &eff) : resolver(gr, gr.get_solver().get_sat_core().new_var(), cost, eff) {}
 resolver::resolver(graph &gr, const var &r, const rational &cost, flaw &eff) : gr(gr), rho(r), intrinsic_cost(cost), effect(eff) {}
 resolver::~resolver() {}
