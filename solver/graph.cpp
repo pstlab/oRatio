@@ -323,37 +323,28 @@ bool graph::is_deferrable(flaw &f)
 void graph::check_gamma()
 {
     assert(slv.root_level());
-    if (slv.get_sat_core().value(gamma) == Undefined) // a unit clause, not gamma, has been deduced or, simply, gamma has never been set..
-    {
-        build();                  // the search procedure may have excluded those parts of the graph that could lead to a solution..
-        slv.take_decision(gamma); // we set gamma again..
-    }
+    if (slv.get_sat_core().value(gamma) != False) // a unit clause, not gamma, has been deduced or, simply, gamma has never been set..
+        build();                                  // the search procedure may have excluded those parts of the graph that could lead to a solution..
     else
     { // the graph has been invalidated..
-        assert(slv.get_sat_core().value(gamma) == False);
         LOG("search has exhausted the graph..");
         // do we have room for increasing the heuristic accuracy?
         if (accuracy < max_accuracy)
             increase_accuracy(); // we increase the heuristic accuracy..
         else
             add_layer(); // we add a layer to the current graph..
-        set_new_gamma(); // we create and set a new graph var..
-    }
-}
-
-void graph::set_new_gamma()
-{
-    // we create a new graph var..
-    gamma = slv.get_sat_core().new_var();
-    LOG("graph var is: γ" << std::to_string(gamma));
+        // we create a new graph var..
+        gamma = slv.get_sat_core().new_var();
+        LOG("graph var is: γ" << std::to_string(gamma));
 #ifdef GRAPH_PRUNING
-    // these flaws have not been expanded, hence, cannot have a solution..
-    for (const auto &f : flaw_q)
-        if (!slv.get_sat_core().new_clause({lit(gamma, false), lit(f->phi, false)}))
+        // these flaws have not been expanded, hence, cannot have a solution..
+        for (const auto &f : flaw_q)
+            if (!slv.get_sat_core().new_clause({lit(gamma, false), lit(f->phi, false)}))
+                throw std::runtime_error("the problem is inconsistent..");
+        if (!slv.get_sat_core().assume(gamma) || !slv.get_sat_core().check())
             throw std::runtime_error("the problem is inconsistent..");
 #endif
-    // we use the new graph var to allow search within the new graph..
-    LOG("assuming γ" << std::to_string(gamma));
+    }
     slv.take_decision(gamma);
 }
 

@@ -52,48 +52,41 @@ void solver::solve()
         q.pop();
     }
 
-    // we build the causal graph..
-    gr.build();
-
-#ifdef BUILD_GUI
-    fire_state_changed();
-#endif
-
-    // we solve all the current inconsistencies..
-    solve_inconsistencies();
-
-    // we enter into the main solving loop..
-    while (!flaws.empty())
+    gr.check_gamma();
+    do
     {
-        assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return sat.value(f->phi) == True; }));                                                                                         // all the current flaws must be active..
-        assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
-
-        // this is the next flaw (i.e. the most expensive one) to be solved..
-        auto f_next = std::min_element(flaws.begin(), flaws.end(), [](flaw *const f0, flaw *const f1) { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
-        assert(f_next != flaws.end());
-
-#ifdef BUILD_GUI
-        fire_current_flaw(**f_next);
-#endif
-        if ((*f_next)->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw: we search..
+        while (!flaws.empty())
         {
-            next();
-            continue;
-        }
+            assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return sat.value(f->phi) == True; }));                                                                                         // all the current flaws must be active..
+            assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
 
-        // this is the next resolver (i.e. the cheapest one) to be applied..
-        auto *res = (*f_next)->get_best_resolver();
+            // this is the next flaw (i.e. the most expensive one) to be solved..
+            auto f_next = std::min_element(flaws.begin(), flaws.end(), [](flaw *const f0, flaw *const f1) { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+            assert(f_next != flaws.end());
+
 #ifdef BUILD_GUI
-        fire_current_resolver(*res);
+            fire_current_flaw(**f_next);
 #endif
-        assert(!res->get_estimated_cost().is_infinite());
+            if ((*f_next)->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw: we search..
+            {
+                next();
+                continue;
+            }
 
-        // we apply the resolver..
-        take_decision(res->get_rho());
+            // this is the next resolver (i.e. the cheapest one) to be applied..
+            auto *res = (*f_next)->get_best_resolver();
+#ifdef BUILD_GUI
+            fire_current_resolver(*res);
+#endif
+            assert(!res->get_estimated_cost().is_infinite());
+
+            // we apply the resolver..
+            take_decision(res->get_rho());
+        }
 
         // we solve all the current inconsistencies..
         solve_inconsistencies();
-    }
+    } while (!flaws.empty());
     // Hurray!! we have found a solution..
 #ifdef BUILD_GUI
     fire_state_changed();
@@ -186,6 +179,16 @@ void solver::take_decision(const lit &ch)
 #ifdef BUILD_GUI
     fire_state_changed();
 #endif
+
+    // we check if we need to expand the graph..
+    if (root_level()) // since we are at root-level, we can reason about flaws..
+    {
+        for (const auto &st : sts)
+            for (const auto &f : st->get_flaws())
+                gr.new_flaw(*f, false); // we add the flaws to the planning graph..
+
+        gr.check_gamma();
+    }
 }
 
 void solver::next()
@@ -216,8 +219,14 @@ void solver::next()
 #endif
 
     // we check if we need to expand the graph..
-    if (root_level())
+    if (root_level()) // since we are at root-level, we can reason about flaws..
+    {
+        for (const auto &st : sts)
+            for (const auto &f : st->get_flaws())
+                gr.new_flaw(*f, false); // we add the flaws to the planning graph..
+
         gr.check_gamma();
+    }
 }
 
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
@@ -381,15 +390,6 @@ std::vector<std::vector<std::pair<lit, double>>> solver::get_incs()
         incs.insert(incs.end(), c_incs.begin(), c_incs.end());
     }
     assert(std::all_of(incs.begin(), incs.end(), [](std::vector<std::pair<lit, double>> inc) { return std::all_of(inc.begin(), inc.end(), [](std::pair<lit, double> ch) { return std::isfinite(ch.second); }); }));
-
-    if (root_level()) // since we are at root-level, we can reason about flaws..
-    {
-        for (const auto &st : sts)
-            for (const auto &f : st->get_flaws())
-                gr.new_flaw(*f, false); // we add the flaws to the planning graph..
-
-        gr.check_gamma();
-    }
     return incs;
 }
 
