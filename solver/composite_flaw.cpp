@@ -78,15 +78,10 @@ void composite_flaw::compute_resolvers()
 
 #ifdef CHECK_COMPOSITE_FLAWS
         check_lits.push_back(cnj_var);
-        get_graph().checking = true;
         if (get_graph().get_solver().get_sat_core().check(check_lits))
-        {
-            get_graph().checking = false;
             add_resolver(*new composite_resolver(get_graph(), *this, cnj_var, cst, rp));
-        }
         else
         {
-            get_graph().checking = false;
             std::vector<smt::lit> no_good;
             no_good.reserve(check_lits.size());
             for (const auto &l : check_lits)
