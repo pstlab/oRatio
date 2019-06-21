@@ -3,6 +3,9 @@
 #include "rational.h"
 #include <deque>
 #include <unordered_map>
+#ifdef GRAPH_PRUNING
+#include <unordered_set>
+#endif
 #include <vector>
 
 namespace smt
@@ -64,8 +67,8 @@ private:
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
-#if defined CHECK_UNIFICATIONS || defined CHECK_COMPOSITE_FLAWS
-  bool checking = false;
+#ifdef GRAPH_PRUNING
+  std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
 };
 

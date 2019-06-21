@@ -335,16 +335,18 @@ void graph::check_gamma()
             add_layer(); // we add a layer to the current graph..
         // we create a new graph var..
         gamma = slv.get_sat_core().new_var();
-        LOG("graph var is: γ" << std::to_string(gamma));
 #ifdef GRAPH_PRUNING
-        // these flaws have not been expanded, hence, cannot have a solution..
-        for (const auto &f : flaw_q)
+        already_closed.clear();
+#endif
+        LOG("graph var is: γ" << std::to_string(gamma));
+    }
+#ifdef GRAPH_PRUNING
+    // these flaws have not been expanded, hence, cannot have a solution..
+    for (const auto &f : flaw_q)
+        if (already_closed.insert(f->phi).second)
             if (!slv.get_sat_core().new_clause({lit(gamma, false), lit(f->phi, false)}))
                 throw std::runtime_error("the problem is inconsistent..");
-        if (!slv.get_sat_core().assume(gamma) || !slv.get_sat_core().check())
-            throw std::runtime_error("the problem is inconsistent..");
 #endif
-    }
     slv.take_decision(gamma);
 }
 
