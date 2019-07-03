@@ -136,6 +136,9 @@ void graph::set_estimated_cost(resolver &r, const rational &cst)
 
 const rational graph::evaluate(const std::vector<flaw *> &fs)
 {
+    if (fs.empty())
+        return 0;
+
     rational c_cost;
 #ifdef H_MAX
     c_cost = rational::NEGATIVE_INFINITY;

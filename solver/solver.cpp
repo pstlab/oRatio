@@ -215,14 +215,13 @@ void solver::new_disjunction(context &d_ctx, const disjunction &disj)
 void solver::take_decision(const lit &ch)
 {
     LOG("taking decision " << (ch.get_sign() ? std::to_string(ch.get_var()) : "!" + std::to_string(ch.get_var())));
-
-    // we push the given resolver into the trail..
-    trail.push_back(layer(ch));
-    LOG("level " << std::to_string(trail.size()));
+    current_decision = ch;
 
     // we take the decision..
     if (!get_sat_core().assume(ch) || !get_sat_core().check())
         throw std::runtime_error("the problem is unsolvable");
+    assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || f->get_estimated_cost().is_positive_infinite(); }); }));
+    assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return (sat.value(r->rho) != False && r->get_estimated_cost() == gr.evaluate(r->get_preconditions()) + r->intrinsic_cost) || r->get_estimated_cost().is_positive_infinite(); }); }));
 
 #ifdef BUILD_GUI
     fire_state_changed();
@@ -261,6 +260,8 @@ void solver::next()
 
     if (!get_sat_core().check())
         throw std::runtime_error("the problem is unsolvable");
+    assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || f->get_estimated_cost().is_positive_infinite(); }); }));
+    assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return (sat.value(r->rho) != False && r->get_estimated_cost() == gr.evaluate(r->get_preconditions()) + r->intrinsic_cost) || r->get_estimated_cost().is_positive_infinite(); }); }));
 
 #ifdef BUILD_GUI
     fire_state_changed();
@@ -331,7 +332,12 @@ bool solver::check(std::vector<lit> &cnfl)
     return true;
 }
 
-void solver::push() {}
+void solver::push()
+{
+    // we push the given decision into the trail..
+    trail.push_back(layer(current_decision));
+    LOG("level " << std::to_string(trail.size()));
+}
 
 void solver::pop()
 {
