@@ -44,6 +44,7 @@ bool sat_core::new_clause(const std::vector<lit> &lits)
 
     // we filter out false literals..
     std::vector<lit> c_lits;
+    c_lits.reserve(lits.size());
     for (const auto &l : lits)
         switch (value(l))
         {
@@ -52,16 +53,9 @@ bool sat_core::new_clause(const std::vector<lit> &lits)
         case False:
             break; // we skip false literals..
         case Undefined:
-            bool found = false;
-            for (const auto &c_l : c_lits)
-                if (c_l == l)
-                {
-                    found = true;
-                    break;
-                }
-                else if (c_l == !l)
-                    return true; // the clause represents a tautology..
-            if (!found)
+            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
+                return true; // the clause represents a tautology..
+            else
                 c_lits.push_back(l);
         }
 
@@ -106,7 +100,25 @@ var sat_core::new_eq(const lit &left, const lit &right)
 var sat_core::new_conj(const std::vector<lit> &ls)
 {
     assert(root_level());
-    std::vector<lit> c_lits = ls;
+    std::vector<lit> c_lits;
+    c_lits.reserve(ls.size());
+    for (const auto &l : ls)
+        switch (value(l))
+        {
+        case True:
+            break; // we skip true literals..
+        case False:
+            return FALSE_var; // the conjunction cannot be satisfied..
+        case Undefined:
+            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
+                return FALSE_var; // the conjunction cannot be satisfied..
+            else
+                c_lits.push_back(l);
+        }
+
+    if (c_lits.empty()) // an empty conjunction is assumed to be satisfied..
+        return TRUE_var;
+
     std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
@@ -122,10 +134,10 @@ var sat_core::new_conj(const std::vector<lit> &ls)
         // we need to create a new variable..
         const var c = new_var();
         std::vector<lit> lits;
-        lits.reserve(ls.size() + 1);
+        lits.reserve(c_lits.size() + 1);
         lits.push_back(c);
         bool nc;
-        for (const auto &l : ls)
+        for (const auto &l : c_lits)
         {
             nc = new_clause({lit(c, false), l});
             assert(nc);
@@ -140,7 +152,26 @@ var sat_core::new_conj(const std::vector<lit> &ls)
 
 var sat_core::new_disj(const std::vector<lit> &ls)
 {
-    std::vector<lit> c_lits = ls;
+    assert(root_level());
+    std::vector<lit> c_lits;
+    c_lits.reserve(ls.size());
+    for (const auto &l : ls)
+        switch (value(l))
+        {
+        case True:
+            return TRUE_var; // the disjunction is already satisfied..
+        case False:
+            break; // we skip false literals..
+        case Undefined:
+            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
+                return TRUE_var; // the disjunction is already satisfied..
+            else
+                c_lits.push_back(l);
+        }
+
+    if (c_lits.empty()) // an empty disjunction is assumed to be unsatisfable..
+        return FALSE_var;
+
     std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
@@ -156,10 +187,10 @@ var sat_core::new_disj(const std::vector<lit> &ls)
         // we need to create a new variable..
         const var d = new_var();
         std::vector<lit> lits;
-        lits.reserve(ls.size() + 1);
+        lits.reserve(c_lits.size() + 1);
         lits.push_back(lit(d, false));
         bool nc;
-        for (const auto &l : ls)
+        for (const auto &l : c_lits)
         {
             nc = new_clause({!l, d});
             assert(nc);
@@ -235,7 +266,25 @@ bool sat_core::eq(const lit &left, const lit &right, const var &p)
 bool sat_core::conj(const std::vector<lit> &ls, const var &p)
 {
     assert(root_level());
-    std::vector<lit> c_lits = ls;
+    std::vector<lit> c_lits;
+    c_lits.reserve(ls.size());
+    for (const auto &l : ls)
+        switch (value(l))
+        {
+        case True:
+            break; // we skip true literals..
+        case False:
+            return FALSE_var; // the conjunction cannot be satisfied..
+        case Undefined:
+            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
+                return FALSE_var; // the conjunction cannot be satisfied..
+            else
+                c_lits.push_back(l);
+        }
+
+    if (c_lits.empty()) // an empty conjunction is assumed to be satisfied..
+        return value(p) == True;
+
     std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
@@ -249,9 +298,9 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
     else
     {
         std::vector<lit> lits;
-        lits.reserve(ls.size() + 1);
+        lits.reserve(c_lits.size() + 1);
         lits.push_back(p);
-        for (const auto &l : ls)
+        for (const auto &l : c_lits)
         {
             if (!new_clause({lit(p, false), l}))
                 return false;
@@ -266,7 +315,26 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
 
 bool sat_core::disj(const std::vector<lit> &ls, const var &p)
 {
-    std::vector<lit> c_lits = ls;
+    assert(root_level());
+    std::vector<lit> c_lits;
+    c_lits.reserve(ls.size());
+    for (const auto &l : ls)
+        switch (value(l))
+        {
+        case True:
+            return true; // the disjunction is already satisfied..
+        case False:
+            break; // we skip false literals..
+        case Undefined:
+            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
+                return true; // the disjunction is already satisfied..
+            else
+                c_lits.push_back(l);
+        }
+
+    if (c_lits.empty()) // an empty disjunction is assumed to be unsatisfable..
+        return value(p) == False;
+
     std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
@@ -280,9 +348,9 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
     else
     {
         std::vector<lit> lits;
-        lits.reserve(ls.size() + 1);
+        lits.reserve(c_lits.size() + 1);
         lits.push_back(lit(p, false));
-        for (const auto &l : ls)
+        for (const auto &l : c_lits)
         {
             if (!new_clause({!l, p}))
                 return false;
