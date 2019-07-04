@@ -30,4 +30,4 @@ private:
   sat_core &s;
   std::vector<lit> lits;
 };
-} // namespace sat
+} // namespace smt
