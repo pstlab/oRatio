@@ -135,7 +135,9 @@ void solver::solve()
         solve_inconsistencies();
     } while (!flaws.empty());
 #endif
+
     // Hurray!! we have found a solution..
+    LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
 #ifdef BUILD_GUI
     fire_state_changed();
 #endif
@@ -214,7 +216,6 @@ void solver::new_disjunction(context &d_ctx, const disjunction &disj)
 
 void solver::take_decision(const lit &ch)
 {
-    LOG("taking decision " << (ch.get_sign() ? std::to_string(ch.get_var()) : "!" + std::to_string(ch.get_var())));
     current_decision = ch;
 
     // we take the decision..
@@ -334,13 +335,18 @@ bool solver::check(std::vector<lit> &cnfl)
 
 void solver::push()
 {
+    LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")"
+                                     << " +[" << (current_decision.get_sign() ? std::to_string(current_decision.get_var()) : "!" + std::to_string(current_decision.get_var())) << "]");
+
     // we push the given decision into the trail..
     trail.push_back(layer(current_decision));
-    LOG("level " << std::to_string(trail.size()));
 }
 
 void solver::pop()
 {
+    LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")"
+                                     << " -[" << (trail.back().decision.get_sign() ? std::to_string(trail.back().decision.get_var()) : "!" + std::to_string(trail.back().decision.get_var())) << "]");
+
     // we reintroduce the solved flaw..
     for (const auto &f : trail.back().solved_flaws)
         flaws.insert(f);
@@ -371,7 +377,7 @@ void solver::pop()
 
     trail.pop_back();
 
-    LOG("level " << std::to_string(trail.size()));
+    LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
 }
 
 void solver::solve_inconsistencies()
