@@ -286,19 +286,14 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 
     if (p.get_sign())
     { // some flaws and/or some resolvers have been activated..
-        if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
-            for (const auto &r : at_rhos_p->second) // these are the activated resolvers..
-                if (flaws.erase(&r->effect))        // this resolver has been activated, hence its effect flaw has been resolved..
-                    if (!root_level())
-                        trail.back().solved_flaws.insert(&r->effect);
         if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
             for (const auto &f : at_phis_p->second) // these are the activated flaws..
-                if (std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
-                { // this flaw has been activated and not yet accidentally solved..
-                    flaws.insert(f);
-                    if (!root_level())
-                        trail.back().new_flaws.insert(f);
-                }
+                if (flaws.insert(f).second && !root_level())
+                    trail.back().new_flaws.insert(f);
+        if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
+            for (const auto &r : at_rhos_p->second)           // these are the activated resolvers..
+                if (flaws.erase(&r->effect) && !root_level()) // this resolver has been activated, hence its effect flaw has been resolved..
+                    trail.back().solved_flaws.insert(&r->effect);
     }
     else
     { // some flaws and/or some resolvers have been forbidden..
