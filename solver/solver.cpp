@@ -284,44 +284,97 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
     assert(cnfl.empty());
     assert(gr.phis.count(p.get_var()) || gr.rhos.count(p.get_var()));
 
-    if (p.get_sign())
-    { // some flaws and/or some resolvers have been activated..
-        if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
-            for (const auto &f : at_phis_p->second)
-            { // 'f' is an activated flaw..
-                assert(!flaws.count(f));
-                if (!root_level())
-                    trail.back().new_flaws.insert(f);
-                if (std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
-                    flaws.insert(f); // this flaw has been activated and not yet accidentally solved..
-                else if (!root_level())
-                    trail.back().solved_flaws.insert(f);
+    if (root_level())
+    { // we are at root-level: we do not need to store the updates and we can perform some cleanings..
+        if (p.get_sign())
+        { // some flaw and/or some resolver has been activated..
+            if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
+            {
+                for (const auto &f : at_phis_p->second)
+                { // 'f' is an activated flaw..
+                    assert(!flaws.count(f));
+                    if (std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
+                        flaws.insert(f); // this flaw has been activated and not yet accidentally solved..
+                }
+                // since we are at root-level, we can perform some cleaning..
+                gr.phis.erase(at_phis_p);
             }
-        if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
-            for (const auto &r : at_rhos_p->second)
-                // 'r' is an activated resolver..
-                if (flaws.erase(&r->effect) && !root_level()) // this resolver has been activated, hence its effect flaw has been resolved (notice that we remove its effect only in case it was already active)..
-                    trail.back().solved_flaws.insert(&r->effect);
+            if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
+            {
+                for (const auto &r : at_rhos_p->second)
+                    // 'r' is an activated resolver..
+                    flaws.erase(&r->effect); // this resolver has been activated, hence its effect flaw has been resolved..
+                // since we are at root-level, we can perform some cleaning..
+                gr.rhos.erase(at_rhos_p);
+            }
+        }
+        else
+        { // some flaw and/or some resolver has been forbidden..
+            if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
+            {
+                for (const auto &r : at_rhos_p->second)                     // these are the forbidden resolvers..
+                    gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY); // since this resolver has been forbidden, its cost is set to +inf..
+                // since we are at root-level, we can perform some cleaning..
+                gr.rhos.erase(at_rhos_p);
+            }
+            if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
+            {
+                for (const auto &f : at_phis_p->second) // these are the forbidden flaws..
+                {                                       // this flaw will never appear in any incoming partial solutions..
+                    assert(!flaws.count(f));
+                    if (f->est_cost != rational::POSITIVE_INFINITY)
+                    {
+                        f->est_cost = rational::POSITIVE_INFINITY; // notice that supports' costs will be set to +inf by causal propagation..
+#ifdef BUILD_GUI
+                        fire_flaw_cost_changed(*f);
+#endif
+                    }
+                }
+                // since we are at root-level, we can perform some cleaning..
+                gr.phis.erase(at_phis_p);
+            }
+        }
     }
     else
-    { // some flaws and/or some resolvers have been forbidden..
-        if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
-            for (const auto &r : at_rhos_p->second)                     // these are the forbidden resolvers..
-                gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY); // since this resolver has been forbidden, its cost is set to +inf..
-        if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
-            for (const auto &f : at_phis_p->second) // these are the forbidden flaws..
-            {                                       // this flaw will never appear in any incoming partial solutions..
-                assert(!flaws.count(f));
-                if (f->est_cost != rational::POSITIVE_INFINITY)
-                {
-                    if (!root_level()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking (just for having consistency with resolvers)..
-                        trail.back().old_f_costs.try_emplace(f, f->est_cost);
-                    f->est_cost = rational::POSITIVE_INFINITY; // notice that supports' costs will be set to +inf by causal propagation..
-#ifdef BUILD_GUI
-                    fire_flaw_cost_changed(*f);
-#endif
+    { // we are not at root-level: we do need to store the updates..
+        if (p.get_sign())
+        { // some flaw and/or some resolver has been activated..
+            if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
+                for (const auto &f : at_phis_p->second)
+                { // 'f' is an activated flaw..
+                    assert(!flaws.count(f));
+                    trail.back().new_flaws.insert(f);
+                    if (std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
+                        flaws.insert(f); // this flaw has been activated and not yet accidentally solved..
+                    else
+                        trail.back().solved_flaws.insert(f); // this flaw has been accidentally solved..
                 }
-            }
+            if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
+                for (const auto &r : at_rhos_p->second)
+                    // 'r' is an activated resolver..
+                    if (flaws.erase(&r->effect)) // this resolver has been activated, hence its effect flaw has been resolved (notice that we remove its effect only in case it was already active)..
+                        trail.back().solved_flaws.insert(&r->effect);
+        }
+        else
+        { // some flaw and/or some resolver has been forbidden..
+            if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
+                for (const auto &r : at_rhos_p->second)                     // 'r' is a forbidden resolver..
+                    gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY); // since this resolver has been forbidden, its cost is set to +inf..
+            if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
+                for (const auto &f : at_phis_p->second) // 'f' is a forbidden flaw..
+                {                                       // this flaw will never appear in any incoming partial solutions..
+                    assert(!flaws.count(f));
+                    if (f->est_cost != rational::POSITIVE_INFINITY)
+                    {
+                        // we store the current flaw's estimated cost, if not already stored, for allowing backtracking (just for having consistency with resolvers)..
+                        trail.back().old_f_costs.try_emplace(f, f->est_cost);
+                        f->est_cost = rational::POSITIVE_INFINITY; // notice that supports' costs will be set to +inf by causal propagation..
+#ifdef BUILD_GUI
+                        fire_flaw_cost_changed(*f);
+#endif
+                    }
+                }
+        }
     }
 
     return true;
