@@ -149,7 +149,7 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
                             {
                                 auto a0_vals = get_solver().enum_value(a0_tau_itm);
                                 auto a1_vals = get_solver().enum_value(a1_tau_itm);
-                                for (const auto &plc : plcs.at({&as[0], &as[1]}))
+                                for (const auto &plc : plcs.at({as[0], as[1]}))
                                     choices.push_back({plc.first, 1l - 2l / static_cast<double>(a0_vals.size() + a1_vals.size())});
                             }
                             else if (a0_tau_itm) // only 'a1_tau' is a singleton variable..
