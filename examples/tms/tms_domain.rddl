@@ -1,0 +1,101 @@
+class Klin : StateVariable {
+
+    real id;
+    ReusableResource energy;
+    ReusableResource capacity;
+    real baking_time;
+
+    Klin(real id, ReusableResource energy, real capacity, real baking_time) : id(id), energy(energy), capacity(new ReusableResource(capacity)), baking_time(baking_time) {}
+
+    predicate Fire() {
+        duration == baking_time;
+
+        fact use_energy = new energy.Use(start:start, end:end, duration:duration, amount:1.0);
+        goal ready = new Ready(end:start);
+    }
+
+    predicate Ready() {
+        duration >= 1.0;
+
+        goal fire = new Fire(end:start);
+    }
+}
+
+class CeramicPiece : StateVariable {
+
+    real id;
+    real baking_time;
+    real treating_time;
+
+    CeramicPiece(real id, real baking_time, real treating_time) : id(id), baking_time(baking_time), treating_time(treating_time) {}
+
+    predicate Baking(Klin k) {
+        duration == baking_time;
+
+        goal firing = new k.Fire();
+        firing.start <= start;
+        firing.end >= end;
+
+        fact requires_space = new k.capacity.Use(start:start, end:end, duration:duration, amount:1.0);
+    }
+
+    predicate Baked() {
+        duration >= 1.0;
+
+        goal fire = new Baking(end:start);
+    }
+
+    predicate Treating() {
+        duration == treating_time;
+
+        goal backed = new Baked(end:start);
+    }
+
+    predicate Treated() {
+        duration >= 1.0;
+
+        goal treating = new Treating(end:start);
+    }
+}
+
+class CeramicStructure : StateVariable {
+
+    real id;
+    CeramicPiece p0;
+    CeramicPiece p1;
+    real baking_time;
+
+    CeramicStructure(real id, CeramicPiece p0, CeramicPiece p1, real baking_time) : id(id), p0(p0), p1(p1), baking_time(baking_time) {}
+
+    predicate Assembling() {
+        duration == 1.0;
+
+        goal p0_treated = new p0.Treated();
+        p0_treated.end <= start;
+        goal p1_treated = new p1.Treated();
+        p1_treated.end <= start;
+    }
+
+    predicate Assembled() {
+        duration >= 1.0;
+
+        goal assembling = new Assembling(end:start);
+    }
+
+    predicate Baking(Klin k) {
+        duration == baking_time;
+
+        goal firing = new k.Fire();
+        firing.start <= start;
+        firing.end >= end;
+
+        fact requires_space = new k.capacity.Use(start:start, end:end, duration:duration, amount:2.0);
+        goal assembled = new Assembled(end:start);
+    }
+
+    predicate Baked() {
+        duration >= 1.0;
+
+        goal fire = new Baking(end:start);
+    }
+}
