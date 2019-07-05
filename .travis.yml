@@ -27,4 +27,4 @@ script:
   - cd build 
   - cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DGRAPH_PRUNING=$GRAPH_PRUNING -DMAX_ACCURACY=$MAX_ACCURACY .. 
   - make 
-  - travis_wait ctest
+  - ctest
