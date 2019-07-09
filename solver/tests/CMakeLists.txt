@@ -31,10 +31,10 @@ add_test(NAME SVTest01 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_s
 add_test(NAME SVTest02 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_sv_2.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 #add_test(NAME SVTest03 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_sv_3.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_test(NAME CyclicCausalityTest14 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-add_test(NAME CyclicCausalityTest14 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_1.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-add_test(NAME CyclicCausalityTest14 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_2.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-add_test(NAME CyclicCausalityTest14 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_3.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME CyclicCausalityTest00 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME CyclicCausalityTest01 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_1.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME CyclicCausalityTest02 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_2.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME CyclicCausalityTest03 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_cyclic_causality_3.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_test(NAME TestBlocks02 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_02.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME TestBlocks03 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/blocks/blocks_problem_03.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
