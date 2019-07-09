@@ -416,7 +416,7 @@ void solver::pop()
     // we restore the resolvers' estimated costs..
     for (const auto &r : trail.back().old_r_costs)
     {
-        assert(r.first->est_cost != r.second);
+        // assert(r.first->est_cost != r.second);
         r.first->est_cost = r.second;
 #ifdef BUILD_GUI
         fire_resolver_cost_changed(*r.first);
@@ -426,7 +426,7 @@ void solver::pop()
     // we restore the flaws' estimated costs..
     for (const auto &f : trail.back().old_f_costs)
     {
-        assert(f.first->est_cost != f.second);
+        // assert(f.first->est_cost != f.second);
         f.first->est_cost = f.second;
 #ifdef BUILD_GUI
         fire_flaw_cost_changed(*f.first);
