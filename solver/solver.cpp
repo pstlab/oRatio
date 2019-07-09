@@ -216,6 +216,7 @@ void solver::new_disjunction(context &d_ctx, const disjunction &disj)
 
 void solver::take_decision(const lit &ch)
 {
+    assert(get_sat_core().value(ch) == Undefined);
     current_decision = ch;
 
     // we take the decision..
