@@ -150,19 +150,19 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
                                 auto a0_vals = get_solver().enum_value(a0_tau_itm);
                                 auto a1_vals = get_solver().enum_value(a1_tau_itm);
                                 for (const auto &plc : plcs.at({as[0], as[1]}))
-                                    if (get_solver().get_sat_core().value(plc.first) != False)
+                                    if (get_solver().get_sat_core().value(plc.first) == Undefined)
                                         choices.push_back({plc.first, 1l - 2l / static_cast<double>(a0_vals.size() + a1_vals.size())});
                             }
                             else if (a0_tau_itm) // only 'a1_tau' is a singleton variable..
                             {
                                 if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau))
-                                    if (get_solver().get_sat_core().value(get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau)) != False)
+                                    if (get_solver().get_sat_core().value(get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau)) == Undefined)
                                         choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau), false), 1l - 1l / static_cast<double>(a0_vals.size())});
                             }
                             else if (a1_tau_itm) // only 'a0_tau' is a singleton variable..
                             {
                                 if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau))
-                                    if (get_solver().get_sat_core().value(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau)) != False)
+                                    if (get_solver().get_sat_core().value(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau)) == Undefined)
                                         choices.push_back({lit(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau), false), 1l - 1l / static_cast<double>(a1_vals.size())});
                             }
                         }
