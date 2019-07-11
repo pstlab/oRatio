@@ -62,13 +62,12 @@ void graph::new_causal_link(flaw &f, resolver &r)
     assert(new_clause);
 
 #ifdef CHECK_CYCLES
-    for (auto &&cycle : circuits(r.effect))
+    for (auto &&cycle : circuits(f, r))
     {
         std::vector<lit> no_cycle;
         no_cycle.reserve(cycle.size());
         for (auto &&res : cycle)
-            for (auto &&cause : res->causes)
-                no_cycle.push_back(lit(cause->rho, false));
+            no_cycle.push_back(lit(res->rho, false));
         if (!slv.get_sat_core().new_clause(no_cycle))
             throw std::runtime_error("the problem is inconsistent..");
     }
@@ -339,21 +338,26 @@ bool graph::is_deferrable(flaw &f)
 #ifdef CHECK_CYCLES
 // finds all the simple cycles in the graph using Johnson's algorithm..
 // this algorithm is an adaptation of D.B.Johnson, "Finding all the elementary circuits of a directed graph", SIAM J. Comput., 4 (1975), pp. 77-84..
-bool circuit(const flaw &s, const flaw &v, std::vector<flaw const *> &stack, std::unordered_set<flaw const *> &blocked_set, std::unordered_map<flaw const *, std::vector<flaw const *>> &blocked_map, std::vector<std::vector<flaw const *>> &circuits)
+bool circuit(const flaw &s, const resolver &v, std::vector<resolver const *> &stack, std::unordered_set<flaw const *> &blocked_set, std::unordered_map<flaw const *, std::vector<flaw const *>> &blocked_map, std::vector<std::vector<resolver const *>> &circuits)
 {
     bool f = false;
     stack.push_back(&v);
-    blocked_set.emplace(&v);
-    for (auto &&supp : v.get_supports())
+    blocked_set.emplace(&v.get_effect());
+    for (auto &&supp : v.get_effect().get_supports())
         if (&supp->get_effect() == &s)
-            circuits.push_back(stack), f = true;
-        else if (!blocked_set.count(&supp->get_effect()) && circuit(s, supp->get_effect(), stack, blocked_set, blocked_map, circuits))
+        { // we have found a cycle..
+            stack.push_back(supp);
+            circuits.push_back(stack);
+            stack.pop_back();
+            f = true;
+        }
+        else if (!blocked_set.count(&supp->get_effect()) && circuit(s, *supp, stack, blocked_set, blocked_map, circuits)) // we explore this neighbour only if it is not in blocked_set..
             f = true;
 
     if (f)
-    {
+    { // we unblock the vertex and all vertices which are dependent on this vertex..
         std::queue<flaw const *> q;
-        q.push(&v);
+        q.push(&v.get_effect());
         while (!q.empty())
         {
             blocked_set.erase(q.front());
@@ -366,17 +370,19 @@ bool circuit(const flaw &s, const flaw &v, std::vector<flaw const *> &stack, std
             q.pop();
         }
     }
-    else
-        for (auto &&supp : v.get_supports())
-            blocked_map[&supp->get_effect()].push_back(&v);
+    else // if any of these neighbours ever get unblocked, we unblock the current vertex as well..
+        for (auto &&supp : v.get_effect().get_supports())
+            blocked_map[&supp->get_effect()].push_back(&v.get_effect());
 
+    // we remove vertex from the stack..
+    stack.pop_back();
     return f;
 }
 
-std::vector<std::vector<flaw const *>> graph::circuits(const flaw &s) const
+std::vector<std::vector<resolver const *>> graph::circuits(flaw &f, resolver &r) const
 {
-    std::vector<std::vector<flaw const *>> crts;
-    circuit(s, s, std::vector<flaw const *>(), std::unordered_set<flaw const *>(), std::unordered_map<flaw const *, std::vector<flaw const *>>(), crts);
+    std::vector<std::vector<resolver const *>> crts;
+    circuit(f, r, std::vector<resolver const *>(), std::unordered_set<flaw const *>(), std::unordered_map<flaw const *, std::vector<flaw const *>>(), crts);
     return crts;
 }
 #endif
