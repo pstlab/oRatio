@@ -56,6 +56,10 @@ private:
   bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
 #endif
 
+#ifdef CHECK_CYCLES
+  std::vector<std::vector<flaw const *>> circuits(const flaw &s) const; // returns all the simple circuits starting from node 's'..
+#endif
+
   void check_gamma(); // checks and possibly resets the value of gamma..
 
 private:

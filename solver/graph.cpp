@@ -60,6 +60,19 @@ void graph::new_causal_link(flaw &f, resolver &r)
     f.supports.push_back(&r);
     bool new_clause = slv.sat.new_clause({lit(r.rho, false), f.phi});
     assert(new_clause);
+
+#ifdef CHECK_CYCLES
+    for (auto &&cycle : circuits(r.effect))
+    {
+        std::vector<lit> no_cycle;
+        no_cycle.reserve(cycle.size());
+        for (auto &&res : cycle)
+            for (auto &&cause : res->causes)
+                no_cycle.push_back(lit(cause->rho, false));
+        if (!slv.get_sat_core().new_clause(no_cycle))
+            throw std::runtime_error("the problem is inconsistent..");
+    }
+#endif
 }
 
 void graph::set_estimated_cost(resolver &r, const rational &cst)
@@ -320,6 +333,50 @@ bool graph::is_deferrable(flaw &f)
     }
     // we have an undeferrable flaw..
     return false;
+}
+#endif
+
+#ifdef CHECK_CYCLES
+// finds all the simple cycles in the graph using Johnson's algorithm..
+// this algorithm is an adaptation of D.B.Johnson, "Finding all the elementary circuits of a directed graph", SIAM J. Comput., 4 (1975), pp. 77-84..
+bool circuit(const flaw &s, const flaw &v, std::vector<flaw const *> &stack, std::unordered_set<flaw const *> &blocked_set, std::unordered_map<flaw const *, std::vector<flaw const *>> &blocked_map, std::vector<std::vector<flaw const *>> &circuits)
+{
+    bool f = false;
+    stack.push_back(&v);
+    blocked_set.emplace(&v);
+    for (auto &&supp : v.get_supports())
+        if (&supp->get_effect() == &s)
+            circuits.push_back(stack), f = true;
+        else if (!blocked_set.count(&supp->get_effect()) && circuit(s, supp->get_effect(), stack, blocked_set, blocked_map, circuits))
+            f = true;
+
+    if (f)
+    {
+        std::queue<flaw const *> q;
+        q.push(&v);
+        while (!q.empty())
+        {
+            blocked_set.erase(q.front());
+            if (const auto q_it = blocked_map.find(q.front()); q_it != blocked_map.end())
+            {
+                for (auto &&blckd : q_it->second)
+                    q.push(blckd);
+                blocked_map.erase(q_it);
+            }
+        }
+    }
+    else
+        for (auto &&supp : v.get_supports())
+            blocked_map[&supp->get_effect()].push_back(&v);
+
+    return f;
+}
+
+std::vector<std::vector<flaw const *>> graph::circuits(const flaw &s) const
+{
+    std::vector<std::vector<flaw const *>> crts;
+    circuit(s, s, std::vector<flaw const *>(), std::unordered_set<flaw const *>(), std::unordered_map<flaw const *, std::vector<flaw const *>>(), crts);
+    return crts;
 }
 #endif
 
