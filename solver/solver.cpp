@@ -78,9 +78,11 @@ void solver::solve()
 #ifdef BUILD_GUI
         fire_current_flaw(**f_next);
 #endif
-        if ((*f_next)->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw: we search..
-        {
+        if ((*f_next)->get_estimated_cost().is_infinite())
+        { // we don't know how to solve this flaw: we search..
             next();
+            while (std::any_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return f->get_estimated_cost().is_infinite(); }))
+                next();
             // we solve all the current inconsistencies..
             solve_inconsistencies();
             continue;
@@ -114,9 +116,11 @@ void solver::solve()
 #ifdef BUILD_GUI
             fire_current_flaw(**f_next);
 #endif
-            if ((*f_next)->get_estimated_cost().is_infinite()) // we don't know how to solve this flaw: we search..
-            {
+            if ((*f_next)->get_estimated_cost().is_infinite())
+            { // we don't know how to solve this flaw: we search..
                 next();
+                while (std::any_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return f->get_estimated_cost().is_infinite(); }))
+                    next();
                 continue;
             }
 
