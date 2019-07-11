@@ -363,6 +363,7 @@ bool circuit(const flaw &s, const flaw &v, std::vector<flaw const *> &stack, std
                     q.push(blckd);
                 blocked_map.erase(q_it);
             }
+            q.pop();
         }
     }
     else
