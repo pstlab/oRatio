@@ -386,7 +386,6 @@ std::vector<std::vector<resolver const *>> graph::circuits(flaw &f, resolver &r)
     std::unordered_map<flaw const *, std::vector<flaw const *>> blocking_map;
     std::vector<std::vector<resolver const *>> crts;
     circuit(f, r, stack, blocking_set, blocking_map, crts);
-    assert(stack.empty() && blocking_set.empty() && blocking_map.empty());
     return crts;
 }
 #endif
