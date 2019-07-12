@@ -633,7 +633,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
     {
         rational cc = r->l.vars.at(x_j);
         r->l.vars.erase(x_j);
-        for (auto &term : expr.vars)
+        for (const auto &term : expr.vars)
             if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
             {
                 r->l.vars.emplace(term.first, term.second * cc);

@@ -62,11 +62,11 @@ void graph::new_causal_link(flaw &f, resolver &r)
     assert(new_clause);
 
 #ifdef CHECK_CYCLES
-    for (auto &&cycle : circuits(f, r))
+    for (const auto &cycle : circuits(f, r))
     {
         std::vector<lit> no_cycle;
         no_cycle.reserve(cycle.size());
-        for (auto &&res : cycle)
+        for (const auto &res : cycle)
             no_cycle.push_back(lit(res->rho, false));
         if (!slv.get_sat_core().new_clause(no_cycle))
             throw std::runtime_error("the problem is inconsistent..");
@@ -343,7 +343,7 @@ bool circuit(const flaw &s, const resolver &v, std::vector<resolver const *> &st
     bool f = false;
     stack.push_back(&v);
     blocked_set.emplace(&v.get_effect());
-    for (auto &&supp : v.get_effect().get_supports())
+    for (const auto &supp : v.get_effect().get_supports())
         if (&supp->get_effect() == &s)
         { // we have found a cycle..
             stack.push_back(supp);
@@ -363,7 +363,7 @@ bool circuit(const flaw &s, const resolver &v, std::vector<resolver const *> &st
             blocked_set.erase(q.front());
             if (const auto q_it = blocked_map.find(q.front()); q_it != blocked_map.end())
             {
-                for (auto &&blckd : q_it->second)
+                for (const auto &blckd : q_it->second)
                     q.push(blckd);
                 blocked_map.erase(q_it);
             }
@@ -371,7 +371,7 @@ bool circuit(const flaw &s, const resolver &v, std::vector<resolver const *> &st
         }
     }
     else // if any of these neighbours ever get unblocked, we unblock the current vertex as well..
-        for (auto &&supp : v.get_effect().get_supports())
+        for (const auto &supp : v.get_effect().get_supports())
             blocked_map[&supp->get_effect()].push_back(&v.get_effect());
 
     // we remove vertex from the stack..
