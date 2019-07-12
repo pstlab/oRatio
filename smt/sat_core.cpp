@@ -55,8 +55,8 @@ bool sat_core::new_clause(const std::vector<lit> &lits)
         case Undefined:
             if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
                 return true; // the clause represents a tautology..
-            else
-                c_lits.push_back(l);
+            else if (std::none_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == l; }))
+                c_lits.push_back(l); // we skip duplicates..
         }
 
     switch (c_lits.size())

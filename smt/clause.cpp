@@ -16,7 +16,7 @@ const bool clause::propagate(const lit &p)
 {
     // make sure false literal is lits[1]..
     if (lits.at(0).get_var() == p.get_var())
-        std::iter_swap(lits.begin(), lits.begin() + 1);
+        std::swap(*(lits.begin()), *(lits.begin() + 1));
 
     // if 0th watch is true, the clause is already satisfied..
     if (s.value(lits.at(0)) == True)
@@ -29,7 +29,7 @@ const bool clause::propagate(const lit &p)
     for (size_t i = 1; i < lits.size(); i++)
         if (s.value(lits.at(i)) != False)
         {
-            std::iter_swap(lits.begin() + 1, lits.begin() + i);
+            std::swap(*(lits.begin() + 1), *(lits.begin() + i));
             s.watches.at(sat_core::index(!lits.at(1))).push_back(this);
             return true;
         }
