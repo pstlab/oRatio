@@ -344,15 +344,16 @@ bool circuit(const flaw &s, const resolver &v, std::vector<resolver const *> &st
     stack.push_back(&v);
     blocked_set.emplace(&v.get_effect());
     for (const auto &supp : v.get_effect().get_supports())
-        if (&supp->get_effect() == &s)
-        { // we have found a cycle..
-            stack.push_back(supp);
-            circuits.push_back(stack);
-            stack.pop_back();
-            f = true;
-        }
-        else if (!blocked_set.count(&supp->get_effect()) && circuit(s, *supp, stack, blocked_set, blocked_map, circuits)) // we explore this neighbour only if it is not in blocked_set..
-            f = true;
+        if (v.get_graph().get_solver().get_sat_core().value(supp->get_rho()) != False)
+            if (&supp->get_effect() == &s)
+            { // we have found a cycle..
+                stack.push_back(supp);
+                circuits.push_back(stack);
+                stack.pop_back();
+                f = true;
+            }
+            else if (!blocked_set.count(&supp->get_effect()) && circuit(s, *supp, stack, blocked_set, blocked_map, circuits)) // we explore this neighbour only if it is not in blocked_set..
+                f = true;
 
     if (f)
     { // we unblock the vertex and all vertices which are dependent on this vertex..
@@ -372,7 +373,8 @@ bool circuit(const flaw &s, const resolver &v, std::vector<resolver const *> &st
     }
     else // if any of these neighbours ever get unblocked, we unblock the current vertex as well..
         for (const auto &supp : v.get_effect().get_supports())
-            blocked_map[&supp->get_effect()].push_back(&v.get_effect());
+            if (v.get_graph().get_solver().get_sat_core().value(supp->get_rho()) != False)
+                blocked_map[&supp->get_effect()].push_back(&v.get_effect());
 
     // we remove vertex from the stack..
     stack.pop_back();
