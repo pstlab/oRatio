@@ -483,6 +483,7 @@ bool sat_core::propagate(std::vector<lit> &cnfl)
 
         // we perform theory propagation..
         if (const auto bnds_it = bounds.find(prop_q.front().get_var()); bnds_it != bounds.end())
+        {
             for (const auto &th : bnds_it->second)
                 if (!th->propagate(prop_q.front(), cnfl))
                 {
@@ -491,6 +492,9 @@ bool sat_core::propagate(std::vector<lit> &cnfl)
                         prop_q.pop();
                     return false;
                 }
+            if (root_level()) // since this variable will no more be assigned, we can perform some cleanings..
+                bounds.erase(bnds_it);
+        }
 
         prop_q.pop();
     }
@@ -593,9 +597,14 @@ bool sat_core::enqueue(const lit &p, clause *const c)
         reason[p.get_var()] = c;
         trail.push_back(p);
         prop_q.push(p);
+        // we notify the listeners that a listening variable has been assigned..
         if (const auto at_p = listening.find(p.get_var()); at_p != listening.end())
+        {
             for (const auto &l : at_p->second)
                 l->sat_value_change(p.get_var());
+            if (root_level()) // since this variable will no more be assigned, we can perform some cleanings..
+                listening.erase(at_p);
+        }
         return true;
     }
     default:
