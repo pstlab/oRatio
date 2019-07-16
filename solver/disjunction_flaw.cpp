@@ -17,7 +17,7 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
 disjunction_flaw::disjunction_flaw(graph &gr, resolver *const cause, const context &ctx, const disjunction &disj) : flaw(gr, get_cause(cause), false), ctx(ctx), disj(disj)
 {
     if (cause)
-        add_precondition(*cause);
+        make_precondition_of(*cause);
 }
 disjunction_flaw::~disjunction_flaw() {}
 

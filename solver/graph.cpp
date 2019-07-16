@@ -218,10 +218,10 @@ void graph::add_layer()
     }
 }
 
-void graph::increase_accuracy()
+void graph::set_accuracy(const unsigned short &acc)
 {
     assert(slv.get_sat_core().root_level());
-    accuracy++;
+    accuracy = acc;
     LOG("current heuristic accuracy: " + std::to_string(accuracy));
 
     // we clean up composite flaws trivial flaws and already solved flaws..
@@ -230,10 +230,9 @@ void graph::increase_accuracy()
             // we remove the composite flaw from the current flaws..
             slv.flaws.erase(it++);
         else if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [this](resolver *r) { return slv.get_sat_core().value(r->rho) == True; }))
-        { // we have either a trivial (i.e. has only one resolver) or an already solved flaw..
+            // we have either a trivial (i.e. has only one resolver) or an already solved flaw..
             // we remove the flaw from the current flaws..
             slv.flaws.erase(it++);
-        }
         else
             ++it;
 
@@ -402,7 +401,7 @@ void graph::check_gamma()
         LOG("search has exhausted the graph..");
         // do we have room for increasing the heuristic accuracy?
         if (accuracy < max_accuracy)
-            increase_accuracy(); // we increase the heuristic accuracy..
+            set_accuracy(accuracy + 1); // we increase the heuristic accuracy..
         else
             add_layer(); // we add a layer to the current graph..
         // we create a new graph var..
@@ -492,7 +491,7 @@ void flaw::add_resolver(resolver &r)
     gr.new_resolver(r);
 }
 
-void flaw::add_precondition(resolver &r)
+void flaw::make_precondition_of(resolver &r)
 {
     r.preconditions.push_back(this);
     supports.push_back(&r);

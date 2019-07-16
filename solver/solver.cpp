@@ -54,6 +54,9 @@ void solver::solve()
 
     // we build the initial causal graph..
     gr.build();
+    if (gr.accuracy < gr.min_accuracy)
+        gr.set_accuracy(gr.min_accuracy);
+
     // we extract the initial inconsistencies (and translate them into flaws)..
     std::vector<std::vector<std::pair<lit, double>>> incs = get_incs();
     for (const auto &st : sts)

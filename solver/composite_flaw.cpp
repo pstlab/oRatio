@@ -19,7 +19,7 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
 composite_flaw::composite_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs) : flaw(gr, get_cause(cause)), flaws(fs)
 {
     if (cause)
-        add_precondition(*cause);
+        make_precondition_of(*cause);
 }
 composite_flaw::~composite_flaw() {}
 

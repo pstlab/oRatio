@@ -16,7 +16,7 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
 var_flaw::var_flaw(graph &gr, resolver *const cause, var_item &v_itm) : flaw(gr, get_cause(cause), true), v_itm(v_itm)
 {
     if (cause)
-        add_precondition(*cause);
+        make_precondition_of(*cause);
 }
 var_flaw::~var_flaw() {}
 

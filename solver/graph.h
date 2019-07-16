@@ -45,9 +45,9 @@ private:
   void set_estimated_cost(resolver &r, const smt::rational &cst);     // sets the estimated cost of the given resolver, propagating it to other resolvers..
   static const smt::rational evaluate(const std::vector<flaw *> &fs); // evaluates, together, the given vector of flaws..
 
-  void build();             // builds the planning graph..
-  void add_layer();         // adds a layer to the current planning graph..
-  void increase_accuracy(); // increases the heuristic accuracy by one..
+  void build();                                 // builds the planning graph..
+  void add_layer();                             // adds a layer to the current planning graph..
+  void set_accuracy(const unsigned short &acc); // set the heuristic accuracy to the given value..
 
   void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
   void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
@@ -64,7 +64,8 @@ private:
 
 private:
   solver &slv;                                                // the solver this graph belongs to..
-  unsigned short accuracy = MIN_ACCURACY;                     // the current heuristic accuracy..
+  unsigned short accuracy = 1;                                // the current heuristic accuracy..
+  static const unsigned short min_accuracy = MIN_ACCURACY;    // the minimum heuristic accuracy..
   static const unsigned short max_accuracy = MAX_ACCURACY;    // the maximum heuristic accuracy..
   smt::var gamma;                                             // this variable represents the validity of the current graph..
   resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
@@ -123,7 +124,7 @@ protected:
   /**
    * Adds this flaw to the preconditions of the resolver 'r'.
    */
-  void add_precondition(resolver &r);
+  void make_precondition_of(resolver &r);
 
 private:
   graph &gr;                                                 // the graph this flaw belongs to..

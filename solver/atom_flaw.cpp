@@ -21,7 +21,7 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
 atom_flaw::atom_flaw(graph &gr, resolver *const cause, atom &atm, const bool is_fact) : flaw(gr, get_cause(cause), true), atm(atm), is_fact(is_fact)
 {
     if (cause)
-        add_precondition(*cause);
+        make_precondition_of(*cause);
 }
 atom_flaw::~atom_flaw() {}
 
