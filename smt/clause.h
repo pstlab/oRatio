@@ -25,6 +25,8 @@ public:
 
 private:
   const bool propagate(const lit &p);
+  const bool simplify();
+  void remove();
 
 private:
   sat_core &s;

@@ -432,7 +432,19 @@ bool sat_core::check()
             record(no_good);
         }
         else
+        {
+            if (root_level())
+            { // we perform some cleanings..
+                size_t j = 0;
+                for (size_t i = 0; i < constrs.size(); ++i)
+                    if (constrs.at(i)->simplify())
+                        constrs.at(i)->remove();
+                    else
+                        constrs[j++] = constrs.at(i);
+                constrs.resize(j);
+            }
             return true;
+        }
     }
 }
 
