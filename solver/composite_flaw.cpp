@@ -3,6 +3,8 @@
 #include "combinations.h"
 #include "solver.h"
 
+using namespace smt;
+
 namespace ratio
 {
 
@@ -43,7 +45,7 @@ void composite_flaw::compute_resolvers()
         rs.push_back(f->get_resolvers());
 
 #ifdef CHECK_COMPOSITE_FLAWS
-    std::vector<smt::lit> check_lits;
+    std::vector<lit> check_lits;
     std::queue<const flaw *> q;
     q.push(this);
     std::unordered_set<const flaw *> seen;
@@ -51,10 +53,10 @@ void composite_flaw::compute_resolvers()
     {
         if (seen.insert(q.front()).second) // we avoid some repetition of literals..
         {
-            if (get_graph().get_solver().get_sat_core().value(q.front()->get_phi() == smt::False))
+            if (get_graph().get_solver().get_sat_core().value(q.front()->get_phi() == False))
                 return;
             for (const auto &cause : q.front()->get_causes())
-                if (get_graph().get_solver().get_sat_core().value(cause->get_rho()) != smt::True)
+                if (get_graph().get_solver().get_sat_core().value(cause->get_rho()) != True)
                 {
                     check_lits.push_back(cause->get_rho()); // we add the resolver's variable to the unification literals..
                     q.push(&cause->get_effect());           // we push its effect..
@@ -67,14 +69,14 @@ void composite_flaw::compute_resolvers()
     for (const auto &rp : cartesian_product(rs))
     {
         // the resolver's cost is given by the sum of the enclosing resolvers' costs..
-        smt::rational cst;
-        std::vector<smt::lit> cnj;
+        rational cst;
+        std::vector<lit> cnj;
         for (const auto &r : rp)
         {
             cst += r->get_intrinsic_cost();
             cnj.push_back(r->get_rho());
         }
-        smt::var cnj_var = get_graph().get_solver().get_sat_core().new_conj(cnj);
+        var cnj_var = get_graph().get_solver().get_sat_core().new_conj(cnj);
 
 #ifdef CHECK_COMPOSITE_FLAWS
         check_lits.push_back(cnj_var);
@@ -82,7 +84,7 @@ void composite_flaw::compute_resolvers()
             add_resolver(*new composite_resolver(get_graph(), *this, cnj_var, cst, rp));
         else
         {
-            std::vector<smt::lit> no_good;
+            std::vector<lit> no_good;
             no_good.reserve(check_lits.size());
             for (const auto &l : check_lits)
                 no_good.push_back(!l);
@@ -91,13 +93,13 @@ void composite_flaw::compute_resolvers()
         }
         check_lits.pop_back();
 #else
-        if (get_graph().get_solver().get_sat_core().value(cnj_var) != smt::False)
+        if (get_graph().get_solver().get_sat_core().value(cnj_var) != False)
             add_resolver(*new composite_resolver(get_graph(), *this, cnj_var, cst, rp));
 #endif
     }
 }
 
-composite_flaw::composite_resolver::composite_resolver(graph &gr, composite_flaw &s_flaw, const smt::var &app_r, const smt::rational &cst, const std::vector<resolver *> &rs) : resolver(gr, app_r, cst, s_flaw), resolvers(rs) {}
+composite_flaw::composite_resolver::composite_resolver(graph &gr, composite_flaw &s_flaw, const var &app_r, const rational &cst, const std::vector<resolver *> &rs) : resolver(gr, app_r, cst, s_flaw), resolvers(rs) {}
 composite_flaw::composite_resolver::~composite_resolver() {}
 
 #ifdef BUILD_GUI
@@ -121,7 +123,7 @@ void composite_flaw::composite_resolver::apply()
     std::vector<flaw *> precs;
     for (const auto &r : resolvers)
         for (const auto &pre : r->get_preconditions())
-            if (get_graph().get_solver().get_sat_core().value(pre->get_phi()) != smt::True) // we don't need to consider those flaws which are already active..
+            if (get_graph().get_solver().get_sat_core().value(pre->get_phi()) != True) // we don't need to consider those flaws which are already active..
                 precs.push_back(pre);
 
     if (precs.size() > get_graph().get_accuracy()) // we create sets having the size of the accuracy..
