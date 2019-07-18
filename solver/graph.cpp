@@ -200,8 +200,8 @@ void graph::build()
 #endif
     }
 
-    if (accuracy < min_accuracy)
-        set_accuracy(min_accuracy);
+    if (accuracy < MIN_ACCURACY)
+        set_accuracy(MIN_ACCURACY);
 }
 
 void graph::add_layer()
@@ -397,7 +397,7 @@ void graph::check_gamma()
     { // the graph has been invalidated..
         LOG("search has exhausted the graph..");
         // do we have room for increasing the heuristic accuracy?
-        if (accuracy < max_accuracy)
+        if (accuracy < MAX_ACCURACY)
             set_accuracy(accuracy + 1); // we increase the heuristic accuracy..
         else
             add_layer(); // we add a layer to the current graph..

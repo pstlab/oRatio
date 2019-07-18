@@ -65,8 +65,6 @@ private:
 private:
   solver &slv;                                                // the solver this graph belongs to..
   unsigned short accuracy = 1;                                // the current heuristic accuracy..
-  static const unsigned short min_accuracy = MIN_ACCURACY;    // the minimum heuristic accuracy..
-  static const unsigned short max_accuracy = MAX_ACCURACY;    // the maximum heuristic accuracy..
   smt::var gamma;                                             // this variable represents the validity of the current graph..
   resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
