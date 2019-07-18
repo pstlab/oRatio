@@ -195,9 +195,13 @@ void graph::build()
         std::deque<flaw *> c_q;
         std::swap(c_q, flaw_q); // flaw_q is now empty..
         for (const auto &f : c_q)
-            expand_flaw(*f); // we expand the flaw..
+            if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
+                expand_flaw(*f); // we expand the flaw..
 #endif
     }
+
+    if (accuracy < min_accuracy)
+        set_accuracy(min_accuracy);
 }
 
 void graph::add_layer()
@@ -224,19 +228,14 @@ void graph::set_accuracy(const unsigned short &acc)
     accuracy = acc;
     LOG("current heuristic accuracy: " + std::to_string(accuracy));
 
-    // we clean up composite flaws trivial flaws and already solved flaws..
+    // we clean up composite flaws..
     for (auto it = slv.flaws.begin(); it != slv.flaws.end();)
         if (composite_flaw *sf = dynamic_cast<composite_flaw *>(*it))
             // we remove the composite flaw from the current flaws..
             slv.flaws.erase(it++);
-        else if (std::any_of((*it)->resolvers.begin(), (*it)->resolvers.end(), [this](resolver *r) { return slv.get_sat_core().value(r->rho) == True; }))
-            // we have either a trivial (i.e. has only one resolver) or an already solved flaw..
-            // we remove the flaw from the current flaws..
-            slv.flaws.erase(it++);
         else
             ++it;
 
-    flaw_q.clear();
     if (slv.flaws.size() >= accuracy)
     {
         const auto fss = combinations(std::vector<flaw *>(slv.flaws.begin(), slv.flaws.end()), accuracy);
@@ -285,13 +284,7 @@ void graph::expand_flaw(flaw &f)
         throw std::runtime_error("the problem is inconsistent..");
 
     // we clean up already solved flaws..
-    if (composite_flaw *sf = dynamic_cast<composite_flaw *>(&f))
-    {
-        for (const auto &c_f : sf->flaws)
-            if (slv.sat.value(c_f->phi) == True && std::any_of(c_f->resolvers.begin(), c_f->resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
-                slv.flaws.erase(c_f); // this flaw has already been solved..
-    }
-    else if (slv.sat.value(f.phi) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
+    if (slv.sat.value(f.phi) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
         slv.flaws.erase(&f); // this flaw has already been solved..
 }
 
@@ -318,13 +311,17 @@ void graph::apply_resolver(resolver &r)
 #ifdef DEFERRABLE_FLAWS
 bool graph::is_deferrable(flaw &f)
 {
+    if (slv.get_sat_core().value(f.phi) == True)
+        return false;
     std::queue<flaw *> q;
     q.push(&f);
     while (!q.empty())
     {
         assert(slv.get_sat_core().value(q.front()->phi) != False);
-        if (q.front()->get_estimated_cost() < rational::POSITIVE_INFINITY) // we already have a possible solution for this flaw, thus we defer..
-            return true;
+        if (slv.get_sat_core().value(q.front()->phi) == True)
+            return false; // we necessarily have to solve this flaw: it cannot be deferred..
+        else if (q.front()->get_estimated_cost() < rational::POSITIVE_INFINITY)
+            return true; // we already have a possible solution for this flaw, thus we defer..
         for (const auto &r : q.front()->causes)
             q.push(&r->effect);
         q.pop();

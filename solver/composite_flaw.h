@@ -24,7 +24,7 @@ private:
   class composite_resolver : public resolver
   {
   public:
-    composite_resolver(graph &gr, composite_flaw &s_flaw, const smt::var &app_r, const smt::rational &cst, const std::vector<resolver *> &rs);
+    composite_resolver(graph &gr, composite_flaw &s_flaw, const resolver &res, const std::vector<flaw *> &precs);
     composite_resolver(const composite_resolver &that) = delete;
     virtual ~composite_resolver();
 
@@ -36,7 +36,8 @@ private:
     void apply() override;
 
   private:
-    const std::vector<resolver *> resolvers;
+    const resolver &res;             // the resolver which gave rise to the composite resolver..
+    const std::vector<flaw *> precs; // the flaws becoming part of the preconditions of the composite resolver..
   };
 
 private:
