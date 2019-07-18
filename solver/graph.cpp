@@ -318,10 +318,10 @@ bool graph::is_deferrable(flaw &f)
     while (!q.empty())
     {
         assert(slv.get_sat_core().value(q.front()->phi) != False);
-        if (slv.get_sat_core().value(q.front()->phi) == True)
-            return false; // we necessarily have to solve this flaw: it cannot be deferred..
-        else if (q.front()->get_estimated_cost() < rational::POSITIVE_INFINITY)
+        if (q.front()->get_estimated_cost() < rational::POSITIVE_INFINITY)
             return true; // we already have a possible solution for this flaw, thus we defer..
+        else if (slv.get_sat_core().value(q.front()->phi) == True)
+            return false; // we necessarily have to solve this flaw: it cannot be deferred..
         for (const auto &r : q.front()->causes)
             q.push(&r->effect);
         q.pop();
