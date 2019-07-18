@@ -64,8 +64,6 @@ void composite_flaw::composite_resolver::apply()
     // all the resolver's preconditions..
     std::vector<flaw *> c_precs = res.get_preconditions();
     c_precs.insert(c_precs.end(), precs.begin(), precs.end());
-    // we don't need to consider those flaws which are already active..
-    c_precs.erase(std::remove_if(c_precs.begin(), c_precs.end(), [this](flaw *f) { return get_graph().get_solver().get_sat_core().value(f->get_phi()) == True; }), c_precs.end());
 
     if (c_precs.size() > get_graph().get_accuracy()) // we create sets having the size of the accuracy..
     {
