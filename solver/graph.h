@@ -42,8 +42,7 @@ private:
   void new_resolver(resolver &r);                     // notifies the graph that a new resolver 'r' has been created..
   void new_causal_link(flaw &f, resolver &r);         // notifies the graph that a new causal link between a flaw 'f' and a resolver 'r' has been created..
 
-  void set_estimated_cost(resolver &r, const smt::rational &cst);     // sets the estimated cost of the given resolver, propagating it to other resolvers..
-  static const smt::rational evaluate(const std::vector<flaw *> &fs); // evaluates, together, the given vector of flaws..
+  void set_estimated_cost(flaw &f, const smt::rational &cst); // sets the estimated cost of the given flaw, propagating it to other flaws..
 
   void build();                                 // builds the planning graph..
   void add_layer();                             // adds a layer to the current planning graph..

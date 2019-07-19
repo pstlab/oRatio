@@ -228,7 +228,7 @@ void solver::take_decision(const lit &ch)
     if (!get_sat_core().assume(ch) || !get_sat_core().check())
         throw std::runtime_error("the problem is unsolvable");
     assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || f->get_estimated_cost().is_positive_infinite(); }); }));
-    assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return (sat.value(r->rho) != False && r->get_estimated_cost() == gr.evaluate(r->get_preconditions()) + r->intrinsic_cost) || r->get_estimated_cost().is_positive_infinite(); }); }));
+    assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return r->get_estimated_cost().is_positive_infinite() || sat.value(r->rho) != False; }); }));
 
 #ifdef BUILD_GUI
     fire_state_changed();
@@ -268,7 +268,7 @@ void solver::next()
     if (!get_sat_core().check())
         throw std::runtime_error("the problem is unsolvable");
     assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || f->get_estimated_cost().is_positive_infinite(); }); }));
-    assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return (sat.value(r->rho) != False && r->get_estimated_cost() == gr.evaluate(r->get_preconditions()) + r->intrinsic_cost) || r->get_estimated_cost().is_positive_infinite(); }); }));
+    assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return r->get_estimated_cost().is_positive_infinite() || sat.value(r->rho) != False; }); }));
 
 #ifdef BUILD_GUI
     fire_state_changed();
@@ -318,23 +318,26 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
         { // some flaw and/or some resolver has been forbidden..
             if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
             {
-                for (const auto &r : at_rhos_p->second)                     // these are the forbidden resolvers..
-                    gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY); // since this resolver has been forbidden, its cost is set to +inf..
+                for (const auto &r : at_rhos_p->second)
+                { // 'r' is a forbidden resolver..
+#ifdef BUILD_GUI
+                    fire_resolver_cost_changed(*r);
+#endif
+                    if (sat.value(r->effect.phi) != False)
+                    { // we update the cost of the resolver's effect..
+                        resolver *best_r = r->effect.get_best_resolver();
+                        gr.set_estimated_cost(r->effect, best_r ? best_r->get_estimated_cost() : rational::POSITIVE_INFINITY);
+                    }
+                }
                 // since we are at root-level, we can perform some cleaning..
                 gr.rhos.erase(at_rhos_p);
             }
             if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
             {
-                for (const auto &f : at_phis_p->second) // these are the forbidden flaws..
-                {                                       // this flaw will never appear in any incoming partial solutions..
+                for (const auto &f : at_phis_p->second)
+                { // 'f' will never appear in any incoming partial solutions..
                     assert(!flaws.count(f));
-                    if (f->est_cost != rational::POSITIVE_INFINITY)
-                    {
-                        f->est_cost = rational::POSITIVE_INFINITY; // notice that supports' costs will be set to +inf by causal propagation..
-#ifdef BUILD_GUI
-                        fire_flaw_cost_changed(*f);
-#endif
-                    }
+                    gr.set_estimated_cost(*f, rational::POSITIVE_INFINITY);
                 }
                 // since we are at root-level, we can perform some cleaning..
                 gr.phis.erase(at_phis_p);
@@ -364,21 +367,22 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
         else
         { // some flaw and/or some resolver has been forbidden..
             if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
-                for (const auto &r : at_rhos_p->second)                     // 'r' is a forbidden resolver..
-                    gr.set_estimated_cost(*r, rational::POSITIVE_INFINITY); // since this resolver has been forbidden, its cost is set to +inf..
-            if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
-                for (const auto &f : at_phis_p->second) // 'f' is a forbidden flaw..
-                {                                       // this flaw will never appear in any incoming partial solutions..
-                    assert(!flaws.count(f));
-                    if (f->est_cost != rational::POSITIVE_INFINITY)
-                    {
-                        // we store the current flaw's estimated cost, if not already stored, for allowing backtracking (just for having consistency with resolvers)..
-                        trail.back().old_f_costs.try_emplace(f, f->est_cost);
-                        f->est_cost = rational::POSITIVE_INFINITY; // notice that supports' costs will be set to +inf by causal propagation..
+                for (const auto &r : at_rhos_p->second)
+                { // 'r' is a forbidden resolver..
 #ifdef BUILD_GUI
-                        fire_flaw_cost_changed(*f);
+                    fire_resolver_cost_changed(*r);
 #endif
+                    if (sat.value(r->effect.phi) != False)
+                    { // we update the cost of the resolver's effect..
+                        resolver *best_r = r->effect.get_best_resolver();
+                        gr.set_estimated_cost(r->effect, best_r ? best_r->get_estimated_cost() : rational::POSITIVE_INFINITY);
                     }
+                }
+            if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
+                for (const auto &f : at_phis_p->second)
+                { // 'f' will never appear in any incoming partial solutions..
+                    assert(!flaws.count(f));
+                    gr.set_estimated_cost(*f, rational::POSITIVE_INFINITY);
                 }
         }
     }
@@ -417,16 +421,6 @@ void solver::pop()
     // we erase the new flaws..
     for (const auto &f : trail.back().new_flaws)
         flaws.erase(f);
-
-    // we restore the resolvers' estimated costs..
-    for (const auto &r : trail.back().old_r_costs)
-    {
-        // assert(r.first->est_cost != r.second);
-        r.first->est_cost = r.second;
-#ifdef BUILD_GUI
-        fire_resolver_cost_changed(*r.first);
-#endif
-    }
 
     // we restore the flaws' estimated costs..
     for (const auto &f : trail.back().old_f_costs)
@@ -521,6 +515,8 @@ void solver::fire_new_flaw(const flaw &f) const
 {
     for (const auto &l : listeners)
         l->new_flaw(f);
+    for (const auto &r : f.supports)
+        fire_resolver_cost_changed(*r);
 }
 void solver::fire_flaw_state_changed(const flaw &f) const
 {
@@ -531,6 +527,8 @@ void solver::fire_flaw_cost_changed(const flaw &f) const
 {
     for (const auto &l : listeners)
         l->flaw_cost_changed(f);
+    for (const auto &r : f.supports)
+        fire_resolver_cost_changed(*r);
 }
 void solver::fire_current_flaw(const flaw &f) const
 {
@@ -561,6 +559,7 @@ void solver::fire_causal_link_added(const flaw &f, const resolver &r) const
 {
     for (const auto &l : listeners)
         l->causal_link_added(f, r);
+    fire_resolver_cost_changed(r);
 }
 #endif
 } // namespace ratio

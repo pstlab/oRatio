@@ -55,13 +55,16 @@ void graph::new_resolver(resolver &r)
 
 void graph::new_causal_link(flaw &f, resolver &r)
 {
-#ifdef BUILD_GUI
-    slv.fire_causal_link_added(f, r);
-#endif
     r.preconditions.push_back(&f);
     f.supports.push_back(&r);
     bool new_clause = slv.sat.new_clause({lit(r.rho, false), f.phi});
     assert(new_clause);
+#ifdef BUILD_GUI
+    slv.fire_causal_link_added(f, r);
+#endif
+
+    resolver *best_r = r.effect.get_best_resolver();
+    set_estimated_cost(r.effect, best_r ? best_r->get_estimated_cost() : rational::POSITIVE_INFINITY);
 
 #ifdef CHECK_CYCLES
     for (const auto &cycle : circuits(f, r))
@@ -76,104 +79,61 @@ void graph::new_causal_link(flaw &f, resolver &r)
 #endif
 }
 
-void graph::set_estimated_cost(resolver &r, const rational &cst)
+void graph::set_estimated_cost(flaw &f, const rational &cst)
 {
-    assert(slv.get_sat_core().value(r.rho) != False || cst.is_positive_infinite());
-    if (r.est_cost == cst)
+    assert(slv.get_sat_core().value(f.phi) != False || cst.is_positive_infinite());
+    if (f.est_cost == cst)
         return; // nothing to propagate..
 
-    // the resolver costs queue (for resolver cost propagation)..
-    std::queue<resolver *> resolver_q;
-    // the set of already seen resolvers (aimed at spotting cyclic causality)..
-    std::unordered_set<resolver *> seen;
-    if (!slv.trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
-        slv.trail.back().old_r_costs.try_emplace(&r, r.est_cost);
+    // the flaw costs queue (for flaw cost propagation)..
+    std::queue<flaw *> flaw_q;
+    // the set of already seen flaws (aimed at spotting cyclic causality)..
+    std::unordered_set<flaw *> seen;
+    if (!slv.trail.empty()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking..
+        slv.trail.back().old_f_costs.try_emplace(&f, f.est_cost);
 
-    // we update the resolver's estimated cost..
-    r.est_cost = cst;
-    resolver_q.push(&r);
-    seen.insert(&r);
+    // we update the flaw's estimated cost..
+    f.est_cost = cst;
+    flaw_q.push(&f);
 #ifdef BUILD_GUI
-    slv.fire_resolver_cost_changed(r);
+    slv.fire_flaw_cost_changed(f);
 #endif
 
-    // we propagate the cost..
-    resolver *c_res;
-    resolver *bst_res;
+    // we propagate the costs..
+    flaw *c_f;         // the current flaw..
+    resolver *bst_res; // the flaw's best resolver..
     rational c_cost;
-    while (!resolver_q.empty())
+    while (!flaw_q.empty())
     {
-        c_res = resolver_q.front();
-        resolver_q.pop();
-        if (slv.get_sat_core().value(c_res->effect.phi) == False)
+        c_f = flaw_q.front();
+        flaw_q.pop();
+        if (slv.get_sat_core().value(c_f->phi) == False)
             continue; // nothing to propagate..
 
-        // this is the best resolver for the resolver's effect (for computing the resolver's effect's estimated cost)..
-        bst_res = c_res->effect.get_best_resolver();
-        // this is the new estimated cost of the resolver's effect..
-        c_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
-        if (c_res->effect.est_cost == c_cost)
-            continue; // nothing to propagate..
-
-        // the cost of the resolver's effect has changed as a consequence of the resolver's cost update, hence, we propagate the update to all the supports of the resolver's effect..
-        if (!slv.trail.empty()) // we store the current resolver's effect's estimated cost, if not already stored, for allowing backtracking..
-            slv.trail.back().old_f_costs.try_emplace(&c_res->effect, c_res->effect.est_cost);
-
-        // we update the resolver's effect's estimated cost..
-        c_res->effect.est_cost = c_cost;
-#ifdef BUILD_GUI
-        slv.fire_flaw_cost_changed(c_res->effect);
-#endif
-
-        // we (try to) update the estimated costs of the supports and enqueue them for cost propagation..
-        for (const auto &supp : c_res->effect.supports)
+        // we (try to) update the estimated costs of the supports' effects and enqueue them for cost propagation..
+        for (const auto &supp : c_f->supports)
         {
             if (slv.get_sat_core().value(supp->rho) == False)
                 continue; // nothing to propagate..
 
-            c_cost = seen.insert(supp).second ? evaluate(supp->preconditions) : rational::POSITIVE_INFINITY;
-            if (supp->est_cost == c_cost)
+            // this is the best resolver for the support's effect (for computing the resolver's effect's estimated cost)..
+            bst_res = supp->effect.get_best_resolver();
+            // this is the new estimated cost of the support's effect..
+            c_cost = bst_res && seen.insert(c_f).second ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
+            if (supp->effect.est_cost == c_cost)
                 continue; // nothing to propagate..
 
-            if (!slv.trail.empty()) // we store the current resolver's estimated cost, if not already stored, for allowing backtracking..
-                slv.trail.back().old_r_costs.try_emplace(supp, supp->est_cost);
+            if (!slv.trail.empty()) // we store the current support's effect's estimated cost, if not already stored, for allowing backtracking..
+                slv.trail.back().old_f_costs.try_emplace(&supp->effect, supp->effect.est_cost);
 
-            // we update the resolver's estimated cost..
-            supp->est_cost = c_cost;
+            // we update the support's effect's estimated cost..
+            supp->effect.est_cost = c_cost;
 #ifdef BUILD_GUI
-            slv.fire_resolver_cost_changed(*supp);
+            slv.fire_flaw_cost_changed(supp->effect);
 #endif
-            resolver_q.push(supp);
+            flaw_q.push(&supp->effect);
         }
     }
-}
-
-const rational graph::evaluate(const std::vector<flaw *> &fs)
-{
-    if (fs.empty())
-        return 0;
-
-    rational c_cost;
-#ifdef H_MAX
-    c_cost = rational::NEGATIVE_INFINITY;
-    for (const auto &f : fs)
-        if (!f->is_expanded())
-            return rational::POSITIVE_INFINITY;
-        else // we compute the maximum of the flaws' estimated costs..
-        {
-            rational c = f->get_estimated_cost();
-            if (c > c_cost)
-                c_cost = c;
-        }
-#endif
-#ifdef H_ADD
-    for (const auto &f : fs)
-        if (!f->is_expanded())
-            return rational::POSITIVE_INFINITY;
-        else // we compute the sum of the flaws' estimated costs..
-            c_cost += f->get_estimated_cost();
-#endif
-    return c_cost;
 }
 
 void graph::build()
@@ -307,7 +267,10 @@ void graph::apply_resolver(resolver &r)
     slv.restore_ni();
     res = nullptr;
     if (r.preconditions.empty() && slv.get_sat_core().value(r.rho) != False) // there are no requirements for this resolver..
-        set_estimated_cost(r, 0);
+    {
+        resolver *best_r = r.effect.get_best_resolver();
+        set_estimated_cost(r.effect, best_r ? best_r->get_estimated_cost() : rational::POSITIVE_INFINITY);
+    }
 }
 
 #ifdef DEFERRABLE_FLAWS

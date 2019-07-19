@@ -109,7 +109,6 @@ void atom_flaw::compute_resolvers()
                 unify = true;
                 add_resolver(*u_res);
                 get_graph().new_causal_link(t_flaw, *u_res);
-                get_graph().set_estimated_cost(*u_res, t_flaw.get_estimated_cost());
 #ifdef CHECK_UNIFICATIONS
             }
 #endif
