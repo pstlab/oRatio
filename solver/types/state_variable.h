@@ -2,6 +2,8 @@
 
 #include "smart_type.h"
 #include "constructor.h"
+#include "flaw.h"
+#include "resolver.h"
 
 #define STATE_VARIABLE_NAME "StateVariable"
 

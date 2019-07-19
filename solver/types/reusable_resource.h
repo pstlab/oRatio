@@ -3,7 +3,8 @@
 #include "smart_type.h"
 #include "constructor.h"
 #include "predicate.h"
-#include "graph.h"
+#include "flaw.h"
+#include "resolver.h"
 
 #define REUSABLE_RESOURCE_NAME "ReusableResource"
 #define REUSABLE_RESOURCE_CAPACITY "capacity"

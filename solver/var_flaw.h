@@ -1,6 +1,7 @@
 #pragma once
 
-#include "graph.h"
+#include "flaw.h"
+#include "resolver.h"
 
 namespace smt
 {

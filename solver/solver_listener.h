@@ -1,6 +1,8 @@
 #pragma once
 
 #include "solver.h"
+#include "flaw.h"
+#include "resolver.h"
 #include "sat_value_listener.h"
 #include <algorithm>
 
