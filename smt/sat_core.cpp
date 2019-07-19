@@ -246,7 +246,7 @@ bool sat_core::eq(const lit &left, const lit &right, const var &p)
     if (left == right)
         return true;
     if (left.get_var() > right.get_var())
-        return eq(right, left);
+        return eq(right, left, p);
     const std::string s_expr = (left.get_sign() ? "b" : "!b") + std::to_string(left.get_var()) + " == " + (right.get_sign() ? "b" : "!b") + std::to_string(right.get_var());
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
@@ -283,7 +283,7 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
         }
 
     if (c_lits.empty()) // an empty conjunction is assumed to be satisfied..
-        return value(p) == True;
+        return eq(p, TRUE_var);
 
     std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
@@ -333,7 +333,7 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
         }
 
     if (c_lits.empty()) // an empty disjunction is assumed to be unsatisfable..
-        return value(p) == False;
+        return eq(p, FALSE_var);
 
     std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
