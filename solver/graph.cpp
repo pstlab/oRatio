@@ -107,8 +107,6 @@ void graph::set_estimated_cost(flaw &f, const rational &cst)
     {
         c_f = flaw_q.front();
         flaw_q.pop();
-        if (slv.get_sat_core().value(c_f->phi) == False)
-            continue; // nothing to propagate..
 
         // we (try to) update the estimated costs of the supports' effects and enqueue them for cost propagation..
         for (const auto &supp : c_f->supports)
