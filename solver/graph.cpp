@@ -113,7 +113,7 @@ void graph::set_estimated_cost(flaw &f, const rational &cst)
         // we (try to) update the estimated costs of the supports' effects and enqueue them for cost propagation..
         for (const auto &supp : c_f->supports)
         {
-            if (slv.get_sat_core().value(supp->rho) == False)
+            if (slv.get_sat_core().value(supp->rho) == False || slv.get_sat_core().value(supp->effect.phi) == False)
                 continue; // nothing to propagate..
 
             // this is the best resolver for the support's effect (for computing the resolver's effect's estimated cost)..
