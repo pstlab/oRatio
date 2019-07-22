@@ -63,8 +63,7 @@ void graph::new_causal_link(flaw &f, resolver &r)
     slv.fire_causal_link_added(f, r);
 #endif
 
-    resolver *best_r = r.effect.get_best_resolver();
-    set_estimated_cost(r.effect, best_r ? best_r->get_estimated_cost() : rational::POSITIVE_INFINITY);
+    set_estimated_cost(r.effect);
 
 #ifdef CHECK_CYCLES
     for (const auto &cycle : circuits(f, r))
@@ -79,10 +78,57 @@ void graph::new_causal_link(flaw &f, resolver &r)
 #endif
 }
 
-void graph::set_estimated_cost(flaw &f, const rational &cst)
+void graph::set_deferrable(flaw &f)
 {
-    assert(slv.get_sat_core().value(f.phi) != False || cst.is_positive_infinite());
-    if (f.est_cost == cst)
+    /*
+    assert(slv.get_sat_core().root_level());
+    bool def = !(slv.get_sat_core().value(f.phi) == True || f.est_cost.is_positive_infinite()) || std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.get_sat_core().value(r->get_rho()) == True || !r->get_estimated_cost().is_infinite(); });
+    if (f.deferrable == def)
+        return; // nothing to propagate..
+
+    // the flaw def queue (for flaw deferrable state propagation)..
+    std::queue<flaw *> flaw_q;
+    // we update the flaw's deferrable state..
+    f.deferrable = def;
+    flaw_q.push(&f);
+    // we propagate the deferrable states..
+    flaw *c_f; // the current flaw..
+    while (!flaw_q.empty())
+    {
+        c_f = flaw_q.front();
+        flaw_q.pop();
+
+        // we (try to) update the deferrable state of the supports' effects and enqueue them for deferrable state propagation..
+        for (const auto &supp : c_f->supports)
+            if (supp->effect.deferrable != c_f->deferrable)
+            { // we update the support's effect's deferrable state..
+                supp->effect.deferrable = c_f->deferrable;
+                flaw_q.push(&supp->effect);
+            }
+
+        // we (try to) update the deferrable state of the resolvers' preconditions and enqueue them for deferrable state propagation..
+        for (const auto &res : c_f->resolvers)
+            for (const auto &pre : res->preconditions)
+                if (def = c_f->deferrable && slv.get_sat_core().value(pre->phi) == True; pre->deferrable != def)
+                { // we update the precondition's deferrable state..
+                    pre->deferrable = def;
+                    flaw_q.push(pre);
+                }
+    } */
+}
+
+void graph::set_estimated_cost(flaw &f)
+{
+    resolver *bst_res; // the flaw's best resolver..
+    rational c_cost;
+    if (slv.get_sat_core().value(f.phi) == False)
+        c_cost = rational::POSITIVE_INFINITY;
+    else
+    {
+        bst_res = f.get_best_resolver();
+        c_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
+    }
+    if (f.est_cost == c_cost)
         return; // nothing to propagate..
 
     // the flaw costs queue (for flaw cost propagation)..
@@ -93,16 +139,14 @@ void graph::set_estimated_cost(flaw &f, const rational &cst)
         slv.trail.back().old_f_costs.try_emplace(&f, f.est_cost);
 
     // we update the flaw's estimated cost..
-    f.est_cost = cst;
+    f.est_cost = c_cost;
     flaw_q.push(&f);
 #ifdef BUILD_GUI
     slv.fire_flaw_cost_changed(f);
 #endif
 
     // we propagate the costs..
-    flaw *c_f;         // the current flaw..
-    resolver *bst_res; // the flaw's best resolver..
-    rational c_cost;
+    flaw *c_f; // the current flaw..
     while (!flaw_q.empty())
     {
         c_f = flaw_q.front();
@@ -246,6 +290,8 @@ void graph::expand_flaw(flaw &f)
     // we clean up already solved flaws..
     if (slv.sat.value(f.phi) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
         slv.flaws.erase(&f); // this flaw has already been solved..
+
+    set_deferrable(f);
 }
 
 void graph::apply_resolver(resolver &r)
@@ -265,10 +311,7 @@ void graph::apply_resolver(resolver &r)
     slv.restore_ni();
     res = nullptr;
     if (r.preconditions.empty() && slv.get_sat_core().value(r.rho) != False) // there are no requirements for this resolver..
-    {
-        resolver *best_r = r.effect.get_best_resolver();
-        set_estimated_cost(r.effect, best_r ? best_r->get_estimated_cost() : rational::POSITIVE_INFINITY);
-    }
+        set_estimated_cost(r.effect);
 }
 
 #ifdef DEFERRABLE_FLAWS

@@ -324,9 +324,9 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                     fire_resolver_cost_changed(*r);
 #endif
                     if (sat.value(r->effect.phi) != False)
-                    { // we update the cost of the resolver's effect..
-                        resolver *best_r = r->effect.get_best_resolver();
-                        gr.set_estimated_cost(r->effect, best_r ? best_r->get_estimated_cost() : rational::POSITIVE_INFINITY);
+                    { // we update the cost and the deferrable state of the resolver's effect..
+                        gr.set_estimated_cost(r->effect);
+                        gr.set_deferrable(r->effect);
                     }
                 }
                 // since we are at root-level, we can perform some cleaning..
@@ -337,7 +337,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                 for (const auto &f : at_phis_p->second)
                 { // 'f' will never appear in any incoming partial solutions..
                     assert(!flaws.count(f));
-                    gr.set_estimated_cost(*f, rational::POSITIVE_INFINITY);
+                    gr.set_estimated_cost(*f);
                 }
                 // since we are at root-level, we can perform some cleaning..
                 gr.phis.erase(at_phis_p);
@@ -372,17 +372,14 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 #ifdef BUILD_GUI
                     fire_resolver_cost_changed(*r);
 #endif
-                    if (sat.value(r->effect.phi) != False)
-                    { // we update the cost of the resolver's effect..
-                        resolver *best_r = r->effect.get_best_resolver();
-                        gr.set_estimated_cost(r->effect, best_r ? best_r->get_estimated_cost() : rational::POSITIVE_INFINITY);
-                    }
+                    if (sat.value(r->effect.phi) != False) // we update the cost of the resolver's effect..
+                        gr.set_estimated_cost(r->effect);
                 }
             if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
                 for (const auto &f : at_phis_p->second)
                 { // 'f' will never appear in any incoming partial solutions..
                     assert(!flaws.count(f));
-                    gr.set_estimated_cost(*f, rational::POSITIVE_INFINITY);
+                    gr.set_estimated_cost(*f);
                 }
         }
     }
