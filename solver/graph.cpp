@@ -63,8 +63,6 @@ void graph::new_causal_link(flaw &f, resolver &r)
     slv.fire_causal_link_added(f, r);
 #endif
 
-    set_estimated_cost(r.effect);
-
 #ifdef CHECK_CYCLES
     for (const auto &cycle : circuits(f, r))
     {
@@ -287,6 +285,7 @@ void graph::expand_flaw(flaw &f)
     if (slv.sat.value(f.phi) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
         slv.flaws.erase(&f); // this flaw has already been solved..
 
+    set_estimated_cost(f);
     set_deferrable(f);
 }
 
@@ -306,8 +305,6 @@ void graph::apply_resolver(resolver &r)
 
     slv.restore_ni();
     res = nullptr;
-    if (r.preconditions.empty() && slv.get_sat_core().value(r.rho) != False) // there are no requirements for this resolver..
-        set_estimated_cost(r.effect);
 }
 
 #ifdef DEFERRABLE_FLAWS
