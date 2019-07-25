@@ -134,7 +134,7 @@ void graph::set_estimated_cost(flaw &f)
     // the flaw costs queue (for flaw cost propagation)..
     std::queue<flaw *> flaw_q;
     // the set of already seen flaws (aimed at spotting cyclic causality)..
-    std::unordered_set<flaw *> seen;
+    std::unordered_set<flaw *> seen({&f});
     if (!slv.trail.empty()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking..
         slv.trail.back().old_f_costs.try_emplace(&f, f.est_cost);
 
@@ -161,7 +161,7 @@ void graph::set_estimated_cost(flaw &f)
             // this is the best resolver for the support's effect (for computing the resolver's effect's estimated cost)..
             bst_res = supp->effect.get_best_resolver();
             // this is the new estimated cost of the support's effect..
-            c_cost = bst_res && seen.insert(c_f).second ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
+            c_cost = bst_res && seen.insert(&supp->effect).second ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
             if (supp->effect.est_cost == c_cost)
                 continue; // nothing to propagate..
 
