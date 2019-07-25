@@ -115,11 +115,11 @@ void graph::set_deferrable(flaw &f)
     } */
 }
 
-void graph::set_estimated_cost(flaw &f)
+void graph::set_estimated_cost(flaw &f, std::unordered_set<flaw *> &visited)
 {
     resolver *bst_res; // the flaw's best resolver..
     rational c_cost;
-    if (slv.get_sat_core().value(f.phi) == False)
+    if (slv.get_sat_core().value(f.phi) == False || visited.count(&f))
         c_cost = rational::POSITIVE_INFINITY;
     else
     {
@@ -129,51 +129,25 @@ void graph::set_estimated_cost(flaw &f)
     if (f.est_cost == c_cost)
         return; // nothing to propagate..
 
-    // the flaw costs queue (for flaw cost propagation)..
-    std::queue<flaw *> flaw_q;
-    // the set of already seen flaws (aimed at spotting cyclic causality)..
-    std::unordered_set<flaw *> seen({&f});
     if (!slv.trail.empty()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking..
         slv.trail.back().old_f_costs.try_emplace(&f, f.est_cost);
 
     // we update the flaw's estimated cost..
     f.est_cost = c_cost;
-    flaw_q.push(&f);
 #ifdef BUILD_GUI
     slv.fire_flaw_cost_changed(f);
 #endif
+    visited.insert(&f);
 
-    // we propagate the costs..
-    flaw *c_f; // the current flaw..
-    while (!flaw_q.empty())
-    {
-        c_f = flaw_q.front();
-        flaw_q.pop();
-
-        // we (try to) update the estimated costs of the supports' effects and enqueue them for cost propagation..
-        for (const auto &supp : c_f->supports)
+    // we (try to) update the estimated costs of the supports' effects and enqueue them for cost propagation..
+    if (f.supports.size() == 1)
+        set_estimated_cost((*f.supports.begin())->effect, visited);
+    else
+        for (const auto &supp : f.supports)
         {
-            if (slv.get_sat_core().value(supp->rho) == False || slv.get_sat_core().value(supp->effect.phi) == False)
-                continue; // nothing to propagate..
-
-            // this is the best resolver for the support's effect (for computing the resolver's effect's estimated cost)..
-            bst_res = supp->effect.get_best_resolver();
-            // this is the new estimated cost of the support's effect..
-            c_cost = bst_res && seen.insert(&supp->effect).second ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
-            if (supp->effect.est_cost == c_cost)
-                continue; // nothing to propagate..
-
-            if (!slv.trail.empty()) // we store the current support's effect's estimated cost, if not already stored, for allowing backtracking..
-                slv.trail.back().old_f_costs.try_emplace(&supp->effect, supp->effect.est_cost);
-
-            // we update the support's effect's estimated cost..
-            supp->effect.est_cost = c_cost;
-#ifdef BUILD_GUI
-            slv.fire_flaw_cost_changed(supp->effect);
-#endif
-            flaw_q.push(&supp->effect);
+            std::unordered_set<flaw *> c_visited = visited;
+            set_estimated_cost(supp->effect, c_visited);
         }
-    }
 }
 
 void graph::build()
@@ -285,7 +259,8 @@ void graph::expand_flaw(flaw &f)
     if (slv.sat.value(f.phi) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
         slv.flaws.erase(&f); // this flaw has already been solved..
 
-    set_estimated_cost(f);
+    std::unordered_set<flaw *> c_visited;
+    set_estimated_cost(f, c_visited);
     set_deferrable(f);
 }
 

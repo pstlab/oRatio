@@ -74,9 +74,23 @@ void composite_flaw::composite_resolver::apply()
     {
         const auto fss = combinations(std::vector<flaw *>(c_precs.begin(), c_precs.end()), get_graph().get_accuracy());
         for (const auto &fs : fss) // we create a new composite flaw for each of the possible combinations..
-            get_graph().new_flaw(*new composite_flaw(get_graph(), this, fs));
+            if (auto fs_it = get_graph().composite_flaws.find(std::set<flaw *>(fs.begin(), fs.end())); fs_it != get_graph().composite_flaws.end())
+                get_graph().new_causal_link(*fs_it->second, *this);
+            else
+            {
+                composite_flaw *cf = new composite_flaw(get_graph(), this, fs);
+                get_graph().composite_flaws.emplace(std::set<flaw *>(fs.begin(), fs.end()), cf);
+                get_graph().new_flaw(*cf);
+            }
     }
     else if (!c_precs.empty()) // we create a new composite flaw including all the preconditions of this resolver..
-        get_graph().new_flaw(*new composite_flaw(get_graph(), this, std::vector<flaw *>(c_precs.begin(), c_precs.end())));
+        if (auto fs_it = get_graph().composite_flaws.find(std::set<flaw *>(c_precs.begin(), c_precs.end())); fs_it != get_graph().composite_flaws.end())
+            get_graph().new_causal_link(*fs_it->second, *this);
+        else
+        {
+            composite_flaw *cf = new composite_flaw(get_graph(), this, std::vector<flaw *>(c_precs.begin(), c_precs.end()));
+            get_graph().composite_flaws.emplace(std::set<flaw *>(c_precs.begin(), c_precs.end()), cf);
+            get_graph().new_flaw(*cf);
+        }
 }
 } // namespace ratio

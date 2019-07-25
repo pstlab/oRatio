@@ -3,9 +3,9 @@
 #include "rational.h"
 #include <deque>
 #include <unordered_map>
-#ifdef GRAPH_PRUNING
+#include <map>
+#include <set>
 #include <unordered_set>
-#endif
 #include <vector>
 
 namespace smt
@@ -19,6 +19,7 @@ namespace ratio
 class solver;
 class flaw;
 class composite_flaw;
+class composite_resolver;
 class resolver;
 class atom_flaw;
 
@@ -27,6 +28,7 @@ class graph
   friend class solver;
   friend class flaw;
   friend class composite_flaw;
+  friend class composite_resolver;
   friend class atom_flaw;
 
 public:
@@ -42,8 +44,8 @@ private:
   void new_resolver(resolver &r);                     // notifies the graph that a new resolver 'r' has been created..
   void new_causal_link(flaw &f, resolver &r);         // notifies the graph that a new causal link between a flaw 'f' and a resolver 'r' has been created..
 
-  void set_deferrable(flaw &f);     // sets the deferrable state of the given flaw, propagating it to other flaws..
-  void set_estimated_cost(flaw &f); // sets the estimated cost of the given flaw, propagating it to other flaws..
+  void set_deferrable(flaw &f);                                          // sets the deferrable state of the given flaw, propagating it to other flaws..
+  void set_estimated_cost(flaw &f, std::unordered_set<flaw *> &visited); // sets the estimated cost of the given flaw, propagating it to other flaws..
 
   void build();                                 // builds the planning graph..
   void add_layer();                             // adds a layer to the current planning graph..
@@ -70,6 +72,7 @@ private:
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
+  std::map<std::set<flaw *>, flaw *> composite_flaws;         // the composite flaws indexed by their enclosing flaws (for reusing composite flaws whenever possible)..
 #ifdef GRAPH_PRUNING
   std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif

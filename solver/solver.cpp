@@ -329,7 +329,8 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
 #endif
                     if (sat.value(r->effect.phi) != False)
                     { // we update the cost and the deferrable state of the resolver's effect..
-                        gr.set_estimated_cost(r->effect);
+                        std::unordered_set<flaw *> c_visited;
+                        gr.set_estimated_cost(r->effect, c_visited);
                         gr.set_deferrable(r->effect);
                     }
                 }
@@ -341,7 +342,8 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                 for (const auto &f : at_phis_p->second)
                 { // 'f' will never appear in any incoming partial solutions..
                     assert(!flaws.count(f));
-                    gr.set_estimated_cost(*f);
+                    std::unordered_set<flaw *> c_visited;
+                    gr.set_estimated_cost(*f, c_visited);
                 }
                 // since we are at root-level, we can perform some cleaning..
                 gr.phis.erase(at_phis_p);
@@ -377,13 +379,17 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                     fire_resolver_cost_changed(*r);
 #endif
                     if (sat.value(r->effect.phi) != False) // we update the cost of the resolver's effect..
-                        gr.set_estimated_cost(r->effect);
+                    {
+                        std::unordered_set<flaw *> c_visited;
+                        gr.set_estimated_cost(r->effect, c_visited);
+                    }
                 }
             if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
                 for (const auto &f : at_phis_p->second)
                 { // 'f' will never appear in any incoming partial solutions..
                     assert(!flaws.count(f));
-                    gr.set_estimated_cost(*f);
+                    std::unordered_set<flaw *> c_visited;
+                    gr.set_estimated_cost(*f, c_visited);
                 }
         }
     }
