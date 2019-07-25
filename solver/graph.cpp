@@ -196,11 +196,13 @@ void graph::build()
                 expand_flaw(*flaw_q.front()); // we expand the flaw..
         flaw_q.pop_front();
 #else
-        std::deque<flaw *> c_q;
-        std::swap(c_q, flaw_q); // flaw_q is now empty..
-        for (const auto &f : c_q)
+        size_t q_size = flaw_q.size();
+        for (size_t i = 0; i < q_size; ++i)
+        {
             if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
-                expand_flaw(*f); // we expand the flaw..
+                expand_flaw(*flaw_q.front()); // we expand the flaw..
+            flaw_q.pop_front();
+        }
 #endif
     }
 }
@@ -210,16 +212,17 @@ void graph::add_layer()
     assert(slv.get_sat_core().root_level());
     LOG("adding a layer to the causal graph..");
 
-    std::deque<flaw *> f_q(flaw_q);
-    while (std::all_of(f_q.begin(), f_q.end(), [](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
+    while (std::all_of(flaw_q.begin(), flaw_q.end(), [](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
     {
         if (flaw_q.empty())
             throw std::runtime_error("the problem is inconsistent..");
-        std::deque<flaw *> c_q;
-        std::swap(c_q, flaw_q); // flaw_q is now empty..
-        for (const auto &f : c_q)
-            if (slv.get_sat_core().value(f->phi) != False) // we expand the flaw..
-                expand_flaw(*f);
+        size_t q_size = flaw_q.size();
+        for (size_t i = 0; i < q_size; ++i)
+        {
+            if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
+                expand_flaw(*flaw_q.front()); // we expand the flaw..
+            flaw_q.pop_front();
+        }
     }
 }
 
@@ -253,16 +256,18 @@ void graph::set_accuracy(const unsigned short &acc)
 void graph::expand_flaw(flaw &f)
 {
     assert(!f.expanded);
+    assert(std::find(flaw_q.begin(), flaw_q.end(), &f) != flaw_q.end());
 
     if (composite_flaw *sf = dynamic_cast<composite_flaw *>(&f))
         // we expand the unexpanded enclosing flaws..
         for (const auto &c_f : sf->flaws)
             if (!c_f->expanded)
-            { // we expand the enclosing flaw..
+            {
+                assert(std::find(flaw_q.begin(), flaw_q.end(), c_f) != flaw_q.end());
+                // we remove the enclosing flaw from the flaw queue..
+                flaw_q.erase(std::find(flaw_q.begin(), flaw_q.end(), c_f));
+                // .. and expand it..
                 c_f->expand();
-                // ..and remove it from the flaw queue..
-                if (auto f_it = std::find(flaw_q.begin(), flaw_q.end(), c_f); f_it != flaw_q.end())
-                    flaw_q.erase(f_it);
 
                 // we apply the enclosing flaw's resolvers..
                 for (const auto &r : c_f->resolvers)
