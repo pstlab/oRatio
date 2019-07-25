@@ -212,7 +212,8 @@ void graph::add_layer()
     assert(slv.get_sat_core().root_level());
     LOG("adding a layer to the causal graph..");
 
-    while (std::all_of(flaw_q.begin(), flaw_q.end(), [](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
+    std::deque<flaw *> f_q(flaw_q);
+    while (std::all_of(f_q.begin(), f_q.end(), [](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
     {
         if (flaw_q.empty())
             throw std::runtime_error("the problem is inconsistent..");
@@ -256,17 +257,15 @@ void graph::set_accuracy(const unsigned short &acc)
 void graph::expand_flaw(flaw &f)
 {
     assert(!f.expanded);
-    assert(std::find(flaw_q.begin(), flaw_q.end(), &f) != flaw_q.end());
 
     if (composite_flaw *sf = dynamic_cast<composite_flaw *>(&f))
         // we expand the unexpanded enclosing flaws..
         for (const auto &c_f : sf->flaws)
             if (!c_f->expanded)
             {
-                assert(std::find(flaw_q.begin(), flaw_q.end(), c_f) != flaw_q.end());
-                // we remove the enclosing flaw from the flaw queue..
-                flaw_q.erase(std::find(flaw_q.begin(), flaw_q.end(), c_f));
-                // .. and expand it..
+                if (auto f_it = std::find(flaw_q.begin(), flaw_q.end(), c_f); f_it != flaw_q.end())
+                    flaw_q.erase(f_it); // we remove the enclosing flaw from the flaw queue..
+                // we expand the enclosing flaw..
                 c_f->expand();
 
                 // we apply the enclosing flaw's resolvers..
