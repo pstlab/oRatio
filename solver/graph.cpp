@@ -203,9 +203,6 @@ void graph::build()
                 expand_flaw(*f); // we expand the flaw..
 #endif
     }
-
-    if (accuracy < MIN_ACCURACY)
-        set_accuracy(MIN_ACCURACY);
 }
 
 void graph::add_layer()
@@ -261,12 +258,7 @@ void graph::expand_flaw(flaw &f)
         // we expand the unexpanded enclosing flaws..
         for (const auto &c_f : sf->flaws)
             if (!c_f->expanded)
-            {
-                assert(!c_f->expanded);
-#ifdef BUILD_GUI
-                slv.fire_current_flaw(*c_f);
-#endif
-                // we expand the enclosing flaw..
+            { // we expand the enclosing flaw..
                 c_f->expand();
                 // ..and remove it from the flaw queue..
                 if (auto f_it = std::find(flaw_q.begin(), flaw_q.end(), c_f); f_it != flaw_q.end())

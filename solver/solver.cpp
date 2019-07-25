@@ -60,6 +60,10 @@ void solver::solve()
     for (const auto &st : sts)
         for (const auto &f : st->get_flaws())
             gr.new_flaw(*f, false); // we add the flaws to the planning graph..
+
+    if (gr.accuracy < MIN_ACCURACY)
+        gr.set_accuracy(MIN_ACCURACY);
+
     // we set the gamma variable..
     gr.check_gamma();
 
