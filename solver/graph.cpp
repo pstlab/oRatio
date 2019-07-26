@@ -209,7 +209,7 @@ void graph::set_accuracy(const unsigned short &acc)
     for (auto it = slv.flaws.begin(); it != slv.flaws.end();)
         if (composite_flaw *sf = dynamic_cast<composite_flaw *>(*it))
             // we remove the composite flaw from the current flaws..
-            slv.flaws.erase(it++);
+            it = slv.flaws.erase(it);
         else
             ++it;
 

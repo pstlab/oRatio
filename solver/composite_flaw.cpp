@@ -51,8 +51,6 @@ void composite_flaw::compute_resolvers()
 {
     for (const auto &f : flaws)
     {
-        if (!get_graph().slv.get_sat_core().new_clause({lit(get_phi(), false), f->get_phi()}))
-            throw std::runtime_error("the problem is inconsistent..");
         std::vector<flaw *> back;
         std::copy_if(flaws.begin(), flaws.end(), std::back_inserter(back), [f](const flaw *t) { return t != f; });
         for (const auto &r : f->get_resolvers())
@@ -78,6 +76,11 @@ void composite_flaw::composite_resolver::apply()
     // all the resolver's preconditions..
     std::unordered_set<flaw *> c_precs(res.get_preconditions().begin(), res.get_preconditions().end());
     c_precs.insert(precs.begin(), precs.end());
+    for (auto it = c_precs.begin(); it != c_precs.end();)
+        if (std::any_of((*it)->get_resolvers().begin(), (*it)->get_resolvers().end(), [this](resolver *r) { return get_graph().get_solver().get_sat_core().value(r->get_rho()) == True; }))
+            it = c_precs.erase(it);
+        else
+            ++it;
 
     if (c_precs.size() > get_graph().get_accuracy()) // we create sets having the size of the accuracy..
     {
