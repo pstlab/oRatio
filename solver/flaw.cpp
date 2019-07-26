@@ -8,7 +8,8 @@ using namespace smt;
 namespace ratio
 {
 
-flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), causes(causes), exclusive(exclusive) {}
+flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), phi(-1), causes(causes), exclusive(exclusive) {}
+flaw::flaw(graph &gr, const smt::var &p, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), phi(p), causes(causes), exclusive(exclusive) {}
 flaw::~flaw() {}
 
 resolver *flaw::get_best_resolver() const
@@ -29,19 +30,18 @@ void flaw::init()
     assert(!expanded);
     assert(gr.get_solver().get_sat_core().root_level());
 
-    if (causes.empty())
-        // this flaw is necessarily active..
-        phi = TRUE_var;
-    else
-    {
-        // we create a new variable..
-        std::vector<lit> cs;
-        for (const auto &c : causes)
-            cs.push_back(c->rho);
+    if (phi == -1)
+        if (causes.empty()) // this flaw is necessarily active..
+            phi = TRUE_var;
+        else
+        { // we create a new variable..
+            std::vector<lit> cs;
+            for (const auto &c : causes)
+                cs.push_back(c->rho);
 
-        // this flaw is active iff the conjunction of its causes is active..
-        phi = gr.get_solver().get_sat_core().new_conj(cs);
-    }
+            // this flaw is active iff the conjunction of its causes is active..
+            phi = gr.get_solver().get_sat_core().new_conj(cs);
+        }
 }
 
 void flaw::expand()

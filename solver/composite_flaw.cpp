@@ -16,7 +16,16 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
         return {};
 }
 
-composite_flaw::composite_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs) : flaw(gr, get_cause(cause)), flaws(fs)
+inline const var conj(graph &gr, const std::vector<flaw *> &fs)
+{
+    std::vector<lit> lits;
+    lits.reserve(fs.size());
+    for (const auto &f : fs)
+        lits.push_back(f->get_phi());
+    return gr.get_solver().get_sat_core().new_conj(lits);
+}
+
+composite_flaw::composite_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs) : flaw(gr, conj(gr, fs), get_cause(cause)), flaws(fs)
 {
     if (cause)
         make_precondition_of(*cause);
