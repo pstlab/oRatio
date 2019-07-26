@@ -232,17 +232,21 @@ void graph::expand_flaw(flaw &f)
 
     if (composite_flaw *sf = dynamic_cast<composite_flaw *>(&f))
         // we expand the unexpanded enclosing flaws..
-        for (const auto &c_f : sf->flaws)
-            if (!c_f->expanded)
+        for (const auto &enc_f : sf->flaws)
+            if (!enc_f->expanded)
             {
-                if (auto f_it = std::find(flaw_q.begin(), flaw_q.end(), c_f); f_it != flaw_q.end())
+                if (auto f_it = std::find(flaw_q.begin(), flaw_q.end(), enc_f); f_it != flaw_q.end())
                     flaw_q.erase(f_it); // we remove the enclosing flaw from the flaw queue..
                 // we expand the enclosing flaw..
-                c_f->expand();
+                enc_f->expand();
 
                 // we apply the enclosing flaw's resolvers..
-                for (const auto &r : c_f->resolvers)
+                for (const auto &r : enc_f->resolvers)
                     apply_resolver(*r);
+
+                std::unordered_set<flaw *> c_visited;
+                set_estimated_cost(*enc_f, c_visited);
+                set_deferrable(*enc_f);
             }
 
     // we expand the flaw..
