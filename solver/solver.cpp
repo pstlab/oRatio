@@ -331,7 +331,6 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                     { // we update the cost and the deferrable state of the resolver's effect..
                         std::unordered_set<flaw *> c_visited;
                         gr.set_estimated_cost(r->effect, c_visited);
-                        gr.set_deferrable(r->effect);
                     }
                 }
                 // since we are at root-level, we can perform some cleaning..

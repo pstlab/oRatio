@@ -3,6 +3,7 @@
 #include "flaw.h"
 #include "resolver.h"
 #include "combinations.h"
+#include "atom_flaw.h"
 #include "composite_flaw.h"
 #include <stdexcept>
 #include <cassert>
@@ -74,45 +75,6 @@ void graph::new_causal_link(flaw &f, resolver &r)
             throw std::runtime_error("the problem is inconsistent..");
     }
 #endif
-}
-
-void graph::set_deferrable(flaw &f)
-{
-    /*
-    assert(slv.get_sat_core().root_level());
-    bool def = !(slv.get_sat_core().value(f.phi) == True || f.est_cost.is_positive_infinite()) || std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.get_sat_core().value(r->get_rho()) == True || !r->get_estimated_cost().is_infinite(); });
-    if (f.deferrable == def)
-        return; // nothing to propagate..
-
-    // the flaw def queue (for flaw deferrable state propagation)..
-    std::queue<flaw *> flaw_q;
-    // we update the flaw's deferrable state..
-    f.deferrable = def;
-    flaw_q.push(&f);
-    // we propagate the deferrable states..
-    flaw *c_f; // the current flaw..
-    while (!flaw_q.empty())
-    {
-        c_f = flaw_q.front();
-        flaw_q.pop();
-
-        // we (try to) update the deferrable state of the supports' effects and enqueue them for deferrable state propagation..
-        for (const auto &supp : c_f->supports)
-            if (supp->effect.deferrable != c_f->deferrable)
-            { // we update the support's effect's deferrable state..
-                supp->effect.deferrable = c_f->deferrable;
-                flaw_q.push(&supp->effect);
-            }
-
-        // we (try to) update the deferrable state of the resolvers' preconditions and enqueue them for deferrable state propagation..
-        for (const auto &res : c_f->resolvers)
-            for (const auto &pre : res->preconditions)
-                if (def = c_f->deferrable && slv.get_sat_core().value(pre->phi) == True; pre->deferrable != def)
-                { // we update the precondition's deferrable state..
-                    pre->deferrable = def;
-                    flaw_q.push(pre);
-                }
-    } */
 }
 
 void graph::set_estimated_cost(flaw &f, std::unordered_set<flaw *> &visited)
@@ -246,7 +208,6 @@ void graph::expand_flaw(flaw &f)
 
                 std::unordered_set<flaw *> c_visited;
                 set_estimated_cost(*enc_f, c_visited);
-                set_deferrable(*enc_f);
             }
 
     // we expand the flaw..
@@ -265,7 +226,6 @@ void graph::expand_flaw(flaw &f)
 
     std::unordered_set<flaw *> c_visited;
     set_estimated_cost(f, c_visited);
-    set_deferrable(f);
 }
 
 void graph::apply_resolver(resolver &r)

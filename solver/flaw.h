@@ -34,7 +34,6 @@ public:
   const std::vector<resolver *> &get_supports() const { return supports; }
 
   smt::rational get_estimated_cost() const { return est_cost; }
-  bool is_deferrable() const { return deferrable; }
   bool is_expanded() const { return expanded; }
 
   resolver *get_best_resolver() const;
@@ -72,7 +71,6 @@ private:
   graph &gr;                                                 // the graph this flaw belongs to..
   smt::var phi;                                              // the propositional variable indicating whether the flaw is active or not..
   smt::rational est_cost = smt::rational::POSITIVE_INFINITY; // the current estimated cost of the flaw..
-  bool deferrable = false;                                   // a boolean indicating whether the flaw is deferrable..
   bool expanded = false;                                     // a boolean indicating whether the flaw has been expanded..
   std::vector<resolver *> resolvers;                         // the resolvers for this flaw..
   const std::vector<resolver *> causes;                      // the causes for having this flaw (used for activating the flaw through causal propagation)..
