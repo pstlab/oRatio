@@ -14,7 +14,7 @@ Block h = new Block(8.0);
 Block i = new Block(9.0);
 Block j = new Block(10.0);
 Block k = new Block(11.0);
-Block l = new Block(11.0);
+Block l = new Block(12.0);
 
 BlocksAgent agent = new BlocksAgent();
 BlocksState state = agent.propositional_state;
