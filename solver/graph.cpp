@@ -3,7 +3,6 @@
 #include "flaw.h"
 #include "resolver.h"
 #include "combinations.h"
-#include "atom_flaw.h"
 #include "composite_flaw.h"
 #include <stdexcept>
 #include <cassert>

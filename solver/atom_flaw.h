@@ -12,7 +12,6 @@ class atom;
 class atom_flaw : public flaw
 {
   friend class smart_type;
-  friend class graph;
 
 public:
   atom_flaw(graph &gr, resolver *const cause, atom &a, const bool is_fact);
