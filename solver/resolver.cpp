@@ -16,7 +16,7 @@ smt::rational resolver::get_estimated_cost() const
     if (gr.get_solver().get_sat_core().value(rho) == False)
         return rational::POSITIVE_INFINITY;
     else if (preconditions.empty())
-        return 0;
+        return intrinsic_cost;
 
     rational est_cost;
 #ifdef H_MAX
