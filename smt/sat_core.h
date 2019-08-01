@@ -45,6 +45,7 @@ public:
 
   bool assume(const lit &p);
   void pop();
+  bool simplify_db();
   bool check();
   bool check(const std::vector<lit> &lits);
 

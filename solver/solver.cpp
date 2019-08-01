@@ -64,6 +64,9 @@ void solver::solve()
     if (gr.accuracy < MIN_ACCURACY)
         gr.set_accuracy(MIN_ACCURACY);
 
+    // we perform some cleanings..
+    sat.simplify_db();
+
     // we set the gamma variable..
     gr.check_gamma();
 

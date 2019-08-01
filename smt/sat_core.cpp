@@ -413,11 +413,26 @@ void sat_core::pop()
         th->pop();
 }
 
+bool sat_core::simplify_db()
+{
+    assert(root_level());
+    std::vector<lit> cnfl;
+    if (!propagate(cnfl))
+        return false;
+    size_t j = 0;
+    for (size_t i = 0; i < constrs.size(); ++i)
+        if (constrs.at(i)->simplify())
+            constrs.at(i)->remove();
+        else
+            constrs[j++] = constrs.at(i);
+    constrs.resize(j);
+    return true;
+}
+
 bool sat_core::check()
 {
     std::vector<lit> cnfl;
     while (true)
-    {
         if (!propagate(cnfl))
         {
             if (root_level())
@@ -426,26 +441,14 @@ bool sat_core::check()
             size_t bt_level;
             // we analyze the conflict..
             analyze(cnfl, no_good, bt_level);
+            assert(cnfl.empty());
             while (decision_level() > bt_level)
                 pop();
             // we record the no-good..
             record(no_good);
         }
         else
-        {
-            if (root_level())
-            { // we perform some cleanings..
-                size_t j = 0;
-                for (size_t i = 0; i < constrs.size(); ++i)
-                    if (constrs.at(i)->simplify())
-                        constrs.at(i)->remove();
-                    else
-                        constrs[j++] = constrs.at(i);
-                constrs.resize(j);
-            }
             return true;
-        }
-    }
 }
 
 bool sat_core::check(const std::vector<lit> &lits)
