@@ -2,6 +2,7 @@
 #include "solver.h"
 #include "resolver.h"
 #include <cassert>
+#include <stdexcept>
 
 using namespace smt;
 

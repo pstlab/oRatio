@@ -2,6 +2,7 @@
 #include "cartesian_product.h"
 #include "combinations.h"
 #include "solver.h"
+#include <stdexcept>
 
 using namespace smt;
 
