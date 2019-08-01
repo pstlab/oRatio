@@ -13,11 +13,11 @@ rational::rational(I n) : num(n), den(1) {}
 rational::rational(I n, I d) : num(n), den(d) { normalize(); }
 
 bool rational::operator!=(const rational &rhs) const { return num != rhs.num || den != rhs.den; }
-bool rational::operator<(const rational &rhs) const { return (den == 0 && rhs.den == 0) ? num < rhs.num : num * rhs.den < den * rhs.num; }
+bool rational::operator<(const rational &rhs) const { return (den == rhs.den) ? num < rhs.num : num * rhs.den < den * rhs.num; }
 bool rational::operator<=(const rational &rhs) const { return num * rhs.den <= den * rhs.num; }
 bool rational::operator==(const rational &rhs) const { return num == rhs.num && den == rhs.den; }
 bool rational::operator>=(const rational &rhs) const { return num * rhs.den >= den * rhs.num; }
-bool rational::operator>(const rational &rhs) const { return (den == 0 && rhs.den == 0) ? num > rhs.num : num * rhs.den > den * rhs.num; }
+bool rational::operator>(const rational &rhs) const { return (den == rhs.den) ? num > rhs.num : num * rhs.den > den * rhs.num; }
 
 bool rational::operator!=(const I &rhs) const { return num != rhs || den != 1; }
 bool rational::operator<(const I &rhs) const { return num < den * rhs; }
