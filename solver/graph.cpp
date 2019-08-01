@@ -78,17 +78,22 @@ void graph::new_causal_link(flaw &f, resolver &r)
 
 void graph::set_estimated_cost(flaw &f, std::unordered_set<flaw *> &visited)
 {
-    resolver *bst_res; // the flaw's best resolver..
-    rational c_cost;
-    if (slv.get_sat_core().value(f.phi) == False || visited.count(&f))
+    rational c_cost; // the current cost..
+    if (slv.get_sat_core().value(f.phi) == False)
         c_cost = rational::POSITIVE_INFINITY;
     else
     {
-        bst_res = f.get_best_resolver();
+        resolver *bst_res = f.get_best_resolver(); // the flaw's best resolver..
         c_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
     }
     if (f.est_cost == c_cost)
         return; // nothing to propagate..
+    else if (visited.count(&f))
+    { // we are propagating costs within a cycle..
+        c_cost = rational::POSITIVE_INFINITY;
+        if (f.est_cost == c_cost)
+            return; // nothing to propagate..
+    }
 
     if (!slv.trail.empty()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking..
         slv.trail.back().old_f_costs.try_emplace(&f, f.est_cost);
