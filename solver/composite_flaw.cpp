@@ -55,7 +55,8 @@ void composite_flaw::compute_resolvers()
         std::vector<flaw *> back;
         std::copy_if(flaws.begin(), flaws.end(), std::back_inserter(back), [f](const flaw *t) { return t != f; });
         for (const auto &r : f->get_resolvers())
-            add_resolver(*new composite_resolver(get_graph(), *this, *r, back));
+            if (get_graph().get_solver().get_sat_core().value(r->get_rho()) != False)
+                add_resolver(*new composite_resolver(get_graph(), *this, *r, back));
     }
 }
 
