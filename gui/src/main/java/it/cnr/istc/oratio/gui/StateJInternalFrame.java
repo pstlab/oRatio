@@ -138,15 +138,14 @@ public class StateJInternalFrame extends JInternalFrame implements StateListener
             public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
                 StateNode node = (StateNode) event.getPath().getLastPathComponent();
                 if (!node.hasLoadedChildren) {
-                    SwingUtilities.invokeLater(() -> {
-                        node.loadChildren();
-                    });
+                    node.loadChildren();
                 }
             }
 
             @Override
             public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {
             }
+
         });
         state_tree.setRootVisible(false);
         add(new JScrollPane(state_tree));

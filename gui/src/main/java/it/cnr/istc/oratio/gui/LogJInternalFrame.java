@@ -1,5 +1,7 @@
 package it.cnr.istc.oratio.gui;
 
+import java.lang.reflect.InvocationTargetException;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JInternalFrame;
 import javax.swing.JList;
@@ -32,7 +34,11 @@ public class LogJInternalFrame extends JInternalFrame implements StateListener {
 
     @Override
     public void log(String log) {
-        SwingUtilities.invokeLater(() -> logs_model.addElement(log));
+        try {
+            SwingUtilities.invokeAndWait(() -> logs_model.addElement(log));
+        } catch (InvocationTargetException | InterruptedException e) {
+			e.printStackTrace();
+		}
     }
 
     @Override

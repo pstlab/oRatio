@@ -17,6 +17,7 @@ import it.cnr.istc.oratio.riddle.Core;
 import it.cnr.istc.oratio.riddle.Item;
 import it.cnr.istc.oratio.riddle.Predicate;
 import it.cnr.istc.oratio.riddle.Type;
+import it.cnr.istc.oratio.riddle.Item.EnumItem;
 
 /**
  * TimelinesList
@@ -68,7 +69,7 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
         q.addAll(core.getExprs().entrySet());
         while (!q.isEmpty()) {
             Map.Entry<String, Item> entry = q.poll();
-            if (!seen.contains(entry.getValue())) {
+            if (!seen.contains(entry.getValue()) && !(entry.getValue() instanceof EnumItem)) {
                 seen.add(entry.getValue());
                 Type type = getTimelineType(entry.getValue().getType());
                 if (type != null)
