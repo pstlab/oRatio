@@ -61,6 +61,10 @@ void solver::solve()
         for (const auto &f : st->get_flaws())
             gr.new_flaw(*f, false); // we add the flaws to the planning graph..
 
+#ifdef BUILD_GUI
+    fire_state_changed();
+#endif
+
     if (gr.accuracy < MIN_ACCURACY)
         gr.set_accuracy(MIN_ACCURACY);
 
