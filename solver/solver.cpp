@@ -452,14 +452,14 @@ void solver::solve_inconsistencies()
     std::vector<std::vector<std::pair<lit, double>>> incs = get_incs();
 
     while (!incs.empty())
-        if (const auto uns_flw = std::find_if(incs.begin(), incs.end(), [](const std::vector<std::pair<lit, double>> &v) { return v.empty(); }); uns_flw != incs.end())
+        if (const auto &uns_flw = std::find_if(incs.begin(), incs.end(), [](const std::vector<std::pair<lit, double>> &v) { return v.empty(); }); uns_flw != incs.end())
         { // we have an unsolvable flaw..
             // we backtrack..
             next();
             // we re-collect all the inconsistencies from all the smart-types..
             incs = get_incs();
         }
-        else if (const auto det_flw = std::find_if(incs.begin(), incs.end(), [](const std::vector<std::pair<lit, double>> &v) { return v.size() == 1; }); det_flw != incs.end())
+        else if (const auto &det_flw = std::find_if(incs.begin(), incs.end(), [](const std::vector<std::pair<lit, double>> &v) { return v.size() == 1; }); det_flw != incs.end())
         { // we have deterministic flaw..
             assert(get_sat_core().value(det_flw->at(0).first) != False);
             if (get_sat_core().value(det_flw->at(0).first) == Undefined)

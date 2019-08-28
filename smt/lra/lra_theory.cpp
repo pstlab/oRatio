@@ -435,7 +435,7 @@ bool lra_theory::check(std::vector<lit> &cnfl)
     assert(cnfl.empty());
     while (true)
     {
-        const auto x_i_it = std::find_if(tableau.begin(), tableau.end(), [this](const std::pair<var, row *> &v) { return value(v.first) < lb(v.first) || value(v.first) > ub(v.first); });
+        const auto &x_i_it = std::find_if(tableau.begin(), tableau.end(), [this](const std::pair<var, row *> &v) { return value(v.first) < lb(v.first) || value(v.first) > ub(v.first); });
         if (x_i_it == tableau.end())
             return true;
         // the current value of the x_i variable is out of its bounds..
@@ -444,7 +444,7 @@ bool lra_theory::check(std::vector<lit> &cnfl)
         const row *f_row = (*x_i_it).second;
         if (value(x_i) < lb(x_i))
         {
-            const auto x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, inf_rational> &v) { return (f_row->l.vars.at(v.first).is_positive() && value(v.first) < ub(v.first)) || (f_row->l.vars.at(v.first).is_negative() && value(v.first) > lb(v.first)); });
+            const auto &x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, inf_rational> &v) { return (f_row->l.vars.at(v.first).is_positive() && value(v.first) < ub(v.first)) || (f_row->l.vars.at(v.first).is_negative() && value(v.first) > lb(v.first)); });
             if (x_j_it != f_row->l.vars.end()) // var x_j can be used to increase the value of x_i..
                 pivot_and_update(x_i, (*x_j_it).first, lb(x_i));
             else // we generate an explanation for the conflict..
@@ -460,7 +460,7 @@ bool lra_theory::check(std::vector<lit> &cnfl)
         }
         else if (value(x_i) > ub(x_i))
         {
-            const auto x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, inf_rational> &v) { return (f_row->l.vars.at(v.first).is_negative() && value(v.first) < ub(v.first)) || (f_row->l.vars.at(v.first).is_positive() && value(v.first) > lb(v.first)); });
+            const auto &x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, inf_rational> &v) { return (f_row->l.vars.at(v.first).is_negative() && value(v.first) < ub(v.first)) || (f_row->l.vars.at(v.first).is_positive() && value(v.first) > lb(v.first)); });
             if (x_j_it != f_row->l.vars.end()) // var x_j can be used to decrease the value of x_i..
                 pivot_and_update(x_i, (*x_j_it).first, ub(x_i));
             else // we generate an explanation for the conflict..

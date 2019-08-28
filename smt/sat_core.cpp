@@ -453,8 +453,8 @@ bool sat_core::check()
 
 bool sat_core::check(const std::vector<lit> &lits)
 {
-    size_t c_rl = decision_level(); // the current root-level..
-    size_t c_dl;                    // the current decision-level..
+    const size_t c_rl = decision_level(); // the current root-level..
+    size_t c_dl;                          // the current decision-level..
     for (const auto &p : lits)
     {
         c_dl = decision_level();
