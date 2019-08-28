@@ -63,7 +63,7 @@ public:
     }
   }                                                          // returns the value of literal 'p'..
   size_t decision_level() const { return trail_lim.size(); } // returns the current decision level..
-  bool root_level() const { return trail_lim.empty(); }      // checks whether this decision level is root level..
+  bool root_level() const { return trail_lim.empty(); }      // checks whether the current decision level is root level..
 
 private:
   static size_t index(const lit &p) { return p.get_sign() ? p.get_var() << 1 : (p.get_var() << 1) ^ 1; }
