@@ -96,7 +96,7 @@ void test_no_good()
 
     bool nc = core.new_clause({b0, b1});
     assert(nc);
-    nc = core.new_clause({b0, b1, b6});
+    nc = core.new_clause({b0, b2, b6});
     assert(nc);
     nc = core.new_clause({lit(b1, false), lit(b2, false), b3});
     assert(nc);
@@ -117,6 +117,37 @@ void test_no_good()
     assert(assm);
 }
 
+void test_assumptions()
+{
+    sat_core core;
+
+    var b0 = core.new_var();
+    var b1 = core.new_var();
+    var b2 = core.new_var();
+    var b3 = core.new_var();
+    var b4 = core.new_var();
+    var b5 = core.new_var();
+    var b6 = core.new_var();
+    var b7 = core.new_var();
+    var b8 = core.new_var();
+
+    bool nc = core.new_clause({b0, b1});
+    assert(nc);
+    nc = core.new_clause({b0, b2, b6});
+    assert(nc);
+    nc = core.new_clause({lit(b1, false), lit(b2, false), b3});
+    assert(nc);
+    nc = core.new_clause({lit(b3, false), b4, b7});
+    assert(nc);
+    nc = core.new_clause({lit(b3, false), b5, b8});
+    assert(nc);
+    nc = core.new_clause({lit(b4, false), lit(b5, false)});
+    assert(nc);
+
+    bool assm = core.check({lit(b6, false), lit(b7, false), lit(b8, false), lit(b0, false)});
+    assert(!assm);
+}
+
 int main(int, char **)
 {
     test_basic_core_0();
@@ -124,4 +155,6 @@ int main(int, char **)
     test_basic_core_2();
 
     test_no_good();
+
+    test_assumptions();
 }
