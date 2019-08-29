@@ -230,34 +230,6 @@ void graph::expand_flaw(flaw &f)
 
     std::unordered_set<flaw *> c_visited;
     set_estimated_cost(f, c_visited);
-
-#ifdef CHECK_RESOLVERS
-    if (!f.get_estimated_cost().is_positive_infinite())
-    {
-        std::vector<lit> c_lits;
-        std::queue<const resolver *> q;
-        for (const auto &r : f.causes)
-            q.push(r);
-        while (!q.empty())
-        {
-            c_lits.push_back(q.front()->rho);
-            for (const auto &r : q.front()->effect.causes)
-                q.push(r);
-            q.pop();
-        }
-        for (const auto &r : f.resolvers)
-        {
-            c_lits.push_back(r->rho);
-            if (!slv.get_sat_core().check(c_lits))
-                if (!slv.get_sat_core().new_clause({lit(r->rho, false)}))
-                    throw std::runtime_error("the problem is inconsistent..");
-            c_lits.pop_back();
-        }
-
-        if (!slv.get_sat_core().check())
-            throw std::runtime_error("the problem is inconsistent..");
-    }
-#endif
 }
 
 void graph::apply_resolver(resolver &r)
