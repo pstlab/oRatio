@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(oRatio VERSION 2.0.0)
+project(oRatio VERSION 2.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -14,9 +14,12 @@ configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 set(HEURISTIC_TYPE "h_max" CACHE STRING "Heuristic type")
 set_property(CACHE HEURISTIC_TYPE PROPERTY STRINGS "h_max" "h_add")
 set(MIN_ACCURACY 1 CACHE STRING "Min heuristic accuracy")
-add_definitions(-DMIN_ACCURACY=${MIN_ACCURACY})
 set(MAX_ACCURACY 2 CACHE STRING "Max heuristic accuracy")
-add_definitions(-DMAX_ACCURACY=${MAX_ACCURACY})
+add_definitions(-DMIN_ACCURACY=${MIN_ACCURACY} -DMAX_ACCURACY=${MAX_ACCURACY})
+
+set(HOST "127.0.0.1" CACHE STRING "Socket listener host")
+set(PORT 1100 CACHE STRING "Socket listener port")
+add_definitions(-DHOST="${HOST}" -DPORT=${PORT})
 
 option(DEFERRABLE_FLAWS "Check for deferrable flaws" ON)
 option(CHECK_CYCLES "Check for causal cycles and adds non-cyclicity constraints" ON)
@@ -36,6 +39,11 @@ message(STATUS "Graph refining:         ${GRAPH_REFINING}" )
 message(STATUS "Graph pruning:          ${GRAPH_PRUNING}")
 message(STATUS "Check inconsistencies:  ${CHECK_INCONSISTENCIES}")
 message(STATUS "Build GUI:              ${BUILD_GUI}")
+
+if(BUILD_GUI)
+    message(STATUS "Socket listener host:   ${HOST}")
+    message(STATUS "Socket listener port:   ${PORT}")
+endif()
 
 if(HEURISTIC_TYPE MATCHES "h_max")
     add_definitions(-DH_MAX)
