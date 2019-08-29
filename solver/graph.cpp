@@ -143,6 +143,10 @@ void graph::build()
         }
 #endif
     }
+
+#ifdef GRAPH_REFINING
+    LOG("refining the causal graph..");
+#endif
 }
 
 void graph::add_layer()
@@ -248,6 +252,11 @@ void graph::apply_resolver(resolver &r)
 
     slv.restore_ni();
     res = nullptr;
+
+#ifdef GRAPH_REFINING
+    if (r.preconditions.empty() && slv.get_sat_core().value(r.rho) == Undefined)
+        empty_precs_resolvers.insert(&r);
+#endif
 }
 
 #ifdef DEFERRABLE_FLAWS

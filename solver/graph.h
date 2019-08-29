@@ -75,5 +75,8 @@ private:
 #ifdef GRAPH_PRUNING
   std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
+#ifdef GRAPH_REFINING
+  std::unordered_set<resolver *> empty_precs_resolvers; // resolvers having an empty precondition set..
+#endif
 };
 } // namespace ratio
