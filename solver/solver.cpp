@@ -338,6 +338,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                     { // we update the cost and the deferrable state of the resolver's effect..
                         std::unordered_set<flaw *> c_visited;
                         gr.set_estimated_cost(r->effect, c_visited);
+                        assert(c_visited.empty());
                     }
                 }
                 // since we are at root-level, we can perform some cleaning..
@@ -350,6 +351,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                     assert(!flaws.count(f));
                     std::unordered_set<flaw *> c_visited;
                     gr.set_estimated_cost(*f, c_visited);
+                    assert(c_visited.empty());
                 }
                 // since we are at root-level, we can perform some cleaning..
                 gr.phis.erase(at_phis_p);
@@ -388,6 +390,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                     {
                         std::unordered_set<flaw *> c_visited;
                         gr.set_estimated_cost(r->effect, c_visited);
+                        assert(c_visited.empty());
                     }
                 }
             if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
@@ -396,6 +399,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                     assert(!flaws.count(f));
                     std::unordered_set<flaw *> c_visited;
                     gr.set_estimated_cost(*f, c_visited);
+                    assert(c_visited.empty());
                 }
         }
     }

@@ -103,17 +103,12 @@ void graph::set_estimated_cost(flaw &f, std::unordered_set<flaw *> &visited)
 #ifdef BUILD_GUI
     slv.fire_flaw_cost_changed(f);
 #endif
-    visited.insert(&f);
 
     // we (try to) update the estimated costs of the supports' effects and enqueue them for cost propagation..
-    if (f.supports.size() == 1)
-        set_estimated_cost((*f.supports.begin())->effect, visited);
-    else
-        for (const auto &supp : f.supports)
-        {
-            std::unordered_set<flaw *> c_visited = visited;
-            set_estimated_cost(supp->effect, c_visited);
-        }
+    visited.insert(&f);
+    for (const auto &supp : f.supports)
+        set_estimated_cost(supp->effect, visited);
+    visited.erase(&f);
 }
 
 void graph::build()
@@ -216,6 +211,7 @@ void graph::expand_flaw(flaw &f)
 
                 std::unordered_set<flaw *> c_visited;
                 set_estimated_cost(*enc_f, c_visited);
+                assert(c_visited.empty());
             }
 
     // we expand the flaw..
@@ -234,6 +230,7 @@ void graph::expand_flaw(flaw &f)
 
     std::unordered_set<flaw *> c_visited;
     set_estimated_cost(f, c_visited);
+    assert(c_visited.empty());
 }
 
 void graph::apply_resolver(resolver &r)
