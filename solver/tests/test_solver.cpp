@@ -1,9 +1,6 @@
 #include "solver.h"
 #ifdef BUILD_GUI
 #include "socket_listener.h"
-
-#define HOST "127.0.0.1"
-#define PORT 1100
 #endif
 #include <iostream>
 #include <fstream>
