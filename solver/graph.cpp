@@ -138,10 +138,6 @@ void graph::build()
         }
 #endif
     }
-
-#ifdef GRAPH_REFINING
-    LOG("refining the causal graph..");
-#endif
 }
 
 void graph::add_layer()
@@ -333,6 +329,13 @@ std::vector<std::vector<resolver const *>> graph::circuits(flaw &f, resolver &r)
     std::vector<std::vector<resolver const *>> crts;
     circuit(f, r, stack, blocking_set, blocking_map, crts);
     return crts;
+}
+#endif
+
+#ifdef GRAPH_REFINING
+void graph::refine()
+{
+    LOG("refining the causal graph..");
 }
 #endif
 
