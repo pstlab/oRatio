@@ -108,7 +108,11 @@ token *lexer::next()
         ch = next_char();
         return mk_token(CARET_ID);
     case '!':
-        ch = next_char();
+        if ((ch = next_char()) == '=')
+        {
+            ch = next_char();
+            return mk_token(BANGEQ_ID);
+        }
         return mk_token(BANG_ID);
     case '.':
         ch = next_char();
