@@ -23,7 +23,6 @@ class flaw
 
 public:
   flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive = false);
-  flaw(graph &gr, const smt::var &p, const std::vector<resolver *> &causes, const bool &exclusive = false);
   flaw(const flaw &that) = delete;
   ~flaw();
 

@@ -36,7 +36,6 @@ void atom_flaw::compute_resolvers()
 {
     assert(get_graph().get_solver().get_sat_core().value(get_phi()) != False);
     assert(get_graph().get_solver().get_sat_core().value(atm.get_sigma()) != False);
-    bool unify = false;
     if (get_graph().get_solver().get_sat_core().value(atm.get_sigma()) == Undefined) // we check if the atom can unify..
     {
         // we collect the ancestors of this flaw, so as to avoid cyclic causality..
@@ -78,21 +77,20 @@ void atom_flaw::compute_resolvers()
 
             unify_atom *u_res = new unify_atom(get_graph(), *this, atm, t_atm, {lit(atm.get_sigma(), false), t_atm.get_sigma(), eq_v});
             assert(get_graph().get_solver().get_sat_core().value(u_res->get_rho()) != False);
-            unify = true;
             add_resolver(*u_res);
             get_graph().new_causal_link(t_flaw, *u_res);
         }
     }
 
     if (is_fact)
-        if (unify)
-            add_resolver(*new activate_fact(get_graph(), *this, atm));
-        else
+        if (get_resolvers().empty())
             add_resolver(*new activate_fact(get_graph(), get_phi(), *this, atm));
-    else if (unify)
-        add_resolver(*new activate_goal(get_graph(), *this, atm));
-    else
+        else
+            add_resolver(*new activate_fact(get_graph(), *this, atm));
+    else if (get_resolvers().empty())
         add_resolver(*new activate_goal(get_graph(), get_phi(), *this, atm));
+    else
+        add_resolver(*new activate_goal(get_graph(), *this, atm));
 }
 
 atom_flaw::activate_fact::activate_fact(graph &gr, atom_flaw &f, atom &a) : resolver(gr, 0, f), atm(a) {}

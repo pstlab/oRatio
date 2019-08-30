@@ -16,20 +16,7 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
         return {};
 }
 
-inline const var conj(graph &gr, resolver *const cause, const std::vector<flaw *> &fs)
-{
-    if (cause)
-    {
-        for (const auto &f : fs)
-            if (!gr.get_solver().get_sat_core().new_clause({lit(cause->get_rho(), false), f->get_phi()}))
-                throw unsolvable_exception();
-        return cause->get_rho();
-    }
-    else
-        return TRUE_var;
-}
-
-composite_flaw::composite_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs) : flaw(gr, conj(gr, cause, fs), get_cause(cause), true), flaws(fs)
+composite_flaw::composite_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs) : flaw(gr, get_cause(cause)), flaws(fs)
 {
     if (cause)
         make_precondition_of(*cause);
@@ -53,34 +40,53 @@ std::string composite_flaw::get_label() const
 
 void composite_flaw::compute_resolvers()
 {
+    std::vector<std::vector<resolver *>> rss;
     for (const auto &f : flaws)
-    {
-        std::vector<flaw *> back;
-        std::copy_if(flaws.begin(), flaws.end(), std::back_inserter(back), [f](const flaw *t) { return t != f; });
-        for (const auto &r : f->get_resolvers())
-            if (get_graph().get_solver().get_sat_core().value(r->get_rho()) != False)
-                add_resolver(*new composite_resolver(get_graph(), *this, *r, back));
-    }
+        rss.push_back(f->get_resolvers());
+
+    for (const auto &rs : cartesian_product(rss))
+        if (std::none_of(rs.begin(), rs.end(), [this](resolver *r) { return get_graph().get_solver().get_sat_core().value(r->get_rho()) == False; }))
+            add_resolver(*new composite_resolver(get_graph(), *this, rs));
 }
 
-composite_flaw::composite_resolver::composite_resolver(graph &gr, composite_flaw &s_flaw, const resolver &res, const std::vector<flaw *> &precs) : resolver(gr, res.get_intrinsic_cost(), s_flaw), res(res), precs(precs) {}
+rational intrinsic_costs(const std::vector<resolver *> &rs)
+{
+    rational cost;
+    for (const auto &r : rs)
+        cost += r->get_intrinsic_cost();
+    return cost;
+}
+
+composite_flaw::composite_resolver::composite_resolver(graph &gr, composite_flaw &s_flaw, const std::vector<resolver *> &rs) : resolver(gr, intrinsic_costs(rs), s_flaw), resolvers(rs) {}
 composite_flaw::composite_resolver::~composite_resolver() {}
 
 #ifdef BUILD_GUI
 std::string composite_flaw::composite_resolver::get_label() const
 {
-    return "ρ" + std::to_string(get_rho()) + " {" + res.get_label() + "}";
+    std::string r_str = "ρ" + std::to_string(get_rho()) + " {";
+    for (std::vector<resolver *>::const_iterator f_it = resolvers.cbegin(); f_it != resolvers.cend(); ++f_it)
+    {
+        if (f_it != resolvers.cbegin())
+            r_str += ", ";
+        r_str += (*f_it)->get_label();
+    }
+    r_str += "}";
+    return r_str;
 }
 #endif
 
 void composite_flaw::composite_resolver::apply()
 {
-    if (!get_graph().slv.get_sat_core().new_clause({lit(get_rho(), false), res.get_rho()}))
-        throw unsolvable_exception();
+    // the application of the resolver must trigger the application of the underlying resolvers..
+    for (const auto &r : resolvers)
+        if (!get_graph().slv.get_sat_core().new_clause({lit(get_rho(), false), r->get_rho()}))
+            throw unsolvable_exception();
 
     // all the resolver's preconditions..
-    std::unordered_set<flaw *> c_precs(res.get_preconditions().begin(), res.get_preconditions().end());
-    c_precs.insert(precs.begin(), precs.end());
+    std::unordered_set<flaw *> c_precs;
+    for (const auto &r : resolvers)
+        c_precs.insert(r->get_preconditions().begin(), r->get_preconditions().end());
+
     for (auto it = c_precs.begin(); it != c_precs.end();)
         if (std::any_of((*it)->get_resolvers().begin(), (*it)->get_resolvers().end(), [this](resolver *r) { return get_graph().get_solver().get_sat_core().value(r->get_rho()) == True; }))
             it = c_precs.erase(it);

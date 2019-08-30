@@ -8,8 +8,7 @@ using namespace smt;
 namespace ratio
 {
 
-flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), phi(-1), causes(causes), exclusive(exclusive) {}
-flaw::flaw(graph &gr, const smt::var &p, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), phi(p), causes(causes), exclusive(exclusive) {}
+flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), phi(causes.empty() ? TRUE_var : gr.get_solver().get_sat_core().new_var()), causes(causes), exclusive(exclusive) {}
 flaw::~flaw() {}
 
 resolver *flaw::get_best_resolver() const
@@ -30,18 +29,17 @@ void flaw::init()
     assert(!expanded);
     assert(gr.get_solver().get_sat_core().root_level());
 
-    if (phi == -1)
-        if (causes.empty()) // this flaw is necessarily active..
-            phi = TRUE_var;
-        else
-        { // we create a new variable..
-            std::vector<lit> cs;
-            for (const auto &c : causes)
-                cs.push_back(c->rho);
+    if (!causes.empty())
+    { // we link the new variable to the causes of the flaws..
+        std::vector<lit> cs;
+        cs.reserve(causes.size() + 1);
+        cs.push_back(phi);
+        for (const auto &c : causes)
+            cs.push_back(lit(c->rho, false));
 
-            // this flaw is active iff the conjunction of its causes is active..
-            phi = gr.get_solver().get_sat_core().new_conj(cs);
-        }
+        if (!gr.get_solver().get_sat_core().new_clause(cs))
+            throw unsolvable_exception();
+    }
 }
 
 void flaw::expand()
@@ -74,12 +72,18 @@ void flaw::expand()
 
 void flaw::add_resolver(resolver &r)
 {
+    // the activation of the resolver activates (and solves!) the flaw..
+    if (!gr.get_solver().get_sat_core().new_clause({lit(r.rho, false), phi}))
+        throw unsolvable_exception();
     resolvers.push_back(&r);
     gr.new_resolver(r);
 }
 
 void flaw::make_precondition_of(resolver &r)
 {
+    // the activation of the resolver forces the activation of the precondition flaw..
+    if (!gr.get_solver().get_sat_core().new_clause({lit(r.rho, false), phi}))
+        throw unsolvable_exception();
     r.preconditions.push_back(this);
     supports.push_back(&r);
 }
