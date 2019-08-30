@@ -190,6 +190,6 @@ protected:
 
 class unsolvable_exception : public std::exception
 {
-  const char *what() const override { return "the problem is unsolvable.."; }
+  const char *what() const noexcept override { return "the problem is unsolvable.."; }
 };
 } // namespace ratio
