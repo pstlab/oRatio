@@ -294,10 +294,7 @@ expression_statement::~expression_statement() {}
 void expression_statement::execute(const scope &scp, context &ctx) const
 {
     bool_expr be = dynamic_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx);
-    if (scp.get_core().get_sat_core().value(be->l) != smt::False)
-        scp.get_core().assert_facts({be->l});
-    else
-        throw unsolvable_exception();
+    scp.get_core().assert_facts({be->l});
 }
 
 disjunction_statement::disjunction_statement(const std::vector<std::pair<const std::vector<const riddle::ast::statement *>, const riddle::ast::expression *const>> &conjs) : riddle::ast::disjunction_statement(conjs) {}
