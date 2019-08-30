@@ -2,7 +2,6 @@
 #include "solver.h"
 #include "resolver.h"
 #include <cassert>
-#include <stdexcept>
 
 using namespace smt;
 
@@ -59,7 +58,7 @@ void flaw::expand()
     {
         // there is no way for solving this flaw..
         if (!gr.get_solver().get_sat_core().new_clause({lit(phi, false)})) // we force the phi variable at false..
-            throw std::runtime_error("the problem is inconsistent..");
+            throw unsolvable_exception();
     }
     else
     {
@@ -69,7 +68,7 @@ void flaw::expand()
             r_chs.push_back(r->rho);
         // we link the phi variable to the resolvers' rho variables..
         if (!(exclusive ? gr.get_solver().get_sat_core().exct_one(r_chs, phi) : gr.get_solver().get_sat_core().disj(r_chs, phi)))
-            throw std::runtime_error("the problem is inconsistent..");
+            throw unsolvable_exception();
     }
 }
 

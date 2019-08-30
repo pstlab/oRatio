@@ -194,7 +194,7 @@ void reusable_resource::new_fact(atom_flaw &f)
 
     // we avoid unification..
     if (!get_core().get_sat_core().new_clause({lit(f.get_phi(), false), atm.get_sigma()}))
-        throw std::runtime_error("the problem is inconsistent..");
+        throw unsolvable_exception();
 
     // we store the variables for on-line flaw resolution..
     for (const auto &c_atm : atoms)

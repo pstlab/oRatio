@@ -14,7 +14,6 @@
 #include "solver_listener.h"
 #endif
 #include <algorithm>
-#include <stdexcept>
 #include <math.h>
 #include <cassert>
 
@@ -237,7 +236,7 @@ void solver::take_decision(const lit &ch)
 
     // we take the decision..
     if (!get_sat_core().assume(ch) || !get_sat_core().check())
-        throw std::runtime_error("the problem is unsolvable");
+        throw unsolvable_exception();
     assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || f->get_estimated_cost().is_positive_infinite(); }); }));
     assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return r->get_estimated_cost().is_positive_infinite() || sat.value(r->rho) != False; }); }));
 
@@ -261,7 +260,7 @@ void solver::next()
     LOG("next..");
 
     if (root_level())
-        throw std::runtime_error("the problem is unsolvable");
+        throw unsolvable_exception();
 
     std::vector<lit> no_good;
     no_good.reserve(trail.size());
@@ -277,7 +276,7 @@ void solver::next()
     record(no_good);
 
     if (!get_sat_core().check())
-        throw std::runtime_error("the problem is unsolvable");
+        throw unsolvable_exception();
     assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || f->get_estimated_cost().is_positive_infinite(); }); }));
     assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return r->get_estimated_cost().is_positive_infinite() || sat.value(r->rho) != False; }); }));
 
@@ -480,7 +479,7 @@ void solver::solve_inconsistencies()
                     learnt.push_back(!l.decision);
                 record(learnt);
                 if (!get_sat_core().check())
-                    throw std::runtime_error("the problem is unsolvable");
+                    throw unsolvable_exception();
             }
 
             // we re-collect all the inconsistencies from all the smart-types..

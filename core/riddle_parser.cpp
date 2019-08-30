@@ -297,7 +297,7 @@ void expression_statement::execute(const scope &scp, context &ctx) const
     if (scp.get_core().get_sat_core().value(be->l) != smt::False)
         scp.get_core().assert_facts({be->l});
     else
-        throw std::runtime_error("the problem is inconsistent..");
+        throw unsolvable_exception();
 }
 
 disjunction_statement::disjunction_statement(const std::vector<std::pair<const std::vector<const riddle::ast::statement *>, const riddle::ast::expression *const>> &conjs) : riddle::ast::disjunction_statement(conjs) {}
@@ -366,15 +366,15 @@ void formula_statement::execute(const scope &scp, context &ctx) const
                 for (const auto &ev : alwd_vals)
                     if (!tt.is_assignable_from(static_cast<item *>(ev)->get_type())) // the target type is not a superclass of the value..
                         not_alwd_vals.push_back(smt::lit(scp.get_core().get_ov_theory().allows(ae->ev, *ev), false));
-                if (alwd_vals.size() == not_alwd_vals.size())                  // none of the values is allowed..
-                    throw std::runtime_error("the problem is inconsistent.."); // no need to go further..
+                if (alwd_vals.size() == not_alwd_vals.size()) // none of the values is allowed..
+                    throw unsolvable_exception();             // no need to go further..
                 else
                     scp.get_core().assert_facts(not_alwd_vals); // we inhibit the not allowed values..
             }
             else
-                throw std::runtime_error("the problem is inconsistent..");
+                throw unsolvable_exception();
         else
-            throw std::runtime_error("the problem is inconsistent..");
+            throw unsolvable_exception();
     }
 
     atom *a;

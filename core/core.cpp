@@ -246,7 +246,7 @@ void core::assert_facts(const std::vector<lit> &facts)
 {
     for (const auto &f : facts)
         if (!sat_cr.new_clause({lit(ni, false), f}))
-            throw std::runtime_error("the problem is unsolvable..");
+            throw unsolvable_exception();
 }
 
 void core::new_methods(const std::vector<const method *> &ms)

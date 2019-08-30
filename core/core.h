@@ -7,6 +7,7 @@
 #include "ov_theory.h"
 #ifdef BUILD_GUI
 #include <iostream>
+
 #define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << std::endl
 #else
 #define LOG(msg)
@@ -185,5 +186,11 @@ protected:
   void fire_read(const std::vector<std::string> &files) const;
   void fire_state_changed() const;
 #endif
+};
+
+class unsolvable_exception : public std::exception
+{
+public:
+  unsolvable_exception() : exception("the problem is unsolvable..") {}
 };
 } // namespace ratio

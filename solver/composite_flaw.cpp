@@ -2,7 +2,6 @@
 #include "cartesian_product.h"
 #include "combinations.h"
 #include "solver.h"
-#include <stdexcept>
 
 using namespace smt;
 
@@ -23,7 +22,7 @@ inline const var conj(graph &gr, resolver *const cause, const std::vector<flaw *
     {
         for (const auto &f : fs)
             if (!gr.get_solver().get_sat_core().new_clause({lit(cause->get_rho(), false), f->get_phi()}))
-                throw std::runtime_error("the problem is inconsistent..");
+                throw unsolvable_exception();
         return cause->get_rho();
     }
     else
@@ -77,7 +76,7 @@ std::string composite_flaw::composite_resolver::get_label() const
 void composite_flaw::composite_resolver::apply()
 {
     if (!get_graph().slv.get_sat_core().new_clause({lit(get_rho(), false), res.get_rho()}))
-        throw std::runtime_error("the problem is inconsistent..");
+        throw unsolvable_exception();
 
     // all the resolver's preconditions..
     std::unordered_set<flaw *> c_precs(res.get_preconditions().begin(), res.get_preconditions().end());

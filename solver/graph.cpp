@@ -4,7 +4,6 @@
 #include "resolver.h"
 #include "combinations.h"
 #include "composite_flaw.h"
-#include <stdexcept>
 #include <cassert>
 
 using namespace smt;
@@ -71,7 +70,7 @@ void graph::new_causal_link(flaw &f, resolver &r)
         for (const auto &res : cycle)
             no_cycle.push_back(lit(res->rho, false));
         if (!slv.get_sat_core().new_clause(no_cycle))
-            throw std::runtime_error("the problem is inconsistent..");
+            throw unsolvable_exception();
     }
 #endif
 }
@@ -119,7 +118,7 @@ void graph::build()
     while (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
     {
         if (flaw_q.empty())
-            throw std::runtime_error("the problem is inconsistent..");
+            throw unsolvable_exception();
 #ifdef DEFERRABLE_FLAWS
         assert(!flaw_q.front()->expanded);
         if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
@@ -149,7 +148,7 @@ void graph::add_layer()
     while (std::all_of(f_q.begin(), f_q.end(), [](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
     {
         if (flaw_q.empty())
-            throw std::runtime_error("the problem is inconsistent..");
+            throw unsolvable_exception();
         size_t q_size = flaw_q.size();
         for (size_t i = 0; i < q_size; ++i)
         {
@@ -218,7 +217,7 @@ void graph::expand_flaw(flaw &f)
         apply_resolver(*r);
 
     if (!slv.get_sat_core().check())
-        throw std::runtime_error("the problem is inconsistent..");
+        throw unsolvable_exception();
 
     // we clean up already solved flaws..
     if (slv.sat.value(f.phi) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
@@ -240,7 +239,7 @@ void graph::apply_resolver(resolver &r)
     catch (const std::runtime_error &)
     {
         if (!slv.get_sat_core().new_clause({lit(r.rho, false)}))
-            throw std::runtime_error("the problem is inconsistent..");
+            throw unsolvable_exception();
     }
 
     slv.restore_ni();
@@ -357,7 +356,7 @@ void graph::check_gamma()
     for (const auto &f : flaw_q)
         if (already_closed.insert(f->phi).second)
             if (!slv.get_sat_core().new_clause({lit(gamma, false), lit(f->phi, false)}))
-                throw std::runtime_error("the problem is inconsistent..");
+                throw unsolvable_exception();
 #endif
     slv.take_decision(gamma);
 }
