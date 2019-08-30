@@ -1,5 +1,6 @@
 language: cpp
 compiler: gcc
+dist: bionic
 
 env:
   - BUILD_TYPE=Debug GRAPH_PRUNING=ON CHECK_INCONSISTENCIES=ON CHECK_CYCLES=ON MAX_ACCURACY=1
