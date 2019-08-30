@@ -65,10 +65,6 @@ void solver::solve()
     fire_state_changed();
 #endif
 
-#ifdef GRAPH_REFINING
-    gr.refine();
-#endif
-
     if (gr.accuracy < MIN_ACCURACY)
         gr.set_accuracy(MIN_ACCURACY);
 

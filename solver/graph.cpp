@@ -332,13 +332,6 @@ std::vector<std::vector<resolver const *>> graph::circuits(flaw &f, resolver &r)
 }
 #endif
 
-#ifdef GRAPH_REFINING
-void graph::refine()
-{
-    LOG("refining the causal graph..");
-}
-#endif
-
 void graph::check_gamma()
 {
     assert(slv.root_level());
