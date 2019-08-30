@@ -25,6 +25,7 @@ class Truck : StateVariable {
     predicate DriveTo(Location l) {
         duration >= 1.0;
         goal at = new At(end:start);
+        at.l.id != l.id;
         at.l.city == l.city;
     }
 }
@@ -43,6 +44,7 @@ class Airplane : StateVariable {
     predicate FlyTo(Airport a) {
         duration >= 1.0;
         goal at = new At(end:start);
+        at.a.id != a.id;
     }
 }
 
