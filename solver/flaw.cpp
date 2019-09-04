@@ -62,11 +62,20 @@ void flaw::expand()
     {
         // we need to take a decision for solving this flaw..
         std::vector<lit> r_chs;
+        r_chs.reserve(resolvers.size() + 1);
+        r_chs.push_back(lit(phi, false));
         for (const auto &r : resolvers)
             r_chs.push_back(r->rho);
+
         // we link the phi variable to the resolvers' rho variables..
-        if (!(exclusive ? gr.get_solver().get_sat_core().exct_one(r_chs, phi) : gr.get_solver().get_sat_core().disj(r_chs, phi)))
+        if (!gr.get_solver().get_sat_core().new_clause(r_chs))
             throw unsolvable_exception();
+
+        if (exclusive)
+            for (size_t i = 0; i < resolvers.size(); ++i)
+                for (size_t j = i + 1; j < resolvers.size(); ++j)
+                    if (!gr.get_solver().get_sat_core().new_clause({lit(resolvers[i]->rho, false), lit(resolvers[j]->rho, false)}))
+                        throw unsolvable_exception();
     }
 }
 
@@ -81,9 +90,6 @@ void flaw::add_resolver(resolver &r)
 
 void flaw::make_precondition_of(resolver &r)
 {
-    // the activation of the resolver forces the activation of the precondition flaw..
-    if (!gr.get_solver().get_sat_core().new_clause({lit(r.rho, false), phi}))
-        throw unsolvable_exception();
     r.preconditions.push_back(this);
     supports.push_back(&r);
 }
