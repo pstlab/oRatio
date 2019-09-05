@@ -281,9 +281,6 @@ bool graph::is_deferrable(flaw &f)
 {
     if (slv.get_sat_core().value(f.phi) == True)
         return false;
-    else if (composite_flaw *cf = dynamic_cast<composite_flaw *>(&f))
-        if (std::any_of(cf->flaws.begin(), cf->flaws.end(), [this](flaw *sf) { return is_deferrable(*sf); }))
-            return true;
 
     std::queue<flaw *> q;
     q.push(&f);
