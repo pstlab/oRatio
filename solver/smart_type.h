@@ -10,6 +10,7 @@ namespace ratio
 {
 
 class solver;
+class graph;
 class atom;
 class flaw;
 class atom_flaw;
@@ -18,6 +19,7 @@ class resolver;
 class smart_type : public type
 {
   friend class solver;
+  friend class graph;
 
 public:
   smart_type(solver &slv, scope &scp, const std::string &name);

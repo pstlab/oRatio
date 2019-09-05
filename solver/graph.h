@@ -61,6 +61,10 @@ private:
   std::vector<std::vector<resolver const *>> circuits(flaw &f, resolver &r) const; // returns all the simple circuits starting from node 'f' and containing resolver 'r'..
 #endif
 
+#ifdef CHECK_RESOLVERS
+  void check_resolvers(); // checks the applicability of the resolvers and performs some graph refinement..
+#endif
+
   void check_gamma(); // checks and possibly resets the value of gamma..
 
 private:

@@ -51,27 +51,15 @@ void solver::solve()
         q.pop();
     }
 
-    // we build the initial causal graph..
-    gr.build();
+    if (gr.accuracy < MIN_ACCURACY)
+        gr.set_accuracy(MIN_ACCURACY);
 
-    // we extract the initial inconsistencies (and translate them into flaws)..
-    std::vector<std::vector<std::pair<lit, double>>> incs = get_incs();
-    for (const auto &st : sts)
-        for (const auto &f : st->get_flaws())
-            gr.new_flaw(*f, false); // we add the flaws to the planning graph..
+    // we set the gamma variable..
+    gr.check_gamma();
 
 #ifdef BUILD_GUI
     fire_state_changed();
 #endif
-
-    if (gr.accuracy < MIN_ACCURACY)
-        gr.set_accuracy(MIN_ACCURACY);
-
-    // we perform some cleanings..
-    sat.simplify_db();
-
-    // we set the gamma variable..
-    gr.check_gamma();
 
 #ifdef CHECK_INCONSISTENCIES
     // we solve all the current inconsistencies..
@@ -245,14 +233,8 @@ void solver::take_decision(const lit &ch)
 #endif
 
     // we check if we need to expand the graph..
-    if (root_level()) // since we are at root-level, we can reason about flaws..
-    {
-        for (const auto &st : sts)
-            for (const auto &f : st->get_flaws())
-                gr.new_flaw(*f, false); // we add the flaws to the planning graph..
-
+    if (root_level())
         gr.check_gamma();
-    }
 }
 
 void solver::next()
@@ -286,13 +268,7 @@ void solver::next()
 
     // we check if we need to expand the graph..
     if (root_level()) // since we are at root-level, we can reason about flaws..
-    {
-        for (const auto &st : sts)
-            for (const auto &f : st->get_flaws())
-                gr.new_flaw(*f, false); // we add the flaws to the planning graph..
-
         gr.check_gamma();
-    }
 }
 
 bool solver::propagate(const lit &p, std::vector<lit> &cnfl)

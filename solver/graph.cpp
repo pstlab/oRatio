@@ -4,6 +4,7 @@
 #include "resolver.h"
 #include "combinations.h"
 #include "composite_flaw.h"
+#include "smart_type.h"
 #include <cassert>
 
 using namespace smt;
@@ -114,18 +115,22 @@ void graph::build()
     assert(slv.get_sat_core().root_level());
     LOG("building the causal graph..");
 
-    while (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
+#ifdef CHECK_RESOLVERS
+    do
     {
-        if (flaw_q.empty())
-            throw unsolvable_exception();
+#endif
+        while (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
+        {
+            if (flaw_q.empty())
+                throw unsolvable_exception();
 #ifdef DEFERRABLE_FLAWS
-        assert(!flaw_q.front()->expanded);
-        if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
-            if (is_deferrable(*flaw_q.front())) // we have a deferrable flaw: we can postpone its expansion..
-                flaw_q.push_back(flaw_q.front());
-            else
-                expand_flaw(*flaw_q.front()); // we expand the flaw..
-        flaw_q.pop_front();
+            assert(!flaw_q.front()->expanded);
+            if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
+                if (is_deferrable(*flaw_q.front())) // we have a deferrable flaw: we can postpone its expansion..
+                    flaw_q.push_back(flaw_q.front());
+                else
+                    expand_flaw(*flaw_q.front()); // we expand the flaw..
+            flaw_q.pop_front();
 #else
         size_t q_size = flaw_q.size();
         for (size_t i = 0; i < q_size; ++i)
@@ -135,13 +140,28 @@ void graph::build()
             flaw_q.pop_front();
         }
 #endif
-    }
+        }
+
+        // we extract the inconsistencies (and translate them into flaws)..
+        std::vector<std::vector<std::pair<lit, double>>> incs = slv.get_incs();
+        for (const auto &st : slv.sts)
+            for (const auto &f : st->get_flaws())
+                new_flaw(*f, false); // we add the flaws to the planning graph..
+
+#ifdef CHECK_RESOLVERS
+        check_resolvers();
+    } while (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }));
+#endif
+
+    // we perform some cleanings..
+    slv.get_sat_core().simplify_db();
 }
 
 void graph::add_layer()
 {
-    assert(slv.get_sat_core().root_level());
     LOG("adding a layer to the causal graph..");
+    assert(slv.get_sat_core().root_level());
+    assert(std::none_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }));
 
     std::deque<flaw *> f_q(flaw_q);
     while (std::all_of(f_q.begin(), f_q.end(), [](flaw *f) { return f->get_estimated_cost().is_infinite(); }))
@@ -156,6 +176,12 @@ void graph::add_layer()
             flaw_q.pop_front();
         }
     }
+
+#ifdef CHECK_RESOLVERS
+    check_resolvers();
+    if (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
+        build();
+#endif
 }
 
 void graph::set_accuracy(const unsigned short &acc)
@@ -334,6 +360,41 @@ std::vector<std::vector<resolver const *>> graph::circuits(flaw &f, resolver &r)
 }
 #endif
 
+#ifdef CHECK_RESOLVERS
+void graph::check_resolvers()
+{
+    LOG("checking resolvers..");
+
+    assert(slv.root_level());
+    assert(std::none_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }));
+
+    // since the 'rhos' map can change within the check we make a copy..
+    std::unordered_map<smt::var, std::vector<resolver *>> c_rhos = rhos;
+    for (const auto &r : c_rhos)
+        if (slv.get_sat_core().value(r.first) == Undefined)
+        {
+            if (!slv.get_sat_core().assume(r.first) || !slv.get_sat_core().check())
+                throw unsolvable_exception();
+
+            if (!slv.root_level()) // the resolver is applicable..
+                if (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
+                { // the resolver is incompatible with the current graph..
+                    slv.get_sat_core().pop();
+                    if (!slv.get_sat_core().new_clause({lit(r.first, false), lit(gamma, false)}) || !slv.get_sat_core().check())
+                        throw unsolvable_exception();
+                }
+                else
+                    slv.get_sat_core().pop();
+            else
+            { // the resolver is not applicable..
+                assert(slv.get_sat_core().value(r.first) == False);
+                if (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
+                    return;
+            }
+        }
+}
+#endif
+
 void graph::check_gamma()
 {
     assert(slv.root_level());
@@ -349,12 +410,13 @@ void graph::check_gamma()
             add_layer(); // we add a layer to the current graph..
         // we create a new graph var..
         gamma = slv.get_sat_core().new_var();
+        LOG("graph var is: γ" << std::to_string(gamma));
 #ifdef GRAPH_PRUNING
         already_closed.clear();
 #endif
-        LOG("graph var is: γ" << std::to_string(gamma));
     }
 #ifdef GRAPH_PRUNING
+    LOG("pruning the graph..");
     // these flaws have not been expanded, hence, cannot have a solution..
     for (const auto &f : flaw_q)
         if (already_closed.insert(f->phi).second)
