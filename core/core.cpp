@@ -56,7 +56,7 @@ void core::read(const std::string &script)
 #endif
 
     if (!sat_cr.check())
-        throw std::runtime_error("the input problem is inconsistent..");
+        throw unsolvable_exception();
 #ifdef BUILD_GUI
     fire_state_changed();
 #endif
@@ -75,7 +75,7 @@ void core::read(const std::vector<std::string> &files)
             cus.push_back(cu);
         }
         else
-            throw std::invalid_argument("file not found: " + f);
+            throw unsolvable_exception();
 
     for (const auto &cu : c_cus)
         cu->declare(*this);

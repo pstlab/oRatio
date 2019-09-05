@@ -2,6 +2,7 @@
 #include "solver.h"
 #include "atom.h"
 #include "atom_flaw.h"
+#include <stdexcept>
 
 using namespace smt;
 

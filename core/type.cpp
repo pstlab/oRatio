@@ -6,6 +6,7 @@
 #include "method.h"
 #include "predicate.h"
 #include <algorithm>
+#include <stdexcept>
 #include <cassert>
 
 namespace ratio

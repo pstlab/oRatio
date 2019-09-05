@@ -188,6 +188,11 @@ protected:
 #endif
 };
 
+class inconsistency_exception : public std::exception
+{
+  const char *what() const noexcept override { return "an inconsistency has been found.."; }
+};
+
 class unsolvable_exception : public std::exception
 {
   const char *what() const noexcept override { return "the problem is unsolvable.."; }

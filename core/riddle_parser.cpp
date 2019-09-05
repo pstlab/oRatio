@@ -364,23 +364,14 @@ void formula_statement::execute(const scope &scp, context &ctx) const
                     if (!tt.is_assignable_from(static_cast<item *>(ev)->get_type())) // the target type is not a superclass of the value..
                         not_alwd_vals.push_back(smt::lit(scp.get_core().get_ov_theory().allows(ae->ev, *ev), false));
                 if (alwd_vals.size() == not_alwd_vals.size()) // none of the values is allowed..
-                {
-                    scp.get_core().assert_facts({false});
-                    return; // no need to go further..
-                }
-                else
-                    scp.get_core().assert_facts(not_alwd_vals); // we inhibit the not allowed values..
+                    throw inconsistency_exception();
+                else // we inhibit the not allowed values..
+                    scp.get_core().assert_facts(not_alwd_vals);
             }
-            else
-            { // the evaluated expression is a constant which cannot be assigned to the target type (which is a subclass of the type of the evaluated expression)..
-                scp.get_core().assert_facts({false});
-                return; // no need to go further..
-            }
-        else
-        { // the evaluated expression is unrelated with the target type (we are probably in the presence of a modeling error!)..
-            scp.get_core().assert_facts({false});
-            return; // no need to go further..
-        }
+            else // the evaluated expression is a constant which cannot be assigned to the target type (which is a subclass of the type of the evaluated expression)..
+                throw inconsistency_exception();
+        else // the evaluated expression is unrelated with the target type (we are probably in the presence of a modeling error!)..
+            throw inconsistency_exception();
     }
 
     atom *a;

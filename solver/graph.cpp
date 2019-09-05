@@ -261,7 +261,7 @@ void graph::apply_resolver(resolver &r)
     {
         r.apply();
     }
-    catch (const std::runtime_error &)
+    catch (const inconsistency_exception &)
     {
         if (!slv.get_sat_core().new_clause({lit(r.rho, false)}))
             throw unsolvable_exception();
