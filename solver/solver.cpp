@@ -51,6 +51,9 @@ void solver::solve()
         q.pop();
     }
 
+    // we build the initial graph..
+    gr.build();
+
     if (gr.accuracy < MIN_ACCURACY)
         gr.set_accuracy(MIN_ACCURACY);
 

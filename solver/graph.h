@@ -61,8 +61,9 @@ private:
   std::vector<std::vector<resolver const *>> circuits(flaw &f, resolver &r) const; // returns all the simple circuits starting from node 'f' and containing resolver 'r'..
 #endif
 
-#ifdef CHECK_RESOLVERS
-  void check_resolvers(); // checks the applicability of the resolvers and performs some graph refinement..
+#ifdef CHECK_GRAPH
+  void check_graph();                                                                       // checks the applicability of the resolvers and performs some graph refinement..
+  bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::vector<resolver *> &ina_r, std::vector<resolver *> &inv_r); // checks the solvability of the given flaw filling the set of inapplicable resolvers (i.e., those which can never be applyed) and the set of invalid resolvers (i.e., those which are not valid in the current graph)..
 #endif
 
   void check_gamma(); // checks and possibly resets the value of gamma..
@@ -75,7 +76,6 @@ private:
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
-  std::map<std::set<flaw *>, flaw *> composite_flaws;         // the composite flaws indexed by their enclosing flaws (for reusing composite flaws whenever possible)..
 #ifdef GRAPH_PRUNING
   std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
