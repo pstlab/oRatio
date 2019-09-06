@@ -66,8 +66,10 @@ void graph::new_causal_link(flaw &f, resolver &r)
 #ifdef CHECK_CYCLES
     LOG("checking cycles..");
     std::vector<std::vector<resolver const *>> cs = circuits(f, r);
+#ifdef BUILD_GUI
     if (!cs.empty())
         LOG("found " << std::to_string(cs.size()) << " cycles..");
+#endif
     for (const auto &cycle : cs)
     {
         std::vector<lit> no_cycle;
@@ -376,10 +378,12 @@ void graph::check_graph()
         check_flaw(*f, visited, inv_r, inc_r);
     assert(visited.empty());
 
+#ifdef BUILD_GUI
     if (!inv_r.empty())
         LOG("found " << std::to_string(inv_r.size()) << " invalid resolvers..");
     if (!inc_r.empty())
         LOG("found " << std::to_string(inc_r.size()) << " resolvers incompatible with the current graph..");
+#endif
 
     for (const auto &r : inv_r)
         if (!slv.get_sat_core().new_clause({lit(r->rho, false)}))
