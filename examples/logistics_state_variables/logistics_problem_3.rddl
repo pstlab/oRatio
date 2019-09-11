@@ -26,4 +26,4 @@ fact at_obj22_pos2 = new obj22.At(l:pos2, start:origin);  at_obj22_pos2.duration
 fact at_obj23_pos2 = new obj23.At(l:pos2, start:origin);  at_obj23_pos2.duration >= 1.0;
 
 goal at_obj11_apt1 = new obj11.At(l:apt1, end:horizon);
-goal at_obj13_apt1 = new obj13.At(l:apt1, end:horizon);
+goal at_obj13_apt2 = new obj13.At(l:apt2, end:horizon);
