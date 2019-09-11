@@ -9,8 +9,7 @@ using namespace ratio;
 class test_solver : public core
 {
     virtual void solve() override {}
-    virtual void new_fact(atom &atm) override {}
-    virtual void new_goal(atom &atm) override {}
+    virtual void new_atom(atom &atm, const bool &is_fact) override {}
     virtual void new_disjunction(context &ctx, const disjunction &disj) override {}
 };
 

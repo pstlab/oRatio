@@ -141,42 +141,21 @@ void state_variable::new_predicate(predicate &pred)
     new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
 }
 
-void state_variable::new_fact(atom_flaw &f)
+void state_variable::new_atom(atom_flaw &f)
 {
-    // we apply interval-predicate whenever the fact becomes active..
     atom &atm = f.get_atom();
-    set_ni(atm.get_sigma());
-    get_core().get_predicate("IntervalPredicate").apply_rule(atm);
-    restore_ni();
-
-    // we store the variables for on-line flaw resolution..
-    for (const auto &c_atm : atoms)
-        store_variables(atm, *c_atm.first);
-
-    // we store, for the fact, its atom listener..
-    atoms.push_back({&atm, new sv_atom_listener(*this, atm)});
-
-    // we filter out those atoms which are not strictly active..
-    if (atm.get_core().get_sat_core().value(atm.get_sigma()) == True)
-    {
-        expr c_scope = atm.get(TAU);
-        if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))                  // the 'tau' parameter is a variable..
-            for (const auto &val : atm.get_core().get_ov_theory().value(enum_scope->ev)) // we check for all its allowed values..
-                to_check.insert(static_cast<item *>(val));
-        else // the 'tau' parameter is a constant..
-            to_check.insert(&*c_scope);
+    if (f.is_fact)
+    { // we apply interval-predicate whenever the fact becomes active..
+        set_ni(atm.get_sigma());
+        get_core().get_predicate("IntervalPredicate").apply_rule(atm);
+        restore_ni();
     }
-}
-
-void state_variable::new_goal(atom_flaw &f)
-{
-    atom &atm = f.get_atom();
 
     // we store the variables for on-line flaw resolution..
     for (const auto &c_atm : atoms)
         store_variables(atm, *c_atm.first);
 
-    // we store, for the goal, its atom listener..
+    // we store, for the atom, its atom listener..
     atoms.push_back({&atm, new sv_atom_listener(*this, atm)});
 
     // we filter out those atoms which are not strictly active..

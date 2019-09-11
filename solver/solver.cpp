@@ -163,10 +163,10 @@ expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_
     return xp;
 }
 
-void solver::new_fact(atom &atm)
+void solver::new_atom(atom &atm, const bool &is_fact)
 {
     // we create a new atom flaw representing a fact..
-    atom_flaw *af = new atom_flaw(gr, gr.res, atm, true);
+    atom_flaw *af = new atom_flaw(gr, gr.res, atm, is_fact);
     gr.new_flaw(*af);
 
     // we associate the flaw to the atom..
@@ -180,32 +180,7 @@ void solver::new_fact(atom &atm)
         while (!q.empty())
         {
             if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
-                st->new_fact(*af);
-            for (const auto &st : q.front()->get_supertypes())
-                q.push(st);
-            q.pop();
-        }
-    }
-}
-
-void solver::new_goal(atom &atm)
-{
-    // we create a new atom flaw representing a goal..
-    atom_flaw *af = new atom_flaw(gr, gr.res, atm, false);
-    gr.new_flaw(*af);
-
-    // we associate the flaw to the atom..
-    reason.emplace(&atm, af);
-
-    // we check if we need to notify the new goal to any smart types..
-    if (&atm.get_type().get_scope() != this)
-    {
-        std::queue<type *> q;
-        q.push(static_cast<type *>(&atm.get_type().get_scope()));
-        while (!q.empty())
-        {
-            if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
-                st->new_goal(*af);
+                st->new_atom(*af);
             for (const auto &st : q.front()->get_supertypes())
                 q.push(st);
             q.pop();

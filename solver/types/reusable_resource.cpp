@@ -184,10 +184,13 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
 
 void reusable_resource::new_predicate(predicate &) { throw std::logic_error("it is not possible to define predicates on a reusable resource.."); }
 
-void reusable_resource::new_fact(atom_flaw &f)
+void reusable_resource::new_atom(atom_flaw &f)
 {
-    // we apply interval-predicate whenever the fact becomes active..
+    if (!f.is_fact)
+        throw std::logic_error("it is not possible to define goals on a reusable resource..");
+
     atom &atm = f.get_atom();
+    // we apply interval-predicate whenever the fact becomes active..
     set_ni(atm.get_sigma());
     static_cast<predicate &>(get_predicate(REUSABLE_RESOURCE_USE_PREDICATE_NAME)).apply_rule(atm);
     restore_ni();
@@ -200,7 +203,7 @@ void reusable_resource::new_fact(atom_flaw &f)
     for (const auto &c_atm : atoms)
         store_variables(atm, *c_atm.first);
 
-    // we store, for the fact, its atom listener..
+    // we store, for the atom, its atom listener..
     atoms.push_back({&atm, new rr_atom_listener(*this, atm)});
 
     // we filter out those atoms which are not strictly active..
@@ -214,8 +217,6 @@ void reusable_resource::new_fact(atom_flaw &f)
             to_check.insert(&*c_scope);
     }
 }
-
-void reusable_resource::new_goal(atom_flaw &) { throw std::logic_error("it is not possible to define goals on a reusable resource.."); }
 
 void reusable_resource::store_variables(atom &atm0, atom &atm1)
 {

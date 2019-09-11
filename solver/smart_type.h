@@ -43,8 +43,7 @@ private:
    */
   virtual std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() = 0;
 
-  virtual void new_fact(atom_flaw &);
-  virtual void new_goal(atom_flaw &);
+  virtual void new_atom(atom_flaw &);
 
 protected:
   void set_ni(const smt::var &v); // temporally sets the solver's 'ni' variable..

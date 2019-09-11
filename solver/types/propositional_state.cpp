@@ -34,21 +34,17 @@ void propositional_state::new_predicate(predicate &pred)
     new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
 }
 
-void propositional_state::new_fact(atom_flaw &f)
-{
-    // we apply interval-predicate if the fact becomes active..
-    atom &atm = f.get_atom();
-    set_ni(atm.get_sigma());
-    static_cast<predicate &>(get_predicate(PROPOSITIONAL_STATE_PREDICATE_NAME)).apply_rule(atm);
-    restore_ni();
-
-    atoms.push_back({&atm, new ps_atom_listener(*this, atm)});
-    to_check.insert(&atm);
-}
-
-void propositional_state::new_goal(atom_flaw &f)
+void propositional_state::new_atom(atom_flaw &f)
 {
     atom &atm = f.get_atom();
+    if (f.is_fact)
+    { // we apply interval-predicate if the fact becomes active..
+        set_ni(atm.get_sigma());
+        static_cast<predicate &>(get_predicate(PROPOSITIONAL_STATE_PREDICATE_NAME)).apply_rule(atm);
+        restore_ni();
+    }
+
+    // we store, for the atom, its atom listener..
     atoms.push_back({&atm, new ps_atom_listener(*this, atm)});
     to_check.insert(&atm);
 }

@@ -19,10 +19,11 @@ std::vector<std::vector<std::pair<lit, double>>> propositional_agent::get_curren
     return incs;
 }
 
-void propositional_agent::new_fact(atom_flaw &) { throw std::logic_error("it is not possible to define facts on propositional agents.."); }
-
-void propositional_agent::new_goal(atom_flaw &f)
+void propositional_agent::new_atom(atom_flaw &f)
 {
+    if (f.is_fact)
+        throw std::logic_error("it is not possible to define facts on propositional agents..");
+
     atom &atm = f.get_atom();
     atoms.push_back({&atm, new agnt_atom_listener(*this, atm)});
     to_check.insert(&atm);

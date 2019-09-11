@@ -19,8 +19,7 @@ public:
 private:
   std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;
 
-  void new_fact(atom_flaw &f) override;
-  void new_goal(atom_flaw &f) override;
+  void new_atom(atom_flaw &f) override;
 
   class agnt_constructor : public constructor
   {

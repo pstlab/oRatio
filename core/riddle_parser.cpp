@@ -411,11 +411,7 @@ void formula_statement::execute(const scope &scp, context &ctx) const
         q.pop();
     }
 
-    if (is_fact)
-        scp.get_core().new_fact(*a);
-    else
-        scp.get_core().new_goal(*a);
-
+    scp.get_core().new_atom(*a, is_fact);
     ctx->exprs.emplace(formula_name, expr(a));
 }
 

@@ -42,9 +42,8 @@ public:
   atom_flaw &get_reason(const atom &atm) const { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
 
 private:
-  void new_fact(atom &atm) override;                                      // creates a new fact token..
-  void new_goal(atom &atm) override;                                      // creates a new goal token..
-  void new_disjunction(context &d_ctx, const disjunction &disj) override; // creates a new disjunction..
+  void new_atom(atom &atm, const bool &is_fact) override;                 // notifies the creation of a new atom..
+  void new_disjunction(context &d_ctx, const disjunction &disj) override; // notifies the creation of a new disjunction..
 
   size_t decision_level() const { return trail.size(); } // returns the current decision level..
   bool root_level() const { return trail.empty(); }      // checks whether the current decision level is root level..
