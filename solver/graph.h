@@ -76,11 +76,8 @@ private:
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
-#ifdef GRAPH_PRUNING
+#if defined GRAPH_PRUNING || defined CHECK_GRAPH
   std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
-#endif
-#ifdef GRAPH_REFINING
-  std::unordered_set<resolver *> empty_precs_resolvers; // resolvers having an empty precondition set..
 #endif
 };
 } // namespace ratio
