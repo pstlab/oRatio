@@ -365,8 +365,8 @@ void graph::check_graph()
 {
     LOG("checking the graph..");
     std::unordered_set<resolver *> visited;
-    std::vector<resolver *> inv_r;
-    std::vector<resolver *> inc_r;
+    std::unordered_set<var> inv_r;
+    std::unordered_set<var> inc_r;
 
     // since the 'flaws' set can change within the check, we first make a copy..
     std::unordered_set<flaw *> flaws = slv.flaws;
@@ -382,18 +382,18 @@ void graph::check_graph()
 #endif
 
     for (const auto &r : inv_r)
-        if (!slv.get_sat_core().new_clause({lit(r->rho, false)}))
+        if (!slv.get_sat_core().new_clause({lit(r, false)}))
             throw unsolvable_exception();
     for (const auto &r : inc_r)
-        if (already_closed.insert(r->rho).second)
-            if (!slv.get_sat_core().new_clause({lit(r->rho, false), lit(gamma, false)}))
+        if (already_closed.insert(r).second)
+            if (!slv.get_sat_core().new_clause({lit(r, false), lit(gamma, false)}))
                 throw unsolvable_exception();
 
     if (!slv.get_sat_core().check())
         throw unsolvable_exception();
 }
 
-bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::vector<resolver *> &inv_r, std::vector<resolver *> &inc_r)
+bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<var> &inv_r, std::unordered_set<var> &inc_r)
 {
     assert(f.expanded);
     assert(slv.get_sat_core().value(f.phi) == True);
@@ -424,7 +424,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::ve
                     { // the resolver is applicable..
                         if (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
                         { // the resolver is applicable but incompatible with the current graph..
-                            inc_r.push_back(r);
+                            inc_r.insert(r->rho);
                             slv.get_sat_core().pop();
                             assert(c_lvl == slv.decision_level());
                         }
@@ -437,7 +437,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::ve
                         }
                     }
                     else // the resolver is not applicable..
-                        inv_r.push_back(r);
+                        inv_r.insert(r->rho);
                 }
                 else
                 { // we assume the resolver's rho variable..
@@ -448,7 +448,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::ve
                     if (c_lvl < slv.decision_level()) // the resolver is applicable..
                         if (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
                         { // the resolver is applicable but incompatible with the current graph..
-                            inc_r.push_back(r);
+                            inc_r.insert(r->rho);
                             slv.get_sat_core().pop();
                             assert(c_lvl == slv.decision_level());
                         }
@@ -465,7 +465,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::ve
                             assert(c_lvl == slv.decision_level());
                         }
                     else // the resolver is not applicable..
-                        inv_r.push_back(r);
+                        inv_r.insert(r->rho);
                 }
                 visited.erase(r);
             }
