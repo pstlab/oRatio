@@ -46,7 +46,15 @@ void composite_flaw::compute_resolvers()
 
     for (const auto &rs : cartesian_product(rss))
         if (std::none_of(rs.begin(), rs.end(), [this](resolver *r) { return get_graph().get_solver().get_sat_core().value(r->get_rho()) == False; }))
-            add_resolver(*new composite_resolver(get_graph(), *this, rs));
+        {
+#ifdef CHECK_GRAPH
+            std::set<smt::var> mtx;
+            for (const auto &r : rs)
+                mtx.insert(r->get_rho());
+            if (!get_graph().mutexes.count(mtx))
+#endif
+                add_resolver(*new composite_resolver(get_graph(), *this, rs));
+        }
 }
 
 rational intrinsic_costs(const std::vector<resolver *> &rs)

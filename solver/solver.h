@@ -73,7 +73,7 @@ private:
   std::vector<smart_type *> sts;                        // the smart-types..
   std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
   std::unordered_set<flaw *> flaws;                     // the currently active flaws..
-  smt::lit current_decision;                            // the current decision which has just been taken..
+  smt::lit current_decision;                            // the decision which has just been taken..
   std::vector<layer> trail;                             // the list of taken decisions, with the associated changes made, in chronological order..
 
 #ifdef BUILD_GUI

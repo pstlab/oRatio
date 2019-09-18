@@ -79,5 +79,8 @@ private:
 #if defined GRAPH_PRUNING || defined CHECK_GRAPH
   std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
+#ifdef CHECK_GRAPH
+  std::set<std::set<smt::var>> mutexes; // all the mutex resolvers found so far..
+#endif
 };
 } // namespace ratio
