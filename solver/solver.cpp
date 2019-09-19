@@ -51,11 +51,16 @@ void solver::solve()
         q.pop();
     }
 
-    // we build the initial graph..
-    gr.build();
-
     if (gr.accuracy < MIN_ACCURACY)
+    {
+        // we build the initial graph..
+        gr.build();
+
+#ifdef CHECK_GRAPH
+        gr.check_graph();
+#endif
         gr.set_accuracy(MIN_ACCURACY);
+    }
 
     // we set the gamma variable..
     gr.check_gamma();
@@ -120,9 +125,20 @@ void solver::solve()
 #endif
             if ((*f_next)->get_estimated_cost().is_infinite())
             { // we don't know how to solve this flaw: we search..
-                next();
+
+                // we look for alternatives..
+                for (const auto &f : gr.flaw_q)
+                    if (sat.value(f->phi) == True)
+                        gr.alt_flaws.insert(f);
+                next(); // we search..
                 while (std::any_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return f->get_estimated_cost().is_infinite(); }))
-                    next();
+                {
+                    // we look for alternatives..
+                    for (const auto &f : gr.flaw_q)
+                        if (sat.value(f->phi) == True)
+                            gr.alt_flaws.insert(f);
+                    next(); // we search..
+                }
                 continue;
             }
 
@@ -345,7 +361,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                         gr.set_estimated_cost(r->effect, c_visited);
                         assert(c_visited.empty());
                     }
-#ifdef CHECK_GRAPH
+#ifdef CHECK_MUTEXES
                     std::set<smt::var> mutex;
                     for (const auto &l : trail)
                         mutex.insert(l.decision.get_var());

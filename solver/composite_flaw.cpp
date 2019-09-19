@@ -47,7 +47,7 @@ void composite_flaw::compute_resolvers()
     for (const auto &rs : cartesian_product(rss))
         if (std::none_of(rs.begin(), rs.end(), [this](resolver *r) { return get_graph().get_solver().get_sat_core().value(r->get_rho()) == False; }))
         {
-#ifdef CHECK_GRAPH
+#ifdef CHECK_MUTEXES
             std::set<smt::var> mtx;
             for (const auto &r : rs)
                 mtx.insert(r->get_rho());

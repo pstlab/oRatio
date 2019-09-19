@@ -62,8 +62,8 @@ private:
 #endif
 
 #ifdef CHECK_GRAPH
-  void check_graph();                                                                                                                         // checks the applicability of the resolvers and performs some graph refinement..
-  bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<smt::var> &inc_r, std::unordered_set<flaw *> &alt_fs); // checks the solvability of the given flaw filling the set of incompatible resolvers (i.e., those which are not valid in the current graph), if the flaw has a solution, or the set of alternatives, if it has not..
+  void check_graph();                                                                                     // checks the applicability of the resolvers and performs some graph refinement..
+  bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<smt::var> &inc_r); // checks the solvability of the given flaw filling, if the flaw has a solution, the set of incompatible resolvers (i.e., those which are not valid in the current graph)..
 #endif
 
 #ifdef CHECK_GRAPH
@@ -78,12 +78,13 @@ private:
   smt::var gamma;                                             // this variable represents the validity of the current graph..
   resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
+  std::unordered_set<flaw *> alt_flaws;                       // the flaws to expand once the search within the graph has been exhausted..
   std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
   std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
 #if defined GRAPH_PRUNING || defined CHECK_GRAPH
   std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
-#ifdef CHECK_GRAPH
+#ifdef CHECK_MUTEXES
   std::set<std::set<smt::var>> mutexes; // all the mutex resolvers found so far..
 #endif
 };
