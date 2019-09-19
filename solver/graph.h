@@ -62,8 +62,12 @@ private:
 #endif
 
 #ifdef CHECK_GRAPH
-  void check_graph();                                                                                                                // checks the applicability of the resolvers and performs some graph refinement..
+  void check_graph();                                                                                                                          // checks the applicability of the resolvers and performs some graph refinement..
   bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<smt::var> &inv_r, std::unordered_set<smt::var> &inc_r); // checks the solvability of the given flaw filling the set of invalid resolvers (i.e., those which can never be applyed) and the set of incompatible resolvers (i.e., those which are not valid in the current graph)..
+#endif
+
+#ifdef CHECK_GRAPH
+  void check_mutexes();
 #endif
 
   void check_gamma(); // checks and possibly resets the value of gamma..

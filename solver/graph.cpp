@@ -476,6 +476,29 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
 }
 #endif
 
+#ifdef CHECK_GRAPH
+void graph::check_mutexes()
+{
+    LOG("checking for mutexes..");
+    std::set<var> c_rhos;
+    for (const auto &r : rhos)
+        c_rhos.insert(r.first);
+
+    for (const auto &r : c_rhos)
+        if (slv.get_sat_core().value(r) == Undefined && std::none_of(rhos[r].begin(), rhos[r].end(), [](resolver *r) { return r->get_estimated_cost().is_positive_infinite(); }))
+        {
+            slv.current_decision = r;
+            if (!slv.get_sat_core().assume(r) || !slv.get_sat_core().check())
+                throw unsolvable_exception();
+            if (slv.decision_level())
+            { // the resolver is applicable..
+                slv.get_sat_core().pop();
+                assert(slv.root_level());
+            }
+        }
+}
+#endif
+
 void graph::check_gamma()
 {
     assert(slv.root_level());
