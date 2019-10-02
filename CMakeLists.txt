@@ -28,7 +28,7 @@ option(CHECK_MUTEXES "Check for mutexes in the graph" OFF)
 option(GRAPH_PRUNING "Prunes the causal graph before starting the search" OFF)
 option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
 option(BUILD_GUI "Builds the GUI" OFF)
-option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" ON)
+option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
 
 message(STATUS "Heuristic type:           ${HEURISTIC_TYPE}")
 message(STATUS "Min heuristic accuracy:   ${MIN_ACCURACY}")
