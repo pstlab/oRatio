@@ -51,13 +51,6 @@ public class PropositionalStateVisualizer implements TimelineVisualizer {
             collection.addSeries(true_series);
             collection.addSeries(false_series);
 
-            XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
-            plot.getRangeAxis().setVisible(false);
-            plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-            XYTextAnnotation annotation = new XYTextAnnotation(fluent.getName(), 0, 1);
-            annotation.setTextAnchor(TextAnchor.TOP_LEFT);
-            plot.addAnnotation(annotation);
-
             for (Literal lit : fluent.getValues()) {
                 switch (lit.getPolarity()) {
                 case True:
@@ -72,6 +65,12 @@ public class PropositionalStateVisualizer implements TimelineVisualizer {
                     break;
                 }
             }
+
+            XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
+            plot.getRangeAxis().setVisible(false);
+            plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
+            plot.addAnnotation(new XYTextAnnotation(fluent.getName(), 0, 1));
+
             plots.add(plot);
         }
 
