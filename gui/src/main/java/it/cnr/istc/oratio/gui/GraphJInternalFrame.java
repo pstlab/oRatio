@@ -77,6 +77,7 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
     private final Display display = new Display(vis);
     private final Map<String, Node> flaws = new HashMap<>();
     private final Map<String, Node> resolvers = new HashMap<>();
+    private final Map<Node, Double> intrinsic_costs = new HashMap<>();
     private String current_flaw;
     private String current_resolver;
 
@@ -239,6 +240,7 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void flawCreated(FlawCreated flaw) {
         synchronized (vis) {
             assert !flaws.containsKey(flaw.flaw) : "the flaw already exists..";
@@ -252,8 +254,15 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
             flaw_node.set(NODE_STATE, flaw.state);
             flaws.put(flaw.flaw, flaw_node);
             for (String c : flaw.causes) {
-                Edge c_edge = g.addEdge(flaw_node, resolvers.get(c));
+                Node resolver_node = resolvers.get(c);
+                Edge c_edge = g.addEdge(flaw_node, resolver_node);
                 c_edge.set(EDGE_STATE, resolvers.get(c).get(NODE_STATE));
+                double intrinsic_cost = intrinsic_costs.get(resolver_node);
+                double min = Double.POSITIVE_INFINITY;
+                Iterator<Edge> in_edges = resolver_node.inEdges();
+                while (in_edges.hasNext())
+                    min = Math.min(min, -intrinsic_cost + (double) in_edges.next().getSourceNode().get(NODE_COST));
+                resolver_node.set(NODE_COST, min);
             }
         }
     }
@@ -268,6 +277,7 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void flawCostChanged(FlawCostChanged flaw) {
         synchronized (vis) {
             assert flaws.containsKey(flaw.flaw) : "the flaw does not exist..";
@@ -276,10 +286,11 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
             Iterator<Edge> out_edges = flaw_node.outEdges();
             while (out_edges.hasNext()) {
                 Node resolver_node = out_edges.next().getTargetNode();
+                double intrinsic_cost = intrinsic_costs.get(resolver_node);
                 double min = Double.POSITIVE_INFINITY;
                 Iterator<Edge> in_edges = resolver_node.inEdges();
                 while (in_edges.hasNext())
-                    min = Math.min(min, (double) in_edges.next().getSourceNode().get(NODE_COST));
+                    min = Math.min(min, -intrinsic_cost + (double) in_edges.next().getSourceNode().get(NODE_COST));
                 resolver_node.set(NODE_COST, min);
             }
         }
@@ -304,18 +315,21 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
         synchronized (vis) {
             assert !resolvers.containsKey(resolver.resolver) : "the resolver already exists..";
             assert flaws.containsKey(resolver.effect) : "the resolver's solved flaw does not exist..";
+            double intrinsic_cost = (double) resolver.cost.getNumerator() / resolver.cost.getDenominator();
             Node resolver_node = g.addNode();
             resolver_node.set(VisualItem.LABEL, resolver.label);
             resolver_node.set(NODE_TYPE, "resolver");
-            resolver_node.set(NODE_COST, -(double) resolver.cost.getNumerator() / resolver.cost.getDenominator());
+            resolver_node.set(NODE_COST, -intrinsic_cost);
             resolver_node.set(NODE_STATE, resolver.state);
             resolvers.put(resolver.resolver, resolver_node);
+            intrinsic_costs.put(resolver_node, intrinsic_cost);
             Edge c_edge = g.addEdge(resolver_node, flaws.get(resolver.effect));
             c_edge.set(EDGE_STATE, resolver.state);
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void resolverStateChanged(ResolverStateChanged resolver) {
         synchronized (vis) {
             assert resolvers.containsKey(resolver.resolver) : "the resolver does not exist..";
