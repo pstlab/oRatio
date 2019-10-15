@@ -345,6 +345,8 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
     public void currentResolver(CurrentResolver resolver) {
         assert resolvers.containsKey(resolver.resolver) : "the resolver does not exist..";
         synchronized (vis) {
+            if (current_resolver != null)
+                vis.getVisualItem(NODES, resolvers.get(current_resolver)).setHighlighted(false);
             current_resolver = resolver.resolver;
             vis.getVisualItem(NODES, resolvers.get(resolver.resolver)).setHighlighted(true);
         }
