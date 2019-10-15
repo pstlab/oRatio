@@ -333,7 +333,7 @@ void reusable_resource::rr_flaw::compute_resolvers()
     }
 }
 
-reusable_resource::order_resolver::order_resolver(rr_flaw &flw, const var &r, const atom &before, const atom &after) : resolver(flw.get_graph(), r, 10000, flw), before(before), after(after) {}
+reusable_resource::order_resolver::order_resolver(rr_flaw &flw, const var &r, const atom &before, const atom &after) : resolver(flw.get_graph(), r, 0, flw), before(before), after(after) {}
 reusable_resource::order_resolver::~order_resolver() {}
 
 #ifdef BUILD_GUI
@@ -347,7 +347,7 @@ void reusable_resource::order_resolver::apply()
 {
 }
 
-reusable_resource::place_resolver::place_resolver(rr_flaw &flw, const var &r, atom &plc_atm, item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 10000, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
+reusable_resource::place_resolver::place_resolver(rr_flaw &flw, const var &r, atom &plc_atm, item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 0, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
 reusable_resource::place_resolver::~place_resolver() {}
 
 #ifdef BUILD_GUI
@@ -361,7 +361,7 @@ void reusable_resource::place_resolver::apply()
 {
 }
 
-reusable_resource::forbid_resolver::forbid_resolver(rr_flaw &flw, atom &atm, item &itm) : resolver(flw.get_graph(), 10000, flw), atm(atm), itm(itm) {}
+reusable_resource::forbid_resolver::forbid_resolver(rr_flaw &flw, atom &atm, item &itm) : resolver(flw.get_graph(), 0, flw), atm(atm), itm(itm) {}
 reusable_resource::forbid_resolver::~forbid_resolver() {}
 
 #ifdef BUILD_GUI
