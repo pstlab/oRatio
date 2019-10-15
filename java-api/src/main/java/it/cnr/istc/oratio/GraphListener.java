@@ -19,8 +19,6 @@ public interface GraphListener {
 
     public void resolverStateChanged(final ResolverStateChanged resolver);
 
-    public void resolverCostChanged(final ResolverCostChanged resolver);
-
     public void currentResolver(final CurrentResolver resolver);
 
     public void causalLinkAdded(final CausalLinkAdded causal_link);
@@ -59,11 +57,6 @@ public interface GraphListener {
     public static class ResolverStateChanged {
         public String resolver;
         public int state;
-    }
-
-    public static class ResolverCostChanged {
-        public String resolver;
-        public Rational cost;
     }
 
     public static class CurrentResolver {

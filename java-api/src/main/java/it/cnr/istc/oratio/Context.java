@@ -42,7 +42,6 @@ public class Context {
     private static final String CURRENT_FLAW = "current_flaw ";
     private static final String RESOLVER_CREATED = "resolver_created ";
     private static final String RESOLVER_STATE_CHANGED = "resolver_state_changed ";
-    private static final String RESOLVER_COST_CHANGED = "resolver_cost_changed ";
     private static final String CURRENT_RESOLVER = "current_resolver ";
     private static final String CAUSAL_LINK_ADDED = "causal_link_added ";
     private static final String POKE = "poke";
@@ -174,11 +173,6 @@ public class Context {
                             ResolverStateChanged.class);
                     for (GraphListener l : graph_listeners)
                         l.resolverStateChanged(rsc);
-                } else if (inputLine.startsWith(RESOLVER_COST_CHANGED)) {
-                    ResolverCostChanged rcc = gson.fromJson(inputLine.substring(RESOLVER_COST_CHANGED.length()),
-                            ResolverCostChanged.class);
-                    for (GraphListener l : graph_listeners)
-                        l.resolverCostChanged(rcc);
                 } else if (inputLine.startsWith(CURRENT_RESOLVER)) {
                     CurrentResolver cr = gson.fromJson(inputLine.substring(CURRENT_RESOLVER.length()),
                             CurrentResolver.class);

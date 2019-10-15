@@ -273,6 +273,15 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
             assert flaws.containsKey(flaw.flaw) : "the flaw does not exist..";
             Node flaw_node = flaws.get(flaw.flaw);
             flaw_node.set(NODE_COST, -(double) flaw.cost.getNumerator() / flaw.cost.getDenominator());
+            Iterator<Edge> out_edges = flaw_node.outEdges();
+            while (out_edges.hasNext()) {
+                Node resolver_node = out_edges.next().getTargetNode();
+                double min = Double.POSITIVE_INFINITY;
+                Iterator<Edge> in_edges = resolver_node.inEdges();
+                while (in_edges.hasNext())
+                    min = Math.min(min, (double) in_edges.next().getSourceNode().get(NODE_COST));
+                resolver_node.set(NODE_COST, min);
+            }
         }
     }
 
@@ -315,15 +324,6 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
             Iterator<Edge> c_edges = resolver_node.edges();
             while (c_edges.hasNext())
                 c_edges.next().set(EDGE_STATE, resolver.state);
-        }
-    }
-
-    @Override
-    public void resolverCostChanged(ResolverCostChanged resolver) {
-        synchronized (vis) {
-            assert resolvers.containsKey(resolver.resolver) : "the resolver does not exist..";
-            Node resolver_node = resolvers.get(resolver.resolver);
-            resolver_node.set(NODE_COST, -(double) resolver.cost.getNumerator() / resolver.cost.getDenominator());
         }
     }
 

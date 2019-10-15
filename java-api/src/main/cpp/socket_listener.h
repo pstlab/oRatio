@@ -35,7 +35,6 @@ private:
 
   void resolver_created(const resolver &r) override;
   void resolver_state_changed(const resolver &r) override;
-  void resolver_cost_changed(const resolver &r) override;
   void current_resolver(const resolver &r) override;
 
   void causal_link_added(const flaw &f, const resolver &r) override;
