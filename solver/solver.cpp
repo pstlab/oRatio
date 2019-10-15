@@ -300,9 +300,6 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
             {
                 for (const auto &r : at_rhos_p->second)
                 { // 'r' is a forbidden resolver..
-#ifdef BUILD_GUI
-                    fire_resolver_cost_changed(*r);
-#endif
                     if (sat.value(r->effect.phi) != False)
                     { // we update the cost and the deferrable state of the resolver's effect..
                         std::unordered_set<flaw *> c_visited;
@@ -351,10 +348,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
         { // some flaw and/or some resolver has been forbidden..
             if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
                 for (const auto &r : at_rhos_p->second)
-                { // 'r' is a forbidden resolver..
-#ifdef BUILD_GUI
-                    fire_resolver_cost_changed(*r);
-#endif
+                {                                          // 'r' is a forbidden resolver..
                     if (sat.value(r->effect.phi) != False) // we update the cost of the resolver's effect..
                     {
                         std::unordered_set<flaw *> c_visited;
@@ -508,8 +502,6 @@ void solver::fire_new_flaw(const flaw &f) const
 {
     for (const auto &l : listeners)
         l->new_flaw(f);
-    for (const auto &r : f.supports)
-        fire_resolver_cost_changed(*r);
 }
 void solver::fire_flaw_state_changed(const flaw &f) const
 {
@@ -520,8 +512,6 @@ void solver::fire_flaw_cost_changed(const flaw &f) const
 {
     for (const auto &l : listeners)
         l->flaw_cost_changed(f);
-    for (const auto &r : f.supports)
-        fire_resolver_cost_changed(*r);
 }
 void solver::fire_current_flaw(const flaw &f) const
 {
@@ -538,11 +528,6 @@ void solver::fire_resolver_state_changed(const resolver &r) const
     for (const auto &l : listeners)
         l->resolver_state_changed(r);
 }
-void solver::fire_resolver_cost_changed(const resolver &r) const
-{
-    for (const auto &l : listeners)
-        l->resolver_cost_changed(r);
-}
 void solver::fire_current_resolver(const resolver &r) const
 {
     for (const auto &l : listeners)
@@ -552,7 +537,6 @@ void solver::fire_causal_link_added(const flaw &f, const resolver &r) const
 {
     for (const auto &l : listeners)
         l->causal_link_added(f, r);
-    fire_resolver_cost_changed(r);
 }
 #endif
 } // namespace ratio

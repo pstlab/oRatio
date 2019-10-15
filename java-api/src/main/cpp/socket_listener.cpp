@@ -129,14 +129,6 @@ void socket_listener::resolver_state_changed(const resolver &r)
     ss << "resolver_state_changed {\"resolver\":\"" << static_cast<const void *>(&r) << "\", \"state\":" << std::to_string(slv.get_sat_core().value(r.get_rho())) << "}\n";
     send_message(ss.str());
 }
-void socket_listener::resolver_cost_changed(const resolver &r)
-{
-    smt::rational est_cost = r.get_estimated_cost();
-    std::stringstream ss;
-    ss << "resolver_cost_changed {\"resolver\":\"" << static_cast<const void *>(&r) << "\", \"cost\":{"
-       << "\"num\":" << std::to_string(est_cost.numerator()) << ", \"den\":" << std::to_string(est_cost.denominator()) << "}}\n";
-    send_message(ss.str());
-}
 void socket_listener::current_resolver(const resolver &r)
 {
     std::stringstream ss;

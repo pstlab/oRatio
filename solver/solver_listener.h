@@ -38,7 +38,6 @@ private:
 
   virtual void resolver_created(const resolver &r) {}
   virtual void resolver_state_changed(const resolver &r) {}
-  virtual void resolver_cost_changed(const resolver &r) {}
   virtual void current_resolver(const resolver &r) {}
 
   virtual void causal_link_added(const flaw &f, const resolver &r) {}
