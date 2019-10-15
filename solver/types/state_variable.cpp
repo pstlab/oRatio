@@ -282,7 +282,7 @@ void state_variable::sv_flaw::compute_resolvers()
     }
 }
 
-state_variable::order_resolver::order_resolver(sv_flaw &flw, const var &r, const atom &before, const atom &after) : resolver(flw.get_graph(), r, 10000, flw), before(before), after(after) {}
+state_variable::order_resolver::order_resolver(sv_flaw &flw, const var &r, const atom &before, const atom &after) : resolver(flw.get_graph(), r, 0, flw), before(before), after(after) {}
 state_variable::order_resolver::~order_resolver() {}
 
 #ifdef BUILD_GUI
@@ -296,7 +296,7 @@ void state_variable::order_resolver::apply()
 {
 }
 
-state_variable::place_resolver::place_resolver(sv_flaw &flw, const var &r, atom &plc_atm, item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 10000, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
+state_variable::place_resolver::place_resolver(sv_flaw &flw, const var &r, atom &plc_atm, item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 0, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
 state_variable::place_resolver::~place_resolver() {}
 
 #ifdef BUILD_GUI
@@ -310,7 +310,7 @@ void state_variable::place_resolver::apply()
 {
 }
 
-state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, atom &atm, item &itm) : resolver(flw.get_graph(), 10000, flw), atm(atm), itm(itm) {}
+state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, atom &atm, item &itm) : resolver(flw.get_graph(), 0, flw), atm(atm), itm(itm) {}
 state_variable::forbid_resolver::~forbid_resolver() {}
 
 #ifdef BUILD_GUI
