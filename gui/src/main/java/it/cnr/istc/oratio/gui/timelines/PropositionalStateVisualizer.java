@@ -9,15 +9,14 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.DatasetRenderingOrder;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 
 import it.cnr.istc.oratio.gui.TimelinesJInternalFrame.TimelineVisualizer;
 import it.cnr.istc.oratio.timelines.PropositionalState;
-import it.cnr.istc.oratio.timelines.Timeline;
 import it.cnr.istc.oratio.timelines.PropositionalState.Fluent;
 import it.cnr.istc.oratio.timelines.PropositionalState.Literal;
+import it.cnr.istc.oratio.timelines.Timeline;
 
 /**
  * PropositionalStateVisualizer
