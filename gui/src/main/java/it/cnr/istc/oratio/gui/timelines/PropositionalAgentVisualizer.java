@@ -56,7 +56,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
                 end_pulse = action.getTo().doubleValue();
             }
             double y = getYValue(start_pulse, end_pulse, ends);
-            actions.add(start_pulse, start_pulse, end_pulse, y - 1, y - 1, y, action);
+            actions.add(start_pulse, start_pulse, end_pulse, y, y, y + 1, action);
         }
         collection.addSeries(actions);
 
@@ -88,9 +88,7 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
         XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
         plot.getRangeAxis().setVisible(false);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-        XYTextAnnotation annotation = new XYTextAnnotation(pa.getName(), 0, 1);
-        annotation.setTextAnchor(TextAnchor.TOP_LEFT);
-        plot.addAnnotation(annotation);
+        plot.addAnnotation(new XYTextAnnotation(pa.getName(), 0, 1));
 
         return Arrays.asList(plot);
     }
