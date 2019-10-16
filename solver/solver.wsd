@@ -1,0 +1,96 @@
+@startuml solver
+skinparam Monochrome true
+skinparam Handwritten true
+
+abstract class core
+
+interface theory
+theory : +theory(sat: sat_core)
+theory : #bind(v: var): bool
+theory : #record(cls: vector<lit>): bool
+theory : -propagate(p: lit, cnfl: vector<lit>): bool
+theory : -check(cnfl: vector<lit>): bool
+theory : -push(): void
+theory : -pop(): void
+
+class solver
+core <|-- solver
+theory <|-- solver
+solver : +solver()
+solver : +init(): void
+solver : +solve(): void
+solver : -take_decision(ch: lit): void
+solver : -next() : void
+solver : -solve_inconsistencies() : void
+solver o--> graph: gr
+
+class graph
+graph : +graph(slv:solver)
+graph : -accuracy: int
+graph : -gamma: var
+graph : -res: resolver
+graph : -flaw_q: deque<flaw>
+graph : -phis: map<var, vector<flaw>>
+graph : -rhos: map<var, vector<resolver>>
+
+graph : -new_flaw(f: flaw, enqueue: bool): void
+graph : -new_resolver(r: resolver): void
+graph : -new_causal_link(f: flaw, r: resolver): void
+
+graph : -set_estimated_cost(f: flaw, visited: set<flaw>): void
+
+graph : -build(): void
+graph : -add_layer(): void
+graph : -set_accuracy(acc: int): void
+
+graph : -expand_flaw(f: flaw): void
+graph : -apply_resolver(r: resolver): void
+
+graph : -is_deferrable(f: flaw): void
+
+graph : -check_graph(): void
+graph : -check_flaw(f: flaw, alt: map<resolver, vector<flaw>>): bool
+
+class flaw
+flaw : -phi: var
+flaw : -exclusive: bool
+flaw : -expanded: bool
+flaw : -est_cost: rational
+flaw : +flaw(gr: graph, causes: vector<resolver>, exclusive: bool)
+flaw : +is_expanded(): bool
+flaw : +get_estimated_cost(): rational
+flaw : -init(): void
+flaw : -expand(): void
+flaw : -compute_resolvers(): void
+flaw : #add_resolver(r: resolver): void
+flaw : #make_precondition_of(r: resolver): void
+flaw : +get_label(): string
+flaw o--> "*" resolver : resolvers
+flaw o--> "*" resolver : causes
+flaw o--> "*" resolver : supports
+flaw o--> graph: gr
+
+class resolver
+resolver : -rho: var
+resolver : -intrinsic_cost: rational
+resolver : +resolver(gr: graph, cost: rational, eff: flaw)
+resolver : +resolver(gr: graph, r:var, cost: rational, eff: flaw)
+resolver : -apply(): void
+resolver : +get_estimated_cost(): rational
+resolver : +get_label(): string
+resolver o--> "*" flaw : preconditions
+resolver o--> "1" flaw : effect
+resolver o--> graph: gr
+
+class refinement_flaw
+flaw <|-- refinement_flaw
+refinement_flaw : flaws: vector<flaw>
+refinement_flaw : +refinement_flaw(gr: graph, cause: resolver, fs: vector<flaw>)
+refinement_flaw : -compute_resolvers(): void
+
+class refinement_resolver
+resolver <|-- refinement_resolver
+refinement_resolver : +resolvers: vector<resolver>
+refinement_resolver : +refinement_resolver(gr: graph, eff: refinement_flaw, rs: vector<resolver>)
+refinement_resolver : -apply(): void
+@enduml

@@ -353,12 +353,20 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void causalLinkAdded(CausalLinkAdded causal_link) {
         synchronized (vis) {
             assert flaws.containsKey(causal_link.flaw) : "the flaw does not exist..";
             assert resolvers.containsKey(causal_link.resolver) : "the resolver does not exist..";
-            Edge c_edge = g.addEdge(flaws.get(causal_link.flaw), resolvers.get(causal_link.resolver));
-            c_edge.set(EDGE_STATE, resolvers.get(causal_link.resolver).get(NODE_STATE));
+            Node resolver_node = resolvers.get(causal_link.resolver);
+            Edge c_edge = g.addEdge(flaws.get(causal_link.flaw), resolver_node);
+            c_edge.set(EDGE_STATE, resolver_node.get(NODE_STATE));
+            double intrinsic_cost = intrinsic_costs.get(resolver_node);
+            double min = Double.POSITIVE_INFINITY;
+            Iterator<Edge> in_edges = resolver_node.inEdges();
+            while (in_edges.hasNext())
+                min = Math.min(min, -intrinsic_cost + (double) in_edges.next().getSourceNode().get(NODE_COST));
+            resolver_node.set(NODE_COST, min);
         }
     }
 
