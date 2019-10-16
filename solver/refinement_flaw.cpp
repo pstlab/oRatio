@@ -39,7 +39,10 @@ std::string refinement_flaw::get_label() const
 void refinement_flaw::compute_resolvers()
 {
     for (const auto &f : flaws)
-        add_resolver(*new refinement_resolver(get_graph(), *this, f->get_causes()));
+        if (flaws.size() == 1)
+            add_resolver(*new refinement_resolver(get_graph(), get_phi(), *this, f->get_causes()));
+        else
+            add_resolver(*new refinement_resolver(get_graph(), *this, f->get_causes()));
 }
 
 static inline rational intrinsic_costs(const std::vector<resolver *> &rs)
@@ -50,6 +53,7 @@ static inline rational intrinsic_costs(const std::vector<resolver *> &rs)
     return cost;
 }
 
+refinement_flaw::refinement_resolver::refinement_resolver(graph &gr, const smt::var &r, refinement_flaw &s_flaw, const std::vector<resolver *> &rs) : resolver(gr, r, intrinsic_costs(rs), s_flaw), resolvers(rs) {}
 refinement_flaw::refinement_resolver::refinement_resolver(graph &gr, refinement_flaw &s_flaw, const std::vector<resolver *> &rs) : resolver(gr, intrinsic_costs(rs), s_flaw), resolvers(rs) {}
 refinement_flaw::refinement_resolver::~refinement_resolver() {}
 
