@@ -1,6 +1,6 @@
 @startuml solver
-'skinparam Monochrome true
-'skinparam Handwritten true
+skinparam Monochrome true
+skinparam Handwritten true
 
 abstract class core
 
@@ -81,4 +81,16 @@ resolver : +get_label(): string
 resolver o--> "*" flaw : preconditions
 resolver o--> "1" flaw : effect
 resolver o--> graph: gr
+
+class refinement_flaw
+flaw <|-- refinement_flaw
+refinement_flaw : flaws: vector<flaw>
+refinement_flaw : +refinement_flaw(gr: graph, cause: resolver, fs: vector<flaw>)
+refinement_flaw : -compute_resolvers(): void
+
+class refinement_resolver
+resolver <|-- refinement_resolver
+refinement_resolver : +resolvers: vector<resolver>
+refinement_resolver : +refinement_resolver(gr: graph, eff: refinement_flaw, rs: vector<resolver>)
+refinement_resolver : -apply(): void
 @enduml
