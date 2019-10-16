@@ -8,7 +8,7 @@ using namespace smt;
 namespace ratio
 {
 
-inline const std::vector<resolver *> get_cause(resolver *const cause)
+static inline const std::vector<resolver *> cause_to_vector(resolver *const cause)
 {
     if (cause)
         return {cause};
@@ -16,7 +16,7 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
         return {};
 }
 
-composite_flaw::composite_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs) : flaw(gr, get_cause(cause)), flaws(fs)
+composite_flaw::composite_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs) : flaw(gr, cause_to_vector(cause)), flaws(fs)
 {
     if (cause)
         make_precondition_of(*cause);
@@ -57,7 +57,7 @@ void composite_flaw::compute_resolvers()
         }
 }
 
-rational intrinsic_costs(const std::vector<resolver *> &rs)
+static inline rational intrinsic_costs(const std::vector<resolver *> &rs)
 {
     rational cost;
     for (const auto &r : rs)

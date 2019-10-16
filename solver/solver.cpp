@@ -125,20 +125,9 @@ void solver::solve()
 #endif
             if ((*f_next)->get_estimated_cost().is_infinite())
             { // we don't know how to solve this flaw: we search..
-
-                // we look for alternatives..
-                for (const auto &f : gr.flaw_q)
-                    if (sat.value(f->phi) == True)
-                        gr.alt_flaws.insert(f);
-                next(); // we search..
+                next();
                 while (std::any_of(flaws.begin(), flaws.end(), [this](flaw *const f) { return f->get_estimated_cost().is_infinite(); }))
-                {
-                    // we look for alternatives..
-                    for (const auto &f : gr.flaw_q)
-                        if (sat.value(f->phi) == True)
-                            gr.alt_flaws.insert(f);
-                    next(); // we search..
-                }
+                    next(); // and we we search..
                 continue;
             }
 

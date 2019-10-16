@@ -5,7 +5,7 @@
 namespace ratio
 {
 
-inline const std::vector<resolver *> get_cause(resolver *const cause)
+static inline const std::vector<resolver *> cause_to_vector(resolver *const cause)
 {
     if (cause)
         return {cause};
@@ -13,7 +13,7 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
         return {};
 }
 
-var_flaw::var_flaw(graph &gr, resolver *const cause, var_item &v_itm) : flaw(gr, get_cause(cause), true), v_itm(v_itm)
+var_flaw::var_flaw(graph &gr, resolver *const cause, var_item &v_itm) : flaw(gr, cause_to_vector(cause), true), v_itm(v_itm)
 {
     if (cause)
         make_precondition_of(*cause);
