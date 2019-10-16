@@ -6,7 +6,7 @@
 namespace ratio
 {
 
-inline const std::vector<resolver *> get_cause(resolver *const cause)
+static inline const std::vector<resolver *> cause_to_vector(resolver *const cause)
 {
     if (cause)
         return {cause};
@@ -14,7 +14,7 @@ inline const std::vector<resolver *> get_cause(resolver *const cause)
         return {};
 }
 
-disjunction_flaw::disjunction_flaw(graph &gr, resolver *const cause, const context &ctx, const disjunction &disj) : flaw(gr, get_cause(cause), false), ctx(ctx), disj(disj)
+disjunction_flaw::disjunction_flaw(graph &gr, resolver *const cause, const context &ctx, const disjunction &disj) : flaw(gr, cause_to_vector(cause), false), ctx(ctx), disj(disj)
 {
     if (cause)
         make_precondition_of(*cause);
