@@ -28,12 +28,10 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 class TypeRefinementListener extends riddleBaseListener {
 
     private final Core core;
-    private final riddleParser parser;
     private Scope scope = null;
 
-    TypeRefinementListener(final Core core, final riddleParser parser) {
+    TypeRefinementListener(final Core core) {
         this.core = core;
-        this.parser = parser;
         this.scope = core;
     }
 
@@ -42,7 +40,7 @@ class TypeRefinementListener extends riddleBaseListener {
         EnumType c_type = (EnumType) core.scopes.get(ctx);
         ctx.enum_constants().stream().filter(enum_constant -> (enum_constant.type() != null))
                 .forEach(enum_constant -> c_type.enums
-                        .add((EnumType) new TypeVisitor(core, parser).visit(enum_constant.type())));
+                        .add((EnumType) new TypeVisitor(core).visit(enum_constant.type())));
     }
 
     @Override
@@ -51,7 +49,7 @@ class TypeRefinementListener extends riddleBaseListener {
         scope = core.scopes.get(ctx);
         if (ctx.type_list() != null)
             for (riddleParser.TypeContext type : ctx.type_list().type())
-                ((Type) scope).superclasses.add(new TypeVisitor(core, parser).visit(type));
+                ((Type) scope).superclasses.add(new TypeVisitor(core).visit(type));
     }
 
     @Override
@@ -65,7 +63,7 @@ class TypeRefinementListener extends riddleBaseListener {
     @Override
     public void enterField_declaration(riddleParser.Field_declarationContext ctx) {
         // we add a field to the current scope..
-        Type c_type = new TypeVisitor(core, parser).visit(ctx.type());
+        Type c_type = new TypeVisitor(core).visit(ctx.type());
         ctx.variable_dec().forEach(dec -> defineField(new Field(c_type, dec.name.getText())));
     }
 
@@ -79,7 +77,7 @@ class TypeRefinementListener extends riddleBaseListener {
             List<TerminalNode> ids = ctx.typed_list().ID();
             parameters = new Field[typed_list.size()];
             for (int i = 0; i < typed_list.size(); i++)
-                parameters[i] = new Field(new TypeVisitor(core, parser).visit(typed_list.get(i)), ids.get(i).getText());
+                parameters[i] = new Field(new TypeVisitor(core).visit(typed_list.get(i)), ids.get(i).getText());
         } else
             parameters = new Field[0];
 
@@ -106,7 +104,7 @@ class TypeRefinementListener extends riddleBaseListener {
             List<TerminalNode> ids = ctx.typed_list().ID();
             parameters = new Field[typed_list.size()];
             for (int i = 0; i < typed_list.size(); i++)
-                parameters[i] = new Field(new TypeVisitor(core, parser).visit(typed_list.get(i)), ids.get(i).getText());
+                parameters[i] = new Field(new TypeVisitor(core).visit(typed_list.get(i)), ids.get(i).getText());
         } else
             parameters = new Field[0];
         Method method = new Method(core, scope, ctx.name.getText(), null, parameters);
@@ -131,10 +129,10 @@ class TypeRefinementListener extends riddleBaseListener {
             List<TerminalNode> ids = ctx.typed_list().ID();
             parameters = new Field[typed_list.size()];
             for (int i = 0; i < typed_list.size(); i++)
-                parameters[i] = new Field(new TypeVisitor(core, parser).visit(typed_list.get(i)), ids.get(i).getText());
+                parameters[i] = new Field(new TypeVisitor(core).visit(typed_list.get(i)), ids.get(i).getText());
         } else
             parameters = new Field[0];
-        Method method = new Method(core, scope, ctx.name.getText(), new TypeVisitor(core, parser).visit(ctx.type()),
+        Method method = new Method(core, scope, ctx.name.getText(), new TypeVisitor(core).visit(ctx.type()),
                 parameters);
         defineMethod(method);
         core.scopes.put(ctx, method);
@@ -157,7 +155,7 @@ class TypeRefinementListener extends riddleBaseListener {
             List<TerminalNode> ids = ctx.typed_list().ID();
             parameters = new Field[typed_list.size()];
             for (int i = 0; i < typed_list.size(); i++)
-                parameters[i] = new Field(new TypeVisitor(core, parser).visit(typed_list.get(i)), ids.get(i).getText());
+                parameters[i] = new Field(new TypeVisitor(core).visit(typed_list.get(i)), ids.get(i).getText());
         } else
             parameters = new Field[0];
         Predicate predicate = new Predicate(core, scope, ctx.name.getText(), parameters);
@@ -169,7 +167,7 @@ class TypeRefinementListener extends riddleBaseListener {
     @Override
     public void enterQualified_predicate(riddleParser.Qualified_predicateContext ctx) {
         core.scopes.put(ctx, scope);
-        ((Predicate) scope).superclasses.add(new TypeVisitor(core, parser).visit(ctx));
+        ((Predicate) scope).superclasses.add(new TypeVisitor(core).visit(ctx));
     }
 
     @Override

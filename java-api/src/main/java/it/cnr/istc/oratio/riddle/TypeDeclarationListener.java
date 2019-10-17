@@ -23,18 +23,16 @@ package it.cnr.istc.oratio.riddle;
 class TypeDeclarationListener extends riddleBaseListener {
 
     private final Core core;
-    private final riddleParser parser;
     private Scope scope = null;
 
-    TypeDeclarationListener(final Core core, final riddleParser parser) {
+    TypeDeclarationListener(final Core core) {
         this.core = core;
-        this.parser = parser;
         this.scope = core;
     }
 
     @Override
     public void enterTypedef_declaration(riddleParser.Typedef_declarationContext ctx) {
-        defineType(new Typedef(core, scope, new TypeVisitor(core, parser).visit(ctx.primitive_type()),
+        defineType(new Typedef(core, scope, new TypeVisitor(core).visit(ctx.primitive_type()),
                 ctx.name.getText()));
     }
 

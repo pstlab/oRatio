@@ -196,8 +196,8 @@ public class Core implements Scope {
     public void read(final String script) {
         CodeSnippet snippet = new CodeSnippet(null,
                 new riddleParser(new CommonTokenStream(new riddleLexer(CharStreams.fromString(script)))));
-        ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this, snippet.parser), snippet.cu);
-        ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this, snippet.parser), snippet.cu);
+        ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this), snippet.cu);
+        ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this), snippet.cu);
     }
 
     public void read(final File... files) throws IOException {
@@ -211,8 +211,8 @@ public class Core implements Scope {
             snippets.add(new CodeSnippet(f,
                     new riddleParser(new CommonTokenStream(new riddleLexer(CharStreams.fromPath(f.toPath()))))));
         for (CodeSnippet snippet : snippets) {
-            ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this, snippet.parser), snippet.cu);
-            ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this, snippet.parser), snippet.cu);
+            ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this), snippet.cu);
+            ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this), snippet.cu);
         }
     }
 

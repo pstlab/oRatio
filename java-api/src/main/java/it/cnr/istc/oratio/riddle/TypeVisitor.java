@@ -25,11 +25,9 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 class TypeVisitor extends riddleBaseVisitor<Type> {
 
     private final Core core;
-    private final riddleParser parser;
 
-    TypeVisitor(final Core core, final riddleParser parser) {
+    TypeVisitor(final Core core) {
         this.core = core;
-        this.parser = parser;
     }
 
     @Override
