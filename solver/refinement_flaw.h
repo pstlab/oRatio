@@ -25,6 +25,7 @@ private:
   class refinement_resolver : public resolver
   {
   public:
+    refinement_resolver(graph &gr, const smt::var &r, refinement_flaw &s_flaw, const std::vector<resolver *> &rs);
     refinement_resolver(graph &gr, refinement_flaw &s_flaw, const std::vector<resolver *> &rs);
     refinement_resolver(const refinement_resolver &that) = delete;
     virtual ~refinement_resolver();
