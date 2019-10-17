@@ -166,21 +166,31 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
                     ps.addFluent(p.getName() + "()");
             }
 
-            for (Atom atm : atoms)
-                ps.getFluent(atm.getType().getName() + "("
-                        + atm.getType().getFields().values().stream().filter(fld -> !fld.getName().equals("tau"))
-                                .map(fld -> atm.getExpr(fld.getName())).map(c_itm -> {
-                                    if (c_itm instanceof EnumItem) {
-                                        if (((EnumItem) c_itm).getVals().length == 1)
-                                            return core.guessName(((EnumItem) c_itm).getVals()[0]);
-                                        else
-                                            return Stream.of(((EnumItem) c_itm).getVals()).map(i -> core.guessName(i))
-                                                    .collect(Collectors.joining(", "));
-                                    } else
-                                        return core.guessName(c_itm);
-                                }).collect(Collectors.joining(", "))
-                        + ")").addLiteral(((Item.ArithItem) atm.getExpr("start")).getValue(),
-                                ((Item.ArithItem) atm.getExpr("end")).getValue(), atm);
+            for (Atom atm : atoms) {
+                String[][] par_vals = atm.getType().getFields().values().stream()
+                        .filter(fld -> !fld.getName().equals("tau")).map(fld -> atm.getExpr(fld.getName()))
+                        .map(c_itm -> {
+                            if (c_itm instanceof EnumItem) {
+                                if (((EnumItem) c_itm).getVals().length == 1)
+                                    return new String[] { core.guessName(((EnumItem) c_itm).getVals()[0]) };
+                                else
+                                    return Stream.of(((EnumItem) c_itm).getVals()).map(i -> core.guessName(i))
+                                            .toArray(String[]::new);
+                            } else
+                                return new String[] { core.guessName(c_itm) };
+                        }).toArray(String[][]::new);
+                if (par_vals.length == 0)
+                    ps.getFluent(atm.getType().getName() + "()").addLiteral(
+                            ((Item.ArithItem) atm.getExpr("start")).getValue(),
+                            ((Item.ArithItem) atm.getExpr("end")).getValue(), atm);
+                else
+                    for (String[] vals : new CartesianProductGenerator<>(par_vals)) {
+                        ps.getFluent(
+                                atm.getType().getName() + "(" + Stream.of(vals).collect(Collectors.joining(", ")) + ")")
+                                .addLiteral(((Item.ArithItem) atm.getExpr("start")).getValue(),
+                                        ((Item.ArithItem) atm.getExpr("end")).getValue(), atm);
+                    }
+            }
 
             return ps;
         }
