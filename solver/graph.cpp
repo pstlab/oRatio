@@ -305,30 +305,39 @@ void graph::check_graph()
     LOG("checking the graph..");
     std::unordered_set<resolver *> visited;
     std::unordered_set<flaw *> flaws(slv.flaws); // since the 'flaws' set can change within the check, we first make a copy..
+    std::unordered_set<resolver *> inv_rs;
     std::unordered_map<resolver *, std::vector<flaw *>> alt_fs;
 
     do
     {
         alt_fs.clear();
+        inv_rs.clear();
         for (const auto &f : flaws)
-            check_flaw(*f, visited, alt_fs);
+            check_flaw(*f, visited, inv_rs, alt_fs);
         assert(visited.empty());
 
-        if (!alt_fs.empty())
+        for (const auto &r : inv_rs)
+            if (!slv.sat.new_clause({lit(r->rho, false)}))
+                throw unsolvable_exception();
+
+        for (const auto &r : alt_fs)
         {
-            for (const auto &r : alt_fs)
-            {
-                new_flaw(*new refinement_flaw(*this, r.first, r.second), false);
-                std::unordered_set<flaw *> c_visited;
-                set_estimated_cost(r.first->effect, c_visited);
-            }
+            new_flaw(*new refinement_flaw(*this, r.first, r.second), false);
+            std::unordered_set<flaw *> c_visited;
+            set_estimated_cost(r.first->effect, c_visited);
+        }
+
+        if (!inv_rs.empty() || !alt_fs.empty())
+        {
+            if (!slv.get_sat_core().check())
+                throw unsolvable_exception();
             build();
             flaws = slv.flaws;
         }
-    } while (!alt_fs.empty());
+    } while (!inv_rs.empty() && !alt_fs.empty());
 }
 
-bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_map<resolver *, std::vector<flaw *>> &alt_fs)
+bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<resolver *> &inv_rs, std::unordered_map<resolver *, std::vector<flaw *>> &alt_fs)
 {
     assert(f.expanded);
     assert(slv.get_sat_core().value(f.phi) == True);
@@ -339,7 +348,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
 
     if (auto it = std::find_if(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.get_sat_core().value(r->rho) == True; }); it != f.resolvers.end())
         // a resolver is already applied for the given flaw..
-        return std::all_of((*it)->preconditions.begin(), (*it)->preconditions.end(), [this, &visited, &alt_fs](flaw *f) { return check_flaw(*f, visited, alt_fs); });
+        return std::all_of((*it)->preconditions.begin(), (*it)->preconditions.end(), [this, &visited, &inv_rs, &alt_fs](flaw *f) { return check_flaw(*f, visited, inv_rs, alt_fs); });
     else
     {
         // we sort the flaws' resolvers..
@@ -360,8 +369,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                     if (!slv.get_sat_core().assume(r->rho) || !slv.get_sat_core().check())
                         throw unsolvable_exception();
 
-                    if (c_lvl < slv.decision_level())
-                    { // the resolver is applicable..
+                    if (c_lvl < slv.decision_level()) // the resolver is applicable..
                         if (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
                         { // the resolver is applicable but incompatible with the current graph..
                             // we look for alternatives..
@@ -378,7 +386,8 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                             assert(c_lvl == slv.decision_level());
                             return true;
                         }
-                    }
+                    else
+                        inv_rs.insert(r);
                 }
                 else
                 { // we assume the resolver's rho variable..
@@ -398,7 +407,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                         }
                         else
                         { // the resolver is applicable..
-                            if (std::all_of(r->preconditions.begin(), r->preconditions.end(), [this, &visited, &alt_fs](flaw *f) { return check_flaw(*f, visited, alt_fs); }))
+                            if (std::all_of(r->preconditions.begin(), r->preconditions.end(), [this, &visited, &inv_rs, &alt_fs](flaw *f) { return check_flaw(*f, visited, inv_rs, alt_fs); }))
                             { // .. so are all of its preconditions..
                                 visited.erase(r);
                                 slv.get_sat_core().pop();
@@ -408,6 +417,8 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                             slv.get_sat_core().pop();
                             assert(c_lvl == slv.decision_level());
                         }
+                    else
+                        inv_rs.insert(r);
                 }
                 visited.erase(r);
             }

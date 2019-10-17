@@ -45,8 +45,8 @@ private:
 
   void set_estimated_cost(flaw &f, std::unordered_set<flaw *> &visited); // sets the estimated cost of the given flaw, propagating it to other flaws..
 
-  void build();                                 // builds the planning graph..
-  void add_layer();                             // adds a layer to the current planning graph..
+  void build();     // builds the planning graph..
+  void add_layer(); // adds a layer to the current planning graph..
 
   void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
   void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
@@ -60,8 +60,8 @@ private:
 #endif
 
 #ifdef CHECK_GRAPH
-  void check_graph();                                                                                                             // checks the applicability of the resolvers and performs some graph refinement..
-  bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_map<resolver *, std::vector<flaw *>> &alt_fs); // checks the solvability of the given flaw filling..
+  void check_graph();                                                                                                                                                     // checks the applicability of the resolvers and performs some graph refinement..
+  bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<resolver *> &inv_rs, std::unordered_map<resolver *, std::vector<flaw *>> &alt_fs); // checks the solvability of the given flaw filling..
 #endif
 
 #ifdef CHECK_GRAPH
