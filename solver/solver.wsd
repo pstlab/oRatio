@@ -26,7 +26,6 @@ solver o--> graph: gr
 
 class graph
 graph : +graph(slv:solver)
-graph : -accuracy: int
 graph : -gamma: var
 graph : -res: resolver
 graph : -flaw_q: deque<flaw>
@@ -41,7 +40,6 @@ graph : -set_estimated_cost(f: flaw, visited: set<flaw>): void
 
 graph : -build(): void
 graph : -add_layer(): void
-graph : -set_accuracy(acc: int): void
 
 graph : -expand_flaw(f: flaw): void
 graph : -apply_resolver(r: resolver): void

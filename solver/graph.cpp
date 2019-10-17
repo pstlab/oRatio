@@ -4,7 +4,6 @@
 #include "resolver.h"
 #include "combinations.h"
 #include "refinement_flaw.h"
-#include "composite_flaw.h"
 #include "smart_type.h"
 #include "atom_flaw.h"
 #include <cassert>
@@ -178,59 +177,9 @@ void graph::add_layer()
     }
 }
 
-void graph::set_accuracy(const unsigned short &acc)
-{
-    assert(slv.get_sat_core().root_level());
-    accuracy = acc;
-    LOG("current heuristic accuracy: " + std::to_string(accuracy));
-
-    // we clean up composite flaws..
-    for (auto it = slv.flaws.begin(); it != slv.flaws.end();)
-        if (composite_flaw *sf = dynamic_cast<composite_flaw *>(*it))
-            // we remove the composite flaw from the current flaws..
-            it = slv.flaws.erase(it);
-        else
-            ++it;
-
-    if (slv.flaws.size() >= accuracy)
-    {
-        const auto fss = combinations(std::vector<flaw *>(slv.flaws.begin(), slv.flaws.end()), accuracy);
-        for (const auto &fs : fss) // we create a new composite flaw..
-            new_flaw(*new composite_flaw(*this, res, fs));
-    }
-    else // we create a new composite flaw..
-        new_flaw(*new composite_flaw(*this, res, std::vector<flaw *>(slv.flaws.begin(), slv.flaws.end())));
-
-    // we restart the building graph procedure..
-    build();
-
-#ifdef CHECK_GRAPH
-    check_graph();
-#endif
-}
-
 void graph::expand_flaw(flaw &f)
 {
     assert(!f.expanded);
-
-    if (composite_flaw *sf = dynamic_cast<composite_flaw *>(&f))
-        // we expand the unexpanded enclosing flaws..
-        for (const auto &enc_f : sf->flaws)
-            if (!enc_f->expanded)
-            {
-                if (auto f_it = std::find(flaw_q.begin(), flaw_q.end(), enc_f); f_it != flaw_q.end())
-                    flaw_q.erase(f_it); // we remove the enclosing flaw from the flaw queue..
-                // we expand the enclosing flaw..
-                enc_f->expand();
-
-                // we apply the enclosing flaw's resolvers..
-                for (const auto &r : enc_f->resolvers)
-                    apply_resolver(*r);
-
-                std::unordered_set<flaw *> c_visited;
-                set_estimated_cost(*enc_f, c_visited);
-                assert(c_visited.empty());
-            }
 
     // we expand the flaw..
     f.expand();
@@ -506,11 +455,7 @@ void graph::check_gamma()
 #if defined GRAPH_PRUNING || defined CHECK_GRAPH
         already_closed.clear();
 #endif
-        // do we have room for increasing the heuristic accuracy?
-        if (accuracy < MAX_ACCURACY)
-            set_accuracy(accuracy + 1); // we increase the heuristic accuracy..
-        else
-            add_layer(); // we add a layer to the current graph..
+        add_layer(); // we add a layer to the current graph..
     }
 
 #ifdef CHECK_GRAPH

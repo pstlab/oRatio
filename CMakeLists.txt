@@ -13,9 +13,6 @@ configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
 set(HEURISTIC_TYPE "h_max" CACHE STRING "Heuristic type")
 set_property(CACHE HEURISTIC_TYPE PROPERTY STRINGS "h_max" "h_add")
-set(MIN_ACCURACY 1 CACHE STRING "Min heuristic accuracy")
-set(MAX_ACCURACY 2 CACHE STRING "Max heuristic accuracy")
-add_definitions(-DMIN_ACCURACY=${MIN_ACCURACY} -DMAX_ACCURACY=${MAX_ACCURACY})
 
 set(HOST "127.0.0.1" CACHE STRING "Socket listener host")
 set(PORT 1100 CACHE STRING "Socket listener port")
@@ -31,8 +28,6 @@ option(BUILD_GUI "Builds the GUI" OFF)
 option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
 
 message(STATUS "Heuristic type:           ${HEURISTIC_TYPE}")
-message(STATUS "Min heuristic accuracy:   ${MIN_ACCURACY}")
-message(STATUS "Max heuristic accuracy:   ${MAX_ACCURACY}")
 if(HEURISTIC_TYPE MATCHES "h_max")
     add_definitions(-DH_MAX)
 elseif(HEURISTIC_TYPE MATCHES "h_add")

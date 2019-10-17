@@ -3,7 +3,6 @@
 #include "var_flaw.h"
 #include "atom_flaw.h"
 #include "disjunction_flaw.h"
-#include "composite_flaw.h"
 #include "smart_type.h"
 #include "atom.h"
 #include "state_variable.h"
@@ -49,17 +48,6 @@ void solver::solve()
         for (const auto &st : q.front()->get_types())
             q.push(st.second);
         q.pop();
-    }
-
-    if (gr.accuracy < MIN_ACCURACY)
-    {
-        // we build the initial graph..
-        gr.build();
-
-#ifdef CHECK_GRAPH
-        gr.check_graph();
-#endif
-        gr.set_accuracy(MIN_ACCURACY);
     }
 
     // we set the gamma variable..

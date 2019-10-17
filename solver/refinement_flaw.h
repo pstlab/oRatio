@@ -38,7 +38,7 @@ private:
     void apply() override;
 
   private:
-    const std::vector<resolver *> resolvers; // the resolvers composing the composite resolver..
+    const std::vector<resolver *> resolvers; // the resolvers composing the resolver..
   };
 
 private:

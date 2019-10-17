@@ -18,8 +18,6 @@ namespace ratio
 
 class solver;
 class flaw;
-class composite_flaw;
-class composite_resolver;
 class refinement_flaw;
 class refinement_resolver;
 class resolver;
@@ -29,8 +27,6 @@ class graph
 {
   friend class solver;
   friend class flaw;
-  friend class composite_flaw;
-  friend class composite_resolver;
   friend class refinement_flaw;
   friend class refinement_resolver;
   friend class atom_flaw;
@@ -41,7 +37,6 @@ public:
   ~graph();
 
   solver &get_solver() const { return slv; }
-  unsigned short get_accuracy() const { return accuracy; }
 
 private:
   void new_flaw(flaw &f, const bool &enqueue = true); // notifies the graph that a new flaw 'f' has been created..
@@ -52,7 +47,6 @@ private:
 
   void build();                                 // builds the planning graph..
   void add_layer();                             // adds a layer to the current planning graph..
-  void set_accuracy(const unsigned short &acc); // set the heuristic accuracy to the given value..
 
   void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
   void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
@@ -78,7 +72,6 @@ private:
 
 private:
   solver &slv;                                                // the solver this graph belongs to..
-  unsigned short accuracy = 1;                                // the current heuristic accuracy..
   smt::var gamma;                                             // this variable represents the validity of the current graph..
   resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
   std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
