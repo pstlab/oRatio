@@ -38,10 +38,10 @@ std::string refinement_flaw::get_label() const
 
 void refinement_flaw::compute_resolvers()
 {
-    for (const auto &f : flaws)
-        if (flaws.size() == 1)
-            add_resolver(*new refinement_resolver(get_graph(), get_phi(), *this, f->get_causes()));
-        else
+    if (flaws.size() == 1)
+        add_resolver(*new refinement_resolver(get_graph(), get_phi(), *this, (*flaws.begin())->get_causes()));
+    else
+        for (const auto &f : flaws)
             add_resolver(*new refinement_resolver(get_graph(), *this, f->get_causes()));
 }
 
