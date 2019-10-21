@@ -148,9 +148,9 @@ void graph::build()
 
     // we extract the inconsistencies (and translate them into flaws)..
     std::vector<std::vector<std::pair<lit, double>>> incs = slv.get_incs();
-    for (const auto &st : slv.sts)
-        for (const auto &f : st->get_flaws())
-            new_flaw(*f, false); // we add the flaws to the planning graph..
+    for (const auto &f : slv.pending_flaws)
+        new_flaw(*f, false); // we add the flaws to the planning graph..
+    slv.pending_flaws.clear();
 
     // we perform some cleanings..
     slv.get_sat_core().simplify_db();

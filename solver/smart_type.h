@@ -30,13 +30,6 @@ public:
 
 private:
   /**
-   * Retrieves, and removes, all the flaws found so far.
-   * 
-   * @return a vector containing pointers to the flaws found so far.
-   * @pre the solver must be at root-level.
-   */
-  std::vector<flaw *> get_flaws();
-  /**
    * Returns all the decisions to take for solving the current inconsistencies with their choices' estimated costs.
    * 
    * @return a vector of decisions, each represented by a vector of pairs containing the literals representing the choice and its estimated cost.
@@ -49,13 +42,12 @@ protected:
   void set_ni(const smt::var &v); // temporally sets the solver's 'ni' variable..
   void restore_ni();              // restores the solver's 'ni' variable..
 
-  void store_flaw(flaw &f); // stores the flaw for retrieval when at root-level..
+  void store_flaw(flaw &f); // stores the flaw waiting for its initialization at root-level..
 
   static std::vector<resolver *> get_resolvers(solver &slv, const std::set<atom *> &atms); // returns the vector of resolvers which has given rise to the given atoms..
 
 private:
   solver &slv;
-  std::vector<flaw *> flaws;
 };
 
 class atom_listener : public smt::sat_value_listener, public smt::lra_value_listener, public smt::ov_value_listener

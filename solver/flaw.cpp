@@ -27,7 +27,7 @@ resolver *flaw::get_best_resolver() const
 void flaw::init()
 {
     assert(!expanded);
-    assert(gr.get_solver().get_sat_core().root_level());
+    assert(gr.get_solver().root_level());
 
     if (!causes.empty())
     { // we link the new variable to the causes of the flaws..
@@ -45,7 +45,7 @@ void flaw::init()
 void flaw::expand()
 {
     assert(!expanded);
-    assert(gr.get_solver().get_sat_core().root_level());
+    assert(gr.get_solver().root_level());
     expanded = true; // the flaw is now expanded..
 
     // we compute the resolvers..

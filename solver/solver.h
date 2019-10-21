@@ -41,12 +41,13 @@ public:
   expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals) override;
   atom_flaw &get_reason(const atom &atm) const { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
 
+  size_t decision_level() const { return trail.size(); } // returns the current decision level..
+  bool root_level() const { return trail.empty(); }      // checks whether the current decision level is root level..
+
 private:
   void new_atom(atom &atm, const bool &is_fact) override;                 // notifies the creation of a new atom..
   void new_disjunction(context &d_ctx, const disjunction &disj) override; // notifies the creation of a new disjunction..
 
-  size_t decision_level() const { return trail.size(); } // returns the current decision level..
-  bool root_level() const { return trail.empty(); }      // checks whether the current decision level is root level..
   void take_decision(const smt::lit &ch);
   void next();
 
@@ -71,6 +72,7 @@ private:
   };
   graph gr;                                             // the causal graph..
   std::vector<smart_type *> sts;                        // the smart-types..
+  std::vector<flaw *> pending_flaws;                    // flaws pending to be initialized at root-level..
   std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
   std::unordered_set<flaw *> flaws;                     // the currently active flaws..
   smt::lit current_decision;                            // the decision which has just been taken..

@@ -11,20 +11,12 @@ namespace ratio
 smart_type::smart_type(solver &slv, scope &scp, const std::string &name) : type(slv, scp, name, false), slv(slv) {}
 smart_type::~smart_type() {}
 
-std::vector<flaw *> smart_type::get_flaws()
-{
-    assert(slv.get_sat_core().root_level());
-    std::vector<flaw *> tmp;
-    std::swap(tmp, flaws); // flaws is now empty..
-    return tmp;
-}
-
 void smart_type::new_atom(atom_flaw &af) {}
 
 void smart_type::set_ni(const smt::var &v) { get_solver().set_ni(v); }
 void smart_type::restore_ni() { get_solver().restore_ni(); }
 
-void smart_type::store_flaw(flaw &f) { flaws.push_back(&f); }
+void smart_type::store_flaw(flaw &f) { slv.pending_flaws.push_back(&f); }
 
 std::vector<resolver *> smart_type::get_resolvers(solver &slv, const std::set<atom *> &atms)
 {
