@@ -81,7 +81,7 @@ private:
   std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
 #ifdef CHECK_MUTEXES
-  std::set<std::set<smt::var>> mutexes; // all the mutex resolvers found so far..
+  std::map<std::set<smt::var>, std::unordered_set<resolver *>> mutexes; // all the mutex resolvers found so far..
 #endif
 };
 } // namespace ratio

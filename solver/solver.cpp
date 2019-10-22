@@ -333,11 +333,10 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                         assert(c_visited.empty());
                     }
 #ifdef CHECK_MUTEXES
-                    std::set<smt::var> mutex;
+                    std::set<smt::var> mtx_trail;
                     for (const auto &l : trail)
-                        mutex.insert(l.decision.get_var());
-                    mutex.insert(p.get_var());
-                    gr.mutexes.insert(mutex);
+                        mtx_trail.insert(l.decision.get_var());
+                    gr.mutexes[mtx_trail].insert(r);
 #endif
                 }
             if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
