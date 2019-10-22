@@ -72,7 +72,7 @@ private:
   };
   graph gr;                                             // the causal graph..
   std::vector<smart_type *> sts;                        // the smart-types..
-  std::vector<flaw *> pending_flaws;                    // flaws pending to be initialized at root-level..
+  std::vector<flaw *> pending_flaws;                    // pending flaws, waiting root-level for being initialized..
   std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
   std::unordered_set<flaw *> flaws;                     // the currently active flaws..
   smt::lit current_decision;                            // the decision which has just been taken..

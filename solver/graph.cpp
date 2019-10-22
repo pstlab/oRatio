@@ -56,7 +56,8 @@ void graph::new_resolver(resolver &r)
 
 void graph::new_causal_link(flaw &f, resolver &r)
 {
-    f.make_precondition_of(r);
+    r.preconditions.push_back(&f);
+    f.supports.push_back(&r);
     bool new_clause = slv.sat.new_clause({lit(r.rho, false), f.phi});
     assert(new_clause);
 #ifdef BUILD_GUI

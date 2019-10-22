@@ -35,7 +35,11 @@ void flaw::init()
         cs.reserve(causes.size() + 1);
         cs.push_back(phi);
         for (const auto &c : causes)
+        {
+            c->preconditions.push_back(this);
+            supports.push_back(c);
             cs.push_back(lit(c->rho, false));
+        }
 
         if (!gr.get_solver().get_sat_core().new_clause(cs))
             throw unsolvable_exception();
@@ -86,11 +90,5 @@ void flaw::add_resolver(resolver &r)
         throw unsolvable_exception();
     resolvers.push_back(&r);
     gr.new_resolver(r);
-}
-
-void flaw::make_precondition_of(resolver &r)
-{
-    r.preconditions.push_back(this);
-    supports.push_back(&r);
 }
 } // namespace ratio

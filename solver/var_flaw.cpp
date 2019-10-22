@@ -13,11 +13,7 @@ static inline const std::vector<resolver *> cause_to_vector(resolver *const caus
         return {};
 }
 
-var_flaw::var_flaw(graph &gr, resolver *const cause, var_item &v_itm) : flaw(gr, cause_to_vector(cause), true), v_itm(v_itm)
-{
-    if (cause)
-        make_precondition_of(*cause);
-}
+var_flaw::var_flaw(graph &gr, resolver *const cause, var_item &v_itm) : flaw(gr, cause_to_vector(cause), true), v_itm(v_itm) {}
 var_flaw::~var_flaw() {}
 
 #ifdef BUILD_GUI

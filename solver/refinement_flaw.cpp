@@ -14,11 +14,7 @@ static inline const std::vector<resolver *> cause_to_vector(resolver *const caus
         return {};
 }
 
-refinement_flaw::refinement_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs) : flaw(gr, cause_to_vector(cause)), flaws(fs)
-{
-    if (cause)
-        make_precondition_of(*cause);
-}
+refinement_flaw::refinement_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs) : flaw(gr, cause_to_vector(cause)), flaws(fs) {}
 refinement_flaw::~refinement_flaw() {}
 
 #ifdef BUILD_GUI

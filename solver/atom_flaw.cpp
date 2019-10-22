@@ -18,11 +18,7 @@ static inline const std::vector<resolver *> cause_to_vector(resolver *const caus
         return {};
 }
 
-atom_flaw::atom_flaw(graph &gr, resolver *const cause, atom &atm, const bool is_fact) : flaw(gr, cause_to_vector(cause), true), atm(atm), is_fact(is_fact)
-{
-    if (cause)
-        make_precondition_of(*cause);
-}
+atom_flaw::atom_flaw(graph &gr, resolver *const cause, atom &atm, const bool is_fact) : flaw(gr, cause_to_vector(cause), true), atm(atm), is_fact(is_fact) {}
 atom_flaw::~atom_flaw() {}
 
 #ifdef BUILD_GUI

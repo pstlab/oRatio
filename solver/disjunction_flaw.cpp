@@ -14,11 +14,7 @@ static inline const std::vector<resolver *> cause_to_vector(resolver *const caus
         return {};
 }
 
-disjunction_flaw::disjunction_flaw(graph &gr, resolver *const cause, const context &ctx, const disjunction &disj) : flaw(gr, cause_to_vector(cause), false), ctx(ctx), disj(disj)
-{
-    if (cause)
-        make_precondition_of(*cause);
-}
+disjunction_flaw::disjunction_flaw(graph &gr, resolver *const cause, const context &ctx, const disjunction &disj) : flaw(gr, cause_to_vector(cause), false), ctx(ctx), disj(disj) {}
 disjunction_flaw::~disjunction_flaw() {}
 
 #ifdef BUILD_GUI

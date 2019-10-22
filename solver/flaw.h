@@ -61,10 +61,6 @@ protected:
    * Adds the resolver 'r' to this flaw.
    */
   void add_resolver(resolver &r);
-  /**
-   * Adds this flaw to the preconditions of the resolver 'r'.
-   */
-  void make_precondition_of(resolver &r);
 
 private:
   graph &gr;                                                 // the graph this flaw belongs to..
