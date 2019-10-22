@@ -59,7 +59,8 @@ class Package : StateVariable {
         { goal ul = new UnloadTruck(l:l, end:start); } or { goal ul = new UnloadAirplane(a:l, end:start); }
     }
 
-    predicate UnloadTruck(Truck t, Location l) { 
+    predicate UnloadTruck(Truck t, Location l) {
+        duration >= 1.0;
         goal at_t = new t.At(l:l); at_t.start <= start; at_t.end >= end;
         goal i = new IntoTruck(t:t, end:start);
     }
