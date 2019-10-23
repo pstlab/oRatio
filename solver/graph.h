@@ -20,6 +20,8 @@ class solver;
 class flaw;
 class refinement_flaw;
 class refinement_resolver;
+class mutex_flaw;
+class mutex_resolver;
 class resolver;
 class atom_flaw;
 
@@ -29,6 +31,8 @@ class graph
   friend class flaw;
   friend class refinement_flaw;
   friend class refinement_resolver;
+  friend class mutex_flaw;
+  friend class mutex_resolver;
   friend class atom_flaw;
 
 public:
@@ -60,8 +64,8 @@ private:
 #endif
 
 #ifdef CHECK_GRAPH
-  void check_graph();                                                                                                                                                     // checks the applicability of the resolvers and performs some graph refinement..
-  bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<resolver *> &inv_rs, std::unordered_map<resolver *, std::vector<flaw *>> &alt_fs); // checks the solvability of the given flaw filling..
+  void check_graph();                                                                                        // checks the applicability of the resolvers and performs some graph refinement..
+  bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<resolver *> &inv_rs); // checks the solvability of the given flaw filling..
 #endif
 
 #ifdef CHECK_GRAPH
@@ -82,6 +86,7 @@ private:
 #endif
 #ifdef CHECK_MUTEXES
   std::map<std::set<smt::var>, std::unordered_set<resolver *>> mutexes; // all the mutex resolvers found so far..
+  std::unordered_set<flaw *> to_enqueue;                                // the set of flaws which have to be enqueued within graph check..
 #endif
 };
 } // namespace ratio
