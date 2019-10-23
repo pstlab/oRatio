@@ -56,7 +56,7 @@ private:
   void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
 
 #ifdef DEFERRABLE_FLAWS
-  bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
+  bool is_deferrable(flaw &f, std::unordered_set<flaw *> &visited); // checks whether the given flaw is deferrable..
 #endif
 
 #ifdef CHECK_CYCLES

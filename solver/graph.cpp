@@ -128,22 +128,26 @@ void graph::build()
     {
         if (flaw_q.empty())
             throw unsolvable_exception();
-#ifdef DEFERRABLE_FLAWS
-        assert(!flaw_q.front()->expanded);
-        if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
-            if (is_deferrable(*flaw_q.front())) // we have a deferrable flaw: we can postpone its expansion..
-                flaw_q.push_back(flaw_q.front());
-            else
-                expand_flaw(*flaw_q.front()); // we expand the flaw..
+        flaw *c_f = flaw_q.front();
         flaw_q.pop_front();
+#ifdef DEFERRABLE_FLAWS
+        assert(!c_f->expanded);
+        if (slv.get_sat_core().value(c_f->phi) != False)
+        {
+            std::unordered_set<flaw *> visited;
+            if (is_deferrable(*c_f, visited)) // we have a deferrable flaw: we can postpone its expansion..
+                flaw_q.push_back(c_f);
+            else
+                expand_flaw(*c_f); // we expand the flaw..
+            assert(visited.empty());
+        }
 #else
         size_t q_size = flaw_q.size();
         for (size_t i = 0; i < q_size; ++i)
         {
-            assert(!flaw_q.front()->expanded);
-            if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
-                expand_flaw(*flaw_q.front()); // we expand the flaw..
-            flaw_q.pop_front();
+            assert(!c_f->expanded);
+            if (slv.get_sat_core().value(c_f->phi) != False)
+                expand_flaw(*c_f); // we expand the flaw..
         }
 #endif
     }
@@ -172,9 +176,10 @@ void graph::add_layer()
         size_t q_size = flaw_q.size();
         for (size_t i = 0; i < q_size; ++i)
         {
-            if (slv.get_sat_core().value(flaw_q.front()->phi) != False)
-                expand_flaw(*flaw_q.front()); // we expand the flaw..
+            flaw *c_f = flaw_q.front();
             flaw_q.pop_front();
+            if (slv.get_sat_core().value(c_f->phi) != False)
+                expand_flaw(*c_f); // we expand the flaw..
         }
     }
 }
@@ -221,26 +226,16 @@ void graph::apply_resolver(resolver &r)
 }
 
 #ifdef DEFERRABLE_FLAWS
-bool graph::is_deferrable(flaw &f)
+bool graph::is_deferrable(flaw &f, std::unordered_set<flaw *> &visited)
 {
-    if (slv.get_sat_core().value(f.phi) == True)
-        return false;
-
-    std::queue<flaw *> q;
-    q.push(&f);
-    while (!q.empty())
-    {
-        assert(slv.get_sat_core().value(q.front()->phi) != False);
-        if (q.front()->get_estimated_cost() < rational::POSITIVE_INFINITY || std::any_of(q.front()->resolvers.begin(), q.front()->resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
-            return true; // we already have a possible solution for this flaw, thus we defer..
-        else if (slv.get_sat_core().value(q.front()->phi) == True)
-            return false; // we necessarily have to solve this flaw: it cannot be deferred..
-        for (const auto &r : q.front()->causes)
-            q.push(&r->effect);
-        q.pop();
-    }
-    // we have an undeferrable flaw..
-    return false;
+    if (f.get_estimated_cost() < rational::POSITIVE_INFINITY || std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
+        return true; // we already have a possible solution for this flaw, thus we defer..
+    if (slv.get_sat_core().value(f.phi) == True || visited.count(&f))
+        return false; // we necessarily have to solve this flaw: it cannot be deferred..
+    visited.insert(&f);
+    bool def = std::all_of(f.supports.begin(), f.supports.end(), [this, &visited](resolver *r) { return is_deferrable(r->get_effect(), visited); });
+    visited.erase(&f);
+    return def;
 }
 #endif
 
@@ -309,7 +304,11 @@ void graph::check_graph()
     std::unordered_set<flaw *> flaws(slv.flaws); // since the 'flaws' set can change within the check, we first make a copy..
     std::unordered_set<resolver *> inv_rs;
 
-    while (!std::all_of(flaws.begin(), flaws.end(), [this, &visited, &inv_rs](flaw *f) { return check_flaw(*f, visited, inv_rs); }))
+    bool ok = true;
+    for (const auto &f : flaws)
+        if (!check_flaw(*f, visited, inv_rs))
+            ok = false;
+    while (!ok)
     {
         for (const auto &f : slv.pending_flaws)
         {
@@ -323,6 +322,12 @@ void graph::check_graph()
         if (!slv.get_sat_core().check())
             throw unsolvable_exception();
         build();
+
+        ok = true;
+        flaws = slv.flaws;
+        for (const auto &f : flaws)
+            if (!check_flaw(*f, visited, inv_rs))
+                ok = false;
     }
 }
 
