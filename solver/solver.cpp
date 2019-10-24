@@ -333,11 +333,14 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                         assert(c_visited.empty());
                     }
 #ifdef CHECK_GRAPH
-                    std::set<smt::var> mtx_trail;
-                    for (const auto &l : trail)
-                        mtx_trail.insert(l.decision.get_var());
-                    if (sat.value(r->effect.phi) == True && gr.mutexes[mtx_trail].insert(r).second)
-                        gr.to_enqueue.insert(&r->effect);
+                    if (gr.checking)
+                    { // we update the mutexes..
+                        std::set<smt::var> mtx_trail;
+                        for (const auto &l : trail)
+                            mtx_trail.insert(l.decision.get_var());
+                        if (sat.value(r->effect.phi) == True && gr.mutexes[mtx_trail].insert(r).second)
+                            gr.to_enqueue.insert(&r->effect); // the effect of 'r' has been pruned by the current trail..
+                    }
 #endif
                 }
             if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())

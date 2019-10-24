@@ -300,6 +300,7 @@ std::vector<std::vector<resolver const *>> graph::circuits(flaw &f, resolver &r)
 void graph::check_graph()
 {
     LOG("checking the graph..");
+    checking = true;
     std::unordered_set<resolver *> visited;
     std::unordered_set<flaw *> flaws(slv.flaws); // since the 'flaws' set can change within the check, we first make a copy..
     std::unordered_set<resolver *> inv_rs;
@@ -329,6 +330,7 @@ void graph::check_graph()
             if (!check_flaw(*f, visited, inv_rs))
                 ok = false;
     }
+    checking = false;
 }
 
 bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<resolver *> &inv_rs)

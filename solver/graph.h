@@ -81,6 +81,7 @@ private:
   std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
 #ifdef CHECK_GRAPH
+  bool checking = false;
   std::map<std::set<smt::var>, std::unordered_set<resolver *>> mutexes; // all the mutex resolvers found so far..
   std::unordered_set<flaw *> to_enqueue;                                // the set of flaws which have to be enqueued within graph check..
 #endif
