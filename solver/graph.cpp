@@ -439,7 +439,10 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                     }
                 }
                 else
+                { // 'r' is an invalid resolver (i.e. its constraints do not propagate)..
                     inv_rs.insert(r);
+                    to_enqueue.clear(); // we clean the set of flaws affected by mutexes..
+                }
 
                 visited.erase(r);
             }
