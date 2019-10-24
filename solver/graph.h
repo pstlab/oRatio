@@ -60,8 +60,8 @@ private:
 #endif
 
 #ifdef CHECK_GRAPH
-  void check_graph();                                                                                        // checks the applicability of the resolvers and performs some graph refinement..
-  bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<resolver *> &inv_rs); // checks the solvability of the given flaw filling..
+  void check_graph();                                                                                                                                                                                                       // checks the applicability of the resolvers and performs some graph refinement..
+  bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<resolver *> &inv_rs, std::unordered_set<resolver *> &inc_rs, std::vector<refinement_flaw *> &ref_fs, std::unordered_map<resolver *, std::vector<resolver *>> &to_merge); // checks the solvability of the given flaw filling..
 #endif
 
   void check_gamma(); // checks and possibly resets the value of gamma..
