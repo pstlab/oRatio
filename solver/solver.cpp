@@ -332,7 +332,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                         gr.set_estimated_cost(r->effect, c_visited);
                         assert(c_visited.empty());
                     }
-#ifdef CHECK_MUTEXES
+#ifdef CHECK_GRAPH
                     std::set<smt::var> mtx_trail;
                     for (const auto &l : trail)
                         mtx_trail.insert(l.decision.get_var());

@@ -68,10 +68,6 @@ private:
   bool check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<resolver *> &inv_rs); // checks the solvability of the given flaw filling..
 #endif
 
-#ifdef CHECK_GRAPH
-  void check_mutexes();
-#endif
-
   void check_gamma(); // checks and possibly resets the value of gamma..
 
 private:
@@ -84,7 +80,7 @@ private:
 #if defined GRAPH_PRUNING || defined CHECK_GRAPH
   std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
-#ifdef CHECK_MUTEXES
+#ifdef CHECK_GRAPH
   std::map<std::set<smt::var>, std::unordered_set<resolver *>> mutexes; // all the mutex resolvers found so far..
   std::unordered_set<flaw *> to_enqueue;                                // the set of flaws which have to be enqueued within graph check..
 #endif
