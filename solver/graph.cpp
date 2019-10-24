@@ -324,25 +324,35 @@ void graph::check_graph()
             for (const auto &c : f->causes)
                 set_estimated_cost(c->effect, c_visited);
         }
-        ref_fs.clear();
 
         // we merge resolvers with those of singleton flaws..
         for (const auto &c_r : to_merge)
+        {
             for (const auto &r : c_r.second)
             {
                 if (!slv.sat.new_clause({lit(c_r.first->rho, false), r->rho}))
                     throw unsolvable_exception();
                 for (const auto &f : r->preconditions)
-                    new_causal_link(*f, *c_r.first);
+                    if (std::find(c_r.first->preconditions.begin(), c_r.first->preconditions.end(), f) == c_r.first->preconditions.end())
+                        new_causal_link(*f, *c_r.first);
             }
-        to_merge.clear();
-
-        if (!ok)
-            inc_rs.clear();
+            std::unordered_set<flaw *> c_visited;
+            set_estimated_cost(c_r.first->effect, c_visited);
+        }
 
         if (!slv.get_sat_core().check())
             throw unsolvable_exception();
-        build();
+
+        if (!ok && ref_fs.empty() && to_merge.empty())
+            add_layer();
+        else
+            build();
+
+        // we clean up things..
+        ref_fs.clear();
+        to_merge.clear();
+        if (!ok)
+            inc_rs.clear();
     } while (!ok);
 
     if (!inc_rs.empty())
@@ -385,6 +395,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
 #ifdef BUILD_GUI
                 slv.fire_current_resolver(*r);
 #endif
+                assert(to_enqueue.empty());
                 // we assume the resolver's rho variable..
                 slv.current_decision = r->rho;
                 if (!slv.get_sat_core().assume(r->rho) || !slv.get_sat_core().check())
