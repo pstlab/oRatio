@@ -11,7 +11,7 @@ class refinement_flaw : public flaw
   friend class graph;
 
 public:
-  refinement_flaw(graph &gr, resolver *const cause, const std::vector<flaw *> &fs);
+  refinement_flaw(graph &gr, resolver *const cause, flaw &to_enqueue, const std::vector<resolver *> &non_mtx_rs);
   refinement_flaw(const refinement_flaw &orig) = delete;
   virtual ~refinement_flaw();
 
@@ -25,8 +25,8 @@ private:
   class refinement_resolver : public resolver
   {
   public:
-    refinement_resolver(graph &gr, const smt::var &r, refinement_flaw &s_flaw, const std::vector<resolver *> &rs);
-    refinement_resolver(graph &gr, refinement_flaw &s_flaw, const std::vector<resolver *> &rs);
+    refinement_resolver(graph &gr, const smt::var &r, refinement_flaw &s_flaw, resolver &non_mtx_r);
+    refinement_resolver(graph &gr, refinement_flaw &s_flaw, resolver &non_mtx_r);
     refinement_resolver(const refinement_resolver &that) = delete;
     virtual ~refinement_resolver();
 
@@ -38,10 +38,11 @@ private:
     void apply() override;
 
   private:
-    const std::vector<resolver *> resolvers; // the resolvers composing the resolver..
+    resolver &non_mtx_r; // the non-mutex resolver..
   };
 
 private:
-  const std::vector<flaw *> flaws;
+  flaw &to_enqueue;
+  const std::vector<resolver *> non_mtx_rs;
 };
 } // namespace ratio

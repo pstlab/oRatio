@@ -4,7 +4,6 @@
 #include "resolver.h"
 #include "combinations.h"
 #include "refinement_flaw.h"
-#include "mutex_flaw.h"
 #include "smart_type.h"
 #include "atom_flaw.h"
 #include <cassert>
@@ -366,7 +365,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
 
                 if (c_lvl < slv.decision_level())
                 { // the resolver is applicable..
-                    // we refine the graph taking into account mutexe resolvers..
+                    // we refine the graph taking into account mutex resolvers..
                     for (const auto &f : to_enqueue)
                         if (&r->effect != f)
                         {
@@ -375,7 +374,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                             for (const auto &r : f->resolvers)
                                 if (slv.sat.value(r->rho) != False)
                                     non_mtx_rs.push_back(r);
-                            slv.pending_flaws.push_back(new mutex_flaw(*this, r, *f, non_mtx_rs));
+                            slv.pending_flaws.push_back(new refinement_flaw(*this, r, *f, non_mtx_rs));
                         }
                     to_enqueue.clear();
 

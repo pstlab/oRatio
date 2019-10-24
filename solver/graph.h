@@ -20,8 +20,6 @@ class solver;
 class flaw;
 class refinement_flaw;
 class refinement_resolver;
-class mutex_flaw;
-class mutex_resolver;
 class resolver;
 class atom_flaw;
 
@@ -31,8 +29,6 @@ class graph
   friend class flaw;
   friend class refinement_flaw;
   friend class refinement_resolver;
-  friend class mutex_flaw;
-  friend class mutex_resolver;
   friend class atom_flaw;
 
 public:
