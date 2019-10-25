@@ -181,6 +181,15 @@ void graph::add_layer()
                 expand_flaw(*c_f); // we expand the flaw..
         }
     }
+
+    // we extract the inconsistencies (and translate them into flaws)..
+    std::vector<std::vector<std::pair<lit, double>>> incs = slv.get_incs();
+    for (const auto &f : slv.pending_flaws)
+        new_flaw(*f, false); // we add the flaws to the planning graph..
+    slv.pending_flaws.clear();
+
+    // we perform some cleanings..
+    slv.get_sat_core().simplify_db();
 }
 
 void graph::expand_flaw(flaw &f)
@@ -348,10 +357,10 @@ void graph::check_graph()
         if (!slv.get_sat_core().check())
             throw unsolvable_exception();
 
-        if (!ok && ref_fs.empty() && to_merge.empty())
-            add_layer();
-        else
+        if (ok || std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
             build();
+        else
+            add_layer();
 
         // we clean up things..
         ref_fs.clear();
