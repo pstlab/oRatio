@@ -316,6 +316,11 @@ void graph::check_graph()
             if (!check_flaw(*f, visited, inv_rs, inc_rs, ref_fs, to_merge))
                 ok = false;
 
+        // we prune away the invalid resolvers..
+        for (const auto &r : inv_rs)
+            if (!slv.get_sat_core().new_clause({lit(r->rho, false)}))
+                throw unsolvable_exception();
+
         // we add the flaws to the planning graph..
         for (const auto &f : ref_fs)
         {
@@ -351,20 +356,46 @@ void graph::check_graph()
         // we clean up things..
         ref_fs.clear();
         to_merge.clear();
+        inv_rs.clear();
         if (!ok)
             inc_rs.clear();
+        else if (!inc_rs.empty())
+        { // the graph is, till now, good, but we have some inconsistent resolvers..
+            for (const auto &r : inc_rs)
+                if (already_closed.insert(r->rho).second)
+                    if (!slv.get_sat_core().new_clause({lit(r->rho, false), lit(gamma, false)}))
+                        throw unsolvable_exception();
+
+            if (!slv.get_sat_core().check())
+                throw unsolvable_exception();
+
+            slv.current_decision = gamma;
+            if (!slv.get_sat_core().assume(gamma) || !slv.get_sat_core().check())
+                throw unsolvable_exception();
+            if (slv.root_level())
+            {
+                assert(slv.get_sat_core().value(gamma) == False);
+                // the graph has been invalidated..
+                LOG("search has exhausted the graph..");
+                // we create a new graph var..
+                gamma = slv.get_sat_core().new_var();
+                LOG("graph var is: γ" << std::to_string(gamma));
+#if defined GRAPH_PRUNING || defined CHECK_GRAPH
+                already_closed.clear();
+#endif
+                add_layer(); // we add a layer to the current graph..
+                ok = false;
+            }
+            else if (std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
+            { // the inconsistent resolvers do not allow finding a solution..
+                slv.get_sat_core().pop();
+                ok = false;
+            }
+            else // we go back to search..
+                slv.get_sat_core().pop();
+            assert(slv.root_level());
+        }
     } while (!ok);
-
-    if (!inc_rs.empty())
-    {
-        for (const auto &r : inc_rs)
-            if (already_closed.insert(r->rho).second)
-                if (!slv.get_sat_core().new_clause({lit(r->rho, false), lit(gamma, false)}))
-                    throw unsolvable_exception();
-
-        if (!slv.get_sat_core().check())
-            throw unsolvable_exception();
-    }
 
     checking = false;
 }
