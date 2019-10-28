@@ -357,7 +357,7 @@ void graph::check_graph()
         if (!slv.get_sat_core().check())
             throw unsolvable_exception();
 
-        if (ok || std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
+        if (ok || !inv_rs.empty() || !ref_fs.empty() || !to_merge.empty() || std::any_of(slv.flaws.begin(), slv.flaws.end(), [](flaw *f) { return f->get_estimated_cost().is_positive_infinite(); }))
             build();
         else
             add_layer();
