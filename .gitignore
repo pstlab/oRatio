@@ -1,4 +1,12 @@
 .vscode
+.DS_Store
 /build
-/solver/gui/build/
-/solver/gui/dist
+/gui/.classpath
+/gui/dependency-reduced-pom.xml
+/gui/.settings
+/gui/target/
+/gui/.project
+/java-api/.classpath
+/java-api/.settings
+/java-api/target/
+/java-api/.project

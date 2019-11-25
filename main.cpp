@@ -1,29 +1,9 @@
 #include "solver.h"
-#ifndef NDEBUG
+#ifdef BUILD_GUI
 #include "socket_listener.h"
 #endif
 #include <iostream>
 #include <fstream>
-
-#ifdef STATISTICS
-void print_statistics(ratio::solver &s)
-{
-    std::cout << "Created flaws" << std::endl;
-    std::cout << " - facts:            " << s.nr_created_facts() << std::endl;
-    std::cout << " - goals:            " << s.nr_created_goals() << std::endl;
-    std::cout << " - variables:        " << s.nr_created_vars() << std::endl;
-    std::cout << " - disjunctions:     " << s.nr_created_disjs() << std::endl;
-    std::cout << " - inconsistencies:  " << s.nr_created_incs() << std::endl;
-    std::cout << "Solved flaws" << std::endl;
-    std::cout << " - facts:            " << s.nr_solved_facts() << std::endl;
-    std::cout << " - goals:            " << s.nr_solved_goals() << std::endl;
-    std::cout << " - variables:        " << s.nr_solved_vars() << std::endl;
-    std::cout << " - disjunctions:     " << s.nr_solved_disjs() << std::endl;
-    std::cout << " - inconsistencies:  " << s.nr_solved_incs() << std::endl;
-    std::cout << "Parsing time:        " << double(std::chrono::duration_cast<std::chrono::milliseconds>(s.get_parsing_time()).count()) / 1000 << "s" << std::endl;
-    std::cout << "Graph building time: " << double(std::chrono::duration_cast<std::chrono::milliseconds>(s.get_graph_building_time()).count()) / 1000 << "s" << std::endl;
-}
-#endif
 
 int main(int argc, char *argv[])
 {
@@ -44,22 +24,17 @@ int main(int argc, char *argv[])
     std::string sol_name = argv[argc - 1];
 
     std::cout << "starting oRatio";
-#ifndef NDEBUG
+#ifdef BUILD_GUI
     std::cout << " in debug mode";
 #endif
     std::cout << ".." << std::endl;
 
     solver s;
-#ifndef NDEBUG
-    socket_listener l(s);
+#ifdef BUILD_GUI
+    socket_listener l(s, HOST, PORT);
 #endif
 
     s.init();
-
-#ifdef STATISTICS
-    auto start_solving = std::chrono::high_resolution_clock::now();
-#endif
-
     try
     {
         std::cout << "parsing input files.." << std::endl;
@@ -69,13 +44,6 @@ int main(int argc, char *argv[])
         s.solve();
         std::cout << "hurray!! we have found a solution.." << std::endl;
 
-#ifdef STATISTICS
-        print_statistics(s);
-        auto end_solving = std::chrono::high_resolution_clock::now();
-        auto solving_time = end_solving - start_solving;
-        std::cout << "Total solving time:  " << double(std::chrono::duration_cast<std::chrono::milliseconds>(solving_time).count()) / 1000 << "s" << std::endl;
-#endif
-
         std::ofstream sol_file;
         sol_file.open(sol_name);
         sol_file << s.to_string();
@@ -84,13 +52,6 @@ int main(int argc, char *argv[])
     catch (const std::exception &ex)
     {
         std::cout << ex.what() << std::endl;
-
-#ifdef STATISTICS
-        print_statistics(s);
-        auto end_solving = std::chrono::high_resolution_clock::now();
-        auto solving_time = end_solving - start_solving;
-        std::cout << "Total solving time:  " << double(std::chrono::duration_cast<std::chrono::milliseconds>(solving_time).count()) / 1000 << "s" << std::endl;
-#endif
         return 1;
     }
 }

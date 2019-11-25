@@ -2,9 +2,9 @@
 
 #include "smart_type.h"
 #include "constructor.h"
+#include "predicate.h"
 #include "flaw.h"
 #include "resolver.h"
-#include "predicate.h"
 
 #define REUSABLE_RESOURCE_NAME "ReusableResource"
 #define REUSABLE_RESOURCE_CAPACITY "capacity"
@@ -22,12 +22,13 @@ public:
   virtual ~reusable_resource();
 
 private:
-  std::vector<flaw *> get_flaws() override;
+  std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;
 
-  void new_predicate(predicate &) override { throw std::logic_error("it is not possible to define predicates on a reusable resource.."); }
-  void new_fact(atom_flaw &f) override;
-  void new_goal(atom_flaw &f) override;
+  void new_predicate(predicate &) override;
+  void new_atom(atom_flaw &f) override;
+  void store_variables(atom &atm0, atom &atm1);
 
+  // the reusable-resource constructor..
   class rr_constructor : public constructor
   {
   public:
@@ -36,6 +37,7 @@ private:
     virtual ~rr_constructor();
   };
 
+  // the reusable-resource 'use' predicate..
   class use_predicate : public predicate
   {
   public:
@@ -44,6 +46,7 @@ private:
     virtual ~use_predicate();
   };
 
+  // the atom listener for the reusable-resource..
   class rr_atom_listener : public atom_listener
   {
   public:
@@ -62,59 +65,95 @@ private:
     reusable_resource &rr;
   };
 
+  // the flaw (i.e. two or more temporally overlapping atoms on the same reusable-resource instance) that can arise from a reusable-resource..
   class rr_flaw : public flaw
   {
+    friend class state_variable;
+
   public:
-    rr_flaw(solver &slv, const std::set<atom *> &overlapping_atoms);
+    rr_flaw(reusable_resource &rr, const std::set<atom *> &atms);
     rr_flaw(rr_flaw &&) = delete;
     virtual ~rr_flaw();
 
-    std::string get_label() const override { return "φ" + std::to_string(get_phi()) + "rr-flaw"; }
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
 
   private:
     void compute_resolvers() override;
 
   private:
+    reusable_resource &rr;
     const std::set<atom *> overlapping_atoms;
   };
 
+  // a resolver for temporally ordering atoms..
   class order_resolver : public resolver
   {
   public:
-    order_resolver(solver &slv, const smt::var &r, rr_flaw &f, const atom &before, const atom &after);
+    order_resolver(rr_flaw &flw, const smt::var &r, const atom &before, const atom &after);
     order_resolver(const order_resolver &that) = delete;
     virtual ~order_resolver();
 
-    std::string get_label() const override { return "ρ" + std::to_string(rho) + " σ" + std::to_string(before.sigma) + " <= σ" + std::to_string(after.sigma); }
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
 
   private:
     void apply() override;
 
   private:
-    const atom &before;
-    const atom &after;
+    const atom &before; // applying the resolver will order this atom before the other..
+    const atom &after;  // applying the resolver will order this atom after the other..
   };
 
-  class displace_resolver : public resolver
+  // a resolver for placing atoms on a specific reusable-resource..
+  class place_resolver : public resolver
   {
   public:
-    displace_resolver(solver &slv, rr_flaw &f, const atom &a0, const atom &a1, const smt::lit &neq_lit);
-    displace_resolver(const displace_resolver &that) = delete;
-    virtual ~displace_resolver();
+    place_resolver(rr_flaw &flw, const smt::var &r, atom &plc_atm, item &plc_itm, atom &frbd_atm);
+    place_resolver(const place_resolver &that) = delete;
+    virtual ~place_resolver();
 
-    std::string get_label() const override { return "ρ" + std::to_string(rho) + " displ σ" + std::to_string(a0.sigma) + ".τ != σ" + std::to_string(a1.sigma) + ".τ"; }
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
 
   private:
     void apply() override;
 
   private:
-    const atom &a0;
-    const atom &a1;
-    const smt::lit neq_lit;
+    atom &plc_atm;  // applying the resolver will force this atom on the 'plc_item' item..
+    item &plc_itm;  // applying the resolver will force the 'plc_atm' atom on this item..
+    atom &frbd_atm; // applying the resolver will forbid this atom on the 'plc_itm' item..
+  };
+
+  // a resolver for forbidding atoms on a specific reusable-resource..
+  class forbid_resolver : public resolver
+  {
+  public:
+    forbid_resolver(rr_flaw &flw, atom &atm, item &itm);
+    forbid_resolver(const forbid_resolver &that) = delete;
+    virtual ~forbid_resolver();
+
+#ifdef BUILD_GUI
+    std::string get_label() const override;
+#endif
+
+  private:
+    void apply() override;
+
+  private:
+    atom &atm; // applying the resolver will forbid this atom on the 'itm' item..
+    item &itm; // applying the resolver will forbid the 'atm' atom on this item..
   };
 
 private:
-  std::set<item *> to_check;
-  std::vector<std::pair<atom *, rr_atom_listener *>> atoms;
+  std::set<item *> to_check;                                // the reusable-resource instances whose atoms have changed..
+  std::vector<std::pair<atom *, rr_atom_listener *>> atoms; // we store, for each atom, its atom listener..
+
+  std::map<std::set<atom *>, rr_flaw *> rr_flaws;                            // the reusable-resource flaws found so far..
+  std::map<atom *, std::map<atom *, smt::var>> leqs;                         // all the possible ordering constraints..
+  std::map<std::set<atom *>, std::vector<std::pair<smt::var, item *>>> plcs; // all the possible placement constraints..
 };
-}
+} // namespace ratio

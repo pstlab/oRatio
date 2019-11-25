@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="ratio::flaw">
+    <DisplayString>{{ φ{phi} }}</DisplayString>
+    <Expand>
+      <Item Name="[φ]">phi</Item>
+      <Item Name="[causes]">causes</Item>
+      <Item Name="[resolvers]">resolvers</Item>
+    </Expand>
+  </Type>
+  <Type Name="ratio::atom_flaw">
+    <DisplayString Condition="is_fact">{{ φ{phi} fact σ{atm.sigma} }}</DisplayString>
+    <DisplayString>{{ φ{phi} goal σ{atm.sigma} }}</DisplayString>
+    <Expand>
+      <Item Name="[φ]">phi</Item>
+      <Item Name="[atom]">atm</Item>
+      <Item Name="[causes]">causes</Item>
+      <Item Name="[resolvers]">resolvers</Item>
+    </Expand>
+  </Type>
+  <Type Name="ratio::disjunction_flaw">
+    <DisplayString>{{ φ{phi} disj }}</DisplayString>
+    <Expand>
+      <Item Name="[φ]">phi</Item>
+      <Item Name="[causes]">causes</Item>
+      <Item Name="[resolvers]">resolvers</Item>
+    </Expand>
+  </Type>
+  <Type Name="ratio::resolver">
+    <DisplayString>{{ ρ{rho} }}</DisplayString>
+    <Expand>
+      <Item Name="[ρ]">rho</Item>
+      <Item Name="[effect]">effect</Item>
+      <Item Name="[preconditions]">preconditions</Item>
+    </Expand>
+  </Type>
+</AutoVisualizer>

@@ -1,129 +1,95 @@
 #pragma once
 
 #include "core.h"
-#include <deque>
+#include "graph.h"
+
+#define START "start"
+#define END "end"
 
 namespace ratio
 {
 
-class flaw;
-class resolver;
-class atom_flaw;
-class hyper_flaw;
-#ifndef NDEBUG
+class smart_type;
+#ifdef BUILD_GUI
 class solver_listener;
 #endif
 
-class solver : public core, public smt::theory
+class solver : public core, private smt::theory
 {
-  friend class flaw;
-  friend class resolver;
-  friend class atom_flaw;
-  friend class hyper_flaw;
-#ifndef NDEBUG
+  friend class graph;
+  friend class smart_type;
+#ifdef BUILD_GUI
   friend class solver_listener;
 #endif
-
 public:
   solver();
   solver(const solver &orig) = delete;
-  virtual ~solver();
+  ~solver();
 
-  void init(); // initializes the solver..
+  graph &get_graph() { return gr; }
+
+  /**
+   * Initializes the solver.
+   */
+  void init();
+
+  /**
+   * Solves the given problem.
+   */
+  void solve() override;
 
   expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals) override;
-
-private:
-  void new_fact(atom &atm) override;
-  void new_goal(atom &atm) override;
-  void new_disjunction(context &d_ctx, const disjunction &disj) override;
-
-public:
-  void solve() override;                                                    // solves the given problem..
   atom_flaw &get_reason(const atom &atm) const { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
 
+  size_t decision_level() const { return trail.size(); } // returns the current decision level..
+  bool root_level() const { return trail.empty(); }      // checks whether the current decision level is root level..
+
 private:
-  void build_graph();               // builds the planning graph..
-  void check_graph();               // checks whether the planning graph can be used for the search..
-  bool is_deferrable(flaw &f);      // checks whether the given flaw is deferrable..
-  void add_layer();                 // adds a layer to the current planning graph..
-  void increase_accuracy();         // increases the heuristic accuracy by one..
-  bool has_inconsistencies();       // checks whether the types have some inconsistency..
-  void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
-  void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
+  void new_atom(atom &atm, const bool &is_fact) override;                 // notifies the creation of a new atom..
+  void new_disjunction(context &d_ctx, const disjunction &disj) override; // notifies the creation of a new disjunction..
 
-  void new_flaw(flaw &f);
-  void new_resolver(resolver &r);
-  void new_causal_link(flaw &f, resolver &r);
-
-  void set_estimated_cost(resolver &r, const smt::rational &cst); // sets the estimated cost of the given resolver propagating it to other resolvers..
-  flaw *select_flaw();                                            // selects the most expensive flaw from the 'flaws' set, returns a nullptr if there are no active flaws..
-
-  static const smt::rational h_max(const std::vector<flaw *> &fs);
-  static const smt::rational h_add(const std::vector<flaw *> &fs);
+  void take_decision(const smt::lit &ch);
+  void next();
 
   bool propagate(const smt::lit &p, std::vector<smt::lit> &cnfl) override;
   bool check(std::vector<smt::lit> &cnfl) override;
   void push() override;
   void pop() override;
 
+  void solve_inconsistencies();                                     // checks whether the types have any inconsistency and, in case, solve them..
+  std::vector<std::vector<std::pair<smt::lit, double>>> get_incs(); // collects all the current inconsistencies..
+
 private:
   struct layer
   {
 
-    layer(resolver *const r) : r(r) {}
+    layer(const smt::lit &dec) : decision(dec) {}
 
-    resolver *const r;
-    std::unordered_map<resolver *, smt::rational> old_costs; // the old estimated resolvers' costs..
-    std::unordered_set<flaw *> new_flaws;                    // the just activated flaws..
-    std::unordered_set<flaw *> solved_flaws;                 // the just solved flaws..
+    const smt::lit decision;                               // the decision which introduced the new layer..
+    std::unordered_map<flaw *, smt::rational> old_f_costs; // the old estimated flaws' costs..
+    std::unordered_set<flaw *> new_flaws;                  // the just activated flaws..
+    std::unordered_set<flaw *> solved_flaws;               // the just solved flaws..
   };
+  graph gr;                                             // the causal graph..
+  std::vector<smart_type *> sts;                        // the smart-types..
+  std::vector<flaw *> pending_flaws;                    // pending flaws, waiting root-level for being initialized..
+  std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
+  std::unordered_set<flaw *> flaws;                     // the currently active flaws..
+  smt::lit current_decision;                            // the decision which has just been taken..
+  std::vector<layer> trail;                             // the list of taken decisions, with the associated changes made, in chronological order..
 
-  resolver *res = nullptr;                                    // the current resolver (will be into the trail)..
-  smt::var gamma;                                             // this variable represents the validity of the current graph..
-  unsigned short accuracy = 1;                                // the current heuristic accuracy..
-  static const unsigned short max_accuracy = 1;               // the maximum heuristic accuracy..
-  std::map<std::set<flaw *>, hyper_flaw *> hyper_flaws;       // the enclosing flaws for each hyper-flaw..
-  std::deque<flaw *> flaw_q;                                  // the flaw queue (for graph building procedure)..
-  std::unordered_set<flaw *> flaws;                           // the current active flaws..
-  std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (boolean variable to flaws) of the flaws..
-  std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (boolean variable to resolver) of the resolvers..
-  std::unordered_map<const atom *, atom_flaw *> reason;       // the reason for having introduced an atom..
-  std::vector<layer> trail;                                   // the list of resolvers in chronological order..
-#ifdef STATISTICS
-public:
-  void created_flaw(flaw &f);
-  unsigned nr_created_facts() const { return n_created_facts; }
-  unsigned nr_created_goals() const { return n_created_goals; }
-  unsigned nr_created_disjs() const { return n_created_disjs; }
-  unsigned nr_created_vars() const { return n_created_vars; }
-  unsigned nr_created_incs() const { return n_created_incs; }
-  void solved_flaw(flaw &f);
-  unsigned nr_solved_facts() const { return n_solved_facts; }
-  unsigned nr_solved_goals() const { return n_solved_goals; }
-  unsigned nr_solved_disjs() const { return n_solved_disjs; }
-  unsigned nr_solved_vars() const { return n_solved_vars; }
-  unsigned nr_solved_incs() const { return n_solved_incs; }
-
-  std::chrono::duration<double> get_graph_building_time() const { return graph_building_time; }
-
+#ifdef BUILD_GUI
 private:
-  unsigned n_created_facts = 0; // the number of created facts..
-  unsigned n_created_goals = 0; // the number of created goals..
-  unsigned n_created_disjs = 0; // the number of created disjunctions..
-  unsigned n_created_vars = 0;  // the number of created variables..
-  unsigned n_created_incs = 0;  // the number of created inconsistencies..
-  unsigned n_solved_facts = 0;  // the number of solved facts..
-  unsigned n_solved_goals = 0;  // the number of solved goals..
-  unsigned n_solved_disjs = 0;  // the number of solved disjunctions..
-  unsigned n_solved_vars = 0;   // the number of solved variables..
-  unsigned n_solved_incs = 0;   // the number of solved inconsistencies..
+  std::vector<solver_listener *> listeners; // the solver listeners..
 
-  std::chrono::duration<double> graph_building_time = std::chrono::duration<double>::zero();
-#endif
-#ifndef NDEBUG
-private:
-  std::vector<solver_listener *> listeners; // the causal-graph listeners..
+  void fire_new_flaw(const flaw &f) const;
+  void fire_flaw_state_changed(const flaw &f) const;
+  void fire_flaw_cost_changed(const flaw &f) const;
+  void fire_current_flaw(const flaw &f) const;
+  void fire_new_resolver(const resolver &r) const;
+  void fire_resolver_state_changed(const resolver &r) const;
+  void fire_current_resolver(const resolver &r) const;
+  void fire_causal_link_added(const flaw &f, const resolver &r) const;
 #endif
 };
-}
+} // namespace ratio

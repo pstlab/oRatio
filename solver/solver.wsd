@@ -1,145 +1,94 @@
-@startuml cg-lib
-skinparam monochrome true
-skinparam handwritten true
+@startuml solver
+skinparam Monochrome true
+skinparam Handwritten true
 
-class cg_listener
-cg_listener : +cg_listener(s:solver)
-cg_listener : +flaw_created(f:flaw):void
-cg_listener : +flaw_state_changed(f:flaw):void
-cg_listener : +flaw_cost_changed(f:flaw):void
-cg_listener : +current_flaw(f:flaw):void
-cg_listener : +new_resolver(r:resolver):void
-cg_listener : +resolver_created(r:resolver):void
-cg_listener : +resolver_state_changed(r:resolver):void
-cg_listener : +current_resolver(r:resolver):void
-cg_listener : +causal_link_added(f:flaw,r:resolver):void
+abstract class core
+
+interface theory
+theory : +theory(sat: sat_core)
+theory : #bind(v: var): bool
+theory : #record(cls: vector<lit>): bool
+theory : -propagate(p: lit, cnfl: vector<lit>): bool
+theory : -check(cnfl: vector<lit>): bool
+theory : -push(): void
+theory : -pop(): void
 
 class solver
 core <|-- solver
-solver : -phis:map<var,vector<flaw>>
-solver : -rhos:map<var,vector<resolver>>
-solver : -flaw_q:queue<flaw>
-solver : -flaw_costs_q:queue<flaw>
+theory <|-- solver
 solver : +solver()
-solver : +new_enum(tp:type,allowed_vals:set<item>):expr
-solver : -new_fact(a:atom):void
-solver : -new_goal(a:atom):void
-solver : -new_disjunction(ctx:context,d:disjunction):void
-solver : +solve():void
-solver : +get_flaw(atm:atom):atom_flaw
-solver : -build():void
-solver : -is_deferrable(f:flaw):bool
-solver : -add_layer():void
-solver : -has_inconsistencies():bool
-solver : -new_flaw(f:flaw):void
-solver : -new_resolver(r:resolver):void
-solver : -new_causal_link(f:flaw,r:resolver):void
-solver : -set_cost(r:resolver,cst:double)
-solver : -propagate_costs():void
-solver : -select_flaw():flaw
-solver : -select_resolver(flw:flaw):resolver
-solver : -propagate(p:lit,cnfl:vector<lit>):bool
-solver : -check(cnfl:vector<lit>):bool
-solver : -push():void
-solver : -pop():void
-solver o--> "*" cg_listener : listeners
-solver o--> "*" flaw : flaws
-solver o--> "*" resolver : resolvers
-solver o--> "*" resolver : next_resolvers
+solver : +init(): void
+solver : +solve(): void
+solver : -take_decision(ch: lit): void
+solver : -next() : void
+solver : -solve_inconsistencies() : void
+solver o--> graph: gr
+
+class graph
+graph : +graph(slv:solver)
+graph : -gamma: var
+graph : -res: resolver
+graph : -flaw_q: deque<flaw>
+graph : -phis: map<var, vector<flaw>>
+graph : -rhos: map<var, vector<resolver>>
+
+graph : -new_flaw(f: flaw, enqueue: bool): void
+graph : -new_resolver(r: resolver): void
+graph : -new_causal_link(f: flaw, r: resolver): void
+
+graph : -set_estimated_cost(f: flaw, visited: set<flaw>): void
+
+graph : -build(): void
+graph : -add_layer(): void
+
+graph : -expand_flaw(f: flaw): void
+graph : -apply_resolver(r: resolver): void
+
+graph : -is_deferrable(f: flaw): void
+
+graph : -check_graph(): void
+graph : -check_flaw(f: flaw, alt: map<resolver, vector<flaw>>): bool
 
 class flaw
-flaw : -phi:var
-flaw : -exclusive:bool
-flaw : -structural:bool
-flaw : -expanded:bool
-flaw : +flaw(s:solver,exclusive:bool,structural:bool)
-flaw : +is_expanded():bool
-flaw : -init():void
-flaw : -expand():void
-flaw : -compute_resolvers():void
-flaw : +get_cost():double
-flaw : +get_label():string
-flaw : #add_resolver(r:resolver):void
+flaw : -phi: var
+flaw : -exclusive: bool
+flaw : -expanded: bool
+flaw : -est_cost: rational
+flaw : +flaw(gr: graph, causes: vector<resolver>, exclusive: bool)
+flaw : +is_expanded(): bool
+flaw : +get_estimated_cost(): rational
+flaw : -init(): void
+flaw : -expand(): void
+flaw : -compute_resolvers(): void
+flaw : #add_resolver(r: resolver): void
+flaw : #make_precondition_of(r: resolver): void
+flaw : +get_label(): string
 flaw o--> "*" resolver : resolvers
-flaw o--> "*" resolver : cause
+flaw o--> "*" resolver : causes
 flaw o--> "*" resolver : supports
+flaw o--> graph: gr
 
 class resolver
-resolver : -rho:var
-resolver : -cost:double
-resolver : +resolver(s:solver,cost:lin,eff:flaw)
-resolver : +resolver(s:solver,r:var,cost:lin,eff:flaw)
-resolver : -apply():void
-resolver : +get_cost():double
-resolver : +get_label():string
+resolver : -rho: var
+resolver : -intrinsic_cost: rational
+resolver : +resolver(gr: graph, cost: rational, eff: flaw)
+resolver : +resolver(gr: graph, r:var, cost: rational, eff: flaw)
+resolver : -apply(): void
+resolver : +get_estimated_cost(): rational
+resolver : +get_label(): string
 resolver o--> "*" flaw : preconditions
 resolver o--> "1" flaw : effect
+resolver o--> graph: gr
 
-class var_flaw
-flaw <|-- var_flaw
-var_flaw : -vi:var_item
-var_flaw : +var_flaw(s:solver,vi:var_item)
-var_flaw : -compute_resolvers():void
+class refinement_flaw
+flaw <|-- refinement_flaw
+refinement_flaw : flaws: vector<flaw>
+refinement_flaw : +refinement_flaw(gr: graph, cause: resolver, fs: vector<flaw>)
+refinement_flaw : -compute_resolvers(): void
 
-class choose_value
-resolver <|-- choose_value
-choose_value : +choose_value(s:solver,f:var_flaw,v:var_value)
-choose_value : -apply():void
-
-class disjunction_flaw
-flaw <|-- disjunction_flaw
-disjunction_flaw : -disj:disjunction
-disjunction_flaw : +var_flaw(s:solver,ctx:context,d:disjunction)
-disjunction_flaw : -compute_resolvers():void
-
-class choose_conjunction
-resolver <|-- choose_conjunction
-choose_conjunction : -choose_conjunction:conjunction
-choose_conjunction : +choose_conjunction(s:solver,f:disjunction_flaw,c:conjunction)
-choose_conjunction : -apply():void
-
-class atom_flaw
-flaw <|-- atom_flaw
-atom_flaw : -atm:atom
-atom_flaw : -is_fact:bool
-atom_flaw : +atom_flaw(s:solver,atm:atom,is_fact:bool)
-atom_flaw : -compute_resolvers():void
-
-class activate_fact
-resolver <|-- activate_fact
-activate_fact : -atm:atom
-activate_fact : +activate_fact(s:solver,f:disjunction_flaw,atm:atom)
-activate_fact : -apply():void
-
-class activate_goal
-resolver <|-- activate_goal
-activate_goal : -atm:atom
-activate_goal : +activate_goal(s:solver,f:disjunction_flaw,atm:atom)
-activate_goal : -apply():void
-
-class unify_atom
-resolver <|-- unify_atom
-unify_atom : -atm:atom
-unify_atom : -trgt:atom
-unify_atom : +unify_atom(s:solver,f:disjunction_flaw,atm:atom,trgt:atom)
-unify_atom : -apply():void
-
-class atom_listener
-sat_value_listener <|-- atom_listener
-la_value_listener <|-- atom_listener
-ov_value_listener <|-- atom_listener
-
-class smart_type
-type <|-- smart_type
-smart_type : +smart_type(s:solver,scp:scope,name:string)
-smart_type : -get_flaws():vector<flaw>
-smart_type : -new_fact(atm:atom):void
-smart_type : -new_goal(atm:atom):void
-
-class state_variable
-smart_type <|-- state_variable
-
-class reusable_resource
-smart_type <|-- reusable_resource
-
+class refinement_resolver
+resolver <|-- refinement_resolver
+refinement_resolver : +resolvers: vector<resolver>
+refinement_resolver : +refinement_resolver(gr: graph, eff: refinement_flaw, rs: vector<resolver>)
+refinement_resolver : -apply(): void
 @enduml
