@@ -3,6 +3,8 @@ package it.cnr.istc.oratio;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
@@ -16,6 +18,9 @@ import java.util.logging.Logger;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
 
 import it.cnr.istc.oratio.GraphListener.*;
 import it.cnr.istc.oratio.riddle.Core;
@@ -100,6 +105,17 @@ public class Context {
         state_listeners.remove(l);
     }
 
+    public void readState(File state) {
+        deserializer.setCore(core);
+        try {
+            gson.fromJson(new JsonReader(new FileReader(state)), Core.class);
+            for (StateListener l : state_listeners)
+                l.stateChanged(core);
+        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void startServer(int port) {
         LOG.info("Starting server..");
         try (ServerSocket ss = new ServerSocket(port);
@@ -117,9 +133,8 @@ public class Context {
                         l.stateChanged(core);
                 } else if (inputLine.equals(READ_0)) {
                     StringBuilder script = new StringBuilder();
-                    while ((inputLine = in.readLine()) != null && !inputLine.equals("EOS")) {
+                    while ((inputLine = in.readLine()) != null && !inputLine.equals("EOS"))
                         script.append(inputLine).append('\n');
-                    }
                     if (inputLine == null)
                         throw new RuntimeException("Connection lost..");
                     core.read(script.toString());

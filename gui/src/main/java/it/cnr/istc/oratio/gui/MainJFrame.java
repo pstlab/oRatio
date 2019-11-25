@@ -14,12 +14,6 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.WindowConstants;
 
-import it.cnr.istc.oratio.Context;
-import it.cnr.istc.oratio.gui.timelines.PropositionalAgentVisualizer;
-import it.cnr.istc.oratio.gui.timelines.PropositionalStateVisualizer;
-import it.cnr.istc.oratio.gui.timelines.ReusableResourceVisualizer;
-import it.cnr.istc.oratio.gui.timelines.StateVariableVisualizer;
-
 /**
  * MainJFrame
  */
@@ -27,31 +21,13 @@ public class MainJFrame extends JFrame {
 
     private final JDesktopPane mainJDesktopPane = new JDesktopPane();
 
-    public MainJFrame() {
+    public MainJFrame(JInternalFrame... frames) {
         super("oRatio");
 
-        StateJInternalFrame state_frame = new StateJInternalFrame(Context.getContext().getCore());
-        Context.getContext().addStateListener(state_frame);
-        state_frame.setVisible(true);
-
-        TimelinesJInternalFrame timelines_frame = new TimelinesJInternalFrame(Context.getContext().getCore());
-        timelines_frame.addVisualizers(new StateVariableVisualizer(), new ReusableResourceVisualizer(),
-                new PropositionalStateVisualizer(), new PropositionalAgentVisualizer());
-        Context.getContext().addStateListener(timelines_frame);
-        timelines_frame.setVisible(true);
-
-        GraphJInternalFrame graph_frame = new GraphJInternalFrame(Context.getContext().getCore());
-        Context.getContext().addGraphListener(graph_frame);
-        graph_frame.setVisible(true);
-
-        LogJInternalFrame log_frame = new LogJInternalFrame(Context.getContext().getCore());
-        Context.getContext().addStateListener(log_frame);
-        log_frame.setVisible(true);
-
-        mainJDesktopPane.add(state_frame);
-        mainJDesktopPane.add(timelines_frame);
-        mainJDesktopPane.add(graph_frame);
-        mainJDesktopPane.add(log_frame);
+        for (JInternalFrame frame : frames) {
+            frame.setVisible(true);
+            mainJDesktopPane.add(frame);
+        }
 
         add(mainJDesktopPane);
 
