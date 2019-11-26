@@ -975,6 +975,10 @@ expression *parser::_expression(const size_t &pr)
     {
         tk = next();
         expression *min_e = _expression();
+
+        if (!match(COMMA_ID))
+            error("expected ','..");
+
         expression *max_e = _expression();
 
         if (!match(RBRACKET_ID))

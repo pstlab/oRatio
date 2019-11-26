@@ -1,2 +1,2 @@
-enum Speed {"High", "Medium", "Low"};
-Speed x3;
+real x0 = 5;
+real x1 = [0, 10];
