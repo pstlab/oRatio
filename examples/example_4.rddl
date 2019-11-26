@@ -1,0 +1,2 @@
+enum Speed {"High", "Medium", "Low"};
+Speed x3;

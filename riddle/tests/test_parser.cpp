@@ -25,9 +25,17 @@ void test_parser_2()
     ast::compilation_unit *cu = prs.parse();
 }
 
+void test_parser_3()
+{
+    std::stringstream ss("enum Speed {\"High\", \"Medium\", \"Low\"}; Speed x3;");
+    parser prs(ss);
+    ast::compilation_unit *cu = prs.parse();
+}
+
 int main(int, char **)
 {
     test_parser_0();
     test_parser_1();
     test_parser_2();
+    test_parser_3();
 }

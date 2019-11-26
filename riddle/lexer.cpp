@@ -25,6 +25,7 @@ token *lexer::next()
             switch (ch = next_char())
             {
             case '"':
+                ch = next_char();
                 return mk_string_token(str);
             case '\\':
                 // read escaped char..
