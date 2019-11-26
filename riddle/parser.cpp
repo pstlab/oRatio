@@ -770,6 +770,7 @@ statement *parser::_statement()
         case BAR_ID:
         case AMP_ID:
         case CARET_ID:
+        case SEMICOLON_ID:
         {
             backtrack(c_pos);
             expression *e = _expression();
