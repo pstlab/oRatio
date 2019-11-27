@@ -699,21 +699,28 @@ statement *parser::_statement()
         }
         tk = next();
 
-        if (!match(ID_ID))
-            error("expected identifier..");
-        std::string n = static_cast<id_token *>(tks[pos - 2])->id;
+        std::vector<std::string> ns;
+        std::vector<const expression *> es;
 
-        expression *e = nullptr;
-        if (tk->sym == EQ_ID)
+        do
         {
-            tk = next();
-            e = _expression();
-        }
+            if (!match(ID_ID))
+                error("expected identifier..");
+            ns.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+
+            if (tk->sym == EQ_ID)
+            {
+                tk = next();
+                es.push_back(_expression());
+            }
+            else
+                es.push_back(nullptr);
+        } while (match(COMMA_ID));
 
         if (!match(SEMICOLON_ID))
             error("expected ';'..");
 
-        return new_local_field_statement(ft, n, e);
+        return new_local_field_statement(ft, ns, es);
     }
     case ID_ID: // either a local field, an assignment or an expression..
     {
@@ -732,19 +739,26 @@ statement *parser::_statement()
         {
         case ID_ID: // a local field..
         {
-            std::string n = static_cast<id_token *>(tk)->id;
-            expression *e = nullptr;
-            tk = next();
-            if (tk->sym == EQ_ID)
+            std::vector<std::string> ns;
+            std::vector<const expression *> es;
+
+            do
             {
+                ns.push_back(static_cast<id_token *>(tk)->id);
                 tk = next();
-                e = _expression();
-            }
+                if (tk->sym == EQ_ID)
+                {
+                    tk = next();
+                    es.push_back(_expression());
+                }
+                else
+                    es.push_back(nullptr);
+            } while (match(COMMA_ID));
 
             if (!match(SEMICOLON_ID))
                 error("expected ';'..");
 
-            return new_local_field_statement(is, n, e);
+            return new_local_field_statement(is, ns, es);
         }
         case EQ_ID: // an assignment..
         {

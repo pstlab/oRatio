@@ -258,25 +258,28 @@ expr division_expression::evaluate(const scope &scp, context &ctx) const
 statement::statement() {}
 statement::~statement() {}
 
-local_field_statement::local_field_statement(const std::vector<std::string> &ft, const std::string &n, const riddle::ast::expression *const e) : riddle::ast::local_field_statement(ft, n, e) {}
+local_field_statement::local_field_statement(const std::vector<std::string> &ft, const std::vector<std::string> &ns, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::local_field_statement(ft, ns, es) {}
 local_field_statement::~local_field_statement() {}
 void local_field_statement::execute(const scope &scp, context &ctx) const
 {
-    if (xpr)
-        ctx->exprs.emplace(name, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx));
-    else
+    for (size_t i = 0; i < names.size(); i++)
     {
-        scope *s = const_cast<scope *>(&scp);
-        for (const auto &tp : field_type)
-            s = &s->get_type(tp);
-        type *t = static_cast<type *>(s);
-        if (t->is_primitive())
-            ctx->exprs.emplace(name, t->new_instance(ctx));
+        if (xprs[i])
+            ctx->exprs.emplace(names[i], dynamic_cast<const ast::expression *>(xprs[i])->evaluate(scp, ctx));
         else
-            ctx->exprs.emplace(name, t->new_existential());
+        {
+            scope *s = const_cast<scope *>(&scp);
+            for (const auto &tp : field_type)
+                s = &s->get_type(tp);
+            type *t = static_cast<type *>(s);
+            if (t->is_primitive())
+                ctx->exprs.emplace(names[i], t->new_instance(ctx));
+            else
+                ctx->exprs.emplace(names[i], t->new_existential());
+        }
+        if (const core *c = dynamic_cast<const core *>(&scp)) // we create fields for root items..
+            const_cast<core *>(c)->fields.emplace(names[i], new field(ctx->exprs.at(names[i])->get_type(), names[i]));
     }
-    if (const core *c = dynamic_cast<const core *>(&scp)) // we create fields for root items..
-        const_cast<core *>(c)->fields.emplace(name, new field(ctx->exprs.at(name)->get_type(), name));
 }
 
 assignment_statement::assignment_statement(const std::vector<std::string> &is, const std::string &i, const riddle::ast::expression *const e) : riddle::ast::assignment_statement(is, i, e) {}

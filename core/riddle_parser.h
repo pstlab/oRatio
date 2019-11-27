@@ -295,7 +295,7 @@ public:
 class local_field_statement : public riddle::ast::local_field_statement, public statement
 {
 public:
-  local_field_statement(const std::vector<std::string> &ft, const std::string &n, const riddle::ast::expression *const e = nullptr);
+  local_field_statement(const std::vector<std::string> &ft, const std::vector<std::string> &ns, const std::vector<const riddle::ast::expression *> &es);
   local_field_statement(const local_field_statement &orig) = delete;
   virtual ~local_field_statement();
 
@@ -492,7 +492,7 @@ private:
   /**
    * The statements.
    */
-  ast::local_field_statement *new_local_field_statement(const std::vector<std::string> &ft, const std::string &n, const riddle::ast::expression *const e = nullptr) override { return new ast::local_field_statement(ft, n, e); }
+  ast::local_field_statement *new_local_field_statement(const std::vector<std::string> &ft, const std::vector<std::string> &ns, const std::vector<const riddle::ast::expression *> &es) override { return new ast::local_field_statement(ft, ns, es); }
   ast::assignment_statement *new_assignment_statement(const std::vector<std::string> &is, const std::string &i, const riddle::ast::expression *const e) override { return new ast::assignment_statement(is, i, e); }
   ast::expression_statement *new_expression_statement(const riddle::ast::expression *const e) override { return new ast::expression_statement(e); }
   ast::disjunction_statement *new_disjunction_statement(const std::vector<std::pair<const std::vector<const riddle::ast::statement *>, const riddle::ast::expression *const>> &conjs) override { return new ast::disjunction_statement(conjs); }

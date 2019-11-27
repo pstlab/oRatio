@@ -394,14 +394,14 @@ public:
 class local_field_statement : public statement
 {
 public:
-  local_field_statement(const std::vector<std::string> &ft, const std::string &n, const expression *const e = nullptr) : field_type(ft), name(n), xpr(e) {}
+  local_field_statement(const std::vector<std::string> &ft, const std::vector<std::string> &ns, const std::vector<const expression *> &es) : field_type(ft), names(ns), xprs(es) {}
   local_field_statement(const local_field_statement &orig) = delete;
-  virtual ~local_field_statement() { delete xpr; }
+  virtual ~local_field_statement() {}
 
 protected:
   const std::vector<std::string> field_type;
-  const std::string name;
-  const expression *const xpr;
+  const std::vector<std::string> names;
+  const std::vector<const expression *> xprs;
 };
 
 class assignment_statement : public statement
@@ -708,7 +708,7 @@ private:
   /**
    * The statements.
    */
-  virtual ast::local_field_statement *new_local_field_statement(const std::vector<std::string> &ft, const std::string &n, const ast::expression *const e = nullptr) { return new ast::local_field_statement(ft, n, e); }
+  virtual ast::local_field_statement *new_local_field_statement(const std::vector<std::string> &ft, const std::vector<std::string> &ns, const std::vector<const ast::expression *> &es) { return new ast::local_field_statement(ft, ns, es); }
   virtual ast::assignment_statement *new_assignment_statement(const std::vector<std::string> &is, const std::string &i, const ast::expression *const e) { return new ast::assignment_statement(is, i, e); }
   virtual ast::expression_statement *new_expression_statement(const ast::expression *const e) { return new ast::expression_statement(e); }
   virtual ast::disjunction_statement *new_disjunction_statement(const std::vector<std::pair<const std::vector<const ast::statement *>, const ast::expression *const>> &conjs) { return new ast::disjunction_statement(conjs); }
