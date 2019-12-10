@@ -275,6 +275,7 @@ class_declaration *parser::_class_declaration()
                 ms.push_back(_method_declaration());
                 break;
             case EQ_ID:
+            case COMMA_ID:
             case SEMICOLON_ID:
                 backtrack(c_pos);
                 fs.push_back(_field_declaration());
