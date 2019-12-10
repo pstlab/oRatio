@@ -1,0 +1,29 @@
+Orientation or_0 = new Orientation(0.0, 0.0);
+Orientation or_1 = new Orientation(1.0, 1.0);
+Orientation or_2 = new Orientation(2.0, 2.0);
+Orientation or_3 = new Orientation(3.0, 3.0);
+Orientation or_4 = new Orientation(4.0, 4.0);
+Orientation or_5 = new Orientation(5.0, 5.0);
+Orientation or_6 = new Orientation(6.0, 6.0);
+Orientation or_7 = new Orientation(7.0, 7.0);
+
+Satellite s = new Satellite();
+
+fact vis_0 = new s.visibility_window.NotVisible(start:origin, end:100.0);
+fact vis_1 = new s.visibility_window.Visible(start:100.0, end:150.0);
+fact vis_2 = new s.visibility_window.NotVisible(start:150.0, end:350.0);
+fact vis_3 = new s.visibility_window.Visible(start:350.0, end:450.0);
+fact vis_4 = new s.visibility_window.NotVisible(start:450.0, end:horizon);
+
+fact at_0 = new s.pointing_module.Pointing(o:or_0, start:origin);
+at_0.duration >= 1.0;
+
+goal tp_0 = new s.Communicate(o:or_1);
+goal tp_1 = new s.Communicate(o:or_2);
+goal tp_2 = new s.Communicate(o:or_3);
+goal tp_3 = new s.Communicate(o:or_4);
+goal tp_4 = new s.Communicate(o:or_5);
+goal tp_5 = new s.Communicate(o:or_6);
+goal tp_6 = new s.Communicate(o:or_7);
+
+origin == 0.0;
