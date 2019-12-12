@@ -1,0 +1,36 @@
+predicate BodyTemperature(real temperature) { false; }
+
+predicate Spring() { false; }
+predicate Summer() { false; }
+predicate Autumn() { false; }
+predicate Winter() { false; }
+
+predicate Flu() {
+    goal temp = new BodyTemperature();
+    temp.temperature >= 37;
+    {
+        goal au = new Autumn();
+    } or {
+        goal wi = new Winter();
+    }
+}
+
+predicate Virus() {
+    goal flu = new Flu();
+}
+
+predicate Bacterium() {
+    {
+        goal sp = new Spring();
+    } or {
+        goal su = new Summer();
+    }
+}
+
+predicate Sick() {
+    {
+        goal vi = new Virus();
+    } or {
+        goal ba = new Bacterium();
+    }
+}

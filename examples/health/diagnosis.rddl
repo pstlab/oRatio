@@ -1,0 +1,4 @@
+fact win = new Winter();
+fact body_temp = new BodyTemperature(temperature:37.5);
+
+goal sick = new Sick();
