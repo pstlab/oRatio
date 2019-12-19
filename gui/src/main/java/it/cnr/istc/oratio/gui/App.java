@@ -70,7 +70,9 @@ public class App {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Context.getContext().startServer(Integer.parseInt(properties.getProperty("server.port", "1100")));
+            new Thread(() -> {
+                Context.getContext().startServer(Integer.parseInt(properties.getProperty("server.port", "1100")));
+            }).start();
         }
     }
 }

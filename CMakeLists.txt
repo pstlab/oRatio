@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(oRatio VERSION 2.1.0)
 
+find_package (JNI)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -24,8 +26,9 @@ option(CHECK_CYCLES "Check for causal cycles and adds non-cyclicity constraints"
 option(CHECK_GRAPH "Check the validity of the graph by applying the resolvers" OFF)
 option(GRAPH_PRUNING "Prunes the causal graph before starting the search" ON)
 option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
-option(BUILD_GUI "Builds the GUI" OFF)
 option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
+option(BUILD_GUI "Builds the GUI" OFF)
+option(BUILD_JAVA_LIB "Builds the Java lib" OFF)
 
 message(STATUS "Heuristic type:           ${HEURISTIC_TYPE}")
 if(HEURISTIC_TYPE MATCHES "h_max")
@@ -59,14 +62,6 @@ if(CHECK_INCONSISTENCIES)
     add_definitions(-DCHECK_INCONSISTENCIES)
 endif()
 
-message(STATUS "Build GUI:                ${BUILD_GUI}")
-if(BUILD_GUI)
-    message(STATUS "Socket listener host:     ${HOST}")
-    message(STATUS "Socket listener port:     ${PORT}")
-    add_definitions(-DBUILD_GUI)
-    list(APPEND SOURCES java-api/src/main/cpp/socket_listener.cpp)
-endif()
-
 message(STATUS "Optimize for native arch: ${OPTIMIZE_FOR_NATIVE_ARCH}")
 if (OPTIMIZE_FOR_NATIVE_ARCH)
     if(MSVC)
@@ -78,10 +73,29 @@ if (OPTIMIZE_FOR_NATIVE_ARCH)
     endif()
 endif()
 
+message(STATUS "Build GUI:                ${BUILD_GUI}")
+if(BUILD_GUI)
+    message(STATUS "Socket listener host:     ${HOST}")
+    message(STATUS "Socket listener port:     ${PORT}")
+    add_definitions(-DBUILD_GUI)
+    list(APPEND SOURCES java-api/src/main/cpp/socket_listener.cpp)
+endif()
+
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 if(BUILD_GUI AND WIN32)
     target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 #[[-PROFILE]])
+endif()
+
+message(STATUS "Build Java bindings:      ${BUILD_JAVA_LIB}")
+if(BUILD_JAVA_LIB)
+    add_definitions(-DBUILD_JAVA_LIB)
+    include_directories(${JNI_INCLUDE_DIRS})
+    list(APPEND SOURCES java-api/src/main/cpp/it_cnr_istc_oratio_Solver.cpp)
+    add_library ("${PROJECT_NAME}-lib" SHARED ${SOURCES})
+    if(BUILD_GUI AND WIN32)
+        target_link_libraries("${PROJECT_NAME}-lib" wsock32 ws2_32 #[[-PROFILE]])
+    endif()
 endif()
 
 add_subdirectory(smt/tests)
