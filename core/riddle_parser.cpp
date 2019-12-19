@@ -262,7 +262,7 @@ local_field_statement::local_field_statement(const std::vector<std::string> &ft,
 local_field_statement::~local_field_statement() {}
 void local_field_statement::execute(const scope &scp, context &ctx) const
 {
-    for (size_t i = 0; i < names.size(); i++)
+    for (size_t i = 0; i < names.size(); ++i)
     {
         if (xprs[i])
             ctx->exprs.emplace(names[i], dynamic_cast<const ast::expression *>(xprs[i])->evaluate(scp, ctx));

@@ -32,7 +32,7 @@ void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
 {
     context ctx(new env(get_core(), &itm));
     ctx->exprs.emplace(THIS_KEYWORD, expr(&itm));
-    for (size_t i = 0; i < args.size(); i++)
+    for (size_t i = 0; i < args.size(); ++i)
         ctx->exprs.emplace(args.at(i)->get_name(), exprs.at(i));
 
     // we initialize the supertypes..

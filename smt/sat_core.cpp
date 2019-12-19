@@ -224,9 +224,9 @@ var sat_core::new_exct_one(const std::vector<lit> &ls)
         lits.reserve(ls.size() + 1);
         lits.push_back(lit(eo, false));
         bool nc;
-        for (size_t i = 0; i < ls.size(); i++)
+        for (size_t i = 0; i < ls.size(); ++i)
         {
-            for (size_t j = i + 1; j < ls.size(); j++)
+            for (size_t j = i + 1; j < ls.size(); ++j)
             {
                 nc = new_clause({!ls.at(i), !ls.at(j), lit(eo, false)});
                 assert(nc);
@@ -381,9 +381,9 @@ bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
         std::vector<lit> lits;
         lits.reserve(ls.size() + 1);
         lits.push_back(lit(p, false));
-        for (size_t i = 0; i < ls.size(); i++)
+        for (size_t i = 0; i < ls.size(); ++i)
         {
-            for (size_t j = i + 1; j < ls.size(); j++)
+            for (size_t j = i + 1; j < ls.size(); ++j)
                 if (!new_clause({!ls.at(i), !ls.at(j), lit(p, false)}))
                     return false;
             lits.push_back(ls.at(i));
@@ -478,12 +478,12 @@ bool sat_core::propagate(std::vector<lit> &cnfl)
         // we propagate sat constraints..
         std::vector<clause *> tmp;
         std::swap(tmp, watches.at(index(prop_q.front())));
-        for (size_t i = 0; i < tmp.size(); i++)
+        for (size_t i = 0; i < tmp.size(); ++i)
         {
             if (!tmp.at(i)->propagate(prop_q.front()))
             {
                 // constraint is conflicting..
-                for (size_t j = i + 1; j < tmp.size(); j++)
+                for (size_t j = i + 1; j < tmp.size(); ++j)
                     watches.at(index(prop_q.front())).push_back(tmp.at(j));
                 assert(std::count_if(tmp.at(i)->lits.begin(), tmp.at(i)->lits.end(), [&](const lit &p) { return std::find(watches.at(index(!p)).begin(), watches.at(index(!p)).end(), tmp.at(i)) != watches.at(index(!p)).end(); }) == 2);
                 while (!prop_q.empty())

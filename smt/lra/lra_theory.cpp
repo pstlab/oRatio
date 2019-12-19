@@ -668,7 +668,7 @@ std::string lra_theory::to_string()
 {
     std::string la;
     la += "{ \"vars\" : [";
-    for (size_t i = 0; i < vals.size(); i++)
+    for (size_t i = 0; i < vals.size(); ++i)
     {
         if (i)
             la += ", ";

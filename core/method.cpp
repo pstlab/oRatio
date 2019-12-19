@@ -23,7 +23,7 @@ item *method::invoke(context &ctx, const std::vector<expr> &exprs) const
 {
     assert(args.size() == exprs.size());
     context c_ctx(new env(get_core(), ctx));
-    for (size_t i = 0; i < args.size(); i++)
+    for (size_t i = 0; i < args.size(); ++i)
         c_ctx->exprs.emplace(args.at(i)->get_name(), exprs.at(i));
 
     for (const auto &s : statements)

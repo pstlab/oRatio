@@ -224,7 +224,7 @@ arith_expr core::div(const std::vector<arith_expr> &exprs)
     assert(std::all_of(++exprs.begin(), exprs.end(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
     assert(lra_th.value(exprs.at(1)->l).get_infinitesimal() == rational::ZERO);
     rational c = lra_th.value(exprs.at(1)->l).get_rational();
-    for (size_t i = 2; i < exprs.size(); i++)
+    for (size_t i = 2; i < exprs.size(); ++i)
     {
         assert(lra_th.value(exprs.at(i)->l).get_infinitesimal() == rational::ZERO);
         c *= lra_th.value(exprs.at(i)->l).get_rational();
@@ -285,7 +285,7 @@ const method &core::get_method(const std::string &name, const std::vector<const 
             if (mthd->args.size() == ts.size())
             {
                 found = true;
-                for (size_t i = 0; i < ts.size(); i++)
+                for (size_t i = 0; i < ts.size(); ++i)
                     if (!mthd->args.at(i)->get_type().is_assignable_from(*ts.at(i)))
                     {
                         found = false;
