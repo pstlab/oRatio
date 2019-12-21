@@ -6,7 +6,7 @@ class RRContainer {
     RRContainer(real id) : id(id) {}
 }
 
-predicate Use(RRContainer rr, real id) : IntervalPredicate {
+predicate Use(RRContainer rr, real id) : Interval {
     fact u0 = new rr.capacity.Use(amount:4.0, duration:2.0);
 }
 

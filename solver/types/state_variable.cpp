@@ -136,7 +136,7 @@ std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_inc
 void state_variable::new_predicate(predicate &pred)
 {
     // each state-variable predicate is also an interval-predicate..
-    new_supertypes(pred, {&get_core().get_predicate("IntervalPredicate")});
+    new_supertypes(pred, {&get_core().get_predicate("Interval")});
     // each state-variable predicate has a tau parameter indicating on which state-variables the atoms insist on..
     new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
 }
@@ -147,7 +147,7 @@ void state_variable::new_atom(atom_flaw &f)
     if (f.is_fact)
     { // we apply interval-predicate whenever the fact becomes active..
         set_ni(atm.get_sigma());
-        get_core().get_predicate("IntervalPredicate").apply_rule(atm);
+        get_core().get_predicate("Interval").apply_rule(atm);
         restore_ni();
     }
 

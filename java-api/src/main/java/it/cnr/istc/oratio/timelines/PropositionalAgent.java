@@ -100,18 +100,18 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
                     ((Item.ArithItem) itm.getCore().getExpr("horizon")).getValue());
 
             atoms.stream().filter(atm -> atm.getType().getSuperclasses().stream()
-                    .filter(t -> t.getName().equals("ImpulsivePredicate") || t.getName().equals("IntervalPredicate"))
+                    .filter(t -> t.getName().equals("Impulse") || t.getName().equals("Interval"))
                     .findAny().isPresent()).sorted((Atom a0, Atom a1) -> {
                         Item.ArithItem a0_start = (Item.ArithItem) a0.getExpr(a0.getType().getSuperclasses().stream()
-                                .filter(t -> t.getName().equals("ImpulsivePredicate")).findAny().isPresent() ? "at"
+                                .filter(t -> t.getName().equals("Impulse")).findAny().isPresent() ? "at"
                                         : "start");
                         Item.ArithItem a1_start = (Item.ArithItem) a1.getExpr(a1.getType().getSuperclasses().stream()
-                                .filter(t -> t.getName().equals("ImpulsivePredicate")).findAny().isPresent() ? "at"
+                                .filter(t -> t.getName().equals("Impulse")).findAny().isPresent() ? "at"
                                         : "start");
                         return a0_start.getValue().compareTo(a1_start.getValue());
                     }).forEach(atm -> {
                         if (atm.getType().getSuperclasses().stream()
-                                .filter(t -> t.getName().equals("ImpulsivePredicate")).findAny().isPresent())
+                                .filter(t -> t.getName().equals("Impulse")).findAny().isPresent())
                             pa.addValue(((Item.ArithItem) atm.getExpr("at")).getValue(),
                                     ((Item.ArithItem) atm.getExpr("at")).getValue(), atm);
                         else

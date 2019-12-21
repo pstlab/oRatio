@@ -52,7 +52,7 @@ void propositional_state::new_atom(atom_flaw &f)
 propositional_state::ps_constructor::ps_constructor(propositional_state &ps) : constructor(ps.get_solver(), ps, {}, {}, {}) {}
 propositional_state::ps_constructor::~ps_constructor() {}
 
-propositional_state::ps_predicate::ps_predicate(propositional_state &ps) : predicate(ps.get_solver(), ps, PROPOSITIONAL_STATE_PREDICATE_NAME, {new field(ps.get_solver().get_type("bool"), PROPOSITIONAL_STATE_POLARITY_NAME)}, {}) { new_supertypes({&ps.get_core().get_predicate("IntervalPredicate")}); }
+propositional_state::ps_predicate::ps_predicate(propositional_state &ps) : predicate(ps.get_solver(), ps, PROPOSITIONAL_STATE_PREDICATE_NAME, {new field(ps.get_solver().get_type("bool"), PROPOSITIONAL_STATE_POLARITY_NAME)}, {}) { new_supertypes({&ps.get_core().get_predicate("Interval")}); }
 propositional_state::ps_predicate::~ps_predicate() {}
 
 propositional_state::ps_atom_listener::ps_atom_listener(propositional_state &ps, atom &atm) : atom_listener(atm), ps(ps) {}

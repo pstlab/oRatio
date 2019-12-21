@@ -66,7 +66,7 @@ class BlocksAgent : PropositionalAgent {
 
     BlocksAgent() : propositional_state(new BlocksState(this)) {}
 
-    predicate Pick_up(Block x) : ImpulsivePredicate {
+    predicate Pick_up(Block x) : Impulse {
         goal clear_x = new propositional_state.Clear(polarity:true, x:x);  clear_x.start <= at - 1.0;  clear_x.end >= at;
         goal ontable_x = new propositional_state.Ontable(polarity:true, x:x);  ontable_x.start <= at - 1.0;  ontable_x.end >= at;
         goal handempty = new propositional_state.Handempty(polarity:true);  handempty.start <= at - 1.0;  handempty.end >= at;
@@ -76,7 +76,7 @@ class BlocksAgent : PropositionalAgent {
         fact holding_x = new propositional_state.Holding(polarity:true, x:x, start:at);  holding_x.duration >= 1.0;
     }
 
-    predicate Put_down(Block x) : ImpulsivePredicate {
+    predicate Put_down(Block x) : Impulse {
         goal holding_x = new propositional_state.Holding(polarity:true, x:x);  holding_x.start <= at - 1.0;  holding_x.end >= at;
         fact not_holding_x = new propositional_state.Holding(polarity:false, x:x, start:at);  not_holding_x.duration >= 1.0;
         fact clear_x = new propositional_state.Clear(polarity:true, x:x, start:at);  clear_x.duration >= 1.0;
@@ -84,7 +84,7 @@ class BlocksAgent : PropositionalAgent {
         fact ontable_x = new propositional_state.Ontable(polarity:true, x:x, start:at);  ontable_x.duration >= 1.0;
     }
 
-    predicate Stack(Block x, Block y) : ImpulsivePredicate {
+    predicate Stack(Block x, Block y) : Impulse {
         goal holding_x = new propositional_state.Holding(polarity:true, x:x);  holding_x.start <= at - 1.0;  holding_x.end >= at;
         goal clear_y = new propositional_state.Clear(polarity:true, x:y);  clear_y.start <= at - 1.0;  clear_y.end >= at;
         fact not_holding_x = new propositional_state.Holding(polarity:false, x:x, start:at);  not_holding_x.duration >= 1.0;
@@ -94,7 +94,7 @@ class BlocksAgent : PropositionalAgent {
         fact on_x_y = new propositional_state.On(polarity:true, x:x, y:y, start:at);  on_x_y.duration >= 1.0;
     }
 
-    predicate Unstack(Block x, Block y) : ImpulsivePredicate {
+    predicate Unstack(Block x, Block y) : Impulse {
         goal on_x_y = new propositional_state.On(polarity:true, x:x, y:y);  on_x_y.start <= at - 1.0;  on_x_y.end >= at;
         goal clear_x = new propositional_state.Clear(polarity:true, x:x);  clear_x.start <= at - 1.0;  clear_x.end >= at;
         goal handempty = new propositional_state.Handempty(polarity:true);  handempty.start <= at - 1.0;  handempty.end >= at;

@@ -68,10 +68,10 @@ public class Core implements Scope {
         types.put(REAL, new Type(this, this, REAL));
         types.put(STRING, new Type(this, this, STRING));
 
-        predicates.put("ImpulsivePredicate",
-                new Predicate(this, this, "ImpulsivePredicate", new Field(types.get(REAL), "at")));
-        predicates.put("IntervalPredicate",
-                new Predicate(this, this, "IntervalPredicate", new Field(types.get(REAL), "start"),
+        predicates.put("Impulse",
+                new Predicate(this, this, "Impulse", new Field(types.get(REAL), "at")));
+        predicates.put("Interval",
+                new Predicate(this, this, "Interval", new Field(types.get(REAL), "start"),
                         new Field(types.get(REAL), "end"), new Field(types.get(REAL), "duration")));
 
         // we add some complex types..
@@ -80,14 +80,14 @@ public class Core implements Scope {
 
         Type rr = new Type(this, this, "ReusableResource");
         Predicate rr_use = new Predicate(this, rr, "Use", new Field(types.get(REAL), "amount"));
-        rr_use.superclasses.add(predicates.get("IntervalPredicate"));
+        rr_use.superclasses.add(predicates.get("Interval"));
         rr.predicates.put(rr_use.name, rr_use);
         types.put(rr.name, rr);
 
         Type ps = new Type(this, this, "PropositionalState");
         Predicate ps_use = new Predicate(this, ps, "PropositionalStatePredicate",
                 new Field(types.get(BOOL), "polarity"));
-        ps_use.superclasses.add(predicates.get("IntervalPredicate"));
+        ps_use.superclasses.add(predicates.get("Interval"));
         ps.predicates.put(ps_use.name, ps_use);
         types.put(ps.name, ps);
 

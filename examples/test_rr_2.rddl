@@ -1,7 +1,7 @@
 ReusableResource rr0 = new ReusableResource(10.0);
 ReusableResource rr1 = new ReusableResource(10.0);
 
-predicate Use(ReusableResource rr, real id) : IntervalPredicate {
+predicate Use(ReusableResource rr, real id) : Interval {
     fact u0 = new rr.Use(amount:4.0, duration:2.0);
 }
 

@@ -87,7 +87,7 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
             if (BUILDERS.containsKey(c_type))
                 return c_type;
             if (c_type.getPredicates().values().stream().anyMatch(p -> p.getSuperclasses().stream().anyMatch(
-                    sp -> sp.getName().equals("ImpulsivePredicate") || sp.getName().equals("IntervalPredicate"))))
+                    sp -> sp.getName().equals("Impulse") || sp.getName().equals("Interval"))))
                 try {
                     return t.getCore().getType("PropositionalAgent");
                 } catch (ClassNotFoundException e) {

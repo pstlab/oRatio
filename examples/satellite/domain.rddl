@@ -63,11 +63,11 @@ class Satellite {
 
     Satellite() : pointing_module(new PointingSystem()), camera(new Camera(pointing_module)), visibility_window(new VisibilityWindow()), antenna(new ReusableResource(2.0)), memory(new ReusableResource(3.0)) {}
 
-    predicate Pointing(Orientation o) : IntervalPredicate {
+    predicate Pointing(Orientation o) : Interval {
         goal p_at = new pointing_module.Pointing(o:o, start:start, end:end, duration:duration);
     }
 
-    predicate Communicate(Orientation o) : IntervalPredicate {
+    predicate Communicate(Orientation o) : Interval {
         duration == 10.0;
         goal tp = new camera.TakingPicture(o:o);
         tp.end <= start;
