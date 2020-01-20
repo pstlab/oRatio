@@ -6,6 +6,7 @@
 #include "refinement_flaw.h"
 #include "smart_type.h"
 #include "atom_flaw.h"
+#include <execution>
 #include <cassert>
 
 using namespace smt;
@@ -424,7 +425,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
     else
     {
         // we sort the flaws' resolvers..
-        std::sort(f.resolvers.begin(), f.resolvers.end(), [](resolver *r0, resolver *r1) { return r0->get_estimated_cost() < r1->get_estimated_cost(); });
+        std::sort(std::execution::par, f.resolvers.begin(), f.resolvers.end(), [](resolver *r0, resolver *r1) { return r0->get_estimated_cost() < r1->get_estimated_cost(); });
 
         size_t c_lvl = slv.decision_level();
         for (const auto &r : f.resolvers)

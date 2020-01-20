@@ -507,7 +507,7 @@ bool lra_theory::assert_lower(const var &x_i, const inf_rational &val, const lit
             layers.back().insert({lb_index(x_i), {lb(x_i), bounds.at(lb_index(x_i)).reason}});
         bounds[lb_index(x_i)] = {val, new lit(p.get_var(), p.get_sign())};
 
-        if (vals.at(x_i) < val && !is_basic(x_i))
+        if (vals[x_i] < val && !is_basic(x_i))
             update(x_i, val);
 
         // unate propagation..
@@ -540,7 +540,7 @@ bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit
             layers.back().insert({ub_index(x_i), {ub(x_i), bounds.at(ub_index(x_i)).reason}});
         bounds[ub_index(x_i)] = {val, new lit(p.get_var(), p.get_sign())};
 
-        if (vals.at(x_i) > val && !is_basic(x_i))
+        if (vals[x_i] > val && !is_basic(x_i))
             update(x_i, val);
 
         // unate propagation..
@@ -562,14 +562,14 @@ void lra_theory::update(const var &x_i, const inf_rational &v)
     for (const auto &c : t_watches.at(x_i))
     {
         // x_j = x_j + a_ji(v - x_i)..
-        vals.at(c->x) += c->l.vars.at(x_i) * (v - vals.at(x_i));
+        vals[c->x] += c->l.vars.at(x_i) * (v - vals[x_i]);
         const auto at_c_x = listening.find(c->x);
         if (at_c_x != listening.end())
             for (const auto &l : at_c_x->second)
                 l->lra_value_change(c->x);
     }
     // x_i = v..
-    vals.at(x_i) = v;
+    vals[x_i] = v;
     const auto at_x_i = listening.find(x_i);
     if (at_x_i != listening.end())
         for (const auto &l : at_x_i->second)
@@ -582,17 +582,17 @@ void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rati
     assert(!is_basic(x_j) && "x_j should be a non-basic variable..");
     assert(tableau.at(x_i)->l.vars.count(x_j));
 
-    const inf_rational theta = (v - vals.at(x_i)) / tableau.at(x_i)->l.vars.at(x_j);
+    const inf_rational theta = (v - vals[x_i]) / tableau.at(x_i)->l.vars.at(x_j);
     assert(!theta.is_infinite());
 
     // x_i = v
-    vals.at(x_i) = v;
+    vals[x_i] = v;
     if (const auto at_x_i = listening.find(x_i); at_x_i != listening.end())
         for (const auto &l : at_x_i->second)
             l->lra_value_change(x_i);
 
     // x_j += theta
-    vals.at(x_j) += theta;
+    vals[x_j] += theta;
     if (const auto at_x_j = listening.find(x_j); at_x_j != listening.end())
         for (const auto &l : at_x_j->second)
             l->lra_value_change(x_j);
@@ -601,7 +601,7 @@ void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rati
         if (c->x != x_i)
         {
             // x_k += a_kj * theta..
-            vals.at(c->x) += c->l.vars.at(x_j) * theta;
+            vals[c->x] += c->l.vars.at(x_j) * theta;
             if (const auto at_x_c = listening.find(c->x); at_x_c != listening.end())
                 for (const auto &l : at_x_c->second)
                     l->lra_value_change(c->x);

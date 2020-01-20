@@ -124,7 +124,7 @@ expr core::new_enum(const type &tp, const std::vector<var> &vars, const std::vec
         bool nc;
         for (size_t i = 0; i < vars.size(); ++i)
         {
-            nc = sat_cr.new_clause({lit(vars.at(i), false), sat_cr.new_eq(dynamic_cast<bool_item *>(vals.at(i))->l, b->l)});
+            nc = sat_cr.new_clause({lit(vars[i], false), sat_cr.new_eq(dynamic_cast<bool_item *>(vals[i])->l, b->l)});
             assert(nc);
         }
         return b;
@@ -135,7 +135,7 @@ expr core::new_enum(const type &tp, const std::vector<var> &vars, const std::vec
         bool nc;
         for (size_t i = 0; i < vars.size(); ++i)
         {
-            nc = sat_cr.new_clause({lit(vars.at(i), false), sat_cr.new_conj({lra_th.new_leq(ie->l, dynamic_cast<arith_item *>(vals.at(i))->l), lra_th.new_geq(ie->l, dynamic_cast<arith_item *>(vals.at(i))->l)})});
+            nc = sat_cr.new_clause({lit(vars[i], false), sat_cr.new_conj({lra_th.new_leq(ie->l, dynamic_cast<arith_item *>(vals[i])->l), lra_th.new_geq(ie->l, dynamic_cast<arith_item *>(vals[i])->l)})});
             assert(nc);
         }
         return ie;
@@ -146,7 +146,7 @@ expr core::new_enum(const type &tp, const std::vector<var> &vars, const std::vec
         bool nc;
         for (size_t i = 0; i < vars.size(); ++i)
         {
-            nc = sat_cr.new_clause({lit(vars.at(i), false), sat_cr.new_conj({lra_th.new_leq(re->l, dynamic_cast<arith_item *>(vals.at(i))->l), lra_th.new_geq(re->l, dynamic_cast<arith_item *>(vals.at(i))->l)})});
+            nc = sat_cr.new_clause({lit(vars[i], false), sat_cr.new_conj({lra_th.new_leq(re->l, dynamic_cast<arith_item *>(vals[i])->l), lra_th.new_geq(re->l, dynamic_cast<arith_item *>(vals[i])->l)})});
             assert(nc);
         }
         return re;
@@ -222,12 +222,12 @@ arith_expr core::div(const std::vector<arith_expr> &exprs)
 {
     assert(exprs.size() > 1);
     assert(std::all_of(++exprs.begin(), exprs.end(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
-    assert(lra_th.value(exprs.at(1)->l).get_infinitesimal() == rational::ZERO);
-    rational c = lra_th.value(exprs.at(1)->l).get_rational();
+    assert(lra_th.value(exprs[1]->l).get_infinitesimal() == rational::ZERO);
+    rational c = lra_th.value(exprs[1]->l).get_rational();
     for (size_t i = 2; i < exprs.size(); ++i)
     {
-        assert(lra_th.value(exprs.at(i)->l).get_infinitesimal() == rational::ZERO);
-        c *= lra_th.value(exprs.at(i)->l).get_rational();
+        assert(lra_th.value(exprs[i]->l).get_infinitesimal() == rational::ZERO);
+        c *= lra_th.value(exprs[i]->l).get_rational();
     }
     return new arith_item(*this, *types.at(REAL_KEYWORD), exprs.at(0)->l / c);
 }
@@ -286,7 +286,7 @@ const method &core::get_method(const std::string &name, const std::vector<const 
             {
                 found = true;
                 for (size_t i = 0; i < ts.size(); ++i)
-                    if (!mthd->args.at(i)->get_type().is_assignable_from(*ts.at(i)))
+                    if (!mthd->args[i]->get_type().is_assignable_from(*ts[i]))
                     {
                         found = false;
                         break;

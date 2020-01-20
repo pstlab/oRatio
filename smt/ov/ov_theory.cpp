@@ -46,16 +46,16 @@ var ov_theory::new_var(const std::vector<var> &vars, const std::vector<var_value
     assigns.push_back(std::unordered_map<var_value *, var>());
     for (size_t i = 0; i < vars.size(); ++i)
     {
-        assigns.back().emplace(vals.at(i), vars.at(i));
-        is_contained_in.at(vars.at(i)).insert(id);
+        assigns.back().emplace(vals[i], vars[i]);
+        is_contained_in.at(vars[i]).insert(id);
     }
     return id;
 }
 
 var ov_theory::allows(const var &v, var_value &val) const
 {
-    const auto at_right = assigns.at(v).find(&val);
-    if (at_right != assigns.at(v).end())
+    const auto at_right = assigns[v].find(&val);
+    if (at_right != assigns[v].end())
         return at_right->second;
     else
         return FALSE_var;
@@ -75,8 +75,8 @@ var ov_theory::new_eq(const var &left, const var &right)
     else
     {
         std::unordered_set<var_value *> intersection;
-        for (const auto &v : assigns.at(left))
-            if (assigns.at(right).count(v.first))
+        for (const auto &v : assigns[left])
+            if (assigns[right].count(v.first))
                 intersection.insert(v.first);
 
         if (intersection.empty())
@@ -125,8 +125,8 @@ bool ov_theory::eq(const var &left, const var &right, const var &p)
     else
     {
         std::unordered_set<var_value *> intersection;
-        for (const auto &v : assigns.at(left))
-            if (assigns.at(right).count(v.first))
+        for (const auto &v : assigns[left])
+            if (assigns[right].count(v.first))
                 intersection.insert(v.first);
 
         if (intersection.empty())

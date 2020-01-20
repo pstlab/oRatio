@@ -2,6 +2,7 @@
 #include "clause.h"
 #include "sat_value_listener.h"
 #include <algorithm>
+#include <execution>
 #include <cassert>
 
 namespace smt
@@ -64,7 +65,7 @@ bool sat_core::new_clause(const std::vector<lit> &lits)
     case 0: // the clause is unsatisfable..
         return false;
     case 1: // the clause is unique under the current assignment..
-        return enqueue(c_lits.at(0));
+        return enqueue(c_lits[0]);
     default:
         constrs.push_back(new clause(*this, c_lits));
         return true;
@@ -119,7 +120,7 @@ var sat_core::new_conj(const std::vector<lit> &ls)
     if (c_lits.empty()) // an empty conjunction is assumed to be satisfied..
         return TRUE_var;
 
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -172,7 +173,7 @@ var sat_core::new_disj(const std::vector<lit> &ls)
     if (c_lits.empty()) // an empty disjunction is assumed to be unsatisfable..
         return FALSE_var;
 
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -206,7 +207,7 @@ var sat_core::new_disj(const std::vector<lit> &ls)
 var sat_core::new_exct_one(const std::vector<lit> &ls)
 {
     std::vector<lit> c_lits = ls;
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -228,10 +229,10 @@ var sat_core::new_exct_one(const std::vector<lit> &ls)
         {
             for (size_t j = i + 1; j < ls.size(); ++j)
             {
-                nc = new_clause({!ls.at(i), !ls.at(j), lit(eo, false)});
+                nc = new_clause({!ls[i], !ls[j], lit(eo, false)});
                 assert(nc);
             }
-            lits.push_back(ls.at(i));
+            lits.push_back(ls[i]);
         }
         nc = new_clause(lits);
         assert(nc);
@@ -285,7 +286,7 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
     if (c_lits.empty()) // an empty conjunction is assumed to be satisfied..
         return eq(p, TRUE_var);
 
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -335,7 +336,7 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
     if (c_lits.empty()) // an empty disjunction is assumed to be unsatisfable..
         return eq(p, FALSE_var);
 
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -366,7 +367,7 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
 bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
 {
     std::vector<lit> c_lits = ls;
-    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     std::string s_expr;
     for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
     {
@@ -384,9 +385,9 @@ bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
         for (size_t i = 0; i < ls.size(); ++i)
         {
             for (size_t j = i + 1; j < ls.size(); ++j)
-                if (!new_clause({!ls.at(i), !ls.at(j), lit(p, false)}))
+                if (!new_clause({!ls[i], !ls[j], lit(p, false)}))
                     return false;
-            lits.push_back(ls.at(i));
+            lits.push_back(ls[i]);
         }
         if (!new_clause(lits))
             return false;
@@ -421,10 +422,10 @@ bool sat_core::simplify_db()
         return false;
     size_t j = 0;
     for (size_t i = 0; i < constrs.size(); ++i)
-        if (constrs.at(i)->simplify())
-            constrs.at(i)->remove();
+        if (constrs[i]->simplify())
+            constrs[i]->remove();
         else
-            constrs[j++] = constrs.at(i);
+            constrs[j++] = constrs[i];
     constrs.resize(j);
     return true;
 }
@@ -477,21 +478,21 @@ bool sat_core::propagate(std::vector<lit> &cnfl)
     {
         // we propagate sat constraints..
         std::vector<clause *> tmp;
-        std::swap(tmp, watches.at(index(prop_q.front())));
+        std::swap(tmp, watches[index(prop_q.front())]);
         for (size_t i = 0; i < tmp.size(); ++i)
         {
-            if (!tmp.at(i)->propagate(prop_q.front()))
+            if (!tmp[i]->propagate(prop_q.front()))
             {
                 // constraint is conflicting..
                 for (size_t j = i + 1; j < tmp.size(); ++j)
-                    watches.at(index(prop_q.front())).push_back(tmp.at(j));
-                assert(std::count_if(tmp.at(i)->lits.begin(), tmp.at(i)->lits.end(), [&](const lit &p) { return std::find(watches.at(index(!p)).begin(), watches.at(index(!p)).end(), tmp.at(i)) != watches.at(index(!p)).end(); }) == 2);
+                    watches[index(prop_q.front())].push_back(tmp[j]);
+                assert(std::count_if(tmp[i]->lits.begin(), tmp[i]->lits.end(), [&](const lit &p) { return std::find(watches[index(!p)].begin(), watches[index(!p)].end(), tmp[i]) != watches[index(!p)].end(); }) == 2);
                 while (!prop_q.empty())
                     prop_q.pop();
-                cnfl.insert(cnfl.begin(), tmp.at(i)->lits.begin(), tmp.at(i)->lits.end());
+                cnfl.insert(cnfl.begin(), tmp[i]->lits.begin(), tmp[i]->lits.end());
                 return false;
             }
-            assert(std::count_if(tmp.at(i)->lits.begin(), tmp.at(i)->lits.end(), [&](const lit &p) { return std::find(watches.at(index(!p)).begin(), watches.at(index(!p)).end(), tmp.at(i)) != watches.at(index(!p)).end(); }) == 2);
+            assert(std::count_if(tmp[i]->lits.begin(), tmp[i]->lits.end(), [&](const lit &p) { return std::find(watches[index(!p)].begin(), watches[index(!p)].end(), tmp[i]) != watches[index(!p)].end(); }) == 2);
         }
 
         // we perform theory propagation..
@@ -540,26 +541,26 @@ void sat_core::analyze(std::vector<lit> &cnfl, std::vector<lit> &out_learnt, siz
             if (seen.insert(q.get_var()).second)
             {
                 assert(value(q) == False); // this literal should have propagated the clause..
-                if (level.at(q.get_var()) == decision_level())
+                if (level[q.get_var()] == decision_level())
                     counter++;
-                else if (level.at(q.get_var()) > 0) // exclude variables from decision level 0..
+                else if (level[q.get_var()] > 0) // exclude variables from decision level 0..
                 {
                     out_learnt.push_back(q); // this literal has been assigned in a previous decision level..
-                    out_btlevel = std::max(out_btlevel, level.at(q.get_var()));
+                    out_btlevel = std::max(out_btlevel, level[q.get_var()]);
                 }
             }
         // select next literal to look at..
         do
         {
             p = trail.back();
-            assert(level.at(p.get_var()) == decision_level()); // this variable must have been assigned at the current decision level..
-            if (reason.at(p.get_var()))                        // 'p' can be the asserting literal..
+            assert(level[p.get_var()] == decision_level()); // this variable must have been assigned at the current decision level..
+            if (reason[p.get_var()])                        // 'p' can be the asserting literal..
             {
-                assert(reason.at(p.get_var())->lits.at(0) == p);                                                                                                         // a consequence of propagating the clause is the assignment of literal 'p'..
-                assert(value(p) == True);                                                                                                                                // 'p' has been propagated as true..
-                assert(std::all_of(reason.at(p.get_var())->lits.begin() + 1, reason.at(p.get_var())->lits.end(), [this](const lit &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
+                assert(reason[p.get_var()]->lits[0] == p);                                                                                                         // a consequence of propagating the clause is the assignment of literal 'p'..
+                assert(value(p) == True);                                                                                                                          // 'p' has been propagated as true..
+                assert(std::all_of(reason[p.get_var()]->lits.begin() + 1, reason[p.get_var()]->lits.end(), [this](const lit &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
                 p_reason.clear();
-                p_reason.insert(p_reason.end(), reason.at(p.get_var())->lits.begin() + 1, reason.at(p.get_var())->lits.end());
+                p_reason.insert(p_reason.end(), reason[p.get_var()]->lits.begin() + 1, reason[p.get_var()]->lits.end());
             }
             pop_one();
         } while (!seen.count(p.get_var()));
@@ -573,23 +574,23 @@ void sat_core::analyze(std::vector<lit> &cnfl, std::vector<lit> &out_learnt, siz
 
 void sat_core::record(const std::vector<lit> &lits)
 {
-    assert(value(lits.at(0)) == Undefined);
+    assert(value(lits[0]) == Undefined);
     assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == True; }) == 0);
     assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == Undefined; }) == 1);
     assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == False; }) == lits.size() - 1);
     if (lits.size() == 1)
     {
         assert(root_level());
-        bool e = enqueue(lits.at(0));
+        bool e = enqueue(lits[0]);
         assert(e);
     }
     else
     {
         std::vector<lit> c_lits(lits.begin(), lits.end());
         // we sort literals according to descending order of variable assignment (except for the first literal which is now unassigned)..
-        std::sort(c_lits.begin() + 1, c_lits.end(), [this](lit &a, lit &b) { return level.at(a.get_var()) > level.at(b.get_var()); });
+        std::sort(std::execution::par_unseq, c_lits.begin() + 1, c_lits.end(), [this](lit &a, lit &b) { return level[a.get_var()] > level[b.get_var()]; });
         clause *c = new clause(*this, c_lits);
-        bool e = enqueue(c_lits.at(0), c);
+        bool e = enqueue(c_lits[0], c);
         assert(e);
         constrs.push_back(c);
     }
