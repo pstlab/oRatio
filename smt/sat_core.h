@@ -67,6 +67,7 @@ public:
 
 private:
   static size_t index(const lit &p) { return p.get_sign() ? p.get_var() << 1 : (p.get_var() << 1) ^ 1; }
+  static std::string to_string(const lit &p) { return (p.get_sign() ? "b" : "!b") + std::to_string(p.get_var()); }
 
   bool propagate(std::vector<lit> &cnfl);
   void analyze(std::vector<lit> &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel);

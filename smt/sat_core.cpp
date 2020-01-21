@@ -79,7 +79,7 @@ var sat_core::new_eq(const lit &left, const lit &right)
         return TRUE_var;
     if (left.get_var() > right.get_var())
         return new_eq(right, left);
-    const std::string s_expr = (left.get_sign() ? "b" : "!b") + std::to_string(left.get_var()) + " == " + (right.get_sign() ? "b" : "!b") + std::to_string(right.get_var());
+    const std::string s_expr = "=" + to_string(left) + to_string(right);
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
@@ -121,13 +121,9 @@ var sat_core::new_conj(const std::vector<lit> &ls)
         return TRUE_var;
 
     std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr;
-    for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
-    {
-        if (it != c_lits.cbegin())
-            s_expr += " & ";
-        s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
-    }
+    std::string s_expr = "&";
+    for (const auto &l : c_lits)
+        s_expr += to_string(l);
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
@@ -174,13 +170,9 @@ var sat_core::new_disj(const std::vector<lit> &ls)
         return FALSE_var;
 
     std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr;
-    for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
-    {
-        if (it != c_lits.cbegin())
-            s_expr += " | ";
-        s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
-    }
+    std::string s_expr = "|";
+    for (const auto &l : c_lits)
+        s_expr += to_string(l);
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
@@ -208,13 +200,9 @@ var sat_core::new_exct_one(const std::vector<lit> &ls)
 {
     std::vector<lit> c_lits = ls;
     std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr;
-    for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
-    {
-        if (it != c_lits.cbegin())
-            s_expr += " ^ ";
-        s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
-    }
+    std::string s_expr = "^";
+    for (const auto &l : c_lits)
+        s_expr += to_string(l);
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
@@ -248,7 +236,7 @@ bool sat_core::eq(const lit &left, const lit &right, const var &p)
         return true;
     if (left.get_var() > right.get_var())
         return eq(right, left, p);
-    const std::string s_expr = (left.get_sign() ? "b" : "!b") + std::to_string(left.get_var()) + " == " + (right.get_sign() ? "b" : "!b") + std::to_string(right.get_var());
+    const std::string s_expr = "=" + to_string(left) + to_string(right);
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
@@ -287,13 +275,9 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
         return eq(p, TRUE_var);
 
     std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr;
-    for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
-    {
-        if (it != c_lits.cbegin())
-            s_expr += " & ";
-        s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
-    }
+    std::string s_expr = "&";
+    for (const auto &l : c_lits)
+        s_expr += to_string(l);
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
@@ -337,13 +321,9 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
         return eq(p, FALSE_var);
 
     std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr;
-    for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
-    {
-        if (it != c_lits.cbegin())
-            s_expr += " | ";
-        s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
-    }
+    std::string s_expr = "|";
+    for (const auto &l : c_lits)
+        s_expr += to_string(l);
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
@@ -368,13 +348,9 @@ bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
 {
     std::vector<lit> c_lits = ls;
     std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr;
-    for (std::vector<lit>::const_iterator it = c_lits.cbegin(); it != c_lits.cend(); ++it)
-    {
-        if (it != c_lits.cbegin())
-            s_expr += " ^ ";
-        s_expr += (it->get_sign() ? "b" : "!b") + std::to_string(it->get_var());
-    }
+    std::string s_expr = "^";
+    for (const auto &l : c_lits)
+        s_expr += to_string(l);
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
