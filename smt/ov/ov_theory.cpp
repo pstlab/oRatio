@@ -10,7 +10,7 @@ ov_theory::ov_theory(sat_core &sat) : theory(sat) {}
 
 ov_theory::~ov_theory() {}
 
-var ov_theory::new_var(const std::unordered_set<var_value *> &items, const bool enforce_exct_one)
+var ov_theory::new_var(const std::vector<var_value *> &items, const bool enforce_exct_one)
 {
     assert(!items.empty());
     const var id = assigns.size();

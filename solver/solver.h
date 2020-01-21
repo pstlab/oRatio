@@ -38,7 +38,7 @@ public:
    */
   void solve() override;
 
-  expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals) override;
+  expr new_enum(const type &tp, const std::vector<item *> &allowed_vals) override;
   atom_flaw &get_reason(const atom &atm) const { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
 
   size_t decision_level() const { return trail.size(); } // returns the current decision level..

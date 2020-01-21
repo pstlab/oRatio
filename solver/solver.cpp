@@ -142,7 +142,7 @@ void solver::solve()
 #endif
 }
 
-expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals)
+expr solver::new_enum(const type &tp, const std::vector<item *> &allowed_vals)
 {
     assert(allowed_vals.size() > 1);
     assert(tp.get_name().compare(BOOL_KEYWORD) != 0);
@@ -150,7 +150,7 @@ expr solver::new_enum(const type &tp, const std::unordered_set<item *> &allowed_
     assert(tp.get_name().compare(REAL_KEYWORD) != 0);
     // we create a new enum expression..
     // notice that we do not enforce the exct_one constraint!
-    var_expr xp = new var_item(*this, tp, get_ov_theory().new_var(std::unordered_set<var_value *>(allowed_vals.begin(), allowed_vals.end()), false));
+    var_expr xp = new var_item(*this, tp, get_ov_theory().new_var(std::vector<var_value *>(allowed_vals.begin(), allowed_vals.end()), false));
     if (allowed_vals.size() > 1) // we create a new var flaw..
         gr.new_flaw(*new var_flaw(gr, gr.res, *xp));
     return xp;

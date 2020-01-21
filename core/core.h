@@ -79,7 +79,7 @@ public:
   arith_expr new_real(const smt::rational &val);
   string_expr new_string();
   string_expr new_string(const std::string &val);
-  virtual expr new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals);
+  virtual expr new_enum(const type &tp, const std::vector<item *> &allowed_vals);
 
   bool_expr negate(bool_expr var);
   bool_expr eq(bool_expr left, bool_expr right);

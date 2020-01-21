@@ -107,13 +107,13 @@ arith_expr core::new_real(const rational &val) { return new arith_item(*this, *t
 string_expr core::new_string() { return new string_item(*this, ""); }
 string_expr core::new_string(const std::string &val) { return new string_item(*this, val); }
 
-expr core::new_enum(const type &tp, const std::unordered_set<item *> &allowed_vals)
+expr core::new_enum(const type &tp, const std::vector<item *> &allowed_vals)
 {
     assert(allowed_vals.size() > 1);
     assert(tp.get_name().compare(BOOL_KEYWORD) != 0);
     assert(tp.get_name().compare(INT_KEYWORD) != 0);
     assert(tp.get_name().compare(REAL_KEYWORD) != 0);
-    return new var_item(*this, tp, ov_th.new_var(std::unordered_set<var_value *>(allowed_vals.begin(), allowed_vals.end())));
+    return new var_item(*this, tp, ov_th.new_var(std::vector<var_value *>(allowed_vals.begin(), allowed_vals.end())));
 }
 
 expr core::new_enum(const type &tp, const std::vector<var> &vars, const std::vector<item *> &vals)

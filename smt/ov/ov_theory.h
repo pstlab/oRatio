@@ -21,8 +21,8 @@ public:
   ov_theory(const ov_theory &orig) = delete;
   virtual ~ov_theory();
 
-  var new_var(const std::unordered_set<var_value *> &items, const bool enforce_exct_one = true); // creates and returns a new object variable having the given domain..
-  var new_var(const std::vector<var> &vars, const std::vector<var_value *> &vals);               // creates and returns a new object variable having the given domain, the presence of the values into the domain is controlled by the 'vars' propositional variables..
+  var new_var(const std::vector<var_value *> &items, const bool enforce_exct_one = true); // creates and returns a new object variable having the given domain..
+  var new_var(const std::vector<var> &vars, const std::vector<var_value *> &vals);        // creates and returns a new object variable having the given domain, the presence of the values into the domain is controlled by the 'vars' propositional variables..
 
   var allows(const var &v, var_value &val) const;                      // returns the propositional variable that controls the presence of the 'val' value into the domain of variable 'v'..
   var new_eq(const var &left, const var &right);                       // creates an equality constraints between 'left' and 'right' variables returning a propositional variable that controls it..

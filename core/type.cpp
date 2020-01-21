@@ -74,9 +74,10 @@ expr type::new_existential()
         return *instances.begin();
     else
     {
-        std::unordered_set<item *> c_items;
+        std::vector<item *> c_items;
+        c_items.reserve(instances.size());
         for (const auto &i : instances)
-            c_items.insert(&*i);
+            c_items.push_back(&*i);
         return cr.new_enum(*this, c_items);
     }
 }

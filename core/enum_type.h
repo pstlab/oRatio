@@ -1,7 +1,6 @@
 #pragma once
 
 #include "type.h"
-#include <unordered_set>
 
 namespace ratio
 {
@@ -25,7 +24,7 @@ public:
   expr new_instance(context &ctx) override;
 
 private:
-  std::unordered_set<item *> get_all_instances() const;
+  std::vector<item *> get_all_instances() const;
 
 private:
   std::vector<enum_type *> enums;
