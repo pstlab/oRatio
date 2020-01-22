@@ -33,15 +33,17 @@ public:
   var new_var();                                 // creates a new propositional variable..
   bool new_clause(const std::vector<lit> &lits); // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
 
-  var new_eq(const lit &left, const lit &right); // creates a new reified equality..
-  var new_conj(const std::vector<lit> &ls);      // creates a new reified conjunction..
-  var new_disj(const std::vector<lit> &ls);      // creates a new reified disjunction..
-  var new_exct_one(const std::vector<lit> &ls);  // creates a new reified exct-one..
+  var new_eq(const lit &left, const lit &right);   // creates a new reified equality..
+  var new_conj(const std::vector<lit> &ls);        // creates a new reified conjunction..
+  var new_disj(const std::vector<lit> &ls);        // creates a new reified disjunction..
+  var new_at_most_one(const std::vector<lit> &ls); // creates a new reified at-most-one..
+  var new_exct_one(const std::vector<lit> &ls);    // creates a new reified exct-one..
 
-  bool eq(const lit &left, const lit &right, const var &p = TRUE_var); // creates a new reified equality controlled by the 'p' literal..
-  bool conj(const std::vector<lit> &ls, const var &p = TRUE_var);      // creates a new reified conjunction controlled by the 'p' literal..
-  bool disj(const std::vector<lit> &ls, const var &p = TRUE_var);      // creates a new reified disjunction controlled by the 'p' literal..
-  bool exct_one(const std::vector<lit> &ls, const var &p = TRUE_var);  // creates a new reified exct-one controlled by the 'p' literal..
+  bool eq(const lit &left, const lit &right, const var &p = TRUE_var);   // creates a new reified equality controlled by the 'p' literal..
+  bool conj(const std::vector<lit> &ls, const var &p = TRUE_var);        // creates a new reified conjunction controlled by the 'p' literal..
+  bool disj(const std::vector<lit> &ls, const var &p = TRUE_var);        // creates a new reified disjunction controlled by the 'p' literal..
+  bool at_most_one(const std::vector<lit> &ls, const var &p = TRUE_var); // creates a new reified at-most-one controlled by the 'p' literal..
+  bool exct_one(const std::vector<lit> &ls, const var &p = TRUE_var);    // creates a new reified exct-one controlled by the 'p' literal..
 
   bool assume(const lit &p);
   void pop();

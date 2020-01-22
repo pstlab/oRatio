@@ -148,6 +148,28 @@ void test_assumptions()
     assert(!assm);
 }
 
+void test_amo()
+{
+    sat_core core;
+
+    var b0 = core.new_var();
+    var b1 = core.new_var();
+    var b2 = core.new_var();
+    var b3 = core.new_var();
+    var b4 = core.new_var();
+    var b5 = core.new_var();
+
+    bool nc = core.at_most_one({b0, b1, b2, b3, b4, b5});
+    assert(nc);
+
+    bool assm = core.assume(lit(b0, false)) && core.check();
+    assert(assm);
+    assm = core.assume(b1) && core.check();
+    assert(assm);
+    assm = core.check({lit(b2, false), lit(b3, false), lit(b4, false), lit(b5, false)});
+    assert(assm);
+}
+
 int main(int, char **)
 {
     test_basic_core_0();
@@ -157,4 +179,6 @@ int main(int, char **)
     test_no_good();
 
     test_assumptions();
+
+    test_amo();
 }

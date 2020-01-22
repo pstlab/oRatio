@@ -42,23 +42,20 @@ var sat_core::new_var()
 bool sat_core::new_clause(const std::vector<lit> &lits)
 {
     assert(root_level());
-
-    // we filter out false literals..
-    std::vector<lit> c_lits;
-    c_lits.reserve(lits.size());
-    for (const auto &l : lits)
-        switch (value(l))
-        {
-        case True:
-            return true; // the clause is already satisfied..
-        case False:
-            break; // we skip false literals..
-        case Undefined:
-            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
-                return true; // the clause represents a tautology..
-            else if (std::none_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == l; }))
-                c_lits.push_back(l); // we skip duplicates..
+    // we check if the clause is already satisfied and filter out false/duplicate literals..
+    std::vector<lit> c_lits = lits;
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    lit p;
+    size_t j = 0;
+    for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
+        if (value(*it) == True || *it == !p)
+            return true; // the clause is already satisfied or represents a tautology..
+        else if (value(*it) != False && *it != p)
+        { // we need to include this literal in the clause..
+            p = *it;
+            c_lits[j++] = p;
         }
+    c_lits.resize(j);
 
     switch (c_lits.size())
     {
@@ -66,7 +63,7 @@ bool sat_core::new_clause(const std::vector<lit> &lits)
         return false;
     case 1: // the clause is unique under the current assignment..
         return enqueue(c_lits[0]);
-    default:
+    default: // we need to create a new clause..
         constrs.push_back(new clause(*this, c_lits));
         return true;
     }
@@ -75,25 +72,53 @@ bool sat_core::new_clause(const std::vector<lit> &lits)
 var sat_core::new_eq(const lit &left, const lit &right)
 {
     assert(root_level());
-    if (left == right)
-        return TRUE_var;
-    if (left.get_var() > right.get_var())
-        return new_eq(right, left);
-    const std::string s_expr = "=" + to_string(left) + to_string(right);
+    // we try to avoid creating a new variable..
+    switch (value(left))
+    {
+    case True:
+        switch (value(right))
+        {
+        case True:
+            return TRUE_var; // the variables assume the same value..
+        case False:
+            return FALSE_var; // the variables cannot assume the same value..
+        case Undefined:
+            if (right.get_sign())
+                return right.get_var();
+        }
+    case False:
+        switch (value(right))
+        {
+        case True:
+            return FALSE_var; // the variables cannot assume the same value..
+        case False:
+            return TRUE_var; // the variables assume the same value..
+        case Undefined:
+            if (!right.get_sign())
+                return right.get_var();
+        }
+    case Undefined:
+        switch (value(right))
+        {
+        case True:
+            if (left.get_sign())
+                return left.get_var();
+        case False:
+            if (!left.get_sign())
+                return left.get_var();
+        case Undefined:
+            break;
+        }
+    }
+
+    const std::string s_expr = "=" + (left.get_var() < right.get_var()) ? (to_string(left) + to_string(right)) : to_string(right) + to_string(left);
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
-    {
-        // we need to create a new variable..
+    { // we need to create a new variable..
         const var e = new_var();
-        bool nc;
-        nc = new_clause({lit(e, false), !left, right});
+        bool nc = eq(left, right, e);
         assert(nc);
-        nc = new_clause({lit(e, false), left, !right});
-        assert(nc);
-        nc = new_clause({e, !left, !right});
-        assert(nc);
-        exprs.emplace(s_expr, e);
         return e;
     }
 }
@@ -101,48 +126,34 @@ var sat_core::new_eq(const lit &left, const lit &right)
 var sat_core::new_conj(const std::vector<lit> &ls)
 {
     assert(root_level());
-    std::vector<lit> c_lits;
-    c_lits.reserve(ls.size());
-    for (const auto &l : ls)
-        switch (value(l))
-        {
-        case True:
-            break; // we skip true literals..
-        case False:
+    // we try to avoid creating a new variable..
+    std::vector<lit> c_lits = ls;
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    lit p;
+    size_t j = 0;
+    std::string s_expr = "&";
+    for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
+        if (value(*it) == False || *it == !p)
             return FALSE_var; // the conjunction cannot be satisfied..
-        case Undefined:
-            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
-                return FALSE_var; // the conjunction cannot be satisfied..
-            else
-                c_lits.push_back(l);
+        else if (value(*it) != True && *it != p)
+        { // we need to include this literal in the conjunction..
+            p = *it;
+            s_expr += to_string(p);
+            c_lits[j++] = p;
         }
+    c_lits.resize(j);
 
     if (c_lits.empty()) // an empty conjunction is assumed to be satisfied..
         return TRUE_var;
-
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr = "&";
-    for (const auto &l : c_lits)
-        s_expr += to_string(l);
-    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+    else if (c_lits.size() == 1 && c_lits[0].get_sign())
+        return c_lits[0].get_var();
+    else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
-    {
-        // we need to create a new variable..
+    { // we need to create a new variable..
         const var c = new_var();
-        std::vector<lit> lits;
-        lits.reserve(c_lits.size() + 1);
-        lits.push_back(c);
-        bool nc;
-        for (const auto &l : c_lits)
-        {
-            nc = new_clause({lit(c, false), l});
-            assert(nc);
-            lits.push_back(!l);
-        }
-        nc = new_clause(lits);
+        bool nc = conj(c_lits, c);
         assert(nc);
-        exprs.emplace(s_expr, c);
         return c;
     }
 }
@@ -150,81 +161,122 @@ var sat_core::new_conj(const std::vector<lit> &ls)
 var sat_core::new_disj(const std::vector<lit> &ls)
 {
     assert(root_level());
-    std::vector<lit> c_lits;
-    c_lits.reserve(ls.size());
-    for (const auto &l : ls)
-        switch (value(l))
-        {
-        case True:
+    // we try to avoid creating a new variable..
+    std::vector<lit> c_lits = ls;
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    lit p;
+    size_t j = 0;
+    std::string s_expr = "|";
+    for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
+        if (value(*it) == True || *it == !p)
             return TRUE_var; // the disjunction is already satisfied..
-        case False:
-            break; // we skip false literals..
-        case Undefined:
-            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
-                return TRUE_var; // the disjunction is already satisfied..
-            else
-                c_lits.push_back(l);
+        else if (value(*it) != False && *it != p)
+        { // we need to include this literal in the conjunction..
+            p = *it;
+            s_expr += to_string(p);
+            c_lits[j++] = p;
         }
+    c_lits.resize(j);
 
     if (c_lits.empty()) // an empty disjunction is assumed to be unsatisfable..
         return FALSE_var;
-
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr = "|";
-    for (const auto &l : c_lits)
-        s_expr += to_string(l);
-    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+    else if (c_lits.size() == 1 && c_lits[0].get_sign())
+        return c_lits[0].get_var();
+    else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
-    {
-        // we need to create a new variable..
+    { // we need to create a new variable..
         const var d = new_var();
-        std::vector<lit> lits;
-        lits.reserve(c_lits.size() + 1);
-        lits.push_back(lit(d, false));
-        bool nc;
-        for (const auto &l : c_lits)
-        {
-            nc = new_clause({!l, d});
-            assert(nc);
-            lits.push_back(l);
-        }
-        nc = new_clause(lits);
+        bool nc = disj(c_lits, d);
         assert(nc);
-        exprs.emplace(s_expr, d);
         return d;
+    }
+}
+
+var sat_core::new_at_most_one(const std::vector<lit> &ls)
+{
+    assert(root_level());
+    // we try to avoid creating a new variable..
+    std::vector<lit> c_lits = ls;
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    lit p;
+    size_t j = 0;
+    std::string s_expr = "amo";
+    for (std::vector<lit>::const_iterator it0 = c_lits.begin(); it0 != c_lits.end(); ++it0)
+        if (value(*it0) == True)
+            for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
+            {
+                if (value(*it1) == True || *it1 == !p)
+                    return FALSE_var; // the at-most-one cannot be satisfied..
+                else if (value(*it1) != False && *it1 != p)
+                { // we need to include this literal in the exact-one..
+                    p = *it1;
+                    s_expr += to_string(p);
+                    c_lits[j++] = p;
+                }
+            }
+        else if (value(*it0) != False && *it0 != p)
+        { // we need to include this literal in the at-most-one..
+            p = *it0;
+            s_expr += to_string(p);
+            c_lits[j++] = p;
+        }
+    c_lits.resize(j);
+
+    if (c_lits.empty() || c_lits.size() == 1) // an empty or a singleton at-most-one is assumed to be satisfied..
+        return TRUE_var;
+    else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        return at_expr->second;
+    else
+    { // we need to create a new variable..
+        const var amo = new_var();
+        bool nc = at_most_one(c_lits, amo);
+        assert(nc);
+        return amo;
     }
 }
 
 var sat_core::new_exct_one(const std::vector<lit> &ls)
 {
+    assert(root_level());
+    // we try to avoid creating a new variable..
     std::vector<lit> c_lits = ls;
     std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    lit p;
+    size_t j = 0;
     std::string s_expr = "^";
-    for (const auto &l : c_lits)
-        s_expr += to_string(l);
-    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+    for (std::vector<lit>::const_iterator it0 = c_lits.begin(); it0 != c_lits.end(); ++it0)
+        if (value(*it0) == True)
+            for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
+            {
+                if (value(*it1) == True || *it1 == !p)
+                    return FALSE_var; // the exact-one cannot be satisfied..
+                else if (value(*it1) != False && *it1 != p)
+                { // we need to include this literal in the exact-one..
+                    p = *it1;
+                    s_expr += to_string(p);
+                    c_lits[j++] = p;
+                }
+            }
+        else if (value(*it0) != False && *it0 != p)
+        { // we need to include this literal in the exact-one..
+            p = *it0;
+            s_expr += to_string(p);
+            c_lits[j++] = p;
+        }
+    c_lits.resize(j);
+
+    if (c_lits.empty()) // an empty exact-one is assumed to be unsatisfable..
+        return FALSE_var;
+    else if (c_lits.size() == 1 && c_lits[0].get_sign())
+        return c_lits[0].get_var();
+    else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
     else
-    {
-        // we need to create a new variable..
+    { // we need to create a new variable..
         const var eo = new_var();
-        std::vector<lit> lits;
-        lits.reserve(ls.size() + 1);
-        lits.push_back(lit(eo, false));
-        bool nc;
-        for (size_t i = 0; i < ls.size(); ++i)
-        {
-            for (size_t j = i + 1; j < ls.size(); ++j)
-            {
-                nc = new_clause({!ls[i], !ls[j], lit(eo, false)});
-                assert(nc);
-            }
-            lits.push_back(ls[i]);
-        }
-        nc = new_clause(lits);
+        bool nc = exct_one(c_lits, eo);
         assert(nc);
-        exprs.emplace(s_expr, eo);
         return eo;
     }
 }
@@ -232,11 +284,107 @@ var sat_core::new_exct_one(const std::vector<lit> &ls)
 bool sat_core::eq(const lit &left, const lit &right, const var &p)
 {
     assert(root_level());
-    if (left == right)
-        return true;
-    if (left.get_var() > right.get_var())
-        return eq(right, left, p);
-    const std::string s_expr = "=" + to_string(left) + to_string(right);
+    switch (value(p))
+    {
+    case True:
+        switch (value(left))
+        {
+        case True:
+            switch (value(right))
+            {
+            case True:
+                return true; // the variables assume the same value..
+            case False:
+                return false; // the variables do not assume the same value..
+            case Undefined:
+                return enqueue(right); // the eq constraint is unique under the current assignment..
+            }
+        case False:
+            switch (value(right))
+            {
+            case True:
+                return false; // the variables do not assume the same value..
+            case False:
+                return true; // the variables assume the same value..
+            case Undefined:
+                return enqueue(!right); // the eq constraint is unique under the current assignment..
+            }
+        case Undefined:
+            switch (value(right))
+            {
+            case True:
+                return enqueue(left); // the eq constraint is unique under the current assignment..
+            case False:
+                return enqueue(!left); // the eq constraint is unique under the current assignment..
+            case Undefined:
+                break;
+            }
+        }
+        break;
+    case False:
+        switch (value(left))
+        {
+        case True:
+            switch (value(right))
+            {
+            case True:
+                return false; // the variables do not assume the same value..
+            case False:
+                return true; // the variables assume the same value..
+            case Undefined:
+                return enqueue(!right); // the eq constraint is unique under the current assignment..
+            }
+        case False:
+            switch (value(right))
+            {
+            case True:
+                return true; // the variables assume the same value..
+            case False:
+                return false; // the variables do not assume the same value..
+            case Undefined:
+                return enqueue(right); // the eq constraint is unique under the current assignment..
+            }
+        case Undefined:
+            switch (value(right))
+            {
+            case True:
+                return enqueue(!left); // the eq constraint is unique under the current assignment..
+            case False:
+                return enqueue(left); // the eq constraint is unique under the current assignment..
+            case Undefined:
+                break;
+            }
+        }
+        break;
+    case Undefined:
+        switch (value(left))
+        {
+        case True:
+            switch (value(right))
+            {
+            case True:
+                return enqueue(lit(p, false)); // the eq constraint is unique under the current assignment..
+            case False:
+                return enqueue(p); // the eq constraint is unique under the current assignment..
+            case Undefined:
+                break;
+            }
+        case False:
+            switch (value(right))
+            {
+            case True:
+                return enqueue(lit(p, false)); // the eq constraint is unique under the current assignment..
+            case False:
+                return enqueue(p); // the eq constraint is unique under the current assignment..
+            case Undefined:
+                break;
+            }
+        case Undefined:
+            break;
+        }
+        break;
+    }
+    const std::string s_expr = "=" + (left.get_var() < right.get_var()) ? (to_string(left) + to_string(right)) : (to_string(right) + to_string(left));
     if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
@@ -255,30 +403,25 @@ bool sat_core::eq(const lit &left, const lit &right, const var &p)
 bool sat_core::conj(const std::vector<lit> &ls, const var &p)
 {
     assert(root_level());
-    std::vector<lit> c_lits;
-    c_lits.reserve(ls.size());
-    for (const auto &l : ls)
-        switch (value(l))
-        {
-        case True:
-            break; // we skip true literals..
-        case False:
-            return FALSE_var; // the conjunction cannot be satisfied..
-        case Undefined:
-            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
-                return FALSE_var; // the conjunction cannot be satisfied..
-            else
-                c_lits.push_back(l);
+    std::vector<lit> c_lits = ls;
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    lit c_p;
+    size_t j = 0;
+    std::string s_expr = "&";
+    for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
+        if (value(*it) == False || *it == !c_p)
+            return eq(p, FALSE_var); // the conjunction cannot be satisfied..
+        else if (value(*it) != True && *it != c_p)
+        { // we need to include this literal in the conjunction..
+            c_p = *it;
+            s_expr += to_string(c_p);
+            c_lits[j++] = c_p;
         }
+    c_lits.resize(j);
 
     if (c_lits.empty()) // an empty conjunction is assumed to be satisfied..
         return eq(p, TRUE_var);
-
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr = "&";
-    for (const auto &l : c_lits)
-        s_expr += to_string(l);
-    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+    else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
     {
@@ -301,30 +444,25 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
 bool sat_core::disj(const std::vector<lit> &ls, const var &p)
 {
     assert(root_level());
-    std::vector<lit> c_lits;
-    c_lits.reserve(ls.size());
-    for (const auto &l : ls)
-        switch (value(l))
-        {
-        case True:
-            return true; // the disjunction is already satisfied..
-        case False:
-            break; // we skip false literals..
-        case Undefined:
-            if (std::any_of(c_lits.begin(), c_lits.end(), [this, l](const auto &c_l) { return c_l == !l; }))
-                return true; // the disjunction is already satisfied..
-            else
-                c_lits.push_back(l);
+    std::vector<lit> c_lits = ls;
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    lit c_p;
+    size_t j = 0;
+    std::string s_expr = "|";
+    for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
+        if (value(*it) == True || *it == !p)
+            return TRUE_var; // the disjunction is already satisfied..
+        else if (value(*it) != False && *it != c_p)
+        { // we need to include this literal in the conjunction..
+            c_p = *it;
+            s_expr += to_string(c_p);
+            c_lits[j++] = c_p;
         }
+    c_lits.resize(j);
 
     if (c_lits.empty()) // an empty disjunction is assumed to be unsatisfable..
         return eq(p, FALSE_var);
-
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
-    std::string s_expr = "|";
-    for (const auto &l : c_lits)
-        s_expr += to_string(l);
-    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+    else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return eq(p, at_expr->second);
     else
     {
@@ -344,28 +482,109 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
     }
 }
 
+bool sat_core::at_most_one(const std::vector<lit> &ls, const var &p)
+{
+    std::vector<lit> c_lits = ls;
+    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    lit c_p;
+    size_t j = 0;
+    std::string s_expr = "amo";
+    for (std::vector<lit>::const_iterator it0 = c_lits.begin(); it0 != c_lits.end(); ++it0)
+        if (value(*it0) == True)
+            for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
+            {
+                if (value(*it1) == True || *it1 == !c_p)
+                    return FALSE_var; // the at-most-one cannot be satisfied..
+                else if (value(*it1) != False && *it1 != c_p)
+                { // we need to include this literal in the exact-one..
+                    c_p = *it1;
+                    s_expr += to_string(c_p);
+                    c_lits[j++] = c_p;
+                }
+            }
+        else if (value(*it0) != False && *it0 != c_p)
+        { // we need to include this literal in the at-most-one..
+            c_p = *it0;
+            s_expr += to_string(c_p);
+            c_lits[j++] = c_p;
+        }
+    c_lits.resize(j);
+
+    if (c_lits.empty() || c_lits.size() == 1) // an empty or a singleton at-most-one is assumed to be satisfied..
+        return TRUE_var;
+    else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        return eq(p, at_expr->second);
+    else if (ls.size() < 5)
+    { // we use the standard encoding..
+        for (size_t i = 0; i < ls.size(); ++i)
+            for (size_t j = i + 1; j < ls.size(); ++j)
+                if (!new_clause({!ls[i], !ls[j], lit(p, false)}))
+                    return false;
+        exprs.emplace(s_expr, p);
+        return true;
+    }
+    else
+    {
+        double ps = ceil(sqrt(ls.size()));
+        double qs = ceil(ls.size() / ps);
+
+        std::vector<lit> u, v;
+        for (size_t i = 0; i < ps; ++i)
+            u.push_back(new_var());
+        for (size_t j = 0; j < qs; ++j)
+            v.push_back(new_var());
+
+        if (!at_most_one(u, p) || !at_most_one(v, p))
+            return false;
+
+        for (size_t i = 0; i < ps; ++i)
+            for (size_t j = 0; j < qs; ++j)
+                if (size_t k = static_cast<size_t>(i * qs + j); k < ls.size())
+                    if (!new_clause({!ls[k], u[i], lit(p, false)}) || !new_clause({!ls[k], v[j], lit(p, false)}))
+                        return false;
+
+        exprs.emplace(s_expr, p);
+        return true;
+    }
+}
+
 bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
 {
     std::vector<lit> c_lits = ls;
     std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    lit c_p;
+    size_t j = 0;
     std::string s_expr = "^";
-    for (const auto &l : c_lits)
-        s_expr += to_string(l);
-    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
-        return eq(p, at_expr->second);
+    for (std::vector<lit>::const_iterator it0 = c_lits.begin(); it0 != c_lits.end(); ++it0)
+        if (value(*it0) == True)
+            for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
+            {
+                if (value(*it1) == True || *it1 == !c_p)
+                    return FALSE_var; // the exact-one cannot be satisfied..
+                else if (value(*it1) != False && *it1 != c_p)
+                { // we need to include this literal in the exact-one..
+                    c_p = *it1;
+                    s_expr += to_string(c_p);
+                    c_lits[j++] = c_p;
+                }
+            }
+        else if (value(*it0) != False && *it0 != c_p)
+        { // we need to include this literal in the exact-one..
+            c_p = *it0;
+            s_expr += to_string(c_p);
+            c_lits[j++] = c_p;
+        }
+    c_lits.resize(j);
+
+    if (c_lits.empty()) // an empty exact-one is assumed to be unsatisfable..
+        return FALSE_var;
+    else if (c_lits.size() == 1 && c_lits[0].get_sign())
+        return c_lits[0].get_var();
+    else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        return at_expr->second;
     else
     {
-        std::vector<lit> lits;
-        lits.reserve(ls.size() + 1);
-        lits.push_back(lit(p, false));
-        for (size_t i = 0; i < ls.size(); ++i)
-        {
-            for (size_t j = i + 1; j < ls.size(); ++j)
-                if (!new_clause({!ls[i], !ls[j], lit(p, false)}))
-                    return false;
-            lits.push_back(ls[i]);
-        }
-        if (!new_clause(lits))
+        if (!disj(ls, p) || !at_most_one(ls, p))
             return false;
         exprs.emplace(s_expr, p);
         return true;
