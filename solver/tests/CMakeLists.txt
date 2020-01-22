@@ -13,6 +13,8 @@ endif()
 add_test(NAME SolverTest00 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/example_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME SolverTest01 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/example_1.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME SolverTest02 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/example_2.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SolverTest03 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/example_3.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SolverTest04 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/example_4.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 set_tests_properties(SolverTest02 PROPERTIES WILL_FAIL TRUE)
 
 add_test(NAME HeuristicTest00 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/test_heuristic_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
