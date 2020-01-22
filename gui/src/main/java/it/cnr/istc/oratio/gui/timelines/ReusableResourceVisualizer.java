@@ -62,9 +62,11 @@ public class ReusableResourceVisualizer implements TimelineVisualizer {
         renderer.setSeriesPaint(1, new Color(135, 0, 0));
         renderer.setSeriesStroke(1, new BasicStroke(1.5f));
 
-        XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
+        NumberAxis na = new NumberAxis(rr.getName());
+        na.setLabelAngle(Math.PI / 2);
+        XYPlot plot = new XYPlot(collection, null, na, renderer);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-        plot.addAnnotation(new XYTextAnnotation(rr.getName(), 0, 1));
+        plot.addAnnotation(new XYTextAnnotation("capacity", 0, rr.getCapacity().intValue()));
 
         return Arrays.asList(plot);
     }
