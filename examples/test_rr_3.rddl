@@ -1,13 +1,13 @@
 class RRContainer {
 
     real id;
-    ReusableResource capacity = new ReusableResource(10.0);
+    ReusableResource res = new ReusableResource(10.0);
 
     RRContainer(real id) : id(id) {}
 }
 
 predicate Use(RRContainer rr, real id) : Interval {
-    fact u0 = new rr.capacity.Use(amount:4.0, duration:2.0);
+    fact u0 = new rr.res.Use(amount:4.0, duration:2.0);
 }
 
 RRContainer rr0 = new RRContainer(1.0);

@@ -10,7 +10,7 @@ BlocksAgent agent = new BlocksAgent();
 BlocksState state = agent.propositional_state;
 
 fact clear_b = new agent.propositional_state.Clear(polarity:true, x:b, start:origin);  clear_b.duration >= 1.0;
-fact on_b_a = new agent.propositional_state.On(polarity:true, x:b, y:a, end:horizon);
+fact on_b_a = new agent.propositional_state.On(polarity:true, x:b, y:a, start:origin);
 fact ontable_a = new agent.propositional_state.Ontable(polarity:true, x:a, start:origin);  ontable_a.duration >= 1.0;
 fact handempty = new agent.propositional_state.Handempty(polarity:true, start:origin);  handempty.duration >= 1.0;
 
