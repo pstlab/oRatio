@@ -2,11 +2,13 @@ package it.cnr.istc.oratio.gui.timelines;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
@@ -29,6 +31,26 @@ import it.cnr.istc.oratio.timelines.PropositionalAgent.Action;
  * PropositionalAgentVisualizer
  */
 public class PropositionalAgentVisualizer implements TimelineVisualizer {
+
+    private static final NumberFormat NF = new NumberFormat() {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+            return toAppendTo;
+        }
+
+        @Override
+        public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+            return toAppendTo;
+        }
+
+        @Override
+        public Number parse(String source, ParsePosition parsePosition) {
+            return 0;
+        }
+    };
 
     @Override
     public Class<? extends Timeline<?>> getType() {
@@ -85,10 +107,11 @@ public class PropositionalAgentVisualizer implements TimelineVisualizer {
                                     .getSeries(series).getDataItem(item)).action.getAtom().toString());
         }
 
-        XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
-        plot.getRangeAxis().setVisible(false);
+        NumberAxis na = new NumberAxis(pa.getName());
+        na.setNumberFormatOverride(NF);
+        na.setLabelAngle(Math.PI / 2);
+        XYPlot plot = new XYPlot(collection, null, na, renderer);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-        plot.addAnnotation(new XYTextAnnotation(pa.getName(), 0, 1));
 
         return Arrays.asList(plot);
     }

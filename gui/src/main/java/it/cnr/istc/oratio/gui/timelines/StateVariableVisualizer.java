@@ -2,11 +2,13 @@ package it.cnr.istc.oratio.gui.timelines;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParsePosition;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.jfree.chart.annotations.XYTextAnnotation;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.ItemLabelAnchor;
 import org.jfree.chart.labels.ItemLabelPosition;
@@ -30,6 +32,26 @@ import it.cnr.istc.oratio.timelines.StateVariable.SVValue;
  */
 public class StateVariableVisualizer implements TimelineVisualizer {
 
+    private static final NumberFormat NF = new NumberFormat() {
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public StringBuffer format(double number, StringBuffer toAppendTo, FieldPosition pos) {
+            return toAppendTo;
+        }
+
+        @Override
+        public StringBuffer format(long number, StringBuffer toAppendTo, FieldPosition pos) {
+            return toAppendTo;
+        }
+
+        @Override
+        public Number parse(String source, ParsePosition parsePosition) {
+            return 0;
+        }
+    };
+
     @Override
     public Class<? extends Timeline<?>> getType() {
         return StateVariable.class;
@@ -42,8 +64,8 @@ public class StateVariableVisualizer implements TimelineVisualizer {
 
         XYIntervalSeriesCollection collection = new XYIntervalSeriesCollection();
         SVValueXYIntervalSeries undefined = new SVValueXYIntervalSeries("Undefined");
-        SVValueXYIntervalSeries sv_values = new SVValueXYIntervalSeries("Values");
         SVValueXYIntervalSeries conflicts = new SVValueXYIntervalSeries("Conflicts");
+        SVValueXYIntervalSeries sv_values = new SVValueXYIntervalSeries("Values");
 
         for (SVValue val : sv.getValues()) {
             switch (val.getAtoms().size()) {
@@ -62,14 +84,14 @@ public class StateVariableVisualizer implements TimelineVisualizer {
             }
         }
 
-        collection.addSeries(undefined);
         collection.addSeries(sv_values);
         collection.addSeries(conflicts);
+        collection.addSeries(undefined);
 
         XYBarRenderer renderer = new XYBarRenderer();
-        renderer.setSeriesPaint(0, Color.lightGray);
-        renderer.setSeriesPaint(1, new Color(100, 250, 100));
-        renderer.setSeriesPaint(2, Color.pink);
+        renderer.setSeriesPaint(0, new Color(100, 250, 100));
+        renderer.setSeriesPaint(1, Color.pink);
+        renderer.setSeriesPaint(2, Color.lightGray);
         renderer.setBarPainter(new ReverseGradientXYBarPainter());
         renderer.setDrawBarOutline(true);
         renderer.setShadowXOffset(2);
@@ -95,10 +117,11 @@ public class StateVariableVisualizer implements TimelineVisualizer {
                                             .map(atm -> atm.toString()).collect(Collectors.joining(", ")));
         }
 
-        XYPlot plot = new XYPlot(collection, null, new NumberAxis(""), renderer);
-        plot.getRangeAxis().setVisible(false);
+        NumberAxis na = new NumberAxis(sv.getName());
+        na.setNumberFormatOverride(NF);
+        na.setLabelAngle(Math.PI / 2);
+        XYPlot plot = new XYPlot(collection, null, na, renderer);
         plot.setDatasetRenderingOrder(DatasetRenderingOrder.FORWARD);
-        plot.addAnnotation(new XYTextAnnotation(sv.getName(), 0, 1));
 
         return Arrays.asList(plot);
     }
