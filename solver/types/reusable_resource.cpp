@@ -5,7 +5,6 @@
 #include "atom_flaw.h"
 #include "combinations.h"
 #include "riddle_parser.h"
-#include <execution>
 #include <stdexcept>
 #include <list>
 
@@ -87,7 +86,7 @@ std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_
                 // we extract minimal conflict sets (MCSs)..
                 // we sort the overlapping atoms, according to their resource usage, in descending order..
                 std::vector<atom *> inc_atoms(overlapping_atoms.begin(), overlapping_atoms.end());
-                std::sort(std::execution::par, inc_atoms.begin(), inc_atoms.end(), [this](atom *atm0, atom *atm1) {
+                std::sort(inc_atoms.begin(), inc_atoms.end(), [this](atom *atm0, atom *atm1) {
                     arith_expr amnt0 = atm0->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
                     arith_expr amnt1 = atm1->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
                     return get_core().arith_value(amnt0) > get_core().arith_value(amnt1);

@@ -2,7 +2,7 @@
 #include "clause.h"
 #include "sat_value_listener.h"
 #include <algorithm>
-#include <execution>
+#include <cmath>
 #include <cassert>
 
 namespace smt
@@ -44,7 +44,7 @@ bool sat_core::new_clause(const std::vector<lit> &lits)
     assert(root_level());
     // we check if the clause is already satisfied and filter out false/duplicate literals..
     std::vector<lit> c_lits = lits;
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     lit p;
     size_t j = 0;
     for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
@@ -128,7 +128,7 @@ var sat_core::new_conj(const std::vector<lit> &ls)
     assert(root_level());
     // we try to avoid creating a new variable..
     std::vector<lit> c_lits = ls;
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     lit p;
     size_t j = 0;
     std::string s_expr = "&";
@@ -163,7 +163,7 @@ var sat_core::new_disj(const std::vector<lit> &ls)
     assert(root_level());
     // we try to avoid creating a new variable..
     std::vector<lit> c_lits = ls;
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     lit p;
     size_t j = 0;
     std::string s_expr = "|";
@@ -198,7 +198,7 @@ var sat_core::new_at_most_one(const std::vector<lit> &ls)
     assert(root_level());
     // we try to avoid creating a new variable..
     std::vector<lit> c_lits = ls;
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     lit p;
     size_t j = 0;
     std::string s_expr = "amo";
@@ -241,7 +241,7 @@ var sat_core::new_exct_one(const std::vector<lit> &ls)
     assert(root_level());
     // we try to avoid creating a new variable..
     std::vector<lit> c_lits = ls;
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     lit p;
     size_t j = 0;
     std::string s_expr = "^";
@@ -404,7 +404,7 @@ bool sat_core::conj(const std::vector<lit> &ls, const var &p)
 {
     assert(root_level());
     std::vector<lit> c_lits = ls;
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     lit c_p;
     size_t j = 0;
     std::string s_expr = "&";
@@ -445,7 +445,7 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
 {
     assert(root_level());
     std::vector<lit> c_lits = ls;
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     lit c_p;
     size_t j = 0;
     std::string s_expr = "|";
@@ -485,7 +485,7 @@ bool sat_core::disj(const std::vector<lit> &ls, const var &p)
 bool sat_core::at_most_one(const std::vector<lit> &ls, const var &p)
 {
     std::vector<lit> c_lits = ls;
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     lit c_p;
     size_t j = 0;
     std::string s_expr = "amo";
@@ -551,7 +551,7 @@ bool sat_core::at_most_one(const std::vector<lit> &ls, const var &p)
 bool sat_core::exct_one(const std::vector<lit> &ls, const var &p)
 {
     std::vector<lit> c_lits = ls;
-    std::sort(std::execution::par_unseq, c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
+    std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return l0.get_var() < l1.get_var(); });
     lit c_p;
     size_t j = 0;
     std::string s_expr = "^";
@@ -781,9 +781,9 @@ void sat_core::record(const std::vector<lit> &lits)
     }
     else
     {
-        std::vector<lit> c_lits(lits.begin(), lits.end());
+        std::vector<lit> c_lits = lits;
         // we sort literals according to descending order of variable assignment (except for the first literal which is now unassigned)..
-        std::sort(std::execution::par_unseq, c_lits.begin() + 1, c_lits.end(), [this](lit &a, lit &b) { return level[a.get_var()] > level[b.get_var()]; });
+        std::sort(c_lits.begin() + 1, c_lits.end(), [this](const lit &a, const lit &b) { return level[a.get_var()] > level[b.get_var()]; });
         clause *c = new clause(*this, c_lits);
         bool e = enqueue(c_lits[0], c);
         assert(e);
