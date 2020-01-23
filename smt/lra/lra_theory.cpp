@@ -451,10 +451,10 @@ bool lra_theory::check(std::vector<lit> &cnfl)
             {
                 for (const auto &term : f_row->l.vars)
                     if (term.second.is_positive())
-                        cnfl.push_back(!*bounds.at(lra_theory::ub_index(term.first)).reason);
+                        cnfl.push_back(!*bounds[lra_theory::ub_index(term.first)].reason);
                     else if (term.second.is_negative())
-                        cnfl.push_back(!*bounds.at(lra_theory::lb_index(term.first)).reason);
-                cnfl.push_back(!*bounds.at(lra_theory::lb_index(x_i)).reason);
+                        cnfl.push_back(!*bounds[lra_theory::lb_index(term.first)].reason);
+                cnfl.push_back(!*bounds[lra_theory::lb_index(x_i)].reason);
                 return false;
             }
         }
@@ -467,10 +467,10 @@ bool lra_theory::check(std::vector<lit> &cnfl)
             {
                 for (const auto &term : f_row->l.vars)
                     if (term.second.is_positive())
-                        cnfl.push_back(!*bounds.at(lra_theory::lb_index(term.first)).reason);
+                        cnfl.push_back(!*bounds[lra_theory::lb_index(term.first)].reason);
                     else if (term.second.is_negative())
-                        cnfl.push_back(!*bounds.at(lra_theory::ub_index(term.first)).reason);
-                cnfl.push_back(!*bounds.at(lra_theory::ub_index(x_i)).reason);
+                        cnfl.push_back(!*bounds[lra_theory::ub_index(term.first)].reason);
+                cnfl.push_back(!*bounds[lra_theory::ub_index(x_i)].reason);
                 return false;
             }
         }
@@ -484,7 +484,7 @@ void lra_theory::pop()
     // we restore the variables' bounds and their reason..
     for (const auto &b : layers.back())
     {
-        delete bounds.at(b.first).reason;
+        delete bounds[b.first].reason;
         bounds[b.first] = b.second;
     }
     layers.pop_back();
@@ -497,25 +497,25 @@ bool lra_theory::assert_lower(const var &x_i, const inf_rational &val, const lit
         return true;
     else if (val > ub(x_i))
     {
-        cnfl.push_back(!p);                                // either the literal 'p' is false ..
-        cnfl.push_back(!*bounds.at(ub_index(x_i)).reason); // or what asserted the upper bound is false..
+        cnfl.push_back(!p);                             // either the literal 'p' is false ..
+        cnfl.push_back(!*bounds[ub_index(x_i)].reason); // or what asserted the upper bound is false..
         return false;
     }
     else
     {
         if (!layers.empty() && !layers.back().count(lb_index(x_i)))
-            layers.back().insert({lb_index(x_i), {lb(x_i), bounds.at(lb_index(x_i)).reason}});
+            layers.back().insert({lb_index(x_i), {lb(x_i), bounds[lb_index(x_i)].reason}});
         bounds[lb_index(x_i)] = {val, new lit(p.get_var(), p.get_sign())};
 
         if (vals[x_i] < val && !is_basic(x_i))
             update(x_i, val);
 
         // unate propagation..
-        for (const auto &c : a_watches.at(x_i))
+        for (const auto &c : a_watches[x_i])
             if (!c->propagate_lb(x_i, cnfl))
                 return false;
         // bound propagation..
-        for (const auto &c : t_watches.at(x_i))
+        for (const auto &c : t_watches[x_i])
             if (!c->propagate_lb(x_i, cnfl))
                 return false;
 
@@ -530,25 +530,25 @@ bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit
         return true;
     else if (val < lb(x_i))
     {
-        cnfl.push_back(!p);                                // either the literal 'p' is false ..
-        cnfl.push_back(!*bounds.at(lb_index(x_i)).reason); // or what asserted the lower bound is false..
+        cnfl.push_back(!p);                             // either the literal 'p' is false ..
+        cnfl.push_back(!*bounds[lb_index(x_i)].reason); // or what asserted the lower bound is false..
         return false;
     }
     else
     {
         if (!layers.empty() && !layers.back().count(ub_index(x_i)))
-            layers.back().insert({ub_index(x_i), {ub(x_i), bounds.at(ub_index(x_i)).reason}});
+            layers.back().insert({ub_index(x_i), {ub(x_i), bounds[ub_index(x_i)].reason}});
         bounds[ub_index(x_i)] = {val, new lit(p.get_var(), p.get_sign())};
 
         if (vals[x_i] > val && !is_basic(x_i))
             update(x_i, val);
 
         // unate propagation..
-        for (const auto &c : a_watches.at(x_i))
+        for (const auto &c : a_watches[x_i])
             if (!c->propagate_ub(x_i, cnfl))
                 return false;
         // bound propagation..
-        for (const auto &c : t_watches.at(x_i))
+        for (const auto &c : t_watches[x_i])
             if (!c->propagate_ub(x_i, cnfl))
                 return false;
 
@@ -559,7 +559,7 @@ bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit
 void lra_theory::update(const var &x_i, const inf_rational &v)
 {
     assert(!is_basic(x_i) && "x_i should be a non-basic variable..");
-    for (const auto &c : t_watches.at(x_i))
+    for (const auto &c : t_watches[x_i])
     {
         // x_j = x_j + a_ji(v - x_i)..
         vals[c->x] += c->l.vars.at(x_i) * (v - vals[x_i]);
@@ -597,7 +597,7 @@ void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rati
         for (const auto &l : at_x_j->second)
             l->lra_value_change(x_j);
 
-    for (const auto &c : t_watches.at(x_j))
+    for (const auto &c : t_watches[x_j])
         if (c->x != x_i)
         {
             // x_k += a_kj * theta..
@@ -618,7 +618,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
     tableau.erase(x_i);
     // we remove the row from the watches..
     for (const auto &c : expr.vars)
-        t_watches.at(c.first).erase(ex_row);
+        t_watches[c.first].erase(ex_row);
     delete ex_row;
 
     const rational c = expr.vars.at(x_j);
@@ -628,7 +628,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
 
     // these are the rows in which x_j appears..
     std::unordered_set<row *> x_j_watches;
-    std::swap(x_j_watches, t_watches.at(x_j));
+    std::swap(x_j_watches, t_watches[x_j]);
     for (const auto &r : x_j_watches)
     {
         rational cc = r->l.vars.at(x_j);
@@ -637,7 +637,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
             if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
             {
                 r->l.vars.emplace(term.first, term.second * cc);
-                t_watches.at(term.first).emplace(r);
+                t_watches[term.first].emplace(r);
             }
             else
             {
@@ -646,7 +646,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
                 if (trm_it->second == rational::ZERO)
                 {
                     r->l.vars.erase(trm_it);
-                    t_watches.at(term.first).erase(r);
+                    t_watches[term.first].erase(r);
                 }
             }
         r->l.known_term += expr.known_term * cc;
@@ -661,7 +661,7 @@ void lra_theory::new_row(const var &x, const lin &l)
     row *r = new row(*this, x, l);
     tableau.emplace(x, r);
     for (const auto &term : l.vars)
-        t_watches.at(term.first).emplace(r);
+        t_watches[term.first].emplace(r);
 }
 
 std::string lra_theory::to_string()
