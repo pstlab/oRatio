@@ -181,44 +181,56 @@ void state_variable::store_variables(atom &atm0, atom &atm1)
     expr a1_tau = atm1.get(TAU);
     var_item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
     var_item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
-    if (a0_tau_itm && a1_tau_itm) // we have two non-singleton variables..
-    {
+    if (a0_tau_itm && a1_tau_itm)
+    { // we have two non-singleton variables..
         auto a0_vals = get_solver().enum_value(a0_tau_itm);
         auto a1_vals = get_solver().enum_value(a1_tau_itm);
 
         bool found = false;
         for (const auto &v0 : a0_vals)
-            if (a1_vals.count(v0)) // we store the ordering variables..
+            if (a1_vals.count(v0))
             {
                 if (!found)
-                {
+                { // we store the ordering variables..
                     leqs[&atm0][&atm1] = get_solver().get_lra_theory().new_leq(a0_end->l, a1_start->l);
                     leqs[&atm1][&atm0] = get_solver().get_lra_theory().new_leq(a1_end->l, a0_start->l);
+                    // we boost propagation..
+                    bool nc = get_solver().get_sat_core().new_clause({lit(leqs[&atm0][&atm1], false), lit(leqs[&atm1][&atm0], false)});
+                    assert(nc);
                     found = true;
                 }
                 plcs[{&atm0, &atm1}].push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_tau_itm->ev, *v0), lit(get_solver().get_ov_theory().allows(a1_tau_itm->ev, *v0), false)}), static_cast<item *>(v0)});
             }
     }
-    else if (a0_tau_itm) // only 'a1_tau' is a singleton variable..
-    {
-        if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau)) // we store the ordering variables..
-        {
+    else if (a0_tau_itm)
+    { // only 'a1_tau' is a singleton variable..
+        if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau))
+        { // we store the ordering variables..
             leqs[&atm0][&atm1] = get_solver().get_lra_theory().new_leq(a0_end->l, a1_start->l);
             leqs[&atm1][&atm0] = get_solver().get_lra_theory().new_leq(a1_end->l, a0_start->l);
+            // we boost propagation..
+            bool nc = get_solver().get_sat_core().new_clause({lit(leqs[&atm0][&atm1], false), lit(leqs[&atm1][&atm0], false)});
+            assert(nc);
         }
     }
-    else if (a1_tau_itm) // only 'a0_tau' is a singleton variable..
-    {
-        if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau)) // we store the ordering variables..
-        {
+    else if (a1_tau_itm)
+    { // only 'a0_tau' is a singleton variable..
+        if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau))
+        { // we store the ordering variables..
             leqs[&atm0][&atm1] = get_solver().get_lra_theory().new_leq(a0_end->l, a1_start->l);
             leqs[&atm1][&atm0] = get_solver().get_lra_theory().new_leq(a1_end->l, a0_start->l);
+            // we boost propagation..
+            bool nc = get_solver().get_sat_core().new_clause({lit(leqs[&atm0][&atm1], false), lit(leqs[&atm1][&atm0], false)});
+            assert(nc);
         }
     }
-    else if (&*a0_tau == &*a1_tau) // the two atoms are on the same state-variable: we store the ordering variables..
-    {
+    else if (&*a0_tau == &*a1_tau)
+    { // the two atoms are on the same state-variable: we store the ordering variables..
         leqs[&atm0][&atm1] = get_solver().get_lra_theory().new_leq(a0_end->l, a1_start->l);
         leqs[&atm1][&atm0] = get_solver().get_lra_theory().new_leq(a1_end->l, a0_start->l);
+        // we boost propagation..
+        bool nc = get_solver().get_sat_core().new_clause({lit(leqs[&atm0][&atm1], false), lit(leqs[&atm1][&atm0], false)});
+        assert(nc);
     }
 }
 
