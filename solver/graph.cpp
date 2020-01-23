@@ -439,41 +439,26 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                 if (!slv.get_sat_core().assume(r->rho) || !slv.get_sat_core().check())
                     throw unsolvable_exception();
 
-                if (c_lvl < slv.decision_level()) // we check whether the resolver has actually been applied..
-                {
+                // we check whether the resolver has actually been applied..
+                if (c_lvl < slv.decision_level())
+                { // the resolver has actually been applied..
                     assert(slv.get_sat_core().value(r->rho) == True);
-                    // we check if we can refine the graph (notice that to_enqueue contains, also, the flaw which has just been solved)..
-                    if (to_enqueue.size() > 1)
-                    { // we refine the graph..
-                        // we compute the resolver's ancestors, so as to avoid causal cycles..
-                        std::unordered_set<const flaw *> ancestors;
-                        std::queue<const flaw *> q;
-                        for (const auto &supp : r->effect.supports)
-                            if (slv.sat.value(supp->get_rho()) == True)
-                                q.push(&supp->get_effect()); // we push its effect..
-                        while (!q.empty())
-                        {
-                            if (ancestors.insert(q.front()).second)
-                                for (const auto &supp : q.front()->supports)
-                                    if (slv.sat.value(supp->get_rho()) == True)
-                                        q.push(&supp->get_effect()); // we push its effect..
-                            q.pop();
-                        }
-                        // we refine the graph taking into account mutex resolvers..
-                        for (const auto &f : to_enqueue)
-                            if (&r->effect != f && !ancestors.count(f))
-                            { // we have a new flaw to append..
-                                assert(std::any_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *c_r) { return slv.sat.value(c_r->rho) == False; }));
-                                // the still activable resolvers..
-                                std::vector<resolver *> non_mtx_rs;
-                                for (const auto &r : f->resolvers)
-                                    if (slv.sat.value(r->rho) != False)
-                                        non_mtx_rs.push_back(r);
-                                if (non_mtx_rs.size() == 1) // the flaw has become singleton..
-                                    to_merge[r].push_back(non_mtx_rs.front());
-                                else
-                                    ref_fs.push_back(new refinement_flaw(*this, r, *f, non_mtx_rs));
-                            }
+
+                    // we make some cleanings..
+
+                    // we refine the graph taking into account mutex resolvers..
+                    for (const auto &f : to_enqueue)
+                    { // we have a new flaw to append..
+                        assert(std::any_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *c_r) { return slv.sat.value(c_r->rho) == False; }));
+                        // the still activable resolvers..
+                        std::vector<resolver *> non_mtx_rs;
+                        for (const auto &r : f->resolvers)
+                            if (slv.sat.value(r->rho) != False)
+                                non_mtx_rs.push_back(r);
+                        if (non_mtx_rs.size() == 1) // the flaw has become singleton..
+                            to_merge[r].push_back(non_mtx_rs.front());
+                        else
+                            ref_fs.push_back(new refinement_flaw(*this, r, *f, non_mtx_rs));
                     }
                     to_enqueue.clear();
 
@@ -530,6 +515,7 @@ void graph::check_gamma()
     }
 
 #ifdef CHECK_GRAPH
+    check_graph();
     check_graph();
 #endif
 
