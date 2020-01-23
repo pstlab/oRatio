@@ -309,7 +309,7 @@ void graph::check_graph()
 {
     LOG("checking the graph..");
     checking = true;
-    std::unordered_set<resolver *> visited;                           // the visited resolvers..
+    std::unordered_set<flaw *> visited;                               // the visited flaws..
     std::unordered_set<resolver *> inv_rs;                            // these resolvers cannot be applied..
     std::unordered_set<resolver *> inc_rs;                            // these resolvers cannot be applied within the current grahp..
     std::vector<refinement_flaw *> ref_fs;                            // the enqueued refinement flaws, will be added as soon as we are at root-level..
@@ -406,7 +406,7 @@ void graph::check_graph()
     checking = false;
 }
 
-bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::unordered_set<resolver *> &inv_rs, std::unordered_set<resolver *> &inc_rs, std::vector<refinement_flaw *> &ref_fs, std::unordered_map<resolver *, std::vector<resolver *>> &to_merge)
+bool graph::check_flaw(flaw &f, std::unordered_set<flaw *> &visited, std::unordered_set<resolver *> &inv_rs, std::unordered_set<resolver *> &inc_rs, std::vector<refinement_flaw *> &ref_fs, std::unordered_map<resolver *, std::vector<resolver *>> &to_merge)
 {
     assert(f.expanded);
     assert(slv.get_sat_core().value(f.phi) == True);
@@ -415,21 +415,22 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
     slv.fire_current_flaw(f);
 #endif
 
-    if (auto it = std::find_if(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.get_sat_core().value(r->rho) == True; }); it != f.resolvers.end())
-        // a resolver is already applied for the given flaw..
-        // we check its active preconditions (notice that preconditions might include consistency-flaws which, depending also from other resolvers, might not be active)..
-        return std::all_of((*it)->preconditions.begin(), (*it)->preconditions.end(), [this, &visited, &inv_rs, &inc_rs, &ref_fs, &to_merge](flaw *f) { return slv.get_sat_core().value(f->phi) == Undefined || check_flaw(*f, visited, inv_rs, inc_rs, ref_fs, to_merge); });
-    else
-    {
-        // we sort the flaws' resolvers according to their estimated cost..
-        std::sort(f.resolvers.begin(), f.resolvers.end(), [](resolver *r0, resolver *r1) { return r0->get_estimated_cost() < r1->get_estimated_cost(); });
+    if (visited.insert(&f).second)
+        if (auto it = std::find_if(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.get_sat_core().value(r->rho) == True; }); it != f.resolvers.end())
+            // a resolver is already applied for the given flaw..
+            // we check its active preconditions (notice that preconditions might include consistency-flaws which, depending also from other resolvers, might not be active)..
+            return std::all_of((*it)->preconditions.begin(), (*it)->preconditions.end(), [this, &visited, &inv_rs, &inc_rs, &ref_fs, &to_merge](flaw *f) { return slv.get_sat_core().value(f->phi) == Undefined || check_flaw(*f, visited, inv_rs, inc_rs, ref_fs, to_merge); });
+        else
+        {
+            // we sort the flaws' resolvers according to their estimated cost..
+            std::sort(f.resolvers.begin(), f.resolvers.end(), [](resolver *r0, resolver *r1) { return r0->get_estimated_cost() < r1->get_estimated_cost(); });
 
-        size_t c_lvl = slv.decision_level();
-        for (const auto &r : f.resolvers)
-            if (r->get_estimated_cost().is_infinite())
-                continue; // either the resolver cannot be applied or it would not lead to a solution..
-            else if (visited.insert(r).second)
+            size_t c_lvl = slv.decision_level();
+            for (const auto &r : f.resolvers)
             {
+                if (r->get_estimated_cost().is_infinite())
+                    continue; // either the resolver cannot be applied or it would not lead to a solution..
+
 #ifdef BUILD_GUI
                 slv.fire_current_resolver(*r);
 #endif
@@ -444,7 +445,22 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                 { // the resolver has actually been applied..
                     assert(slv.get_sat_core().value(r->rho) == True);
 
-                    // we make some cleanings..
+                    // we make some cleanings..c
+                    for (const auto &v_f : visited)
+                    {
+                        to_enqueue.erase(v_f); // we remove ancestor flaws..
+                        if (refinement_flaw *rf = dynamic_cast<refinement_flaw *>(v_f))
+                            to_enqueue.erase(&rf->to_enqueue); // we remove flaws represented by refinement-flaws within the ancestors..
+                    }
+                    for (auto f_it = to_enqueue.begin(), last = to_enqueue.end(); f_it != last;)
+                        if (refinement_flaw *rf = dynamic_cast<refinement_flaw *>(*f_it))
+                            if (visited.count(&rf->to_enqueue))
+                                // we remove refinement-flaws representing flaws within the ancestors..
+                                f_it = to_enqueue.erase(f_it);
+                            else
+                                ++f_it;
+                        else
+                            ++f_it;
 
                     // we refine the graph taking into account mutex resolvers..
                     for (const auto &f : to_enqueue)
@@ -467,7 +483,7 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                     { // we still have an estimated solution, hence we check for the resolver's active preconditions (again, resolver's preconditions might include consistency-flaws which, depending also from other resolvers, might not be active)..
                         if (dynamic_cast<atom_flaw::unify_atom *>(r) || std::all_of(r->preconditions.begin(), r->preconditions.end(), [this, &visited, &inv_rs, &inc_rs, &ref_fs, &to_merge](flaw *f) { return slv.get_sat_core().value(f->phi) == Undefined || check_flaw(*f, visited, inv_rs, inc_rs, ref_fs, to_merge); }))
                         { // either 'r' is a valid unification or all of its preconditions are applicable..
-                            visited.erase(r);
+                            visited.erase(&f);
                             slv.get_sat_core().pop();
                             assert(c_lvl == slv.decision_level());
                             return true;
@@ -488,9 +504,9 @@ bool graph::check_flaw(flaw &f, std::unordered_set<resolver *> &visited, std::un
                     to_enqueue.clear(); // we clean the set of flaws affected by mutexes..
                 }
 
-                visited.erase(r);
+                visited.erase(&f);
             }
-    }
+        }
 
     // it is not possible to estimate a solution for the given flaw..
     return false;
