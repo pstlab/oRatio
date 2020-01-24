@@ -26,7 +26,7 @@ std::string refinement_flaw::get_label() const
 #endif
 
 void refinement_flaw::compute_resolvers()
-{
+{ // we need to create these resolvers (instead of using the original ones) for propagating costs..
     for (const auto &r : non_mtx_rs)
         add_resolver(*new refinement_resolver(get_graph(), *this, *r));
 }
