@@ -443,28 +443,10 @@ bool graph::check_flaw(flaw &f, std::unordered_set<flaw *> &visited, std::unorde
                 if (c_lvl < slv.decision_level())
                 { // the resolver has actually been applied..
                     assert(slv.get_sat_core().value(r->rho) == True);
+                    assert(std::none_of(visited.begin(), visited.end(), [this](flaw *v_f) { if (refinement_flaw *vrf = dynamic_cast<refinement_flaw *>(v_f)) return to_enqueue.count(&vrf->to_enqueue); else return to_enqueue.count(v_f); }));
+                    assert(std::none_of(to_enqueue.begin(), to_enqueue.end(), [this, visited](flaw *v_f) { if (refinement_flaw *vrf = dynamic_cast<refinement_flaw *>(v_f)) return visited.count(&vrf->to_enqueue); else return visited.count(v_f); }));
 
-                    // we make some cleanings..
-                    for (const auto &v_f : visited)
-                    {
-                        to_enqueue.erase(v_f); // we remove ancestor flaws..
-                        if (refinement_flaw *rf = dynamic_cast<refinement_flaw *>(v_f))
-                            to_enqueue.erase(&rf->to_enqueue); // we remove flaws represented by refinement-flaws within the ancestors..
-                    }
-                    for (auto f_it = to_enqueue.begin(), last = to_enqueue.end(); f_it != last;)
-                        if (auto slv_res = std::find_if((*f_it)->resolvers.begin(), (*f_it)->resolvers.end(), [this](resolver *c_r) { return slv.sat.value(c_r->rho) == True; }); slv_res != (*f_it)->resolvers.end())
-                        {
-                            f_it = to_enqueue.erase(f_it); // we remove already solved flaws..
-                            for (const auto &pre_f : (*slv_res)->preconditions)
-                                csl_lnks[r].insert(pre_f); // .. we add deduced preconditions to the current resolver..
-                        }
-                        else if (refinement_flaw *rf = dynamic_cast<refinement_flaw *>(*f_it))
-                            if (std::any_of(visited.begin(), visited.end(), [this, rf](flaw *v_f) { if (refinement_flaw *vrf = dynamic_cast<refinement_flaw *>(v_f)) return &rf->to_enqueue == &vrf->to_enqueue; else return &rf->to_enqueue == v_f; }))
-                                f_it = to_enqueue.erase(f_it); // we remove refinement-flaws representing flaws within the ancestors..
-                            else
-                                ++f_it;
-                        else
-                            ++f_it;
+                    // TODO: avoid the introduction of cyclic causality!!
 
                     // we refine the graph taking into account mutex resolvers..
                     for (const auto &f : to_enqueue)
