@@ -250,7 +250,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
     if (root_level())
     { // we are at root-level: we do not need to store the updates and we can perform some cleanings..
         if (p.get_sign())
-        { // some flaw and/or some resolver has been activated..
+        { // some flaws and/or some resolvers have been activated..
             if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
             {
                 for (const auto &f : at_phis_p->second)
@@ -272,7 +272,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
             }
         }
         else
-        { // some flaw and/or some resolver has been forbidden..
+        { // some flaws and/or some resolvers have been forbidden..
             if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
             {
                 for (const auto &r : at_rhos_p->second)
@@ -304,7 +304,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
     else
     { // we are not at root-level: we do need to store the updates..
         if (p.get_sign())
-        { // some flaw and/or some resolver has been activated..
+        { // some flaws and/or some resolvers have been activated..
             if (const auto at_phis_p = gr.phis.find(p.get_var()); at_phis_p != gr.phis.end())
                 for (const auto &f : at_phis_p->second)
                 { // 'f' is an activated flaw..
@@ -317,12 +317,17 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                 }
             if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
                 for (const auto &r : at_rhos_p->second)
-                    // 'r' is an activated resolver..
+                {                                // 'r' is an activated resolver..
                     if (flaws.erase(&r->effect)) // this resolver has been activated, hence its effect flaw has been resolved (notice that we remove its effect only in case it was already active)..
                         trail.back().solved_flaws.insert(&r->effect);
+#ifdef CHECK_GRAPH
+                    if (gr.checking)                     // we update the mutexes..
+                        gr.to_enqueue.erase(&r->effect); // the effect of 'r' has been solved by the current trail..
+#endif
+                }
         }
         else
-        { // some flaw and/or some resolver has been forbidden..
+        { // some flaws and/or some resolvers have been forbidden..
             if (const auto at_rhos_p = gr.rhos.find(p.get_var()); at_rhos_p != gr.rhos.end())
                 for (const auto &r : at_rhos_p->second)
                 {                                          // 'r' is a forbidden resolver..
@@ -338,7 +343,7 @@ bool solver::propagate(const lit &p, std::vector<lit> &cnfl)
                         std::set<smt::var> mtx_trail;
                         for (const auto &l : trail)
                             mtx_trail.insert(l.decision.get_var());
-                        if (sat.value(r->effect.phi) == True && gr.mutexes[mtx_trail].insert(r).second)
+                        if (sat.value(r->effect.phi) == True && std::none_of(r->effect.resolvers.begin(), r->effect.resolvers.end(), [this](resolver *res) { return sat.value(res->rho) == True; }) && gr.mutexes[mtx_trail].insert(r).second)
                             gr.to_enqueue.insert(&r->effect); // the effect of 'r' has been pruned by the current trail..
                     }
 #endif
