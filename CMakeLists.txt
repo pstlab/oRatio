@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 project(oRatio VERSION 2.1.0)
 
 find_package (JNI)
+find_package (Threads)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -84,8 +85,12 @@ endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
+if(OPTIMIZE_FOR_NATIVE_ARCH)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+endif()
+
 if(BUILD_GUI AND WIN32)
-    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32 #[[-PROFILE]])
+    target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32 #[[-PROFILE]])
 endif()
 
 message(STATUS "Build Java bindings:      ${BUILD_JAVA_LIB}")
@@ -95,7 +100,7 @@ if(BUILD_JAVA_LIB)
     list(APPEND SOURCES java-api/src/main/cpp/it_cnr_istc_oratio_Solver.cpp)
     add_library ("${PROJECT_NAME}-lib" SHARED ${SOURCES})
     if(BUILD_GUI AND WIN32)
-        target_link_libraries("${PROJECT_NAME}-lib" wsock32 ws2_32 #[[-PROFILE]])
+        target_link_libraries("${PROJECT_NAME}-lib" PRIVATE wsock32 ws2_32 #[[-PROFILE]])
     endif()
 endif()
 

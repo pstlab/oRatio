@@ -6,8 +6,12 @@ endif()
 
 add_executable(solver_tests ${SOLVER_SOURCES})
 
+if(OPTIMIZE_FOR_NATIVE_ARCH)
+    target_link_libraries(solver_tests PRIVATE Threads::Threads)
+endif()
+
 if(BUILD_GUI AND WIN32)
-    target_link_libraries(solver_tests wsock32 ws2_32 #[[-PROFILE]])
+    target_link_libraries(solver_tests PRIVATE wsock32 ws2_32 #[[-PROFILE]])
 endif()
 
 add_test(NAME SolverTest00 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/example_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
