@@ -6,6 +6,9 @@
 #include <set>
 #include <unordered_set>
 #include <unordered_map>
+#ifdef OPTIMIZE_FOR_NATIVE_ARCH
+#include <atomic>
+#endif
 
 namespace smt
 {
@@ -107,5 +110,9 @@ private:
   std::vector<std::unordered_set<row *>> t_watches;          // for each variable 'v', a list of tableau rows watching 'v'..
   std::vector<std::unordered_map<size_t, bound>> layers;     // we store the updated bounds..
   std::unordered_map<var, std::set<lra_value_listener *>> listening;
+
+#ifdef OPTIMIZE_FOR_NATIVE_ARCH
+  std::vector<mutex_wrapper> t_mutexes;
+#endif
 };
 } // namespace smt

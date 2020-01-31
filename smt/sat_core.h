@@ -3,6 +3,9 @@
 #include "lit.h"
 #include "lbool.h"
 #include "theory.h"
+#ifdef OPTIMIZE_FOR_NATIVE_ARCH
+#include "thread_pool.h"
+#endif
 #include <vector>
 #include <queue>
 #include <string>
@@ -67,6 +70,13 @@ public:
   size_t decision_level() const { return trail_lim.size(); } // returns the current decision level..
   bool root_level() const { return trail_lim.empty(); }      // checks whether the current decision level is root level..
 
+#ifdef OPTIMIZE_FOR_NATIVE_ARCH
+  thread_pool &get_thread_pool()
+  {
+    return th_pool;
+  }
+#endif
+
 private:
   static size_t index(const lit &p) { return p.get_sign() ? p.get_var() << 1 : (p.get_var() << 1) ^ 1; }
   static std::string to_string(const lit &p) { return (p.get_sign() ? "b" : "!b") + std::to_string(p.get_var()); }
@@ -96,6 +106,10 @@ private:
   std::vector<theory *> theories; // all the theories..
   std::unordered_map<var, std::set<theory *>> bounds;
   std::unordered_map<var, std::set<sat_value_listener *>> listening;
+
+#ifdef OPTIMIZE_FOR_NATIVE_ARCH
+  thread_pool th_pool;
+#endif
 };
 
 } // namespace smt
