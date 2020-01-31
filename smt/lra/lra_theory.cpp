@@ -630,21 +630,21 @@ void lra_theory::pivot(const var x_i, const var x_j)
     std::unordered_set<row *> x_j_watches;
     std::swap(x_j_watches, t_watches[x_j]);
     for (const auto &r : x_j_watches)
-    {
+    { // 'r' is a row in which 'x_j' appears..
         rational cc = r->l.vars.at(x_j);
         r->l.vars.erase(x_j);
         for (const auto &term : expr.vars)
             if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
-            {
+            { // we are adding a new term to 'r'..
                 r->l.vars.emplace(term.first, term.second * cc);
                 t_watches[term.first].emplace(r);
             }
             else
-            {
+            { // we are updating an existing term of 'r'..
                 assert(trm_it->first == term.first);
                 trm_it->second += term.second * cc;
                 if (trm_it->second == rational::ZERO)
-                {
+                { // the updated term's coefficient has become equal to zero, hence we can remove the term..
                     r->l.vars.erase(trm_it);
                     t_watches[term.first].erase(r);
                 }
