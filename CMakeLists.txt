@@ -3,10 +3,9 @@ project(oRatio VERSION 2.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 find_package(JNI)
-find_package(Threads)
+find_package(Threads REQUIRED)
 
 include(CTest)
 enable_testing()
@@ -86,9 +85,7 @@ endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-if(OPTIMIZE_FOR_NATIVE_ARCH)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
-endif()
+target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 
 if(BUILD_GUI AND WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32 #[[-PROFILE]])

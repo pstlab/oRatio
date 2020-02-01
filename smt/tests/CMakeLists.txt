@@ -8,9 +8,10 @@ add_executable(lra_lib_tests ${LRA_SOURCES})
 add_executable(ov_lib_tests ${OV_SOURCES})
 add_executable(time_lib_tests ${TIME_SOURCES})
 
-if(OPTIMIZE_FOR_NATIVE_ARCH)
-    target_link_libraries(lra_lib_tests PRIVATE Threads::Threads)
-endif()
+target_link_libraries(sat_lib_tests PRIVATE Threads::Threads)
+target_link_libraries(lra_lib_tests PRIVATE Threads::Threads)
+target_link_libraries(ov_lib_tests PRIVATE Threads::Threads)
+target_link_libraries(time_lib_tests PRIVATE Threads::Threads)
 
 add_test(NAME SAT_LibTest COMMAND sat_lib_tests WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME LRA_LibTest COMMAND lra_lib_tests WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

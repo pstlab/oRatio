@@ -6,9 +6,7 @@ endif()
 
 add_executable(solver_tests ${SOLVER_SOURCES})
 
-if(OPTIMIZE_FOR_NATIVE_ARCH)
-    target_link_libraries(solver_tests PRIVATE Threads::Threads)
-endif()
+target_link_libraries(solver_tests PRIVATE Threads::Threads)
 
 if(BUILD_GUI AND WIN32)
     target_link_libraries(solver_tests PRIVATE wsock32 ws2_32 #[[-PROFILE]])
