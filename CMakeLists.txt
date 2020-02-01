@@ -5,13 +5,13 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(JNI)
-find_package(Threads REQUIRED)
+find_package(Threads)
 
 include(CTest)
 enable_testing()
 
 file(GLOB SOURCES main.cpp smt/*.cpp smt/lra/*.cpp smt/ov/*.cpp riddle/*.cpp core/*.cpp solver/*.cpp solver/types/*.cpp)
-include_directories(smt smt/lra smt/ov smt/time riddle core solver solver/types java-api/src/main/cpp)
+include_directories(smt smt/parallel smt/lra smt/ov smt/time riddle core solver solver/types java-api/src/main/cpp)
 
 configure_file(solver/init.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 
@@ -64,7 +64,7 @@ if(CHECK_INCONSISTENCIES)
 endif()
 
 message(STATUS "Optimize for native arch: ${OPTIMIZE_FOR_NATIVE_ARCH}")
-if (OPTIMIZE_FOR_NATIVE_ARCH)
+if(OPTIMIZE_FOR_NATIVE_ARCH)
     add_definitions(-DOPTIMIZE_FOR_NATIVE_ARCH)
     if(MSVC)
         message(STATUS "Using AVX2..")
@@ -73,6 +73,7 @@ if (OPTIMIZE_FOR_NATIVE_ARCH)
         message(STATUS "Using native optimization..")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
     endif()
+    list(APPEND SOURCES smt/parallel/thread_pool.cpp)
 endif()
 
 message(STATUS "Build GUI:                ${BUILD_GUI}")
@@ -85,7 +86,9 @@ endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+if(OPTIMIZE_FOR_NATIVE_ARCH)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
+endif()
 
 if(BUILD_GUI AND WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32 #[[-PROFILE]])
