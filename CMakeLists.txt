@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(oRatio VERSION 2.1.0)
 
-find_package(JNI)
-find_package(Threads)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
+
+find_package(JNI)
+find_package(Threads)
 
 include(CTest)
 enable_testing()
