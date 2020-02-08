@@ -1,3 +1,7 @@
+/*
+* This problem is intended to introduce some basic concepts about the constraint network and the available propositional constraints.
+*/
+
 // we create some bool variable..
 bool b0;
 bool b1;

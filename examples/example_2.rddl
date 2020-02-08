@@ -1,3 +1,8 @@
+/*
+* This problem is intended to introduce some basic concepts about the constraint network and the available numeric constraints.
+* Notice that this problem is inconsistent. An explanation for the inconsistency should be generated.
+*/
+
 // we create some real variable..
 real x0;
 real x1;
