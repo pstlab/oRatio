@@ -6,9 +6,6 @@
 #include <set>
 #include <unordered_set>
 #include <unordered_map>
-#ifdef OPTIMIZE_FOR_NATIVE_ARCH
-#include <atomic>
-#endif
 
 namespace smt
 {

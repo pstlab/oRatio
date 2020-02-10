@@ -22,9 +22,6 @@ var lra_theory::new_var()
     exprs.emplace("x" + std::to_string(id), id);
     a_watches.resize(vals.size());
     t_watches.resize(vals.size());
-#ifdef OPTIMIZE_FOR_NATIVE_ARCH
-    t_mutexes.resize(vals.size());
-#endif
     return id;
 }
 
@@ -633,50 +630,27 @@ void lra_theory::pivot(const var x_i, const var x_j)
     std::swap(x_j_watches, t_watches[x_j]);
     for (const auto &r : x_j_watches)
     { // 'r' is a row in which 'x_j' appears..
-#ifdef OPTIMIZE_FOR_NATIVE_ARCH
-        sat.get_thread_pool().enqueue([this, x_j, expr, r] {
-#endif
-            rational cc = r->l.vars.at(x_j);
-            r->l.vars.erase(x_j);
-            for (const auto &term : expr.vars)
-                if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
-                { // we are adding a new term to 'r'..
-                    r->l.vars.emplace(term.first, term.second * cc);
-#ifdef OPTIMIZE_FOR_NATIVE_ARCH
-                    {
-                        std::lock_guard<std::mutex> lock(t_mutexes[term.first]);
-#endif
-                        t_watches[term.first].emplace(r);
-#ifdef OPTIMIZE_FOR_NATIVE_ARCH
-                    }
-#endif
+        rational cc = r->l.vars.at(x_j);
+        r->l.vars.erase(x_j);
+        for (const auto &term : std::map<const var, rational>(expr.vars))
+            if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
+            { // we are adding a new term to 'r'..
+                r->l.vars.emplace(term.first, term.second * cc);
+                t_watches[term.first].emplace(r);
+            }
+            else
+            { // we are updating an existing term of 'r'..
+                assert(trm_it->first == term.first);
+                trm_it->second += term.second * cc;
+                if (trm_it->second == rational::ZERO)
+                { // the updated term's coefficient has become equal to zero, hence we can remove the term..
+                    r->l.vars.erase(trm_it);
+                    t_watches[term.first].erase(r);
+                    t_watches[term.first].erase(r);
                 }
-                else
-                { // we are updating an existing term of 'r'..
-                    assert(trm_it->first == term.first);
-                    trm_it->second += term.second * cc;
-                    if (trm_it->second == rational::ZERO)
-                    { // the updated term's coefficient has become equal to zero, hence we can remove the term..
-                        r->l.vars.erase(trm_it);
-                        t_watches[term.first].erase(r);
-#ifdef OPTIMIZE_FOR_NATIVE_ARCH
-                        {
-                            std::lock_guard<std::mutex> lock(t_mutexes[term.first]);
-#endif
-                            t_watches[term.first].erase(r);
-#ifdef OPTIMIZE_FOR_NATIVE_ARCH
-                        }
-#endif
-                    }
-                }
-            r->l.known_term += expr.known_term * cc;
-#ifdef OPTIMIZE_FOR_NATIVE_ARCH
-        });
-#endif
+            }
+        r->l.known_term += expr.known_term * cc;
     }
-#ifdef OPTIMIZE_FOR_NATIVE_ARCH
-    sat.get_thread_pool().join();
-#endif
 
     // we add a new row into the tableau..
     new_row(x_j, expr);

@@ -5,7 +5,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(JNI)
-find_package(Threads)
 
 include(CTest)
 enable_testing()
@@ -65,7 +64,6 @@ endif()
 
 message(STATUS "Optimize for native arch: ${OPTIMIZE_FOR_NATIVE_ARCH}")
 if(OPTIMIZE_FOR_NATIVE_ARCH)
-    add_definitions(-DOPTIMIZE_FOR_NATIVE_ARCH)
     if(MSVC)
         message(STATUS "Using AVX2..")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch:AVX2")
@@ -73,7 +71,6 @@ if(OPTIMIZE_FOR_NATIVE_ARCH)
         message(STATUS "Using native optimization..")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
     endif()
-    list(APPEND SOURCES smt/parallel/thread_pool.cpp)
 endif()
 
 message(STATUS "Build GUI:                ${BUILD_GUI}")
@@ -85,10 +82,6 @@ if(BUILD_GUI)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-
-if(OPTIMIZE_FOR_NATIVE_ARCH)
-    target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
-endif()
 
 if(BUILD_GUI AND WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32 #[[-PROFILE]])
