@@ -75,7 +75,7 @@ void core::read(const std::vector<std::string> &files)
             cus.push_back(cu);
         }
         else
-            throw std::invalid_argument("cannot find file " + f);
+            throw std::invalid_argument("cannot find file '" + f + "'");
 
     for (const auto &cu : c_cus)
         cu->declare(*this);
