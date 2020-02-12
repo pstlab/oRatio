@@ -23,6 +23,14 @@ int main(int argc, char *argv[])
     // the solution file..
     std::string sol_name = argv[argc - 1];
 
+#ifdef NDEBUG
+    if (std::ifstream(sol_name).good())
+    {
+        std::cout << "The solution file '" << sol_name << "' already exists! Please, specify a different solution file..";
+        return -1;
+    }
+#endif
+
     std::cout << "starting oRatio";
 #ifdef BUILD_GUI
     std::cout << " in debug mode";
