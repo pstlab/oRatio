@@ -127,9 +127,9 @@ void graph::build()
     {
         if (flaw_q.empty())
             throw unsolvable_exception();
+#ifdef DEFERRABLE_FLAWS
         flaw *c_f = flaw_q.front();
         flaw_q.pop_front();
-#ifdef DEFERRABLE_FLAWS
         assert(!c_f->expanded);
         if (slv.get_sat_core().value(c_f->phi) != False)
         {
@@ -144,6 +144,8 @@ void graph::build()
         size_t q_size = flaw_q.size();
         for (size_t i = 0; i < q_size; ++i)
         {
+            flaw *c_f = flaw_q.front();
+            flaw_q.pop_front();
             assert(!c_f->expanded);
             if (slv.get_sat_core().value(c_f->phi) != False)
                 expand_flaw(*c_f); // we expand the flaw..
