@@ -29,20 +29,16 @@ void flaw::init()
     assert(!expanded);
     assert(gr.get_solver().root_level());
 
-    if (causes.empty())
-        phi = TRUE_var;
-    else
+    std::vector<lit> cs;
+    cs.reserve(causes.size());
+    for (const auto &c : causes)
     {
-        std::vector<lit> cs;
-        cs.reserve(causes.size());
-        for (const auto &c : causes)
-        {
-            c->preconditions.push_back(this);
-            supports.push_back(c);
-            cs.push_back(c->rho);
-        }
-        phi = gr.get_solver().get_sat_core().new_conj(cs);
+        c->preconditions.push_back(this); // this flaw is a precondition of its 'c' cause..
+        supports.push_back(c);            // .. and it also supports its 'c' cause..
+        cs.push_back(c->rho);
     }
+    // we initialize phi as the conjunction of the causes' rho variables..
+    phi = gr.get_solver().get_sat_core().new_conj(cs);
 }
 
 void flaw::expand()
