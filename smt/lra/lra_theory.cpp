@@ -28,17 +28,18 @@ var lra_theory::new_var()
 var lra_theory::new_var(const lin &l)
 {
     // we create, if needed, a new arithmetic variable which is equal to the given linear expression..
-    assert(sat.root_level());
     const std::string s_expr = l.to_string();
-    const auto at_expr = exprs.find(s_expr);
-    if (at_expr != exprs.end()) // the expression already exists..
+    if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
         return at_expr->second;
-    else // we need to create a new slack variable..
-    {
+    else
+    { // we need to create a new slack variable..
+        assert(sat.root_level());
         const var slack = new_var();
         exprs.emplace(s_expr, slack);
-        vals[slack] = value(l); // we set the initial value of the new slack variable..
-        new_row(slack, l);      // we add a new row into the tableau..
+        bounds[lb_index(slack)] = {lb(l), nullptr}; // we set the lower bound..
+        bounds[ub_index(slack)] = {ub(l), nullptr}; // we set the upper bound..
+        vals[slack] = value(l);                     // we set the initial value of the new slack variable..
+        new_row(slack, l);                          // we add a new row into the tableau..
         return slack;
     }
 }
@@ -68,8 +69,7 @@ var lra_theory::new_lt(const lin &left, const lin &right)
 
     const var slack = new_var(expr);
     const std::string s_assertion = "x" + std::to_string(slack) + " <= " + c_right.to_string();
-    const auto at_asrt = s_asrts.find(s_assertion);
-    if (at_asrt != s_asrts.end()) // this assertion already exists..
+    if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
         return at_asrt->second;
     else
     {
@@ -106,8 +106,7 @@ var lra_theory::new_leq(const lin &left, const lin &right)
 
     const var slack = new_var(expr);
     const std::string s_assertion = "x" + std::to_string(slack) + " <= " + c_right.to_string();
-    const auto at_asrt = s_asrts.find(s_assertion);
-    if (at_asrt != s_asrts.end()) // this assertion already exists..
+    if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
         return at_asrt->second;
     else
     {
@@ -144,8 +143,7 @@ var lra_theory::new_geq(const lin &left, const lin &right)
 
     const var slack = new_var(expr);
     const std::string s_assertion = "x" + std::to_string(slack) + " >= " + c_right.to_string();
-    const auto at_asrt = s_asrts.find(s_assertion);
-    if (at_asrt != s_asrts.end()) // this assertion already exists..
+    if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
         return at_asrt->second;
     else
     {
@@ -182,8 +180,7 @@ var lra_theory::new_gt(const lin &left, const lin &right)
 
     const var slack = new_var(expr);
     const std::string s_assertion = "x" + std::to_string(slack) + " >= " + c_right.to_string();
-    const auto at_asrt = s_asrts.find(s_assertion);
-    if (at_asrt != s_asrts.end()) // this assertion already exists..
+    if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
         return at_asrt->second;
     else
     {
@@ -220,8 +217,7 @@ bool lra_theory::lt(const lin &left, const lin &right, const var &p)
 
     const var slack = new_var(expr);
     const std::string s_assertion = "x" + std::to_string(slack) + " <= " + c_right.to_string();
-    const auto at_asrt = s_asrts.find(s_assertion);
-    if (at_asrt != s_asrts.end()) // this assertion already exists..
+    if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
         return sat.eq(p, at_asrt->second);
     else
         switch (sat.value(p))
@@ -269,8 +265,7 @@ bool lra_theory::leq(const lin &left, const lin &right, const var &p)
 
     const var slack = new_var(expr);
     const std::string s_assertion = "x" + std::to_string(slack) + " <= " + c_right.to_string();
-    const auto at_asrt = s_asrts.find(s_assertion);
-    if (at_asrt != s_asrts.end()) // this assertion already exists..
+    if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
         return sat.eq(p, at_asrt->second);
     else
         switch (sat.value(p))
@@ -318,8 +313,7 @@ bool lra_theory::geq(const lin &left, const lin &right, const var &p)
 
     const var slack = new_var(expr);
     const std::string s_assertion = "x" + std::to_string(slack) + " >= " + c_right.to_string();
-    const auto at_asrt = s_asrts.find(s_assertion);
-    if (at_asrt != s_asrts.end()) // this assertion already exists..
+    if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
         return sat.eq(p, at_asrt->second);
     else
         switch (sat.value(p))
@@ -367,8 +361,7 @@ bool lra_theory::gt(const lin &left, const lin &right, const var &p)
 
     const var slack = new_var(expr);
     const std::string s_assertion = "x" + std::to_string(slack) + " >= " + c_right.to_string();
-    const auto at_asrt = s_asrts.find(s_assertion);
-    if (at_asrt != s_asrts.end()) // this assertion already exists..
+    if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
         return sat.eq(p, at_asrt->second);
     else
         switch (sat.value(p))

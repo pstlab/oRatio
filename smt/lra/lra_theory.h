@@ -40,9 +40,9 @@ public:
   bool geq(const lin &left, const lin &right, const var &p = TRUE_var);
   bool gt(const lin &left, const lin &right, const var &p = TRUE_var);
 
-  inf_rational lb(const var &v) const { return bounds.at(lb_index(v)).value; } // the current lower bound of variable 'v'..
-  inf_rational ub(const var &v) const { return bounds.at(ub_index(v)).value; } // the current upper bound of variable 'v'..
-  inf_rational value(const var &v) const { return vals[v]; }                   // the current value of variable 'v'..
+  inf_rational lb(const var &v) const { return bounds[lb_index(v)].value; } // the current lower bound of variable 'v'..
+  inf_rational ub(const var &v) const { return bounds[ub_index(v)].value; } // the current upper bound of variable 'v'..
+  inf_rational value(const var &v) const { return vals[v]; }                // the current value of variable 'v'..
 
   inf_rational lb(const lin &l) const // returns the current lower bound of linear expression 'l'..
   {
