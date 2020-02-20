@@ -8,7 +8,7 @@ using namespace smt;
 namespace ratio
 {
 
-flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), phi(causes.empty() ? TRUE_var : gr.get_solver().get_sat_core().new_var()), causes(causes), exclusive(exclusive) {}
+flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), causes(causes), exclusive(exclusive) {}
 flaw::~flaw() {}
 
 resolver *flaw::get_best_resolver() const
@@ -29,20 +29,19 @@ void flaw::init()
     assert(!expanded);
     assert(gr.get_solver().root_level());
 
-    if (!causes.empty())
-    { // we link the new variable to the causes of the flaws..
+    if (causes.empty())
+        phi = TRUE_var;
+    else
+    {
         std::vector<lit> cs;
-        cs.reserve(causes.size() + 1);
-        cs.push_back(phi);
+        cs.reserve(causes.size());
         for (const auto &c : causes)
         {
             c->preconditions.push_back(this);
             supports.push_back(c);
-            cs.push_back(lit(c->rho, false));
+            cs.push_back(c->rho);
         }
-
-        if (!gr.get_solver().get_sat_core().new_clause(cs))
-            throw unsolvable_exception();
+        phi = gr.get_solver().get_sat_core().new_conj(cs);
     }
 }
 
