@@ -37,7 +37,7 @@ void flaw::init()
         supports.push_back(c);            // .. and it also supports its 'c' cause..
         cs.push_back(c->rho);
     }
-    // we initialize phi as the conjunction of the causes' rho variables..
+    // we initialize the phi variable as the conjunction of the causes' rho variables..
     phi = gr.get_solver().get_sat_core().new_conj(cs);
 }
 
@@ -52,14 +52,12 @@ void flaw::expand()
 
     // we add causal relations between the flaw and its resolvers (i.e., if the flaw is phi exactly one of its resolvers should be in plan)..
     if (resolvers.empty())
-    {
-        // there is no way for solving this flaw..
-        if (!gr.get_solver().get_sat_core().new_clause({lit(phi, false)})) // we force the phi variable at false..
+    { // there is no way for solving this flaw: we force the phi variable at false..
+        if (!gr.get_solver().get_sat_core().new_clause({lit(phi, false)}))
             throw unsolvable_exception();
     }
     else
-    {
-        // we need to take a decision for solving this flaw..
+    { // we need to take a decision for solving this flaw..
         std::vector<lit> r_chs;
         r_chs.reserve(resolvers.size() + 1);
         r_chs.push_back(lit(phi, false));
@@ -70,7 +68,7 @@ void flaw::expand()
         if (!gr.get_solver().get_sat_core().new_clause(r_chs))
             throw unsolvable_exception();
 
-        if (exclusive)
+        if (exclusive) // we make the resolvers mutually exclusive..
             for (size_t i = 0; i < resolvers.size(); ++i)
                 for (size_t j = i + 1; j < resolvers.size(); ++j)
                     if (!gr.get_solver().get_sat_core().new_clause({lit(resolvers[i]->rho, false), lit(resolvers[j]->rho, false)}))
