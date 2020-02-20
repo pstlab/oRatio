@@ -1,0 +1,11 @@
+Robot r = new Robot();
+
+Location start_loc = new Location(0.0, 0.0);
+fact start = new r.At(start:origin,l:start_loc);
+start.duration >= 1.0;
+
+Location target_loc = new Location(10.0 ,0.0);
+goal end = new r.At(end:horizon,l:target_loc);
+
+origin == 0.0;
+horizon <= 11.0;

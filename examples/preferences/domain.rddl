@@ -1,0 +1,24 @@
+class Location {
+    real x;
+    real y;
+    Location(real x, real y) : x(x), y(y) {}
+}
+
+class Robot : StateVariable {
+    predicate FlyTo(Location l) {
+        duration >= 5.0;
+        goal at = new At(end:start);
+    }
+    predicate WalkTo(Location l) {
+        duration >= 10.0;
+        goal at = new At(end:start);
+    }
+    predicate At(Location l) {
+        duration >= 1.0;
+        {
+            goal w = new WalkTo(l:l, end:start);
+        } [3.0] or {
+            goal f = new FlyTo(l:l, end:start);
+        } [100.0]
+    }
+}
