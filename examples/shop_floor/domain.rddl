@@ -1,0 +1,98 @@
+class Cart : StateVariable {
+
+    real id;
+    ReusableResource load = new ReusableResource(5.0);
+
+    Cart(real id) : id(id) {}
+
+    predicate At(Machine m) {
+        duration >= 1.0;
+        goal gt = new GoingTo(end:start, m:m);
+    }
+
+    predicate GoingTo(Machine m) {
+        duration >= 1.0;
+        goal at = new At(end:start);
+    }
+}
+
+class Spindle : StateVariable {
+
+    Machine machine;
+
+    Spindle(Machine machine) : machine(machine) {}
+
+    predicate Free() {
+        duration >= 1.0;
+        goal mnt = new Mounting(end:start);
+        fact unl = new mnt.t.UnloadMachine(m:machine, start:start); unl.duration >= 1;
+        fact at = new mnt.t.At(m:machine, start:unl.end); at.duration >= 1;
+        fact bfr_usg = new machine.buffer.Use(amount:1.0, start:at.start, end:at.end);
+    }
+
+    predicate Mounting(Tool t) {
+        false;
+    }
+}
+
+class Tool : StateVariable {
+
+    real id;
+
+    Tool(real id) : id(id) {}
+
+    predicate At(Machine m) {
+        duration >= 1.0;
+        fact bfr_usg = new m.buffer.Use(amount:1.0, start:start, end:end);
+        { goal ul = new UnloadCart(m:m, end:start); } or { goal um = new UnloadMachine(m:m, end:start); }
+    }
+
+    predicate LoadCart(Machine m) {
+        duration == 1.0;
+        goal t_at = new At(m:m, end:start);
+        goal c_at = new cart.At(m:m); c_at.start <= start; c_at.end >= end;
+    }
+
+    predicate IntoCart() {
+        duration >= 1.0;
+        fact crt_usg = new cart.load.Use(amount:1.0, start:start, end:end);
+        goal at = new LoadCart(end:start);
+    }
+
+    predicate UnloadCart(Machine m) {
+        duration == 1.0;
+        goal ic = new IntoCart(end:start);
+        goal c_at = new cart.At(m:m); c_at.start <= start; c_at.end >= end;
+    }
+
+    predicate LoadMachine(Machine m) {
+        duration == 1.0;
+        goal at = new At(m:m, end:start);
+    }
+
+    predicate Into(Machine m) {
+        duration >= 1.0;
+        goal fr = new m.spindle.Free(end:start);
+        fact mnt = new m.spindle.Mounting(t:tau, start:start, end:end);
+        goal lm = new LoadMachine(m:m, end:start);
+    }
+
+    predicate UnloadMachine(Machine m) {
+        duration == 1.0;
+        goal into = new Into(m:m, end:start);
+    }
+}
+
+class Machine : StateVariable {
+
+    real id;
+    ReusableResource buffer = new ReusableResource(100.0);
+    Spindle spindle;
+
+    Machine(real id) : id(id), spindle(new Spindle(this)) {}
+
+    predicate ProduceP01(real id) {
+        goal use_t01 = new t01.Into(m:tau); use_t01.start >= start; use_t01.end <= end;
+        goal use_t03 = new t03.Into(m:tau); use_t03.start >= start; use_t03.end <= end;
+    }
+}

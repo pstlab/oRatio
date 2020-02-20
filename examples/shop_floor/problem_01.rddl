@@ -1,0 +1,27 @@
+Cart cart = new Cart(1.0);
+
+Machine m1 = new Machine(1.0);
+Machine m2 = new Machine(2.0);
+Machine m3 = new Machine(3.0);
+Machine m4 = new Machine(4.0);
+
+Tool t01 = new Tool(1.0);
+Tool t02 = new Tool(2.0);
+Tool t03 = new Tool(3.0);
+Tool t04 = new Tool(4.0);
+
+fact at_m1_cart = new cart.At(start:origin, m:m1); at_m1_cart.duration >= 1.0;
+fact free_m1 = new m1.spindle.Free(start:origin); free_m1.duration >= 1.0;
+fact free_m2 = new m2.spindle.Free(start:origin); free_m2.duration >= 1.0;
+
+fact at_t01 = new t01.At(m:m1, start:origin); at_t01.duration >= 1.0;
+fact t01_init_buf_usg = new m1.buffer.Use(amount:1.0, start:at_t01.start, end:at_t01.end);
+fact at_t02 = new t02.At(m:m1, start:origin); at_t02.duration >= 1.0;
+fact t02_init_buf_usg = new m1.buffer.Use(amount:1.0, start:at_t02.start, end:at_t02.end);
+fact at_t03 = new t03.At(m:m2, start:origin); at_t03.duration >= 1.0;
+fact t03_init_buf_usg = new m2.buffer.Use(amount:1.0, start:at_t03.start, end:at_t03.end);
+fact at_t04 = new t04.At(m:m2, start:origin); at_t04.duration >= 1.0;
+fact t04_init_buf_usg = new m2.buffer.Use(amount:1.0, start:at_t04.start, end:at_t04.end);
+
+Machine m_prod_01;
+goal prod_01 = new m_prod_01.ProduceP01(id:1.0);
