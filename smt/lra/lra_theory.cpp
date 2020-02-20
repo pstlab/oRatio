@@ -16,9 +16,9 @@ var lra_theory::new_var()
 {
     // we create a new arithmetic variable..
     const var id = vals.size();
-    bounds.push_back({rational::NEGATIVE_INFINITY, nullptr}); // we set the lower bound at -inf..
-    bounds.push_back({rational::POSITIVE_INFINITY, nullptr}); // we set the upper bound at +inf..
-    vals.push_back(rational::ZERO);                           // we set the current value at 0..
+    bounds.push_back({rational::NEGATIVE_INFINITY, TRUE_var}); // we set the lower bound at -inf..
+    bounds.push_back({rational::POSITIVE_INFINITY, TRUE_var}); // we set the upper bound at +inf..
+    vals.push_back(rational::ZERO);                            // we set the current value at 0..
     exprs.emplace("x" + std::to_string(id), id);
     a_watches.resize(vals.size());
     t_watches.resize(vals.size());
@@ -36,10 +36,10 @@ var lra_theory::new_var(const lin &l)
         assert(sat.root_level());
         const var slack = new_var();
         exprs.emplace(s_expr, slack);
-        bounds[lb_index(slack)] = {lb(l), nullptr}; // we set the lower bound..
-        bounds[ub_index(slack)] = {ub(l), nullptr}; // we set the upper bound..
-        vals[slack] = value(l);                     // we set the initial value of the new slack variable..
-        new_row(slack, l);                          // we add a new row into the tableau..
+        bounds[lb_index(slack)] = {lb(l), TRUE_var}; // we set the lower bound..
+        bounds[ub_index(slack)] = {ub(l), TRUE_var}; // we set the upper bound..
+        vals[slack] = value(l);                      // we set the initial value of the new slack variable..
+        new_row(slack, l);                           // we add a new row into the tableau..
         return slack;
     }
 }
@@ -424,10 +424,10 @@ bool lra_theory::check(std::vector<lit> &cnfl)
             {
                 for (const auto &term : f_row->l.vars)
                     if (term.second.is_positive())
-                        cnfl.push_back(!*bounds[lra_theory::ub_index(term.first)].reason);
+                        cnfl.push_back(!bounds[lra_theory::ub_index(term.first)].reason);
                     else if (term.second.is_negative())
-                        cnfl.push_back(!*bounds[lra_theory::lb_index(term.first)].reason);
-                cnfl.push_back(!*bounds[lra_theory::lb_index(x_i)].reason);
+                        cnfl.push_back(!bounds[lra_theory::lb_index(term.first)].reason);
+                cnfl.push_back(!bounds[lra_theory::lb_index(x_i)].reason);
                 return false;
             }
         }
@@ -440,10 +440,10 @@ bool lra_theory::check(std::vector<lit> &cnfl)
             {
                 for (const auto &term : f_row->l.vars)
                     if (term.second.is_positive())
-                        cnfl.push_back(!*bounds[lra_theory::lb_index(term.first)].reason);
+                        cnfl.push_back(!bounds[lra_theory::lb_index(term.first)].reason);
                     else if (term.second.is_negative())
-                        cnfl.push_back(!*bounds[lra_theory::ub_index(term.first)].reason);
-                cnfl.push_back(!*bounds[lra_theory::ub_index(x_i)].reason);
+                        cnfl.push_back(!bounds[lra_theory::ub_index(term.first)].reason);
+                cnfl.push_back(!bounds[lra_theory::ub_index(x_i)].reason);
                 return false;
             }
         }
@@ -456,10 +456,7 @@ void lra_theory::pop()
 {
     // we restore the variables' bounds and their reason..
     for (const auto &b : layers.back())
-    {
-        delete bounds[b.first].reason;
         bounds[b.first] = b.second;
-    }
     layers.pop_back();
 }
 
@@ -470,15 +467,15 @@ bool lra_theory::assert_lower(const var &x_i, const inf_rational &val, const lit
         return true;
     else if (val > ub(x_i))
     {
-        cnfl.push_back(!p);                             // either the literal 'p' is false ..
-        cnfl.push_back(!*bounds[ub_index(x_i)].reason); // or what asserted the upper bound is false..
+        cnfl.push_back(!p);                            // either the literal 'p' is false ..
+        cnfl.push_back(!bounds[ub_index(x_i)].reason); // or what asserted the upper bound is false..
         return false;
     }
     else
     {
         if (!layers.empty() && !layers.back().count(lb_index(x_i)))
             layers.back().insert({lb_index(x_i), {lb(x_i), bounds[lb_index(x_i)].reason}});
-        bounds[lb_index(x_i)] = {val, new lit(p.get_var(), p.get_sign())};
+        bounds[lb_index(x_i)] = {val, lit(p.get_var(), p.get_sign())};
 
         if (vals[x_i] < val && !is_basic(x_i))
             update(x_i, val);
@@ -503,15 +500,15 @@ bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit
         return true;
     else if (val < lb(x_i))
     {
-        cnfl.push_back(!p);                             // either the literal 'p' is false ..
-        cnfl.push_back(!*bounds[lb_index(x_i)].reason); // or what asserted the lower bound is false..
+        cnfl.push_back(!p);                            // either the literal 'p' is false ..
+        cnfl.push_back(!bounds[lb_index(x_i)].reason); // or what asserted the lower bound is false..
         return false;
     }
     else
     {
         if (!layers.empty() && !layers.back().count(ub_index(x_i)))
             layers.back().insert({ub_index(x_i), {ub(x_i), bounds[ub_index(x_i)].reason}});
-        bounds[ub_index(x_i)] = {val, new lit(p.get_var(), p.get_sign())};
+        bounds[ub_index(x_i)] = {val, lit(p.get_var(), p.get_sign())};
 
         if (vals[x_i] > val && !is_basic(x_i))
             update(x_i, val);

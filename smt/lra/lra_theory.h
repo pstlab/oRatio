@@ -94,7 +94,7 @@ private:
   struct bound
   {
     inf_rational value; // the value of the bound..
-    lit *reason;        // the reason for the value..
+    lit reason;         // the reason for the value..
   };
 
   std::vector<bound> bounds;                                 // the current bounds..
