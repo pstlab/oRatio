@@ -51,15 +51,12 @@ var lra_theory::new_lt(const lin &left, const lin &right)
     for (const auto &term : expr.vars)
         vars.push_back(term.first);
     for (const auto &v : vars)
-    {
-        const auto at_v = tableau.find(v);
-        if (at_v != tableau.end())
+        if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
             rational c = expr.vars.at(v);
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
-    }
 
     const inf_rational c_right = inf_rational(-expr.known_term, -1);
     expr.known_term = 0;
@@ -92,15 +89,12 @@ var lra_theory::new_leq(const lin &left, const lin &right)
     for (const auto &term : expr.vars)
         vars.push_back(term.first);
     for (const auto &v : vars)
-    {
-        const auto at_v = tableau.find(v);
-        if (at_v != tableau.end())
+        if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
             rational c = expr.vars.at(v);
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
-    }
 
     const inf_rational c_right = -expr.known_term;
     expr.known_term = 0;
@@ -133,15 +127,12 @@ var lra_theory::new_geq(const lin &left, const lin &right)
     for (const auto &term : expr.vars)
         vars.push_back(term.first);
     for (const auto &v : vars)
-    {
-        const auto at_v = tableau.find(v);
-        if (at_v != tableau.end())
+        if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
             rational c = expr.vars.at(v);
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
-    }
 
     const inf_rational c_right = -expr.known_term;
     expr.known_term = 0;
@@ -174,15 +165,12 @@ var lra_theory::new_gt(const lin &left, const lin &right)
     for (const auto &term : expr.vars)
         vars.push_back(term.first);
     for (const auto &v : vars)
-    {
-        const auto at_v = tableau.find(v);
-        if (at_v != tableau.end())
+        if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
             rational c = expr.vars.at(v);
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
-    }
 
     const inf_rational c_right = inf_rational(-expr.known_term, 1);
     expr.known_term = 0;
@@ -215,15 +203,12 @@ bool lra_theory::lt(const lin &left, const lin &right, const var &p)
     for (const auto &term : expr.vars)
         vars.push_back(term.first);
     for (const auto &v : vars)
-    {
-        const auto at_v = tableau.find(v);
-        if (at_v != tableau.end())
+        if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
             rational c = expr.vars.at(v);
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
-    }
 
     const inf_rational c_right = inf_rational(-expr.known_term, -1);
     expr.known_term = 0;
@@ -267,15 +252,12 @@ bool lra_theory::leq(const lin &left, const lin &right, const var &p)
     for (const auto &term : expr.vars)
         vars.push_back(term.first);
     for (const auto &v : vars)
-    {
-        const auto at_v = tableau.find(v);
-        if (at_v != tableau.end())
+        if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
             rational c = expr.vars.at(v);
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
-    }
 
     const inf_rational c_right = -expr.known_term;
     expr.known_term = 0;
@@ -319,15 +301,12 @@ bool lra_theory::geq(const lin &left, const lin &right, const var &p)
     for (const auto &term : expr.vars)
         vars.push_back(term.first);
     for (const auto &v : vars)
-    {
-        const auto at_v = tableau.find(v);
-        if (at_v != tableau.end())
+        if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
             rational c = expr.vars.at(v);
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
-    }
 
     const inf_rational c_right = -expr.known_term;
     expr.known_term = 0;
@@ -415,17 +394,18 @@ bool lra_theory::gt(const lin &left, const lin &right, const var &p)
 bool lra_theory::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
-    for (const auto &a : v_asrts.at(p.get_var()))
-        if (p.get_sign()) // the assertion is direct..
-        {
+    if (p.get_sign())
+    { // the assertion is direct..
+        for (const auto &a : v_asrts.at(p.get_var()))
             if (!((a->o == op::leq) ? assert_upper(a->x, a->v, p, cnfl) : assert_lower(a->x, a->v, p, cnfl)))
                 return false;
-        }
-        else // the assertion is negated..
-        {
+    }
+    else
+    { // the assertion is negated..
+        for (const auto &a : v_asrts.at(p.get_var()))
             if (!((a->o == op::leq) ? assert_lower(a->x, a->v + inf_rational(rational::ZERO, rational::ONE), p, cnfl) : assert_upper(a->x, a->v - inf_rational(rational::ZERO, rational::ONE), p, cnfl)))
                 return false;
-        }
+    }
 
     return true;
 }
