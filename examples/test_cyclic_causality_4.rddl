@@ -1,0 +1,6 @@
+predicate G0() { goal a0 = new A0(); fact g1 = new G1(); }
+predicate G1() { goal a0 = new A0(); fact g0 = new G0(); }
+predicate A0() { }
+
+goal g0 = new G0();
+goal g1 = new G1();
