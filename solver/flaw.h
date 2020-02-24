@@ -38,9 +38,7 @@ public:
   resolver *get_cheapest_resolver() const;
   virtual resolver *get_best_resolver() const { return get_cheapest_resolver(); }
 
-#ifdef BUILD_GUI
   virtual std::string get_label() const = 0;
-#endif
 
 private:
   /**

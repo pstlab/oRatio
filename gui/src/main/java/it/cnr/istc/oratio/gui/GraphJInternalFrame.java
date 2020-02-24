@@ -11,7 +11,11 @@ import java.util.logging.Logger;
 
 import javax.swing.JInternalFrame;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import it.cnr.istc.oratio.GraphListener;
+import it.cnr.istc.oratio.riddle.Atom;
 import it.cnr.istc.oratio.riddle.Core;
 import prefuse.Constants;
 import prefuse.Display;
@@ -63,6 +67,7 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
     private static final String EDGE_DECORATORS = "edgeDeco";
     private static final String NODE_DECORATORS = "nodeDeco";
     private static final Schema DECORATOR_SCHEMA = PrefuseLib.getVisualItemSchema();
+    private static final JsonParser PARSER = new JsonParser();
 
     static {
         DECORATOR_SCHEMA.setDefault(VisualItem.INTERACTIVE, false);
@@ -91,8 +96,10 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
         g.getNodeTable().addColumn(NODE_TYPE, String.class);
         g.getNodeTable().addColumn(NODE_COST, Double.class);
         g.getNodeTable().addColumn(NODE_STATE, Integer.class);
+        g.getNodeTable().addColumn(VisualItem.VALUE, JsonObject.class);
         g.getEdgeTable().addColumn(VisualItem.LABEL, String.class);
         g.getEdgeTable().addColumn(EDGE_STATE, Integer.class);
+        g.getEdgeTable().addColumn(VisualItem.VALUE, JsonObject.class);
 
         vis.setInteractive(EDGES, null, false);
         vis.setValue(NODES, null, VisualItem.SHAPE, Constants.SHAPE_ELLIPSE);
@@ -181,26 +188,26 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
                     Node nodeData = (Node) vi.getSourceTuple();
                     String t_text = "";
                     switch ((String) nodeData.get(NODE_TYPE)) {
-                    case "flaw":
-                        t_text += Character.toString('\u03C6');
-                        break;
-                    case "resolver":
-                        t_text += Character.toString('\u03C1');
-                        break;
+                        case "flaw":
+                            t_text += Character.toString('\u03C6');
+                            break;
+                        case "resolver":
+                            t_text += Character.toString('\u03C1');
+                            break;
                     }
                     t_text += ": ";
                     switch ((int) nodeData.get(NODE_STATE)) {
-                    case 0:
-                        t_text += "False";
-                        break;
-                    case 1:
-                        t_text += "True";
-                        break;
-                    case 2:
-                        t_text += "Undefined";
-                        break;
-                    default:
-                        break;
+                        case 0:
+                            t_text += "False";
+                            break;
+                        case 1:
+                            t_text += "True";
+                            break;
+                        case 2:
+                            t_text += "Undefined";
+                            break;
+                        default:
+                            break;
                     }
                     t_text += ", cost: " + (-(Double) nodeData.get(NODE_COST));
                     d.setToolTipText(t_text);
@@ -218,10 +225,10 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
                 if (vi.getSourceTuple() instanceof Node) {
                     Node nodeData = (Node) vi.getSourceTuple();
                     switch ((String) nodeData.get(NODE_TYPE)) {
-                    case "flaw":
-                        break;
-                    case "resolver":
-                        break;
+                        case "flaw":
+                            break;
+                        case "resolver":
+                            break;
                     }
                 }
             }
@@ -248,10 +255,39 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
                     .allMatch(c -> resolvers.containsKey(c)) : "the flaw's cause does not exist: "
                             + Arrays.toString(flaw.causes) + resolvers;
             Node flaw_node = g.addNode();
-            flaw_node.set(VisualItem.LABEL, flaw.label);
+            JsonObject json_obj = (JsonObject) PARSER.parse(flaw.label);
+            String label = "ϕ" + json_obj.get("phi").getAsLong();
+            switch (json_obj.get("type").getAsString()) {
+                case "fact":
+                    label += " fact ";
+                    Atom f_atom = core.getAtom(json_obj.get("atom").getAsString());
+                    label += f_atom.getType().getName();
+                    break;
+                case "goal":
+                    label += " goal ";
+                    Atom g_atom = core.getAtom(json_obj.get("atom").getAsString());
+                    label += g_atom.getType().getName();
+                    break;
+                case "disjunction":
+                    label += " disj";
+                    break;
+                case "refinement":
+                    label += " {ϕ"
+                            + ((JsonObject) flaws.get(json_obj.get("to_enqueue").getAsString()).get(VisualItem.VALUE))
+                                    .get("phi").getAsLong()
+                            + "}";
+                    break;
+                case "enum":
+                    label += " enum";
+                    break;
+                default:
+                    break;
+            }
+            flaw_node.set(VisualItem.LABEL, label);
             flaw_node.set(NODE_TYPE, "flaw");
             flaw_node.set(NODE_COST, Double.NEGATIVE_INFINITY);
             flaw_node.set(NODE_STATE, flaw.state);
+            flaw_node.set(VisualItem.VALUE, json_obj);
             flaws.put(flaw.flaw, flaw_node);
             for (String c : flaw.causes) {
                 Node resolver_node = resolvers.get(c);
@@ -317,13 +353,34 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
             assert flaws.containsKey(resolver.effect) : "the resolver's solved flaw does not exist..";
             double intrinsic_cost = (double) resolver.cost.getNumerator() / resolver.cost.getDenominator();
             Node resolver_node = g.addNode();
-            resolver_node.set(VisualItem.LABEL, resolver.label);
+            Node effect = flaws.get(resolver.effect);
+            JsonObject json_obj = (JsonObject) PARSER.parse(resolver.label);
+            String label = "ρ" + json_obj.get("rho").getAsLong();
+            switch (((JsonObject) effect.get(VisualItem.VALUE)).get("type").getAsString()) {
+                case "fact":
+                case "goal":
+                    switch (json_obj.get("type").getAsString()) {
+                        case "activate":
+                            label += " add σ" + core.getAtom(json_obj.get("atom").getAsString()).getSigma();
+                            break;
+                        case "unify":
+                            label += " unify";
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            resolver_node.set(VisualItem.LABEL, label);
             resolver_node.set(NODE_TYPE, "resolver");
             resolver_node.set(NODE_COST, -intrinsic_cost);
             resolver_node.set(NODE_STATE, resolver.state);
+            resolver_node.set(VisualItem.VALUE, json_obj);
             resolvers.put(resolver.resolver, resolver_node);
             intrinsic_costs.put(resolver_node, intrinsic_cost);
-            Edge c_edge = g.addEdge(resolver_node, flaws.get(resolver.effect));
+            Edge c_edge = g.addEdge(resolver_node, effect);
             c_edge.set(EDGE_STATE, resolver.state);
         }
     }

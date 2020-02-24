@@ -36,9 +36,7 @@ private:
     activate_fact(const activate_fact &that) = delete;
     virtual ~activate_fact();
 
-#ifdef BUILD_GUI
     std::string get_label() const override;
-#endif
 
   private:
     void apply() override;
@@ -55,9 +53,7 @@ private:
     activate_goal(const activate_goal &that) = delete;
     virtual ~activate_goal();
 
-#ifdef BUILD_GUI
     std::string get_label() const override;
-#endif
 
   private:
     void apply() override;
@@ -73,9 +69,7 @@ private:
     unify_atom(const unify_atom &that) = delete;
     virtual ~unify_atom();
 
-#ifdef BUILD_GUI
     std::string get_label() const override;
-#endif
 
   private:
     void apply() override;

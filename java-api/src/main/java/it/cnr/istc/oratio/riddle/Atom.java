@@ -36,6 +36,13 @@ public class Atom extends Item {
         this.state = state;
     }
 
+    /**
+     * @return the sigma
+     */
+    public long getSigma() {
+        return sigma;
+    }
+
     @Override
     public Predicate getType() {
         return (Predicate) super.getType();
@@ -57,24 +64,24 @@ public class Atom extends Item {
     public String toString() {
         return "σ" + sigma + " " + type.getName() + "(" + exprs.entrySet().stream().map(expr -> {
             switch (expr.getValue().getType().getName()) {
-            case Core.BOOL:
-                return expr.getKey() + " = " + ((Item.BoolItem) expr.getValue()).getValue();
-            case Core.INT:
-            case Core.REAL:
-                return expr.getKey() + " = " + ((Item.ArithItem) expr.getValue()).getValue();
-            case Core.STRING:
-                return expr.getKey() + " = " + ((Item.StringItem) expr.getValue()).getValue();
-            default:
-                String val = expr.getKey() + " = ";
-                if (expr.getValue() instanceof EnumItem) {
-                    if (((EnumItem) expr.getValue()).getVals().length == 1)
-                        val += core.guessName(((EnumItem) expr.getValue()).getVals()[0]);
-                    else
-                        val += Stream.of(((EnumItem) expr.getValue()).getVals()).map(itm -> core.guessName(itm))
-                                .collect(Collectors.joining(", "));
-                } else
-                    val += core.guessName(expr.getValue());
-                return val;
+                case Core.BOOL:
+                    return expr.getKey() + " = " + ((Item.BoolItem) expr.getValue()).getValue();
+                case Core.INT:
+                case Core.REAL:
+                    return expr.getKey() + " = " + ((Item.ArithItem) expr.getValue()).getValue();
+                case Core.STRING:
+                    return expr.getKey() + " = " + ((Item.StringItem) expr.getValue()).getValue();
+                default:
+                    String val = expr.getKey() + " = ";
+                    if (expr.getValue() instanceof EnumItem) {
+                        if (((EnumItem) expr.getValue()).getVals().length == 1)
+                            val += core.guessName(((EnumItem) expr.getValue()).getVals()[0]);
+                        else
+                            val += Stream.of(((EnumItem) expr.getValue()).getVals()).map(itm -> core.guessName(itm))
+                                    .collect(Collectors.joining(", "));
+                    } else
+                        val += core.guessName(expr.getValue());
+                    return val;
             }
         }).collect(Collectors.joining(", ")) + ")";
     }

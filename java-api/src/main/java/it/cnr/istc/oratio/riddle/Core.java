@@ -53,6 +53,8 @@ public class Core implements Scope {
     public static final String INT = "int";
     public static final String REAL = "real";
     public static final String STRING = "string";
+    final Map<String, Item> items = new HashMap<>();
+    final Map<String, Atom> atoms = new HashMap<>();
     final Map<String, Field> fields = new LinkedHashMap<>();
     final Map<String, Collection<Method>> methods = new HashMap<>();
     final Map<String, Type> types = new LinkedHashMap<>();
@@ -68,11 +70,9 @@ public class Core implements Scope {
         types.put(REAL, new Type(this, this, REAL));
         types.put(STRING, new Type(this, this, STRING));
 
-        predicates.put("Impulse",
-                new Predicate(this, this, "Impulse", new Field(types.get(REAL), "at")));
-        predicates.put("Interval",
-                new Predicate(this, this, "Interval", new Field(types.get(REAL), "start"),
-                        new Field(types.get(REAL), "end"), new Field(types.get(REAL), "duration")));
+        predicates.put("Impulse", new Predicate(this, this, "Impulse", new Field(types.get(REAL), "at")));
+        predicates.put("Interval", new Predicate(this, this, "Interval", new Field(types.get(REAL), "start"),
+                new Field(types.get(REAL), "end"), new Field(types.get(REAL), "duration")));
 
         // we add some complex types..
         Type sv = new Type(this, this, "StateVariable");
@@ -93,6 +93,14 @@ public class Core implements Scope {
 
         Type pa = new Type(this, this, "PropositionalAgent");
         types.put(pa.name, pa);
+    }
+
+    public Item getItem(String id) {
+        return items.get(id);
+    }
+
+    public Atom getAtom(String id) {
+        return atoms.get(id);
     }
 
     @Override

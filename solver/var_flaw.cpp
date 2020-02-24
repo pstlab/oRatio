@@ -16,12 +16,7 @@ static inline const std::vector<resolver *> cause_to_vector(resolver *const caus
 var_flaw::var_flaw(graph &gr, resolver *const cause, var_item &v_itm) : flaw(gr, cause_to_vector(cause), true), v_itm(v_itm) {}
 var_flaw::~var_flaw() {}
 
-#ifdef BUILD_GUI
-std::string var_flaw::get_label() const
-{
-    return "φ" + std::to_string(get_phi()) + " enum";
-}
-#endif
+std::string var_flaw::get_label() const { return "{\"type\":\"enum\", \"phi\":" + std::to_string(get_phi()) + "}"; }
 
 void var_flaw::compute_resolvers()
 {
@@ -33,14 +28,7 @@ void var_flaw::compute_resolvers()
 var_flaw::choose_value::choose_value(graph &gr, smt::rational cst, var_flaw &enm_flaw, smt::var_value &val) : resolver(gr, gr.get_solver().get_ov_theory().allows(enm_flaw.v_itm.ev, val), cst, enm_flaw), v(enm_flaw.v_itm.ev), val(val) {}
 var_flaw::choose_value::~choose_value() {}
 
-#ifdef BUILD_GUI
-std::string var_flaw::choose_value::get_label() const
-{
-    return "ρ" + std::to_string(get_rho()) + " val";
-}
-#endif
+std::string var_flaw::choose_value::get_label() const { return "{\"rho\":" + std::to_string(get_rho()) + "}"; }
 
-void var_flaw::choose_value::apply()
-{
-}
+void var_flaw::choose_value::apply() {}
 } // namespace ratio

@@ -15,9 +15,7 @@ public:
   refinement_flaw(const refinement_flaw &orig) = delete;
   virtual ~refinement_flaw();
 
-#ifdef BUILD_GUI
   std::string get_label() const override;
-#endif
 
 private:
   void compute_resolvers() override;
@@ -30,9 +28,7 @@ private:
     refinement_resolver(const refinement_resolver &that) = delete;
     virtual ~refinement_resolver();
 
-#ifdef BUILD_GUI
     std::string get_label() const override;
-#endif
 
   private:
     void apply() override;

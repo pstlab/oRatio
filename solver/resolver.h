@@ -34,9 +34,7 @@ public:
   flaw &get_effect() const { return effect; }
   const std::vector<flaw *> &get_preconditions() const { return preconditions; }
 
-#ifdef BUILD_GUI
   virtual std::string get_label() const = 0;
-#endif
 
 private:
   /**
