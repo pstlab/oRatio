@@ -21,9 +21,7 @@ public:
 
   atom &get_atom() const { return atm; }
 
-#ifdef BUILD_GUI
   std::string get_label() const override;
-#endif
 
 private:
   void compute_resolvers() override;

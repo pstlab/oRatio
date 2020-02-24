@@ -90,7 +90,14 @@ void socket_listener::flaw_created(const flaw &f)
             ss << ", ";
         ss << static_cast<const void *>(*causes_it);
     }
-    ss << "], \"label\":\"" << f.get_label() << "\", \"state\":" << std::to_string(slv.get_sat_core().value(f.get_phi())) << "}\n";
+    std::string label = f.get_label();
+    size_t start_pos = 0;
+    while ((start_pos = label.find("\"", start_pos)) != std::string::npos)
+    {
+        label.replace(start_pos, 1, "\\\"");
+        start_pos += 2;
+    }
+    ss << "], \"label\":\"" << label << "\", \"state\":" << std::to_string(slv.get_sat_core().value(f.get_phi())) << "}\n";
     send_message(ss.str());
 }
 void socket_listener::flaw_state_changed(const flaw &f)
@@ -118,7 +125,14 @@ void socket_listener::resolver_created(const resolver &r)
 {
     smt::rational est_cost = r.get_estimated_cost();
     std::stringstream ss;
-    ss << "resolver_created {\"resolver\":\"" << static_cast<const void *>(&r) << "\", \"effect\":\"" << static_cast<const void *>(&r.get_effect()) << "\", \"label\":\"" << r.get_label() << "\", \"cost\":{"
+    std::string label = r.get_label();
+    size_t start_pos = 0;
+    while ((start_pos = label.find("\"", start_pos)) != std::string::npos)
+    {
+        label.replace(start_pos, 1, "\\\"");
+        start_pos += 2;
+    }
+    ss << "resolver_created {\"resolver\":\"" << static_cast<const void *>(&r) << "\", \"effect\":\"" << static_cast<const void *>(&r.get_effect()) << "\", \"label\":\"" << label << "\", \"cost\":{"
        << "\"num\":" << std::to_string(est_cost.numerator()) << ", \"den\":" << std::to_string(est_cost.denominator()) << "}"
        << ", \"state\":" << std::to_string(slv.get_sat_core().value(r.get_rho())) << "}\n";
     send_message(ss.str());
