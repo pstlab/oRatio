@@ -24,9 +24,9 @@ atom_flaw::~atom_flaw() {}
 std::string atom_flaw::get_label() const
 {
     if (is_fact)
-        return "{\"type\":\"fact\", \"phi\":" + std::to_string(get_phi()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}";
+        return "{\"type\":\"fact\", \"phi\":" + std::to_string(get_phi()) + ", \"sigma\":" + std::to_string(atm.get_sigma()) + ", \"predicate\":\"" + atm.get_type().get_name() + "\", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}";
     else
-        return "{\"type\":\"goal\", \"phi\":" + std::to_string(get_phi()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}";
+        return "{\"type\":\"goal\", \"phi\":" + std::to_string(get_phi()) + ", \"sigma\":" + std::to_string(atm.get_sigma()) + ", \"predicate\":\"" + atm.get_type().get_name() + "\", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}";
 }
 
 void atom_flaw::compute_resolvers()

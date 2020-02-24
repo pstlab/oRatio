@@ -257,12 +257,18 @@ void state_variable::sv_atom_listener::something_changed()
 state_variable::sv_flaw::sv_flaw(state_variable &sv, const std::set<atom *> &atms) : flaw(sv.get_solver().get_graph(), smart_type::get_resolvers(sv.get_solver(), atms), {}), sv(sv), overlapping_atoms(atms) {}
 state_variable::sv_flaw::~sv_flaw() {}
 
-#ifdef BUILD_GUI
 std::string state_variable::sv_flaw::get_label() const
 {
-    return "φ" + std::to_string(get_phi()) + " sv-flaw";
+    std::string lbl = "{\"type\":\"sv-flaw\", \"phi\":" + std::to_string(get_phi()) + ", \"atoms\":[";
+    for (std::set<atom *>::iterator as_it = overlapping_atoms.begin(); as_it != overlapping_atoms.end(); ++as_it)
+    {
+        if (as_it != overlapping_atoms.begin())
+            lbl += ", ";
+        lbl += "\"" + std::to_string(reinterpret_cast<uintptr_t>(*as_it)) + "\"";
+    }
+    lbl += "]}";
+    return lbl;
 }
-#endif
 
 void state_variable::sv_flaw::compute_resolvers()
 {
@@ -297,43 +303,21 @@ void state_variable::sv_flaw::compute_resolvers()
 state_variable::order_resolver::order_resolver(sv_flaw &flw, const var &r, const atom &before, const atom &after) : resolver(flw.get_graph(), r, 0, flw), before(before), after(after) {}
 state_variable::order_resolver::~order_resolver() {}
 
-#ifdef BUILD_GUI
-std::string state_variable::order_resolver::get_label() const
-{
-    return "ρ" + std::to_string(get_rho()) + " σ" + std::to_string(before.get_sigma()) + " <= σ" + std::to_string(after.get_sigma());
-}
-#endif
+std::string state_variable::order_resolver::get_label() const { return "{\"type\":\"order\", \"rho\":" + std::to_string(get_rho()) + ", \"before_sigma\":" + std::to_string(before.get_sigma()) + "\", after_sigma\":" + std::to_string(after.get_sigma()) + ", \"before_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&before)) + ", \"after_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&after)) + "}"; }
 
-void state_variable::order_resolver::apply()
-{
-}
+void state_variable::order_resolver::apply() {}
 
 state_variable::place_resolver::place_resolver(sv_flaw &flw, const var &r, atom &plc_atm, item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 0, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
 state_variable::place_resolver::~place_resolver() {}
 
-#ifdef BUILD_GUI
-std::string state_variable::place_resolver::get_label() const
-{
-    return "ρ" + std::to_string(get_rho()) + " pl σ" + std::to_string(plc_atm.get_sigma()) + ".τ ≠ σ" + std::to_string(frbd_atm.get_sigma());
-}
-#endif
+std::string state_variable::place_resolver::get_label() const { return "{\"type\":\"place\", \"rho\":" + std::to_string(get_rho()) + ", \"place_sigma\":" + std::to_string(plc_atm.get_sigma()) + "\", forbid_sigma\":" + std::to_string(frbd_atm.get_sigma()) + ", \"place_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&plc_atm)) + ", \"forbid_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&frbd_atm)) + "}"; }
 
-void state_variable::place_resolver::apply()
-{
-}
+void state_variable::place_resolver::apply() {}
 
 state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, atom &atm, item &itm) : resolver(flw.get_graph(), 0, flw), atm(atm), itm(itm) {}
 state_variable::forbid_resolver::~forbid_resolver() {}
 
-#ifdef BUILD_GUI
-std::string state_variable::forbid_resolver::get_label() const
-{
-    return "ρ" + std::to_string(get_rho()) + " frbd σ" + std::to_string(atm.get_sigma()) + ".τ";
-}
-#endif
+std::string state_variable::forbid_resolver::get_label() const { return "{\"type\":\"forbid\", \"rho\":" + std::to_string(get_rho()) + ", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "}"; }
 
-void state_variable::forbid_resolver::apply()
-{
-    get_graph().get_solver().get_sat_core().new_clause({lit(get_rho(), false), lit(get_graph().get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm), false)});
-}
+void state_variable::forbid_resolver::apply() { get_graph().get_solver().get_sat_core().new_clause({lit(get_rho(), false), lit(get_graph().get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm), false)}); }
 } // namespace ratio

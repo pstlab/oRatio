@@ -259,14 +259,12 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
             String label = "ϕ" + json_obj.get("phi").getAsLong();
             switch (json_obj.get("type").getAsString()) {
                 case "fact":
-                    label += " fact ";
-                    Atom f_atom = core.getAtom(json_obj.get("atom").getAsString());
-                    label += f_atom.getType().getName();
+                    label += " fact σ" + json_obj.get("sigma").getAsString() + " "
+                            + json_obj.get("predicate").getAsString();
                     break;
                 case "goal":
-                    label += " goal ";
-                    Atom g_atom = core.getAtom(json_obj.get("atom").getAsString());
-                    label += g_atom.getType().getName();
+                    label += " goal σ" + json_obj.get("sigma").getAsString() + " "
+                            + json_obj.get("predicate").getAsString();
                     break;
                 case "disjunction":
                     label += " disj";
@@ -281,6 +279,7 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
                     label += " enum";
                     break;
                 default:
+                    label += " " + json_obj.get("type").getAsString();
                     break;
             }
             flaw_node.set(VisualItem.LABEL, label);
@@ -361,10 +360,28 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
                 case "goal":
                     switch (json_obj.get("type").getAsString()) {
                         case "activate":
-                            label += " add σ" + core.getAtom(json_obj.get("atom").getAsString()).getSigma();
+                            label += " add";
                             break;
                         case "unify":
                             label += " unify";
+                            break;
+                        default:
+                            break;
+                    }
+                    break;
+                case "sv-flaw":
+                case "rr-flaw":
+                    switch (json_obj.get("type").getAsString()) {
+                        case "order":
+                            label += " σ" + json_obj.get("before_sigma").getAsLong() + " <= σ"
+                                    + json_obj.get("after_sigma").getAsLong();
+                            break;
+                        case "place":
+                            label += " σ" + json_obj.get("place_sigma").getAsLong() + ".τ ≠ σ"
+                                    + json_obj.get("forbid_sigma").getAsLong() + ".τ";
+                            break;
+                        case "forbid":
+                            label += " !σ" + json_obj.get("atom_sigma").getAsLong() + ".τ";
                             break;
                         default:
                             break;
