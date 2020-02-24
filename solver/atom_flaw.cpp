@@ -94,7 +94,7 @@ atom_flaw::activate_fact::activate_fact(graph &gr, atom_flaw &f, atom &a) : reso
 atom_flaw::activate_fact::activate_fact(graph &gr, const smt::var &r, atom_flaw &f, atom &a) : resolver(gr, r, 0, f), atm(a) {}
 atom_flaw::activate_fact::~activate_fact() {}
 
-std::string atom_flaw::activate_fact::get_label() const { return "{\"type\":\"activate\", \"rho\":" + std::to_string(get_rho()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "}"; }
+std::string atom_flaw::activate_fact::get_label() const { return "{\"type\":\"activate\", \"rho\":" + std::to_string(get_rho()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
 
 void atom_flaw::activate_fact::apply() { get_graph().get_solver().get_sat_core().new_clause({lit(get_rho(), false), atm.get_sigma()}); }
 
@@ -102,7 +102,7 @@ atom_flaw::activate_goal::activate_goal(graph &gr, atom_flaw &f, atom &a) : reso
 atom_flaw::activate_goal::activate_goal(graph &gr, const smt::var &r, atom_flaw &f, atom &a) : resolver(gr, r, 1, f), atm(a) {}
 atom_flaw::activate_goal::~activate_goal() {}
 
-std::string atom_flaw::activate_goal::get_label() const { return "{\"type\":\"activate\", \"rho\":" + std::to_string(get_rho()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "}"; }
+std::string atom_flaw::activate_goal::get_label() const { return "{\"type\":\"activate\", \"rho\":" + std::to_string(get_rho()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
 
 void atom_flaw::activate_goal::apply()
 {
@@ -113,7 +113,7 @@ void atom_flaw::activate_goal::apply()
 atom_flaw::unify_atom::unify_atom(graph &gr, atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(gr, 1, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}
 atom_flaw::unify_atom::~unify_atom() {}
 
-std::string atom_flaw::unify_atom::get_label() const { return "{\"type\":\"unify\", \"rho\":" + std::to_string(get_rho()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + ", \"target\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&trgt)) + "}"; }
+std::string atom_flaw::unify_atom::get_label() const { return "{\"type\":\"unify\", \"rho\":" + std::to_string(get_rho()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\", \"target\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&trgt)) + "\"}"; }
 
 void atom_flaw::unify_atom::apply()
 {

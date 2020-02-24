@@ -66,9 +66,7 @@ private:
     sv_flaw(sv_flaw &&) = delete;
     virtual ~sv_flaw();
 
-#ifdef BUILD_GUI
     std::string get_label() const override;
-#endif
 
   private:
     void compute_resolvers() override;
@@ -86,9 +84,7 @@ private:
     order_resolver(const order_resolver &that) = delete;
     virtual ~order_resolver();
 
-#ifdef BUILD_GUI
     std::string get_label() const override;
-#endif
 
   private:
     void apply() override;
@@ -106,9 +102,7 @@ private:
     place_resolver(const place_resolver &that) = delete;
     virtual ~place_resolver();
 
-#ifdef BUILD_GUI
     std::string get_label() const override;
-#endif
 
   private:
     void apply() override;
@@ -127,9 +121,7 @@ private:
     forbid_resolver(const forbid_resolver &that) = delete;
     virtual ~forbid_resolver();
 
-#ifdef BUILD_GUI
     std::string get_label() const override;
-#endif
 
   private:
     void apply() override;
