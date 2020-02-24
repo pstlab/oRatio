@@ -35,7 +35,8 @@ public:
   smt::rational get_estimated_cost() const { return est_cost; }
   bool is_expanded() const { return expanded; }
 
-  resolver *get_best_resolver() const;
+  resolver *get_cheapest_resolver() const;
+  virtual resolver *get_best_resolver() const { return get_cheapest_resolver(); }
 
 #ifdef BUILD_GUI
   virtual std::string get_label() const = 0;

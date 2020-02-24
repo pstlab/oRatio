@@ -90,8 +90,8 @@ void graph::set_estimated_cost(flaw &f, std::unordered_set<flaw *> &visited)
         c_cost = rational::POSITIVE_INFINITY;
     else
     {
-        resolver *bst_res = f.get_best_resolver(); // the flaw's best resolver..
-        c_cost = bst_res ? bst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
+        resolver *chpst_res = f.get_cheapest_resolver(); // the flaw's cheapest resolver..
+        c_cost = chpst_res ? chpst_res->get_estimated_cost() : rational::POSITIVE_INFINITY;
     }
     if (f.est_cost == c_cost)
         return; // nothing to propagate..

@@ -11,7 +11,7 @@ namespace ratio
 flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), causes(causes), exclusive(exclusive) {}
 flaw::~flaw() {}
 
-resolver *flaw::get_best_resolver() const
+resolver *flaw::get_cheapest_resolver() const
 {
     resolver *c_res = nullptr;
     rational c_cost = rational::POSITIVE_INFINITY;
