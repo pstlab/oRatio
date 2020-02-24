@@ -256,21 +256,21 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
                             + Arrays.toString(flaw.causes) + resolvers;
             Node flaw_node = g.addNode();
             JsonObject json_obj = (JsonObject) PARSER.parse(flaw.label);
-            String label = "ϕ" + json_obj.get("phi").getAsLong();
+            String label = Character.toString('\u03C6') + json_obj.get("phi").getAsLong();
             switch (json_obj.get("type").getAsString()) {
                 case "fact":
-                    label += " fact σ" + json_obj.get("sigma").getAsString() + " "
+                    label += " fact " + Character.toString('\u03C3') + json_obj.get("sigma").getAsString() + " "
                             + json_obj.get("predicate").getAsString();
                     break;
                 case "goal":
-                    label += " goal σ" + json_obj.get("sigma").getAsString() + " "
+                    label += " goal " + Character.toString('\u03C3') + json_obj.get("sigma").getAsString() + " "
                             + json_obj.get("predicate").getAsString();
                     break;
                 case "disjunction":
                     label += " disj";
                     break;
                 case "refinement":
-                    label += " {ϕ"
+                    label += " {" + Character.toString('\u03C6')
                             + ((JsonObject) flaws.get(json_obj.get("to_enqueue").getAsString()).get(VisualItem.VALUE))
                                     .get("phi").getAsLong()
                             + "}";
@@ -354,7 +354,7 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
             Node resolver_node = g.addNode();
             Node effect = flaws.get(resolver.effect);
             JsonObject json_obj = (JsonObject) PARSER.parse(resolver.label);
-            String label = "ρ" + json_obj.get("rho").getAsLong();
+            String label = Character.toString('\u03C1') + json_obj.get("rho").getAsLong();
             switch (((JsonObject) effect.get(VisualItem.VALUE)).get("type").getAsString()) {
                 case "fact":
                 case "goal":
@@ -373,15 +373,19 @@ public class GraphJInternalFrame extends JInternalFrame implements GraphListener
                 case "rr-flaw":
                     switch (json_obj.get("type").getAsString()) {
                         case "order":
-                            label += " σ" + json_obj.get("before_sigma").getAsLong() + " <= σ"
+                            label += " " + Character.toString('\u03C3') + json_obj.get("before_sigma").getAsLong() + " "
+                                    + Character.toString('\u2264') + " " + Character.toString('\u03C3')
                                     + json_obj.get("after_sigma").getAsLong();
                             break;
                         case "place":
-                            label += " σ" + json_obj.get("place_sigma").getAsLong() + ".τ ≠ σ"
-                                    + json_obj.get("forbid_sigma").getAsLong() + ".τ";
+                            label += " " + Character.toString('\u03C3') + json_obj.get("place_sigma").getAsLong() + "."
+                                    + Character.toString('\u03C4') + " " + Character.toString('\u2260') + " "
+                                    + Character.toString('\u03C3') + json_obj.get("forbid_sigma").getAsLong() + "."
+                                    + Character.toString('\u03C4');
                             break;
                         case "forbid":
-                            label += " !σ" + json_obj.get("atom_sigma").getAsLong() + ".τ";
+                            label += " !" + Character.toString('\u03C3') + json_obj.get("atom_sigma").getAsLong() + "."
+                                    + Character.toString('\u03C4');
                             break;
                         default:
                             break;
