@@ -54,7 +54,7 @@ var lra_theory::new_lt(const lin &left, const lin &right)
     for (const auto &v : vars)
         if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
-            rational c = expr.vars.at(v);
+            rational c = expr.vars[v];
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
@@ -91,7 +91,7 @@ var lra_theory::new_leq(const lin &left, const lin &right)
     for (const auto &v : vars)
         if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
-            rational c = expr.vars.at(v);
+            rational c = expr.vars[v];
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
@@ -128,7 +128,7 @@ var lra_theory::new_geq(const lin &left, const lin &right)
     for (const auto &v : vars)
         if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
-            rational c = expr.vars.at(v);
+            rational c = expr.vars[v];
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
@@ -165,7 +165,7 @@ var lra_theory::new_gt(const lin &left, const lin &right)
     for (const auto &v : vars)
         if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
-            rational c = expr.vars.at(v);
+            rational c = expr.vars[v];
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
@@ -202,7 +202,7 @@ bool lra_theory::lt(const lin &left, const lin &right, const var &p)
     for (const auto &v : vars)
         if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
-            rational c = expr.vars.at(v);
+            rational c = expr.vars[v];
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
@@ -250,7 +250,7 @@ bool lra_theory::leq(const lin &left, const lin &right, const var &p)
     for (const auto &v : vars)
         if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
-            rational c = expr.vars.at(v);
+            rational c = expr.vars[v];
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
@@ -298,7 +298,7 @@ bool lra_theory::geq(const lin &left, const lin &right, const var &p)
     for (const auto &v : vars)
         if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
-            rational c = expr.vars.at(v);
+            rational c = expr.vars[v];
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
@@ -346,7 +346,7 @@ bool lra_theory::gt(const lin &left, const lin &right, const var &p)
     for (const auto &v : vars)
         if (const auto at_v = tableau.find(v); at_v != tableau.end())
         {
-            rational c = expr.vars.at(v);
+            rational c = expr.vars[v];
             expr.vars.erase(v);
             expr += at_v->second->l * c;
         }
@@ -389,13 +389,13 @@ bool lra_theory::propagate(const lit &p, std::vector<lit> &cnfl)
     assert(cnfl.empty());
     if (p.get_sign())
     { // the assertion is direct..
-        for (const auto &a : v_asrts.at(p.get_var()))
+        for (const auto &a : v_asrts[p.get_var()])
             if (!((a->o == op::leq) ? assert_upper(a->x, a->v, p, cnfl) : assert_lower(a->x, a->v, p, cnfl)))
                 return false;
     }
     else
     { // the assertion is negated..
-        for (const auto &a : v_asrts.at(p.get_var()))
+        for (const auto &a : v_asrts[p.get_var()])
             if (!((a->o == op::leq) ? assert_lower(a->x, a->v + inf_rational(rational::ZERO, rational::ONE), p, cnfl) : assert_upper(a->x, a->v - inf_rational(rational::ZERO, rational::ONE), p, cnfl)))
                 return false;
     }
@@ -532,7 +532,7 @@ void lra_theory::update(const var &x_i, const inf_rational &v)
     for (const auto &c : t_watches[x_i])
     {
         // x_j = x_j + a_ji(v - x_i)..
-        vals[c->x] += c->l.vars.at(x_i) * (v - vals[x_i]);
+        vals[c->x] += c->l.vars[x_i] * (v - vals[x_i]);
         const auto at_c_x = listening.find(c->x);
         if (at_c_x != listening.end())
             for (const auto &l : at_c_x->second)
@@ -550,9 +550,9 @@ void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rati
 {
     assert(is_basic(x_i) && "x_i should be a basic variable..");
     assert(!is_basic(x_j) && "x_j should be a non-basic variable..");
-    assert(tableau.at(x_i)->l.vars.count(x_j));
+    assert(tableau[x_i]->l.vars.count(x_j));
 
-    const inf_rational theta = (v - vals[x_i]) / tableau.at(x_i)->l.vars.at(x_j);
+    const inf_rational theta = (v - vals[x_i]) / tableau[x_i]->l.vars[x_j];
     assert(!theta.is_infinite());
 
     // x_i = v
@@ -570,7 +570,7 @@ void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rati
     for (const auto &c : t_watches[x_j])
         if (c->x != x_i)
         { // x_k += a_kj * theta..
-            vals[c->x] += c->l.vars.at(x_j) * theta;
+            vals[c->x] += c->l.vars[x_j] * theta;
             if (const auto at_x_c = listening.find(c->x); at_x_c != listening.end())
                 for (const auto &l : at_x_c->second)
                     l->lra_value_change(c->x);
@@ -582,7 +582,7 @@ void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rati
 void lra_theory::pivot(const var x_i, const var x_j)
 {
     // the exiting row..
-    row *ex_row = tableau.at(x_i);
+    row *ex_row = tableau[x_i];
     lin expr = std::move(ex_row->l);
     tableau.erase(x_i);
     // we remove the row from the watches..
@@ -590,7 +590,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
         t_watches[c.first].erase(ex_row);
     delete ex_row;
 
-    const rational c = expr.vars.at(x_j);
+    const rational c = expr.vars[x_j];
     expr.vars.erase(x_j);
     expr /= -c;
     expr.vars.emplace(x_i, rational::ONE / c);
@@ -600,7 +600,7 @@ void lra_theory::pivot(const var x_i, const var x_j)
     std::swap(x_j_watches, t_watches[x_j]);
     for (const auto &r : x_j_watches)
     { // 'r' is a row in which 'x_j' appears..
-        rational cc = r->l.vars.at(x_j);
+        rational cc = r->l.vars[x_j];
         r->l.vars.erase(x_j);
         for (const auto &term : std::map<const var, rational>(expr.vars))
             if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
