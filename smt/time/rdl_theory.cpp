@@ -116,62 +116,45 @@ bool rdl_theory::propagate(const size_t &from, const size_t &to, const inf_ratio
         // TODO: build the caouse for the conflict..
         return false;
 
-    if (!layers.empty())
+    set_diff(from, to, diff);
+    std::vector<size_t> set_i;
+    std::vector<size_t> set_j;
+
+    // start with an O(n) loop
+    for (size_t u = 0; u < size(); ++u)
     {
+        if (_data[u][from] < _data[u][to] - diff)
+        { // u -> from -> to is shorter than u -> to
+            set_diff(u, to, _data[u][from] + diff);
+            set_i.push_back(u);
+        }
+        if (_data[to][u] < _data[from][u] - diff)
+        { // from -> to -> u is shorter than from -> u
+            set_diff(from, u, _data[to][u] + diff);
+            set_j.push_back(u);
+        }
+    }
+
+    // finally, loop over set_i and set_j in O(n^2) time (but possibly much less)
+    for (int i = 0; i < set_i.size(); ++i)
+        for (int j = 0; j < set_j.size(); ++j)
+            if (set_i[i] != set_j[j] && _data[set_i[i]][to] + _data[to][set_j[j]] < _data[set_i[i]][set_j[j]])
+                // set_i[i] -> from -> to -> set_j[j] is shorter than set_i[i] -> set_j[j]
+                set_diff(set_i[i], set_j[j], _data[set_i[i]][to] + _data[to][set_j[j]]);
+    return true;
+}
+
+void rdl_theory::set_diff(const size_t &from, const size_t &to, const inf_rational &diff)
+{
+    assert(_data[from][to] > diff);
+    if (!layers.empty())
+    { // we store the current values for backtracking purposes..
         if (!layers.back().old_dists.count({from, to}))
             layers.back().old_dists.insert({{from, to}, _data[from][to]});
         if (!layers.back().old_preds.count(to))
             layers.back().old_preds.insert({to, from});
     }
     _data[from][to] = diff;
-    std::vector<size_t> set_i(size(), 0);
-    std::vector<size_t> set_j(size(), 0);
-    size_t size_i = 0, size_j = 0;
-
-    // start with an O(n) loop
-    for (size_t k = 0; k < size(); ++k)
-    {
-        if (_data[k][from] < _data[k][to] - diff)
-        { // u -> from -> to is shorter than u -> to
-            if (!layers.empty())
-            { // we store the current values..
-                if (!layers.back().old_dists.count({k, to}))
-                    layers.back().old_dists.insert({{k, to}, _data[k][to]});
-                if (!layers.back().old_preds.count(to))
-                    layers.back().old_preds.insert({to, k});
-            }
-            _data[k][to] = _data[k][from] + diff;
-            set_i[size_i++] = k;
-        }
-        if (_data[to][k] < _data[from][k] - diff)
-        { // from -> to -> u is shorter than from -> u
-            if (!layers.empty())
-            { // we store the current values..
-                if (!layers.back().old_dists.count({from, k}))
-                    layers.back().old_dists.insert({{from, k}, _data[from][k]});
-                if (!layers.back().old_preds.count(k))
-                    layers.back().old_preds.insert({k, from});
-            }
-            _data[from][k] = diff + _data[to][k];
-            set_j[size_j++] = k;
-        }
-    }
-
-    // finally, loop over set_i and set_j in O(n^2) time (but possibly much less)
-    for (int i = 0; i < size_i; ++i)
-        for (int j = 0; j < size_j; ++j)
-            if (set_i[i] != set_j[j] && _data[set_i[i]][to] + _data[to][set_j[j]] < _data[set_i[i]][set_j[j]])
-            { // set_i[i] -> from -> to -> set_j[j] is shorter than set_i[i] -> set_j[j]
-                if (!layers.empty())
-                { // we store the current values..
-                    if (!layers.back().old_dists.count({set_i[i], set_j[j]}))
-                        layers.back().old_dists.insert({{set_i[i], set_j[j]}, _data[set_i[i]][set_j[j]]});
-                    if (!layers.back().old_preds.count(set_j[j]))
-                        layers.back().old_preds.insert({set_j[j], set_i[i]});
-                }
-                _data[set_i[i]][set_j[j]] = _data[set_i[i]][to] + _data[to][set_j[j]];
-            }
-    return true;
 }
 
 void rdl_theory::resize(const size_t &size)
