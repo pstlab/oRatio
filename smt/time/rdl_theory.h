@@ -28,7 +28,7 @@ private:
     void push() override;
     void pop() override;
 
-    bool propagate(const size_t &from, const size_t &to, const inf_rational &diff, const lit &p, std::vector<lit> &cnfl);
+    void propagate(const size_t &from, const size_t &to, const inf_rational &diff);
     void set_diff(const size_t &from, const size_t &to, const inf_rational &diff);
 
     void resize(const size_t &size);
@@ -64,6 +64,9 @@ private:
     std::vector<var> _preds;
     std::map<std::pair<var, var>, std::vector<rdl_difference *>> diff_constrs;
     std::unordered_map<var, std::vector<rdl_difference *>> var_diffs;
+#ifndef STRONG_PROPAGATION
+    std::queue<rdl_difference *> prop_q;
+#endif
     std::vector<layer> layers; // we store the updates..
 };
 } // namespace smt
