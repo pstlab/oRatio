@@ -23,9 +23,9 @@ size_t rdl_theory::new_var()
 
 var rdl_theory::new_difference(const var &from, const var &to, const inf_rational &diff)
 {
-    if ((_data[from][to] + diff).is_negative())
+    if (_data[to][from] < -diff)
         return FALSE_var; // the constraint is inconsistent..
-    else if ((_data[from][to] - diff).is_negative())
+    else if (_data[from][to] <= diff)
         return TRUE_var; // the constraint is redundant..
     else
     { // we need to create a new propositional variable..
@@ -40,9 +40,9 @@ var rdl_theory::new_difference(const var &from, const var &to, const inf_rationa
 
 bool rdl_theory::difference(const var &from, const var &to, const inf_rational &diff, const var &p)
 {
-    if ((_data[from][to] + diff).is_negative())
+    if (_data[to][from] < -diff)
         return sat.eq(p, FALSE_var); // the constraint is inconsistent..
-    else if ((_data[from][to] - diff).is_negative())
+    else if (_data[from][to] <= diff)
         return sat.eq(p, TRUE_var); // the constraint is redundant..
     else
         switch (sat.value(p))
@@ -73,7 +73,7 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
     { // the assertion is direct..
         for (const auto &diff : var_diffs.at(p.get_var()))
         {
-            if ((_data[diff->from][diff->to] + diff->diff).is_negative())
+            if (_data[diff->to][diff->from] < -diff->diff)
             { // we build the cause for the conflict..
                 var c_from = diff->from;
                 while (c_from != diff->to)
@@ -97,7 +97,7 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
     { // the assertion is negated..
         for (const auto &diff : var_diffs.at(p.get_var()))
         {
-            if ((_data[diff->to][diff->from] - diff->diff - inf_rational(rational::ZERO, rational::ONE)).is_negative())
+            if (_data[diff->from][diff->to] >= diff->diff)
             { // we build the cause for the conflict..
                 var c_from = diff->from;
                 while (c_from != diff->to)
@@ -122,7 +122,7 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
     for (const auto &ctr : var_diffs)
         for (const auto &diff : ctr.second)
             if (sat.value(diff->b) == Undefined)
-                if ((_data[diff->from][diff->to] + diff->diff).is_negative())
+                if (_data[diff->to][diff->from] < -diff->diff)
                 { // the constraint is inconsistent..
                     cnfl.push_back(lit(diff->b, false));
                     var c_from = diff->from;
@@ -136,7 +136,7 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
                     record(cnfl);
                     cnfl.clear();
                 }
-                else if ((_data[diff->from][diff->to] - diff->diff).is_negative())
+                else if (_data[diff->from][diff->to] <= diff->diff)
                 { // the constraint is redundant..
                     cnfl.push_back(diff->b);
                     var c_from = diff->from;
@@ -166,7 +166,7 @@ bool rdl_theory::check(std::vector<lit> &cnfl)
         switch (sat.value(c_diff->b))
         {
         case True:
-            if ((_data[c_diff->from][c_diff->to] + c_diff->diff).is_negative())
+            if (_data[c_diff->to][c_diff->from] < -c_diff->diff)
             { // we build the cause for the conflict..
                 var c_from = c_diff->from;
                 while (c_from != c_diff->to)
@@ -182,7 +182,7 @@ bool rdl_theory::check(std::vector<lit> &cnfl)
                 propagate(c_diff->from, c_diff->to, c_diff->diff);
             break;
         case False:
-            if ((_data[c_diff->to][c_diff->from] - c_diff->diff - inf_rational(rational::ZERO, rational::ONE)).is_negative())
+            if (_data[c_diff->to][c_diff->from] <= c_diff->diff)
             { // we build the cause for the conflict..
                 var c_from = c_diff->from;
                 while (c_from != c_diff->to)
@@ -260,7 +260,8 @@ void rdl_theory::set_diff(const size_t &from, const size_t &to, const inf_ration
         if (!layers.back().old_preds.count(to))
             layers.back().old_preds.insert({to, from});
     }
-    _data[from][to] = diff;
+    _data[from][to] = diff; // we update the difference..
+    _preds[to] = from;      // we update the predecessor..
 }
 
 void rdl_theory::resize(const size_t &size)

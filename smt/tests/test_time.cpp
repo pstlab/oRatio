@@ -1,4 +1,5 @@
 #include "temporal_network.h"
+#include "rdl_theory.h"
 #include <cassert>
 
 using namespace smt;
@@ -42,8 +43,53 @@ void test_temporal_network_1()
     auto bnd_0 = tn.bound(tp0);
 }
 
+void test_real_difference_logic()
+{
+    sat_core core;
+    rdl_theory rdl(core, 5);
+    var origin = rdl.new_var();
+    var horizon = rdl.new_var();
+    bool nd = rdl.difference(horizon, origin, 0);
+    assert(nd);
+
+    var tp0 = rdl.new_var();
+    nd = rdl.difference(tp0, origin, 0);
+    assert(nd);
+    nd = rdl.difference(horizon, tp0, 0);
+    assert(nd);
+
+    var tp1 = rdl.new_var();
+    nd = rdl.difference(tp1, origin, 0);
+    assert(nd);
+    nd = rdl.difference(horizon, tp1, 0);
+    assert(nd);
+
+    var tp2 = rdl.new_var();
+    nd = rdl.difference(tp2, origin, 0);
+    assert(nd);
+    nd = rdl.difference(horizon, tp2, 0);
+    assert(nd);
+
+    nd = rdl.difference(tp0, tp1, 10);
+    assert(nd);
+    nd = rdl.difference(tp1, tp0, 0);
+    assert(nd);
+
+    nd = rdl.difference(tp1, tp2, 10);
+    assert(nd);
+    nd = rdl.difference(tp2, tp1, 0);
+    assert(nd);
+
+    nd = rdl.difference(origin, tp0, 10);
+    assert(nd);
+    nd = rdl.difference(tp0, origin, 0);
+    assert(nd);
+}
+
 int main(int, char **)
 {
     test_temporal_network_0();
     test_temporal_network_1();
+
+    test_real_difference_logic();
 }
