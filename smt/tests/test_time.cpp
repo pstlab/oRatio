@@ -84,6 +84,23 @@ void test_real_difference_logic()
     assert(nd);
     nd = rdl.difference(tp0, origin, 0);
     assert(nd);
+
+    var tp2_after_40 = rdl.new_difference(tp2, origin, -40);
+    assert(tp2_after_40 == FALSE_var);
+
+    var tp2_after_20 = rdl.new_difference(tp2, origin, -20);
+    var tp2_before_20 = rdl.new_difference(origin, tp2, 20);
+
+    var tp2_after_30 = rdl.new_difference(tp2, origin, -30);
+    var tp2_before_30 = rdl.new_difference(origin, tp2, 30);
+
+    nd = core.disj({core.new_conj({tp2_after_20, tp2_before_20}), core.new_conj({tp2_after_30, tp2_before_30})});
+    assert(nd);
+
+    nd = rdl.difference(origin, tp2, 30);
+    assert(nd);
+    nd = rdl.difference(tp2, origin, -25);
+    assert(nd);
 }
 
 int main(int, char **)

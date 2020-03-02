@@ -69,6 +69,7 @@ bool rdl_theory::difference(const var &from, const var &to, const inf_rational &
 bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
+    assert(var_diffs.count(p.get_var()));
     if (p.get_sign())
     { // the assertion is direct..
         for (const auto &diff : var_diffs.at(p.get_var()))
@@ -78,8 +79,9 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
                 var c_from = diff->from;
                 while (c_from != diff->to)
                 {
-                    for (const auto &c_diff : diff_constrs[{_preds[c_from], c_from}])
-                        cnfl.push_back(lit(c_diff->b, false));
+                    if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
+                        for (const auto &c_diff : c_d->second)
+                            cnfl.push_back(lit(c_diff->b, false));
                     c_from = _preds[c_from];
                 }
                 cnfl.push_back(!p);
@@ -97,13 +99,14 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
     { // the assertion is negated..
         for (const auto &diff : var_diffs.at(p.get_var()))
         {
-            if (_data[diff->from][diff->to] >= diff->diff)
+            if (_data[diff->from][diff->to] <= diff->diff)
             { // we build the cause for the conflict..
                 var c_from = diff->from;
                 while (c_from != diff->to)
                 {
-                    for (const auto &c_diff : diff_constrs[{_preds[c_from], c_from}])
-                        cnfl.push_back(lit(c_diff->b, false));
+                    if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
+                        for (const auto &c_diff : c_d->second)
+                            cnfl.push_back(lit(c_diff->b, false));
                     c_from = _preds[c_from];
                 }
                 cnfl.push_back(!p);
@@ -128,8 +131,9 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
                     var c_from = diff->from;
                     while (c_from != diff->to)
                     {
-                        for (const auto &c_diff : diff_constrs[{_preds[c_from], c_from}])
-                            cnfl.push_back(lit(c_diff->b, false));
+                        if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
+                            for (const auto &c_diff : c_d->second)
+                                cnfl.push_back(lit(c_diff->b, false));
                         c_from = _preds[c_from];
                     }
                     // we propagate the reason for assigning false to diff->b..
@@ -142,8 +146,9 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
                     var c_from = diff->from;
                     while (c_from != diff->to)
                     {
-                        for (const auto &c_diff : diff_constrs[{_preds[c_from], c_from}])
-                            cnfl.push_back(lit(c_diff->b, false));
+                        if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
+                            for (const auto &c_diff : c_d->second)
+                                cnfl.push_back(lit(c_diff->b, false));
                         c_from = _preds[c_from];
                     }
                     // we propagate the reason for assigning true to diff->b..
@@ -171,8 +176,9 @@ bool rdl_theory::check(std::vector<lit> &cnfl)
                 var c_from = c_diff->from;
                 while (c_from != c_diff->to)
                 {
-                    for (const auto &c_diff : diff_constrs[{_preds[c_from], c_from}])
-                        cnfl.push_back(lit(c_diff->b, false));
+                    if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
+                        for (const auto &c_diff : c_d->second)
+                            cnfl.push_back(lit(c_diff->b, false));
                     c_from = _preds[c_from];
                 }
                 cnfl.push_back(lit(c_diff->b, false));
@@ -182,13 +188,14 @@ bool rdl_theory::check(std::vector<lit> &cnfl)
                 propagate(c_diff->from, c_diff->to, c_diff->diff);
             break;
         case False:
-            if (_data[c_diff->to][c_diff->from] <= c_diff->diff)
+            if (_data[c_diff->from][c_diff->to] <= c_diff->diff)
             { // we build the cause for the conflict..
                 var c_from = c_diff->from;
                 while (c_from != c_diff->to)
                 {
-                    for (const auto &c_diff : diff_constrs[{_preds[c_from], c_from}])
-                        cnfl.push_back(lit(c_diff->b, false));
+                    if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
+                        for (const auto &c_diff : c_d->second)
+                            cnfl.push_back(lit(c_diff->b, false));
                     c_from = _preds[c_from];
                 }
                 cnfl.push_back(c_diff->b);
