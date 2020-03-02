@@ -30,6 +30,7 @@ private:
 
     void propagate(const size_t &from, const size_t &to, const inf_rational &diff);
     void set_diff(const size_t &from, const size_t &to, const inf_rational &diff);
+    void check(const size_t &from, const size_t &to, const inf_rational &diff);
 
     void resize(const size_t &size);
 

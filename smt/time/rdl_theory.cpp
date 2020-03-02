@@ -89,7 +89,8 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
             }
 
 #ifdef STRONG_PROPAGATION
-            propagate(diff->from, diff->to, diff->diff);
+            if (_data[diff->from][diff->to] > diff->diff)
+                propagate(diff->from, diff->to, diff->diff);
 #else
             prop_q.push(diff);
 #endif
@@ -114,7 +115,8 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
             }
 
 #ifdef STRONG_PROPAGATION
-            propagate(diff->to, diff->from, -diff->diff - inf_rational(rational::ZERO, rational::ONE));
+            if (_data[diff->to][diff->from] >= -diff->diff)
+                propagate(diff->to, diff->from, -diff->diff - inf_rational(rational::ZERO, rational::ONE));
 #else
             prop_q.push(diff);
 #endif
@@ -122,41 +124,42 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
     }
 
 #ifdef STRONG_PROPAGATION
-    for (const auto &ctr : var_diffs)
-        for (const auto &diff : ctr.second)
-            if (sat.value(diff->b) == Undefined)
+    for (const auto &c_diffs : var_diffs)
+        if (sat.value(c_diffs.first) == Undefined)
+            for (const auto &diff : c_diffs.second)
                 if (_data[diff->to][diff->from] < -diff->diff)
                 { // the constraint is inconsistent..
+                    std::vector<lit> cnfl;
                     cnfl.push_back(lit(diff->b, false));
                     var c_from = diff->from;
                     while (c_from != diff->to)
                     {
                         if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
                             for (const auto &c_diff : c_d->second)
-                                cnfl.push_back(lit(c_diff->b, false));
+                                if (sat.value(c_diff->b) != Undefined)
+                                    cnfl.push_back(lit(c_diff->b, false));
                         c_from = _preds[c_from];
                     }
                     // we propagate the reason for assigning false to diff->b..
                     record(cnfl);
-                    cnfl.clear();
                 }
                 else if (_data[diff->from][diff->to] <= diff->diff)
                 { // the constraint is redundant..
+                    std::vector<lit> cnfl;
                     cnfl.push_back(diff->b);
                     var c_from = diff->from;
                     while (c_from != diff->to)
                     {
                         if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
                             for (const auto &c_diff : c_d->second)
-                                cnfl.push_back(lit(c_diff->b, false));
+                                if (sat.value(c_diff->b) != Undefined)
+                                    cnfl.push_back(lit(c_diff->b, false));
                         c_from = _preds[c_from];
                     }
                     // we propagate the reason for assigning true to diff->b..
                     record(cnfl);
-                    cnfl.clear();
                 }
 #endif
-
     return true;
 }
 
@@ -184,8 +187,8 @@ bool rdl_theory::check(std::vector<lit> &cnfl)
                 cnfl.push_back(lit(c_diff->b, false));
                 return false;
             }
-            else
-                propagate(c_diff->from, c_diff->to, c_diff->diff);
+            else if (_data[c_diff->from][c_diff->to] > c_diff->diff)
+                check(c_diff->from, c_diff->to, c_diff->diff);
             break;
         case False:
             if (_data[c_diff->from][c_diff->to] <= c_diff->diff)
@@ -201,8 +204,8 @@ bool rdl_theory::check(std::vector<lit> &cnfl)
                 cnfl.push_back(c_diff->b);
                 return false;
             }
-            else
-                propagate(c_diff->to, c_diff->from, -c_diff->diff - inf_rational(rational::ZERO, rational::ONE));
+            else if (_data[c_diff->to][c_diff->from] >= -c_diff->diff)
+                check(c_diff->to, c_diff->from, -c_diff->diff - inf_rational(rational::ZERO, rational::ONE));
             break;
         }
         prop_q.pop();
@@ -213,7 +216,9 @@ bool rdl_theory::check(std::vector<lit> &cnfl)
 
 void rdl_theory::push()
 {
+#ifndef STRONG_PROPAGATION
     assert(prop_q.empty());
+#endif
     layers.push_back(layer());
 }
 
@@ -224,8 +229,10 @@ void rdl_theory::pop()
     for (const auto &pred : layers.back().old_preds)
         _preds[pred.first] = pred.second;
     layers.pop_back();
+#ifndef STRONG_PROPAGATION
     while (!prop_q.empty())
         prop_q.pop();
+#endif
 }
 
 void rdl_theory::propagate(const size_t &from, const size_t &to, const inf_rational &diff)
@@ -269,6 +276,35 @@ void rdl_theory::set_diff(const size_t &from, const size_t &to, const inf_ration
     }
     _data[from][to] = diff; // we update the difference..
     _preds[to] = from;      // we update the predecessor..
+}
+
+void rdl_theory::check(const size_t &from, const size_t &to, const inf_rational &diff)
+{
+    set_diff(from, to, diff);
+    std::vector<size_t> set_i;
+    std::vector<size_t> set_j;
+
+    // start with an O(n) loop
+    for (size_t u = 0; u < size(); ++u)
+    {
+        if (_data[u][from] < _data[u][to] - diff)
+        { // u -> from -> to is shorter than u -> to
+            set_diff(u, to, _data[u][from] + diff);
+            set_i.push_back(u);
+        }
+        if (_data[to][u] < _data[from][u] - diff)
+        { // from -> to -> u is shorter than from -> u
+            set_diff(from, u, _data[to][u] + diff);
+            set_j.push_back(u);
+        }
+    }
+
+    // finally, loop over set_i and set_j in O(n^2) time (but possibly much less)
+    for (const auto &i : set_i)
+        for (const auto &j : set_j)
+            if (i != j && _data[i][to] + _data[to][j] < _data[i][j])
+                // i -> from -> to -> j is shorter than i -> j
+                set_diff(i, j, _data[i][to] + _data[to][j]);
 }
 
 void rdl_theory::resize(const size_t &size)

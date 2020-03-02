@@ -101,6 +101,9 @@ void test_real_difference_logic()
     assert(nd);
     nd = rdl.difference(tp2, origin, -25);
     assert(nd);
+
+    bool ch = core.check();
+    assert(ch);
 }
 
 int main(int, char **)

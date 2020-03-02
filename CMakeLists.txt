@@ -63,7 +63,7 @@ if(CHECK_INCONSISTENCIES)
     add_definitions(-DCHECK_INCONSISTENCIES)
 endif()
 
-message(STATUS "Strong propagation:       ${CHECK_INCONSISTENCIES}")
+message(STATUS "Strong propagation:       ${STRONG_PROPAGATION}")
 if(STRONG_PROPAGATION)
     add_definitions(-DSTRONG_PROPAGATION)
 endif()
