@@ -28,14 +28,14 @@ private:
     void push() override;
     void pop() override;
 
-    void propagate(const size_t &from, const size_t &to, const inf_rational &diff);
-    void set_diff(const size_t &from, const size_t &to, const inf_rational &diff);
+    void propagate(const var &from, const var &to, const inf_rational &diff);
+    void set_diff(const var &from, const var &to, const inf_rational &diff);
 
     void resize(const size_t &size);
 
 public:
-    static constexpr size_t origin() { return 0; }
-    static constexpr size_t horizon() { return 1; }
+    static constexpr var origin() { return 0; }
+    static constexpr var horizon() { return 1; }
 
 private:
     class rdl_difference

@@ -134,11 +134,11 @@ void rdl_theory::pop()
     layers.pop_back();
 }
 
-void rdl_theory::propagate(const size_t &from, const size_t &to, const inf_rational &diff)
+void rdl_theory::propagate(const var &from, const var &to, const inf_rational &diff)
 {
     set_diff(from, to, diff);
-    std::vector<size_t> set_i;
-    std::vector<size_t> set_j;
+    std::vector<var> set_i;
+    std::vector<var> set_j;
     std::vector<std::pair<var, var>> c_updates;
 
     // start with an O(n) loop
@@ -206,7 +206,7 @@ void rdl_theory::propagate(const size_t &from, const size_t &to, const inf_ratio
 #endif
 }
 
-void rdl_theory::set_diff(const size_t &from, const size_t &to, const inf_rational &diff)
+void rdl_theory::set_diff(const var &from, const var &to, const inf_rational &diff)
 {
     assert(_data[from][to] > diff);
     if (!layers.empty())
