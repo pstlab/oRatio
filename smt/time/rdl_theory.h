@@ -16,9 +16,9 @@ public:
 
     var new_var(); // creates and returns a new difference logic variable..
 
-    var new_difference(const var &from, const var &to, const inf_rational &diff);
+    var new_difference(const var &from, const var &to, const inf_rational &diff); // creates and returns a new propositional variable for controlling the constraint 'to - from <= diff'..
 
-    bool difference(const var &from, const var &to, const inf_rational &diff, const var &p = TRUE_var);
+    bool difference(const var &from, const var &to, const inf_rational &diff, const var &p = TRUE_var); // creates a new constraint 'to - from <= diff' and associates it to the controlling variable 'p'..
 
     size_t size() const { return _preds.size(); }
 
@@ -30,7 +30,6 @@ private:
 
     void propagate(const size_t &from, const size_t &to, const inf_rational &diff);
     void set_diff(const size_t &from, const size_t &to, const inf_rational &diff);
-    void check(const size_t &from, const size_t &to, const inf_rational &diff);
 
     void resize(const size_t &size);
 
@@ -65,9 +64,6 @@ private:
     std::vector<var> _preds;
     std::map<std::pair<var, var>, std::vector<rdl_difference *>> diff_constrs;
     std::unordered_map<var, std::vector<rdl_difference *>> var_diffs;
-#ifndef STRONG_PROPAGATION
-    std::queue<rdl_difference *> prop_q;
-#endif
     std::vector<layer> layers; // we store the updates..
 };
 } // namespace smt

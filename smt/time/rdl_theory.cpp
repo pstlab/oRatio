@@ -12,12 +12,12 @@ rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _data(s
 
 rdl_theory::~rdl_theory() {}
 
-size_t rdl_theory::new_var()
+var rdl_theory::new_var()
 {
-    size_t tp = _preds.size();
+    var tp = _preds.size();
     if (_data.size() == tp)
         resize((_data.size() * 3) / 2 + 1);
-    _preds.push_back(0);
+    _preds.push_back(tp);
     return tp;
 }
 
@@ -88,12 +88,8 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
                 return false;
             }
 
-#ifdef STRONG_PROPAGATION
             if (_data[diff->from][diff->to] > diff->diff)
                 propagate(diff->from, diff->to, diff->diff);
-#else
-            prop_q.push(diff);
-#endif
         }
     }
     else
@@ -114,19 +110,67 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
                 return false;
             }
 
-#ifdef STRONG_PROPAGATION
             if (_data[diff->to][diff->from] >= -diff->diff)
                 propagate(diff->to, diff->from, -diff->diff - inf_rational(rational::ZERO, rational::ONE));
-#else
-            prop_q.push(diff);
-#endif
+        }
+    }
+    return true;
+}
+
+bool rdl_theory::check(std::vector<lit> &cnfl)
+{
+    assert(cnfl.empty());
+    return true;
+}
+
+void rdl_theory::push() { layers.push_back(layer()); }
+
+void rdl_theory::pop()
+{
+    for (const auto &dist : layers.back().old_dists)
+        _data[dist.first.first][dist.first.second] = dist.second;
+    for (const auto &pred : layers.back().old_preds)
+        _preds[pred.first] = pred.second;
+    layers.pop_back();
+}
+
+void rdl_theory::propagate(const size_t &from, const size_t &to, const inf_rational &diff)
+{
+    set_diff(from, to, diff);
+    std::vector<size_t> set_i;
+    std::vector<size_t> set_j;
+    std::vector<std::pair<var, var>> c_updates;
+
+    // start with an O(n) loop
+    for (size_t u = 0; u < size(); ++u)
+    {
+        if (_data[u][from] < _data[u][to] - diff)
+        { // u -> from -> to is shorter than u -> to
+            set_diff(u, to, _data[u][from] + diff);
+            set_i.push_back(u);
+            c_updates.push_back({u, to});
+        }
+        if (_data[to][u] < _data[from][u] - diff)
+        { // from -> to -> u is shorter than from -> u
+            set_diff(from, u, _data[to][u] + diff);
+            set_j.push_back(u);
+            c_updates.push_back({from, u});
         }
     }
 
+    // finally, loop over set_i and set_j in O(n^2) time (but possibly much less)
+    for (const auto &i : set_i)
+        for (const auto &j : set_j)
+            if (i != j && _data[i][to] + _data[to][j] < _data[i][j])
+            { // i -> from -> to -> j is shorter than i -> j
+                set_diff(i, j, _data[i][to] + _data[to][j]);
+                c_updates.push_back({i, j});
+            }
+
 #ifdef STRONG_PROPAGATION
-    for (const auto &c_diffs : var_diffs)
-        if (sat.value(c_diffs.first) == Undefined)
-            for (const auto &diff : c_diffs.second)
+    for (const auto &c_pairs : c_updates)
+        for (const auto &diff : diff_constrs[c_pairs])
+            if (sat.value(diff->b) == Undefined)
                 if (_data[diff->to][diff->from] < -diff->diff)
                 { // the constraint is inconsistent..
                     std::vector<lit> cnfl;
@@ -160,108 +204,6 @@ bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
                     record(cnfl);
                 }
 #endif
-    return true;
-}
-
-bool rdl_theory::check(std::vector<lit> &cnfl)
-{
-    assert(cnfl.empty());
-#ifndef STRONG_PROPAGATION
-    while (!prop_q.empty())
-    {
-        rdl_difference *c_diff = prop_q.front();
-        assert(sat.value(c_diff->b) != Undefined);
-        switch (sat.value(c_diff->b))
-        {
-        case True:
-            if (_data[c_diff->to][c_diff->from] < -c_diff->diff)
-            { // we build the cause for the conflict..
-                var c_from = c_diff->from;
-                while (c_from != c_diff->to)
-                {
-                    if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
-                        for (const auto &c_diff : c_d->second)
-                            cnfl.push_back(lit(c_diff->b, false));
-                    c_from = _preds[c_from];
-                }
-                cnfl.push_back(lit(c_diff->b, false));
-                return false;
-            }
-            else if (_data[c_diff->from][c_diff->to] > c_diff->diff)
-                check(c_diff->from, c_diff->to, c_diff->diff);
-            break;
-        case False:
-            if (_data[c_diff->from][c_diff->to] <= c_diff->diff)
-            { // we build the cause for the conflict..
-                var c_from = c_diff->from;
-                while (c_from != c_diff->to)
-                {
-                    if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
-                        for (const auto &c_diff : c_d->second)
-                            cnfl.push_back(lit(c_diff->b, false));
-                    c_from = _preds[c_from];
-                }
-                cnfl.push_back(c_diff->b);
-                return false;
-            }
-            else if (_data[c_diff->to][c_diff->from] >= -c_diff->diff)
-                check(c_diff->to, c_diff->from, -c_diff->diff - inf_rational(rational::ZERO, rational::ONE));
-            break;
-        }
-        prop_q.pop();
-    }
-#endif
-    return true;
-}
-
-void rdl_theory::push()
-{
-#ifndef STRONG_PROPAGATION
-    assert(prop_q.empty());
-#endif
-    layers.push_back(layer());
-}
-
-void rdl_theory::pop()
-{
-    for (const auto &dist : layers.back().old_dists)
-        _data[dist.first.first][dist.first.second] = dist.second;
-    for (const auto &pred : layers.back().old_preds)
-        _preds[pred.first] = pred.second;
-    layers.pop_back();
-#ifndef STRONG_PROPAGATION
-    while (!prop_q.empty())
-        prop_q.pop();
-#endif
-}
-
-void rdl_theory::propagate(const size_t &from, const size_t &to, const inf_rational &diff)
-{
-    set_diff(from, to, diff);
-    std::vector<size_t> set_i;
-    std::vector<size_t> set_j;
-
-    // start with an O(n) loop
-    for (size_t u = 0; u < size(); ++u)
-    {
-        if (_data[u][from] < _data[u][to] - diff)
-        { // u -> from -> to is shorter than u -> to
-            set_diff(u, to, _data[u][from] + diff);
-            set_i.push_back(u);
-        }
-        if (_data[to][u] < _data[from][u] - diff)
-        { // from -> to -> u is shorter than from -> u
-            set_diff(from, u, _data[to][u] + diff);
-            set_j.push_back(u);
-        }
-    }
-
-    // finally, loop over set_i and set_j in O(n^2) time (but possibly much less)
-    for (const auto &i : set_i)
-        for (const auto &j : set_j)
-            if (i != j && _data[i][to] + _data[to][j] < _data[i][j])
-                // i -> from -> to -> j is shorter than i -> j
-                set_diff(i, j, _data[i][to] + _data[to][j]);
 }
 
 void rdl_theory::set_diff(const size_t &from, const size_t &to, const inf_rational &diff)
@@ -276,35 +218,6 @@ void rdl_theory::set_diff(const size_t &from, const size_t &to, const inf_ration
     }
     _data[from][to] = diff; // we update the difference..
     _preds[to] = from;      // we update the predecessor..
-}
-
-void rdl_theory::check(const size_t &from, const size_t &to, const inf_rational &diff)
-{
-    set_diff(from, to, diff);
-    std::vector<size_t> set_i;
-    std::vector<size_t> set_j;
-
-    // start with an O(n) loop
-    for (size_t u = 0; u < size(); ++u)
-    {
-        if (_data[u][from] < _data[u][to] - diff)
-        { // u -> from -> to is shorter than u -> to
-            set_diff(u, to, _data[u][from] + diff);
-            set_i.push_back(u);
-        }
-        if (_data[to][u] < _data[from][u] - diff)
-        { // from -> to -> u is shorter than from -> u
-            set_diff(from, u, _data[to][u] + diff);
-            set_j.push_back(u);
-        }
-    }
-
-    // finally, loop over set_i and set_j in O(n^2) time (but possibly much less)
-    for (const auto &i : set_i)
-        for (const auto &j : set_j)
-            if (i != j && _data[i][to] + _data[to][j] < _data[i][j])
-                // i -> from -> to -> j is shorter than i -> j
-                set_diff(i, j, _data[i][to] + _data[to][j]);
 }
 
 void rdl_theory::resize(const size_t &size)
