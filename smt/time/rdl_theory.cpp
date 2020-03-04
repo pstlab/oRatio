@@ -1,67 +1,71 @@
 #include "rdl_theory.h"
+#include <algorithm>
 #include <cassert>
 
 namespace smt
 {
 
-rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _data(std::vector<std::vector<inf_rational>>(size, std::vector<inf_rational>(size, rational::POSITIVE_INFINITY)))
+rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<inf_rational>>(size, std::vector<inf_rational>(size, rational::POSITIVE_INFINITY))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
 {
     for (size_t i = 0; i < size; ++i)
-        _data[i][i] = 0;
+    {
+        _dists[i][i] = 0;
+        std::fill(_preds[i].begin(), _preds[i].end(), i);
+        _preds[i][i] = -1;
+    }
 }
 
 rdl_theory::~rdl_theory() {}
 
 var rdl_theory::new_var()
 {
-    var tp = _preds.size();
-    if (_data.size() == tp)
-        resize((_data.size() * 3) / 2 + 1);
-    _preds.push_back(tp);
+    var tp = n_vars++;
+    if (_dists.size() == tp)
+        resize((_dists.size() * 3) / 2 + 1);
     return tp;
 }
 
-var rdl_theory::new_difference(const var &from, const var &to, const inf_rational &diff)
+var rdl_theory::new_distance(const var &from, const var &to, const inf_rational &dist)
 {
-    if (_data[to][from] < -diff)
+    if (_dists[to][from] < -dist)
         return FALSE_var; // the constraint is inconsistent..
-    else if (_data[from][to] <= diff)
+    else if (_dists[from][to] <= dist)
         return TRUE_var; // the constraint is redundant..
     else
     { // we need to create a new propositional variable..
         const var ctr = sat.new_var();
         bind(ctr);
-        rdl_difference *c_diff = new rdl_difference(ctr, from, to, diff);
-        var_diffs[ctr].push_back(c_diff);
-        diff_constrs[{from, to}].push_back(c_diff);
+        rdl_distance *c_dist = new rdl_distance(ctr, from, to, dist);
+        var_dists[ctr].push_back(c_dist);
+        dist_constrs[{from, to}].push_back(c_dist);
         return ctr;
     }
 }
 
-bool rdl_theory::difference(const var &from, const var &to, const inf_rational &diff, const var &p)
+bool rdl_theory::distance(const var &from, const var &to, const inf_rational &dist, const var &p)
 {
-    if (_data[to][from] < -diff)
+    if (_dists[to][from] < -dist)
         return sat.eq(p, FALSE_var); // the constraint is inconsistent..
-    else if (_data[from][to] <= diff)
+    else if (_dists[from][to] <= dist)
         return sat.eq(p, TRUE_var); // the constraint is redundant..
     else
         switch (sat.value(p))
         {
         case True:
         {
-            propagate(from, to, diff);
+            propagate(from, to, dist);
             return true;
         }
         case False:
         {
-            propagate(to, from, -diff - inf_rational(rational::ZERO, rational::ONE));
+            propagate(to, from, -dist - inf_rational(rational::ZERO, rational::ONE));
             return true;
         }
         default:
             bind(p);
-            rdl_difference *c_diff = new rdl_difference(p, from, to, diff);
-            var_diffs[p].push_back(c_diff);
-            diff_constrs[{from, to}].push_back(c_diff);
+            rdl_distance *c_dist = new rdl_distance(p, from, to, dist);
+            var_dists[p].push_back(c_dist);
+            dist_constrs[{from, to}].push_back(c_dist);
             return true;
         }
 }
@@ -69,49 +73,51 @@ bool rdl_theory::difference(const var &from, const var &to, const inf_rational &
 bool rdl_theory::propagate(const lit &p, std::vector<lit> &cnfl)
 {
     assert(cnfl.empty());
-    assert(var_diffs.count(p.get_var()));
+    assert(var_dists.count(p.get_var()));
     if (p.get_sign())
     { // the assertion is direct..
-        for (const auto &diff : var_diffs.at(p.get_var()))
+        for (const auto &dist : var_dists.at(p.get_var()))
         {
-            if (_data[diff->to][diff->from] < -diff->diff)
+            if (_dists[dist->to][dist->from] < -dist->dist)
             { // we build the cause for the conflict..
-                var c_from = diff->from;
-                while (c_from != diff->to)
+                var c_to = dist->from;
+                while (c_to != dist->to)
                 {
-                    if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
-                        for (const auto &c_diff : c_d->second)
-                            cnfl.push_back(lit(c_diff->b, false));
-                    c_from = _preds[c_from];
+                    if (const auto &c_d = dist_constrs.find({_preds[dist->to][c_to], c_to}); c_d != dist_constrs.end())
+                        for (const auto &c_dist : c_d->second)
+                            if (sat.value(c_dist->b) != Undefined)
+                                cnfl.push_back(lit(c_dist->b, false));
+                    c_to = _preds[dist->to][c_to];
                 }
                 cnfl.push_back(!p);
                 return false;
             }
 
-            if (_data[diff->from][diff->to] > diff->diff)
-                propagate(diff->from, diff->to, diff->diff);
+            if (_dists[dist->from][dist->to] > dist->dist)
+                propagate(dist->from, dist->to, dist->dist);
         }
     }
     else
-    { // the assertion is negated..
-        for (const auto &diff : var_diffs.at(p.get_var()))
+    { // the assertion is negated: we try semantic branching..
+        for (const auto &dist : var_dists.at(p.get_var()))
         {
-            if (_data[diff->from][diff->to] <= diff->diff)
+            if (_dists[dist->from][dist->to] <= dist->dist)
             { // we build the cause for the conflict..
-                var c_from = diff->from;
-                while (c_from != diff->to)
+                var c_from = dist->to;
+                while (c_from != dist->from)
                 {
-                    if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
-                        for (const auto &c_diff : c_d->second)
-                            cnfl.push_back(lit(c_diff->b, false));
-                    c_from = _preds[c_from];
+                    if (const auto &c_d = dist_constrs.find({_preds[dist->from][c_from], c_from}); c_d != dist_constrs.end())
+                        for (const auto &c_dist : c_d->second)
+                            if (sat.value(c_dist->b) != Undefined)
+                                cnfl.push_back(lit(c_dist->b, false));
+                    c_from = _preds[dist->from][c_from];
                 }
                 cnfl.push_back(!p);
                 return false;
             }
 
-            if (_data[diff->to][diff->from] >= -diff->diff)
-                propagate(diff->to, diff->from, -diff->diff - inf_rational(rational::ZERO, rational::ONE));
+            if (_dists[dist->to][dist->from] >= -dist->dist)
+                propagate(dist->to, dist->from, -dist->dist - inf_rational(rational::ZERO, rational::ONE));
         }
     }
     return true;
@@ -128,105 +134,137 @@ void rdl_theory::push() { layers.push_back(layer()); }
 void rdl_theory::pop()
 {
     for (const auto &dist : layers.back().old_dists)
-        _data[dist.first.first][dist.first.second] = dist.second;
+        _dists[dist.first.first][dist.first.second] = dist.second;
     for (const auto &pred : layers.back().old_preds)
-        _preds[pred.first] = pred.second;
+        _preds[pred.first.first][pred.first.second] = pred.second;
     layers.pop_back();
 }
 
-void rdl_theory::propagate(const var &from, const var &to, const inf_rational &diff)
+void rdl_theory::propagate(const var &from, const var &to, const inf_rational &dist)
 {
-    set_diff(from, to, diff);
+    set_dist(from, to, dist);
+    set_pred(from, to, from);
     std::vector<var> set_i;
     std::vector<var> set_j;
+#ifdef STRONG_PROPAGATION
     std::vector<std::pair<var, var>> c_updates;
+    c_updates.push_back({from, to});
+    c_updates.push_back({to, from});
+#endif
 
-    // start with an O(n) loop
+    // we start with an O(n) loop..
     for (size_t u = 0; u < size(); ++u)
     {
-        if (_data[u][from] < _data[u][to] - diff)
-        { // u -> from -> to is shorter than u -> to
-            set_diff(u, to, _data[u][from] + diff);
+        if (_dists[u][from] < _dists[u][to] - dist)
+        { // u -> from -> to is shorter than u -> to..
+            set_dist(u, to, _dists[u][from] + dist);
+            set_pred(u, to, from);
             set_i.push_back(u);
+#ifdef STRONG_PROPAGATION
             c_updates.push_back({u, to});
+            c_updates.push_back({to, u});
+#endif
         }
-        if (_data[to][u] < _data[from][u] - diff)
-        { // from -> to -> u is shorter than from -> u
-            set_diff(from, u, _data[to][u] + diff);
+        if (_dists[to][u] < _dists[from][u] - dist)
+        { // from -> to -> u is shorter than from -> u..
+            set_dist(from, u, _dists[to][u] + dist);
+            set_pred(from, u, _preds[to][u]);
             set_j.push_back(u);
+#ifdef STRONG_PROPAGATION
             c_updates.push_back({from, u});
+            c_updates.push_back({u, from});
+#endif
         }
     }
 
-    // finally, loop over set_i and set_j in O(n^2) time (but possibly much less)
+    // finally, we loop over set_i and set_j in O(n^2) time (but possibly much less)..
     for (const auto &i : set_i)
         for (const auto &j : set_j)
-            if (i != j && _data[i][to] + _data[to][j] < _data[i][j])
-            { // i -> from -> to -> j is shorter than i -> j
-                set_diff(i, j, _data[i][to] + _data[to][j]);
+            if (i != j && _dists[i][to] + _dists[to][j] < _dists[i][j])
+            { // i -> from -> to -> j is shorter than i -> j--
+                set_dist(i, j, _dists[i][to] + _dists[to][j]);
+                set_pred(i, j, _preds[to][j]);
+#ifdef STRONG_PROPAGATION
                 c_updates.push_back({i, j});
+                c_updates.push_back({j, i});
+#endif
             }
 
 #ifdef STRONG_PROPAGATION
     for (const auto &c_pairs : c_updates)
-        for (const auto &diff : diff_constrs[c_pairs])
-            if (sat.value(diff->b) == Undefined)
-                if (_data[diff->to][diff->from] < -diff->diff)
-                { // the constraint is inconsistent..
-                    std::vector<lit> cnfl;
-                    cnfl.push_back(lit(diff->b, false));
-                    var c_from = diff->from;
-                    while (c_from != diff->to)
-                    {
-                        if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
-                            for (const auto &c_diff : c_d->second)
-                                if (sat.value(c_diff->b) != Undefined)
-                                    cnfl.push_back(lit(c_diff->b, false));
-                        c_from = _preds[c_from];
+        if (const auto &c_dists = dist_constrs.find(c_pairs); c_dists != dist_constrs.end())
+            for (const auto &dist : c_dists->second)
+                if (sat.value(dist->b) == Undefined)
+                    if (_dists[dist->to][dist->from] < -dist->dist)
+                    { // the constraint is inconsistent..
+                        std::vector<lit> cnfl;
+                        cnfl.push_back(lit(dist->b, false));
+                        var c_to = dist->from;
+                        while (c_to != dist->to)
+                        {
+                            if (const auto &c_d = dist_constrs.find({_preds[dist->to][c_to], c_to}); c_d != dist_constrs.end())
+                                for (const auto &c_dist : c_d->second)
+                                    if (sat.value(c_dist->b) != Undefined)
+                                        cnfl.push_back(lit(c_dist->b, false));
+                            c_to = _preds[dist->to][c_to];
+                        }
+                        // we propagate the reason for assigning false to dist->b..
+                        record(cnfl);
                     }
-                    // we propagate the reason for assigning false to diff->b..
-                    record(cnfl);
-                }
-                else if (_data[diff->from][diff->to] <= diff->diff)
-                { // the constraint is redundant..
-                    std::vector<lit> cnfl;
-                    cnfl.push_back(diff->b);
-                    var c_from = diff->from;
-                    while (c_from != diff->to)
-                    {
-                        if (const auto &c_d = diff_constrs.find({_preds[c_from], c_from}); c_d != diff_constrs.end())
-                            for (const auto &c_diff : c_d->second)
-                                if (sat.value(c_diff->b) != Undefined)
-                                    cnfl.push_back(lit(c_diff->b, false));
-                        c_from = _preds[c_from];
+                    else if (_dists[dist->from][dist->to] <= dist->dist)
+                    { // the constraint is redundant..
+                        std::vector<lit> cnfl;
+                        cnfl.push_back(dist->b);
+                        var c_to = dist->from;
+                        while (c_to != dist->to)
+                        {
+                            if (const auto &c_d = dist_constrs.find({_preds[dist->to][c_to], c_to}); c_d != dist_constrs.end())
+                                for (const auto &c_dist : c_d->second)
+                                    if (sat.value(c_dist->b) != Undefined)
+                                        cnfl.push_back(lit(c_dist->b, false));
+                            c_to = _preds[dist->to][c_to];
+                        }
+                        // we propagate the reason for assigning true to dist->b..
+                        record(cnfl);
                     }
-                    // we propagate the reason for assigning true to diff->b..
-                    record(cnfl);
-                }
 #endif
 }
 
-void rdl_theory::set_diff(const var &from, const var &to, const inf_rational &diff)
+void rdl_theory::set_dist(const var &from, const var &to, const inf_rational &dist)
 {
-    assert(_data[from][to] > diff);
-    if (!layers.empty())
-    { // we store the current values for backtracking purposes..
-        if (!layers.back().old_dists.count({from, to}))
-            layers.back().old_dists.insert({{from, to}, _data[from][to]});
-        if (!layers.back().old_preds.count(to))
-            layers.back().old_preds.insert({to, from});
-    }
-    _data[from][to] = diff; // we update the difference..
-    _preds[to] = from;      // we update the predecessor..
+    assert(_dists[from][to] > dist);
+    if (!layers.empty() && !layers.back().old_dists.count({from, to}))
+        // we store the current values for backtracking purposes..
+        layers.back().old_dists.insert({{from, to}, _dists[from][to]});
+    // we update the disterence..
+    _dists[from][to] = dist;
+}
+
+void rdl_theory::set_pred(const var &from, const var &to, const var &pred)
+{
+    if (!layers.empty() && !layers.back().old_preds.count({from, to}))
+        // we store the current values for backtracking purposes..
+        layers.back().old_preds.insert({{from, to}, from});
+    // we update the predecessor..
+    _preds[from][to] = pred;
 }
 
 void rdl_theory::resize(const size_t &size)
 {
-    const size_t c_size = _data.size();
-    for (auto &row : _data)
+    const size_t c_size = _dists.size();
+    for (auto &row : _dists)
         row.resize(size, rational::POSITIVE_INFINITY);
-    _data.resize(size, std::vector<inf_rational>(size, rational::POSITIVE_INFINITY));
+    _dists.resize(size, std::vector<inf_rational>(size, rational::POSITIVE_INFINITY));
     for (size_t i = c_size; i < size; ++i)
-        _data[i][i] = 0;
+        _dists[i][i] = 0;
+
+    for (size_t i = c_size; i < size; ++i)
+        _preds[i].resize(size, i);
+    _preds.resize(size, std::vector<var>(size, -1));
+    for (size_t i = c_size; i < size; ++i)
+    {
+        std::fill(_preds[i].begin(), _preds[i].end(), i);
+        _preds[i][i] = -1;
+    }
 }
 } // namespace smt
