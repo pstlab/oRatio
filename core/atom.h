@@ -16,6 +16,9 @@ public:
 
   smt::var get_sigma() const { return sigma; } // returns the variable that represents the state of the atom: if the variable is true, the atom is active; if the variable is false, the atom is unified; if the variable is undefined, the atom is not justified..
 
+  smt::var eq(item &i) noexcept override;
+  bool equates(const item &i) const noexcept override;
+
 private:
   const smt::var sigma; // this variable represents the state of the atom: if the variable is true, the atom is active; if the variable is false, the atom is unified; if the variable is undefined, the atom is not justified..
 };
