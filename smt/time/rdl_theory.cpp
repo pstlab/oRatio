@@ -215,14 +215,14 @@ void rdl_theory::propagate(const var &from, const var &to, const inf_rational &d
                     { // the constraint is redundant..
                         std::vector<lit> cnfl;
                         cnfl.push_back(dist->b);
-                        var c_to = dist->from;
-                        while (c_to != dist->to)
+                        var c_to = dist->to;
+                        while (c_to != dist->from)
                         {
-                            if (const auto &c_d = dist_constrs.find({_preds[dist->to][c_to], c_to}); c_d != dist_constrs.end())
+                            if (const auto &c_d = dist_constrs.find({_preds[dist->from][c_to], c_to}); c_d != dist_constrs.end())
                                 for (const auto &c_dist : c_d->second)
                                     if (sat.value(c_dist->b) != Undefined)
                                         cnfl.push_back(lit(c_dist->b, false));
-                            c_to = _preds[dist->to][c_to];
+                            c_to = _preds[dist->from][c_to];
                         }
                         // we propagate the reason for assigning true to dist->b..
                         record(cnfl);
