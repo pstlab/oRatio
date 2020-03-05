@@ -274,8 +274,10 @@ void local_field_statement::execute(const scope &scp, context &ctx) const
             type *t = static_cast<type *>(s);
             if (t->is_primitive())
                 ctx->exprs.emplace(names[i], t->new_instance(ctx));
-            else
+            else if (!t->get_instances().empty())
                 ctx->exprs.emplace(names[i], t->new_existential());
+            else
+                throw inconsistency_exception();
         }
         if (const core *c = dynamic_cast<const core *>(&scp)) // we create fields for root items..
             const_cast<core *>(c)->fields.emplace(names[i], new field(ctx->exprs.at(names[i])->get_type(), names[i]));
@@ -621,8 +623,15 @@ void compilation_unit::refine(scope &scp) const
 }
 void compilation_unit::execute(const scope &scp, context &ctx) const
 {
-    for (const auto &stmnt : statements)
-        dynamic_cast<const ast::statement *>(stmnt)->execute(scp, ctx);
+    try
+    {
+        for (const auto &stmnt : statements)
+            dynamic_cast<const ast::statement *>(stmnt)->execute(scp, ctx);
+    }
+    catch (const inconsistency_exception &)
+    { // we found an inconsistency at root-level..
+        throw unsolvable_exception();
+    }
 }
 } // namespace ast
 

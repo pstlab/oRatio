@@ -70,6 +70,7 @@ expr type::new_instance(context &ctx)
 
 expr type::new_existential()
 {
+    assert(!instances.empty());
     if (instances.size() == 1)
         return *instances.begin();
     else
