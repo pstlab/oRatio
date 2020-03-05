@@ -1,11 +1,10 @@
 #pragma once
 
+#include "defs.h"
 #include <string>
 
 namespace smt
 {
-
-typedef long I;
 
 class rational
 {

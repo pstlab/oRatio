@@ -6,8 +6,6 @@
 namespace smt
 {
 
-typedef size_t var;
-
 class lin
 {
 public:

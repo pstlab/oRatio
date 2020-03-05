@@ -34,10 +34,6 @@ private:
 
     void resize(const size_t &size);
 
-public:
-    static constexpr var origin() { return 0; }
-    static constexpr var horizon() { return 1; }
-
 private:
     class rdl_distance
     {
@@ -57,8 +53,8 @@ private:
 
     struct layer
     {
-        std::map<std::pair<var, var>, inf_rational> old_dists;
-        std::map<std::pair<var, var>, var> old_preds;
+        std::map<std::pair<var, var>, inf_rational> old_dists; // the updated distances..
+        std::map<std::pair<var, var>, var> old_preds;          // the updated predecessors..
     };
 
     size_t n_vars = 0;

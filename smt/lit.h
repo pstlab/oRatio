@@ -1,11 +1,10 @@
 #pragma once
 
+#include "defs.h"
 #include <cstddef>
 
 namespace smt
 {
-
-typedef size_t var;
 
 /**
  * This class is used for representing propositional literals.

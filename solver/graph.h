@@ -8,11 +8,6 @@
 #include <unordered_set>
 #include <vector>
 
-namespace smt
-{
-typedef size_t var;
-} // namespace smt
-
 namespace ratio
 {
 

@@ -3,11 +3,6 @@
 #include "rational.h"
 #include <vector>
 
-namespace smt
-{
-typedef size_t var;
-} // namespace smt
-
 namespace ratio
 {
 

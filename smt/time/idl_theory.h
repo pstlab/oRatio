@@ -6,8 +6,6 @@
 namespace smt
 {
 
-typedef long I;
-
 class idl_theory : public theory
 {
 public:
@@ -34,10 +32,6 @@ private:
     void set_pred(const var &from, const var &to, const var &pred);
 
     void resize(const size_t &size);
-
-public:
-    static constexpr var origin() { return 0; }
-    static constexpr var horizon() { return 1; }
 
 private:
     class idl_distance
