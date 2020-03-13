@@ -314,7 +314,7 @@ void disjunction_statement::execute(const scope &scp, context &ctx) const
         {
             arith_expr a_xpr = dynamic_cast<const ast::expression *const>(c.second)->evaluate(scp, ctx);
             if (!a_xpr->l.vars.empty())
-                throw std::exception("invalid disjunct cost: expected a constant..");
+                throw std::invalid_argument("invalid disjunct cost: expected a constant..");
             cost = scp.get_core().arith_value(a_xpr).get_rational();
         }
         cs.push_back(new conjunction(scp.get_core(), const_cast<scope &>(scp), cost, c.first));
