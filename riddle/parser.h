@@ -20,45 +20,45 @@ public:
 class bool_literal_expression : public expression
 {
 public:
-  bool_literal_expression(const bool &l) : literal(l) {}
+  bool_literal_expression(const bool_token &l) : literal(l) {}
   bool_literal_expression(const bool_literal_expression &orig) = delete;
   virtual ~bool_literal_expression() {}
 
 protected:
-  const bool literal;
+  const bool_token literal;
 };
 
 class int_literal_expression : public expression
 {
 public:
-  int_literal_expression(const smt::I &l) : literal(l) {}
+  int_literal_expression(const int_token &l) : literal(l) {}
   int_literal_expression(const int_literal_expression &orig) = delete;
   virtual ~int_literal_expression() {}
 
 protected:
-  const smt::I literal;
+  const int_token literal;
 };
 
 class real_literal_expression : public expression
 {
 public:
-  real_literal_expression(const smt::rational &l) : literal(l) {}
+  real_literal_expression(const real_token &l) : literal(l) {}
   real_literal_expression(const real_literal_expression &orig) = delete;
   virtual ~real_literal_expression() {}
 
 protected:
-  const smt::rational literal;
+  const real_token literal;
 };
 
 class string_literal_expression : public expression
 {
 public:
-  string_literal_expression(const std::string &l) : literal(l) {}
+  string_literal_expression(const string_token &l) : literal(l) {}
   string_literal_expression(const string_literal_expression &orig) = delete;
   virtual ~string_literal_expression() {}
 
 protected:
-  const std::string literal;
+  const string_token literal;
 };
 
 class cast_expression : public expression
@@ -719,10 +719,10 @@ private:
   /**
    * The expressions.
    */
-  virtual ast::bool_literal_expression *new_bool_literal_expression(const bool &l) { return new ast::bool_literal_expression(l); }
-  virtual ast::int_literal_expression *new_int_literal_expression(const smt::I &l) { return new ast::int_literal_expression(l); }
-  virtual ast::real_literal_expression *new_real_literal_expression(const smt::rational &l) { return new ast::real_literal_expression(l); }
-  virtual ast::string_literal_expression *new_string_literal_expression(const std::string &l) { return new ast::string_literal_expression(l); }
+  virtual ast::bool_literal_expression *new_bool_literal_expression(const bool_token &l) { return new ast::bool_literal_expression(l); }
+  virtual ast::int_literal_expression *new_int_literal_expression(const int_token &l) { return new ast::int_literal_expression(l); }
+  virtual ast::real_literal_expression *new_real_literal_expression(const real_token &l) { return new ast::real_literal_expression(l); }
+  virtual ast::string_literal_expression *new_string_literal_expression(const string_token &l) { return new ast::string_literal_expression(l); }
   virtual ast::cast_expression *new_cast_expression(const std::vector<std::string> &tp, const ast::expression *const e) { return new ast::cast_expression(tp, e); }
   virtual ast::plus_expression *new_plus_expression(const ast::expression *const e) { return new ast::plus_expression(e); }
   virtual ast::minus_expression *new_minus_expression(const ast::expression *const e) { return new ast::minus_expression(e); }

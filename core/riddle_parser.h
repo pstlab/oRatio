@@ -25,7 +25,7 @@ public:
 class bool_literal_expression : public riddle::ast::bool_literal_expression, public expression
 {
 public:
-  bool_literal_expression(const bool &l);
+  bool_literal_expression(const riddle::bool_token &l);
   bool_literal_expression(const bool_literal_expression &orig) = delete;
   virtual ~bool_literal_expression();
 
@@ -35,7 +35,7 @@ public:
 class int_literal_expression : public riddle::ast::int_literal_expression, public expression
 {
 public:
-  int_literal_expression(const smt::I &l);
+  int_literal_expression(const riddle::int_token &l);
   int_literal_expression(const int_literal_expression &orig) = delete;
   virtual ~int_literal_expression();
 
@@ -45,7 +45,7 @@ public:
 class real_literal_expression : public riddle::ast::real_literal_expression, public expression
 {
 public:
-  real_literal_expression(const smt::rational &l);
+  real_literal_expression(const riddle::real_token &l);
   real_literal_expression(const real_literal_expression &orig) = delete;
   virtual ~real_literal_expression();
 
@@ -55,7 +55,7 @@ public:
 class string_literal_expression : public riddle::ast::string_literal_expression, public expression
 {
 public:
-  string_literal_expression(const std::string &l);
+  string_literal_expression(const riddle::string_token &l);
   string_literal_expression(const string_literal_expression &orig) = delete;
   virtual ~string_literal_expression();
 
@@ -503,10 +503,10 @@ private:
   /**
    * The expressions.
    */
-  ast::bool_literal_expression *new_bool_literal_expression(const bool &l) override { return new ast::bool_literal_expression(l); }
-  ast::int_literal_expression *new_int_literal_expression(const smt::I &l) override { return new ast::int_literal_expression(l); }
-  ast::real_literal_expression *new_real_literal_expression(const smt::rational &l) override { return new ast::real_literal_expression(l); }
-  ast::string_literal_expression *new_string_literal_expression(const std::string &l) override { return new ast::string_literal_expression(l); }
+  ast::bool_literal_expression *new_bool_literal_expression(const riddle::bool_token &l) override { return new ast::bool_literal_expression(l); }
+  ast::int_literal_expression *new_int_literal_expression(const riddle::int_token &l) override { return new ast::int_literal_expression(l); }
+  ast::real_literal_expression *new_real_literal_expression(const riddle::real_token &l) override { return new ast::real_literal_expression(l); }
+  ast::string_literal_expression *new_string_literal_expression(const riddle::string_token &l) override { return new ast::string_literal_expression(l); }
   ast::cast_expression *new_cast_expression(const std::vector<std::string> &tp, const riddle::ast::expression *const e) override { return new ast::cast_expression(tp, e); }
   ast::plus_expression *new_plus_expression(const riddle::ast::expression *const e) override { return new ast::plus_expression(e); }
   ast::minus_expression *new_minus_expression(const riddle::ast::expression *const e) override { return new ast::minus_expression(e); }

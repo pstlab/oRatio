@@ -922,19 +922,19 @@ expression *parser::_expression(const size_t &pr)
     {
     case BoolLiteral_ID:
         tk = next();
-        e = new_bool_literal_expression(static_cast<bool_token *>(tks[pos - 2])->val);
+        e = new_bool_literal_expression(*static_cast<bool_token *>(tks[pos - 2]));
         break;
     case IntLiteral_ID:
         tk = next();
-        e = new_int_literal_expression(static_cast<int_token *>(tks[pos - 2])->val);
+        e = new_int_literal_expression(*static_cast<int_token *>(tks[pos - 2]));
         break;
     case RealLiteral_ID:
         tk = next();
-        e = new_real_literal_expression(static_cast<real_token *>(tks[pos - 2])->val);
+        e = new_real_literal_expression(*static_cast<real_token *>(tks[pos - 2]));
         break;
     case StringLiteral_ID:
         tk = next();
-        e = new_string_literal_expression(static_cast<string_token *>(tks[pos - 2])->str);
+        e = new_string_literal_expression(*static_cast<string_token *>(tks[pos - 2]));
         break;
     case LPAREN_ID: // either a parenthesys expression or a cast..
     {

@@ -19,21 +19,21 @@ namespace ast
 expression::expression() {}
 expression::~expression() {}
 
-bool_literal_expression::bool_literal_expression(const bool &l) : riddle::ast::bool_literal_expression(l) {}
+bool_literal_expression::bool_literal_expression(const riddle::bool_token &l) : riddle::ast::bool_literal_expression(l) {}
 bool_literal_expression::~bool_literal_expression() {}
-expr bool_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_bool(literal); }
+expr bool_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_bool(literal.val); }
 
-int_literal_expression::int_literal_expression(const smt::I &l) : riddle::ast::int_literal_expression(l) {}
+int_literal_expression::int_literal_expression(const riddle::int_token &l) : riddle::ast::int_literal_expression(l) {}
 int_literal_expression::~int_literal_expression() {}
-expr int_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_int(literal); }
+expr int_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_int(literal.val); }
 
-real_literal_expression::real_literal_expression(const smt::rational &l) : riddle::ast::real_literal_expression(l) {}
+real_literal_expression::real_literal_expression(const riddle::real_token &l) : riddle::ast::real_literal_expression(l) {}
 real_literal_expression::~real_literal_expression() {}
-expr real_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_real(literal); }
+expr real_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_real(literal.val); }
 
-string_literal_expression::string_literal_expression(const std::string &l) : riddle::ast::string_literal_expression(l) {}
+string_literal_expression::string_literal_expression(const riddle::string_token &l) : riddle::ast::string_literal_expression(l) {}
 string_literal_expression::~string_literal_expression() {}
-expr string_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_string(literal); }
+expr string_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_string(literal.str); }
 
 cast_expression::cast_expression(const std::vector<std::string> &tp, const riddle::ast::expression *const e) : riddle::ast::cast_expression(tp, e) {}
 cast_expression::~cast_expression() {}
