@@ -72,10 +72,9 @@ compilation_unit *parser::parse()
         case BANG_ID:
         case FACT_ID:
         case GOAL_ID:
+        case BoolLiteral_ID:
         case IntLiteral_ID:
         case RealLiteral_ID:
-        case TRUE_ID:
-        case FALSE_ID:
             stmnts.push_back(_statement());
             break;
         case ID_ID:
@@ -921,10 +920,9 @@ expression *parser::_expression(const size_t &pr)
     expression *e = nullptr;
     switch (tk->sym)
     {
-    case TRUE_ID:
-    case FALSE_ID:
+    case BoolLiteral_ID:
         tk = next();
-        e = new_bool_literal_expression(tks[pos - 2]->sym == TRUE_ID);
+        e = new_bool_literal_expression(static_cast<bool_token *>(tks[pos - 2])->val);
         break;
     case IntLiteral_ID:
         tk = next();

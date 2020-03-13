@@ -295,7 +295,7 @@ token *lexer::next()
             if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
-                return mk_token(FALSE_ID);
+                return mk_bool_token(false);
         default:
             return finish_id(str);
         }
@@ -432,7 +432,7 @@ token *lexer::next()
             if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
-                return mk_token(TRUE_ID);
+                return mk_bool_token(true);
         case 'y':
             if (str += ch; (ch = next_char()) != 'p')
                 return finish_id(str);

@@ -25,8 +25,6 @@ enum symbol
   OR_ID,            // 'or'
   THIS_ID,          // 'this'
   VOID_ID,          // 'void'
-  TRUE_ID,          // 'true'
-  FALSE_ID,         // 'false'
   RETURN_ID,        // 'return'
   DOT_ID,           // '.'
   COMMA_ID,         // ','
@@ -55,6 +53,7 @@ enum symbol
   IMPLICATION_ID,   // '->'
   CARET_ID,         // '^'
   ID_ID,            // ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
+  BoolLiteral_ID,   // 'true' | 'false'
   IntLiteral_ID,    // [0-9]+
   RealLiteral_ID,   // [0-9]+ '.' [0-9]+)? | '.' [0-9]+
   StringLiteral_ID, // '" . . ."'
@@ -83,6 +82,16 @@ public:
 
 public:
   const std::string id;
+};
+
+class bool_token : public token
+{
+public:
+  bool_token(const size_t &start_line, const size_t &start_pos, const size_t &end_line, const size_t &end_pos, const bool &val) : token(BoolLiteral_ID, start_line, start_pos, end_line, end_pos), val(val) {}
+  virtual ~bool_token() {}
+
+public:
+  const bool val;
 };
 
 class int_token : public token
@@ -138,6 +147,14 @@ private:
   token *mk_id_token(const std::string &id)
   {
     id_token *tk = new id_token(start_line, start_pos, end_line, end_pos, id);
+    start_line = end_line;
+    start_pos = end_pos;
+    return tk;
+  }
+
+  token *mk_bool_token(const bool &val)
+  {
+    token *tk = new bool_token(start_line, start_pos, end_line, end_pos, val);
     start_line = end_line;
     start_pos = end_pos;
     return tk;
