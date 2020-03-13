@@ -65,7 +65,7 @@ public:
 class cast_expression : public riddle::ast::cast_expression, public expression
 {
 public:
-  cast_expression(const std::vector<std::string> &tp, const riddle::ast::expression *const e);
+  cast_expression(const std::vector<riddle::id_token> &tp, const riddle::ast::expression *const e);
   cast_expression(const cast_expression &orig) = delete;
   virtual ~cast_expression();
 
@@ -115,7 +115,7 @@ public:
 class constructor_expression : public riddle::ast::constructor_expression, public expression
 {
 public:
-  constructor_expression(const std::vector<std::string> &it, const std::vector<const riddle::ast::expression *> &es);
+  constructor_expression(const std::vector<riddle::id_token> &it, const std::vector<const riddle::ast::expression *> &es);
   constructor_expression(const constructor_expression &orig) = delete;
   virtual ~constructor_expression();
 
@@ -185,7 +185,7 @@ public:
 class function_expression : public riddle::ast::function_expression, public expression
 {
 public:
-  function_expression(const std::vector<std::string> &is, const std::string &fn, const std::vector<const riddle::ast::expression *> &es);
+  function_expression(const std::vector<riddle::id_token> &is, const riddle::id_token &fn, const std::vector<const riddle::ast::expression *> &es);
   function_expression(const function_expression &orig) = delete;
   virtual ~function_expression();
 
@@ -195,7 +195,7 @@ public:
 class id_expression : public riddle::ast::id_expression, public expression
 {
 public:
-  id_expression(const std::vector<std::string> &is);
+  id_expression(const std::vector<riddle::id_token> &is);
   id_expression(const id_expression &orig) = delete;
   virtual ~id_expression();
 
@@ -295,7 +295,7 @@ public:
 class local_field_statement : public riddle::ast::local_field_statement, public statement
 {
 public:
-  local_field_statement(const std::vector<std::string> &ft, const std::vector<std::string> &ns, const std::vector<const riddle::ast::expression *> &es);
+  local_field_statement(const std::vector<riddle::id_token> &ft, const std::vector<riddle::id_token> &ns, const std::vector<const riddle::ast::expression *> &es);
   local_field_statement(const local_field_statement &orig) = delete;
   virtual ~local_field_statement();
 
@@ -305,7 +305,7 @@ public:
 class assignment_statement : public riddle::ast::assignment_statement, public statement
 {
 public:
-  assignment_statement(const std::vector<std::string> &is, const std::string &i, const riddle::ast::expression *const e);
+  assignment_statement(const std::vector<riddle::id_token> &is, const riddle::id_token &i, const riddle::ast::expression *const e);
   assignment_statement(const assignment_statement &orig) = delete;
   virtual ~assignment_statement();
 
@@ -345,7 +345,7 @@ public:
 class formula_statement : public riddle::ast::formula_statement, public statement
 {
 public:
-  formula_statement(const bool &isf, const std::string &fn, const std::vector<std::string> &scp, const std::string &pn, const std::vector<std::pair<const std::string, const riddle::ast::expression *const>> &assns);
+  formula_statement(const bool &isf, const riddle::id_token &fn, const std::vector<riddle::id_token> &scp, const riddle::id_token &pn, const std::vector<std::pair<const riddle::id_token, const riddle::ast::expression *const>> &assns);
   formula_statement(const formula_statement &orig) = delete;
   virtual ~formula_statement();
 
@@ -376,7 +376,7 @@ public:
 class method_declaration : public riddle::ast::method_declaration
 {
 public:
-  method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<const riddle::ast::statement *> &stmnts);
+  method_declaration(const std::vector<riddle::id_token> &rt, const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<const riddle::ast::statement *> &stmnts);
   method_declaration(const method_declaration &orig) = delete;
   virtual ~method_declaration();
 
@@ -386,7 +386,7 @@ public:
 class predicate_declaration : public riddle::ast::predicate_declaration
 {
 public:
-  predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const riddle::ast::statement *> &stmnts);
+  predicate_declaration(const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<std::vector<riddle::id_token>> &pl, const std::vector<const riddle::ast::statement *> &stmnts);
   predicate_declaration(const predicate_declaration &orig) = delete;
   virtual ~predicate_declaration();
 
@@ -396,7 +396,7 @@ public:
 class typedef_declaration : public riddle::ast::typedef_declaration, public type_declaration
 {
 public:
-  typedef_declaration(const std::string &n, const std::string &pt, const riddle::ast::expression *const e);
+  typedef_declaration(const riddle::id_token &n, const riddle::id_token &pt, const riddle::ast::expression *const e);
   typedef_declaration(const typedef_declaration &orig) = delete;
   virtual ~typedef_declaration();
 
@@ -406,7 +406,7 @@ public:
 class enum_declaration : public riddle::ast::enum_declaration, public type_declaration
 {
 public:
-  enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs);
+  enum_declaration(const riddle::id_token &n, const std::vector<riddle::string_token> &es, const std::vector<std::vector<riddle::id_token>> &trs);
   enum_declaration(const enum_declaration &orig) = delete;
   virtual ~enum_declaration();
 
@@ -419,7 +419,7 @@ class variable_declaration : public riddle::ast::variable_declaration
   friend class field_declaration;
 
 public:
-  variable_declaration(const std::string &n, const riddle::ast::expression *const e = nullptr) : riddle::ast::variable_declaration(n, e) {}
+  variable_declaration(const riddle::id_token &n, const riddle::ast::expression *const e = nullptr) : riddle::ast::variable_declaration(n, e) {}
   variable_declaration(const variable_declaration &orig) = delete;
   virtual ~variable_declaration() {}
 };
@@ -427,7 +427,7 @@ public:
 class field_declaration : public riddle::ast::field_declaration
 {
 public:
-  field_declaration(const std::vector<std::string> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds);
+  field_declaration(const std::vector<riddle::id_token> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds);
   field_declaration(const field_declaration &orig) = delete;
   virtual ~field_declaration();
 
@@ -479,25 +479,25 @@ private:
   /**
    * The declarations.
    */
-  ast::method_declaration *new_method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::method_declaration(rt, n, pars, stmnts); }
-  ast::predicate_declaration *new_predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::predicate_declaration(n, pars, pl, stmnts); }
-  ast::typedef_declaration *new_typedef_declaration(const std::string &n, const std::string &pt, const riddle::ast::expression *const e) override { return new ast::typedef_declaration(n, pt, e); }
-  ast::enum_declaration *new_enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs) override { return new ast::enum_declaration(n, es, trs); }
+  ast::method_declaration *new_method_declaration(const std::vector<riddle::id_token> &rt, const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::method_declaration(rt, n, pars, stmnts); }
+  ast::predicate_declaration *new_predicate_declaration(const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<std::vector<riddle::id_token>> &pl, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::predicate_declaration(n, pars, pl, stmnts); }
+  ast::typedef_declaration *new_typedef_declaration(const riddle::id_token &n, const riddle::id_token &pt, const riddle::ast::expression *const e) override { return new ast::typedef_declaration(n, pt, e); }
+  ast::enum_declaration *new_enum_declaration(const riddle::id_token &n, const std::vector<riddle::string_token> &es, const std::vector<std::vector<riddle::id_token>> &trs) override { return new ast::enum_declaration(n, es, trs); }
   ast::class_declaration *new_class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts) override { return new ast::class_declaration(n, bcs, fs, cs, ms, ps, ts); }
-  ast::variable_declaration *new_variable_declaration(const std::string &n, const riddle::ast::expression *const e = nullptr) override { return new ast::variable_declaration(n, e); }
-  ast::field_declaration *new_field_declaration(const std::vector<std::string> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds) override { return new ast::field_declaration(tp, ds); }
+  ast::variable_declaration *new_variable_declaration(const riddle::id_token &n, const riddle::ast::expression *const e = nullptr) override { return new ast::variable_declaration(n, e); }
+  ast::field_declaration *new_field_declaration(const std::vector<riddle::id_token> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds) override { return new ast::field_declaration(tp, ds); }
   ast::constructor_declaration *new_constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::constructor_declaration(pars, il, stmnts); }
   ast::compilation_unit *new_compilation_unit(const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts, const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::compilation_unit(ms, ps, ts, stmnts); }
 
   /**
    * The statements.
    */
-  ast::local_field_statement *new_local_field_statement(const std::vector<std::string> &ft, const std::vector<std::string> &ns, const std::vector<const riddle::ast::expression *> &es) override { return new ast::local_field_statement(ft, ns, es); }
-  ast::assignment_statement *new_assignment_statement(const std::vector<std::string> &is, const std::string &i, const riddle::ast::expression *const e) override { return new ast::assignment_statement(is, i, e); }
+  ast::local_field_statement *new_local_field_statement(const std::vector<riddle::id_token> &ft, const std::vector<riddle::id_token> &ns, const std::vector<const riddle::ast::expression *> &es) override { return new ast::local_field_statement(ft, ns, es); }
+  ast::assignment_statement *new_assignment_statement(const std::vector<riddle::id_token> &is, const riddle::id_token &i, const riddle::ast::expression *const e) override { return new ast::assignment_statement(is, i, e); }
   ast::expression_statement *new_expression_statement(const riddle::ast::expression *const e) override { return new ast::expression_statement(e); }
   ast::disjunction_statement *new_disjunction_statement(const std::vector<std::pair<const std::vector<const riddle::ast::statement *>, const riddle::ast::expression *const>> &conjs) override { return new ast::disjunction_statement(conjs); }
   ast::conjunction_statement *new_conjunction_statement(const std::vector<const riddle::ast::statement *> &stmnts) override { return new ast::conjunction_statement(stmnts); }
-  ast::formula_statement *new_formula_statement(const bool &isf, const std::string &fn, const std::vector<std::string> &scp, const std::string &pn, const std::vector<std::pair<const std::string, const riddle::ast::expression *const>> &assns) override { return new ast::formula_statement(isf, fn, scp, pn, assns); }
+  ast::formula_statement *new_formula_statement(const bool &isf, const riddle::id_token &fn, const std::vector<riddle::id_token> &scp, const riddle::id_token &pn, const std::vector<std::pair<const riddle::id_token, const riddle::ast::expression *const>> &assns) override { return new ast::formula_statement(isf, fn, scp, pn, assns); }
   ast::return_statement *new_return_statement(const riddle::ast::expression *const e) override { return new ast::return_statement(e); }
 
   /**
@@ -507,20 +507,20 @@ private:
   ast::int_literal_expression *new_int_literal_expression(const riddle::int_token &l) override { return new ast::int_literal_expression(l); }
   ast::real_literal_expression *new_real_literal_expression(const riddle::real_token &l) override { return new ast::real_literal_expression(l); }
   ast::string_literal_expression *new_string_literal_expression(const riddle::string_token &l) override { return new ast::string_literal_expression(l); }
-  ast::cast_expression *new_cast_expression(const std::vector<std::string> &tp, const riddle::ast::expression *const e) override { return new ast::cast_expression(tp, e); }
+  ast::cast_expression *new_cast_expression(const std::vector<riddle::id_token> &tp, const riddle::ast::expression *const e) override { return new ast::cast_expression(tp, e); }
   ast::plus_expression *new_plus_expression(const riddle::ast::expression *const e) override { return new ast::plus_expression(e); }
   ast::minus_expression *new_minus_expression(const riddle::ast::expression *const e) override { return new ast::minus_expression(e); }
   ast::not_expression *new_not_expression(const riddle::ast::expression *const e) override { return new ast::not_expression(e); }
   ast::range_expression *new_range_expression(const riddle::ast::expression *const min_e, const riddle::ast::expression *const max_e) override { return new ast::range_expression(min_e, max_e); }
-  ast::constructor_expression *new_constructor_expression(const std::vector<std::string> &it, const std::vector<const riddle::ast::expression *> &es) override { return new ast::constructor_expression(it, es); }
+  ast::constructor_expression *new_constructor_expression(const std::vector<riddle::id_token> &it, const std::vector<const riddle::ast::expression *> &es) override { return new ast::constructor_expression(it, es); }
   ast::eq_expression *new_eq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) override { return new ast::eq_expression(l, r); }
   ast::neq_expression *new_neq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) override { return new ast::neq_expression(l, r); }
   ast::lt_expression *new_lt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) override { return new ast::lt_expression(l, r); }
   ast::leq_expression *new_leq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) override { return new ast::leq_expression(l, r); }
   ast::geq_expression *new_geq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) override { return new ast::geq_expression(l, r); }
   ast::gt_expression *new_gt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) override { return new ast::gt_expression(l, r); }
-  ast::function_expression *new_function_expression(const std::vector<std::string> &is, const std::string &fn, const std::vector<const riddle::ast::expression *> &es) override { return new ast::function_expression(is, fn, es); }
-  ast::id_expression *new_id_expression(const std::vector<std::string> &is) override { return new ast::id_expression(is); }
+  ast::function_expression *new_function_expression(const std::vector<riddle::id_token> &is, const riddle::id_token &fn, const std::vector<const riddle::ast::expression *> &es) override { return new ast::function_expression(is, fn, es); }
+  ast::id_expression *new_id_expression(const std::vector<riddle::id_token> &is) override { return new ast::id_expression(is); }
   ast::implication_expression *new_implication_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) override { return new ast::implication_expression(l, r); }
   ast::disjunction_expression *new_disjunction_expression(const std::vector<const riddle::ast::expression *> &es) override { return new ast::disjunction_expression(es); }
   ast::conjunction_expression *new_conjunction_expression(const std::vector<const riddle::ast::expression *> &es) override { return new ast::conjunction_expression(es); }

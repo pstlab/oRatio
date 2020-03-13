@@ -35,7 +35,7 @@ string_literal_expression::string_literal_expression(const riddle::string_token 
 string_literal_expression::~string_literal_expression() {}
 expr string_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_string(literal.str); }
 
-cast_expression::cast_expression(const std::vector<std::string> &tp, const riddle::ast::expression *const e) : riddle::ast::cast_expression(tp, e) {}
+cast_expression::cast_expression(const std::vector<riddle::id_token> &tp, const riddle::ast::expression *const e) : riddle::ast::cast_expression(tp, e) {}
 cast_expression::~cast_expression() {}
 expr cast_expression::evaluate(const scope &scp, context &ctx) const { return dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx); }
 
@@ -62,13 +62,13 @@ expr range_expression::evaluate(const scope &scp, context &ctx) const
     return var;
 }
 
-constructor_expression::constructor_expression(const std::vector<std::string> &it, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::constructor_expression(it, es) {}
+constructor_expression::constructor_expression(const std::vector<riddle::id_token> &it, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::constructor_expression(it, es) {}
 constructor_expression::~constructor_expression() {}
 expr constructor_expression::evaluate(const scope &scp, context &ctx) const
 {
     scope *s = const_cast<scope *>(&scp);
     for (const auto &tp : instance_type)
-        s = &s->get_type(tp);
+        s = &s->get_type(tp.id);
 
     std::vector<expr> exprs;
     std::vector<const type *> par_types;
@@ -136,13 +136,13 @@ expr gt_expression::evaluate(const scope &scp, context &ctx) const
     return scp.get_core().gt(l, r);
 }
 
-function_expression::function_expression(const std::vector<std::string> &is, const std::string &fn, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::function_expression(is, fn, es) {}
+function_expression::function_expression(const std::vector<riddle::id_token> &is, const riddle::id_token &fn, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::function_expression(is, fn, es) {}
 function_expression::~function_expression() {}
 expr function_expression::evaluate(const scope &scp, context &ctx) const
 {
     scope *s = const_cast<scope *>(&scp);
     for (const auto &id : ids)
-        s = &s->get_type(id);
+        s = &s->get_type(id.id);
 
     std::vector<expr> exprs;
     std::vector<const type *> par_types;
@@ -153,7 +153,7 @@ expr function_expression::evaluate(const scope &scp, context &ctx) const
         par_types.push_back(&i->get_type());
     }
 
-    if (const method &m = s->get_method(function_name, par_types); m.get_return_type())
+    if (const method &m = s->get_method(function_name.id, par_types); m.get_return_type())
     {
         if (m.get_return_type() == &scp.get_core().get_type(BOOL_KEYWORD))
             return bool_expr(static_cast<bool_item *>(m.invoke(ctx, exprs)));
@@ -166,13 +166,13 @@ expr function_expression::evaluate(const scope &scp, context &ctx) const
         return scp.get_core().new_bool(true);
 }
 
-id_expression::id_expression(const std::vector<std::string> &is) : riddle::ast::id_expression(is) {}
+id_expression::id_expression(const std::vector<riddle::id_token> &is) : riddle::ast::id_expression(is) {}
 id_expression::~id_expression() {}
 expr id_expression::evaluate(const scope &, context &ctx) const
 {
     env *c_e = &*ctx;
     for (const auto &id : ids)
-        c_e = &*c_e->get(id);
+        c_e = &*c_e->get(id.id);
     return expr(static_cast<item *>(c_e));
 }
 
@@ -258,40 +258,40 @@ expr division_expression::evaluate(const scope &scp, context &ctx) const
 statement::statement() {}
 statement::~statement() {}
 
-local_field_statement::local_field_statement(const std::vector<std::string> &ft, const std::vector<std::string> &ns, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::local_field_statement(ft, ns, es) {}
+local_field_statement::local_field_statement(const std::vector<riddle::id_token> &ft, const std::vector<riddle::id_token> &ns, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::local_field_statement(ft, ns, es) {}
 local_field_statement::~local_field_statement() {}
 void local_field_statement::execute(const scope &scp, context &ctx) const
 {
     for (size_t i = 0; i < names.size(); ++i)
     {
         if (xprs[i])
-            ctx->exprs.emplace(names[i], dynamic_cast<const ast::expression *>(xprs[i])->evaluate(scp, ctx));
+            ctx->exprs.emplace(names[i].id, dynamic_cast<const ast::expression *>(xprs[i])->evaluate(scp, ctx));
         else
         {
             scope *s = const_cast<scope *>(&scp);
             for (const auto &tp : field_type)
-                s = &s->get_type(tp);
+                s = &s->get_type(tp.id);
             type *t = static_cast<type *>(s);
             if (t->is_primitive())
-                ctx->exprs.emplace(names[i], t->new_instance(ctx));
+                ctx->exprs.emplace(names[i].id, t->new_instance(ctx));
             else if (!t->get_instances().empty())
-                ctx->exprs.emplace(names[i], t->new_existential());
+                ctx->exprs.emplace(names[i].id, t->new_existential());
             else
                 throw inconsistency_exception();
         }
         if (const core *c = dynamic_cast<const core *>(&scp)) // we create fields for root items..
-            const_cast<core *>(c)->fields.emplace(names[i], new field(ctx->exprs.at(names[i])->get_type(), names[i]));
+            const_cast<core *>(c)->fields.emplace(names[i].id, new field(ctx->exprs.at(names[i].id)->get_type(), names[i].id));
     }
 }
 
-assignment_statement::assignment_statement(const std::vector<std::string> &is, const std::string &i, const riddle::ast::expression *const e) : riddle::ast::assignment_statement(is, i, e) {}
+assignment_statement::assignment_statement(const std::vector<riddle::id_token> &is, const riddle::id_token &i, const riddle::ast::expression *const e) : riddle::ast::assignment_statement(is, i, e) {}
 assignment_statement::~assignment_statement() {}
 void assignment_statement::execute(const scope &scp, context &ctx) const
 {
     env *c_e = &*ctx;
     for (const auto &c_id : ids)
-        c_e = &*c_e->get(c_id);
-    c_e->exprs.emplace(id, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx));
+        c_e = &*c_e->get(c_id.id);
+    c_e->exprs.emplace(id.id, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx));
 }
 
 expression_statement::expression_statement(const riddle::ast::expression *const e) : riddle::ast::expression_statement(e) {}
@@ -331,7 +331,7 @@ void conjunction_statement::execute(const scope &scp, context &ctx) const
         dynamic_cast<const ast::statement *>(st)->execute(scp, ctx);
 }
 
-formula_statement::formula_statement(const bool &isf, const std::string &fn, const std::vector<std::string> &scp, const std::string &pn, const std::vector<std::pair<const std::string, const riddle::ast::expression *const>> &assns) : riddle::ast::formula_statement(isf, fn, scp, pn, assns) {}
+formula_statement::formula_statement(const bool &isf, const riddle::id_token &fn, const std::vector<riddle::id_token> &scp, const riddle::id_token &pn, const std::vector<std::pair<const riddle::id_token, const riddle::ast::expression *const>> &assns) : riddle::ast::formula_statement(isf, fn, scp, pn, assns) {}
 formula_statement::~formula_statement() {}
 void formula_statement::execute(const scope &scp, context &ctx) const
 {
@@ -341,8 +341,8 @@ void formula_statement::execute(const scope &scp, context &ctx) const
     {
         env *c_scope = &*ctx;
         for (const auto &s : formula_scope)
-            c_scope = &*c_scope->get(s);
-        p = &static_cast<item *>(c_scope)->get_type().get_predicate(predicate_name);
+            c_scope = &*c_scope->get(s.id);
+        p = &static_cast<item *>(c_scope)->get_type().get_predicate(predicate_name.id);
 
         if (var_item *ee = dynamic_cast<var_item *>(c_scope)) // the scope is an enumerative expression..
             assgnments.emplace(TAU, ee);
@@ -351,7 +351,7 @@ void formula_statement::execute(const scope &scp, context &ctx) const
     }
     else
     {
-        p = &scp.get_predicate(predicate_name);
+        p = &scp.get_predicate(predicate_name.id);
         if (&p->get_scope() != &scp.get_core()) // we inherit the scope..
             assgnments.emplace(TAU, ctx->get(TAU));
     }
@@ -359,9 +359,9 @@ void formula_statement::execute(const scope &scp, context &ctx) const
     for (const auto &a : assignments)
     {
         expr e = dynamic_cast<const ast::expression *>(a.second)->evaluate(scp, ctx);
-        const type &tt = p->get_field(a.first).get_type(); // the target type..
-        if (tt.is_assignable_from(e->get_type()))          // the target type is a superclass of the assignment..
-            assgnments.emplace(a.first, e);
+        const type &tt = p->get_field(a.first.id).get_type(); // the target type..
+        if (tt.is_assignable_from(e->get_type()))             // the target type is a superclass of the assignment..
+            assgnments.emplace(a.first.id, e);
         else if (e->get_type().is_assignable_from(tt))        // the target type is a subclass of the assignment..
             if (var_item *ae = dynamic_cast<var_item *>(&*e)) // some of the allowed values might be inhibited..
             {
@@ -419,7 +419,7 @@ void formula_statement::execute(const scope &scp, context &ctx) const
     }
 
     scp.get_core().new_atom(*a, is_fact);
-    ctx->exprs.emplace(formula_name, expr(a));
+    ctx->exprs.emplace(formula_name.id, expr(a));
 }
 
 return_statement::return_statement(const riddle::ast::expression *const e) : riddle::ast::return_statement(e) {}
@@ -429,7 +429,7 @@ void return_statement::execute(const scope &scp, context &ctx) const { ctx->expr
 type_declaration::type_declaration() {}
 type_declaration::~type_declaration() {}
 
-method_declaration::method_declaration(const std::vector<std::string> &rt, const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::method_declaration(rt, n, pars, stmnts) {}
+method_declaration::method_declaration(const std::vector<riddle::id_token> &rt, const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::method_declaration(rt, n, pars, stmnts) {}
 method_declaration::~method_declaration() {}
 void method_declaration::refine(scope &scp) const
 {
@@ -438,7 +438,7 @@ void method_declaration::refine(scope &scp) const
     {
         scope *s = &scp;
         for (const auto &id : return_type)
-            s = &s->get_type(id);
+            s = &s->get_type(id.id);
         rt = static_cast<type *>(s);
     }
 
@@ -447,18 +447,18 @@ void method_declaration::refine(scope &scp) const
     {
         scope *s = &scp;
         for (const auto &id : par.first)
-            s = &s->get_type(id);
+            s = &s->get_type(id.id);
         type *tp = static_cast<type *>(s);
-        args.push_back(new field(*tp, par.second));
+        args.push_back(new field(*tp, par.second.id));
     }
 
-    if (method *m = new method(scp.get_core(), scp, rt, name, args, statements); core *c = dynamic_cast<core *>(&scp))
+    if (method *m = new method(scp.get_core(), scp, rt, name.id, args, statements); core *c = dynamic_cast<core *>(&scp))
         c->new_methods({m});
     else if (type *t = dynamic_cast<type *>(&scp))
         t->new_methods({m});
 }
 
-predicate_declaration::predicate_declaration(const std::string &n, const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::vector<std::string>> &pl, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::predicate_declaration(n, pars, pl, stmnts) {}
+predicate_declaration::predicate_declaration(const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<std::vector<riddle::id_token>> &pl, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::predicate_declaration(n, pars, pl, stmnts) {}
 predicate_declaration::~predicate_declaration() {}
 void predicate_declaration::refine(scope &scp) const
 {
@@ -467,19 +467,19 @@ void predicate_declaration::refine(scope &scp) const
     {
         scope *s = &scp;
         for (const auto &id : par.first)
-            s = &s->get_type(id);
+            s = &s->get_type(id.id);
         type *tp = static_cast<type *>(s);
-        args.push_back(new field(*tp, par.second));
+        args.push_back(new field(*tp, par.second.id));
     }
 
-    predicate *p = new predicate(scp.get_core(), scp, name, args, statements);
+    predicate *p = new predicate(scp.get_core(), scp, name.id, args, statements);
 
     // we add the supertypes.. notice that we do not support forward declaration for predicate supertypes!!
     for (const auto &sp : predicate_list)
     {
         scope *s = &scp;
         for (const auto &id : sp)
-            s = &s->get_predicate(id);
+            s = &s->get_predicate(id.id);
         p->new_supertypes({static_cast<predicate *>(s)});
     }
 
@@ -489,12 +489,12 @@ void predicate_declaration::refine(scope &scp) const
         t->new_predicates({p});
 }
 
-typedef_declaration::typedef_declaration(const std::string &n, const std::string &pt, const riddle::ast::expression *const e) : riddle::ast::typedef_declaration(n, pt, e) {}
+typedef_declaration::typedef_declaration(const riddle::id_token &n, const riddle::id_token &pt, const riddle::ast::expression *const e) : riddle::ast::typedef_declaration(n, pt, e) {}
 typedef_declaration::~typedef_declaration() {}
 void typedef_declaration::declare(scope &scp) const
 {
     // A new typedef type has been declared..
-    typedef_type *td = new typedef_type(scp.get_core(), scp, name, scp.get_type(primitive_type), xpr);
+    typedef_type *td = new typedef_type(scp.get_core(), scp, name.id, scp.get_type(primitive_type.id), xpr);
 
     if (core *c = dynamic_cast<core *>(&scp))
         c->new_types({td});
@@ -502,16 +502,16 @@ void typedef_declaration::declare(scope &scp) const
         t->new_types({td});
 }
 
-enum_declaration::enum_declaration(const std::string &n, const std::vector<std::string> &es, const std::vector<std::vector<std::string>> &trs) : riddle::ast::enum_declaration(n, es, trs) {}
+enum_declaration::enum_declaration(const riddle::id_token &n, const std::vector<riddle::string_token> &es, const std::vector<std::vector<riddle::id_token>> &trs) : riddle::ast::enum_declaration(n, es, trs) {}
 enum_declaration::~enum_declaration() {}
 void enum_declaration::declare(scope &scp) const
 {
     // A new enum type has been declared..
-    enum_type *et = new enum_type(scp.get_core(), scp, name);
+    enum_type *et = new enum_type(scp.get_core(), scp, name.id);
 
     // We add the enum values..
     for (const auto &e : enums)
-        et->instances.push_back(scp.get_core().new_string(e));
+        et->instances.push_back(scp.get_core().new_string(e.str));
 
     if (core *c = dynamic_cast<core *>(&scp))
         c->new_types({et});
@@ -522,29 +522,29 @@ void enum_declaration::refine(scope &scp) const
 {
     if (!type_refs.empty())
     {
-        enum_type *et = static_cast<enum_type *>(&scp.get_type(name));
+        enum_type *et = static_cast<enum_type *>(&scp.get_type(name.id));
         for (const auto &tr : type_refs)
         {
             scope *s = &scp;
             for (const auto &id : tr)
-                s = &s->get_type(id);
+                s = &s->get_type(id.id);
             et->enums.push_back(static_cast<enum_type *>(s));
         }
     }
 }
 
-field_declaration::field_declaration(const std::vector<std::string> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds) : riddle::ast::field_declaration(tp, ds) {}
+field_declaration::field_declaration(const std::vector<riddle::id_token> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds) : riddle::ast::field_declaration(tp, ds) {}
 field_declaration::~field_declaration() {}
 void field_declaration::refine(scope &scp) const
 {
     // we add fields to the current scope..
     scope *s = &scp;
     for (const auto &id : field_type)
-        s = &s->get_type(id);
+        s = &s->get_type(id.id);
     type *tp = static_cast<type *>(s);
 
     for (const auto &vd : declarations)
-        scp.new_fields({new field(*tp, dynamic_cast<const ast::variable_declaration *>(vd)->name, dynamic_cast<const ast::variable_declaration *>(vd)->xpr)});
+        scp.new_fields({new field(*tp, dynamic_cast<const ast::variable_declaration *>(vd)->name.id, dynamic_cast<const ast::variable_declaration *>(vd)->xpr)});
 }
 
 constructor_declaration::constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::constructor_declaration(pars, il, stmnts) {}

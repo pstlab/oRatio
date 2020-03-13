@@ -1,7 +1,6 @@
 #pragma once
 
 #include "defs.h"
-#include <cstddef>
 
 namespace smt
 {

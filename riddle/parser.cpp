@@ -108,8 +108,7 @@ compilation_unit *parser::parse()
 
 typedef_declaration *parser::_typedef_declaration()
 {
-    std::string n;
-    std::string pt;
+    id_token *pt;
     expression *e;
 
     if (!match(TYPEDEF_ID))
@@ -118,16 +117,16 @@ typedef_declaration *parser::_typedef_declaration()
     switch (tk->sym)
     {
     case BOOL_ID:
-        pt = "bool";
+        pt = new id_token(0, 0, 0, 0, "bool");
         break;
     case INT_ID:
-        pt = "int";
+        pt = new id_token(0, 0, 0, 0, "int");
         break;
     case REAL_ID:
-        pt = "real";
+        pt = new id_token(0, 0, 0, 0, "real");
         break;
     case STRING_ID:
-        pt = "string";
+        pt = new id_token(0, 0, 0, 0, "string");
         break;
     default:
         error("expected primitive type..");
@@ -138,26 +137,27 @@ typedef_declaration *parser::_typedef_declaration()
 
     if (!match(ID_ID))
         error("expected identifier..");
-    n = static_cast<id_token *>(tks[pos - 2])->id;
+    id_token n = *static_cast<id_token *>(tks[pos - 2]);
 
     if (!match(SEMICOLON_ID))
         error("expected ';'..");
 
-    return new_typedef_declaration(n, pt, e);
+    id_token prmtv_tp = *pt;
+    delete pt;
+    return new_typedef_declaration(n, prmtv_tp, e);
 }
 
 enum_declaration *parser::_enum_declaration()
 {
-    std::string n;
-    std::vector<std::string> es;
-    std::vector<std::vector<std::string>> trs;
+    std::vector<string_token> es;
+    std::vector<std::vector<id_token>> trs;
 
     if (!match(ENUM_ID))
         error("expected 'enum'..");
 
     if (!match(ID_ID))
         error("expected identifier..");
-    n = static_cast<id_token *>(tks[pos - 2])->id;
+    id_token n = *static_cast<id_token *>(tks[pos - 2]);
 
     do
     {
@@ -167,13 +167,13 @@ enum_declaration *parser::_enum_declaration()
             tk = next();
             if (!match(StringLiteral_ID))
                 error("expected string literal..");
-            es.push_back(static_cast<string_token *>(tks[pos - 2])->str);
+            es.push_back(*static_cast<string_token *>(tks[pos - 2]));
 
             while (match(COMMA_ID))
             {
                 if (!match(StringLiteral_ID))
                     error("expected string literal..");
-                es.push_back(static_cast<string_token *>(tks[pos - 2])->str);
+                es.push_back(*static_cast<string_token *>(tks[pos - 2]));
             }
 
             if (!match(RBRACE_ID))
@@ -181,14 +181,14 @@ enum_declaration *parser::_enum_declaration()
             break;
         case ID_ID:
         {
-            std::vector<std::string> ids;
-            ids.push_back(static_cast<id_token *>(tk)->id);
+            std::vector<id_token> ids;
+            ids.push_back(*static_cast<id_token *>(tk));
             tk = next();
             while (match(DOT_ID))
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+                ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
             }
             trs.push_back(ids);
             break;
@@ -347,36 +347,35 @@ class_declaration *parser::_class_declaration()
 
 field_declaration *parser::_field_declaration()
 {
-    std::vector<std::string> tp;
-    std::string n;
+    std::vector<id_token> tp;
     std::vector<const variable_declaration *> ds;
 
     switch (tk->sym)
     {
     case BOOL_ID:
-        tp.push_back("bool");
+        tp.push_back(id_token(0, 0, 0, 0, "bool"));
         tk = next();
         break;
     case INT_ID:
-        tp.push_back("int");
+        tp.push_back(id_token(0, 0, 0, 0, "int"));
         tk = next();
         break;
     case REAL_ID:
-        tp.push_back("real");
+        tp.push_back(id_token(0, 0, 0, 0, "real"));
         tk = next();
         break;
     case STRING_ID:
-        tp.push_back("string");
+        tp.push_back(id_token(0, 0, 0, 0, "string"));
         tk = next();
         break;
     case ID_ID:
-        tp.push_back(static_cast<id_token *>(tk)->id);
+        tp.push_back(*static_cast<id_token *>(tk));
         tk = next();
         while (match(DOT_ID))
         {
             if (!match(ID_ID))
                 error("expected identifier..");
-            tp.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+            tp.push_back(*static_cast<id_token *>(tks[pos - 2]));
         }
         break;
     default:
@@ -385,7 +384,7 @@ field_declaration *parser::_field_declaration()
 
     if (!match(ID_ID))
         error("expected identifier..");
-    n = static_cast<id_token *>(tks[pos - 2])->id;
+    id_token n = *static_cast<id_token *>(tks[pos - 2]);
 
     if (match(EQ_ID))
         ds.push_back(new_variable_declaration(n, _expression()));
@@ -396,7 +395,7 @@ field_declaration *parser::_field_declaration()
     {
         if (!match(ID_ID))
             error("expected identifier..");
-        n = static_cast<id_token *>(tks[pos - 2])->id;
+        id_token n = *static_cast<id_token *>(tks[pos - 2]);
 
         if (match(EQ_ID))
             ds.push_back(new_variable_declaration(n, _expression()));
@@ -412,9 +411,8 @@ field_declaration *parser::_field_declaration()
 
 method_declaration *parser::_method_declaration()
 {
-    std::vector<std::string> rt;
-    std::string n;
-    std::vector<std::pair<const std::vector<std::string>, const std::string>> pars;
+    std::vector<id_token> rt;
+    std::vector<std::pair<const std::vector<id_token>, const id_token>> pars;
     std::vector<const statement *> stmnts;
 
     if (!match(VOID_ID))
@@ -423,13 +421,13 @@ method_declaration *parser::_method_declaration()
         {
             if (!match(ID_ID))
                 error("expected identifier..");
-            rt.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+            rt.push_back(*static_cast<id_token *>(tks[pos - 2]));
         } while (match(DOT_ID));
     }
 
     if (!match(ID_ID))
         error("expected identifier..");
-    n = static_cast<id_token *>(tks[pos - 2])->id;
+    id_token n = *static_cast<id_token *>(tks[pos - 2]);
 
     if (!match(LPAREN_ID))
         error("expected '('..");
@@ -438,33 +436,33 @@ method_declaration *parser::_method_declaration()
     {
         do
         {
-            std::vector<std::string> p_ids;
+            std::vector<id_token> p_ids;
             switch (tk->sym)
             {
             case BOOL_ID:
-                p_ids.push_back("bool");
+                p_ids.push_back(id_token(0, 0, 0, 0, "bool"));
                 tk = next();
                 break;
             case INT_ID:
-                p_ids.push_back("int");
+                p_ids.push_back(id_token(0, 0, 0, 0, "int"));
                 tk = next();
                 break;
             case REAL_ID:
-                p_ids.push_back("real");
+                p_ids.push_back(id_token(0, 0, 0, 0, "real"));
                 tk = next();
                 break;
             case STRING_ID:
-                p_ids.push_back("string");
+                p_ids.push_back(id_token(0, 0, 0, 0, "string"));
                 tk = next();
                 break;
             case ID_ID:
-                p_ids.push_back(static_cast<id_token *>(tk)->id);
+                p_ids.push_back(*static_cast<id_token *>(tk));
                 tk = next();
                 while (match(DOT_ID))
                 {
                     if (!match(ID_ID))
                         error("expected identifier..");
-                    p_ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+                    p_ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
                 }
                 break;
             default:
@@ -472,7 +470,7 @@ method_declaration *parser::_method_declaration()
             }
             if (!match(ID_ID))
                 error("expected identifier..");
-            std::string pn = static_cast<id_token *>(tks[pos - 2])->id;
+            id_token pn = *static_cast<id_token *>(tks[pos - 2]);
             pars.push_back({p_ids, pn});
         } while (match(COMMA_ID));
 
@@ -585,9 +583,8 @@ constructor_declaration *parser::_constructor_declaration()
 
 predicate_declaration *parser::_predicate_declaration()
 {
-    std::string n;
-    std::vector<std::pair<const std::vector<std::string>, const std::string>> pars;
-    std::vector<std::vector<std::string>> pl;
+    std::vector<std::pair<const std::vector<id_token>, const id_token>> pars;
+    std::vector<std::vector<id_token>> pl;
     std::vector<const statement *> stmnts;
 
     if (!match(PREDICATE_ID))
@@ -595,7 +592,7 @@ predicate_declaration *parser::_predicate_declaration()
 
     if (!match(ID_ID))
         error("expected identifier..");
-    n = static_cast<id_token *>(tks[pos - 2])->id;
+    id_token n = *static_cast<id_token *>(tks[pos - 2]);
 
     if (!match(LPAREN_ID))
         error("expected '('..");
@@ -604,33 +601,33 @@ predicate_declaration *parser::_predicate_declaration()
     {
         do
         {
-            std::vector<std::string> p_ids;
+            std::vector<id_token> p_ids;
             switch (tk->sym)
             {
             case BOOL_ID:
-                p_ids.push_back("bool");
+                p_ids.push_back(id_token(0, 0, 0, 0, "bool"));
                 tk = next();
                 break;
             case INT_ID:
-                p_ids.push_back("int");
+                p_ids.push_back(id_token(0, 0, 0, 0, "int"));
                 tk = next();
                 break;
             case REAL_ID:
-                p_ids.push_back("real");
+                p_ids.push_back(id_token(0, 0, 0, 0, "real"));
                 tk = next();
                 break;
             case STRING_ID:
-                p_ids.push_back("string");
+                p_ids.push_back(id_token(0, 0, 0, 0, "string"));
                 tk = next();
                 break;
             case ID_ID:
-                p_ids.push_back(static_cast<id_token *>(tk)->id);
+                p_ids.push_back(*static_cast<id_token *>(tk));
                 tk = next();
                 while (match(DOT_ID))
                 {
                     if (!match(ID_ID))
                         error("expected identifier..");
-                    p_ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+                    p_ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
                 }
                 break;
             default:
@@ -638,7 +635,7 @@ predicate_declaration *parser::_predicate_declaration()
             }
             if (!match(ID_ID))
                 error("expected identifier..");
-            std::string pn = static_cast<id_token *>(tks[pos - 2])->id;
+            id_token pn = *static_cast<id_token *>(tks[pos - 2]);
             pars.push_back({p_ids, pn});
         } while (match(COMMA_ID));
 
@@ -650,12 +647,12 @@ predicate_declaration *parser::_predicate_declaration()
     {
         do
         {
-            std::vector<std::string> p_ids;
+            std::vector<id_token> p_ids;
             do
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                p_ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+                p_ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
             } while (match(DOT_ID));
             pl.push_back(p_ids);
         } while (match(COMMA_ID));
@@ -679,34 +676,34 @@ statement *parser::_statement()
     case REAL_ID:
     case STRING_ID: // a local field having a primitive type..
     {
-        std::vector<std::string> ft;
+        std::vector<id_token> ft;
         switch (tk->sym)
         {
         case BOOL_ID:
-            ft.push_back("bool");
+            ft.push_back(id_token(0, 0, 0, 0, "bool"));
             break;
         case INT_ID:
-            ft.push_back("int");
+            ft.push_back(id_token(0, 0, 0, 0, "int"));
             break;
         case REAL_ID:
-            ft.push_back("real");
+            ft.push_back(id_token(0, 0, 0, 0, "real"));
             break;
         case STRING_ID:
-            ft.push_back("string");
+            ft.push_back(id_token(0, 0, 0, 0, "string"));
             break;
         default:
             error("expected either 'bool' or 'int' or 'real' or 'string'..");
         }
         tk = next();
 
-        std::vector<std::string> ns;
+        std::vector<id_token> ns;
         std::vector<const expression *> es;
 
         do
         {
             if (!match(ID_ID))
                 error("expected identifier..");
-            ns.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+            ns.push_back(*static_cast<id_token *>(tks[pos - 2]));
 
             if (tk->sym == EQ_ID)
             {
@@ -725,26 +722,26 @@ statement *parser::_statement()
     case ID_ID: // either a local field, an assignment or an expression..
     {
         size_t c_pos = pos;
-        std::vector<std::string> is;
-        is.push_back(static_cast<id_token *>(tk)->id);
+        std::vector<id_token> is;
+        is.push_back(*static_cast<id_token *>(tk));
         tk = next();
         while (match(DOT_ID))
         {
             if (!match(ID_ID))
                 error("expected identifier..");
-            is.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+            is.push_back(*static_cast<id_token *>(tks[pos - 2]));
         }
 
         switch (tk->sym)
         {
         case ID_ID: // a local field..
         {
-            std::vector<std::string> ns;
+            std::vector<id_token> ns;
             std::vector<const expression *> es;
 
             do
             {
-                ns.push_back(static_cast<id_token *>(tk)->id);
+                ns.push_back(*static_cast<id_token *>(tk));
                 tk = next();
                 if (tk->sym == EQ_ID)
                 {
@@ -762,7 +759,7 @@ statement *parser::_statement()
         }
         case EQ_ID: // an assignment..
         {
-            std::string i = is.back();
+            id_token i = is.back();
             is.pop_back();
             tk = next();
             expression *e = _expression();
@@ -847,14 +844,12 @@ statement *parser::_statement()
     {
         bool isf = tk->sym == FACT_ID;
         tk = next();
-        std::string fn;
-        std::vector<std::string> scp;
-        std::string pn;
-        std::vector<std::pair<const std::string, const expression *const>> assns;
+        std::vector<id_token> scp;
+        std::vector<std::pair<const id_token, const expression *const>> assns;
 
         if (!match(ID_ID))
             error("expected identifier..");
-        fn = static_cast<id_token *>(tks[pos - 2])->id;
+        id_token fn = *static_cast<id_token *>(tks[pos - 2]);
 
         if (!match(EQ_ID))
             error("expected '='..");
@@ -866,10 +861,10 @@ statement *parser::_statement()
         {
             if (!match(ID_ID))
                 error("expected identifier..");
-            scp.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+            scp.push_back(*static_cast<id_token *>(tks[pos - 2]));
         } while (match(DOT_ID));
 
-        pn = scp.back();
+        id_token pn = scp.back();
         scp.pop_back();
 
         if (!match(LPAREN_ID))
@@ -881,7 +876,7 @@ statement *parser::_statement()
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                std::string assgn_name = static_cast<id_token *>(tks[pos - 2])->id;
+                id_token assgn_name = *static_cast<id_token *>(tks[pos - 2]);
 
                 if (!match(COLON_ID))
                     error("expected ':'..");
@@ -950,12 +945,12 @@ expression *parser::_expression(const size_t &pr)
         if (match(RPAREN_ID)) // a cast..
         {
             backtrack(c_pos);
-            std::vector<std::string> ids;
+            std::vector<id_token> ids;
             do
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+                ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
             } while (match(DOT_ID));
 
             if (!match(RPAREN_ID))
@@ -1004,12 +999,12 @@ expression *parser::_expression(const size_t &pr)
     case NEW_ID:
     {
         tk = next();
-        std::vector<std::string> ids;
+        std::vector<id_token> ids;
         do
         {
             if (!match(ID_ID))
                 error("expected identifier..");
-            ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+            ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
         } while (match(DOT_ID));
 
         std::vector<const expression *> xprs;
@@ -1032,19 +1027,19 @@ expression *parser::_expression(const size_t &pr)
     }
     case ID_ID:
     {
-        std::vector<std::string> is;
-        is.push_back(static_cast<id_token *>(tk)->id);
+        std::vector<id_token> is;
+        is.push_back(*static_cast<id_token *>(tk));
         tk = next();
         while (match(DOT_ID))
         {
             if (!match(ID_ID))
                 error("expected identifier..");
-            is.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+            is.push_back(*static_cast<id_token *>(tks[pos - 2]));
         }
         if (match(LPAREN_ID))
         {
             tk = next();
-            std::string fn = is.back();
+            id_token fn = is.back();
             is.pop_back();
             std::vector<const expression *> xprs;
             if (!match(LPAREN_ID))
