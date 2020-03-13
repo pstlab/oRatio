@@ -595,7 +595,7 @@ protected:
 class constructor_declaration
 {
 public:
-  constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const expression *>>> &il, const std::vector<const statement *> &stmnts) : parameters(pars), init_list(il), statements(stmnts) {}
+  constructor_declaration(const std::vector<std::pair<const std::vector<id_token>, const id_token>> &pars, const std::vector<std::pair<const id_token, const std::vector<const expression *>>> &il, const std::vector<const statement *> &stmnts) : parameters(pars), init_list(il), statements(stmnts) {}
   constructor_declaration(const constructor_declaration &orig) = delete;
   virtual ~constructor_declaration()
   {
@@ -607,15 +607,15 @@ public:
   }
 
 protected:
-  const std::vector<std::pair<const std::vector<std::string>, const std::string>> parameters;
-  const std::vector<std::pair<const std::string, const std::vector<const expression *>>> init_list;
+  const std::vector<std::pair<const std::vector<id_token>, const id_token>> parameters;
+  const std::vector<std::pair<const id_token, const std::vector<const expression *>>> init_list;
   const std::vector<const statement *> statements;
 };
 
 class class_declaration : public type_declaration
 {
 public:
-  class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const field_declaration *> &fs, const std::vector<const constructor_declaration *> &cs, const std::vector<const method_declaration *> &ms, const std::vector<const predicate_declaration *> &ps, const std::vector<const type_declaration *> &ts) : name(n), base_classes(bcs), fields(fs), constructors(cs), methods(ms), predicates(ps), types(ts) {}
+  class_declaration(const id_token &n, const std::vector<std::vector<id_token>> &bcs, const std::vector<const field_declaration *> &fs, const std::vector<const constructor_declaration *> &cs, const std::vector<const method_declaration *> &ms, const std::vector<const predicate_declaration *> &ps, const std::vector<const type_declaration *> &ts) : name(n), base_classes(bcs), fields(fs), constructors(cs), methods(ms), predicates(ps), types(ts) {}
   class_declaration(const class_declaration &orig) = delete;
   virtual ~class_declaration()
   {
@@ -632,8 +632,8 @@ public:
   }
 
 protected:
-  const std::string name;
-  const std::vector<std::vector<std::string>> base_classes;
+  const id_token name;
+  const std::vector<std::vector<id_token>> base_classes;
   const std::vector<const field_declaration *> fields;
   const std::vector<const constructor_declaration *> constructors;
   const std::vector<const method_declaration *> methods;
@@ -699,10 +699,10 @@ private:
   virtual ast::predicate_declaration *new_predicate_declaration(const id_token &n, const std::vector<std::pair<const std::vector<id_token>, const id_token>> &pars, const std::vector<std::vector<id_token>> &pl, const std::vector<const ast::statement *> &stmnts) { return new ast::predicate_declaration(n, pars, pl, stmnts); }
   virtual ast::typedef_declaration *new_typedef_declaration(const id_token &n, const id_token &pt, const ast::expression *e) { return new ast::typedef_declaration(n, pt, e); }
   virtual ast::enum_declaration *new_enum_declaration(const id_token &n, const std::vector<string_token> &es, const std::vector<std::vector<id_token>> &trs) { return new ast::enum_declaration(n, es, trs); }
-  virtual ast::class_declaration *new_class_declaration(const std::string &n, const std::vector<std::vector<std::string>> &bcs, const std::vector<const ast::field_declaration *> &fs, const std::vector<const ast::constructor_declaration *> &cs, const std::vector<const ast::method_declaration *> &ms, const std::vector<const ast::predicate_declaration *> &ps, const std::vector<const ast::type_declaration *> &ts) { return new ast::class_declaration(n, bcs, fs, cs, ms, ps, ts); }
+  virtual ast::class_declaration *new_class_declaration(const id_token &n, const std::vector<std::vector<id_token>> &bcs, const std::vector<const ast::field_declaration *> &fs, const std::vector<const ast::constructor_declaration *> &cs, const std::vector<const ast::method_declaration *> &ms, const std::vector<const ast::predicate_declaration *> &ps, const std::vector<const ast::type_declaration *> &ts) { return new ast::class_declaration(n, bcs, fs, cs, ms, ps, ts); }
   virtual ast::variable_declaration *new_variable_declaration(const id_token &n, const ast::expression *const e = nullptr) { return new ast::variable_declaration(n, e); }
   virtual ast::field_declaration *new_field_declaration(const std::vector<id_token> &tp, const std::vector<const ast::variable_declaration *> &ds) { return new ast::field_declaration(tp, ds); }
-  virtual ast::constructor_declaration *new_constructor_declaration(const std::vector<std::pair<const std::vector<std::string>, const std::string>> &pars, const std::vector<std::pair<const std::string, const std::vector<const ast::expression *>>> &il, const std::vector<const ast::statement *> &stmnts) { return new ast::constructor_declaration(pars, il, stmnts); }
+  virtual ast::constructor_declaration *new_constructor_declaration(const std::vector<std::pair<const std::vector<id_token>, const id_token>> &pars, const std::vector<std::pair<const id_token, const std::vector<const ast::expression *>>> &il, const std::vector<const ast::statement *> &stmnts) { return new ast::constructor_declaration(pars, il, stmnts); }
   virtual ast::compilation_unit *new_compilation_unit(const std::vector<const ast::method_declaration *> &ms, const std::vector<const ast::predicate_declaration *> &ps, const std::vector<const ast::type_declaration *> &ts, const std::vector<const ast::statement *> &stmnts) { return new ast::compilation_unit(ms, ps, ts, stmnts); }
 
   /**

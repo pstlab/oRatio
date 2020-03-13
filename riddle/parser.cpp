@@ -206,8 +206,7 @@ enum_declaration *parser::_enum_declaration()
 
 class_declaration *parser::_class_declaration()
 {
-    std::string n;                                   // the name of the class..
-    std::vector<std::vector<std::string>> bcs;       // the base classes..
+    std::vector<std::vector<id_token>> bcs;          // the base classes..
     std::vector<const field_declaration *> fs;       // the fields of the class..
     std::vector<const constructor_declaration *> cs; // the constructors of the class..
     std::vector<const method_declaration *> ms;      // the methods of the class..
@@ -219,18 +218,19 @@ class_declaration *parser::_class_declaration()
 
     if (!match(ID_ID))
         error("expected identifier..");
-    n = static_cast<id_token *>(tks[pos - 2])->id;
+    // the name of the class..
+    id_token n = *static_cast<id_token *>(tks[pos - 2]);
 
     if (match(COLON_ID))
     {
         do
         {
-            std::vector<std::string> ids;
+            std::vector<id_token> ids;
             do
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+                ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
             } while (match(DOT_ID));
             bcs.push_back(ids);
         } while (match(COMMA_ID));
@@ -489,8 +489,8 @@ method_declaration *parser::_method_declaration()
 
 constructor_declaration *parser::_constructor_declaration()
 {
-    std::vector<std::pair<const std::vector<std::string>, const std::string>> pars;
-    std::vector<std::pair<const std::string, const std::vector<const expression *>>> il;
+    std::vector<std::pair<const std::vector<id_token>, const id_token>> pars;
+    std::vector<std::pair<const id_token, const std::vector<const expression *>>> il;
     std::vector<const statement *> stmnts;
 
     if (!match(ID_ID))
@@ -503,33 +503,33 @@ constructor_declaration *parser::_constructor_declaration()
     {
         do
         {
-            std::vector<std::string> p_ids;
+            std::vector<id_token> p_ids;
             switch (tk->sym)
             {
             case ID_ID:
-                p_ids.push_back(static_cast<id_token *>(tk)->id);
+                p_ids.push_back(*static_cast<id_token *>(tk));
                 tk = next();
                 while (match(DOT_ID))
                 {
                     if (!match(ID_ID))
                         error("expected identifier..");
-                    p_ids.push_back(static_cast<id_token *>(tks[pos - 2])->id);
+                    p_ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
                 }
                 break;
             case BOOL_ID:
-                p_ids.push_back("bool");
+                p_ids.push_back(id_token(0, 0, 0, 0, "bool"));
                 tk = next();
                 break;
             case INT_ID:
-                p_ids.push_back("int");
+                p_ids.push_back(id_token(0, 0, 0, 0, "int"));
                 tk = next();
                 break;
             case REAL_ID:
-                p_ids.push_back("real");
+                p_ids.push_back(id_token(0, 0, 0, 0, "real"));
                 tk = next();
                 break;
             case STRING_ID:
-                p_ids.push_back("string");
+                p_ids.push_back(id_token(0, 0, 0, 0, "string"));
                 tk = next();
                 break;
             default:
@@ -537,7 +537,7 @@ constructor_declaration *parser::_constructor_declaration()
             }
             if (!match(ID_ID))
                 error("expected identifier..");
-            std::string pn = static_cast<id_token *>(tks[pos - 2])->id;
+            id_token pn = *static_cast<id_token *>(tks[pos - 2]);
             pars.push_back({p_ids, pn});
         } while (match(COMMA_ID));
 
@@ -549,11 +549,10 @@ constructor_declaration *parser::_constructor_declaration()
     {
         do
         {
-            std::string pn;
             std::vector<const expression *> xprs;
             if (!match(ID_ID))
                 error("expected identifier..");
-            pn = static_cast<id_token *>(tks[pos - 2])->id;
+            id_token pn = *static_cast<id_token *>(tks[pos - 2]);
 
             if (!match(LPAREN_ID))
                 error("expected '('..");
