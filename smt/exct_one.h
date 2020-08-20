@@ -8,18 +8,19 @@ namespace smt
   class sat_core;
 
   /**
-   * This class is used for representing propositional clauses.
+   * This class is used for representing propositional exact-one constraints.
    */
-  class clause : public constr
+  class exct_one : public constr
   {
     friend class sat_core;
 
   private:
-    clause(sat_core &s, const std::vector<lit> &lits);
-    clause(const clause &orig) = delete;
-    ~clause() override;
+    exct_one(sat_core &s, const lit &ctr, const std::vector<lit> &lits);
+    exct_one(const exct_one &orig) = delete;
+    ~exct_one() override;
 
   public:
+    const lit get_ctr() const { return ctr; }
     const std::vector<lit> get_lits() const { return lits; }
 
   private:
@@ -29,6 +30,7 @@ namespace smt
     void get_reason(const lit &p, std::vector<lit> &out_reason) const override;
 
   private:
+    lit ctr;
     std::vector<lit> lits;
   };
 } // namespace smt

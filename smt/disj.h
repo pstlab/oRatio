@@ -8,18 +8,19 @@ namespace smt
   class sat_core;
 
   /**
-   * This class is used for representing propositional clauses.
+   * This class is used for representing propositional disjunctions.
    */
-  class clause : public constr
+  class disj : public constr
   {
     friend class sat_core;
 
   private:
-    clause(sat_core &s, const std::vector<lit> &lits);
-    clause(const clause &orig) = delete;
-    ~clause() override;
+    disj(sat_core &s, const lit &ctr, const std::vector<lit> &lits);
+    disj(const disj &orig) = delete;
+    ~disj() override;
 
   public:
+    const lit get_ctr() const { return ctr; }
     const std::vector<lit> get_lits() const { return lits; }
 
   private:
@@ -29,6 +30,7 @@ namespace smt
     void get_reason(const lit &p, std::vector<lit> &out_reason) const override;
 
   private:
+    lit ctr;
     std::vector<lit> lits;
   };
 } // namespace smt
