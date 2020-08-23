@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+
 namespace smt
 {
   typedef size_t var;
@@ -10,4 +12,6 @@ namespace smt
   static const lbool False = 0;
   static const lbool True = 1;
   static const lbool Undefined = 2;
+
+  typedef long I;
 } // namespace smt

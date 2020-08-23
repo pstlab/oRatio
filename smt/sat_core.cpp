@@ -232,6 +232,7 @@ namespace smt
 
     bool sat_core::propagate()
     {
+    main_loop:
         while (!prop_q.empty())
         { // we first propagate sat constraints..
             std::vector<constr *> tmp;
@@ -255,7 +256,7 @@ namespace smt
                     // we record the no-good..
                     record(no_good);
 
-                    return propagate();
+                    goto main_loop;
                 }
 
             // we then perform theory propagation..
@@ -280,7 +281,7 @@ namespace smt
                         // we record the no-good..
                         record(no_good);
 
-                        return propagate();
+                        goto main_loop;
                     }
                 if (root_level()) // since this variable will no more be assigned, we can perform some cleanings..
                     bounds.erase(bnds_it);
@@ -306,7 +307,7 @@ namespace smt
                 // we record the no-good..
                 record(no_good);
 
-                return propagate();
+                goto main_loop;
             }
 
         return true;
