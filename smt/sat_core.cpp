@@ -232,16 +232,19 @@ namespace smt
 
     bool sat_core::propagate()
     {
+        lit p;
     main_loop:
         while (!prop_q.empty())
         { // we first propagate sat constraints..
+            p = prop_q.front();
+            prop_q.pop();
             std::vector<constr *> tmp;
-            std::swap(tmp, watches[index(prop_q.front())]);
+            std::swap(tmp, watches[index(p)]);
             for (size_t i = 0; i < tmp.size(); ++i)
-                if (!tmp[i]->propagate(prop_q.front()))
+                if (!tmp[i]->propagate(p))
                 { // the constraint is conflicting..
                     for (size_t j = i + 1; j < tmp.size(); ++j)
-                        watches[index(prop_q.front())].push_back(tmp[j]);
+                        watches[index(p)].push_back(tmp[j]);
                     while (!prop_q.empty())
                         prop_q.pop();
 
@@ -260,10 +263,10 @@ namespace smt
                 }
 
             // we then perform theory propagation..
-            if (const auto bnds_it = bounds.find(variable(prop_q.front())); bnds_it != bounds.end())
+            if (const auto bnds_it = bounds.find(variable(p)); bnds_it != bounds.end())
             {
                 for (const auto &th : bnds_it->second)
-                    if (!th->propagate(prop_q.front()))
+                    if (!th->propagate(p))
                     {
                         while (!prop_q.empty())
                             prop_q.pop();
@@ -286,8 +289,6 @@ namespace smt
                 if (root_level()) // since this variable will no more be assigned, we can perform some cleanings..
                     bounds.erase(bnds_it);
             }
-
-            prop_q.pop();
         }
 
         // finally, we check theories..
