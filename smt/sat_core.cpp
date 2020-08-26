@@ -1,7 +1,5 @@
 #include "sat_core.h"
 #include "clause.h"
-#include "conj.h"
-#include "disj.h"
 #include "sat_value_listener.h"
 #include "theory.h"
 #include <algorithm>
@@ -156,7 +154,17 @@ namespace smt
         else
         { // we need to create a new variable..
             const var ctr = new_var();
-            constrs.push_back(new conj(*this, ctr, c_lits));
+            std::vector<lit> lits;
+            lits.reserve(c_lits.size() + 1);
+            lits.push_back(ctr);
+            for (const auto &l : c_lits)
+            {
+                if (!new_clause({lit(ctr, false), l}))
+                    return FALSE_var;
+                lits.push_back(!l);
+            }
+            if (!new_clause(lits))
+                return FALSE_var;
             exprs.emplace(s_expr, ctr);
             return ctr;
         }
@@ -191,7 +199,135 @@ namespace smt
         else
         { // we need to create a new variable..
             const var ctr = new_var();
-            constrs.push_back(new disj(*this, ctr, c_lits));
+            std::vector<lit> lits;
+            lits.reserve(c_lits.size() + 1);
+            lits.push_back(lit(ctr, false));
+            for (const auto &l : c_lits)
+            {
+                if (!new_clause({!l, ctr}))
+                    return FALSE_var;
+                lits.push_back(l);
+            }
+            if (!new_clause(lits))
+                return FALSE_var;
+            exprs.emplace(s_expr, ctr);
+            return ctr;
+        }
+    }
+
+    lit sat_core::new_at_most_one(const std::vector<lit> &ls)
+    {
+        assert(root_level());
+        // we try to avoid creating a new variable..
+        std::vector<lit> c_lits = ls;
+        std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return variable(l0) < variable(l1); });
+        lit p;
+        size_t j = 0;
+        std::string s_expr = "amo";
+        for (std::vector<lit>::const_iterator it0 = c_lits.begin(); it0 != c_lits.end(); ++it0)
+            if (value(*it0) == True)
+                for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
+                {
+                    if (value(*it1) == True || *it1 == !p)
+                        return FALSE_var; // the at-most-one cannot be satisfied..
+                    else if (value(*it1) != False && *it1 != p)
+                    { // we need to include this literal in the at-most-one..
+                        p = *it1;
+                        s_expr += to_string(p);
+                        c_lits[j++] = p;
+                    }
+                }
+            else if (value(*it0) != False && *it0 != p)
+            { // we need to include this literal in the at-most-one..
+                p = *it0;
+                s_expr += to_string(p);
+                c_lits[j++] = p;
+            }
+        c_lits.resize(j);
+
+        if (c_lits.empty() || c_lits.size() == 1) // an empty or a singleton at-most-one is assumed to be satisfied..
+            return TRUE_var;
+        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+            return at_expr->second;
+        else
+        { // we need to create a new variable..
+            if (ls.size() < 4)
+            { // we use the standard encoding..
+                const var ctr = new_var();
+                for (size_t i = 0; i < ls.size(); ++i)
+                    for (size_t j = i + 1; j < ls.size(); ++j)
+                        if (!new_clause({!ls[i], !ls[j], lit(ctr, false)}))
+                            return FALSE_var;
+                exprs.emplace(s_expr, ctr);
+                return ctr;
+            }
+            else
+            {
+                double ps = ceil(sqrt(ls.size()));
+                double qs = ceil(ls.size() / ps);
+
+                std::vector<lit> u, v;
+                for (size_t i = 0; i < ps; ++i)
+                    u.push_back(new_var());
+                for (size_t j = 0; j < qs; ++j)
+                    v.push_back(new_var());
+
+                const lit ctr = new_conj({new_at_most_one(u), new_at_most_one(v)});
+
+                for (size_t i = 0; i < ps; ++i)
+                    for (size_t j = 0; j < qs; ++j)
+                        if (size_t k = static_cast<size_t>(i * qs + j); k < ls.size())
+                            if (!new_clause({!ls[k], u[i], !ctr}) || !new_clause({!ls[k], v[j], !ctr}))
+                                return FALSE_var;
+
+                exprs.emplace(s_expr, ctr);
+                return ctr;
+            }
+        }
+    }
+
+    lit sat_core::new_exct_one(const std::vector<lit> &ls)
+    {
+        assert(root_level());
+        // we try to avoid creating a new variable..
+        std::vector<lit> c_lits = ls;
+        std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return variable(l0) < variable(l1); });
+        lit p;
+        size_t j = 0;
+        std::string s_expr = "^";
+        for (std::vector<lit>::const_iterator it0 = c_lits.begin(); it0 != c_lits.end(); ++it0)
+            if (value(*it0) == True)
+                for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
+                {
+                    if (value(*it1) == True || *it1 == !p)
+                        return FALSE_var; // the exact-one cannot be satisfied..
+                    else if (value(*it1) != False && *it1 != p)
+                    { // we need to include this literal in the exact-one..
+                        p = *it1;
+                        s_expr += to_string(p);
+                        c_lits[j++] = p;
+                    }
+                }
+            else if (value(*it0) != False && *it0 != p)
+            { // we need to include this literal in the exact-one..
+                p = *it0;
+                s_expr += to_string(p);
+                c_lits[j++] = p;
+            }
+        c_lits.resize(j);
+
+        if (c_lits.empty()) // an empty exact-one is assumed to be unsatisfable..
+            return FALSE_var;
+        else if (c_lits.size() == 1 && sign(c_lits[0]))
+            return c_lits[0];
+        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+            return at_expr->second;
+        else
+        { // we need to create a new variable..
+            const lit ctr = new_at_most_one(c_lits);
+            c_lits.push_back(!ctr);
+            if (!new_clause(c_lits))
+                return FALSE_var;
             exprs.emplace(s_expr, ctr);
             return ctr;
         }
@@ -202,7 +338,7 @@ namespace smt
         trail_lim.push_back(trail.size());
         for (const auto &th : theories)
             th->push();
-        return enqueue(p);
+        return enqueue(p) && propagate();
     }
 
     void sat_core::pop()

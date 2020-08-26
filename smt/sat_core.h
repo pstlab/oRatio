@@ -27,9 +27,11 @@ namespace smt
     var new_var();                                 // creates a new propositional variable..
     bool new_clause(const std::vector<lit> &lits); // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
 
-    lit new_eq(const lit &left, const lit &right); // creates a new reified equality..
-    lit new_conj(const std::vector<lit> &ls);      // creates a new reified conjunction..
-    lit new_disj(const std::vector<lit> &ls);      // creates a new reified disjunction..
+    lit new_eq(const lit &left, const lit &right);   // creates a new reified equality..
+    lit new_conj(const std::vector<lit> &ls);        // creates a new reified conjunction..
+    lit new_disj(const std::vector<lit> &ls);        // creates a new reified disjunction..
+    lit new_at_most_one(const std::vector<lit> &ls); // creates a new reified at-most-one..
+    lit new_exct_one(const std::vector<lit> &ls);    // creates a new reified exct-one..
 
     bool assume(const lit &p);
     void pop();
@@ -71,12 +73,12 @@ namespace smt
     std::vector<std::vector<constr *>> watches; // for each literal 'p', a list of constraints watching 'p'..
     std::vector<lbool> assigns;                 // the current assignments..
 
-    std::queue<lit> prop_q;                        // propagation queue..
-    std::vector<lit> trail;                        // the list of assignment in chronological order..
-    std::vector<size_t> trail_lim;                 // separator indices for different decision levels in 'trail'..
-    std::vector<constr *> reason;                  // for each variable, the constraint that implied its value..
-    std::vector<size_t> level;                     // for each variable, the decision level it was assigned..
-    std::unordered_map<std::string, size_t> exprs; // the already existing expressions (string to bool variable)..
+    std::queue<lit> prop_q;                     // propagation queue..
+    std::vector<lit> trail;                     // the list of assignment in chronological order..
+    std::vector<size_t> trail_lim;              // separator indices for different decision levels in 'trail'..
+    std::vector<constr *> reason;               // for each variable, the constraint that implied its value..
+    std::vector<size_t> level;                  // for each variable, the decision level it was assigned..
+    std::unordered_map<std::string, lit> exprs; // the already existing expressions (string to literal)..
 
     std::vector<theory *> theories; // all the theories..
     std::unordered_map<size_t, std::set<theory *>> bounds;
