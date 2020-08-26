@@ -129,32 +129,32 @@ namespace smt
     friend inf_rational operator*(const I &lhs, const inf_rational &rhs) { return inf_rational(lhs * rhs.rat, lhs * rhs.inf); }
     friend inf_rational operator/(const I &lhs, const inf_rational &rhs) { return inf_rational(lhs / rhs.rat, lhs / rhs.inf); }
 
-    std::string to_string() const
+    friend std::string to_string(const inf_rational &rhs)
     {
-      if (is_infinite(rat) || inf == rational::ZERO)
-        return rat.to_string();
+      if (is_infinite(rhs.rat) || rhs.inf == rational::ZERO)
+        return to_string(rhs.rat);
       std::string c_str;
-      if (rat != rational::ZERO)
-        c_str += rat.to_string();
-      if (inf == rational::ONE)
+      if (rhs.rat != rational::ZERO)
+        c_str += to_string(rhs.rat);
+      if (rhs.inf == rational::ONE)
         if (c_str.empty())
           c_str += "ε";
         else
           c_str += " + ε";
-      else if (inf == -rational::ONE)
+      else if (rhs.inf == -rational::ONE)
         if (c_str.empty())
           c_str += "-ε";
         else
           c_str += " - ε";
-      else if (is_negative(inf))
+      else if (is_negative(rhs.inf))
         if (c_str.empty())
-          c_str += inf.to_string() + "ε";
+          c_str += to_string(rhs.inf) + "ε";
         else
-          c_str += " " + inf.to_string() + "ε";
+          c_str += " " + to_string(rhs.inf) + "ε";
       else if (c_str.empty())
-        c_str += inf.to_string() + "ε";
+        c_str += to_string(rhs.inf) + "ε";
       else
-        c_str += " +" + inf.to_string() + "ε";
+        c_str += " +" + to_string(rhs.inf) + "ε";
       return c_str;
     };
 

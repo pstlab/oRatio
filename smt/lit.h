@@ -2,6 +2,7 @@
 
 #include "defs.h"
 #include <limits>
+#include <string>
 
 namespace smt
 {
@@ -29,6 +30,8 @@ namespace smt
     bool operator<(const lit &rhs) const { return x < rhs.x; }
     bool operator==(const lit &rhs) const { return x == rhs.x; }
     bool operator!=(const lit &rhs) const { return x != rhs.x; }
+
+    friend std::string to_string(const lit &p) { return sign(p) ? ("b" + std::to_string(variable(p))) : ("¬b" + std::to_string(variable(p))); }
 
   private:
     size_t x;

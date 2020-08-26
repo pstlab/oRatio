@@ -76,4 +76,33 @@ namespace smt
             out_reason.push_back(!lits[i]);
         }
     }
+
+    std::string to_string(const clause &c)
+    {
+        std::string cls;
+        cls += "{ \"lits\" : [";
+
+        for (std::vector<lit>::const_iterator it = c.lits.cbegin(); it != c.lits.cend(); ++it)
+        {
+            if (it != c.lits.cbegin())
+                cls += ", ";
+            cls += "{\"lit\" : \"" + to_string(*it) + "\", \"val\" : \"";
+            switch (c.value(*it))
+            {
+            case True:
+                cls += "T";
+                break;
+            case False:
+                cls += "F";
+                break;
+            case Undefined:
+                cls += "U";
+                break;
+            }
+            cls += "\"}";
+        }
+
+        cls += +"] }";
+        return cls;
+    }
 } // namespace smt

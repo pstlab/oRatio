@@ -179,21 +179,21 @@ namespace smt
         return res;
     }
 
-    std::string lin::to_string() const
+    std::string to_string(const lin &rhs)
     {
-        if (vars.empty())
-            return known_term.to_string();
+        if (rhs.vars.empty())
+            return to_string(rhs.known_term);
 
         std::string s;
-        for (std::map<const var, rational>::const_iterator it = vars.cbegin(); it != vars.cend(); ++it)
-            if (it == vars.cbegin())
+        for (std::map<const var, rational>::const_iterator it = rhs.vars.cbegin(); it != rhs.vars.cend(); ++it)
+            if (it == rhs.vars.cbegin())
             {
                 if (it->second == rational::ONE)
                     s += "x" + std::to_string(it->first);
                 else if (it->second == -rational::ONE)
                     s += "-x" + std::to_string(it->first);
                 else
-                    s += it->second.to_string() + "*x" + std::to_string(it->first);
+                    s += to_string(it->second) + "*x" + std::to_string(it->first);
             }
             else
             {
@@ -202,15 +202,15 @@ namespace smt
                 else if (it->second == -rational::ONE)
                     s += " - x" + std::to_string(it->first);
                 else if (is_positive(it->second))
-                    s += " + " + it->second.to_string() + "*x" + std::to_string(it->first);
+                    s += " + " + to_string(it->second) + "*x" + std::to_string(it->first);
                 else
-                    s += " - " + (-it->second).to_string() + "*x" + std::to_string(it->first);
+                    s += " - " + to_string(-it->second) + "*x" + std::to_string(it->first);
             }
 
-        if (is_positive(known_term))
-            s += " + " + known_term.to_string();
-        if (is_negative(known_term))
-            s += " - " + (-known_term).to_string();
+        if (is_positive(rhs.known_term))
+            s += " + " + to_string(rhs.known_term);
+        if (is_negative(rhs.known_term))
+            s += " - " + to_string(-rhs.known_term);
         return s;
     }
 } // namespace smt

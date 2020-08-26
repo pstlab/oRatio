@@ -316,16 +316,16 @@ namespace smt
         }
     }
 
-    std::string rational::to_string() const
+    std::string to_string(const rational &rhs)
     {
-        switch (den)
+        switch (rhs.den)
         {
         case 0:
-            return num > 0 ? "+inf" : "-inf";
+            return rhs.num > 0 ? "+inf" : "-inf";
         case 1:
-            return std::to_string(num);
+            return std::to_string(rhs.num);
         default:
-            return std::to_string(num) + "/" + std::to_string(den);
+            return std::to_string(rhs.num) + "/" + std::to_string(rhs.den);
         }
     }
 } // namespace smt

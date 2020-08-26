@@ -14,32 +14,32 @@ namespace smt
     lin(const var v, const rational &c);
 
   public:
-    lin operator+(const lin &right) const;
-    lin operator+(const rational &right) const;
+    lin operator+(const lin &rhs) const;
+    lin operator+(const rational &rhs) const;
     friend lin operator+(const rational &lhs, const lin &rhs);
 
-    lin operator-(const lin &right) const;
-    lin operator-(const rational &right) const;
+    lin operator-(const lin &rhs) const;
+    lin operator-(const rational &rhs) const;
     friend lin operator-(const rational &lhs, const lin &rhs);
 
-    lin operator*(const rational &right) const;
+    lin operator*(const rational &rhs) const;
     friend lin operator*(const rational &lhs, const lin &rhs);
 
-    lin operator/(const rational &right) const;
+    lin operator/(const rational &rhs) const;
 
-    lin operator+=(const lin &right);
-    lin operator+=(const rational &right);
+    lin operator+=(const lin &rhs);
+    lin operator+=(const rational &rhs);
 
-    lin operator-=(const lin &right);
-    lin operator-=(const rational &right);
+    lin operator-=(const lin &rhs);
+    lin operator-=(const rational &rhs);
 
-    lin operator*=(const rational &right);
+    lin operator*=(const rational &rhs);
 
-    lin operator/=(const rational &right);
+    lin operator/=(const rational &rhs);
 
     lin operator-() const;
 
-    std::string to_string() const;
+    friend std::string to_string(const lin &rhs);
 
   public:
     std::map<const var, rational> vars;

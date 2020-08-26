@@ -73,8 +73,7 @@ namespace smt
   private:
     void normalize();
 
-  public:
-    std::string to_string() const;
+    friend std::string to_string(const rational &rhs);
 
   private:
     I num; // the numerator..

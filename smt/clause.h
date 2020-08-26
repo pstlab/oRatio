@@ -28,6 +28,8 @@ namespace smt
     void remove() override;
     void get_reason(const lit &p, std::vector<lit> &out_reason) const override;
 
+    friend std::string to_string(const clause &c);
+
   private:
     std::vector<lit> lits;
   };
