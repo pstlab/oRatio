@@ -52,18 +52,21 @@ void test_basic_core_1()
     var b1 = core.new_var();
     var b2 = core.new_var();
 
-    bool ch = core.new_clause({core.new_eq(b0, !lit(b1))});
-    assert(ch);
+    bool nc = core.new_clause({core.new_eq(b0, !lit(b1))});
+    assert(nc);
 
     assert(core.value(b0) == Undefined);
     assert(core.value(b1) == Undefined);
     assert(core.value(b2) == Undefined);
 
-    ch = core.new_clause({b1, b2});
-    assert(ch);
+    nc = core.new_clause({b1, b2});
+    assert(nc);
 
-    ch = core.assume(b0);
-    assert(ch);
+    bool prop = core.propagate();
+    assert(prop);
+
+    bool assm = core.assume(b0);
+    assert(assm);
     assert(core.value(b0) == True);
     assert(core.value(b1) == False);
     assert(core.value(b2) == True);
@@ -95,6 +98,9 @@ void test_no_good()
     assert(nc);
     nc = core.new_clause({lit(b4, false), lit(b5, false)});
     assert(nc);
+
+    bool prop = core.propagate();
+    assert(prop);
 
     bool assm = core.assume(lit(b6, false));
     assert(assm);
@@ -133,6 +139,9 @@ void test_assumptions()
     nc = core.new_clause({lit(b4, false), lit(b5, false)});
     assert(nc);
 
+    bool prop = core.propagate();
+    assert(prop);
+
     bool assm = core.check({lit(b6, false), lit(b7, false), lit(b8, false), lit(b0, false)});
     assert(!assm);
 }
@@ -147,6 +156,9 @@ void test_exct_one_0()
     var b3 = core.new_var();
 
     lit xct_one = core.new_exct_one({b0, b1, b2, b3});
+
+    bool prop = core.propagate();
+    assert(prop);
 
     bool assm = core.assume(xct_one);
     assert(assm);
@@ -168,6 +180,9 @@ void test_exct_one_1()
     var b3 = core.new_var();
 
     lit xct_one = core.new_exct_one({b0, b1, b2, b3});
+
+    bool prop = core.propagate();
+    assert(prop);
 
     bool assm = core.assume(lit(b0, false));
     assert(assm);
@@ -191,6 +206,9 @@ void test_exct_one_2()
     var b3 = core.new_var();
 
     lit xct_one = core.new_exct_one({b0, b1, b2, b3});
+
+    bool prop = core.propagate();
+    assert(prop);
 
     bool assm = core.assume(xct_one);
     assert(assm);

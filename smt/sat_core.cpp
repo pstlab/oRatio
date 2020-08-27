@@ -108,7 +108,7 @@ namespace smt
             }
         }
 
-        const std::string s_expr = "=" + (variable(left) < variable(right)) ? (to_string(left) + to_string(right)) : to_string(right) + to_string(left);
+        const std::string s_expr = "=" + (left < right ? (to_string(left) + to_string(right)) : (to_string(right) + to_string(left)));
         if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
             return at_expr->second;
         else
@@ -335,6 +335,7 @@ namespace smt
 
     bool sat_core::assume(const lit &p)
     {
+        assert(prop_q.empty());
         trail_lim.push_back(trail.size());
         for (const auto &th : theories)
             th->push();
