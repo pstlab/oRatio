@@ -93,8 +93,7 @@ namespace smt
     static size_t lb_index(const var &v) { return v << 1; }       // the index of the lower bound of the 'v' variable..
     static size_t ub_index(const var &v) { return (v << 1) ^ 1; } // the index of the upper bound of the 'v' variable..
 
-  public:
-    std::string to_string();
+    friend std::string to_string(const lra_theory &rhs);
 
   private:
     /**
@@ -111,7 +110,7 @@ namespace smt
     std::map<const var, row *> tableau;                        // the sparse matrix..
     std::unordered_map<std::string, var> exprs;                // the expressions (string to numeric variable) for which already exist slack variables..
     std::unordered_map<std::string, lit> s_asrts;              // the assertions (string to literal) used for reducing the number of boolean variables..
-    std::unordered_map<lit, std::vector<assertion *>> v_asrts; // the assertions (literal to assertions) used for enforcing (negating) assertions..
+    std::unordered_map<var, std::vector<assertion *>> v_asrts; // the assertions (literal to assertions) used for enforcing (negating) assertions..
     std::vector<std::vector<assertion *>> a_watches;           // for each variable 'v', a list of assertions watching 'v'..
     std::vector<std::unordered_set<row *>> t_watches;          // for each variable 'v', a list of tableau rows watching 'v'..
     std::vector<std::unordered_map<size_t, bound>> layers;     // we store the updated bounds..
