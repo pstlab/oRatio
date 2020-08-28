@@ -124,7 +124,7 @@ namespace smt
     }
 
     bool ov_theory::propagate(const lit &p)
-    {
+    { // propagation is performed at SAT level, here we just notify possible listeners..
         assert(cnfl.empty());
         for (const auto &v : is_contained_in.at(variable(p)))
             if (const auto at_v = listening.find(v); at_v != listening.end())
