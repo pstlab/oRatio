@@ -13,6 +13,7 @@ include_directories(smt smt/parallel smt/lra smt/ov smt/dl riddle core solver so
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 add_subdirectory(smt/tests)
+add_subdirectory(riddle/tests)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
