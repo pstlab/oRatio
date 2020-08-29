@@ -9,7 +9,7 @@ namespace smt
     lin::lin(const rational &known_term) : known_term(known_term) {}
     lin::lin(const var v, const rational &c) { vars.emplace(v, c); }
 
-    lin lin::operator+(const lin &right) const
+    lin lin::operator+(const lin &right) const noexcept
     {
         lin res = *this;
         for (const auto &term : right.vars)
@@ -28,21 +28,21 @@ namespace smt
         return res;
     }
 
-    lin lin::operator+(const rational &right) const
+    lin lin::operator+(const rational &right) const noexcept
     {
         lin res = *this;
         res.known_term += right;
         return res;
     }
 
-    lin operator+(const rational &lhs, const lin &rhs)
+    lin operator+(const rational &lhs, const lin &rhs) noexcept
     {
         lin res = rhs;
         res.known_term += lhs;
         return res;
     }
 
-    lin lin::operator-(const lin &right) const
+    lin lin::operator-(const lin &right) const noexcept
     {
         lin res = *this;
         for (const auto &term : right.vars)
@@ -58,21 +58,21 @@ namespace smt
         return res;
     }
 
-    lin lin::operator-(const rational &right) const
+    lin lin::operator-(const rational &right) const noexcept
     {
         lin res = *this;
         res.known_term -= right;
         return res;
     }
 
-    lin operator-(const rational &lhs, const lin &rhs)
+    lin operator-(const rational &lhs, const lin &rhs) noexcept
     {
         lin res = -rhs;
         res.known_term += lhs;
         return res;
     }
 
-    lin lin::operator*(const rational &right) const
+    lin lin::operator*(const rational &right) const noexcept
     {
         lin res = *this;
         for (auto &&term : res.vars)
@@ -81,7 +81,7 @@ namespace smt
         return res;
     }
 
-    lin operator*(const rational &lhs, const lin &rhs)
+    lin operator*(const rational &lhs, const lin &rhs) noexcept
     {
         lin res = rhs;
         for (auto &&term : res.vars)
@@ -90,7 +90,7 @@ namespace smt
         return res;
     }
 
-    lin lin::operator/(const rational &right) const
+    lin lin::operator/(const rational &right) const noexcept
     {
         lin res = *this;
         for (auto &&term : res.vars)
@@ -99,7 +99,7 @@ namespace smt
         return res;
     }
 
-    lin lin::operator+=(const lin &right)
+    lin lin::operator+=(const lin &right) noexcept
     {
         for (const auto &term : right.vars)
             if (const auto trm_it = vars.find(term.first); trm_it == vars.end())
@@ -114,13 +114,13 @@ namespace smt
         return *this;
     }
 
-    lin lin::operator+=(const rational &right)
+    lin lin::operator+=(const rational &right) noexcept
     {
         known_term += right;
         return *this;
     }
 
-    lin lin::operator-=(const lin &right)
+    lin lin::operator-=(const lin &right) noexcept
     {
         for (const auto &term : right.vars)
             if (const auto trm_it = vars.find(term.first); trm_it == vars.end())
@@ -135,13 +135,13 @@ namespace smt
         return *this;
     }
 
-    lin lin::operator-=(const rational &right)
+    lin lin::operator-=(const rational &right) noexcept
     {
         known_term -= right;
         return *this;
     }
 
-    lin lin::operator*=(const rational &right)
+    lin lin::operator*=(const rational &right) noexcept
     {
         assert(!is_infinite(right));
         if (right == rational::ZERO)
@@ -155,7 +155,7 @@ namespace smt
         return *this;
     }
 
-    lin lin::operator/=(const rational &right)
+    lin lin::operator/=(const rational &right) noexcept
     {
         assert(right != rational::ZERO);
         if (is_infinite(right))
@@ -170,7 +170,7 @@ namespace smt
         return *this;
     }
 
-    lin lin::operator-() const
+    lin lin::operator-() const noexcept
     {
         lin res;
         for (const auto &term : vars)
@@ -179,7 +179,7 @@ namespace smt
         return res;
     }
 
-    std::string to_string(const lin &rhs)
+    std::string to_string(const lin &rhs) noexcept
     {
         if (rhs.vars.empty())
             return to_string(rhs.known_term);

@@ -5,22 +5,22 @@
 namespace smt
 {
 
-class rdl_value_listener
-{
+  class rdl_value_listener
+  {
     friend class rdl_theory;
 
-public:
+  public:
     rdl_value_listener(rdl_theory &s) : th(s) {}
     rdl_value_listener(const rdl_value_listener &that) = delete;
     virtual ~rdl_value_listener() {}
 
-protected:
-    void listen_rdl(var v) { th.listen(v, this); }
+  protected:
+    void listen_rdl(var v) noexcept { th.listen(v, this); }
 
-private:
+  private:
     virtual void rdl_value_change(const var &) {}
 
-private:
+  private:
     rdl_theory &th;
-};
+  };
 } // namespace smt

@@ -14,32 +14,32 @@ namespace smt
     lin(const var v, const rational &c);
 
   public:
-    lin operator+(const lin &rhs) const;
-    lin operator+(const rational &rhs) const;
-    friend lin operator+(const rational &lhs, const lin &rhs);
+    lin operator+(const lin &rhs) const noexcept;
+    lin operator+(const rational &rhs) const noexcept;
+    friend lin operator+(const rational &lhs, const lin &rhs) noexcept;
 
-    lin operator-(const lin &rhs) const;
-    lin operator-(const rational &rhs) const;
-    friend lin operator-(const rational &lhs, const lin &rhs);
+    lin operator-(const lin &rhs) const noexcept;
+    lin operator-(const rational &rhs) const noexcept;
+    friend lin operator-(const rational &lhs, const lin &rhs) noexcept;
 
-    lin operator*(const rational &rhs) const;
-    friend lin operator*(const rational &lhs, const lin &rhs);
+    lin operator*(const rational &rhs) const noexcept;
+    friend lin operator*(const rational &lhs, const lin &rhs) noexcept;
 
-    lin operator/(const rational &rhs) const;
+    lin operator/(const rational &rhs) const noexcept;
 
-    lin operator+=(const lin &rhs);
-    lin operator+=(const rational &rhs);
+    lin operator+=(const lin &rhs) noexcept;
+    lin operator+=(const rational &rhs) noexcept;
 
-    lin operator-=(const lin &rhs);
-    lin operator-=(const rational &rhs);
+    lin operator-=(const lin &rhs) noexcept;
+    lin operator-=(const rational &rhs) noexcept;
 
-    lin operator*=(const rational &rhs);
+    lin operator*=(const rational &rhs) noexcept;
 
-    lin operator/=(const rational &rhs);
+    lin operator/=(const rational &rhs) noexcept;
 
-    lin operator-() const;
+    lin operator-() const noexcept;
 
-    friend std::string to_string(const lin &rhs);
+    friend std::string to_string(const lin &rhs) noexcept;
 
   public:
     std::map<const var, rational> vars;

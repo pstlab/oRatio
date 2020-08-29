@@ -28,7 +28,7 @@ namespace smt
             delete c;
     }
 
-    var sat_core::new_var()
+    var sat_core::new_var() noexcept
     {
         const var id = assigns.size();
         watches.push_back(std::vector<constr *>());
@@ -40,7 +40,7 @@ namespace smt
         return id;
     }
 
-    bool sat_core::new_clause(const std::vector<lit> &lits)
+    bool sat_core::new_clause(const std::vector<lit> &lits) noexcept
     {
         assert(root_level());
         // we check if the clause is already satisfied and filter out false/duplicate literals..
@@ -70,7 +70,7 @@ namespace smt
         }
     }
 
-    lit sat_core::new_eq(const lit &left, const lit &right)
+    lit sat_core::new_eq(const lit &left, const lit &right) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
@@ -125,7 +125,7 @@ namespace smt
         }
     }
 
-    lit sat_core::new_conj(const std::vector<lit> &ls)
+    lit sat_core::new_conj(const std::vector<lit> &ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
@@ -170,7 +170,7 @@ namespace smt
         }
     }
 
-    lit sat_core::new_disj(const std::vector<lit> &ls)
+    lit sat_core::new_disj(const std::vector<lit> &ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
@@ -215,7 +215,7 @@ namespace smt
         }
     }
 
-    lit sat_core::new_at_most_one(const std::vector<lit> &ls)
+    lit sat_core::new_at_most_one(const std::vector<lit> &ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
@@ -286,7 +286,7 @@ namespace smt
         }
     }
 
-    lit sat_core::new_exct_one(const std::vector<lit> &ls)
+    lit sat_core::new_exct_one(const std::vector<lit> &ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
@@ -333,7 +333,7 @@ namespace smt
         }
     }
 
-    bool sat_core::assume(const lit &p)
+    bool sat_core::assume(const lit &p) noexcept
     {
         assert(prop_q.empty());
         trail_lim.push_back(trail.size());
@@ -342,7 +342,7 @@ namespace smt
         return enqueue(p) && propagate();
     }
 
-    void sat_core::pop()
+    void sat_core::pop() noexcept
     {
         while (trail_lim.back() < trail.size())
             pop_one();
@@ -352,7 +352,7 @@ namespace smt
             th->pop();
     }
 
-    bool sat_core::simplify_db()
+    bool sat_core::simplify_db() noexcept
     {
         assert(root_level());
         if (!propagate())
@@ -367,7 +367,7 @@ namespace smt
         return true;
     }
 
-    bool sat_core::propagate()
+    bool sat_core::propagate() noexcept
     {
         lit p;
     main_loop:
@@ -451,7 +451,7 @@ namespace smt
         return true;
     }
 
-    bool sat_core::check(const std::vector<lit> &lits)
+    bool sat_core::check(const std::vector<lit> &lits) noexcept
     {
         const size_t c_rl = decision_level(); // the current root-level..
         size_t c_dl;                          // the current decision-level..
@@ -471,7 +471,7 @@ namespace smt
         return true;
     }
 
-    void sat_core::analyze(constr &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel)
+    void sat_core::analyze(constr &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel) noexcept
     {
         std::set<var> seen;
         int counter = 0; // this is the number of variables of the current decision level that have already been seen..
@@ -515,7 +515,7 @@ namespace smt
         out_learnt[0] = !p;
     }
 
-    void sat_core::record(const std::vector<lit> &lits)
+    void sat_core::record(const std::vector<lit> &lits) noexcept
     {
         assert(value(lits[0]) == Undefined);
         assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == True; }) == 0);
@@ -539,7 +539,7 @@ namespace smt
         }
     }
 
-    bool sat_core::enqueue(const lit &p, constr *const c)
+    bool sat_core::enqueue(const lit &p, constr *const c) noexcept
     {
         if (lbool val = value(p); val != Undefined)
             return val;
@@ -562,7 +562,7 @@ namespace smt
         }
     }
 
-    void sat_core::pop_one()
+    void sat_core::pop_one() noexcept
     {
         const var v = variable(trail.back());
         assigns[v] = Undefined;

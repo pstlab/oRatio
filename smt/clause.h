@@ -20,15 +20,15 @@ namespace smt
     ~clause() override;
 
   public:
-    const std::vector<lit> get_lits() const { return lits; }
+    const std::vector<lit> get_lits() const noexcept { return lits; }
 
   private:
-    const bool propagate(const lit &p) override;
-    const bool simplify() override;
-    void remove() override;
-    void get_reason(const lit &p, std::vector<lit> &out_reason) const override;
+    const bool propagate(const lit &p) noexcept override;
+    const bool simplify() noexcept override;
+    void remove() noexcept override;
+    void get_reason(const lit &p, std::vector<lit> &out_reason) const noexcept override;
 
-    friend std::string to_string(const clause &c);
+    friend std::string to_string(const clause &c) noexcept;
 
   private:
     std::vector<lit> lits;

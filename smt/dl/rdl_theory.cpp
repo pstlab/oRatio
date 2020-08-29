@@ -19,7 +19,7 @@ namespace smt
 
     rdl_theory::~rdl_theory() {}
 
-    var rdl_theory::new_var()
+    var rdl_theory::new_var() noexcept
     {
         var tp = n_vars++;
         if (_dists.size() == tp)
@@ -27,7 +27,7 @@ namespace smt
         return tp;
     }
 
-    lit rdl_theory::new_distance(const var &from, const var &to, const inf_rational &dist)
+    lit rdl_theory::new_distance(const var &from, const var &to, const inf_rational &dist) noexcept
     {
         if (_dists[to][from] < -dist)
             return FALSE_var; // the constraint is inconsistent..
@@ -355,7 +355,7 @@ namespace smt
             throw std::invalid_argument("not a valid comparison between real difference logic expressions..");
     }
 
-    bool rdl_theory::propagate(const lit &p)
+    bool rdl_theory::propagate(const lit &p) noexcept
     {
         assert(cnfl.empty());
         assert(var_dists.count(variable(p)));
@@ -425,7 +425,7 @@ namespace smt
         return true;
     }
 
-    bool rdl_theory::check()
+    bool rdl_theory::check() noexcept
     {
         assert(cnfl.empty());
         assert(std::all_of(dist_constr.begin(), dist_constr.end(), [this](const std::pair<std::pair<var, var>, rdl_distance *> &dist) {
@@ -442,9 +442,9 @@ namespace smt
         return true;
     }
 
-    void rdl_theory::push() { layers.push_back(layer()); }
+    void rdl_theory::push() noexcept { layers.push_back(layer()); }
 
-    void rdl_theory::pop()
+    void rdl_theory::pop() noexcept
     {
         for (const auto &dist : layers.back().old_dists)
             _dists[dist.first.first][dist.first.second] = dist.second;
@@ -458,7 +458,7 @@ namespace smt
         layers.pop_back();
     }
 
-    void rdl_theory::propagate(const var &from, const var &to, const inf_rational &dist)
+    void rdl_theory::propagate(const var &from, const var &to, const inf_rational &dist) noexcept
     {
         assert(!is_infinite(dist));
         set_dist(from, to, dist);
@@ -541,7 +541,7 @@ namespace smt
                         }
     }
 
-    void rdl_theory::set_dist(const var &from, const var &to, const inf_rational &dist)
+    void rdl_theory::set_dist(const var &from, const var &to, const inf_rational &dist) noexcept
     {
         assert(_dists[from][to] > dist);
         if (!layers.empty() && !layers.back().old_dists.count({from, to}))
@@ -564,7 +564,7 @@ namespace smt
         }
     }
 
-    void rdl_theory::set_pred(const var &from, const var &to, const var &pred)
+    void rdl_theory::set_pred(const var &from, const var &to, const var &pred) noexcept
     {
         if (!layers.empty() && !layers.back().old_preds.count({from, to}))
             // we store the current values for backtracking purposes..
@@ -573,7 +573,7 @@ namespace smt
         _preds[from][to] = pred;
     }
 
-    void rdl_theory::resize(const size_t &size)
+    void rdl_theory::resize(const size_t &size) noexcept
     {
         const size_t c_size = _dists.size();
         for (auto &row : _dists)

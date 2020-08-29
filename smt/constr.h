@@ -27,11 +27,11 @@ namespace smt
     virtual void get_reason(const lit &p, std::vector<lit> &out_reason) const = 0;
 
   protected:
-    std::vector<constr *> &watches(const lit &p);
-    bool enqueue(const lit &p);
+    std::vector<constr *> &watches(const lit &p) noexcept;
+    bool enqueue(const lit &p) noexcept;
 
-    lbool value(const var &x) const;
-    lbool value(const lit &p) const;
+    lbool value(const var &x) const noexcept;
+    lbool value(const lit &p) const noexcept;
 
   private:
     sat_core &s;

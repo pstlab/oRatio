@@ -25,36 +25,36 @@ namespace smt
     lra_theory(const lra_theory &orig) = delete;
     virtual ~lra_theory();
 
-    var new_var();             // creates and returns a new numeric variable..
-    var new_var(const lin &l); // creates and returns a new numeric variable and makes it equal to the given linear expression..
+    var new_var() noexcept;             // creates and returns a new numeric variable..
+    var new_var(const lin &l) noexcept; // creates and returns a new numeric variable and makes it equal to the given linear expression..
 
-    bool is_basic(const var &v) const { return tableau.count(v); }
+    bool is_basic(const var &v) const noexcept { return tableau.count(v); }
 
-    lit new_lt(const lin &left, const lin &right);
-    lit new_leq(const lin &left, const lin &right);
-    lit new_eq(const lin &left, const lin &right) { return sat.new_conj({new_geq(left, right), new_leq(left, right)}); }
-    lit new_geq(const lin &left, const lin &right);
-    lit new_gt(const lin &left, const lin &right);
+    lit new_lt(const lin &left, const lin &right) noexcept;
+    lit new_leq(const lin &left, const lin &right) noexcept;
+    lit new_eq(const lin &left, const lin &right) noexcept { return sat.new_conj({new_geq(left, right), new_leq(left, right)}); }
+    lit new_geq(const lin &left, const lin &right) noexcept;
+    lit new_gt(const lin &left, const lin &right) noexcept;
 
-    inf_rational lb(const var &v) const { return c_bounds[lb_index(v)].value; } // the current lower bound of variable 'v'..
-    inf_rational ub(const var &v) const { return c_bounds[ub_index(v)].value; } // the current upper bound of variable 'v'..
-    inf_rational value(const var &v) const { return vals[v]; }                  // the current value of variable 'v'..
+    inf_rational lb(const var &v) const noexcept { return c_bounds[lb_index(v)].value; } // the current lower bound of variable 'v'..
+    inf_rational ub(const var &v) const noexcept { return c_bounds[ub_index(v)].value; } // the current upper bound of variable 'v'..
+    inf_rational value(const var &v) const noexcept { return vals[v]; }                  // the current value of variable 'v'..
 
-    inf_rational lb(const lin &l) const // returns the current lower bound of linear expression 'l'..
+    inf_rational lb(const lin &l) const noexcept // returns the current lower bound of linear expression 'l'..
     {
       inf_rational b(l.known_term);
       for (const auto &term : l.vars)
         b += (is_positive(term.second) ? lb(term.first) : ub(term.first)) * term.second;
       return b;
     }
-    inf_rational ub(const lin &l) const // returns the current upper bound of linear expression 'l'..
+    inf_rational ub(const lin &l) const noexcept // returns the current upper bound of linear expression 'l'..
     {
       inf_rational b(l.known_term);
       for (const auto &term : l.vars)
         b += (is_positive(term.second) ? ub(term.first) : lb(term.first)) * term.second;
       return b;
     }
-    std::pair<inf_rational, inf_rational> bounds(const lin &l) const // returns the current upper bound of linear expression 'l'..
+    std::pair<inf_rational, inf_rational> bounds(const lin &l) const noexcept // returns the current upper bound of linear expression 'l'..
     {
       inf_rational c_lb(l.known_term);
       inf_rational c_ub(l.known_term);
@@ -73,27 +73,27 @@ namespace smt
       return v;
     }
 
-    bool equates(const lin &l0, const lin &l1) const;
+    bool equates(const lin &l0, const lin &l1) const noexcept;
 
   private:
-    bool propagate(const lit &p) override;
-    bool check() override;
-    void push() override;
-    void pop() override;
+    bool propagate(const lit &p) noexcept override;
+    bool check() noexcept override;
+    void push() noexcept override;
+    void pop() noexcept override;
 
-    bool assert_lower(const var &x_i, const inf_rational &val, const lit &p);
-    bool assert_upper(const var &x_i, const inf_rational &val, const lit &p);
-    void update(const var &x_i, const inf_rational &v);
-    void pivot_and_update(const var &x_i, const var &x_j, const inf_rational &v);
-    void pivot(const var x_i, const var x_j);
-    void new_row(const var &x, const lin &l);
+    bool assert_lower(const var &x_i, const inf_rational &val, const lit &p) noexcept;
+    bool assert_upper(const var &x_i, const inf_rational &val, const lit &p) noexcept;
+    void update(const var &x_i, const inf_rational &v) noexcept;
+    void pivot_and_update(const var &x_i, const var &x_j, const inf_rational &v) noexcept;
+    void pivot(const var x_i, const var x_j) noexcept;
+    void new_row(const var &x, const lin &l) noexcept;
 
-    void listen(const var &v, lra_value_listener *const l) { listening[v].insert(l); }
+    void listen(const var &v, lra_value_listener *const l) noexcept { listening[v].insert(l); }
 
-    static size_t lb_index(const var &v) { return v << 1; }       // the index of the lower bound of the 'v' variable..
-    static size_t ub_index(const var &v) { return (v << 1) ^ 1; } // the index of the upper bound of the 'v' variable..
+    static size_t lb_index(const var &v) noexcept { return v << 1; }       // the index of the lower bound of the 'v' variable..
+    static size_t ub_index(const var &v) noexcept { return (v << 1) ^ 1; } // the index of the upper bound of the 'v' variable..
 
-    friend std::string to_string(const lra_theory &rhs);
+    friend std::string to_string(const lra_theory &rhs) noexcept;
 
   private:
     /**

@@ -9,7 +9,7 @@ namespace smt
     ov_theory::ov_theory(sat_core &sat) : theory(sat) {}
     ov_theory::~ov_theory() {}
 
-    var ov_theory::new_var(const std::vector<var_value *> &items, const bool enforce_exct_one)
+    var ov_theory::new_var(const std::vector<var_value *> &items, const bool enforce_exct_one) noexcept
     {
         assert(!items.empty());
         const var id = assigns.size();
@@ -38,7 +38,7 @@ namespace smt
         return id;
     }
 
-    var ov_theory::new_var(const std::vector<lit> &lits, const std::vector<var_value *> &vals)
+    var ov_theory::new_var(const std::vector<lit> &lits, const std::vector<var_value *> &vals) noexcept
     {
         assert(!lits.empty());
         assert(std::all_of(lits.begin(), lits.end(), [this](lit p) { return is_contained_in.count(variable(p)); }));
@@ -52,7 +52,7 @@ namespace smt
         return id;
     }
 
-    lit ov_theory::allows(const var &v, var_value &val) const
+    lit ov_theory::allows(const var &v, var_value &val) const noexcept
     {
         if (const auto at_right = assigns[v].find(&val); at_right != assigns[v].end())
             return at_right->second;
@@ -60,7 +60,7 @@ namespace smt
             return FALSE_var;
     }
 
-    lit ov_theory::new_eq(const var &left, const var &right)
+    lit ov_theory::new_eq(const var &left, const var &right) noexcept
     {
         if (left == right)
             return TRUE_var;
@@ -114,7 +114,7 @@ namespace smt
         }
     }
 
-    std::unordered_set<var_value *> ov_theory::value(var v) const
+    std::unordered_set<var_value *> ov_theory::value(var v) const noexcept
     {
         std::unordered_set<var_value *> vals;
         for (const auto &val : assigns[v])
@@ -123,7 +123,7 @@ namespace smt
         return vals;
     }
 
-    bool ov_theory::propagate(const lit &p)
+    bool ov_theory::propagate(const lit &p) noexcept
     { // propagation is performed at SAT level, here we just notify possible listeners..
         assert(cnfl.empty());
         for (const auto &v : is_contained_in.at(variable(p)))
@@ -133,15 +133,15 @@ namespace smt
         return true;
     }
 
-    bool ov_theory::check()
+    bool ov_theory::check() noexcept
     {
         assert(cnfl.empty());
         return true;
     }
 
-    void ov_theory::push() { layers.push_back(layer()); }
+    void ov_theory::push() noexcept { layers.push_back(layer()); }
 
-    void ov_theory::pop()
+    void ov_theory::pop() noexcept
     {
         for (const auto &v : layers.back().vars)
             if (const auto at_v = listening.find(v); at_v != listening.end())
@@ -149,6 +149,4 @@ namespace smt
                     l->ov_value_change(v);
         layers.pop_back();
     }
-
-    void ov_theory::listen(const var &v, ov_value_listener *const l) { listening[v].insert(l); }
 } // namespace smt

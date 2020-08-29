@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(CTest)
 enable_testing()
 
-file(GLOB SOURCES main.cpp smt/*.cpp smt/lra/*.cpp smt/ov/*.cpp riddle/*.cpp core/*.cpp solver/*.cpp solver/types/*.cpp)
+file(GLOB SOURCES main.cpp smt/*.cpp smt/lra/*.cpp smt/ov/*.cpp smt/dl/*.cpp riddle/*.cpp core/*.cpp solver/*.cpp solver/types/*.cpp)
 include_directories(smt smt/parallel smt/lra smt/ov smt/dl riddle core solver solver/types java-api/src/main/cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCES})

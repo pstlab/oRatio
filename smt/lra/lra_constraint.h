@@ -32,11 +32,11 @@ namespace smt
     virtual ~assertion();
 
   private:
-    bool propagate_lb(const var &x); // propagates the lower bound of variable 'x' on the assertion returning whether propagation is successful..
-    bool propagate_ub(const var &x); // propagates the upper bound of variable 'x' on the assertion returning whether propagation is successful..
+    bool propagate_lb(const var &x) noexcept; // propagates the lower bound of variable 'x' on the assertion returning whether propagation is successful..
+    bool propagate_ub(const var &x) noexcept; // propagates the upper bound of variable 'x' on the assertion returning whether propagation is successful..
 
   public:
-    friend std::string to_string(const assertion &a);
+    friend std::string to_string(const assertion &a) noexcept;
 
   private:
     lra_theory &th;
@@ -61,11 +61,11 @@ namespace smt
     virtual ~row();
 
   private:
-    bool propagate_lb(const var &x); // propagates the lower bound of variable 'x' on the tableau row returning whether propagation is successful..
-    bool propagate_ub(const var &x); // propagates the upper bound of variable 'x' on the tableau row returning whether propagation is successful..
+    bool propagate_lb(const var &x) noexcept; // propagates the lower bound of variable 'x' on the tableau row returning whether propagation is successful..
+    bool propagate_ub(const var &x) noexcept; // propagates the upper bound of variable 'x' on the tableau row returning whether propagation is successful..
 
   public:
-    friend std::string to_string(const row &r);
+    friend std::string to_string(const row &r) noexcept;
 
   private:
     lra_theory &th;

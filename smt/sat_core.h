@@ -24,23 +24,23 @@ namespace smt
     sat_core(const sat_core &orig) = delete;
     ~sat_core();
 
-    var new_var();                                 // creates a new propositional variable..
-    bool new_clause(const std::vector<lit> &lits); // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
+    var new_var() noexcept;                                 // creates a new propositional variable..
+    bool new_clause(const std::vector<lit> &lits) noexcept; // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
 
-    lit new_eq(const lit &left, const lit &right);   // creates a new reified equality..
-    lit new_conj(const std::vector<lit> &ls);        // creates a new reified conjunction..
-    lit new_disj(const std::vector<lit> &ls);        // creates a new reified disjunction..
-    lit new_at_most_one(const std::vector<lit> &ls); // creates a new reified at-most-one..
-    lit new_exct_one(const std::vector<lit> &ls);    // creates a new reified exct-one..
+    lit new_eq(const lit &left, const lit &right) noexcept;   // creates a new reified equality..
+    lit new_conj(const std::vector<lit> &ls) noexcept;        // creates a new reified conjunction..
+    lit new_disj(const std::vector<lit> &ls) noexcept;        // creates a new reified disjunction..
+    lit new_at_most_one(const std::vector<lit> &ls) noexcept; // creates a new reified at-most-one..
+    lit new_exct_one(const std::vector<lit> &ls) noexcept;    // creates a new reified exct-one..
 
-    bool assume(const lit &p);
-    void pop();
-    bool simplify_db();
-    bool propagate();
-    bool check(const std::vector<lit> &lits);
+    bool assume(const lit &p) noexcept;
+    void pop() noexcept;
+    bool simplify_db() noexcept;
+    bool propagate() noexcept;
+    bool check(const std::vector<lit> &lits) noexcept;
 
-    lbool value(const var &x) const { return assigns.at(x); } // returns the value of variable 'x'..
-    lbool value(const lit &p) const
+    lbool value(const var &x) const noexcept { return assigns.at(x); } // returns the value of variable 'x'..
+    lbool value(const lit &p) const noexcept
     {
       switch (value(variable(p)))
       {
@@ -51,22 +51,22 @@ namespace smt
       default:
         return Undefined;
       }
-    }                                                          // returns the value of literal 'p'..
-    size_t decision_level() const { return trail_lim.size(); } // returns the current decision level..
-    bool root_level() const { return trail_lim.empty(); }      // checks whether the current decision level is root level..
+    }                                                                   // returns the value of literal 'p'..
+    size_t decision_level() const noexcept { return trail_lim.size(); } // returns the current decision level..
+    bool root_level() const noexcept { return trail_lim.empty(); }      // checks whether the current decision level is root level..
 
   private:
-    static std::string to_string(const lit &p) { return (sign(p) ? "b" : "!b") + std::to_string(variable(p)); }
+    static std::string to_string(const lit &p) noexcept { return (sign(p) ? "b" : "!b") + std::to_string(variable(p)); }
 
-    void analyze(constr &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel);
-    void record(const std::vector<lit> &lits);
+    void analyze(constr &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel) noexcept;
+    void record(const std::vector<lit> &lits) noexcept;
 
-    bool enqueue(const lit &p, constr *const c = nullptr);
-    void pop_one();
+    bool enqueue(const lit &p, constr *const c = nullptr) noexcept;
+    void pop_one() noexcept;
 
-    void add_theory(theory &th) { theories.push_back(&th); }
-    void bind(const var &v, theory &th) { bounds[v].insert(&th); }
-    void listen(const var &v, sat_value_listener &l) { listening[v].insert(&l); }
+    void add_theory(theory &th) noexcept { theories.push_back(&th); }
+    void bind(const var &v, theory &th) noexcept { bounds[v].insert(&th); }
+    void listen(const var &v, sat_value_listener &l) noexcept { listening[v].insert(&l); }
 
   private:
     std::vector<constr *> constrs;              // the collection of problem constraints..

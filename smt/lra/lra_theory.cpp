@@ -10,7 +10,7 @@ namespace smt
     lra_theory::lra_theory(sat_core &sat) : theory(sat) {}
     lra_theory::~lra_theory() {}
 
-    var lra_theory::new_var()
+    var lra_theory::new_var() noexcept
     {
         // we create a new arithmetic variable..
         const var id = vals.size();
@@ -23,7 +23,7 @@ namespace smt
         return id;
     }
 
-    var lra_theory::new_var(const lin &l)
+    var lra_theory::new_var(const lin &l) noexcept
     { // we create, if needed, a new arithmetic variable which is equal to the given linear expression..
         const std::string s_expr = to_string(l);
         if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
@@ -41,7 +41,7 @@ namespace smt
         }
     }
 
-    lit lra_theory::new_lt(const lin &left, const lin &right)
+    lit lra_theory::new_lt(const lin &left, const lin &right) noexcept
     {
         lin expr = left - right;
         std::vector<var> vars;
@@ -78,7 +78,7 @@ namespace smt
         }
     }
 
-    lit lra_theory::new_leq(const lin &left, const lin &right)
+    lit lra_theory::new_leq(const lin &left, const lin &right) noexcept
     {
         lin expr = left - right;
         std::vector<var> vars;
@@ -115,7 +115,7 @@ namespace smt
         }
     }
 
-    lit lra_theory::new_geq(const lin &left, const lin &right)
+    lit lra_theory::new_geq(const lin &left, const lin &right) noexcept
     {
         lin expr = left - right;
         std::vector<var> vars;
@@ -152,7 +152,7 @@ namespace smt
         }
     }
 
-    lit lra_theory::new_gt(const lin &left, const lin &right)
+    lit lra_theory::new_gt(const lin &left, const lin &right) noexcept
     {
         lin expr = left - right;
         std::vector<var> vars;
@@ -189,14 +189,14 @@ namespace smt
         }
     }
 
-    bool lra_theory::equates(const lin &l0, const lin &l1) const
+    bool lra_theory::equates(const lin &l0, const lin &l1) const noexcept
     {
         const auto l0_bounds = bounds(l0);
         const auto l1_bounds = bounds(l1);
         return l0_bounds.second >= l1_bounds.first && l0_bounds.first <= l1_bounds.second; // the two intervals intersect..
     }
 
-    bool lra_theory::propagate(const lit &p)
+    bool lra_theory::propagate(const lit &p) noexcept
     {
         assert(cnfl.empty());
         for (const auto &a : v_asrts[variable(p)])
@@ -215,7 +215,7 @@ namespace smt
         return true;
     }
 
-    bool lra_theory::check()
+    bool lra_theory::check() noexcept
     {
         assert(cnfl.empty());
         while (true)
@@ -262,9 +262,9 @@ namespace smt
         }
     }
 
-    void lra_theory::push() { layers.push_back(std::unordered_map<size_t, bound>()); }
+    void lra_theory::push() noexcept { layers.push_back(std::unordered_map<size_t, bound>()); }
 
-    void lra_theory::pop()
+    void lra_theory::pop() noexcept
     {
         // we restore the variables' c_bounds and their reason..
         for (const auto &b : layers.back())
@@ -272,7 +272,7 @@ namespace smt
         layers.pop_back();
     }
 
-    bool lra_theory::assert_lower(const var &x_i, const inf_rational &val, const lit &p)
+    bool lra_theory::assert_lower(const var &x_i, const inf_rational &val, const lit &p) noexcept
     {
         assert(cnfl.empty());
         if (val <= lb(x_i))
@@ -305,7 +305,7 @@ namespace smt
         }
     }
 
-    bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit &p)
+    bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit &p) noexcept
     {
         assert(cnfl.empty());
         if (val >= ub(x_i))
@@ -338,7 +338,7 @@ namespace smt
         }
     }
 
-    void lra_theory::update(const var &x_i, const inf_rational &v)
+    void lra_theory::update(const var &x_i, const inf_rational &v) noexcept
     {
         assert(!is_basic(x_i) && "x_i should be a non-basic variable..");
         for (const auto &c : t_watches[x_i])
@@ -355,7 +355,7 @@ namespace smt
                 l->lra_value_change(x_i);
     }
 
-    void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rational &v)
+    void lra_theory::pivot_and_update(const var &x_i, const var &x_j, const inf_rational &v) noexcept
     {
         assert(is_basic(x_i) && "x_i should be a basic variable..");
         assert(!is_basic(x_j) && "x_j should be a non-basic variable..");
@@ -388,7 +388,7 @@ namespace smt
         pivot(x_i, x_j);
     }
 
-    void lra_theory::pivot(const var x_i, const var x_j)
+    void lra_theory::pivot(const var x_i, const var x_j) noexcept
     {
         // the exiting row..
         row *ex_row = tableau[x_i];
@@ -434,7 +434,7 @@ namespace smt
         new_row(x_j, expr);
     }
 
-    void lra_theory::new_row(const var &x, const lin &l)
+    void lra_theory::new_row(const var &x, const lin &l) noexcept
     {
         row *r = new row(*this, x, l);
         tableau.emplace(x, r);
@@ -442,7 +442,7 @@ namespace smt
             t_watches[term.first].emplace(r);
     }
 
-    std::string to_string(const lra_theory &rhs)
+    std::string to_string(const lra_theory &rhs) noexcept
     {
         std::string la;
         la += "{ \"vars\" : [";

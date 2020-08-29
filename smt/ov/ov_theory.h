@@ -22,21 +22,21 @@ namespace smt
     ov_theory(const ov_theory &orig) = delete;
     virtual ~ov_theory();
 
-    var new_var(const std::vector<var_value *> &items, const bool enforce_exct_one = true); // creates and returns a new object variable having the given domain..
-    var new_var(const std::vector<lit> &lits, const std::vector<var_value *> &vals);        // creates and returns a new object variable having the given domain, the presence of the values into the domain is controlled by the 'lits' literals..
+    var new_var(const std::vector<var_value *> &items, const bool enforce_exct_one = true) noexcept; // creates and returns a new object variable having the given domain..
+    var new_var(const std::vector<lit> &lits, const std::vector<var_value *> &vals) noexcept;        // creates and returns a new object variable having the given domain, the presence of the values into the domain is controlled by the 'lits' literals..
 
-    lit allows(const var &v, var_value &val) const; // returns the literal controlling the presence of the 'val' value into the domain of variable 'v'..
-    lit new_eq(const var &left, const var &right);  // creates an equality constraints between 'left' and 'right' variables returning the literal that controls it..
+    lit allows(const var &v, var_value &val) const noexcept; // returns the literal controlling the presence of the 'val' value into the domain of variable 'v'..
+    lit new_eq(const var &left, const var &right) noexcept;  // creates an equality constraints between 'left' and 'right' variables returning the literal that controls it..
 
-    std::unordered_set<var_value *> value(var v) const; // returns the current domain of the object variable 'v'..
+    std::unordered_set<var_value *> value(var v) const noexcept; // returns the current domain of the object variable 'v'..
 
   private:
-    bool propagate(const lit &p) override;
-    bool check() override;
-    void push() override;
-    void pop() override;
+    bool propagate(const lit &p) noexcept override;
+    bool check() noexcept override;
+    void push() noexcept override;
+    void pop() noexcept override;
 
-    void listen(const var &v, ov_value_listener *const l);
+    void listen(const var &v, ov_value_listener *const l) noexcept { listening[v].insert(l); }
 
   private:
     struct layer

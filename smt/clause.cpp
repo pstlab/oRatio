@@ -14,7 +14,7 @@ namespace smt
 
     clause::~clause() {}
 
-    const bool clause::propagate(const lit &p)
+    const bool clause::propagate(const lit &p) noexcept
     {
         // make sure false literal is lits[1]..
         if (variable(lits[0]) == variable(p))
@@ -41,7 +41,7 @@ namespace smt
         return enqueue(lits[0]);
     }
 
-    const bool clause::simplify()
+    const bool clause::simplify() noexcept
     {
         size_t j = 0;
         for (size_t i = 0; i < lits.size(); ++i)
@@ -57,7 +57,7 @@ namespace smt
         return false;
     }
 
-    void clause::remove()
+    void clause::remove() noexcept
     {
         auto &l0_w = watches(!lits[0]);
         l0_w.erase(std::find(l0_w.begin(), l0_w.end(), this));
@@ -66,7 +66,7 @@ namespace smt
         delete this;
     }
 
-    void clause::get_reason(const lit &p, std::vector<lit> &out_reason) const
+    void clause::get_reason(const lit &p, std::vector<lit> &out_reason) const noexcept
     {
         assert(is_undefined(p) || p == lits[0]);
         out_reason.reserve(is_undefined(p) ? lits.size() : lits.size() - 1);
@@ -77,7 +77,7 @@ namespace smt
         }
     }
 
-    std::string to_string(const clause &c)
+    std::string to_string(const clause &c) noexcept
     {
         std::string cls;
         cls += "{ \"lits\" : [";

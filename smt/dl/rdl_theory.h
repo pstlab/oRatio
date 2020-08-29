@@ -20,10 +20,10 @@ namespace smt
     rdl_theory(const rdl_theory &orig) = delete;
     virtual ~rdl_theory();
 
-    var new_var(); // creates and returns a new distance logic variable..
+    var new_var() noexcept; // creates and returns a new distance logic variable..
 
-    lit new_distance(const var &from, const var &to, const inf_rational &dist); // creates and returns a new propositional variable for controlling the constraint 'to - from <= dist'..
-    lit new_distance(const var &from, const var &to, const inf_rational &min, const inf_rational &max) { return sat.new_conj({new_distance(to, from, -min), new_distance(from, to, max)}); }
+    lit new_distance(const var &from, const var &to, const inf_rational &dist) noexcept; // creates and returns a new propositional variable for controlling the constraint 'to - from <= dist'..
+    lit new_distance(const var &from, const var &to, const inf_rational &min, const inf_rational &max) noexcept { return sat.new_conj({new_distance(to, from, -min), new_distance(from, to, max)}); }
 
     lit new_lt(const lin &left, const lin &right);
     lit new_leq(const lin &left, const lin &right);
@@ -31,31 +31,31 @@ namespace smt
     lit new_geq(const lin &left, const lin &right);
     lit new_gt(const lin &left, const lin &right);
 
-    inf_rational lb(const var &v) const { return -_dists[v][0]; }
-    inf_rational ub(const var &v) const { return _dists[0][v]; }
-    std::pair<inf_rational, inf_rational> bounds(const var &v) const { return std::make_pair(-_dists[v][0], _dists[0][v]); }
-    std::pair<inf_rational, inf_rational> distance(const var &from, const var &to) const { return std::make_pair(-_dists[to][from], _dists[from][to]); }
+    inf_rational lb(const var &v) const noexcept { return -_dists[v][0]; }
+    inf_rational ub(const var &v) const noexcept { return _dists[0][v]; }
+    std::pair<inf_rational, inf_rational> bounds(const var &v) const noexcept { return std::make_pair(-_dists[v][0], _dists[0][v]); }
+    std::pair<inf_rational, inf_rational> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
 
     std::pair<inf_rational, inf_rational> bounds(const lin &l) const;
     std::pair<inf_rational, inf_rational> distance(const lin &from, const lin &to) const;
 
     bool equates(const lin &l0, const lin &l1) const;
 
-    size_t size() const { return n_vars; }
+    size_t size() const noexcept { return n_vars; }
 
   private:
-    bool propagate(const lit &p) override;
-    bool check() override;
-    void push() override;
-    void pop() override;
+    bool propagate(const lit &p) noexcept override;
+    bool check() noexcept override;
+    void push() noexcept override;
+    void pop() noexcept override;
 
-    void propagate(const var &from, const var &to, const inf_rational &dist);
-    void set_dist(const var &from, const var &to, const inf_rational &dist);
-    void set_pred(const var &from, const var &to, const var &pred);
+    void propagate(const var &from, const var &to, const inf_rational &dist) noexcept;
+    void set_dist(const var &from, const var &to, const inf_rational &dist) noexcept;
+    void set_pred(const var &from, const var &to, const var &pred) noexcept;
 
-    void resize(const size_t &size);
+    void resize(const size_t &size) noexcept;
 
-    void listen(const var &v, rdl_value_listener *const l) { listening[v].insert(l); }
+    void listen(const var &v, rdl_value_listener *const l) noexcept { listening[v].insert(l); }
 
   private:
     class rdl_distance

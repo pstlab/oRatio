@@ -17,11 +17,11 @@ namespace smt
     theory(const theory &orig) = delete;
     virtual ~theory();
 
-    sat_core &get_core() const { return sat; }
+    sat_core &get_core() const noexcept { return sat; }
 
   protected:
-    void bind(const var &v);
-    void record(const std::vector<lit> &clause);
+    void bind(const var &v) noexcept;
+    void record(const std::vector<lit> &clause) noexcept;
 
   private:
     /**

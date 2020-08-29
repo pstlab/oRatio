@@ -9,7 +9,7 @@ namespace smt
     assertion::assertion(lra_theory &th, const op o, const lit b, const var x, const inf_rational &v) : th(th), o(o), b(b), x(x), v(v) { th.a_watches[x].push_back(this); }
     assertion::~assertion() {}
 
-    bool assertion::propagate_lb(const var &x_i)
+    bool assertion::propagate_lb(const var &x_i) noexcept
     {
         assert(cnfl.empty());
         if (th.lb(x_i) > v)
@@ -48,7 +48,7 @@ namespace smt
         return true;
     }
 
-    bool assertion::propagate_ub(const var &x_i)
+    bool assertion::propagate_ub(const var &x_i) noexcept
     {
         assert(cnfl.empty());
         if (th.ub(x_i) < v)
@@ -87,7 +87,7 @@ namespace smt
         return true;
     }
 
-    std::string to_string(const assertion &a)
+    std::string to_string(const assertion &a) noexcept
     {
         std::string asrt;
         asrt += "{ \"lit\" : \"" + to_string(a.b) + "\", \"val\" : \"";
@@ -120,7 +120,7 @@ namespace smt
     row::row(lra_theory &th, const var x, lin l) : th(th), x(x), l(l) {}
     row::~row() {}
 
-    bool row::propagate_lb(const var &v)
+    bool row::propagate_lb(const var &v) noexcept
     {
         assert(cnfl.empty());
         // we make room for the first literal..
@@ -250,7 +250,7 @@ namespace smt
         return true;
     }
 
-    bool row::propagate_ub(const var &v)
+    bool row::propagate_ub(const var &v) noexcept
     {
         assert(cnfl.empty());
         // we make room for the first literal..
@@ -380,5 +380,5 @@ namespace smt
         return true;
     }
 
-    std::string to_string(const row &r) { return "{ \"var\" : \"x" + std::to_string(r.x) + "\", \"expr\" : \"" + to_string(r.l) + "\" }"; }
+    std::string to_string(const row &r) noexcept { return "{ \"var\" : \"x" + std::to_string(r.x) + "\", \"expr\" : \"" + to_string(r.l) + "\" }"; }
 } // namespace smt

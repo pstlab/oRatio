@@ -15,7 +15,7 @@ namespace smt
     virtual ~lra_value_listener() {}
 
   protected:
-    void listen_lra(var v) { th.listen(v, this); }
+    void listen_lra(var v) noexcept { th.listen(v, this); }
 
   private:
     virtual void lra_value_change(const var &) {}

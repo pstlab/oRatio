@@ -19,7 +19,7 @@ namespace smt
 
     idl_theory::~idl_theory() {}
 
-    var idl_theory::new_var()
+    var idl_theory::new_var() noexcept
     {
         var tp = n_vars++;
         if (_dists.size() == tp)
@@ -27,7 +27,7 @@ namespace smt
         return tp;
     }
 
-    lit idl_theory::new_distance(const var &from, const var &to, const I &dist)
+    lit idl_theory::new_distance(const var &from, const var &to, const I &dist) noexcept
     {
         if (_dists[to][from] < -dist)
             return FALSE_var; // the constraint is inconsistent..
@@ -376,7 +376,7 @@ namespace smt
             throw std::invalid_argument("not a valid comparison between real difference logic expressions..");
     }
 
-    bool idl_theory::propagate(const lit &p)
+    bool idl_theory::propagate(const lit &p) noexcept
     {
         assert(cnfl.empty());
         assert(var_dists.count(variable(p)));
@@ -446,7 +446,7 @@ namespace smt
         return true;
     }
 
-    bool idl_theory::check()
+    bool idl_theory::check() noexcept
     {
         assert(cnfl.empty());
         assert(std::all_of(dist_constr.begin(), dist_constr.end(), [this](const std::pair<std::pair<var, var>, idl_distance *> &dist) {
@@ -463,9 +463,9 @@ namespace smt
         return true;
     }
 
-    void idl_theory::push() { layers.push_back(layer()); }
+    void idl_theory::push() noexcept { layers.push_back(layer()); }
 
-    void idl_theory::pop()
+    void idl_theory::pop() noexcept
     {
         for (const auto &dist : layers.back().old_dists)
             _dists[dist.first.first][dist.first.second] = dist.second;
@@ -479,7 +479,7 @@ namespace smt
         layers.pop_back();
     }
 
-    void idl_theory::propagate(const var &from, const var &to, const I &dist)
+    void idl_theory::propagate(const var &from, const var &to, const I &dist) noexcept
     {
         assert(abs(dist) < inf());
         set_dist(from, to, dist);
@@ -562,7 +562,7 @@ namespace smt
                         }
     }
 
-    void idl_theory::set_dist(const var &from, const var &to, const I &dist)
+    void idl_theory::set_dist(const var &from, const var &to, const I &dist) noexcept
     {
         assert(_dists[from][to] > dist);
         if (!layers.empty() && !layers.back().old_dists.count({from, to}))
@@ -585,7 +585,7 @@ namespace smt
         }
     }
 
-    void idl_theory::set_pred(const var &from, const var &to, const var &pred)
+    void idl_theory::set_pred(const var &from, const var &to, const var &pred) noexcept
     {
         if (!layers.empty() && !layers.back().old_preds.count({from, to}))
             // we store the current values for backtracking purposes..
@@ -594,7 +594,7 @@ namespace smt
         _preds[from][to] = pred;
     }
 
-    void idl_theory::resize(const size_t &size)
+    void idl_theory::resize(const size_t &size) noexcept
     {
         const size_t c_size = _dists.size();
         for (auto &row : _dists)
