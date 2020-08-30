@@ -63,12 +63,12 @@ namespace smt
       friend class rdl_theory;
 
     public:
-      rdl_distance(const var &b, const var &from, const var &to, const inf_rational &dist) : b(b), from(from), to(to), dist(dist) {}
+      rdl_distance(const lit &b, const var &from, const var &to, const inf_rational &dist) : b(b), from(from), to(to), dist(dist) {}
       rdl_distance(const rdl_distance &orig) = delete;
       ~rdl_distance() {}
 
     private:
-      const var b; // the propositional variable associated to the distance constraint..
+      const lit b; // the propositional literal associated to the distance constraint..
       const var from;
       const var to;
       const inf_rational dist;

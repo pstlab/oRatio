@@ -508,13 +508,13 @@ namespace smt
                         if (_dists[c_dist->to][c_dist->from] < -c_dist->dist)
                         { // the constraint is inconsistent..
                             std::vector<lit> cnfl;
-                            cnfl.push_back(lit(c_dist->b, false));
+                            cnfl.push_back(!c_dist->b);
                             var c_to = c_dist->from;
                             while (c_to != c_dist->to)
                             {
                                 if (const auto &c_d = dist_constr.find({_preds[c_dist->to][c_to], c_to}); c_d != dist_constr.end())
                                     if (sat.value(c_d->second->b) == True)
-                                        cnfl.push_back(lit(c_d->second->b, false));
+                                        cnfl.push_back(!c_d->second->b);
                                     else if (sat.value(c_d->second->b) == False)
                                         cnfl.push_back(c_d->second->b);
                                 c_to = _preds[c_dist->to][c_to];
@@ -531,7 +531,7 @@ namespace smt
                             {
                                 if (const auto &c_d = dist_constr.find({_preds[c_dist->from][c_to], c_to}); c_d != dist_constr.end())
                                     if (sat.value(c_d->second->b) == True)
-                                        cnfl.push_back(lit(c_d->second->b, false));
+                                        cnfl.push_back(!c_d->second->b);
                                     else if (sat.value(c_d->second->b) == False)
                                         cnfl.push_back(c_d->second->b);
                                 c_to = _preds[c_dist->from][c_to];

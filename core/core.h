@@ -146,8 +146,8 @@ namespace ratio
     virtual void new_disjunction(context &ctx, const disjunction &disj) = 0;
 
   protected:
-    smt::var get_ni() noexcept { return ni; }
-    void set_ni(const smt::var &v) noexcept
+    smt::lit get_ni() noexcept { return ni; }
+    void set_ni(const smt::lit &v) noexcept
     {
       tmp_ni = ni;
       ni = v;
@@ -175,8 +175,8 @@ namespace ratio
     std::map<std::string, type *> types;                        // the types, indexed by their name, defined within this core..
     std::map<std::string, predicate *> predicates;              // the predicates, indexed by their name, defined within this core..
 
-    smt::var tmp_ni;             // the temporary controlling variable, used for restoring the controlling variable..
-    smt::var ni = smt::TRUE_var; // the controlling variable..
+    smt::lit tmp_ni;             // the temporary controlling literal, used for restoring the controlling literal..
+    smt::lit ni = smt::TRUE_var; // the controlling literal..
 
 #ifdef BUILD_GUI
   private:

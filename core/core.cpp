@@ -370,7 +370,7 @@ namespace ratio
     void core::assert_facts(const std::vector<lit> &facts)
     {
         for (const auto &f : facts)
-            if (!sat_cr.new_clause({lit(ni, false), f}))
+            if (!sat_cr.new_clause({!ni, f}))
                 throw unsolvable_exception();
     }
 

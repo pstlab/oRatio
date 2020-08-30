@@ -113,10 +113,10 @@ namespace smt
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const var ctr = new_var();
-            if (!new_clause({lit(ctr, false), !left, right}))
+            const lit ctr = new_var();
+            if (!new_clause({!ctr, !left, right}))
                 return FALSE_var;
-            if (!new_clause({lit(ctr, false), left, !right}))
+            if (!new_clause({!ctr, left, !right}))
                 return FALSE_var;
             if (!new_clause({ctr, !left, !right}))
                 return FALSE_var;
@@ -153,13 +153,13 @@ namespace smt
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const var ctr = new_var();
+            const lit ctr = new_var();
             std::vector<lit> lits;
             lits.reserve(c_lits.size() + 1);
             lits.push_back(ctr);
             for (const auto &l : c_lits)
             {
-                if (!new_clause({lit(ctr, false), l}))
+                if (!new_clause({!ctr, l}))
                     return FALSE_var;
                 lits.push_back(!l);
             }
@@ -198,10 +198,10 @@ namespace smt
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const var ctr = new_var();
+            const lit ctr = new_var();
             std::vector<lit> lits;
             lits.reserve(c_lits.size() + 1);
-            lits.push_back(lit(ctr, false));
+            lits.push_back(!ctr);
             for (const auto &l : c_lits)
             {
                 if (!new_clause({!l, ctr}))
@@ -253,10 +253,10 @@ namespace smt
         { // we need to create a new variable..
             if (ls.size() < 4)
             { // we use the standard encoding..
-                const var ctr = new_var();
+                const lit ctr = new_var();
                 for (size_t i = 0; i < ls.size(); ++i)
                     for (size_t j = i + 1; j < ls.size(); ++j)
-                        if (!new_clause({!ls[i], !ls[j], lit(ctr, false)}))
+                        if (!new_clause({!ls[i], !ls[j], !ctr}))
                             return FALSE_var;
                 exprs.emplace(s_expr, ctr);
                 return ctr;

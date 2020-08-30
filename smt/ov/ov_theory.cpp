@@ -82,35 +82,35 @@ namespace smt
                 return FALSE_var;
 
             // we need to create a new variable..
-            const var eq_var = sat.new_var(); // the equality variable..
+            const lit eq_lit = sat.new_var(); // the equality variable..
 
             bool nc;
             // the values outside the intersection are pruned if the equality control variable becomes true..
             for (const auto &v : assigns[left])
                 if (!intersection.count(v.first))
                 {
-                    nc = sat.new_clause({lit(eq_var, false), !v.second});
+                    nc = sat.new_clause({!eq_lit, !v.second});
                     assert(nc);
                 }
             for (const auto &v : assigns[right])
                 if (!intersection.count(v.first))
                 {
-                    nc = sat.new_clause({lit(eq_var, false), !v.second});
+                    nc = sat.new_clause({!eq_lit, !v.second});
                     assert(nc);
                 }
             // the values inside the intersection are made pairwise equal if the equality variable becomes true..
             for (const auto &v : intersection)
             {
-                nc = sat.new_clause({lit(eq_var, false), !assigns[left].at(v), assigns[right].at(v)});
+                nc = sat.new_clause({!eq_lit, !assigns[left].at(v), assigns[right].at(v)});
                 assert(nc);
-                nc = sat.new_clause({lit(eq_var, false), assigns[left].at(v), !assigns[right].at(v)});
+                nc = sat.new_clause({!eq_lit, assigns[left].at(v), !assigns[right].at(v)});
                 assert(nc);
-                nc = sat.new_clause({eq_var, !assigns[left].at(v), !assigns[right].at(v)});
+                nc = sat.new_clause({eq_lit, !assigns[left].at(v), !assigns[right].at(v)});
                 assert(nc);
             }
 
-            exprs.emplace(s_expr, eq_var);
-            return eq_var;
+            exprs.emplace(s_expr, eq_lit);
+            return eq_lit;
         }
     }
 

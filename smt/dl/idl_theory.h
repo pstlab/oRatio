@@ -66,12 +66,12 @@ namespace smt
       friend class idl_theory;
 
     public:
-      idl_distance(const var &b, const var &from, const var &to, const I &dist) : b(b), from(from), to(to), dist(dist) {}
+      idl_distance(const lit &b, const var &from, const var &to, const I &dist) : b(b), from(from), to(to), dist(dist) {}
       idl_distance(const idl_distance &orig) = delete;
       ~idl_distance() {}
 
     private:
-      const var b; // the propositional variable associated to the distance constraint..
+      const lit b; // the propositional literal associated to the distance constraint..
       const var from;
       const var to;
       const I dist;
