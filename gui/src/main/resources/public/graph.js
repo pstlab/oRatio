@@ -7,13 +7,18 @@ const g = svg.append('g');
 const b_box = svg.node().getBoundingClientRect();
 const width = b_box.width, height = b_box.height;
 
-let c_zoom = d3.zoom().on('zoom', event => g.attr('transform', event.transform));
+const c_zoom = d3.zoom().on('zoom', event => g.attr('transform', event.transform));
 svg.call(c_zoom);
 
 const simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink().id(d => d.id))
     .force('charge', d3.forceManyBody())
     .force('center', d3.forceCenter(width / 2, height / 2));
+
+const ws = new WebSocket("ws://" + location.hostname + ":" + location.port + "/solver");
+ws.onmessage = msg => {
+    console.log(mxg);
+};
 
 updateGraph();
 
@@ -36,7 +41,7 @@ function updateGraph() {
     simulation.force('link').links(links);
 }
 
-function getNode(id) { return nodes[id]; }
+function getNode(id) { return nodes.find(x => x.id === id); }
 
 function addNode(n) {
     nodes.push(n);
