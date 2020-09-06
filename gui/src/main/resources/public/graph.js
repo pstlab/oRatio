@@ -1,8 +1,8 @@
 const nodes = [{ id: 0, label: 'a' }, { id: 1, label: 'b' }, { id: 2, label: 'c' }];
 const links = [{ source: 0, target: 1, type: 'a' }, { source: 1, target: 2, type: 'b' }];
 
-const svg = d3.select("svg");
-const g = svg.append("g");
+const svg = d3.select('#graph').append('svg');
+const g = svg.append('g');
 
 const b_box = svg.node().getBoundingClientRect();
 const width = b_box.width, height = b_box.height;
@@ -15,7 +15,9 @@ const simulation = d3.forceSimulation(nodes)
     .force('charge', d3.forceManyBody())
     .force('center', d3.forceCenter(width / 2, height / 2));
 
-function update() {
+updateGraph();
+
+function updateGraph() {
     const n_group = g.selectAll('g').data(nodes, d => d.id).join(
         enter => {
             const g = enter.append('g').attr('cursor', 'grab');
@@ -34,20 +36,18 @@ function update() {
     simulation.force('link').links(links);
 }
 
-update();
-
 function getNode(id) { return nodes[id]; }
 
 function addNode(n) {
     nodes.push(n);
-    update();
+    updateGraph();
     simulation.restart();
     simulation.alpha(0.3);
 }
 
 function addLink(n0, n1) {
     links.push({ source: n0.id, target: n1.id, type: 'c' });
-    update();
+    updateGraph();
     simulation.restart();
     simulation.alpha(0.3);
 }
