@@ -1,0 +1,16 @@
+predicate Impulse(real at) {
+    at >= origin;
+    at <= horizon;
+}
+
+predicate Interval(real start, real end, real duration) {
+    start >= origin;
+    end <= horizon;
+    duration == end - start;
+    duration >= 0.0;
+}
+
+real origin;
+real horizon;
+origin >= 0.0;
+origin <= horizon;

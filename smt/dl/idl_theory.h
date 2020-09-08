@@ -22,7 +22,7 @@ namespace smt
 
     var new_var() noexcept; // creates and returns a new distance logic variable..
 
-    lit new_distance(const var &from, const var &to, const I &dist) noexcept; // creates and returns a new propositional variable for controlling the constraint 'to - from <= dist'..
+    lit new_distance(const var &from, const var &to, const I &dist) noexcept; // creates and returns a new propositional literal for controlling the constraint 'to - from <= dist'..
     lit new_distance(const var &from, const var &to, const I &min, const I &max) noexcept { return sat.new_conj({new_distance(to, from, -min), new_distance(from, to, max)}); }
 
     lit new_lt(const lin &left, const lin &right);

@@ -1,0 +1,15 @@
+predicate Impulse(tp at) {
+    at >= origin;
+    at <= horizon;
+}
+
+predicate Interval(tp start, tp end) {
+    start >= origin;
+    start <= end;
+    end <= horizon;
+}
+
+tp origin;
+tp horizon;
+origin >= 0.0;
+origin <= horizon;
