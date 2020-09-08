@@ -24,8 +24,6 @@ public interface GraphListener {
 
     public void causalLinkAdded(final CausalLinkAdded causal_link);
 
-    public void poke();
-
     public static class Bound {
 
         public int min = -INF, max = INF;
@@ -42,7 +40,7 @@ public interface GraphListener {
     }
 
     public static class FlawCreated {
-        public String flaw;
+        public String id;
         public String[] causes;
         public String label;
         public int state;
@@ -50,26 +48,26 @@ public interface GraphListener {
     }
 
     public static class FlawStateChanged {
-        public String flaw;
+        public String id;
         public int state;
     }
 
     public static class FlawCostChanged {
-        public String flaw;
+        public String id;
         public Rational cost;
     }
 
     public static class FlawPositionChanged {
-        public String flaw;
+        public String id;
         public Bound position;
     }
 
     public static class CurrentFlaw {
-        public String flaw;
+        public String id;
     }
 
     public static class ResolverCreated {
-        public String resolver;
+        public String id;
         public String effect;
         public Rational cost;
         public String label;
@@ -77,16 +75,16 @@ public interface GraphListener {
     }
 
     public static class ResolverStateChanged {
-        public String resolver;
+        public String id;
         public int state;
     }
 
     public static class CurrentResolver {
-        public String resolver;
+        public String id;
     }
 
     public static class CausalLinkAdded {
-        public String flaw;
-        public String resolver;
+        public String flaw_id;
+        public String resolver_id;
     }
 }

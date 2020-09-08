@@ -56,7 +56,6 @@ public class Context {
     private static final String RESOLVER_STATE_CHANGED = "resolver_state_changed ";
     private static final String CURRENT_RESOLVER = "current_resolver ";
     private static final String CAUSAL_LINK_ADDED = "causal_link_added ";
-    private static final String POKE = "poke";
 
     private final Core core = new Core();
     private final TimelinesList timelines = new TimelinesList(core);
@@ -210,9 +209,6 @@ public class Context {
                             CausalLinkAdded.class);
                     for (GraphListener l : graph_listeners)
                         l.causalLinkAdded(cla);
-                } else if (inputLine.startsWith(POKE)) {
-                    for (GraphListener l : graph_listeners)
-                        l.poke();
                 } else
                     LOG.info("Cannot handle message: {}", inputLine);
             }

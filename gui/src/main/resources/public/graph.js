@@ -15,9 +15,20 @@ const simulation = d3.forceSimulation(nodes)
     .force('charge', d3.forceManyBody())
     .force('center', d3.forceCenter(width / 2, height / 2));
 
-const ws = new WebSocket("ws://" + location.hostname + ":" + location.port + "/solver");
+const ws = new WebSocket("ws://" + location.hostname + ":" + location.port + "/graph");
 ws.onmessage = msg => {
-    console.log(mxg);
+    if (msg.data.startsWith('graph ')) {
+        const c_graph = JSON.parse(msg.data.substring(6));
+        c_graph.flaws.forEach(f => {
+            nodes.push(f);
+            f.causes.forEach(c => links.push({ source: f.id, target: c.id, state: f.state }));
+        });
+        c_graph.resolvers.forEach(r => {
+            nodes.push(r);
+            links.push({ source: r.id, target: r.effect.id, state: r.state });
+        });
+    }
+    updateGraph();
 };
 
 updateGraph();
@@ -39,12 +50,22 @@ function updateGraph() {
         l_group.attr('x1', d => d.source.x).attr('y1', d => d.source.y).attr('x2', d => d.target.x).attr('y2', d => d.target.y);
     });
     simulation.force('link').links(links);
+
+    simulation.restart();
+    simulation.alpha(0.3);
 }
 
 function getNode(id) { return nodes.find(x => x.id === id); }
 
 function addNode(n) {
     nodes.push(n);
+    updateGraph();
+    simulation.restart();
+    simulation.alpha(0.3);
+}
+
+function addNodes(ns) {
+    ns.forEach(n => nodes.push(n));
     updateGraph();
     simulation.restart();
     simulation.alpha(0.3);
