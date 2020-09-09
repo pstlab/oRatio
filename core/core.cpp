@@ -105,7 +105,7 @@ namespace ratio
     arith_expr core::new_real(const rational &val) noexcept { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(val)); }
 
     arith_expr core::new_tp() noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(rdl_th.new_var(), 1)); }
-    arith_expr core::new_tp(const smt::rational &val) noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(val)); }
+    arith_expr core::new_tp(const rational &val) noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(val)); }
 
     string_expr core::new_string() noexcept { return new string_item(*this, ""); }
     string_expr core::new_string(const std::string &val) noexcept { return new string_item(*this, val); }
@@ -452,7 +452,7 @@ namespace ratio
     }
 
     lbool core::bool_value(const bool_expr &x) const noexcept { return sat_cr.value(x->l); }
-    std::pair<smt::inf_rational, smt::inf_rational> core::arith_bounds(const arith_expr &x) const noexcept
+    std::pair<inf_rational, inf_rational> core::arith_bounds(const arith_expr &x) const noexcept
     {
         if (x->get_type().get_name().compare(TP_KEYWORD) == 0)
             return rdl_th.bounds(x->l);
@@ -615,7 +615,7 @@ namespace ratio
                 const auto bounds = c.arith_bounds(ai);
                 const auto val = ai->get_type().get_name().compare(TP_KEYWORD) == 0 ? bounds.first : c.lra_th.value(ai->l);
 
-                iss += "{ \"lin\" : \"" + smt::to_string(ai->l) + "\", \"val\" : ";
+                iss += "{ \"lin\" : \"" + to_string(ai->l) + "\", \"val\" : ";
                 iss += "{ \"num\" : " + std::to_string(val.get_rational().numerator()) + ", \"den\" : " + std::to_string(val.get_rational().denominator());
                 if (val.get_infinitesimal() != rational::ZERO)
                     iss += ", \"inf\" : { \"num\" : " + std::to_string(val.get_infinitesimal().numerator()) + ", \"den\" : " + std::to_string(val.get_infinitesimal().denominator()) + " }";
