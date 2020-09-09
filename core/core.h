@@ -137,7 +137,7 @@ namespace ratio
     smt::lbool bool_value(const bool_expr &x) const noexcept;                                         // the current value of the given boolean expression..
     std::pair<smt::inf_rational, smt::inf_rational> arith_bounds(const arith_expr &x) const noexcept; // the current bounds of the given arith expression..
     smt::inf_rational arith_value(const arith_expr &x) const noexcept;                                // the current value of the given arith expression..
-    std::unordered_set<smt::var_value *> enum_value(const var_expr &x) const noexcept;                // the current allowed values of the given enum expression..
+    std::unordered_set<const smt::var_value *> enum_value(const var_expr &x) const noexcept;          // the current allowed values of the given enum expression..
 
     virtual void solve() = 0;
 

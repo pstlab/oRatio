@@ -466,7 +466,7 @@ namespace ratio
         else
             return lra_th.value(x->l);
     }
-    std::unordered_set<var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th.value(x->ev); }
+    std::unordered_set<const var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th.value(x->ev); }
 
     std::string to_string(const core &c) noexcept
     {
@@ -639,12 +639,12 @@ namespace ratio
             else if (var_item *ei = dynamic_cast<var_item *>(&*is_it->second)) // the expression represents an enum type..
             {
                 iss += "{ \"var\" : \"e" + std::to_string(ei->ev) + "\", \"vals\" : [ ";
-                std::unordered_set<var_value *> vals = c.ov_th.value(ei->ev);
-                for (std::unordered_set<var_value *>::iterator vals_it = vals.begin(); vals_it != vals.end(); ++vals_it)
+                std::unordered_set<const var_value *> vals = c.ov_th.value(ei->ev);
+                for (std::unordered_set<const var_value *>::const_iterator vals_it = vals.begin(); vals_it != vals.end(); ++vals_it)
                 {
                     if (vals_it != vals.begin())
                         iss += ", ";
-                    iss += "\"" + std::to_string(reinterpret_cast<uintptr_t>(static_cast<item *>(*vals_it))) + "\"";
+                    iss += "\"" + std::to_string(reinterpret_cast<uintptr_t>(static_cast<const item *>(*vals_it))) + "\"";
                 }
                 iss += " ] }";
             }

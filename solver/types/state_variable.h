@@ -99,7 +99,7 @@ namespace ratio
     class place_resolver : public resolver
     {
     public:
-      place_resolver(sv_flaw &flw, const smt::lit &r, atom &plc_atm, item &plc_itm, atom &frbd_atm);
+      place_resolver(sv_flaw &flw, const smt::lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm);
       place_resolver(const place_resolver &that) = delete;
       virtual ~place_resolver();
 
@@ -109,9 +109,9 @@ namespace ratio
       void apply() override;
 
     private:
-      atom &plc_atm;  // applying the resolver will force this atom on the 'plc_item' item..
-      item &plc_itm;  // applying the resolver will force the 'plc_atm' atom on this item..
-      atom &frbd_atm; // applying the resolver will forbid this atom on the 'plc_itm' item..
+      atom &plc_atm;       // applying the resolver will force this atom on the 'plc_item' item..
+      const item &plc_itm; // applying the resolver will force the 'plc_atm' atom on this item..
+      atom &frbd_atm;      // applying the resolver will forbid this atom on the 'plc_itm' item..
     };
 
     // a resolver for forbidding atoms on a specific state-variable..
@@ -133,11 +133,11 @@ namespace ratio
     };
 
   private:
-    std::set<item *> to_check;                                // the state-variable instances whose atoms have changed..
+    std::set<const item *> to_check;                          // the state-variable instances whose atoms have changed..
     std::vector<std::pair<atom *, sv_atom_listener *>> atoms; // we store, for each atom, its atom listener..
 
-    std::map<std::set<atom *>, sv_flaw *> sv_flaws;                            // the state-variable flaws found so far..
-    std::map<atom *, std::map<atom *, smt::lit>> leqs;                         // all the possible ordering constraints..
-    std::map<std::set<atom *>, std::vector<std::pair<smt::lit, item *>>> plcs; // all the possible placement constraints..
+    std::map<std::set<atom *>, sv_flaw *> sv_flaws;                                  // the state-variable flaws found so far..
+    std::map<atom *, std::map<atom *, smt::lit>> leqs;                               // all the possible ordering constraints..
+    std::map<std::set<atom *>, std::vector<std::pair<smt::lit, const item *>>> plcs; // all the possible placement constraints..
   };
 } // namespace ratio

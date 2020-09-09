@@ -114,7 +114,7 @@ namespace ratio
             {
                 assert(!get_core().get_ov_theory().value(ev).empty());
                 if (auto vs = get_core().get_ov_theory().value(ev); vs.size() == 1)
-                    return (static_cast<item *>(*vs.begin()))->get(name);
+                    return (static_cast<const item *>(*vs.begin()))->get(name);
                 else
                 {
                     std::vector<lit> c_vars;
@@ -123,7 +123,7 @@ namespace ratio
                     for (const auto &val : vs)
                     {
                         c_vars.push_back(get_core().get_ov_theory().allows(ev, *val));
-                        c_vals.push_back(&*static_cast<item *>(val)->get(name));
+                        c_vals.push_back(&*static_cast<const item *>(val)->get(name));
                         vals_set.insert(c_vals.back());
                     }
                     if (vals_set.size() == 1)
@@ -154,8 +154,8 @@ namespace ratio
             return true;
         else if (const var_item *ei = dynamic_cast<const var_item *>(&i))
         {
-            std::unordered_set<var_value *> c_vals = get_core().get_ov_theory().value(ev);
-            std::unordered_set<var_value *> i_vals = get_core().get_ov_theory().value(ei->ev);
+            std::unordered_set<const var_value *> c_vals = get_core().get_ov_theory().value(ev);
+            std::unordered_set<const var_value *> i_vals = get_core().get_ov_theory().value(ei->ev);
             for (const auto &c_v : c_vals)
                 if (i_vals.count(c_v))
                     return true;
@@ -163,7 +163,7 @@ namespace ratio
         }
         else
         {
-            std::unordered_set<var_value *> c_vals = get_core().get_ov_theory().value(ev);
+            std::unordered_set<const var_value *> c_vals = get_core().get_ov_theory().value(ev);
             return c_vals.count(const_cast<var_value *>(dynamic_cast<const var_value *>(&i)));
         }
     }

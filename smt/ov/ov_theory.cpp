@@ -13,7 +13,7 @@ namespace smt
     {
         assert(!items.empty());
         const var id = assigns.size();
-        assigns.push_back(std::unordered_map<var_value *, lit>());
+        assigns.push_back(std::unordered_map<const var_value *, lit>());
         if (items.size() == 1)
             assigns.back().emplace(*items.begin(), TRUE_var);
         else
@@ -43,7 +43,7 @@ namespace smt
         assert(!lits.empty());
         assert(std::all_of(lits.begin(), lits.end(), [this](lit p) { return is_contained_in.count(variable(p)); }));
         const var id = assigns.size();
-        assigns.push_back(std::unordered_map<var_value *, lit>());
+        assigns.push_back(std::unordered_map<const var_value *, lit>());
         for (size_t i = 0; i < lits.size(); ++i)
         {
             assigns.back().emplace(vals[i], lits[i]);
@@ -52,7 +52,7 @@ namespace smt
         return id;
     }
 
-    lit ov_theory::allows(const var &v, var_value &val) const noexcept
+    lit ov_theory::allows(const var &v, const var_value &val) const noexcept
     {
         if (const auto at_right = assigns[v].find(&val); at_right != assigns[v].end())
             return at_right->second;
@@ -73,7 +73,7 @@ namespace smt
             return at_expr->second;
         else
         {
-            std::unordered_set<var_value *> intersection;
+            std::unordered_set<const var_value *> intersection;
             for (const auto &v : assigns[left])
                 if (assigns[right].count(v.first))
                     intersection.insert(v.first);
@@ -114,9 +114,9 @@ namespace smt
         }
     }
 
-    std::unordered_set<var_value *> ov_theory::value(var v) const noexcept
+    std::unordered_set<const var_value *> ov_theory::value(var v) const noexcept
     {
-        std::unordered_set<var_value *> vals;
+        std::unordered_set<const var_value *> vals;
         for (const auto &val : assigns[v])
             if (sat.value(val.second) != False)
                 vals.insert(val.first);

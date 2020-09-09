@@ -28,7 +28,7 @@ namespace ratio
     class choose_value : public resolver
     {
     public:
-      choose_value(graph &gr, smt::rational cst, var_flaw &enm_flaw, smt::var_value &val);
+      choose_value(graph &gr, smt::rational cst, var_flaw &enm_flaw, const smt::var_value &val);
       choose_value(const choose_value &that) = delete;
       virtual ~choose_value();
 
@@ -38,8 +38,8 @@ namespace ratio
       void apply() override;
 
     private:
-      smt::var v;          // the object variable whose value has to be decided..
-      smt::var_value &val; // the decided value..
+      smt::var v;                // the object variable whose value has to be decided..
+      const smt::var_value &val; // the decided value..
     };
 
   private:

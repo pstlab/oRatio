@@ -23,7 +23,7 @@ namespace ratio
     {
         std::vector<std::vector<std::pair<lit, double>>> incs;
         // we partition atoms for each state-variable they might insist on..
-        std::unordered_map<item *, std::vector<atom *>> sv_instances;
+        std::unordered_map<const item *, std::vector<atom *>> sv_instances;
         for (const auto &atm : atoms)
             if (get_core().get_sat_core().value(atm.first->get_sigma()) == True) // we filter out those which are not strictly active..
             {
@@ -31,8 +31,8 @@ namespace ratio
                 if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
                 {
                     for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
-                        if (to_check.count(static_cast<item *>(val)))
-                            sv_instances[static_cast<item *>(val)].push_back(atm.first);
+                        if (to_check.count(static_cast<const item *>(val)))
+                            sv_instances[static_cast<const item *>(val)].push_back(atm.first);
                 }
                 else if (to_check.count(static_cast<item *>(&*c_scope)))
                     sv_instances[static_cast<item *>(&*c_scope)].push_back(atm.first);
@@ -176,7 +176,7 @@ namespace ratio
             expr c_scope = atm.get(TAU);
             if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))                  // the 'tau' parameter is a variable..
                 for (const auto &val : atm.get_core().get_ov_theory().value(enum_scope->ev)) // we check for all its allowed values..
-                    to_check.insert(static_cast<item *>(val));
+                    to_check.insert(static_cast<const item *>(val));
             else // the 'tau' parameter is a constant..
                 to_check.insert(&*c_scope);
         }
@@ -216,7 +216,7 @@ namespace ratio
 #endif
                         found = true;
                     }
-                    plcs[{&atm0, &atm1}].push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_tau_itm->ev, *v0), !get_solver().get_ov_theory().allows(a1_tau_itm->ev, *v0)}), static_cast<item *>(v0)});
+                    plcs[{&atm0, &atm1}].push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_tau_itm->ev, *v0), !get_solver().get_ov_theory().allows(a1_tau_itm->ev, *v0)}), static_cast<const item *>(v0)});
                 }
         }
         else if (a0_tau_itm)
@@ -280,7 +280,7 @@ namespace ratio
             expr c_scope = atm.get(TAU);
             if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))                  // the 'tau' parameter is a variable..
                 for (const auto &val : atm.get_core().get_ov_theory().value(enum_scope->ev)) // we check for all its allowed values..
-                    sv.to_check.insert(static_cast<item *>(val));
+                    sv.to_check.insert(static_cast<const item *>(val));
             else // the 'tau' parameter is a constant..
                 sv.to_check.insert(&*c_scope);
         }
@@ -339,7 +339,7 @@ namespace ratio
 
     void state_variable::order_resolver::apply() {}
 
-    state_variable::place_resolver::place_resolver(sv_flaw &flw, const lit &r, atom &plc_atm, item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 0, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
+    state_variable::place_resolver::place_resolver(sv_flaw &flw, const lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, 0, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
     state_variable::place_resolver::~place_resolver() {}
 
     std::string state_variable::place_resolver::get_label() const { return "{\"type\":\"place\", \"rho\":" + to_string(get_rho()) + ", \"place_sigma\":" + std::to_string(plc_atm.get_sigma()) + ", \"forbid_sigma\":" + std::to_string(frbd_atm.get_sigma()) + ", \"place_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&plc_atm)) + "\", \"forbid_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&frbd_atm)) + "\"}"; }

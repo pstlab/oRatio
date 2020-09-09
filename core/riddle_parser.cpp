@@ -354,10 +354,10 @@ namespace ratio
                 else if (e->get_type().is_assignable_from(tt))        // the target type is a subclass of the assignment..
                     if (var_item *ae = dynamic_cast<var_item *>(&*e)) // some of the allowed values might be inhibited..
                     {
-                        std::unordered_set<smt::var_value *> alwd_vals = scp.get_core().get_ov_theory().value(ae->ev); // the allowed values..
-                        std::vector<smt::lit> not_alwd_vals;                                                           // the not allowed values..
+                        std::unordered_set<const smt::var_value *> alwd_vals = scp.get_core().get_ov_theory().value(ae->ev); // the allowed values..
+                        std::vector<smt::lit> not_alwd_vals;                                                                 // the not allowed values..
                         for (const auto &ev : alwd_vals)
-                            if (!tt.is_assignable_from(static_cast<item *>(ev)->get_type())) // the target type is not a superclass of the value..
+                            if (!tt.is_assignable_from(static_cast<const item *>(ev)->get_type())) // the target type is not a superclass of the value..
                                 not_alwd_vals.push_back(!scp.get_core().get_ov_theory().allows(ae->ev, *ev));
                         if (alwd_vals.size() == not_alwd_vals.size()) // none of the values is allowed..
                             throw inconsistency_exception();

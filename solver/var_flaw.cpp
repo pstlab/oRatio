@@ -20,12 +20,12 @@ namespace ratio
 
     void var_flaw::compute_resolvers()
     {
-        std::unordered_set<smt::var_value *> vals = get_graph().get_solver().get_ov_theory().value(v_itm.ev);
+        std::unordered_set<const smt::var_value *> vals = get_graph().get_solver().get_ov_theory().value(v_itm.ev);
         for (const auto &v : vals)
             add_resolver(*new choose_value(get_graph(), smt::rational(1, static_cast<smt::I>(vals.size())), *this, *v));
     }
 
-    var_flaw::choose_value::choose_value(graph &gr, smt::rational cst, var_flaw &enm_flaw, smt::var_value &val) : resolver(gr, gr.get_solver().get_ov_theory().allows(enm_flaw.v_itm.ev, val), cst, enm_flaw), v(enm_flaw.v_itm.ev), val(val) {}
+    var_flaw::choose_value::choose_value(graph &gr, smt::rational cst, var_flaw &enm_flaw, const smt::var_value &val) : resolver(gr, gr.get_solver().get_ov_theory().allows(enm_flaw.v_itm.ev, val), cst, enm_flaw), v(enm_flaw.v_itm.ev), val(val) {}
     var_flaw::choose_value::~choose_value() {}
 
     std::string var_flaw::choose_value::get_label() const noexcept { return "{\"rho\":" + to_string(get_rho()) + "}"; }

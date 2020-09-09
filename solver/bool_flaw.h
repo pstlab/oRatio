@@ -23,7 +23,7 @@ namespace ratio
     class choose_value : public resolver
     {
     public:
-      choose_value(graph &gr, smt::rational cst, bool_flaw &bl_flaw, smt::lit &val);
+      choose_value(graph &gr, smt::rational cst, bool_flaw &bl_flaw, const smt::lit &val);
       choose_value(const choose_value &that) = delete;
       virtual ~choose_value();
 

@@ -24,7 +24,7 @@ namespace ratio
         add_resolver(*new choose_value(get_graph(), smt::rational(1, 2), *this, !b_itm.l));
     }
 
-    bool_flaw::choose_value::choose_value(graph &gr, smt::rational cst, bool_flaw &bl_flaw, smt::lit &val) : resolver(gr, val, cst, bl_flaw) {}
+    bool_flaw::choose_value::choose_value(graph &gr, smt::rational cst, bool_flaw &bl_flaw, const smt::lit &val) : resolver(gr, val, cst, bl_flaw) {}
     bool_flaw::choose_value::~choose_value() {}
 
     std::string bool_flaw::choose_value::get_label() const noexcept { return "{\"rho\":" + to_string(get_rho()) + "}"; }
