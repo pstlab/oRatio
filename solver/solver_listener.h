@@ -28,6 +28,7 @@ namespace ratio
     virtual void flaw_created(const flaw &f) {}
     virtual void flaw_state_changed(const flaw &f) {}
     virtual void flaw_cost_changed(const flaw &f) {}
+    virtual void flaw_position_changed(const flaw &f) {}
     virtual void current_flaw(const flaw &f) {}
 
     void new_resolver(const resolver &r)
@@ -45,7 +46,7 @@ namespace ratio
     class flaw_listener : public smt::sat_value_listener
     {
     public:
-      flaw_listener(solver_listener &l, const flaw &f) : sat_value_listener(l.slv.get_sat_core()), listener(l), f(f) { listen_sat(f.get_phi()); }
+      flaw_listener(solver_listener &l, const flaw &f) : sat_value_listener(l.slv.get_sat_core()), listener(l), f(f) { listen_sat(variable(f.get_phi())); }
       flaw_listener(const flaw_listener &orig) = delete;
       virtual ~flaw_listener() {}
 
@@ -60,7 +61,7 @@ namespace ratio
     class resolver_listener : public smt::sat_value_listener
     {
     public:
-      resolver_listener(solver_listener &l, const resolver &r) : sat_value_listener(l.slv.get_sat_core()), listener(l), r(r) { listen_sat(r.get_rho()); }
+      resolver_listener(solver_listener &l, const resolver &r) : sat_value_listener(l.slv.get_sat_core()), listener(l), r(r) { listen_sat(variable(r.get_rho())); }
       resolver_listener(const resolver_listener &orig) = delete;
       virtual ~resolver_listener() {}
 

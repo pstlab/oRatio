@@ -16,9 +16,9 @@ namespace ratio
     virtual ~core_listener() { cr.listeners.erase(std::find(cr.listeners.begin(), cr.listeners.end(), this)); }
 
   private:
-    virtual void log(const std::string &msg) noexcept {}
-    virtual void read(const std::string &script) noexcept {}
-    virtual void read(const std::vector<std::string> &files) noexcept {}
+    virtual void log(const std::string &msg) {}
+    virtual void read(const std::string &script) {}
+    virtual void read(const std::vector<std::string> &files) {}
 
     virtual void state_changed() {}
 

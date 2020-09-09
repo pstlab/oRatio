@@ -24,7 +24,7 @@ namespace ratio
     solver::solver() : core(), theory(get_sat_core()), gr(*this) {}
     solver::~solver() {}
 
-    void solver::init()
+    void solver::init() noexcept
     {
         read(std::vector<std::string>({"init.rddl"}));
         new_types({new state_variable(*this),
@@ -138,6 +138,295 @@ namespace ratio
 #ifdef BUILD_GUI
         fire_state_changed();
 #endif
+    }
+
+    bool_expr solver::new_bool() noexcept
+    {
+        // we create a new boolean expression..
+        bool_expr xp = new bool_item(*this, get_sat_core().new_var());
+        // we create a new boolean flaw..
+        gr.new_flaw(*new bool_flaw(gr, gr.res, *xp));
+        return xp;
+    }
+
+    expr solver::new_enum(const type &tp, const std::vector<item *> &allowed_vals)
+    {
+        assert(allowed_vals.size() > 1);
+        assert(tp.get_name().compare(BOOL_KEYWORD) != 0);
+        assert(tp.get_name().compare(INT_KEYWORD) != 0);
+        assert(tp.get_name().compare(REAL_KEYWORD) != 0);
+        assert(tp.get_name().compare(TP_KEYWORD) != 0);
+        // we create a new enum expression..
+        // notice that we do not enforce the exct_one constraint!
+        var_expr xp = new var_item(*this, tp, get_ov_theory().new_var(std::vector<var_value *>(allowed_vals.begin(), allowed_vals.end()), false));
+        if (allowed_vals.size() > 1) // we create a new var flaw..
+            gr.new_flaw(*new var_flaw(gr, gr.res, *xp));
+        return xp;
+    }
+
+    void solver::new_atom(atom &atm, const bool &is_fact)
+    {
+        // we create a new atom flaw..
+        atom_flaw *af = new atom_flaw(gr, gr.res, atm, is_fact);
+        gr.new_flaw(*af);
+
+        // we associate the flaw to the atom..
+        reason.emplace(&atm, af);
+
+        // we check if we need to notify the new atom to any smart types..
+        if (&atm.get_type().get_scope() != this)
+        {
+            std::queue<type *> q;
+            q.push(static_cast<type *>(&atm.get_type().get_scope()));
+            while (!q.empty())
+            {
+                if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
+                    st->new_atom(*af);
+                for (const auto &st : q.front()->get_supertypes())
+                    q.push(st);
+                q.pop();
+            }
+        }
+    }
+
+    void solver::new_disjunction(context &d_ctx, const disjunction &disj)
+    {
+        // we create a new disjunction flaw..
+        disjunction_flaw *df = new disjunction_flaw(gr, gr.res, d_ctx, disj);
+        gr.new_flaw(*df);
+    }
+
+    void solver::take_decision(const lit &ch)
+    {
+        assert(get_sat_core().value(ch) == Undefined);
+        current_decision = ch;
+
+        // we take the decision..
+        if (!get_sat_core().assume(ch))
+            throw unsolvable_exception();
+        assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
+
+#ifdef BUILD_GUI
+        fire_state_changed();
+#endif
+
+        // we check if we need to expand the graph..
+        if (root_level())
+            gr.check_gamma();
+    }
+
+    void solver::next()
+    {
+        LOG("next..");
+
+        if (root_level())
+            throw unsolvable_exception();
+
+        std::vector<lit> no_good;
+        no_good.reserve(trail.size());
+        for (const auto &l : trail)
+            no_good.push_back(!l.decision);
+        get_sat_core().pop();
+
+        assert(!no_good.empty());
+        assert(get_sat_core().value(no_good.back()) == Undefined);
+
+        // we reverse the no-good and store it..
+        std::reverse(no_good.begin(), no_good.end());
+        record(no_good);
+
+        if (!get_sat_core().propagate())
+            throw unsolvable_exception();
+        assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
+
+#ifdef BUILD_GUI
+        fire_state_changed();
+#endif
+
+        // we check if we need to expand the graph..
+        if (root_level()) // since we are at root-level, we can reason about flaws..
+            gr.check_gamma();
+    }
+
+    bool solver::propagate(const lit &p)
+    {
+        assert(cnfl.empty());
+        assert(gr.phis.count(variable(p)) || gr.rhos.count(variable(p)));
+
+        if (const auto at_phis_p = gr.phis.find(variable(p)); at_phis_p != gr.phis.end())
+            switch (sat.value(at_phis_p->first))
+            {
+            case True:
+                for (const auto &f : at_phis_p->second)
+                { // 'f' is an activated flaw..
+                    assert(!flaws.count(f));
+                    if (std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
+                        flaws.insert(f); // this flaw has been activated and not yet accidentally solved..
+                    else if (!root_level())
+                        trail.back().solved_flaws.insert(f); // this flaw has been accidentally solved..
+                }
+                if (root_level()) // since we are at root-level, we can perform some cleaning..
+                    gr.phis.erase(at_phis_p);
+                break;
+            case False:
+                for (const auto &f : at_phis_p->second)
+                { // 'f' will never appear in any incoming partial solutions..
+                    assert(!flaws.count(f));
+                    std::unordered_set<flaw *> c_visited;
+                    gr.propagate_costs(*f, c_visited);
+                    assert(c_visited.empty());
+                }
+                if (root_level()) // since we are at root-level, we can perform some cleaning..
+                    gr.phis.erase(at_phis_p);
+                break;
+            }
+
+        if (const auto at_rhos_p = gr.rhos.find(variable(p)); at_rhos_p != gr.rhos.end())
+            switch (sat.value(at_rhos_p->first))
+            {
+            case True:
+                for (const auto &r : at_rhos_p->second)
+                    if (flaws.erase(&r->effect) && !root_level()) // this resolver has been activated, hence its effect flaw has been resolved (notice that we remove its effect only in case it was already active)..
+                        trail.back().solved_flaws.insert(&r->effect);
+                if (root_level()) // since we are at root-level, we can perform some cleaning..
+                    gr.rhos.erase(at_rhos_p);
+                break;
+            case False:
+                for (const auto &r : at_rhos_p->second) // 'r' is a forbidden resolver..
+                    if (sat.value(r->effect.phi) != False)
+                    { // we update the cost of the resolver's effect..
+                        std::unordered_set<flaw *> c_visited;
+                        gr.propagate_costs(r->effect, c_visited);
+                        assert(c_visited.empty());
+                    }
+                if (root_level()) // since we are at root-level, we can perform some cleaning..
+                    gr.rhos.erase(at_rhos_p);
+                break;
+            }
+
+        return true;
+    }
+
+    bool solver::check()
+    {
+        assert(cnfl.empty());
+        assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *f) { return sat.value(f->phi) == True; }));
+        assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return sat.value(f->phi) != True || (flaws.count(f) || std::any_of(trail.begin(), trail.end(), [this, f](layer l) { return l.solved_flaws.count(f); })); }); }));
+        assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return sat.value(f->phi) != False || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return sat.value(r->rho) != False || is_positive_infinite(r->get_estimated_cost()); }); }));
+        return true;
+    }
+
+    void solver::push()
+    {
+        LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")"
+                                         << " +[" << to_string(current_decision) << "]");
+
+        // we push the given decision into the trail..
+        trail.push_back(layer(current_decision));
+    }
+
+    void solver::pop()
+    {
+        LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")"
+                                         << " -[" << to_string(current_decision) << "]");
+
+        // we reintroduce the solved flaw..
+        for (const auto &f : trail.back().solved_flaws)
+            flaws.insert(f);
+
+        // we erase the new flaws..
+        for (const auto &f : trail.back().new_flaws)
+            flaws.erase(f);
+
+        // we restore the flaws' estimated costs..
+        for (const auto &f : trail.back().old_f_costs)
+        {
+            // assert(f.first->est_cost != f.second);
+            f.first->est_cost = f.second;
+#ifdef BUILD_GUI
+            fire_flaw_cost_changed(*f.first);
+#endif
+        }
+
+        trail.pop_back();
+
+        LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
+    }
+
+    void solver::solve_inconsistencies()
+    {
+        // all the current inconsistencies..
+        std::vector<std::vector<std::pair<lit, double>>> incs = get_incs();
+
+        while (!incs.empty())
+            if (const auto &uns_flw = std::find_if(incs.begin(), incs.end(), [](const std::vector<std::pair<lit, double>> &v) { return v.empty(); }); uns_flw != incs.end())
+            { // we have an unsolvable flaw..
+                // we backtrack..
+                next();
+                // we re-collect all the inconsistencies from all the smart-types..
+                incs = get_incs();
+            }
+            else if (const auto &det_flw = std::find_if(incs.begin(), incs.end(), [](const std::vector<std::pair<lit, double>> &v) { return v.size() == 1; }); det_flw != incs.end())
+            { // we have deterministic flaw..
+                assert(get_sat_core().value(det_flw->at(0).first) != False);
+                if (get_sat_core().value(det_flw->at(0).first) == Undefined)
+                {
+                    // we learn something from it..
+                    std::vector<lit> learnt;
+                    learnt.reserve(trail.size() + 1);
+                    learnt.push_back(det_flw->at(0).first);
+                    for (const auto &l : trail)
+                        learnt.push_back(!l.decision);
+                    record(learnt);
+                    if (!get_sat_core().propagate())
+                        throw unsolvable_exception();
+                }
+
+                // we re-collect all the inconsistencies from all the smart-types..
+                incs = get_incs();
+            }
+            else
+            { // we have to take a decision..
+                std::vector<std::pair<lit, double>> bst_inc;
+                double k_inv = std::numeric_limits<double>::infinity();
+                for (const auto &inc : incs)
+                {
+                    double bst_commit = std::numeric_limits<double>::infinity();
+                    for (const auto &ch : inc)
+                        if (ch.second < bst_commit)
+                            bst_commit = ch.second;
+                    double c_k_inv = 0;
+                    for (const auto &ch : inc)
+                        c_k_inv += 1l / (1l + (ch.second - bst_commit));
+                    if (c_k_inv < k_inv)
+                    {
+                        k_inv = c_k_inv;
+                        bst_inc = inc;
+                    }
+                }
+
+                // we select the best choice (i.e. the least committing one) from those available for the best flaw..
+                take_decision(std::min_element(bst_inc.begin(), bst_inc.end(), [](std::pair<lit, double> const &ch0, std::pair<lit, double> const &ch1) { return ch0.second < ch1.second; })->first);
+
+                // we re-collect all the inconsistencies from all the smart-types..
+                incs = get_incs();
+            }
+    }
+
+    std::vector<std::vector<std::pair<lit, double>>> solver::get_incs()
+    {
+        std::vector<std::vector<std::pair<lit, double>>> incs;
+        // we collect all the inconsistencies from all the smart-types..
+        for (const auto &st : sts)
+        {
+            const auto c_incs = st->get_current_incs();
+            incs.insert(incs.end(), c_incs.begin(), c_incs.end());
+        }
+        assert(std::all_of(incs.begin(), incs.end(), [](std::vector<std::pair<lit, double>> inc) { return std::all_of(inc.begin(), inc.end(), [](std::pair<lit, double> ch) { return std::isfinite(ch.second); }); }));
+        return incs;
     }
 
 #ifdef BUILD_GUI

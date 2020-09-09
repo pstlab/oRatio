@@ -56,8 +56,6 @@ namespace smt
     bool root_level() const noexcept { return trail_lim.empty(); }      // checks whether the current decision level is root level..
 
   private:
-    static std::string to_string(const lit &p) noexcept { return (sign(p) ? "b" : "!b") + std::to_string(variable(p)); }
-
     void analyze(constr &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel) noexcept;
     void record(const std::vector<lit> &lits) noexcept;
 
