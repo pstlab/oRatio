@@ -274,9 +274,7 @@ namespace ratio
                 for (const auto &f : at_phis_p->second)
                 { // 'f' will never appear in any incoming partial solutions..
                     assert(!flaws.count(f));
-                    std::unordered_set<flaw *> c_visited;
-                    gr.propagate_costs(*f, c_visited);
-                    assert(c_visited.empty());
+                    gr.propagate_costs(*f);
                 }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
                     gr.phis.erase(at_phis_p);
@@ -294,13 +292,9 @@ namespace ratio
                     gr.rhos.erase(at_rhos_p);
                 break;
             case False:
-                for (const auto &r : at_rhos_p->second) // 'r' is a forbidden resolver..
-                    if (sat.value(r->effect.phi) != False)
-                    { // we update the cost of the resolver's effect..
-                        std::unordered_set<flaw *> c_visited;
-                        gr.propagate_costs(r->effect, c_visited);
-                        assert(c_visited.empty());
-                    }
+                for (const auto &r : at_rhos_p->second)    // 'r' is a forbidden resolver..
+                    if (sat.value(r->effect.phi) != False) // we update the cost of the resolver's effect..
+                        gr.propagate_costs(r->effect);
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
                     gr.rhos.erase(at_rhos_p);
                 break;

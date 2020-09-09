@@ -67,7 +67,7 @@ namespace ratio
 #endif
     }
 
-    void graph::propagate_costs(flaw &f, std::unordered_set<flaw *> &visited)
+    void graph::propagate_costs(flaw &f)
     {
         rational c_cost; // the current cost..
         if (slv.get_sat_core().value(f.phi) == False)
@@ -100,7 +100,7 @@ namespace ratio
         visited.insert(&f);
         for (const auto &supp : f.supports)
             if (slv.get_sat_core().value(supp->rho) != False)
-                propagate_costs(supp->effect, visited);
+                propagate_costs(supp->effect);
         visited.erase(&f);
     }
 
@@ -120,7 +120,7 @@ namespace ratio
             if (slv.get_sat_core().value(c_f->phi) != False)
             {
                 std::unordered_set<flaw *> visited;
-                if (is_deferrable(*c_f, visited)) // we have a deferrable flaw: we can postpone its expansion..
+                if (is_deferrable(*c_f)) // we have a deferrable flaw: we can postpone its expansion..
                     flaw_q.push_back(c_f);
                 else
                     expand_flaw(*c_f); // we expand the flaw..
@@ -194,10 +194,8 @@ namespace ratio
         if (!slv.get_sat_core().propagate())
             throw unsolvable_exception();
 
-        // we propagate the costs..
-        std::unordered_set<flaw *> c_visited;
-        propagate_costs(f, c_visited);
-        assert(c_visited.empty());
+        // we propagate the costs starting from the currently expanded flaw..
+        propagate_costs(f);
 
         // we clean up already solved flaws..
         if (slv.sat.value(f.phi) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
@@ -223,14 +221,14 @@ namespace ratio
     }
 
 #ifdef DEFERRABLE_FLAWS
-    bool graph::is_deferrable(flaw &f, std::unordered_set<flaw *> &visited)
+    bool graph::is_deferrable(flaw &f)
     {
         if (f.get_estimated_cost() < rational::POSITIVE_INFINITY || std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return slv.sat.value(r->rho) == True; }))
             return true; // we already have a possible solution for this flaw, thus we defer..
         if (slv.get_sat_core().value(f.phi) == True || visited.count(&f))
             return false; // we necessarily have to solve this flaw: it cannot be deferred..
         visited.insert(&f);
-        bool def = std::all_of(f.supports.begin(), f.supports.end(), [this, &visited](resolver *r) { return is_deferrable(r->get_effect(), visited); });
+        bool def = std::all_of(f.supports.begin(), f.supports.end(), [this](resolver *r) { return is_deferrable(r->get_effect()); });
         visited.erase(&f);
         return def;
     }

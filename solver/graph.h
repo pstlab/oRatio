@@ -43,7 +43,7 @@ namespace ratio
     void new_resolver(resolver &r);                     // notifies the graph that a new resolver 'r' has been created..
     void new_causal_link(flaw &f, resolver &r);         // notifies the graph that a new causal link between a flaw 'f' and a resolver 'r' has been created..
 
-    void propagate_costs(flaw &f, std::unordered_set<flaw *> &visited);
+    void propagate_costs(flaw &f);
 
     void build();     // builds the planning graph..
     void add_layer(); // adds a layer to the current planning graph..
@@ -52,7 +52,7 @@ namespace ratio
     void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
 
 #ifdef DEFERRABLE_FLAWS
-    bool is_deferrable(flaw &f, std::unordered_set<flaw *> &visited); // checks whether the given flaw is deferrable..
+    bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
 #endif
 
     void check_gamma(); // checks and possibly resets the value of gamma..
@@ -64,8 +64,10 @@ namespace ratio
     std::deque<flaw *> flaw_q;                                  // the flaw queue (for the graph building procedure)..
     std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
     std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
+    std::unordered_set<flaw *> visited;                         // the visited flaws, for graph cost propagation (and deferrable flaws check)..
 #if defined GRAPH_PRUNING
-    std::unordered_set<smt::var> already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
+    std::unordered_set<smt::var>
+        already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
   };
 } // namespace ratio
