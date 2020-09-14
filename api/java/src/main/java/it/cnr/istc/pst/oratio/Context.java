@@ -123,99 +123,108 @@ public class Context {
     }
 
     public void startServer(int port) {
-        LOG.info("Starting server..");
-        try (ServerSocket ss = new ServerSocket(port);
-                Socket client = ss.accept();
-                BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"))) {
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                if (inputLine.startsWith(LOG_MESSAGE)) {
-                    for (StateListener l : state_listeners)
-                        l.log(inputLine.substring(LOG_MESSAGE.length()));
-                } else if (inputLine.startsWith(STATE_CHANGED)) {
-                    deserializer.setCore(core);
-                    gson.fromJson(inputLine.substring(STATE_CHANGED.length()), Core.class);
-                    for (StateListener l : state_listeners)
-                        l.stateChanged(core);
-                } else if (inputLine.equals(READ_0)) {
-                    StringBuilder script = new StringBuilder();
-                    while ((inputLine = in.readLine()) != null && !inputLine.equals("EOS"))
-                        script.append(inputLine).append('\n');
-                    if (inputLine == null)
-                        throw new RuntimeException("Connection lost..");
-                    core.read(script.toString());
-                    for (StateListener l : state_listeners)
-                        l.stateChanged(core);
-                } else if (inputLine.equals(READ_1)) {
-                    deserializer.setCore(core);
-                    List<File> files = new ArrayList<>();
-                    while (true) {
-                        File file = File.createTempFile("script_" + System.currentTimeMillis(), ".tmp");
-                        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                            while ((inputLine = in.readLine()) != null && !inputLine.equals("EOF")
-                                    && !inputLine.equals("EOS")) {
-                                writer.write(inputLine + '\n');
+        LOG.info("Starting the server..");
+        while (true) {
+            try (ServerSocket ss = new ServerSocket(port);
+                    Socket client = ss.accept();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"))) {
+
+                LOG.info("Initializing the core..");
+                deserializer.setCore(core);
+                for (StateListener l : state_listeners)
+                    l.init();
+
+                LOG.info("Waiting for input..");
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    if (inputLine.startsWith(LOG_MESSAGE)) {
+                        for (StateListener l : state_listeners)
+                            l.log(inputLine.substring(LOG_MESSAGE.length()));
+                    } else if (inputLine.startsWith(STATE_CHANGED)) {
+                        deserializer.setCore(core);
+                        gson.fromJson(inputLine.substring(STATE_CHANGED.length()), Core.class);
+                        for (StateListener l : state_listeners)
+                            l.stateChanged(core);
+                    } else if (inputLine.equals(READ_0)) {
+                        StringBuilder script = new StringBuilder();
+                        while ((inputLine = in.readLine()) != null && !inputLine.equals("EOS"))
+                            script.append(inputLine).append('\n');
+                        if (inputLine == null)
+                            throw new RuntimeException("Connection lost..");
+                        core.read(script.toString());
+                        for (StateListener l : state_listeners)
+                            l.stateChanged(core);
+                    } else if (inputLine.equals(READ_1)) {
+                        deserializer.setCore(core);
+                        List<File> files = new ArrayList<>();
+                        while (true) {
+                            File file = File.createTempFile("script_" + System.currentTimeMillis(), ".tmp");
+                            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                                while ((inputLine = in.readLine()) != null && !inputLine.equals("EOF")
+                                        && !inputLine.equals("EOS")) {
+                                    writer.write(inputLine + '\n');
+                                }
+                                if (inputLine == null)
+                                    throw new RuntimeException("Connection lost..");
                             }
-                            if (inputLine == null)
-                                throw new RuntimeException("Connection lost..");
+                            files.add(file);
+                            if (inputLine.equals("EOS"))
+                                break;
                         }
-                        files.add(file);
-                        if (inputLine.equals("EOS"))
-                            break;
-                    }
-                    core.read(files.toArray(new File[files.size()]));
-                    for (StateListener l : state_listeners)
-                        l.stateChanged(core);
-                } else if (inputLine.startsWith(FLAW_CREATED)) {
-                    FlawCreated fc = gson.fromJson(inputLine.substring(FLAW_CREATED.length()), FlawCreated.class);
-                    for (GraphListener l : graph_listeners)
-                        l.flawCreated(fc);
-                } else if (inputLine.startsWith(FLAW_STATE_CHANGED)) {
-                    FlawStateChanged fsc = gson.fromJson(inputLine.substring(FLAW_STATE_CHANGED.length()),
-                            FlawStateChanged.class);
-                    for (GraphListener l : graph_listeners)
-                        l.flawStateChanged(fsc);
-                } else if (inputLine.startsWith(FLAW_COST_CHANGED)) {
-                    FlawCostChanged fsc = gson.fromJson(inputLine.substring(FLAW_COST_CHANGED.length()),
-                            FlawCostChanged.class);
-                    for (GraphListener l : graph_listeners)
-                        l.flawCostChanged(fsc);
-                } else if (inputLine.startsWith(FLAW_POSITION_CHANGED)) {
-                    FlawPositionChanged fpc = gson.fromJson(inputLine.substring(FLAW_POSITION_CHANGED.length()),
-                            FlawPositionChanged.class);
-                    for (GraphListener l : graph_listeners)
-                        l.flawPositionChanged(fpc);
-                } else if (inputLine.startsWith(CURRENT_FLAW)) {
-                    CurrentFlaw cf = gson.fromJson(inputLine.substring(CURRENT_FLAW.length()), CurrentFlaw.class);
-                    for (GraphListener l : graph_listeners)
-                        l.currentFlaw(cf);
-                } else if (inputLine.startsWith(RESOLVER_CREATED)) {
-                    ResolverCreated rc = gson.fromJson(inputLine.substring(RESOLVER_CREATED.length()),
-                            ResolverCreated.class);
-                    for (GraphListener l : graph_listeners)
-                        l.resolverCreated(rc);
-                } else if (inputLine.startsWith(RESOLVER_STATE_CHANGED)) {
-                    ResolverStateChanged rsc = gson.fromJson(inputLine.substring(RESOLVER_STATE_CHANGED.length()),
-                            ResolverStateChanged.class);
-                    for (GraphListener l : graph_listeners)
-                        l.resolverStateChanged(rsc);
-                } else if (inputLine.startsWith(CURRENT_RESOLVER)) {
-                    CurrentResolver cr = gson.fromJson(inputLine.substring(CURRENT_RESOLVER.length()),
-                            CurrentResolver.class);
-                    for (GraphListener l : graph_listeners)
-                        l.currentResolver(cr);
-                } else if (inputLine.startsWith(CAUSAL_LINK_ADDED)) {
-                    CausalLinkAdded cla = gson.fromJson(inputLine.substring(CAUSAL_LINK_ADDED.length()),
-                            CausalLinkAdded.class);
-                    for (GraphListener l : graph_listeners)
-                        l.causalLinkAdded(cla);
-                } else
-                    LOG.info("Cannot handle message: {}", inputLine);
+                        core.read(files.toArray(new File[files.size()]));
+                        for (StateListener l : state_listeners)
+                            l.stateChanged(core);
+                    } else if (inputLine.startsWith(FLAW_CREATED)) {
+                        FlawCreated fc = gson.fromJson(inputLine.substring(FLAW_CREATED.length()), FlawCreated.class);
+                        for (GraphListener l : graph_listeners)
+                            l.flawCreated(fc);
+                    } else if (inputLine.startsWith(FLAW_STATE_CHANGED)) {
+                        FlawStateChanged fsc = gson.fromJson(inputLine.substring(FLAW_STATE_CHANGED.length()),
+                                FlawStateChanged.class);
+                        for (GraphListener l : graph_listeners)
+                            l.flawStateChanged(fsc);
+                    } else if (inputLine.startsWith(FLAW_COST_CHANGED)) {
+                        FlawCostChanged fsc = gson.fromJson(inputLine.substring(FLAW_COST_CHANGED.length()),
+                                FlawCostChanged.class);
+                        for (GraphListener l : graph_listeners)
+                            l.flawCostChanged(fsc);
+                    } else if (inputLine.startsWith(FLAW_POSITION_CHANGED)) {
+                        FlawPositionChanged fpc = gson.fromJson(inputLine.substring(FLAW_POSITION_CHANGED.length()),
+                                FlawPositionChanged.class);
+                        for (GraphListener l : graph_listeners)
+                            l.flawPositionChanged(fpc);
+                    } else if (inputLine.startsWith(CURRENT_FLAW)) {
+                        CurrentFlaw cf = gson.fromJson(inputLine.substring(CURRENT_FLAW.length()), CurrentFlaw.class);
+                        for (GraphListener l : graph_listeners)
+                            l.currentFlaw(cf);
+                    } else if (inputLine.startsWith(RESOLVER_CREATED)) {
+                        ResolverCreated rc = gson.fromJson(inputLine.substring(RESOLVER_CREATED.length()),
+                                ResolverCreated.class);
+                        for (GraphListener l : graph_listeners)
+                            l.resolverCreated(rc);
+                    } else if (inputLine.startsWith(RESOLVER_STATE_CHANGED)) {
+                        ResolverStateChanged rsc = gson.fromJson(inputLine.substring(RESOLVER_STATE_CHANGED.length()),
+                                ResolverStateChanged.class);
+                        for (GraphListener l : graph_listeners)
+                            l.resolverStateChanged(rsc);
+                    } else if (inputLine.startsWith(CURRENT_RESOLVER)) {
+                        CurrentResolver cr = gson.fromJson(inputLine.substring(CURRENT_RESOLVER.length()),
+                                CurrentResolver.class);
+                        for (GraphListener l : graph_listeners)
+                            l.currentResolver(cr);
+                    } else if (inputLine.startsWith(CAUSAL_LINK_ADDED)) {
+                        CausalLinkAdded cla = gson.fromJson(inputLine.substring(CAUSAL_LINK_ADDED.length()),
+                                CausalLinkAdded.class);
+                        for (GraphListener l : graph_listeners)
+                            l.causalLinkAdded(cla);
+                    } else
+                        LOG.info("Cannot handle message: {}", inputLine);
+                }
+                if (inputLine == null)
+                    throw new RuntimeException("Connection lost..");
+            } catch (Exception ex) {
+                LOG.error("Cannot read socket", ex);
             }
-            if (inputLine == null)
-                throw new RuntimeException("Connection lost..");
-        } catch (Exception ex) {
-            LOG.error("Cannot read socket", ex);
         }
     }
 }

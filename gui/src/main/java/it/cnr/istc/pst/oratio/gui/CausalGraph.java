@@ -19,6 +19,7 @@ import it.cnr.istc.pst.oratio.riddle.Rational;
 
 public class CausalGraph implements GraphListener {
 
+    private static final String GRAPH = "graph ";
     private static final String FLAW_CREATED = "flaw_created ";
     private static final String FLAW_STATE_CHANGED = "flaw_state_changed ";
     private static final String FLAW_COST_CHANGED = "flaw_cost_changed ";
@@ -33,6 +34,14 @@ public class CausalGraph implements GraphListener {
     private Flaw current_flaw = null;
     private final Map<String, Resolver> resolvers = new HashMap<>();
     private Resolver current_resolver = null;
+
+    void clear() {
+        flaws.clear();
+        resolvers.clear();
+        current_flaw = null;
+        current_resolver = null;
+        App.broadcast(GRAPH + App.GSON.toJson(this));
+    }
 
     @Override
     public void flawCreated(final FlawCreated flaw) {
@@ -141,9 +150,12 @@ public class CausalGraph implements GraphListener {
             flaw.addProperty("label", src.label);
             flaw.addProperty("state", src.state);
             JsonObject position = new JsonObject();
-            position.addProperty("min", src.position.min);
-            position.addProperty("max", src.position.max);
-            flaw.add("position", position);
+            if (src.position.min != -GraphListener.INF)
+                position.addProperty("min", src.position.min);
+            if (src.position.max != GraphListener.INF)
+                position.addProperty("max", src.position.max);
+            if (position.has("min") | position.has("max"))
+                flaw.add("position", position);
             JsonObject cost = new JsonObject();
             cost.addProperty("num", src.cost.getNumerator());
             cost.addProperty("den", src.cost.getDenominator());

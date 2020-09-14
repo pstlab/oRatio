@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +24,8 @@ public class App {
     static final Gson GSON = new GsonBuilder().registerTypeAdapter(CausalGraph.class, new CausalGraph.GraphSerializer())
             .registerTypeAdapter(CausalGraph.Flaw.class, new CausalGraph.FlawSerializer())
             .registerTypeAdapter(CausalGraph.Resolver.class, new CausalGraph.ResolverSerializer()).create();
+    static final SolverState STATE = new SolverState();
+    static final CausalGraph GRAPH = new CausalGraph();
     private static Set<WsContext> contexts = new HashSet<>();
 
     public static void main(final String[] args) {
@@ -35,8 +36,8 @@ public class App {
             LOG.error("Cannot load properties", e);
         }
 
-        CausalGraph graph = new CausalGraph();
-        Context.getContext().addGraphListener(graph);
+        Context.getContext().addStateListener(STATE);
+        Context.getContext().addGraphListener(GRAPH);
 
         new Thread(
                 () -> Context.getContext().startServer(Integer.parseInt(properties.getProperty("server.port", "1100"))))
@@ -50,7 +51,7 @@ public class App {
                 EXECUTOR.execute(() -> {
                     LOG.info("New connection..");
                     contexts.add(ctx);
-                    broadcast("graph " + GSON.toJson(graph));
+                    broadcast("graph " + GSON.toJson(GRAPH));
                 });
             });
             ws.onClose(ctx -> {

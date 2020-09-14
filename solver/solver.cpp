@@ -1,6 +1,7 @@
 #include "solver.h"
 #include "graph.h"
 #include "bool_flaw.h"
+#include "disj_flaw.h"
 #include "var_flaw.h"
 #include "atom_flaw.h"
 #include "disjunction_flaw.h"
@@ -161,6 +162,20 @@ namespace ratio
         var_expr xp = new var_item(*this, tp, get_ov_theory().new_var(std::vector<var_value *>(allowed_vals.begin(), allowed_vals.end()), false));
         if (allowed_vals.size() > 1) // we create a new var flaw..
             gr.new_flaw(*new var_flaw(gr, gr.res, *xp));
+        return xp;
+    }
+
+    bool_expr solver::disj(const std::vector<bool_expr> &exprs) noexcept
+    {
+        // we create a new bool expression..
+        std::vector<lit> lits;
+        for (const auto &bex : exprs)
+            lits.push_back(bex->l);
+        bool_expr xp = new bool_item(*this, get_sat_core().new_disj(lits));
+
+        if (exprs.size() > 1) // we create a new var flaw..
+            gr.new_flaw(*new disj_flaw(gr, gr.res, lits));
+
         return xp;
     }
 

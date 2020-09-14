@@ -10,7 +10,7 @@ using namespace smt;
 
 namespace ratio
 {
-    graph::graph(solver &slv) : slv(slv), gamma(slv.get_sat_core().new_var()) { LOG("graph var is γ" << to_string(gamma)); }
+    graph::graph(solver &slv) : slv(slv), gamma(slv.get_sat_core().new_var()) { LOG("γ is " << to_string(gamma)); }
     graph::~graph() {}
 
     void graph::new_flaw(flaw &f, const bool &enqueue)

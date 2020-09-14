@@ -1,0 +1,20 @@
+/*
+* This problem is intended to introduce some basic concepts about the constraint network and the available numeric constraints.
+*/
+
+// we create some real variable..
+real x0;
+real x1;
+
+// we add some contraints..
+x0 <= x1;
+x0 >= 10;
+x0 + x1 <= 20;
+
+// we create some further variable..
+real x2;
+real x3;
+
+// we add some further (strict) contraints..
+x2 < x3;
+x2 > 10;

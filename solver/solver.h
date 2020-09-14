@@ -40,6 +40,9 @@ namespace ratio
 
     bool_expr new_bool() noexcept override;
     expr new_enum(const type &tp, const std::vector<item *> &allowed_vals) override;
+
+    bool_expr disj(const std::vector<bool_expr> &exprs) noexcept override;
+
     atom_flaw &get_reason(const atom &atm) const noexcept { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
 
     size_t decision_level() const noexcept { return trail.size(); } // returns the current decision level..

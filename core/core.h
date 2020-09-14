@@ -72,7 +72,7 @@ namespace ratio
 
     virtual bool_expr new_bool() noexcept;                   // creates a new boolean variable..
     bool_expr new_bool(const bool &val) noexcept;            // creates a new boolean literal..
-    arith_expr new_int() noexcept;                           // creates a new integer variable..
+    virtual arith_expr new_int() noexcept;                   // creates a new integer variable..
     arith_expr new_int(const smt::I &val) noexcept;          // creates a new integer literal..
     arith_expr new_real() noexcept;                          // creates a new real variable..
     arith_expr new_real(const smt::rational &val) noexcept;  // creates a new real literal..
@@ -85,7 +85,7 @@ namespace ratio
     bool_expr negate(bool_expr var) noexcept;
     bool_expr eq(bool_expr left, bool_expr right) noexcept;
     bool_expr conj(const std::vector<bool_expr> &exprs) noexcept;
-    bool_expr disj(const std::vector<bool_expr> &exprs) noexcept;
+    virtual bool_expr disj(const std::vector<bool_expr> &exprs) noexcept;
     bool_expr exct_one(const std::vector<bool_expr> &exprs) noexcept;
 
     arith_expr add(const std::vector<arith_expr> &exprs) noexcept;

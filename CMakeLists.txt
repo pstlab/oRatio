@@ -105,6 +105,7 @@ endif()
 add_subdirectory(smt/tests)
 add_subdirectory(riddle/tests)
 add_subdirectory(core/tests)
+add_subdirectory(solver/tests)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

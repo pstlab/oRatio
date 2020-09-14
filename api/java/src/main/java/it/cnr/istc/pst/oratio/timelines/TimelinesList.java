@@ -78,6 +78,11 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
         }
     }
 
+    @Override
+    public void init() {
+        clear();
+    }
+
     private Type getTimelineType(Type t) {
         Queue<Type> q = new ArrayDeque<>();
         q.add(t);

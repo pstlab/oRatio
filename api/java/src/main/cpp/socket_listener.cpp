@@ -82,7 +82,7 @@ namespace ratio
     void socket_listener::flaw_created(const flaw &f)
     {
         std::stringstream ss;
-        ss << "flaw_created {\"flaw\":\"" << static_cast<const void *>(&f) << "\", \"causes\":[";
+        ss << "flaw_created {\"id\":\"" << static_cast<const void *>(&f) << "\", \"causes\":[";
         const auto causes = f.get_causes();
         for (auto causes_it = causes.begin(); causes_it != causes.end(); ++causes_it)
         {
@@ -106,14 +106,14 @@ namespace ratio
     void socket_listener::flaw_state_changed(const flaw &f)
     {
         std::stringstream ss;
-        ss << "flaw_state_changed {\"flaw\":\"" << static_cast<const void *>(&f) << "\", \"state\":" << std::to_string(slv.get_sat_core().value(f.get_phi())) << "}\n";
+        ss << "flaw_state_changed {\"id\":\"" << static_cast<const void *>(&f) << "\", \"state\":" << std::to_string(slv.get_sat_core().value(f.get_phi())) << "}\n";
         send_message(ss.str());
     }
     void socket_listener::flaw_cost_changed(const flaw &f)
     {
         smt::rational est_cost = f.get_estimated_cost();
         std::stringstream ss;
-        ss << "flaw_cost_changed {\"flaw\":\"" << static_cast<const void *>(&f) << "\", \"cost\":{"
+        ss << "flaw_cost_changed {\"id\":\"" << static_cast<const void *>(&f) << "\", \"cost\":{"
            << "\"num\":" << std::to_string(est_cost.numerator()) << ", \"den\":" << std::to_string(est_cost.denominator()) << "}}\n";
         send_message(ss.str());
     }
@@ -121,14 +121,14 @@ namespace ratio
     {
         std::pair<smt::I, smt::I> bound = slv.get_idl_theory().bounds(f.get_position());
         std::stringstream ss;
-        ss << "flaw_position_changed {\"flaw\":\"" << static_cast<const void *>(&f) << "\", \"position\":{"
+        ss << "flaw_position_changed {\"id\":\"" << static_cast<const void *>(&f) << "\", \"position\":{"
            << "\"min\":" << std::to_string(bound.first) << ", \"max\":" << std::to_string(bound.second) << "}}\n";
         send_message(ss.str());
     }
     void socket_listener::current_flaw(const flaw &f)
     {
         std::stringstream ss;
-        ss << "current_flaw {\"flaw\":\"" << static_cast<const void *>(&f) << "\"}\n";
+        ss << "current_flaw {\"id\":\"" << static_cast<const void *>(&f) << "\"}\n";
         send_message(ss.str());
     }
 
@@ -143,7 +143,7 @@ namespace ratio
             label.replace(start_pos, 1, "\\\"");
             start_pos += 2;
         }
-        ss << "resolver_created {\"resolver\":\"" << static_cast<const void *>(&r) << "\", \"effect\":\"" << static_cast<const void *>(&r.get_effect()) << "\", \"label\":\"" << label << "\", \"cost\":{"
+        ss << "resolver_created {\"id\":\"" << static_cast<const void *>(&r) << "\", \"effect\":\"" << static_cast<const void *>(&r.get_effect()) << "\", \"label\":\"" << label << "\", \"cost\":{"
            << "\"num\":" << std::to_string(est_cost.numerator()) << ", \"den\":" << std::to_string(est_cost.denominator()) << "}"
            << ", \"state\":" << std::to_string(slv.get_sat_core().value(r.get_rho())) << "}\n";
         send_message(ss.str());
@@ -151,20 +151,20 @@ namespace ratio
     void socket_listener::resolver_state_changed(const resolver &r)
     {
         std::stringstream ss;
-        ss << "resolver_state_changed {\"resolver\":\"" << static_cast<const void *>(&r) << "\", \"state\":" << std::to_string(slv.get_sat_core().value(r.get_rho())) << "}\n";
+        ss << "resolver_state_changed {\"id\":\"" << static_cast<const void *>(&r) << "\", \"state\":" << std::to_string(slv.get_sat_core().value(r.get_rho())) << "}\n";
         send_message(ss.str());
     }
     void socket_listener::current_resolver(const resolver &r)
     {
         std::stringstream ss;
-        ss << "current_resolver {\"resolver\":\"" << static_cast<const void *>(&r) << "\"}\n";
+        ss << "current_resolver {\"id\":\"" << static_cast<const void *>(&r) << "\"}\n";
         send_message(ss.str());
     }
 
     void socket_listener::causal_link_added(const flaw &f, const resolver &r)
     {
         std::stringstream ss;
-        ss << "causal_link_added {\"flaw\":\"" << static_cast<const void *>(&f) << "\", \"resolver\":\"" << static_cast<const void *>(&r) << "\"}\n";
+        ss << "causal_link_added {\"flaw_id\":\"" << static_cast<const void *>(&f) << "\", \"resolver_id\":\"" << static_cast<const void *>(&r) << "\"}\n";
         send_message(ss.str());
     }
 

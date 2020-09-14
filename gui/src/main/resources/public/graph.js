@@ -1,5 +1,8 @@
-const nodes = [{ id: 0, label: 'a' }, { id: 1, label: 'b' }, { id: 2, label: 'c' }];
-const links = [{ source: 0, target: 1, type: 'a' }, { source: 1, target: 2, type: 'b' }];
+const flaws = [];
+const resolvers = [];
+
+const nodes = [];
+const links = [];
 
 const svg = d3.select('#graph').append('svg');
 const g = svg.append('g');
@@ -15,17 +18,30 @@ const simulation = d3.forceSimulation(nodes)
     .force('charge', d3.forceManyBody())
     .force('center', d3.forceCenter(width / 2, height / 2));
 
-const ws = new WebSocket("ws://" + location.hostname + ":" + location.port + "/graph");
+const ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/graph');
 ws.onmessage = msg => {
     if (msg.data.startsWith('graph ')) {
+        flaws.length = 0;
+        resolvers.length = 0;
+        nodes.length = 0;
+        links.length = 0;
+
         const c_graph = JSON.parse(msg.data.substring(6));
         c_graph.flaws.forEach(f => {
-            nodes.push(f);
-            f.causes.forEach(c => links.push({ source: f.id, target: c.id, state: f.state }));
+            const c_f = JSON.parse(f);
+            c_f.label = JSON.parse(c_f.label);
+            flaws.push(c_f);
+
+            nodes.push({ id: c_f.id, label: flaw_label(c_f.label), cost: c_f.cost.num / c_f.cost.den, type: 'flaw' });
+            c_f.causes.forEach(c => links.push({ source: c_f.id, target: c.id, state: c_f.state }));
         });
         c_graph.resolvers.forEach(r => {
-            nodes.push(r);
-            links.push({ source: r.id, target: r.effect.id, state: r.state });
+            const c_r = JSON.parse(r);
+            c_r.label = JSON.parse(c_r.label);
+            resolvers.push(c_r);
+
+            nodes.push({ id: c_r.id, label: resolver_label(c_r.label), cost: c_r.cost.num / c_r.cost.den, type: 'resolver' });
+            links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
         });
     }
     updateGraph();
@@ -95,4 +111,28 @@ function dragended(event, d) {
     d.fx = null;
     d.fy = null;
     d3.select(this).attr('cursor', 'grab');
+}
+
+function flaw_label(label) {
+    switch (label.type) {
+        case 'enum':
+            return 'ϕ' + label.phi + ' enum';
+        case 'bool':
+            return 'ϕ' + label.phi + ' bool';
+        default:
+            return 'ϕ' + label.phi + ' ' + label.type;
+    }
+}
+
+function resolver_label(label) {
+    if (label.type)
+        switch (label.type) {
+            case 'activate':
+                return 'ρ' + label.rho + ' activate';
+            case 'unify':
+                return 'ρ' + label.rho + ' unify';
+            default:
+                return 'ρ' + label.rho + ' ' + label.type;
+        }
+    return 'ρ' + label.rho;
 }

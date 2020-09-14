@@ -7,4 +7,6 @@ public interface StateListener {
     public void log(String log);
 
     public void stateChanged(Core core);
+
+    public void init();
 }
