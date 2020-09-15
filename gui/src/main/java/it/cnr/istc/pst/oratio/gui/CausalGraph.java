@@ -127,7 +127,7 @@ public class CausalGraph implements GraphListener {
         private final String label;
         private int state;
         private Bound position;
-        private Rational cost = new Rational();
+        private Rational cost = Rational.POSITIVE_INFINITY;
 
         private Flaw(String id, Resolver[] causes, String label, int state, Bound position) {
             this.id = id;
