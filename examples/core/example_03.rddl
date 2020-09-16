@@ -1,0 +1,9 @@
+/*
+* This problem is intended to introduce some basic concepts about the constraint network and the available constraints on the object variables.
+*/
+
+enum Speed {"High", "Medium", "Low"};
+Speed x0, x1, x2;
+x0 != x1;
+x1 != x2;
+x0 != x2;
