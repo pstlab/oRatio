@@ -24,6 +24,8 @@ const width = b_box.width, height = b_box.height;
 const c_zoom = d3.zoom().on('zoom', event => g.attr('transform', event.transform));
 svg.call(c_zoom);
 
+var color_interpolator = d3.scaleSequential().domain([1, 10]).interpolator(d3.interpolateRdYlGn);
+
 const simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink().id(d => d.id))
     .force('charge', d3.forceManyBody())
@@ -96,7 +98,7 @@ function updateGraph() {
     const n_group = g.selectAll('g').data(nodes, d => d.id).join(
         enter => {
             const g = enter.append('g').attr('cursor', 'grab');
-            g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', 'pink').style('stroke', 'black').style('stroke-dasharray', d => stroke_dasharray(d));
+            g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('stroke', 'black').style('stroke-dasharray', d => stroke_dasharray(d));
             g.append('text').attr('y', -7).text(d => d.label);
             g.call(d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended));
             return g;
@@ -177,6 +179,15 @@ function stroke_dasharray(n) {
             return '2';
         default:
             break;
+    }
+}
+
+function node_color(n) {
+    switch (n.state) {
+        case 0: // False
+            return '#d9d9d9';
+        default:
+            return color_interpolator(n.cost);
     }
 }
 
