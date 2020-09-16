@@ -44,7 +44,6 @@ namespace smt
     const lit b;          // the literal associated to the assertion..
     const var x;          // the numeric variable..
     const inf_rational v; // the constant..
-    std::vector<lit> cnfl;
   };
 
   /**
@@ -71,6 +70,5 @@ namespace smt
     lra_theory &th;
     const var x; // the basic variable..
     lin l;       // the linear expression which is constrained to be equal to the basic variable 'x'..
-    std::vector<lit> cnfl;
   };
 } // namespace smt

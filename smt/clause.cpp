@@ -6,12 +6,7 @@
 namespace smt
 {
 
-    clause::clause(sat_core &s, const std::vector<lit> &lits) : constr(s), lits(lits)
-    {
-        watches(!lits[0]).push_back(this);
-        watches(!lits[1]).push_back(this);
-    }
-
+    clause::clause(sat_core &s, const std::vector<lit> &lits) : constr(s), lits(lits) {}
     clause::~clause() {}
 
     const bool clause::propagate(const lit &p) noexcept

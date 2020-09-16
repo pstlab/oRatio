@@ -27,8 +27,8 @@ svg.call(c_zoom);
 var color_interpolator = d3.scaleSequential().domain([1, 10]).interpolator(d3.interpolateRdYlGn);
 
 const simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink().id(d => d.id))
-    .force('charge', d3.forceManyBody())
+    .force('link', d3.forceLink().id(d => d.id).distance(60))
+    .force('charge', d3.forceManyBody().strength(-60))
     .force('center', d3.forceCenter(width / 2, height / 2));
 
 const ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/graph');
@@ -47,7 +47,7 @@ ws.onmessage = msg => {
             flaws.push(c_f);
 
             nodes.push({ id: c_f.id, label: flaw_label(c_f.label), cost: c_f.cost.num / c_f.cost.den, state: c_f.state, type: 'flaw' });
-            c_f.causes.forEach(c => links.push({ source: c_f.id, target: c.id, state: c_f.state }));
+            c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
         });
         c_graph.resolvers.forEach(r => {
             const c_r = JSON.parse(r);
@@ -64,7 +64,7 @@ ws.onmessage = msg => {
         flaws.push(c_f);
 
         nodes.push({ id: c_f.id, label: flaw_label(c_f.label), cost: c_f.cost.num / c_f.cost.den, state: c_f.state, type: 'flaw' });
-        c_f.causes.forEach(c => links.push({ source: c_f.id, target: c.id, state: c_f.state }));
+        c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
     } else if (msg.data.startsWith('flaw_state_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_state_changed '.length));
         getNode(c_f.id).state = c_f.state;
@@ -75,7 +75,11 @@ ws.onmessage = msg => {
         links.filter(l => l.source == node.id).forEach(out_link => {
             const c_r = getNode(out_link.target);
             let c_cost = Number.POSITIVE_INFINITY;
-            links.filter(l => l.target == out_link.target).forEach(in_link => { if (c_cost < in_link.cost) c_cost = in_link.cost; });
+            links.filter(l => l.target == out_link.target).forEach(in_link => {
+                const c_in_f = getNode(in_link.source); // a sub-flaw..
+                if (c_cost < c_in_f.cost)
+                    c_cost = c_in_f.cost;
+            });
             c_r.cost = c_cost;
         });
     } else if (msg.data.startsWith('resolver_created ')) {

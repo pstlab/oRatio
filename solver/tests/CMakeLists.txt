@@ -15,4 +15,7 @@ add_test(NAME SolverTest01 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/co
 add_test(NAME SolverTest02 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/core/example_02.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME SolverTest03 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/core/example_03.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME SolverTest04 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/core/example_04.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-set_tests_properties(SolverTest02 PROPERTIES WILL_FAIL TRUE)
+add_test(NAME SolverTest05 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/core/example_05.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SolverTest06 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/core/example_06.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME SolverTest07 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/core/example_07.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+set_tests_properties(SolverTest02 SolverTest05 SolverTest06 PROPERTIES WILL_FAIL TRUE)

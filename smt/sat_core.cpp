@@ -65,6 +65,9 @@ namespace smt
         case 1: // the clause is unique under the current assignment..
             return enqueue(c_lits[0]);
         default: // we need to create a new clause..
+            clause *c = new clause(*this, c_lits);
+            watches[index(!c_lits[0])].push_back(c);
+            watches[index(!c_lits[1])].push_back(c);
             constrs.push_back(new clause(*this, c_lits));
             return true;
         }
@@ -410,15 +413,22 @@ namespace smt
 
                         if (root_level())
                             return false;
+
+                        // we create a clause conflict for the analysis..
+                        std::vector<lit> th_cnfl;
+                        std::swap(th_cnfl, th->cnfl);
+                        constr *cnfl = new clause(*this, th_cnfl);
+
+                        // .. and we analyze the conflict..
                         std::vector<lit> no_good;
                         size_t bt_level;
-                        // we analyze the conflict..
-                        constr *cnfl = new clause(*this, th->cnfl);
                         analyze(*cnfl, no_good, bt_level);
                         delete cnfl;
+
+                        // we backjump..
                         while (decision_level() > bt_level)
                             pop();
-                        // we record the no-good..
+                        // .. and record the no-good..
                         record(no_good);
 
                         goto main_loop;
@@ -434,15 +444,22 @@ namespace smt
             {
                 if (root_level())
                     return false;
+
+                // we create a clause conflict for the analysis..
+                std::vector<lit> th_cnfl;
+                std::swap(th_cnfl, th->cnfl);
+                constr *cnfl = new clause(*this, th_cnfl);
+
+                // .. and we analyze the conflict..
                 std::vector<lit> no_good;
                 size_t bt_level;
-                // we analyze the conflict..
-                constr *cnfl = new clause(*this, th->cnfl);
                 analyze(*cnfl, no_good, bt_level);
                 delete cnfl;
+
+                // we backjump..
                 while (decision_level() > bt_level)
                     pop();
-                // we record the no-good..
+                // .. and record the no-good..
                 record(no_good);
 
                 goto main_loop;
@@ -532,7 +549,11 @@ namespace smt
             std::vector<lit> c_lits = lits;
             // we sort literals according to descending order of variable assignment (except for the first literal which is now unassigned)..
             std::sort(c_lits.begin() + 1, c_lits.end(), [this](const lit &a, const lit &b) { return level[variable(a)] > level[variable(b)]; });
+
             clause *c = new clause(*this, c_lits);
+            watches[index(!c_lits[0])].push_back(c);
+            watches[index(!c_lits[1])].push_back(c);
+
             bool e = enqueue(c_lits[0], c);
             assert(e);
             constrs.push_back(c);
