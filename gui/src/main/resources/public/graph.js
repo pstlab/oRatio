@@ -85,7 +85,7 @@ ws.onmessage = msg => {
     } else if (msg.data.startsWith('flaw_state_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_state_changed '.length));
         nodes.find(x => x.id === c_f.id).state = c_f.state;
-        links.filter(l => l.source.id === c_f.id).state = c_f.state;
+        links.filter(l => l.source.id === c_f.id).forEach(l => l.state = c_f.state);
         updateGraph();
     } else if (msg.data.startsWith('flaw_cost_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_cost_changed '.length));
@@ -116,7 +116,7 @@ ws.onmessage = msg => {
     } else if (msg.data.startsWith('resolver_state_changed ')) {
         const c_r = JSON.parse(msg.data.substring('resolver_state_changed '.length));
         nodes.find(x => x.id === c_r.id).state = c_r.state;
-        links.filter(l => l.source.id === c_r.id).state = c_r.state;
+        links.filter(l => l.source.id === c_r.id).forEach(l => l.state = c_r.state);
         updateGraph();
     } else if (msg.data.startsWith('current_resolver ')) {
         const c_r = JSON.parse(msg.data.substring('current_resolver '.length));
