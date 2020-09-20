@@ -22,3 +22,13 @@ text {
     margin: 0;
     padding: 0;
 }
+
+div.tooltip {	
+    position: absolute;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 3px;
+    margin: 3px;
+    padding: 3px;
+}

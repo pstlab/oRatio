@@ -1,8 +1,7 @@
-const flaws = [];
-const resolvers = [];
-
 const nodes = [];
 const links = [];
+
+let current_flaw, current_resolver;
 
 const svg = d3.select('#graph').append('svg');
 const g = svg.append('g');
@@ -24,18 +23,20 @@ const width = b_box.width, height = b_box.height;
 const c_zoom = d3.zoom().on('zoom', event => g.attr('transform', event.transform));
 svg.call(c_zoom);
 
-var color_interpolator = d3.scaleSequential().domain([1, 10]).interpolator(d3.interpolateRdYlGn);
+var color_interpolator = d3.scaleSequential().domain([15, 0]).interpolator(d3.interpolateRdYlGn);
+
+var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 
 const simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink().id(d => d.id).distance(60))
     .force('charge', d3.forceManyBody().strength(-60))
     .force('center', d3.forceCenter(width / 2, height / 2));
 
+updateGraph();
+
 const ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/graph');
 ws.onmessage = msg => {
     if (msg.data.startsWith('graph ')) {
-        flaws.length = 0;
-        resolvers.length = 0;
         nodes.length = 0;
         links.length = 0;
 
@@ -43,72 +44,122 @@ ws.onmessage = msg => {
         c_graph.flaws.forEach(f => {
             const c_f = JSON.parse(f);
             c_f.label = JSON.parse(c_f.label);
-            if (!c_f.cost) c_f.cost = Number.POSITIVE_INFINITY;
-            flaws.push(c_f);
+            if (c_f.cost)
+                c_f.cost = (c_f.cost.num / c_f.cost.den);
+            else
+                c_f.cost = Number.POSITIVE_INFINITY;
+            c_f.type = 'flaw';
 
-            nodes.push({ id: c_f.id, label: flaw_label(c_f.label), cost: c_f.cost.num / c_f.cost.den, state: c_f.state, type: 'flaw' });
+            nodes.push(c_f);
             c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
         });
         c_graph.resolvers.forEach(r => {
             const c_r = JSON.parse(r);
             c_r.label = JSON.parse(c_r.label);
-            resolvers.push(c_r);
+            c_r.cost = c_r.intrinsic_cost.num / c_r.intrinsic_cost.den;
+            c_r.type = 'resolver';
 
-            nodes.push({ id: c_r.id, label: resolver_label(c_r.label), intrinsic_cost: c_r.cost.num / c_r.cost.den, cost: c_r.cost.num / c_r.cost.den, state: c_r.state, type: 'resolver' });
+            nodes.push(c_r);
             links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
         });
+        updateGraph();
+        c_graph.resolvers.forEach(r => {
+            const c_r = JSON.parse(r);
+            update_resolver_cost(nodes.find(x => x.id === c_r.id));
+        });
+        updateGraph();
     } else if (msg.data.startsWith('flaw_created ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_created '.length));
         c_f.label = JSON.parse(c_f.label);
-        if (!c_f.cost) c_f.cost = Number.POSITIVE_INFINITY;
-        flaws.push(c_f);
+        if (c_f.cost)
+            c_f.cost = (c_f.cost.num / c_f.cost.den);
+        else
+            c_f.cost = Number.POSITIVE_INFINITY;
+        c_f.type = 'flaw';
 
-        nodes.push({ id: c_f.id, label: flaw_label(c_f.label), cost: c_f.cost.num / c_f.cost.den, state: c_f.state, type: 'flaw' });
+        nodes.push(c_f);
         c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
+        updateGraph();
+        c_f.causes.forEach(c => update_resolver_cost(nodes.find(x => x.id === c)));
+        updateGraph();
     } else if (msg.data.startsWith('flaw_state_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_state_changed '.length));
-        getNode(c_f.id).state = c_f.state;
+        nodes.find(x => x.id === c_f.id).state = c_f.state;
+        links.filter(l => l.source.id === c_f.id).state = c_f.state;
+        updateGraph();
     } else if (msg.data.startsWith('flaw_cost_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_cost_changed '.length));
-        const node = getNode(c_f.id);
-        node.cost = c_f.cost.num / c_f.cost.den;
-        links.filter(l => l.source == node.id).forEach(out_link => {
-            const c_r = getNode(out_link.target);
-            let c_cost = Number.POSITIVE_INFINITY;
-            links.filter(l => l.target == out_link.target).forEach(in_link => {
-                const c_in_f = getNode(in_link.source); // a sub-flaw..
-                if (c_cost < c_in_f.cost)
-                    c_cost = c_in_f.cost;
-            });
-            c_r.cost = c_cost;
-        });
+        const f_node = nodes.find(x => x.id === c_f.id);
+        f_node.cost = c_f.cost.num / c_f.cost.den;
+        links.filter(l => l.source.id == f_node.id).forEach(out_link => update_resolver_cost(out_link.target));
+        updateGraph();
+    } else if (msg.data.startsWith('flaw_position_changed ')) {
+        const c_f = JSON.parse(msg.data.substring('flaw_position_changed '.length));
+        nodes.find(x => x.id === c_f.id).position = c_f.position;
+        updateGraph();
+    } else if (msg.data.startsWith('current_flaw ')) {
+        const c_f = JSON.parse(msg.data.substring('current_flaw '.length));
+        if (current_flaw) current_flaw.current = false;
+        const f_node = nodes.find(x => x.id === c_f.id);
+        f_node.current = true;
+        current_flaw = f_node;
+        updateGraph();
     } else if (msg.data.startsWith('resolver_created ')) {
         const c_r = JSON.parse(msg.data.substring('resolver_created '.length));
         c_r.label = JSON.parse(c_r.label);
-        resolvers.push(c_r);
+        c_r.cost = c_r.intrinsic_cost.num / c_r.intrinsic_cost.den;
+        c_r.type = 'resolver';
 
-        nodes.push({ id: c_r.id, label: resolver_label(c_r.label), intrinsic_cost: c_r.cost.num / c_r.cost.den, cost: c_r.cost.num / c_r.cost.den, state: c_r.state, type: 'resolver' });
+        nodes.push(c_r);
         links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
+        updateGraph();
     } else if (msg.data.startsWith('resolver_state_changed ')) {
         const c_r = JSON.parse(msg.data.substring('resolver_state_changed '.length));
-        getNode(c_r.id).state = c_r.state;
+        nodes.find(x => x.id === c_r.id).state = c_r.state;
+        links.filter(l => l.source.id === c_r.id).state = c_r.state;
+        updateGraph();
+    } else if (msg.data.startsWith('current_resolver ')) {
+        const c_r = JSON.parse(msg.data.substring('current_resolver '.length));
+        if (current_resolver) current_resolver.current = false;
+        const r_node = nodes.find(x => x.id === c_r.id);
+        r_node.current = true;
+        current_resolver = r_node;
+        updateGraph();
+    } else if (msg.data.startsWith('causal_link_added ')) {
+        const c_l = JSON.parse(msg.data.substring('causal_link_added '.length));
+        links.push({ source: c_l.flaw_id, target: c_l.resolver_id, state: r_node.state });
+        updateGraph();
+        update_resolver_cost(nodes.find(x => x.id === c_l.resolver_id));
+        updateGraph();
     }
-    updateGraph();
 };
-
-updateGraph();
 
 function updateGraph() {
     const n_group = g.selectAll('g').data(nodes, d => d.id).join(
         enter => {
             const g = enter.append('g').attr('cursor', 'grab');
-            g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('stroke', 'black').style('stroke-dasharray', d => stroke_dasharray(d));
-            g.append('text').attr('y', -7).text(d => d.label);
+            g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d));
+            g.append('text').attr('y', -7).text(d => d.type === 'flaw' ? flaw_label(d) : resolver_label(d));
+            g.on('mouseover', (event, d) => tooltip.html(d.type === 'flaw' ? flaw_tooltip(d) : resolver_tooltip(d)).transition().duration(200).style('opacity', .9))
+                .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
+                .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0));
             g.call(d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended));
             return g;
+        },
+        update => {
+            update.select('rect').style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d));
+            return update;
         }
     );
-    const l_group = g.selectAll('line').data(links).join(enter => enter.append('line').attr('stroke', 'black').style('stroke-dasharray', d => stroke_dasharray(d)));
+    const l_group = g.selectAll('line').data(links).join(
+        enter => {
+            return enter.append('line').attr('stroke', 'black').style('stroke-dasharray', d => stroke_dasharray(d));
+        },
+        update => {
+            update.style('stroke-dasharray', d => stroke_dasharray(d));
+            return update;
+        }
+    );
 
     simulation.nodes(nodes).on('tick', () => {
         n_group.attr('transform', d => `translate(${d.x}, ${d.y})`);
@@ -116,29 +167,6 @@ function updateGraph() {
     });
     simulation.force('link').links(links);
 
-    simulation.restart();
-    simulation.alpha(0.3);
-}
-
-function getNode(id) { return nodes.find(x => x.id === id); }
-
-function addNode(n) {
-    nodes.push(n);
-    updateGraph();
-    simulation.restart();
-    simulation.alpha(0.3);
-}
-
-function addNodes(ns) {
-    ns.forEach(n => nodes.push(n));
-    updateGraph();
-    simulation.restart();
-    simulation.alpha(0.3);
-}
-
-function addLink(n0, n1) {
-    links.push({ source: n0.id, target: n1.id, type: 'c' });
-    updateGraph();
     simulation.restart();
     simulation.alpha(0.3);
 }
@@ -153,6 +181,7 @@ function dragstarted(event, d) {
 function dragged(event, d) {
     d.fx = event.x;
     d.fy = event.y;
+    tooltip.style('left', (event.x) + 'px').style('top', (event.y - 28) + 'px');
 }
 
 function dragended(event, d) {
@@ -173,6 +202,10 @@ function radius(n) {
     }
 }
 
+function stroke(n) {
+    return n.current ? '#ff00ff' : 'black';
+}
+
 function stroke_dasharray(n) {
     switch (n.state) {
         case 0: // False
@@ -186,6 +219,15 @@ function stroke_dasharray(n) {
     }
 }
 
+function update_resolver_cost(resolver) {
+    let c_cost = Number.NEGATIVE_INFINITY;
+    links.filter(l => l.target.id == resolver.id).forEach(in_link => {
+        if (c_cost < in_link.source.cost)
+            c_cost = in_link.source.cost;
+    });
+    resolver.cost = c_cost == Number.NEGATIVE_INFINITY ? resolver.intrinsic_cost.num / resolver.intrinsic_cost.den : resolver.intrinsic_cost.num / resolver.intrinsic_cost.den + c_cost;
+}
+
 function node_color(n) {
     switch (n.state) {
         case 0: // False
@@ -195,26 +237,38 @@ function node_color(n) {
     }
 }
 
-function flaw_label(label) {
-    switch (label.type) {
+function flaw_label(flaw) {
+    switch (flaw.label.type) {
+        case 'fact':
+            return 'fact \u03C3' + flaw.label.sigma + ' ' + flaw.label.predicate;
+        case 'goal':
+            return 'goal \u03C3' + flaw.label.sigma + ' ' + flaw.label.predicate;
         case 'enum':
-            return '\u03C6' + label.phi + ' enum';
+            return 'enum';
         case 'bool':
-            return '\u03C6' + label.phi + ' bool';
+            return 'bool';
         default:
-            return '\u03C6' + label.phi + ' ' + label.type;
+            return '\u03C6' + flaw.label.phi + ' ' + flaw.label.type;
     }
 }
 
-function resolver_label(label) {
-    if (label.type)
-        switch (label.type) {
+function flaw_tooltip(flaw) {
+    return '\u03C6' + flaw.label.phi + ', cost: ' + flaw.cost;
+}
+
+function resolver_label(resolver) {
+    if (resolver.label.type)
+        switch (resolver.label.type) {
             case 'activate':
-                return '\u03C1' + label.rho + ' activate';
+                return 'activate';
             case 'unify':
-                return '\u03C1' + label.rho + ' unify';
+                return 'unify';
             default:
-                return '\u03C1' + label.rho + ' ' + label.type;
+                return '\u03C1' + resolver.label.rho + ' ' + resolver.label.type;
         }
-    return '\u03C1' + label.rho;
+    return '\u03C1' + resolver.label.rho;
+}
+
+function resolver_tooltip(resolver) {
+    return '\u03C1' + resolver.label.rho + ', cost: ' + resolver.cost;
 }

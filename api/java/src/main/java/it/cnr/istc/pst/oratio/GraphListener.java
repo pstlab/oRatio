@@ -69,7 +69,7 @@ public interface GraphListener {
     public static class ResolverCreated {
         public String id;
         public String effect;
-        public Rational cost;
+        public Rational intrinsic_cost;
         public String label;
         public int state;
     }

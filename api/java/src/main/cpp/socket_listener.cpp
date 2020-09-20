@@ -143,7 +143,7 @@ namespace ratio
             label.replace(start_pos, 1, "\\\"");
             start_pos += 2;
         }
-        ss << "resolver_created {\"id\":\"" << static_cast<const void *>(&r) << "\", \"effect\":\"" << static_cast<const void *>(&r.get_effect()) << "\", \"label\":\"" << label << "\", \"cost\":{"
+        ss << "resolver_created {\"id\":\"" << static_cast<const void *>(&r) << "\", \"effect\":\"" << static_cast<const void *>(&r.get_effect()) << "\", \"label\":\"" << label << "\", \"intrinsic_cost\":{"
            << "\"num\":" << std::to_string(est_cost.numerator()) << ", \"den\":" << std::to_string(est_cost.denominator()) << "}"
            << ", \"state\":" << std::to_string(slv.get_sat_core().value(r.get_rho())) << "}\n";
         send_message(ss.str());

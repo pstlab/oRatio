@@ -91,7 +91,7 @@ public class CausalGraph implements GraphListener {
     public void resolverCreated(final ResolverCreated resolver) {
         App.EXECUTOR.execute(() -> {
             resolvers.put(resolver.id, new Resolver(resolver.id, flaws.get(resolver.effect), resolver.label,
-                    resolver.state, resolver.cost));
+                    resolver.state, resolver.intrinsic_cost));
             App.broadcast(RESOLVER_CREATED + App.GSON.toJson(resolver));
         });
     }
@@ -170,15 +170,15 @@ public class CausalGraph implements GraphListener {
         private final Flaw effect;
         private final String label;
         private int state;
-        private final Rational cost;
+        private final Rational intrinsic_cost;
         private final Set<Flaw> preconditions = new HashSet<>();
 
-        private Resolver(String id, Flaw effect, String label, int state, Rational cost) {
+        private Resolver(String id, Flaw effect, String label, int state, Rational intrinsic_cost) {
             this.id = id;
             this.effect = effect;
             this.label = label;
             this.state = state;
-            this.cost = cost;
+            this.intrinsic_cost = intrinsic_cost;
         }
     }
 
@@ -191,10 +191,10 @@ public class CausalGraph implements GraphListener {
             resolver.addProperty("effect", src.effect.id);
             resolver.addProperty("label", src.label);
             resolver.addProperty("state", src.state);
-            JsonObject cost = new JsonObject();
-            cost.addProperty("num", src.cost.getNumerator());
-            cost.addProperty("den", src.cost.getDenominator());
-            resolver.add("cost", cost);
+            JsonObject intrinsic_cost = new JsonObject();
+            intrinsic_cost.addProperty("num", src.intrinsic_cost.getNumerator());
+            intrinsic_cost.addProperty("den", src.intrinsic_cost.getDenominator());
+            resolver.add("intrinsic_cost", intrinsic_cost);
             JsonArray preconditions = new JsonArray();
             src.preconditions.stream().forEach(c -> preconditions.add(c.id));
             resolver.add("preconditions", preconditions);
