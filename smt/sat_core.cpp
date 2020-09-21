@@ -68,7 +68,7 @@ namespace smt
             clause *c = new clause(*this, c_lits);
             watches[index(!c_lits[0])].push_back(c);
             watches[index(!c_lits[1])].push_back(c);
-            constrs.push_back(new clause(*this, c_lits));
+            constrs.push_back(c);
             return true;
         }
     }
