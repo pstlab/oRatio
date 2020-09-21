@@ -66,8 +66,7 @@ namespace ratio
     std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
     std::unordered_set<flaw *> visited;                         // the visited flaws, for graph cost propagation (and deferrable flaws check)..
 #if defined GRAPH_PRUNING
-    std::unordered_set<smt::var>
-        already_closed; // already closed flaws (for avoiding duplicating graph pruning constraints)..
+    std::unordered_set<smt::var> already_closed; // the already closed flaws (for avoiding duplicating graph pruning constraints)..
 #endif
   };
 } // namespace ratio

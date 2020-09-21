@@ -244,7 +244,7 @@ namespace ratio
             LOG("search has exhausted the graph..");
             // we create a new graph var..
             gamma = slv.get_sat_core().new_var();
-            LOG("graph var is: γ" << to_string(gamma));
+            LOG("γ is" << to_string(gamma));
 #if defined GRAPH_PRUNING
             already_closed.clear();
 #endif
