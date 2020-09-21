@@ -4,6 +4,7 @@
 #include "flaw.h"
 #include "resolver.h"
 #include "sat_value_listener.h"
+#include "idl_value_listener.h"
 #include <algorithm>
 
 namespace ratio
@@ -43,15 +44,20 @@ namespace ratio
 
     virtual void causal_link_added(const flaw &f, const resolver &r) {}
 
-    class flaw_listener : public smt::sat_value_listener
+    class flaw_listener : public smt::sat_value_listener, public smt::idl_value_listener
     {
     public:
-      flaw_listener(solver_listener &l, const flaw &f) : sat_value_listener(l.slv.get_sat_core()), listener(l), f(f) { listen_sat(variable(f.get_phi())); }
+      flaw_listener(solver_listener &l, const flaw &f) : sat_value_listener(l.slv.get_sat_core()), idl_value_listener(l.slv.get_idl_theory()), listener(l), f(f)
+      {
+        listen_sat(variable(f.get_phi()));
+        listen_idl(f.get_position());
+      }
       flaw_listener(const flaw_listener &orig) = delete;
       virtual ~flaw_listener() {}
 
     private:
       void sat_value_change(const smt::var &v) override { listener.flaw_state_changed(f); }
+      void idl_value_change(const smt::var &v) override { listener.flaw_position_changed(f); }
 
     protected:
       solver_listener &listener;

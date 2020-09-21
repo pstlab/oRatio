@@ -300,7 +300,7 @@ function flaw_label(flaw) {
 }
 
 function flaw_tooltip(flaw) {
-    return '\u03C6' + flaw.label.phi + ', cost: ' + flaw.cost;
+    return '\u03C6' + flaw.label.phi + ', cost: ' + flaw.cost + ', pos: ' + flaw.position.min;
 }
 
 function resolver_label(resolver) {
