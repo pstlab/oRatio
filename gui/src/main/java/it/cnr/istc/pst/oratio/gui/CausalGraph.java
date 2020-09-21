@@ -82,7 +82,10 @@ public class CausalGraph implements GraphListener {
     @Override
     public void currentFlaw(final CurrentFlaw flaw) {
         App.EXECUTOR.execute(() -> {
+            if (current_flaw != null)
+                current_flaw.current = false;
             current_flaw = flaws.get(flaw.id);
+            current_flaw.current = true;
             App.broadcast(CURRENT_FLAW + App.GSON.toJson(flaw));
         });
     }
@@ -107,7 +110,10 @@ public class CausalGraph implements GraphListener {
     @Override
     public void currentResolver(final CurrentResolver resolver) {
         App.EXECUTOR.execute(() -> {
+            if (current_resolver != null)
+                current_resolver.current = false;
             current_resolver = resolvers.get(resolver.id);
+            current_resolver.current = true;
             App.broadcast(CURRENT_RESOLVER + App.GSON.toJson(resolver));
         });
     }
@@ -128,6 +134,7 @@ public class CausalGraph implements GraphListener {
         private int state;
         private Bound position;
         private Rational cost = Rational.POSITIVE_INFINITY;
+        private boolean current = false;
 
         private Flaw(String id, Resolver[] causes, String label, int state, Bound position) {
             this.id = id;
@@ -160,6 +167,7 @@ public class CausalGraph implements GraphListener {
             cost.addProperty("num", src.cost.getNumerator());
             cost.addProperty("den", src.cost.getDenominator());
             flaw.add("cost", cost);
+            flaw.addProperty("current", src.current);
             return flaw;
         }
     }
@@ -172,6 +180,7 @@ public class CausalGraph implements GraphListener {
         private int state;
         private final Rational intrinsic_cost;
         private final Set<Flaw> preconditions = new HashSet<>();
+        private boolean current = false;
 
         private Resolver(String id, Flaw effect, String label, int state, Rational intrinsic_cost) {
             this.id = id;
@@ -198,6 +207,7 @@ public class CausalGraph implements GraphListener {
             JsonArray preconditions = new JsonArray();
             src.preconditions.stream().forEach(c -> preconditions.add(c.id));
             resolver.add("preconditions", preconditions);
+            resolver.addProperty("current", src.current);
             return resolver;
         }
     }

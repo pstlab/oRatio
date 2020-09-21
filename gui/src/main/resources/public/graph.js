@@ -1,4 +1,5 @@
 const nodes = [];
+const node_map = {}
 const links = [];
 
 let current_flaw, current_resolver;
@@ -51,6 +52,7 @@ ws.onmessage = msg => {
             c_f.type = 'flaw';
 
             nodes.push(c_f);
+            node_map[c_f.id] = c_f;
             c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
         });
         c_graph.resolvers.forEach(r => {
@@ -60,13 +62,12 @@ ws.onmessage = msg => {
             c_r.type = 'resolver';
 
             nodes.push(c_r);
+            node_map[c_r.id] = c_r;
             links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
+            c_r.preconditions.filter(pre => !links.find(l => l.source === pre && l.target === c_r.id)).forEach(pre => links.push({ source: pre, target: c_r.id, state: node_map[pre].state }));
         });
         updateGraph();
-        c_graph.resolvers.forEach(r => {
-            const c_r = JSON.parse(r);
-            update_resolver_cost(nodes.find(x => x.id === c_r.id));
-        });
+        nodes.filter(n => n.type === 'resolver').forEach(r => update_resolver_cost(r));
         updateGraph();
     } else if (msg.data.startsWith('flaw_created ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_created '.length));
@@ -78,29 +79,31 @@ ws.onmessage = msg => {
         c_f.type = 'flaw';
 
         nodes.push(c_f);
+        node_map[c_f.id] = c_f;
         c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
         updateGraph();
-        c_f.causes.forEach(c => update_resolver_cost(nodes.find(x => x.id === c)));
+        c_f.causes.forEach(c => update_resolver_cost(node_map[c]));
         updateGraph();
     } else if (msg.data.startsWith('flaw_state_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_state_changed '.length));
-        nodes.find(x => x.id === c_f.id).state = c_f.state;
+        node_map[c_f.id].state = c_f.state;
         links.filter(l => l.source.id === c_f.id).forEach(l => l.state = c_f.state);
         updateGraph();
     } else if (msg.data.startsWith('flaw_cost_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_cost_changed '.length));
-        const f_node = nodes.find(x => x.id === c_f.id);
+        const f_node = node_map[c_f.id];
         f_node.cost = c_f.cost.num / c_f.cost.den;
         links.filter(l => l.source.id == f_node.id).forEach(out_link => update_resolver_cost(out_link.target));
         updateGraph();
     } else if (msg.data.startsWith('flaw_position_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_position_changed '.length));
-        nodes.find(x => x.id === c_f.id).position = c_f.position;
+        node_map[c_f.id].position = c_f.position;
         updateGraph();
     } else if (msg.data.startsWith('current_flaw ')) {
         const c_f = JSON.parse(msg.data.substring('current_flaw '.length));
         if (current_flaw) current_flaw.current = false;
-        const f_node = nodes.find(x => x.id === c_f.id);
+        if (current_resolver) { current_resolver.current = false; current_resolver = undefined; }
+        const f_node = node_map[c_f.id];
         f_node.current = true;
         current_flaw = f_node;
         updateGraph();
@@ -111,25 +114,26 @@ ws.onmessage = msg => {
         c_r.type = 'resolver';
 
         nodes.push(c_r);
+        node_map[c_r.id] = c_r;
         links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
         updateGraph();
     } else if (msg.data.startsWith('resolver_state_changed ')) {
         const c_r = JSON.parse(msg.data.substring('resolver_state_changed '.length));
-        nodes.find(x => x.id === c_r.id).state = c_r.state;
+        node_map[c_r.id].state = c_r.state;
         links.filter(l => l.source.id === c_r.id).forEach(l => l.state = c_r.state);
         updateGraph();
     } else if (msg.data.startsWith('current_resolver ')) {
         const c_r = JSON.parse(msg.data.substring('current_resolver '.length));
         if (current_resolver) current_resolver.current = false;
-        const r_node = nodes.find(x => x.id === c_r.id);
+        const r_node = node_map[c_r.id];
         r_node.current = true;
         current_resolver = r_node;
         updateGraph();
     } else if (msg.data.startsWith('causal_link_added ')) {
         const c_l = JSON.parse(msg.data.substring('causal_link_added '.length));
-        links.push({ source: c_l.flaw_id, target: c_l.resolver_id, state: r_node.state });
+        links.push({ source: c_l.flaw_id, target: c_l.resolver_id, state: node_map[c_l.flaw_id].state });
         updateGraph();
-        update_resolver_cost(nodes.find(x => x.id === c_l.resolver_id));
+        update_resolver_cost(node_map[c_l.resolver_id]);
         updateGraph();
     }
 };
@@ -138,7 +142,7 @@ function updateGraph() {
     const n_group = g.selectAll('g').data(nodes, d => d.id).join(
         enter => {
             const g = enter.append('g').attr('cursor', 'grab');
-            g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d));
+            g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
             g.append('text').attr('y', -7).text(d => d.type === 'flaw' ? flaw_label(d) : resolver_label(d));
             g.on('mouseover', (event, d) => tooltip.html(d.type === 'flaw' ? flaw_tooltip(d) : resolver_tooltip(d)).transition().duration(200).style('opacity', .9))
                 .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
@@ -147,7 +151,7 @@ function updateGraph() {
             return g;
         },
         update => {
-            update.select('rect').style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d));
+            update.select('rect').style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
             return update;
         }
     );
@@ -204,6 +208,10 @@ function radius(n) {
 
 function stroke(n) {
     return n.current ? '#ff00ff' : 'black';
+}
+
+function stroke_width(n) {
+    return n.current ? '2' : '1';
 }
 
 function stroke_dasharray(n) {
