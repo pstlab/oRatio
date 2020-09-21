@@ -24,7 +24,7 @@ const width = b_box.width, height = b_box.height;
 const c_zoom = d3.zoom().on('zoom', event => g.attr('transform', event.transform));
 svg.call(c_zoom);
 
-var color_interpolator = d3.scaleSequential().domain([15, 0]).interpolator(d3.interpolateRdYlGn);
+var color_interpolator = d3.scaleSequential(d3.interpolateRdYlGn).domain([15, 0]);
 
 var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 

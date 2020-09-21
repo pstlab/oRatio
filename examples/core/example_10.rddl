@@ -1,0 +1,26 @@
+/*
+* This domain represents a navigator which moves from one position to another alternating 'At' and 'GoingTo' values.
+* Starting from a position 0.0, this problem requires to reach three positions (i.e., 1.0, 2.0 and 3.0) in an unspecified order.
+*/
+
+class Navigator : StateVariable {
+
+    predicate At(real l) {
+        duration >= 1;
+        goal going = new GoingTo(end:start, to:l);
+    }
+
+    predicate GoingTo(real from, real to) {
+        duration >= 1;
+        goal at = new At(end:start, l:from);
+    }
+}
+
+Navigator nav = new Navigator();
+
+fact at_0 = new nav.At(start:origin, l:0.0);
+at_0.duration >= 1;
+
+goal at_1 = new nav.At(l:1.0);
+goal at_2 = new nav.At(l:2.0);
+goal at_3 = new nav.At(l:3.0);
