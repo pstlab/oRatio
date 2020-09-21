@@ -1,0 +1,44 @@
+/*
+* This problem creates three goals, each acheivable by introducing a subgoal which, in turn, sets the value of a global variable to a specific value.
+* This problem is intended to challenge the heuristic, which has to choose the correct disjunct in order to solve the problem.
+*/
+
+real n;
+
+predicate P0() {
+    {
+        goal p = new P(x:0.0);
+    } or {
+        goal p = new P(x:1.0);
+    } or {
+        goal p = new P(x:2.0);
+    }
+}
+
+predicate P1() {
+    {
+        goal p = new P(x:1.0);
+    } or {
+        goal p = new P(x:2.0);
+    } or {
+        goal p = new P(x:0.0);
+    }
+}
+
+predicate P2() {
+    {
+        goal p = new P(x:2.0);
+    } or {
+        goal p = new P(x:0.0);
+    } or {
+        goal p = new P(x:1.0);
+    }
+}
+
+predicate P(real x) {
+    x == n;
+}
+
+goal g0 = new P0();
+goal g1 = new P1();
+goal g2 = new P2();
