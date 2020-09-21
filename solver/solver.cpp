@@ -277,6 +277,8 @@ namespace ratio
                 for (const auto &f : at_phis_p->second)
                 { // 'f' is an activated flaw..
                     assert(!flaws.count(f));
+                    if (!root_level())
+                        trail.back().new_flaws.insert(f);
                     if (std::none_of(f->resolvers.begin(), f->resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
                         flaws.insert(f); // this flaw has been activated and not yet accidentally solved..
                     else if (!root_level())
