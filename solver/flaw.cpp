@@ -40,7 +40,7 @@ namespace ratio
             c->preconditions.push_back(this); // this flaw is a precondition of its 'c' cause..
             supports.push_back(c);            // .. and it also supports its 'c' cause..
             cs.push_back(c->rho);
-            bool dist = gr.slv.get_sat_core().new_clause({gr.slv.get_idl_theory().new_distance(c->effect.position, position, -1)});
+            bool dist = gr.slv.get_sat_core().new_clause({!c->rho, gr.slv.get_idl_theory().new_distance(c->effect.position, position, -1)});
             assert(dist);
         }
         // we initialize the phi variable as the conjunction of the causes' rho variables..
