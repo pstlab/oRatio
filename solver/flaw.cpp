@@ -8,11 +8,7 @@ using namespace smt;
 namespace ratio
 {
 
-    flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), position(gr.slv.get_idl_theory().new_var()), causes(causes), exclusive(exclusive)
-    {
-        bool add_distance = gr.slv.get_sat_core().new_clause({gr.slv.get_idl_theory().new_distance(position, 0, 0)});
-        assert(add_distance);
-    }
+    flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), position(gr.slv.get_idl_theory().new_var()), causes(causes), exclusive(exclusive) {}
     flaw::~flaw() {}
 
     resolver *flaw::get_cheapest_resolver() const noexcept
@@ -32,6 +28,9 @@ namespace ratio
     {
         assert(!expanded);
         assert(gr.get_solver().root_level());
+
+        bool add_distance = gr.slv.get_sat_core().new_clause({gr.slv.get_idl_theory().new_distance(position, 0, 0)});
+        assert(add_distance);
 
         std::vector<lit> cs;
         cs.reserve(causes.size());
