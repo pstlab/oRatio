@@ -59,12 +59,17 @@ namespace smt
         const inf_rational c_right = inf_rational(-expr.known_term, -1);
         expr.known_term = 0;
 
-        if (ub(expr) <= c_right) // the constraint is already satisfied..
-            return TRUE_var;
-        else if (lb(expr) > c_right) // the constraint is unsatisfable..
-            return FALSE_var;
+        if (ub(expr) <= c_right)
+            return TRUE_var; // the constraint is already satisfied..
+        else if (lb(expr) > c_right)
+            return FALSE_var; // the constraint is unsatisfable..
 
+        // we create a slack variable from the current expression (notice that the variable can be reused)..
         const var slack = new_var(expr);
+        if (ub(slack) <= c_right)
+            return TRUE_var; // the constraint is already satisfied..
+        else if (lb(slack) > c_right)
+            return FALSE_var; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " <= " + to_string(c_right);
         if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
             return at_asrt->second;
@@ -96,12 +101,17 @@ namespace smt
         const inf_rational c_right = -expr.known_term;
         expr.known_term = 0;
 
-        if (ub(expr) <= c_right) // the constraint is already satisfied..
-            return TRUE_var;
-        else if (lb(expr) > c_right) // the constraint is unsatisfable..
-            return FALSE_var;
+        if (ub(expr) <= c_right)
+            return TRUE_var; // the constraint is already satisfied..
+        else if (lb(expr) > c_right)
+            return FALSE_var; // the constraint is unsatisfable..
 
+        // we create a slack variable from the current expression (notice that the variable can be reused)..
         const var slack = new_var(expr);
+        if (ub(slack) <= c_right)
+            return TRUE_var; // the constraint is already satisfied..
+        else if (lb(slack) > c_right)
+            return FALSE_var; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " <= " + to_string(c_right);
         if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
             return at_asrt->second;
@@ -133,12 +143,17 @@ namespace smt
         const inf_rational c_right = -expr.known_term;
         expr.known_term = 0;
 
-        if (lb(expr) >= c_right) // the constraint is already satisfied..
-            return TRUE_var;
-        else if (ub(expr) < c_right) // the constraint is unsatisfable..
-            return FALSE_var;
+        if (lb(expr) >= c_right)
+            return TRUE_var; // the constraint is already satisfied..
+        else if (ub(expr) < c_right)
+            return FALSE_var; // the constraint is unsatisfable..
 
+        // we create a slack variable from the current expression (notice that the variable can be reused)..
         const var slack = new_var(expr);
+        if (lb(slack) >= c_right)
+            return TRUE_var; // the constraint is already satisfied..
+        else if (ub(slack) < c_right)
+            return FALSE_var; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " >= " + to_string(c_right);
         if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
             return at_asrt->second;
@@ -170,12 +185,17 @@ namespace smt
         const inf_rational c_right = inf_rational(-expr.known_term, 1);
         expr.known_term = 0;
 
-        if (lb(expr) >= c_right) // the constraint is already satisfied..
-            return TRUE_var;
-        else if (ub(expr) < c_right) // the constraint is unsatisfable..
-            return FALSE_var;
+        if (lb(expr) >= c_right)
+            return TRUE_var; // the constraint is already satisfied..
+        else if (ub(expr) < c_right)
+            return FALSE_var; // the constraint is unsatisfable..
 
+        // we create a slack variable from the current expression (notice that the variable can be reused)..
         const var slack = new_var(expr);
+        if (lb(slack) >= c_right)
+            return TRUE_var; // the constraint is already satisfied..
+        else if (ub(slack) < c_right)
+            return FALSE_var; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " >= " + to_string(c_right);
         if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
             return at_asrt->second;
@@ -290,7 +310,7 @@ namespace smt
             c_bounds[lb_index(x_i)] = {val, p};
 
             if (vals[x_i] < val && !is_basic(x_i))
-                update(x_i, val);
+                update(x_i, val); // we set the value of 'x_i' to 'val' and update all the basic variables which are related to 'x_i' by the tableau..
 
             // unate propagation..
             for (const auto &c : a_watches[x_i])
@@ -323,7 +343,7 @@ namespace smt
             c_bounds[ub_index(x_i)] = {val, p};
 
             if (vals[x_i] > val && !is_basic(x_i))
-                update(x_i, val);
+                update(x_i, val); // we set the value of 'x_i' to 'val' and update all the basic variables which are related to 'x_i' by the tableau..
 
             // unate propagation..
             for (const auto &c : a_watches[x_i])
@@ -341,6 +361,7 @@ namespace smt
     void lra_theory::update(const var &x_i, const inf_rational &v) noexcept
     {
         assert(!is_basic(x_i) && "x_i should be a non-basic variable..");
+        // the tableau rows containing 'x_i' as a non-basic variable..
         for (const auto &c : t_watches[x_i])
         { // x_j = x_j + a_ji(v - x_i)..
             vals[c->x] += c->l.vars.at(x_i) * (v - vals[x_i]);
@@ -376,6 +397,7 @@ namespace smt
             for (const auto &l : at_x_j->second)
                 l->lra_value_change(x_j);
 
+        // the tableau rows containing 'x_j' as a non-basic variable..
         for (const auto &c : t_watches[x_j])
             if (c->x != x_i)
             { // x_k += a_kj * theta..
