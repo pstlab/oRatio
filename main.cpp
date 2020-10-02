@@ -42,9 +42,10 @@ int main(int argc, char *argv[])
     socket_listener l(s, HOST, PORT);
 #endif
 
-    s.init();
     try
     {
+        s.init();
+
         std::cout << "parsing input files.." << std::endl;
         s.read(prob_names);
 

@@ -29,8 +29,8 @@ var color_interpolator = d3.scaleSequential(d3.interpolateRdYlGn).domain([15, 0]
 var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 
 const simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink().id(d => d.id).distance(60))
-    .force('charge', d3.forceManyBody().strength(-60))
+    .force('link', d3.forceLink().id(d => d.id).distance(70))
+    .force('charge', d3.forceManyBody().strength(-70))
     .force('center', d3.forceCenter(width / 2, height / 2));
 
 updateGraph();
@@ -146,7 +146,8 @@ function updateGraph() {
             g.append('text').attr('y', -7).text(d => d.type === 'flaw' ? flaw_label(d) : resolver_label(d));
             g.on('mouseover', (event, d) => tooltip.html(d.type === 'flaw' ? flaw_tooltip(d) : resolver_tooltip(d)).transition().duration(200).style('opacity', .9))
                 .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
-                .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0));
+                .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0))
+                .on("click", (event, d) => { d.fx = null; d.fy = null; });
             g.call(d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended));
             return g;
         },
@@ -204,8 +205,6 @@ function updateGraph() {
 
 function dragstarted(event, d) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
     d3.select(this).attr('cursor', 'grabbing');
 }
 
@@ -217,8 +216,8 @@ function dragged(event, d) {
 
 function dragended(event, d) {
     if (!event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
+    d.fx = d.x;
+    d.fy = d.y;
     d3.select(this).attr('cursor', 'grab');
 }
 
