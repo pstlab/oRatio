@@ -1,5 +1,5 @@
 const nodes = [];
-const node_map = {}
+const node_map = new Map();
 const links = [];
 
 let current_flaw, current_resolver;
@@ -52,7 +52,7 @@ ws.onmessage = msg => {
             c_f.type = 'flaw';
 
             nodes.push(c_f);
-            node_map[c_f.id] = c_f;
+            node_map.set(c_f.id, c_f);
             c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
         });
         c_graph.resolvers.forEach(r => {
@@ -62,7 +62,7 @@ ws.onmessage = msg => {
             c_r.type = 'resolver';
 
             nodes.push(c_r);
-            node_map[c_r.id] = c_r;
+            node_map.set(c_r.id, c_r);
             links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
             c_r.preconditions.filter(pre => !links.find(l => l.source === pre && l.target === c_r.id)).forEach(pre => links.push({ source: pre, target: c_r.id, state: node_map[pre].state }));
         });
@@ -79,31 +79,31 @@ ws.onmessage = msg => {
         c_f.type = 'flaw';
 
         nodes.push(c_f);
-        node_map[c_f.id] = c_f;
+        node_map.set(c_f.id, c_f);
         c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
         updateGraph();
-        c_f.causes.forEach(c => update_resolver_cost(node_map[c]));
+        c_f.causes.forEach(c => update_resolver_cost(node_map.get(c)));
         updateGraph();
     } else if (msg.data.startsWith('flaw_state_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_state_changed '.length));
-        node_map[c_f.id].state = c_f.state;
+        node_map.get(c_f.id).state = c_f.state;
         links.filter(l => l.source.id === c_f.id).forEach(l => l.state = c_f.state);
         updateGraph();
     } else if (msg.data.startsWith('flaw_cost_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_cost_changed '.length));
-        const f_node = node_map[c_f.id];
+        const f_node = node_map.get(c_f.id);
         f_node.cost = c_f.cost.num / c_f.cost.den;
         links.filter(l => l.source.id == f_node.id).forEach(out_link => update_resolver_cost(out_link.target));
         updateGraph();
     } else if (msg.data.startsWith('flaw_position_changed ')) {
         const c_f = JSON.parse(msg.data.substring('flaw_position_changed '.length));
-        node_map[c_f.id].position = c_f.position;
+        node_map.get(c_f.id).position = c_f.position;
         updateGraph();
     } else if (msg.data.startsWith('current_flaw ')) {
         const c_f = JSON.parse(msg.data.substring('current_flaw '.length));
         if (current_flaw) current_flaw.current = false;
         if (current_resolver) { current_resolver.current = false; current_resolver = undefined; }
-        const f_node = node_map[c_f.id];
+        const f_node = node_map.get(c_f.id);
         f_node.current = true;
         current_flaw = f_node;
         updateGraph();
@@ -114,26 +114,26 @@ ws.onmessage = msg => {
         c_r.type = 'resolver';
 
         nodes.push(c_r);
-        node_map[c_r.id] = c_r;
+        node_map.set(c_r.id, c_r);
         links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
         updateGraph();
     } else if (msg.data.startsWith('resolver_state_changed ')) {
         const c_r = JSON.parse(msg.data.substring('resolver_state_changed '.length));
-        node_map[c_r.id].state = c_r.state;
+        node_map.get(c_r.id).state = c_r.state;
         links.filter(l => l.source.id === c_r.id).forEach(l => l.state = c_r.state);
         updateGraph();
     } else if (msg.data.startsWith('current_resolver ')) {
         const c_r = JSON.parse(msg.data.substring('current_resolver '.length));
         if (current_resolver) current_resolver.current = false;
-        const r_node = node_map[c_r.id];
+        const r_node = node_map.get(c_r.id);
         r_node.current = true;
         current_resolver = r_node;
         updateGraph();
     } else if (msg.data.startsWith('causal_link_added ')) {
         const c_l = JSON.parse(msg.data.substring('causal_link_added '.length));
-        links.push({ source: c_l.flaw_id, target: c_l.resolver_id, state: node_map[c_l.flaw_id].state });
+        links.push({ source: c_l.flaw_id, target: c_l.resolver_id, state: node_map.get(c_l.flaw_id).state });
         updateGraph();
-        update_resolver_cost(node_map[c_l.resolver_id]);
+        update_resolver_cost(node_map.get(c_l.resolver_id));
         updateGraph();
     }
 };
