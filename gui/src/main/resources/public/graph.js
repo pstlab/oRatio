@@ -1,13 +1,32 @@
+const timelines = [];
 const nodes = [];
 const node_map = new Map();
 const links = [];
 
 let current_flaw, current_resolver;
 
-const svg = d3.select('#graph').append('svg');
-const g = svg.append('g');
+const timelines_svg = d3.select('#timelines').append('svg');
+const timelines_g = timelines_svg.append('g');
 
-svg.append('svg:defs').append('svg:marker')
+const timelines_box = timelines_svg.node().getBoundingClientRect();
+const timelines_width = timelines_box.width, timelines_height = timelines_box.height;
+
+const timelines_zoom = d3.zoom().on('zoom', event => timelines_g.attr('transform', event.transform));
+timelines_svg.call(timelines_zoom);
+
+const timelines_x_scale = d3.scaleLinear().range([0, timelines_width]);
+const timelines_y_scale = d3.scaleBand().rangeRound([0, timelines_height]).padding(0.1);
+
+const graph_svg = d3.select('#graph').append('svg');
+const graph_g = graph_svg.append('g');
+
+const graph_box = graph_svg.node().getBoundingClientRect();
+const graph_width = graph_box.width, graph_height = graph_box.height;
+
+const graph_zoom = d3.zoom().on('zoom', event => graph_g.attr('transform', event.transform));
+graph_svg.call(graph_zoom);
+
+graph_svg.append('svg:defs').append('svg:marker')
     .attr('id', 'triangle')
     .attr('viewBox', '0 -5 10 10')
     .attr('refX', 8)
@@ -18,20 +37,14 @@ svg.append('svg:defs').append('svg:marker')
     .append('path')
     .attr('d', 'M0,-5L10,0L0,5');
 
-const b_box = svg.node().getBoundingClientRect();
-const width = b_box.width, height = b_box.height;
+const color_interpolator = d3.scaleSequential(d3.interpolateRdYlGn).domain([15, 0]);
 
-const c_zoom = d3.zoom().on('zoom', event => g.attr('transform', event.transform));
-svg.call(c_zoom);
-
-var color_interpolator = d3.scaleSequential(d3.interpolateRdYlGn).domain([15, 0]);
-
-var tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+const tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 
 const simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink().id(d => d.id).distance(70))
     .force('charge', d3.forceManyBody().strength(-70))
-    .force('center', d3.forceCenter(width / 2, height / 2));
+    .force('center', d3.forceCenter(graph_width / 2, graph_height / 2));
 
 updateGraph();
 
@@ -40,6 +53,7 @@ ws.onmessage = msg => {
     if (msg.data.startsWith('graph ')) {
         nodes.length = 0;
         links.length = 0;
+        node_map.clear();
 
         const c_graph = JSON.parse(msg.data.substring('graph '.length));
         c_graph.flaws.forEach(f => {
@@ -64,7 +78,7 @@ ws.onmessage = msg => {
             nodes.push(c_r);
             node_map.set(c_r.id, c_r);
             links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
-            c_r.preconditions.filter(pre => !links.find(l => l.source === pre && l.target === c_r.id)).forEach(pre => links.push({ source: pre, target: c_r.id, state: node_map[pre].state }));
+            c_r.preconditions.filter(pre => !links.find(l => l.source === pre && l.target === c_r.id)).forEach(pre => links.push({ source: pre, target: c_r.id, state: node_map.get(pre).state }));
         });
         updateGraph();
         nodes.filter(n => n.type === 'resolver').forEach(r => update_resolver_cost(r));
@@ -135,11 +149,28 @@ ws.onmessage = msg => {
         updateGraph();
         update_resolver_cost(node_map.get(c_l.resolver_id));
         updateGraph();
+    } else if (msg.data.startsWith('timelines ')) {
+        const ts = JSON.parse(msg.data.substring('timelines '.length));
+        timelines_x_scale.domain([0, d3.max(ts, d => d.horizon)]);
+        timelines_y_scale.domain(d3.range(ts.length));
+        updateTimelines();
     }
 };
 
+function updateTimelines() {
+    timelines_g.selectAll('g').data(timelines).join(
+        enter => {
+            const g = enter.append('g').attr('cursor', 'grab');
+            return g;
+        },
+        update => {
+            return update;
+        }
+    );
+}
+
 function updateGraph() {
-    const n_group = g.selectAll('g').data(nodes, d => d.id).join(
+    const n_group = graph_g.selectAll('g').data(nodes, d => d.id).join(
         enter => {
             const g = enter.append('g').attr('cursor', 'grab');
             g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
@@ -156,7 +187,7 @@ function updateGraph() {
             return update;
         }
     );
-    const l_group = g.selectAll('line').data(links).join(
+    const l_group = graph_g.selectAll('line').data(links).join(
         enter => {
             return enter.append('line').attr('stroke', 'black').style('stroke-dasharray', d => stroke_dasharray(d));
         },

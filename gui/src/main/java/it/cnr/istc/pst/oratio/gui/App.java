@@ -51,6 +51,7 @@ public class App {
                 EXECUTOR.execute(() -> {
                     LOG.info("New connection..");
                     contexts.add(ctx);
+                    broadcast("timelines " + App.GSON.toJson(STATE.getTimelines()));
                     broadcast("graph " + GSON.toJson(GRAPH));
                 });
             });

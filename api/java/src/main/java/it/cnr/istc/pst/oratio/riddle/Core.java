@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public class Core implements Scope {
 
     private static final Logger LOG = LoggerFactory.getLogger(Core.class.getName());
-    public static final TemporalNetworkType TEMPORAL_NETWORK_TYPE = TemporalNetworkType.DL;
+    public static final TemporalNetworkType TEMPORAL_NETWORK_TYPE = TemporalNetworkType.LA;
     public static final String BOOL = "bool";
     public static final String INT = "int";
     public static final String REAL = "real";
