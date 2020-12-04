@@ -26,10 +26,6 @@ svg {
     padding: 0;
 }
 
-text {
-    text-anchor: middle;
-}
-
 div.tooltip {	
     position: absolute;
     font: 12px sans-serif;

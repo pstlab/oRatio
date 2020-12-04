@@ -1,4 +1,6 @@
 const timelines = [];
+let horizon;
+
 const nodes = [];
 const node_map = new Map();
 const links = [];
@@ -6,6 +8,19 @@ const links = [];
 let current_flaw, current_resolver;
 
 const timelines_svg = d3.select('#timelines').append('svg');
+var sv_ok_lg = timelines_svg.append('defs').append('linearGradient').attr('id', 'sv-ok-lg').attr('x1', '0%').attr('x2', '0%').attr('y1', '0%').attr('y2', '100%');
+sv_ok_lg.append('stop').attr('offset', '0%').style('stop-color', 'palegreen').style('stop-opacity', 1);
+sv_ok_lg.append('stop').attr('offset', '20%').style('stop-color', 'ivory').style('stop-opacity', 1);
+sv_ok_lg.append('stop').attr('offset', '100%').style('stop-color', 'palegreen').style('stop-opacity', 1);
+var sv_inc_lg = timelines_svg.append('defs').append('linearGradient').attr('id', 'sv-inc-lg').attr('x1', '0%').attr('x2', '0%').attr('y1', '0%').attr('y2', '100%');
+sv_inc_lg.append('stop').attr('offset', '0%').style('stop-color', 'lightsalmon').style('stop-opacity', 1);
+sv_inc_lg.append('stop').attr('offset', '20%').style('stop-color', 'ivory').style('stop-opacity', 1);
+sv_inc_lg.append('stop').attr('offset', '100%').style('stop-color', 'lightsalmon').style('stop-opacity', 1);
+var sv_none_lg = timelines_svg.append('defs').append('linearGradient').attr('id', 'sv-none-lg').attr('x1', '0%').attr('x2', '0%').attr('y1', '0%').attr('y2', '100%');
+sv_none_lg.append('stop').attr('offset', '0%').style('stop-color', 'lightsalmon').style('stop-opacity', 1);
+sv_none_lg.append('stop').attr('offset', '20%').style('stop-color', 'ivory').style('stop-opacity', 1);
+sv_none_lg.append('stop').attr('offset', '100%').style('stop-color', 'lightsalmon').style('stop-opacity', 1);
+
 const timelines_g = timelines_svg.append('g');
 
 const timelines_box = timelines_svg.node().getBoundingClientRect();
@@ -151,22 +166,51 @@ ws.onmessage = msg => {
         updateGraph();
     } else if (msg.data.startsWith('timelines ')) {
         const ts = JSON.parse(msg.data.substring('timelines '.length));
-        timelines_x_scale.domain([0, d3.max(ts, d => d.horizon)]);
-        timelines_y_scale.domain(d3.range(ts.length));
+        ts.forEach((tl, i) => { tl.id = i; timelines[i] = tl; });
+        horizon = d3.max(timelines, d => d.horizon);
+        timelines_x_scale.domain([0, horizon]);
+        timelines_y_scale.domain(d3.range(timelines.length));
         updateTimelines();
+        ts.forEach((tl, i) => updateTimeline(tl, i));
     }
 };
 
 function updateTimelines() {
-    timelines_g.selectAll('g').data(timelines).join(
+    timelines_g.selectAll('g').data(timelines, d => d.id).join(
         enter => {
-            const g = enter.append('g').attr('cursor', 'grab');
-            return g;
+            const tl_g = enter.append('g').attr('class', 'timeline').attr('id', d => 'tl-' + d.id);
+            tl_g.append('rect').attr('x', -10).attr('y', d => timelines_y_scale(timelines.indexOf(d))).attr('width', timelines_x_scale(horizon) + 20).attr('height', timelines_y_scale.bandwidth()).style('fill', 'floralwhite');
+            tl_g.append('text').attr('x', 0).attr('y', d => timelines_y_scale(timelines.indexOf(d)) + timelines_y_scale.bandwidth() * 0.08).text(d => d.name).style('text-anchor', 'start');
+            return tl_g;
         },
         update => {
+            update.select('rect').attr('width', timelines_x_scale(horizon));
             return update;
         }
     );
+}
+
+function updateTimeline(tl, i) {
+    switch (tl.type) {
+        case 'state-variable':
+            d3.select('#tl-' + i).selectAll('g').data(tl.values, d => d.id).join(
+                enter => {
+                    const tl_val_g = enter.append('g');
+                    tl_val_g.append('rect').attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1).attr('width', d => timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', timelines_y_scale.bandwidth() * 0.9).attr('rx', 5).attr('ry', 5).style('fill', d => sv_value_fill(d)).style('stroke', 'lightgray');
+                    tl_val_g.on('mouseover', (event, d) => tooltip.html(sv_value_tooltip(d)).transition().duration(200).style('opacity', .9))
+                        .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
+                        .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0))
+                        .on('click', (event, d) => { d.fx = null; d.fy = null; });
+                    return tl_val_g;
+                },
+                update => {
+                    return update;
+                }
+            );
+            break;
+        default:
+            break;
+    }
 }
 
 function updateGraph() {
@@ -174,11 +218,11 @@ function updateGraph() {
         enter => {
             const g = enter.append('g').attr('cursor', 'grab');
             g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
-            g.append('text').attr('y', -7).text(d => d.type === 'flaw' ? flaw_label(d) : resolver_label(d));
+            g.append('text').attr('y', -7).text(d => d.type === 'flaw' ? flaw_label(d) : resolver_label(d)).style('text-anchor', 'middle');;
             g.on('mouseover', (event, d) => tooltip.html(d.type === 'flaw' ? flaw_tooltip(d) : resolver_tooltip(d)).transition().duration(200).style('opacity', .9))
                 .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                 .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0))
-                .on("click", (event, d) => { d.fx = null; d.fy = null; });
+                .on('click', (event, d) => { d.fx = null; d.fy = null; });
             g.call(d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended));
             return g;
         },
@@ -348,4 +392,16 @@ function resolver_label(resolver) {
 
 function resolver_tooltip(resolver) {
     return '\u03C1' + resolver.label.rho + ', cost: ' + resolver.cost;
+}
+
+function sv_value_tooltip(sv_value) {
+    return sv_value.name;
+}
+
+function sv_value_fill(sv_value) {
+    switch (sv_value.atoms.length) {
+        case 0: return 'url(#sv-none-lg)';
+        case 1: return 'url(#sv-ok-lg)';
+        default: return 'url(#sv-inc-lg)';
+    }
 }
