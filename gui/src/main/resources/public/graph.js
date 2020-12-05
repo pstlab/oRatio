@@ -166,12 +166,17 @@ ws.onmessage = msg => {
         updateGraph();
     } else if (msg.data.startsWith('timelines ')) {
         const ts = JSON.parse(msg.data.substring('timelines '.length));
-        ts.forEach((tl, i) => { tl.id = i; timelines[i] = tl; });
+        timelines.splice(0, timelines.length - ts.length);
+        ts.forEach((tl, i) => {
+            timelines[i] = tl;
+            timelines[i].id = i;
+            timelines[i].values.forEach((v, j) => v.id = j);
+            if (timelines[i].type === 'reusable-resource') timelines[i].values.push({ usage: 0, from: timelines[i].values[timelines[i].values.length - 1].to, id: timelines[i].values.length });
+        });
         horizon = d3.max(timelines, d => d.horizon);
         timelines_x_scale.domain([0, horizon]);
         timelines_y_scale.domain(d3.range(timelines.length));
         updateTimelines();
-        ts.forEach((tl, i) => updateTimeline(tl, i));
     }
 };
 
@@ -184,10 +189,11 @@ function updateTimelines() {
             return tl_g;
         },
         update => {
-            update.select('rect').attr('width', timelines_x_scale(horizon));
+            update.select('rect').attr('width', timelines_x_scale(horizon) + 20);
             return update;
         }
     );
+    timelines.forEach((tl, i) => updateTimeline(tl, i));
 }
 
 function updateTimeline(tl, i) {
@@ -199,11 +205,50 @@ function updateTimeline(tl, i) {
                     tl_val_g.append('rect').attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1).attr('width', d => timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', timelines_y_scale.bandwidth() * 0.9).attr('rx', 5).attr('ry', 5).style('fill', d => sv_value_fill(d)).style('stroke', 'lightgray');
                     tl_val_g.on('mouseover', (event, d) => tooltip.html(sv_value_tooltip(d)).transition().duration(200).style('opacity', .9))
                         .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
-                        .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0))
-                        .on('click', (event, d) => { d.fx = null; d.fy = null; });
+                        .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0));
                     return tl_val_g;
                 },
                 update => {
+                    return update;
+                }
+            );
+            break;
+        case 'reusable-resource':
+            const rr_max_val = d3.max(tl.values, d => d.usage);
+            const rr_y_scale = d3.scaleLinear().domain([0, rr_max_val < tl.capacity ? tl.capacity + tl.capacity * 0.1 : rr_max_val + rr_max_val * 0.1]).range([timelines_y_scale(i) + timelines_y_scale.bandwidth(), timelines_y_scale(i)]);
+            const rr_g = d3.select('#tl-' + i);
+            rr_g.selectAll('path').data([tl.values]).join(
+                enter => {
+                    const tl_val_g = enter.append('path').attr('fill', 'aliceblue').attr('stroke', 'lightblue')
+                        .attr('d', d3.area().curve(d3.curveStepAfter)
+                            .x(d => timelines_x_scale(d.from))
+                            .y0(timelines_y_scale(i) + timelines_y_scale.bandwidth())
+                            .y1(d => rr_y_scale(d.usage)));
+                    tl_val_g.on('mouseover', (event, d) => tooltip.html(rr_value_tooltip(d)).transition().duration(200).style('opacity', .9))
+                        .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
+                        .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0));
+                    return tl_val_g;
+                },
+                update => {
+                    update.attr('d', d3.area().curve(d3.curveStepAfter)
+                        .x(d => timelines_x_scale(d.from))
+                        .y0(timelines_y_scale(i) + timelines_y_scale.bandwidth())
+                        .y1(d => rr_y_scale(d.usage)));
+                    return update;
+                }
+            );
+            rr_g.selectAll('line').data([tl.capacity]).join(
+                enter => {
+                    const line_g = enter.append('line').attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke', 'darkslategray');
+                    line_g.attr('x1', timelines_x_scale(0)).attr('y1', d =>
+                        rr_y_scale(d)
+                    ).attr('x2', timelines_x_scale(horizon)).attr('y2', d =>
+                        rr_y_scale(d)
+                    );
+                    return line_g;
+                },
+                update => {
+                    update.attr('y1', d => rr_y_scale(d)).attr('y2', d => rr_y_scale(d));
                     return update;
                 }
             );
@@ -373,9 +418,7 @@ function flaw_label(flaw) {
     }
 }
 
-function flaw_tooltip(flaw) {
-    return '\u03C6' + flaw.label.phi + ', cost: ' + flaw.cost + ', pos: ' + flaw.position.min;
-}
+function flaw_tooltip(flaw) { return '\u03C6' + flaw.label.phi + ', cost: ' + flaw.cost + ', pos: ' + flaw.position.min; }
 
 function resolver_label(resolver) {
     if (resolver.label.type)
@@ -390,13 +433,11 @@ function resolver_label(resolver) {
     return '\u03C1' + resolver.label.rho;
 }
 
-function resolver_tooltip(resolver) {
-    return '\u03C1' + resolver.label.rho + ', cost: ' + resolver.cost;
-}
+function resolver_tooltip(resolver) { return '\u03C1' + resolver.label.rho + ', cost: ' + resolver.cost; }
 
-function sv_value_tooltip(sv_value) {
-    return sv_value.name;
-}
+function sv_value_tooltip(sv_value) { return sv_value.name; }
+
+function rr_value_tooltip(rr_value) { return rr_value.usage; }
 
 function sv_value_fill(sv_value) {
     switch (sv_value.atoms.length) {

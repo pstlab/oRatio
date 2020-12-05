@@ -58,6 +58,7 @@ public class SolverState implements StateListener {
 
     @Override
     public void init() {
+        App.broadcast(TIMELINES + App.GSON.toJson(getTimelines()));
         App.GRAPH.clear();
     }
 
