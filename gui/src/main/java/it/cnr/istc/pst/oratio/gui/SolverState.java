@@ -45,7 +45,8 @@ public class SolverState implements StateListener {
             } else if (timeline instanceof ReusableResource) {
                 ReusableResource rr = (ReusableResource) timeline;
                 timelines
-                        .add(new RRTimeline(rr.getName(), rr.getOrigin().doubleValue(), rr.getHorizon().doubleValue(),
+                        .add(new RRTimeline(rr.getName(), rr.getCapacity().doubleValue(), rr.getOrigin().doubleValue(),
+                                rr.getHorizon().doubleValue(),
                                 rr.getValues().stream().map(val -> new RRTimeline.Value(val.getUsage().doubleValue(),
                                         val.getFrom().doubleValue(), val.getTo().doubleValue(), val.getAtoms().stream()
                                                 .map(atm -> atm.getSigma()).collect(Collectors.toList())))
@@ -95,11 +96,14 @@ public class SolverState implements StateListener {
 
         private final String type = "reusable-resource";
         private final String name;
+        private final double capacity;
         private final double origin, horizon;
         private final List<Value> values;
 
-        private RRTimeline(final String name, final double origin, final double horizon, final List<Value> values) {
+        private RRTimeline(final String name, final double capacity, final double origin, final double horizon,
+                final List<Value> values) {
             this.name = name;
+            this.capacity = capacity;
             this.origin = origin;
             this.horizon = horizon;
             this.values = values;

@@ -1,0 +1,10 @@
+ReusableResource rr0 = new ReusableResource(10.0);
+ReusableResource rr1 = new ReusableResource(10.0);
+
+predicate Use(ReusableResource rr, real id) : Interval {
+    fact u0 = new rr.Use(amount:4.0, duration:2.0);
+}
+
+goal u0 = new Use(id:1.0);
+goal u1 = new Use(id:2.0);
+goal u2 = new Use(id:3.0);

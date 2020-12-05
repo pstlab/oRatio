@@ -198,7 +198,7 @@ namespace ratio
 
     void reusable_resource::new_atom(atom_flaw &f)
     {
-        assert(!f.is_fact);
+        assert(f.is_fact);
         atom &atm = f.get_atom();
         // we apply interval-predicate whenever the fact becomes active..
         set_ni(atm.get_sigma());
