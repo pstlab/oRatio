@@ -3,6 +3,7 @@
 #include "core.h"
 #include "graph.h"
 
+#define AT "at"
 #define START "start"
 #define END "end"
 

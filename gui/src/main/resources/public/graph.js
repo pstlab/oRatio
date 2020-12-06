@@ -168,6 +168,7 @@ ws.onmessage = msg => {
         const ts = JSON.parse(msg.data.substring('timelines '.length));
         timelines.splice(0, timelines.length - ts.length);
         ts.forEach((tl, i) => {
+            console.log(tl);
             timelines[i] = tl;
             timelines[i].id = i;
             timelines[i].values.forEach((v, j) => v.id = j);

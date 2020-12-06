@@ -11,8 +11,8 @@ namespace ratio
     executor(const executor &orig) = delete;
     ~executor();
 
-    void set_interval(size_t interval);
-    void set_timeout(size_t delay);
+    void set_interval(const size_t& interval);
+    void set_timeout(const size_t& delay);
     void stop();
 
     void state_changed() override;
