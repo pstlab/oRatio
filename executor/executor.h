@@ -1,6 +1,7 @@
 #pragma once
 
 #include "inf_rational.h"
+#include "lit.h"
 #include <vector>
 #include <mutex>
 #include <map>
@@ -46,6 +47,7 @@ namespace ratio
     std::mutex mtx;                             // a mutex for the critical sections..
     bool executing = false;
     size_t current_time;
+    std::vector<smt::lit> pending_facts;
     std::set<atom *> not_starting, not_ending;
     std::map<smt::inf_rational, std::set<atom *>> s_atms, e_atms; // for each pulse (in milliseconds), the atoms starting/ending at that pulse..
     std::set<smt::inf_rational> pulses;                           // all the pulses (in milliseconds) of the plan..
