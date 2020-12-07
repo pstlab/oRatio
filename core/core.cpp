@@ -374,6 +374,13 @@ namespace ratio
                 throw unsolvable_exception();
     }
 
+    void core::assert_facts(const std::vector<bool_expr> &facts)
+    {
+        for (const auto &f : facts)
+            if (!sat_cr.new_clause({!ni, f->l}))
+                throw unsolvable_exception();
+    }
+
     void core::new_methods(const std::vector<const method *> &ms) noexcept
     {
         for (const auto &m : ms)

@@ -14,6 +14,7 @@ namespace ratio
 #ifdef BUILD_GUI
   class solver_listener;
 #endif
+  class executor;
 
   class solver : public core, private smt::theory
   {
@@ -22,6 +23,8 @@ namespace ratio
 #ifdef BUILD_GUI
     friend class solver_listener;
 #endif
+    friend class executor;
+
   public:
     solver();
     solver(const solver &orig) = delete;
@@ -35,8 +38,8 @@ namespace ratio
     void init() noexcept;
 
     /**
-   * Solves the given problem.
-   */
+     * Solves the given problem.
+     */
     void solve() override;
 
     bool_expr new_bool() noexcept override;

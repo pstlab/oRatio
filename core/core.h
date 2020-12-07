@@ -103,6 +103,7 @@ namespace ratio
     bool_expr eq(expr i0, expr i1) noexcept;
 
     void assert_facts(const std::vector<smt::lit> &facts);
+    void assert_facts(const std::vector<bool_expr> &facts);
 
   private:
     expr new_enum(const type &tp, const std::vector<smt::lit> &lits, const std::vector<item *> &vals) noexcept;

@@ -9,16 +9,15 @@
 namespace ratio
 {
 
-  class core;
+  class solver;
+  class predicate;
   class atom;
-  class executor_listener;
 
   class executor
   {
-    friend class executor_listener;
 
   public:
-    executor(core &cr, const size_t &tick_duration, const smt::rational &units_for_milliseconds = smt::rational(1, 1000));
+    executor(solver &slv, const size_t &tick_duration, const smt::rational &units_for_milliseconds = smt::rational(1, 1000));
     executor(const executor &orig) = delete;
     ~executor();
 
@@ -31,18 +30,24 @@ namespace ratio
     void reset_timelines();
 
   private:
-    void end_atoms(const std::set<atom *> &atoms);
+    virtual void tick() {}
+    virtual void starting(const std::set<atom *> &atoms) {}
+    virtual void ending(const std::set<atom *> &atoms) {}
+
+    void dont_start(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
+    void dont_end(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
 
   private:
-    core &cr;
+    solver &slv;
+    predicate &int_pred;
+    predicate &imp_pred;
     const size_t tick_duration;                 // the duration of the ticks in milliseconds..
     const smt::rational units_for_milliseconds; // the number of plan units for a millisecond (e.g., 1/1000 means one unit for second)..
-    std::vector<executor_listener *> listeners; // the executor listeners..
     std::mutex mtx;                             // a mutex for the critical sections..
     bool executing = false;
     size_t current_time;
-    std::map<smt::inf_rational, std::set<atom *>> starting_atoms; // for each pulse (in milliseconds), the atoms starting at that pulse..
-    std::map<smt::inf_rational, std::set<atom *>> ending_atoms;   // for each pulse (in milliseconds), the atoms ending at that pulse..
+    std::set<atom *> not_starting, not_ending;
+    std::map<smt::inf_rational, std::set<atom *>> s_atms, e_atms; // for each pulse (in milliseconds), the atoms starting/ending at that pulse..
     std::set<smt::inf_rational> pulses;                           // all the pulses (in milliseconds) of the plan..
   };
 } // namespace ratio
