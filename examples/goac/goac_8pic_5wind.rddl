@@ -1,0 +1,30 @@
+real speed = 40.0/60.0;
+real picture_size = 40.0;
+real download_rate = 10.0/60.0;
+
+Visibility visibility = new Visibility();
+fact vis0 = new visibility.NotVisible(start:origin, end:280.0);
+fact vis1 = new visibility.Visible(start:vis0.end, end:4000.0);
+fact vis2 = new visibility.NotVisible(start:vis1.end, end:8000.0);
+fact vis3 = new visibility.Visible(start:vis2.end, end:15000.0);
+fact vis4 = new visibility.NotVisible(start:vis3.end, end:20000.0);
+fact vis5 = new visibility.Visible(start:vis4.end, end:25000.0);
+fact vis6 = new visibility.NotVisible(start:vis5.end, end:30000.0);
+fact vis7 = new visibility.Visible(start:vis6.end, end:35000.0);
+fact vis8 = new visibility.NotVisible(start:vis7.end, end:40000.0);
+fact vis9 = new visibility.Visible(start:vis8.end, end:45000.0);
+fact vis10 = new visibility.NotVisible(start:vis9.end, end:horizon);
+
+Robot robot = new Robot(map, visibility);
+
+fact at0 = new robot.navigator.At(l:l_a, start:origin);
+at0.duration >= 10.0;
+
+goal tp0 = new robot.Download(id:0.0, l:l_b);
+goal tp1 = new robot.Download(id:1.0, l:l_c);
+goal tp2 = new robot.Download(id:2.0, l:l_d);
+goal tp3 = new robot.Download(id:3.0, l:l_e);
+goal tp4 = new robot.Download(id:4.0, l:l_f);
+goal tp5 = new robot.Download(id:5.0, l:l_g);
+goal tp6 = new robot.Download(id:6.0, l:l_h);
+goal tp7 = new robot.Download(id:7.0, l:l_i);
