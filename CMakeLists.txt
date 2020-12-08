@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(JNI)
+find_package(Threads REQUIRED)
 
 include(CTest)
 enable_testing()
@@ -86,6 +87,7 @@ if(BUILD_GUI)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCES})
+target_link_libraries(${PROJECT_NAME} PRIVATE Threads::Threads)
 
 if(BUILD_GUI AND WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32 #[[-PROFILE]])
