@@ -60,7 +60,7 @@ class Robot {
 
     predicate Download(real id, Location l) : Interval {
         duration == picture_size/download_rate;
-        goal tp = new TakePicture(id:id, l:l); tp.end <= start;
+        goal tk_pic = new TakePicture(id:id, l:l); tk_pic.end <= start;
         fact antenna_use = new antenna.Use(start:start, end:end, duration:duration, amount:1.0);
         goal vis = new visibility.Visible(); vis.start <= start; vis.end >= end;
     }
