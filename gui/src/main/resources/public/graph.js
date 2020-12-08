@@ -255,19 +255,19 @@ function updateTimeline(tl, i) {
             );
             break;
         case 'agent':
-            const max_overlap = Math.max(d3.max(tl.values, d => d.y), 1);
+            const max_overlap = d3.max(tl.values, d => d.y) + 1;
             const agent_y_scale = d3.scaleBand().domain(d3.range(max_overlap)).rangeRound([0, timelines_y_scale.bandwidth() * 0.9]).padding(0.1);
             d3.select('#tl-' + i).selectAll('g').data(tl.values, d => d.id).join(
                 enter => {
                     const tl_val_g = enter.append('g');
-                    tl_val_g.append('rect').attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(d.y)).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth()).attr('rx', 5).attr('ry', 5).style('fill', 'url(#ag-lg)').style('stroke', 'lightgray');
+                    tl_val_g.append('rect').attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y)).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth()).attr('rx', 5).attr('ry', 5).style('fill', 'url(#ag-lg)').style('stroke', 'lightgray');
                     tl_val_g.on('mouseover', (event, d) => tooltip.html(sv_value_tooltip(d)).transition().duration(200).style('opacity', .9))
                         .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                         .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0));
                     return tl_val_g;
                 },
                 update => {
-                    update.select('rect').transition().duration(200).attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(d.y)).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth() * 0.9);
+                    update.select('rect').transition().duration(200).attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y)).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth() * 0.9);
                     return update;
                 }
             );
@@ -470,8 +470,8 @@ function values_y(start, end, ends) {
     for (let i = 0; i < ends.length; i++)
         if (ends[i] <= start) {
             ends[i] = end;
-            return (i * 2);
+            return i;
         }
     ends.push(end);
-    return (ends.length - 1) * 2;
+    return ends.length - 1;
 }
