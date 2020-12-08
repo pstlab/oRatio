@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import it.cnr.istc.pst.oratio.Context;
 import it.cnr.istc.pst.oratio.StateListener;
 import it.cnr.istc.pst.oratio.riddle.Core;
+import it.cnr.istc.pst.oratio.timelines.PropositionalAgent;
 import it.cnr.istc.pst.oratio.timelines.ReusableResource;
 import it.cnr.istc.pst.oratio.timelines.StateVariable;
 import it.cnr.istc.pst.oratio.timelines.Timeline;
@@ -51,6 +52,13 @@ public class SolverState implements StateListener {
                                         val.getFrom().doubleValue(), val.getTo().doubleValue(), val.getAtoms().stream()
                                                 .map(atm -> atm.getSigma()).collect(Collectors.toList())))
                                         .collect(Collectors.toList())));
+            } else if (timeline instanceof PropositionalAgent) {
+                PropositionalAgent pa = (PropositionalAgent) timeline;
+                timelines.add(new Agent(pa.getName(), pa.getOrigin().doubleValue(), pa.getHorizon().doubleValue(),
+                        pa.getValues().stream()
+                                .map(val -> new Agent.Value(val.getAtom().toString(), val.getFrom().doubleValue(),
+                                        val.getTo().doubleValue(), val.getAtom().getSigma()))
+                                .collect(Collectors.toList())));
             }
         }
         return timelines;
@@ -121,6 +129,36 @@ public class SolverState implements StateListener {
                 this.from = from;
                 this.to = to;
                 this.atoms = atoms;
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private static class Agent {
+
+        private final String type = "agent";
+        private final String name;
+        private final double origin, horizon;
+        private final List<Value> values;
+
+        private Agent(final String name, final double origin, final double horizon, final List<Value> values) {
+            this.name = name;
+            this.origin = origin;
+            this.horizon = horizon;
+            this.values = values;
+        }
+
+        private static class Value {
+
+            private final String name;
+            private final double from, to;
+            private final Long atom;
+
+            private Value(final String name, final double from, final double to, final Long atom) {
+                this.name = name;
+                this.from = from;
+                this.to = to;
+                this.atom = atom;
             }
         }
     }

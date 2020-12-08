@@ -17,9 +17,14 @@ sv_inc_lg.append('stop').attr('offset', '0%').style('stop-color', 'lightsalmon')
 sv_inc_lg.append('stop').attr('offset', '20%').style('stop-color', 'ivory').style('stop-opacity', 1);
 sv_inc_lg.append('stop').attr('offset', '100%').style('stop-color', 'lightsalmon').style('stop-opacity', 1);
 var sv_none_lg = timelines_svg.append('defs').append('linearGradient').attr('id', 'sv-none-lg').attr('x1', '0%').attr('x2', '0%').attr('y1', '0%').attr('y2', '100%');
-sv_none_lg.append('stop').attr('offset', '0%').style('stop-color', 'lightsalmon').style('stop-opacity', 1);
+sv_none_lg.append('stop').attr('offset', '0%').style('stop-color', 'lightgray').style('stop-opacity', 1);
 sv_none_lg.append('stop').attr('offset', '20%').style('stop-color', 'ivory').style('stop-opacity', 1);
-sv_none_lg.append('stop').attr('offset', '100%').style('stop-color', 'lightsalmon').style('stop-opacity', 1);
+sv_none_lg.append('stop').attr('offset', '100%').style('stop-color', 'lightgray').style('stop-opacity', 1);
+
+var ag_lg = timelines_svg.append('defs').append('linearGradient').attr('id', 'ag-lg').attr('x1', '0%').attr('x2', '0%').attr('y1', '0%').attr('y2', '100%');
+ag_lg.append('stop').attr('offset', '0%').style('stop-color', 'navajowhite').style('stop-opacity', 1);
+ag_lg.append('stop').attr('offset', '20%').style('stop-color', 'ivory').style('stop-opacity', 1);
+ag_lg.append('stop').attr('offset', '100%').style('stop-color', 'navajowhite').style('stop-opacity', 1);
 
 const timelines_g = timelines_svg.append('g');
 
@@ -173,6 +178,10 @@ ws.onmessage = msg => {
             timelines[i].id = i;
             timelines[i].values.forEach((v, j) => v.id = j);
             if (timelines[i].type === 'reusable-resource' && timelines[i].values.length) timelines[i].values.push({ usage: 0, from: timelines[i].values[timelines[i].values.length - 1].to, id: timelines[i].values.length });
+            if (timelines[i].type === 'agent') {
+                const ends = [0];
+                timelines[i].values.forEach(v => v.y = values_y(v.from, v.from === v.to ? v.from + 0.1 : v.to, ends));
+            }
         });
         horizon = Math.max(d3.max(timelines, d => d.horizon), 1);
         timelines_x_scale.domain([0, horizon]);
@@ -192,6 +201,9 @@ function updateTimelines() {
         update => {
             update.select('rect').transition().duration(200).attr('width', timelines_x_scale(horizon) + 20);
             return update;
+        },
+        exit => {
+            return exit;
         }
     );
     timelines.forEach((tl, i) => updateTimeline(tl, i));
@@ -241,6 +253,24 @@ function updateTimeline(tl, i) {
                 },
                 update => {
                     update.transition().duration(200).attr('y1', d => rr_y_scale(d)).attr('y2', d => rr_y_scale(d));
+                    return update;
+                }
+            );
+            break;
+        case 'agent':
+            const max_overlap = Math.max(d3.max(tl.values, d => d.y), 1);
+            const agent_y_scale = d3.scaleBand().domain(d3.range(max_overlap)).rangeRound([0, timelines_y_scale.bandwidth() * 0.9]).padding(0.1);
+            d3.select('#tl-' + i).selectAll('g').data(tl.values, d => d.id).join(
+                enter => {
+                    const tl_val_g = enter.append('g');
+                    tl_val_g.append('rect').attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(d.y)).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', d => agent_y_scale.bandwidth()).attr('rx', 5).attr('ry', 5).style('fill', 'url(#ag-lg)').style('stroke', 'lightgray');
+                    tl_val_g.on('mouseover', (event, d) => tooltip.html(sv_value_tooltip(d)).transition().duration(200).style('opacity', .9))
+                        .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
+                        .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0));
+                    return tl_val_g;
+                },
+                update => {
+                    update.select('rect').transition().duration(200).attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', timelines_y_scale.bandwidth() * 0.9);
                     return update;
                 }
             );
@@ -437,4 +467,14 @@ function sv_value_fill(sv_value) {
         case 1: return 'url(#sv-ok-lg)';
         default: return 'url(#sv-inc-lg)';
     }
+}
+
+function values_y(start, end, ends) {
+    for (let i = 0; i < ends.length; i++)
+        if (ends[i] <= start) {
+            ends[i] = end;
+            return (i * 2);
+        }
+    ends.push(end);
+    return (ends.length - 1) * 2;
 }
