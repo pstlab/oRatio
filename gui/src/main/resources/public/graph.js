@@ -191,7 +191,7 @@ ws.onmessage = msg => {
 };
 
 function updateTimelines() {
-    timelines_g.selectAll('g').data(timelines, d => d.id).join(
+    timelines_g.selectAll('g.timeline').data(timelines, d => d.id).join(
         enter => {
             const tl_g = enter.append('g').attr('class', 'timeline').attr('id', d => 'tl-' + d.id);
             tl_g.append('rect').attr('x', -10).attr('y', d => timelines_y_scale(timelines.indexOf(d))).attr('width', timelines_x_scale(horizon) + 20).attr('height', timelines_y_scale.bandwidth()).style('fill', 'floralwhite');
@@ -201,9 +201,6 @@ function updateTimelines() {
         update => {
             update.select('rect').transition().duration(200).attr('width', timelines_x_scale(horizon) + 20);
             return update;
-        },
-        exit => {
-            return exit;
         }
     );
     timelines.forEach((tl, i) => updateTimeline(tl, i));
@@ -263,14 +260,14 @@ function updateTimeline(tl, i) {
             d3.select('#tl-' + i).selectAll('g').data(tl.values, d => d.id).join(
                 enter => {
                     const tl_val_g = enter.append('g');
-                    tl_val_g.append('rect').attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(d.y)).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', d => agent_y_scale.bandwidth()).attr('rx', 5).attr('ry', 5).style('fill', 'url(#ag-lg)').style('stroke', 'lightgray');
+                    tl_val_g.append('rect').attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(d.y)).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth()).attr('rx', 5).attr('ry', 5).style('fill', 'url(#ag-lg)').style('stroke', 'lightgray');
                     tl_val_g.on('mouseover', (event, d) => tooltip.html(sv_value_tooltip(d)).transition().duration(200).style('opacity', .9))
                         .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                         .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0));
                     return tl_val_g;
                 },
                 update => {
-                    update.select('rect').transition().duration(200).attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', timelines_y_scale.bandwidth() * 0.9);
+                    update.select('rect').transition().duration(200).attr('x', d => timelines_x_scale(d.from)).attr('y', d => timelines_y_scale(i) + timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(d.y)).attr('width', d => d.from === d.to ? 1 : timelines_x_scale(d.to) - timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth() * 0.9);
                     return update;
                 }
             );
