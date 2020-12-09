@@ -464,44 +464,43 @@ namespace smt
             t_watches[term.first].emplace(r);
     }
 
-    std::string to_string(const lra_theory &rhs) noexcept
+    json lra_theory::to_json() const noexcept
     {
-        std::string la;
-        la += "{ \"vars\" : [";
-        for (size_t i = 0; i < rhs.vals.size(); ++i)
+        json j_th;
+
+        std::vector<json> j_vars;
+        j_vars.reserve(vals.size());
+        for (size_t i = 0; i < vals.size(); ++i)
         {
-            if (i)
-                la += ", ";
-            la += "{ \"name\" : \"x" + std::to_string(i) + "\", \"value\" : " + to_string(rhs.value(i));
-            if (!is_negative_infinite(rhs.lb(i)))
-                la += ", \"lb\" : " + to_string(rhs.lb(i));
-            if (!is_positive_infinite(rhs.ub(i)))
-                la += ", \"ub\" : " + to_string(rhs.ub(i));
-            la += "}";
+            json var;
+            var->set("name", new string_val(std::to_string(i)));
+            var->set("value", new string_val(to_string(value(i))));
+            if (!is_negative_infinite(lb(i)))
+                var->set("lb", new string_val(to_string(lb(i))));
+            if (!is_positive_infinite(ub(i)))
+                var->set("ub", new string_val(to_string(ub(i))));
+            j_vars.push_back(var);
         }
-        la += "], \"asrts\" : [";
-        for (auto it = rhs.v_asrts.cbegin(); it != rhs.v_asrts.cend(); ++it)
+        j_th->set("vars", new array_val(j_vars));
+
+        std::vector<json> j_asrts;
+        j_asrts.reserve(v_asrts.size());
+        for (auto it = v_asrts.cbegin(); it != v_asrts.cend(); ++it)
         {
-            if (it != rhs.v_asrts.cbegin())
-                la += ", ";
-            la += "[";
+            std::vector<json> c_asrts;
+            c_asrts.reserve(v_asrts.size());
             for (auto a_it = it->second.cbegin(); a_it != it->second.cend(); ++a_it)
-            {
-                if (a_it != it->second.cbegin())
-                    la += ", ";
-                la += to_string(**a_it);
-            }
-            la += "]";
+                c_asrts.push_back((*a_it)->to_json());
+            j_asrts.push_back(new array_val(c_asrts));
         }
-        la += "], \"tableau\" : [";
-        for (auto it = rhs.tableau.cbegin(); it != rhs.tableau.cend(); ++it)
-        {
-            if (it != rhs.tableau.cbegin())
-                la += ", ";
-            la += to_string(*it->second);
-        }
-        la += "]";
-        la += "}";
-        return la;
+        j_th->set("asrts", new array_val(j_asrts));
+
+        std::vector<json> j_tabl;
+        j_tabl.reserve(tableau.size());
+        for (auto it = tableau.cbegin(); it != tableau.cend(); ++it)
+            j_tabl.push_back(it->second->to_json());
+        j_th->set("tableau", new array_val(j_tabl));
+
+        return j_th;
     }
 } // namespace smt

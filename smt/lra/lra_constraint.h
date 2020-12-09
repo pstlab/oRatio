@@ -3,6 +3,7 @@
 #include "lit.h"
 #include "lin.h"
 #include "inf_rational.h"
+#include "json.h"
 #include <vector>
 
 namespace smt
@@ -35,8 +36,7 @@ namespace smt
     bool propagate_lb(const var &x) noexcept; // propagates the lower bound of variable 'x' on the assertion returning whether propagation is successful..
     bool propagate_ub(const var &x) noexcept; // propagates the upper bound of variable 'x' on the assertion returning whether propagation is successful..
 
-  public:
-    friend std::string to_string(const assertion &a) noexcept;
+    json to_json() const noexcept;
 
   private:
     lra_theory &th;
@@ -63,8 +63,7 @@ namespace smt
     bool propagate_lb(const var &x) noexcept; // propagates the lower bound of variable 'x' on the tableau row returning whether propagation is successful..
     bool propagate_ub(const var &x) noexcept; // propagates the upper bound of variable 'x' on the tableau row returning whether propagation is successful..
 
-  public:
-    friend std::string to_string(const row &r) noexcept;
+    json to_json() const noexcept;
 
   private:
     lra_theory &th;

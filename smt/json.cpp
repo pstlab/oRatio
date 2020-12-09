@@ -17,7 +17,7 @@ namespace smt
         t.ptr->ref_count++;
         return *this;
     }
-    void json::to_json(std::ostream &os) const { ptr->to_json(os); }
+    void json::to_json(std::ostream &os) const noexcept { ptr->to_json(os); }
 
     json json::from_json(std::istream &is)
     {
@@ -156,7 +156,7 @@ namespace smt
 
     void json_core::set_null(const std::string &id) { vals.emplace(id, new null_val()); }
 
-    void json_core::to_json(std::ostream &os) const
+    void json_core::to_json(std::ostream &os) const noexcept
     {
         os << '{';
         for (std::map<std::string, json>::const_iterator v_it = vals.begin(); v_it != vals.end(); ++v_it)
@@ -172,40 +172,40 @@ namespace smt
     null_val::null_val() {}
     null_val::~null_val() {}
 
-    void null_val::to_json(std::ostream &os) const { os << "null"; }
+    void null_val::to_json(std::ostream &os) const noexcept { os << "null"; }
 
     bool_val::bool_val() {}
     bool_val::bool_val(const bool &val) : val(val) {}
     bool_val::~bool_val() {}
 
-    void bool_val::to_json(std::ostream &os) const { os << std::boolalpha << val; }
+    void bool_val::to_json(std::ostream &os) const noexcept { os << std::boolalpha << val; }
 
     string_val::string_val() {}
     string_val::string_val(const std::string &val) : val(val) {}
     string_val::~string_val() {}
 
-    void string_val::to_json(std::ostream &os) const { os << '\"' << val << '\"'; }
+    void string_val::to_json(std::ostream &os) const noexcept { os << '\"' << val << '\"'; }
 
     long_val::long_val() {}
     long_val::long_val(const long &val) : val(val) {}
     long_val::~long_val() {}
 
-    void long_val::to_json(std::ostream &os) const { os << std::to_string(val); }
+    void long_val::to_json(std::ostream &os) const noexcept { os << std::to_string(val); }
 
     double_val::double_val() {}
     double_val::double_val(const double &val) : val(val) {}
     double_val::~double_val() {}
 
-    void double_val::to_json(std::ostream &os) const { os << std::to_string(val); }
+    void double_val::to_json(std::ostream &os) const noexcept { os << std::to_string(val); }
 
     array_val::array_val() {}
     array_val::array_val(const std::vector<json> &vals) : vals(vals) {}
     array_val::~array_val() {}
 
-    void array_val::to_json(std::ostream &os) const
+    void array_val::to_json(std::ostream &os) const noexcept
     {
         os << '[';
-        for (std::vector<json>::const_iterator v_it = vals.begin(); v_it != vals.end(); ++v_it)
+        for (auto v_it = vals.begin(); v_it != vals.end(); ++v_it)
         {
             if (v_it != vals.begin())
                 os << ", ";

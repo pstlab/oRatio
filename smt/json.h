@@ -21,7 +21,7 @@ namespace smt
     json &operator=(const json &t);
     json_core *operator->() const { return ptr; }
 
-    void to_json(std::ostream &os) const;
+    void to_json(std::ostream &os) const noexcept;
     static json from_json(std::istream &is);
 
     friend std::ostream &operator<<(std::ostream &os, const json &j);
@@ -40,13 +40,13 @@ namespace smt
     json_core(const std::map<std::string, json> &vals);
     ~json_core();
 
-    json &get(const std::string &id) { return vals.at(id); }
-    void set(const std::string &id, const json &val) { vals.emplace(id, val); }
+    json &get(const std::string &id) noexcept { return vals.at(id); }
+    void set(const std::string &id, const json &val) noexcept { vals.emplace(id, val); }
 
     void set_null(const std::string &id);
 
   private:
-    virtual void to_json(std::ostream &os) const;
+    virtual void to_json(std::ostream &os) const noexcept;
 
   private:
     unsigned ref_count = 0;
@@ -59,7 +59,7 @@ namespace smt
     null_val();
     ~null_val();
 
-    void to_json(std::ostream &os) const override;
+    void to_json(std::ostream &os) const noexcept override;
   };
 
   class bool_val : public json_core
@@ -69,12 +69,12 @@ namespace smt
     bool_val(const bool &val);
     ~bool_val();
 
-    bool get() const { return val; }
-    void set(const bool &val) { this->val = val; }
+    bool get() const noexcept { return val; }
+    void set(const bool &val) noexcept { this->val = val; }
 
-    bool operator*() const { return val; }
+    bool operator*() const noexcept { return val; }
 
-    void to_json(std::ostream &os) const override;
+    void to_json(std::ostream &os) const noexcept override;
 
   private:
     bool val;
@@ -87,12 +87,12 @@ namespace smt
     string_val(const std::string &val);
     ~string_val();
 
-    std::string get() const { return val; }
-    void set(const std::string &val) { this->val = val; }
+    std::string get() const noexcept { return val; }
+    void set(const std::string &val) noexcept { this->val = val; }
 
-    std::string operator*() const { return val; }
+    std::string operator*() const noexcept { return val; }
 
-    void to_json(std::ostream &os) const override;
+    void to_json(std::ostream &os) const noexcept override;
 
   private:
     std::string val;
@@ -105,12 +105,12 @@ namespace smt
     long_val(const long &val);
     ~long_val();
 
-    long get() const { return val; }
-    void set(const long &val) { this->val = val; }
+    long get() const noexcept { return val; }
+    void set(const long &val) noexcept { this->val = val; }
 
-    long operator*() const { return val; }
+    long operator*() const noexcept { return val; }
 
-    void to_json(std::ostream &os) const override;
+    void to_json(std::ostream &os) const noexcept override;
 
   private:
     long val;
@@ -123,12 +123,12 @@ namespace smt
     double_val(const double &val);
     ~double_val();
 
-    double get() const { return val; }
-    void set(const double &val) { this->val = val; }
+    double get() const noexcept { return val; }
+    void set(const double &val) noexcept { this->val = val; }
 
-    double operator*() const { return val; }
+    double operator*() const noexcept { return val; }
 
-    void to_json(std::ostream &os) const override;
+    void to_json(std::ostream &os) const noexcept override;
 
   private:
     double val;
@@ -141,10 +141,10 @@ namespace smt
     array_val(const std::vector<json> &vals);
     ~array_val();
 
-    json get(const size_t &i) const { return vals.at(i); }
-    void set(const size_t &i, const json val) { vals[i] = val; }
+    json get(const size_t &i) const noexcept { return vals.at(i); }
+    void set(const size_t &i, const json val) noexcept { vals[i] = val; }
 
-    void to_json(std::ostream &os) const override;
+    void to_json(std::ostream &os) const noexcept override;
 
   private:
     std::vector<json> vals;

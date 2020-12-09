@@ -87,34 +87,24 @@ namespace smt
         return true;
     }
 
-    std::string to_string(const assertion &a) noexcept
+    json assertion::to_json() const noexcept
     {
-        std::string asrt;
-        asrt += "{ \"lit\" : \"" + to_string(a.b) + "\", \"val\" : \"";
-        switch (a.th.get_core().value(a.b))
+        json j_asrt;
+        j_asrt->set("lit", new string_val(to_string(b)));
+        switch (th.get_core().value(b))
         {
         case True:
-            asrt += "T";
+            j_asrt->set("val", new string_val("T"));
             break;
         case False:
-            asrt += "F";
+            j_asrt->set("val", new string_val("F"));
             break;
         case Undefined:
-            asrt += "U";
+            j_asrt->set("val", new string_val("U"));
             break;
         }
-        asrt += "\", \"constr\" : \"x" + std::to_string(a.x);
-        switch (a.o)
-        {
-        case leq:
-            asrt += " <= ";
-            break;
-        case geq:
-            asrt += " >= ";
-            break;
-        }
-        asrt += to_string(a.v) + "\" }";
-        return asrt;
+        j_asrt->set("constr", new string_val("x" + std::to_string(x) + (o == geq ? " >= " : " <= ") + to_string(v)));
+        return j_asrt;
     }
 
     row::row(lra_theory &th, const var x, lin l) : th(th), x(x), l(l) {}
@@ -380,5 +370,11 @@ namespace smt
         return true;
     }
 
-    std::string to_string(const row &r) noexcept { return "{ \"var\" : \"x" + std::to_string(r.x) + "\", \"expr\" : \"" + to_string(r.l) + "\" }"; }
+    json row::to_json() const noexcept
+    {
+        json j_row;
+        j_row->set("var", new string_val("x" + std::to_string(x)));
+        j_row->set("expr", new string_val(to_string(l)));
+        return j_row;
+    }
 } // namespace smt

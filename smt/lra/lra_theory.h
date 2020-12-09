@@ -4,6 +4,7 @@
 #include "theory.h"
 #include "lin.h"
 #include "inf_rational.h"
+#include "json.h"
 #include <set>
 #include <unordered_set>
 #include <unordered_map>
@@ -93,7 +94,7 @@ namespace smt
     static size_t lb_index(const var &v) noexcept { return v << 1; }       // the index of the lower bound of the 'v' variable..
     static size_t ub_index(const var &v) noexcept { return (v << 1) ^ 1; } // the index of the upper bound of the 'v' variable..
 
-    friend std::string to_string(const lra_theory &rhs) noexcept;
+    json to_json() const noexcept;
 
   private:
     /**

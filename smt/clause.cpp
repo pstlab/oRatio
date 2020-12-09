@@ -72,32 +72,31 @@ namespace smt
         }
     }
 
-    std::string to_string(const clause &c) noexcept
+    json clause::to_json() const noexcept
     {
-        std::string cls;
-        cls += "{ \"lits\" : [";
+        json j_cl;
 
-        for (std::vector<lit>::const_iterator it = c.lits.cbegin(); it != c.lits.cend(); ++it)
+        std::vector<json> j_lits;
+        for (std::vector<lit>::const_iterator it = lits.cbegin(); it != lits.cend(); ++it)
         {
-            if (it != c.lits.cbegin())
-                cls += ", ";
-            cls += "{\"lit\" : \"" + to_string(*it) + "\", \"val\" : \"";
-            switch (c.value(*it))
+            json j_lit;
+            j_lit->set("lit", new string_val(to_string(*it)));
+            switch (value(*it))
             {
             case True:
-                cls += "T";
+                j_lit->set("val", new string_val("T"));
                 break;
             case False:
-                cls += "F";
+                j_lit->set("val", new string_val("F"));
                 break;
             case Undefined:
-                cls += "U";
+                j_lit->set("val", new string_val("U"));
                 break;
             }
-            cls += "\"}";
+            j_lits.push_back(j_lit);
         }
+        j_cl->set("lits", new array_val(j_lits));
 
-        cls += +"] }";
-        return cls;
+        return j_cl;
     }
 } // namespace smt
