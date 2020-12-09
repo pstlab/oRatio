@@ -245,20 +245,16 @@ namespace ratio
             // we create a new graph var..
             gamma = slv.get_sat_core().new_var();
             LOG("γ is" << to_string(gamma));
-#if defined GRAPH_PRUNING
             already_closed.clear();
-#endif
             add_layer(); // we add a layer to the current graph..
         }
 
-#ifdef GRAPH_PRUNING
         LOG("pruning the graph..");
         // these flaws have not been expanded, hence, cannot have a solution..
         for (const auto &f : flaw_q)
             if (already_closed.insert(variable(f->phi)).second)
                 if (!slv.get_sat_core().new_clause({!gamma, !f->phi}))
                     throw unsolvable_exception();
-#endif
 
         slv.take_decision(gamma);
     }
