@@ -156,7 +156,7 @@ namespace ratio
 
     void restore_ni() noexcept { ni = tmp_ni; }
 
-  private:
+  public:
     smt::json to_json() const noexcept;
 
     friend std::ostream &operator<<(std::ostream &os, const core &cr);

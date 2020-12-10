@@ -9,8 +9,6 @@ namespace ratio
 
   class atom : public item
   {
-    friend class core;
-
   public:
     atom(core &cr, const context ctx, const predicate &pred);
     atom(const atom &orig) = delete;
@@ -21,7 +19,6 @@ namespace ratio
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
 
-  private:
     smt::json to_json() const noexcept;
 
   private:

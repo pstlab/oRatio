@@ -13,7 +13,6 @@ namespace ratio
   class item : public env, public smt::var_value
   {
     friend class env;
-    friend class core;
 
   public:
     item(core &cr, const context ctx, const type &tp);
@@ -25,8 +24,9 @@ namespace ratio
     virtual smt::lit new_eq(item &i) noexcept;
     virtual bool equates(const item &i) const noexcept;
 
-  private:
     virtual smt::json to_json() const noexcept;
+
+  private:
     virtual smt::json value_to_json() const noexcept;
 
   private:
