@@ -72,4 +72,26 @@ namespace ratio
             return true;
         }
     }
+
+    json atom::to_json() const noexcept
+    {
+        json j_atm;
+        j_atm->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(this))));
+        j_atm->set("predicate", new string_val(get_type().get_full_name()));
+        j_atm->set("sigma", new string_val(std::to_string(sigma)));
+        switch (cr.get_sat_core().value(sigma))
+        {
+        case True:
+            j_atm->set("state", new string_val("Active"));
+            break;
+        case False:
+            j_atm->set("state", new string_val("Unified"));
+            break;
+        case Undefined:
+            j_atm->set("state", new string_val("Inactive"));
+            break;
+        }
+        j_atm->set("pars", env::to_json());
+        return j_atm;
+    }
 } // namespace ratio

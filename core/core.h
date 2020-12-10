@@ -156,10 +156,10 @@ namespace ratio
 
     void restore_ni() noexcept { ni = tmp_ni; }
 
-    friend std::string to_string(const core &c) noexcept;
-    friend std::string to_string(const core &c, const item &i) noexcept;
-    friend std::string to_string(const core &c, const atom &a) noexcept;
-    friend std::string to_string(const core &c, const std::map<std::string, expr> &items) noexcept;
+  private:
+    smt::json to_json() const noexcept;
+
+    friend std::ostream &operator<<(std::ostream &os, const core &cr);
 
   private:
     smt::sat_core sat_cr;   // the sat core..

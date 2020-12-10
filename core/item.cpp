@@ -33,6 +33,17 @@ namespace ratio
             return false;
     }
 
+    json item::to_json() const noexcept
+    {
+        json j_itm;
+        j_itm->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(this))));
+        j_itm->set("type", new string_val(tp.get_full_name()));
+        j_itm->set("exprs", env::to_json());
+        return j_itm;
+    }
+
+    json item::value_to_json() const noexcept { return new string_val(std::to_string(reinterpret_cast<uintptr_t>(this))); }
+
     bool_item::bool_item(core &cr, const lit &l) : item(cr, &cr, cr.get_type(BOOL_KEYWORD)), l(l) {}
     bool_item::~bool_item() {}
 
@@ -58,6 +69,25 @@ namespace ratio
         }
         else
             return false;
+    }
+
+    json bool_item::value_to_json() const noexcept
+    {
+        json j_val;
+        j_val->set("lit", new string_val((sign(l) ? "b" : "!b") + std::to_string(variable(l))));
+        switch (get_core().get_sat_core().value(l))
+        {
+        case True:
+            j_val->set("val", new string_val("True"));
+            break;
+        case False:
+            j_val->set("val", new string_val("False"));
+            break;
+        case Undefined:
+            j_val->set("val", new string_val("Undefined"));
+            break;
+        }
+        return j_val;
     }
 
     arith_item::arith_item(core &cr, const type &t, const lin &l) : item(cr, &cr, t), l(l) { assert(&t == &cr.get_type(INT_KEYWORD) || &t == &cr.get_type(REAL_KEYWORD) || &t == &cr.get_type(TP_KEYWORD)); }
@@ -87,7 +117,56 @@ namespace ratio
                 return get_core().get_lra_theory().equates(l, ae->l);
         else
             return false;
-    } // namespace ratio
+    }
+
+    json arith_item::value_to_json() const noexcept
+    {
+        const auto bounds = get_type().get_name().compare(TP_KEYWORD) == 0 ? get_core().get_rdl_theory().bounds(l) : get_core().get_lra_theory().bounds(l);
+        const auto val = get_type().get_name().compare(TP_KEYWORD) == 0 ? bounds.first : get_core().get_lra_theory().value(l);
+
+        json j_val;
+        j_val->set("lin", new string_val(to_string(l)));
+        json j_num_val;
+        j_num_val->set("num", new long_val(val.get_rational().numerator()));
+        j_num_val->set("den", new long_val(val.get_rational().denominator()));
+        if (val.get_infinitesimal() != rational::ZERO)
+        {
+            json j_inf;
+            j_inf->set("num", new long_val(val.get_infinitesimal().numerator()));
+            j_inf->set("den", new long_val(val.get_infinitesimal().denominator()));
+            j_num_val->set("inf", j_inf);
+        }
+        if (!is_negative_infinite(bounds.first))
+        {
+            json j_lb_bound;
+            j_lb_bound->set("num", new long_val(bounds.first.get_rational().numerator()));
+            j_lb_bound->set("den", new long_val(bounds.first.get_rational().denominator()));
+            if (val.get_infinitesimal() != rational::ZERO)
+            {
+                json j_inf;
+                j_inf->set("num", new long_val(bounds.first.get_infinitesimal().numerator()));
+                j_inf->set("den", new long_val(bounds.first.get_infinitesimal().denominator()));
+                j_lb_bound->set("inf", j_inf);
+            }
+            j_num_val->set("lb", j_lb_bound);
+        }
+        if (!is_positive_infinite(bounds.second))
+        {
+            json j_ub_bound;
+            j_ub_bound->set("num", new long_val(bounds.second.get_rational().numerator()));
+            j_ub_bound->set("den", new long_val(bounds.second.get_rational().denominator()));
+            if (val.get_infinitesimal() != rational::ZERO)
+            {
+                json j_inf;
+                j_inf->set("num", new long_val(bounds.second.get_infinitesimal().numerator()));
+                j_inf->set("den", new long_val(bounds.second.get_infinitesimal().denominator()));
+                j_ub_bound->set("inf", j_inf);
+            }
+            j_num_val->set("lb", j_ub_bound);
+        }
+
+        return j_val;
+    }
 
     var_item::var_item(core &cr, const type &t, var ev) : item(cr, &cr, t), ev(ev) {}
     var_item::~var_item() {}
@@ -168,6 +247,18 @@ namespace ratio
         }
     }
 
+    json var_item::value_to_json() const noexcept
+    {
+        json j_val;
+        j_val->set("var", new string_val("e" + std::to_string(ev)));
+        std::vector<json> j_vals;
+        std::unordered_set<const var_value *> vals = get_core().get_ov_theory().value(ev);
+        for (const auto &val : vals)
+            j_vals.push_back(new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const item *>(val)))));
+        j_val->set("vals", new array_val(j_vals));
+        return j_val;
+    }
+
     string_item::string_item(core &cr, const std::string &l) : item(cr, &cr, cr.get_type(STRING_KEYWORD)), l(l) {}
     string_item::~string_item() {}
 
@@ -190,4 +281,6 @@ namespace ratio
         else
             return false;
     }
+
+    json string_item::value_to_json() const noexcept { return new string_val(l); }
 } // namespace ratio

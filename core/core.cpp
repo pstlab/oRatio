@@ -475,15 +475,15 @@ namespace ratio
     }
     std::unordered_set<const var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th.value(x->ev); }
 
-    std::string to_string(const core &c) noexcept
+    json core::to_json() const noexcept
     {
         std::set<item *> all_items;
         std::set<atom *> all_atoms;
-        for (const auto &p : c.get_predicates())
+        for (const auto &p : predicates)
             for (const auto &a : p.second->get_instances())
                 all_atoms.insert(static_cast<atom *>(&*a));
         std::queue<type *> q;
-        for (const auto &t : c.get_types())
+        for (const auto &t : types)
             if (!t.second->is_primitive())
                 q.push(t.second);
         while (!q.empty())
@@ -496,172 +496,26 @@ namespace ratio
             q.pop();
         }
 
-        std::string cr;
-        cr += "{ ";
-        if (!all_items.empty())
-        {
-            cr += "\"items\" : [";
-            for (std::set<item *>::iterator is_it = all_items.begin(); is_it != all_items.end(); ++is_it)
-            {
-                if (is_it != all_items.begin())
-                    cr += ", ";
-                cr += to_string(c, **is_it);
-            }
-            cr += "]";
-        }
-        if (!all_atoms.empty())
-        {
-            if (!all_items.empty())
-                cr += ", ";
-            cr += "\"atoms\" : [";
-            for (std::set<atom *>::iterator as_it = all_atoms.begin(); as_it != all_atoms.end(); ++as_it)
-            {
-                if (as_it != all_atoms.begin())
-                    cr += ", ";
-                cr += to_string(c, **as_it);
-            }
-            cr += "]";
-        }
-        if (!all_items.empty() || !all_atoms.empty())
-            cr += ", ";
-        cr += "\"exprs\" : [" + to_string(c, c.get_exprs()) + "] }";
-        return cr;
+        json j_core;
+
+        std::vector<json> j_itms;
+        for (const auto &itm : all_items)
+            j_itms.push_back(itm->to_json());
+        j_core->set("items", new array_val(j_itms));
+
+        std::vector<json> j_atms;
+        for (const auto &atm : all_atoms)
+            j_atms.push_back(atm->to_json());
+        j_core->set("atoms", new array_val(j_atms));
+
+        j_core->set("exprs", env::to_json());
+        return j_core;
     }
 
-    std::string to_string(const core &c, const item &i) noexcept
+    std::ostream &operator<<(std::ostream &os, const core &cr)
     {
-        std::string is;
-        is += "{ \"id\" : \"" + std::to_string(reinterpret_cast<uintptr_t>(&i)) + "\", \"type\" : \"";
-
-        std::string i_type = i.get_type().get_name();
-        const type *t = &i.get_type();
-        while (const type *sc = dynamic_cast<const type *>((&t->get_scope())))
-        {
-            i_type.insert(0, sc->get_name() + ":");
-            t = sc;
-        }
-        is += i_type + "\"";
-
-        if (std::map<std::string, expr> c_is = i.get_exprs(); !c_is.empty())
-            is += ", \"exprs\" : [ " + to_string(c, c_is) + " ]";
-        is += "}";
-        return is;
-    }
-
-    std::string to_string(const core &c, const atom &a) noexcept
-    {
-        std::string as;
-        as += "{ \"id\" : \"" + std::to_string(reinterpret_cast<uintptr_t>(&a)) + "\", \"predicate\" : \"";
-
-        std::string a_type = a.get_type().get_name();
-        const type *t = &a.get_type();
-        while (const type *sc = dynamic_cast<const type *>((&t->get_scope())))
-        {
-            a_type.insert(0, sc->get_name() + ":");
-            t = sc;
-        }
-        as += a_type + "\", \"sigma\" : " + std::to_string(a.get_sigma()) + ", \"state\" : ";
-
-        switch (c.sat_cr.value(a.get_sigma()))
-        {
-        case True:
-            as += "\"Active\"";
-            break;
-        case False:
-            as += "\"Unified\"";
-            break;
-        case Undefined:
-            as += "\"Inactive\"";
-            break;
-        }
-
-        if (std::map<std::string, expr> is = a.get_exprs(); !is.empty())
-            as += ", \"pars\" : [ " + to_string(c, is) + " ]";
-        as += "}";
-        return as;
-    }
-
-    std::string to_string(const core &c, const std::map<std::string, expr> &c_items) noexcept
-    {
-        std::string iss;
-        for (std::map<std::string, expr>::const_iterator is_it = c_items.cbegin(); is_it != c_items.cend(); ++is_it)
-        {
-            if (is_it != c_items.cbegin())
-                iss += ", ";
-            iss += "{ \"name\" : \"" + is_it->first + "\", \"type\" : \"";
-
-            std::string i_type = is_it->second->get_type().get_name();
-            const type *t = &is_it->second->get_type();
-            while (const type *sc = dynamic_cast<const type *>((&t->get_scope())))
-            {
-                i_type.insert(0, sc->get_name() + ":");
-                t = sc;
-            }
-            iss += i_type + "\", \"value\" : ";
-
-            if (bool_item *bi = dynamic_cast<bool_item *>(&*is_it->second)) // the expression represents a primitive bool type..
-            {
-                std::string sign_s = sign(bi->l) ? "b" : "!b";
-                iss += "{ \"lit\" : \"" + sign_s + std::to_string(variable(bi->l)) + "\", \"val\" : ";
-                switch (c.sat_cr.value(bi->l))
-                {
-                case True:
-                    iss += "\"True\"";
-                    break;
-                case False:
-                    iss += "\"False\"";
-                    break;
-                case Undefined:
-                    iss += "\"Undefined\"";
-                    break;
-                }
-                iss += " }";
-            }
-            else if (arith_item *ai = dynamic_cast<arith_item *>(&*is_it->second)) // the expression represents a primitive arithmetic type..
-            {
-                const auto bounds = c.arith_bounds(ai);
-                const auto val = ai->get_type().get_name().compare(TP_KEYWORD) == 0 ? bounds.first : c.lra_th.value(ai->l);
-
-                iss += "{ \"lin\" : \"" + to_string(ai->l) + "\", \"val\" : ";
-                iss += "{ \"num\" : " + std::to_string(val.get_rational().numerator()) + ", \"den\" : " + std::to_string(val.get_rational().denominator());
-                if (val.get_infinitesimal() != rational::ZERO)
-                    iss += ", \"inf\" : { \"num\" : " + std::to_string(val.get_infinitesimal().numerator()) + ", \"den\" : " + std::to_string(val.get_infinitesimal().denominator()) + " }";
-                iss += " }";
-                if (!is_negative_infinite(bounds.first))
-                {
-                    iss += ", \"lb\" : { \"num\" : " + std::to_string(bounds.first.get_rational().numerator()) + ", \"den\" : " + std::to_string(bounds.first.get_rational().denominator());
-                    if (val.get_infinitesimal() != rational::ZERO)
-                        iss += ", \"inf\" : { \"num\" : " + std::to_string(bounds.first.get_infinitesimal().numerator()) + ", \"den\" : " + std::to_string(bounds.first.get_infinitesimal().denominator()) + " }";
-                    iss += " }";
-                }
-                if (!is_positive_infinite(bounds.second))
-                {
-                    iss += ", \"ub\" : { \"num\" : " + std::to_string(bounds.second.get_rational().numerator()) + ", \"den\" : " + std::to_string(bounds.second.get_rational().denominator());
-                    if (val.get_infinitesimal() != rational::ZERO)
-                        iss += ", \"inf\" : { \"num\" : " + std::to_string(bounds.second.get_infinitesimal().numerator()) + ", \"den\" : " + std::to_string(bounds.second.get_infinitesimal().denominator()) + " }";
-                    iss += " }";
-                }
-                iss += " }";
-            }
-            else if (var_item *ei = dynamic_cast<var_item *>(&*is_it->second)) // the expression represents an enum type..
-            {
-                iss += "{ \"var\" : \"e" + std::to_string(ei->ev) + "\", \"vals\" : [ ";
-                std::unordered_set<const var_value *> vals = c.ov_th.value(ei->ev);
-                for (std::unordered_set<const var_value *>::const_iterator vals_it = vals.begin(); vals_it != vals.end(); ++vals_it)
-                {
-                    if (vals_it != vals.begin())
-                        iss += ", ";
-                    iss += "\"" + std::to_string(reinterpret_cast<uintptr_t>(static_cast<const item *>(*vals_it))) + "\"";
-                }
-                iss += " ] }";
-            }
-            else if (string_item *si = dynamic_cast<string_item *>(&*is_it->second)) // the expression represents a primitive string type..
-                iss += "\"" + si->get_value() + "\"";
-            else // the expression represents an item..
-                iss += "\"" + std::to_string(reinterpret_cast<uintptr_t>(&*is_it->second)) + "\"";
-            iss += " }";
-        }
-        return iss;
+        cr.to_json().to_json(os);
+        return os;
     }
 
 #ifdef BUILD_GUI

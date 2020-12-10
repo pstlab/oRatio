@@ -12,6 +12,9 @@ namespace ratio
 
   class item : public env, public smt::var_value
   {
+    friend class env;
+    friend class core;
+
   public:
     item(core &cr, const context ctx, const type &tp);
     item(const item &orig) = delete;
@@ -21,6 +24,10 @@ namespace ratio
 
     virtual smt::lit new_eq(item &i) noexcept;
     virtual bool equates(const item &i) const noexcept;
+
+  private:
+    virtual smt::json to_json() const noexcept;
+    virtual smt::json value_to_json() const noexcept;
 
   private:
     const type &tp;
@@ -36,6 +43,9 @@ namespace ratio
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
 
+  private:
+    smt::json value_to_json() const noexcept override;
+
   public:
     smt::lit l;
   };
@@ -49,6 +59,9 @@ namespace ratio
 
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
+
+  private:
+    smt::json value_to_json() const noexcept override;
 
   public:
     const smt::lin l;
@@ -66,6 +79,9 @@ namespace ratio
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
 
+  private:
+    smt::json value_to_json() const noexcept override;
+
   public:
     const smt::var ev;
   };
@@ -81,6 +97,9 @@ namespace ratio
 
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
+
+  private:
+    smt::json value_to_json() const noexcept override;
 
   private:
     std::string l;

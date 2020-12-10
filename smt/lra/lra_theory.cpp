@@ -485,13 +485,13 @@ namespace smt
 
         std::vector<json> j_asrts;
         j_asrts.reserve(v_asrts.size());
-        for (auto it = v_asrts.cbegin(); it != v_asrts.cend(); ++it)
+        for (const auto &c_asrts : v_asrts)
         {
-            std::vector<json> c_asrts;
-            c_asrts.reserve(v_asrts.size());
-            for (auto a_it = it->second.cbegin(); a_it != it->second.cend(); ++a_it)
-                c_asrts.push_back((*a_it)->to_json());
-            j_asrts.push_back(new array_val(c_asrts));
+            std::vector<json> c_j_asrts;
+            c_j_asrts.reserve(v_asrts.size());
+            for (const auto &c_asrt : c_asrts.second)
+                c_j_asrts.push_back(c_asrt->to_json());
+            j_asrts.push_back(new array_val(c_j_asrts));
         }
         j_th->set("asrts", new array_val(j_asrts));
 

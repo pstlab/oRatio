@@ -1,6 +1,7 @@
 #pragma once
 
 #include "context.h"
+#include "json.h"
 #include <map>
 #include <string>
 
@@ -28,6 +29,8 @@ namespace ratio
     friend class constructor;
     friend class method;
     friend class predicate;
+    friend class item;
+    friend class atom;
     friend class var_item;
     friend class ast::local_field_statement;
     friend class ast::assignment_statement;
@@ -44,6 +47,9 @@ namespace ratio
 
     virtual expr get(const std::string &name) const;                         // returns the expression having the given name, checks in the enclosing environment if the name is not found (notice that this method returns a new expression, incrementing the number of references to the expression having the given name)..
     std::map<std::string, expr> get_exprs() const noexcept { return exprs; } // returns a map of names and their corresponding expressions directly accessible from this environment..
+
+  private:
+    virtual smt::json to_json() const noexcept;
 
   private:
     core &cr; // the core in which this environment is created..

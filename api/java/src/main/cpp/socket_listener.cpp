@@ -171,7 +171,7 @@ namespace ratio
     void socket_listener::state_changed()
     {
         std::stringstream ss;
-        ss << "state_changed " << to_string(slv) << "\n";
+        ss << "state_changed " << slv << "\n";
         send_message(ss.str());
     }
 
