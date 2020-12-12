@@ -70,123 +70,136 @@ updateGraph();
 
 const ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/graph');
 ws.onmessage = msg => {
-    if (msg.data.startsWith('graph ')) {
-        nodes.length = 0;
-        links.length = 0;
-        node_map.clear();
+    const c_msg = JSON.parse(msg.data);
+    switch (c_msg.message_type) {
+        case 'graph': {
+            nodes.length = 0;
+            links.length = 0;
+            node_map.clear();
 
-        const c_graph = JSON.parse(msg.data.substring('graph '.length));
-        c_graph.flaws.forEach(f => {
-            const c_f = JSON.parse(f);
-            c_f.label = JSON.parse(c_f.label);
-            if (c_f.cost)
-                c_f.cost = (c_f.cost.num / c_f.cost.den);
+            c_msg.graph.flaws.forEach(f => {
+                f.label = JSON.parse(f.label);
+                if (f.cost)
+                    f.cost = (f.cost.num / f.cost.den);
+                else
+                    f.cost = Number.POSITIVE_INFINITY;
+                f.type = 'flaw';
+
+                nodes.push(f);
+                node_map.set(f.id, f);
+                f.causes.forEach(c => links.push({ source: f.id, target: c, state: f.state }));
+            });
+            c_msg.graph.resolvers.forEach(r => {
+                r.label = JSON.parse(r.label);
+                r.cost = r.cost.num / r.cost.den;
+                r.type = 'resolver';
+
+                nodes.push(r);
+                node_map.set(r.id, r);
+                links.push({ source: r.id, target: r.effect, state: r.state });
+                r.preconditions.filter(pre => !links.find(l => l.source === pre && l.target === r.id)).forEach(pre => links.push({ source: pre, target: r.id, state: node_map.get(pre).state }));
+            });
+            updateGraph();
+            nodes.filter(n => n.type === 'resolver').forEach(r => update_resolver_cost(r));
+            updateGraph();
+        }
+            break;
+        case 'flaw_created': {
+            c_msg.label = JSON.parse(c_msg.label);
+            if (c_msg.cost)
+                c_msg.cost = (c_msg.cost.num / c_msg.cost.den);
             else
-                c_f.cost = Number.POSITIVE_INFINITY;
-            c_f.type = 'flaw';
+                c_msg.cost = Number.POSITIVE_INFINITY;
+            c_msg.type = 'flaw';
 
-            nodes.push(c_f);
-            node_map.set(c_f.id, c_f);
-            c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
-        });
-        c_graph.resolvers.forEach(r => {
-            const c_r = JSON.parse(r);
-            c_r.label = JSON.parse(c_r.label);
-            c_r.cost = c_r.intrinsic_cost.num / c_r.intrinsic_cost.den;
-            c_r.type = 'resolver';
+            nodes.push(c_msg);
+            node_map.set(c_msg.id, c_msg);
+            c_msg.causes.forEach(c => links.push({ source: c_msg.id, target: c, state: c_msg.state }));
+            updateGraph();
+            c_msg.causes.forEach(c => update_resolver_cost(node_map.get(c)));
+            updateGraph();
+        }
+            break;
+        case 'flaw_state_changed': {
+            node_map.get(c_msg.id).state = c_msg.state;
+            links.filter(l => l.source.id === c_msg.id).forEach(l => l.state = c_msg.state);
+            updateGraph();
+        }
+            break;
+        case 'flaw_cost_changed': {
+            const f_node = node_map.get(c_msg.id);
+            f_node.cost = c_msg.cost.num / c_msg.cost.den;
+            links.filter(l => l.source.id == f_node.id).forEach(out_link => update_resolver_cost(out_link.target));
+            updateGraph();
+        }
+            break;
+        case 'flaw_position_changed': {
+            node_map.get(c_msg.id).position = c_msg.position;
+            updateGraph();
+        }
+            break;
+        case 'current_flaw': {
+            if (current_flaw) current_flaw.current = false;
+            if (current_resolver) { current_resolver.current = false; current_resolver = undefined; }
+            const f_node = node_map.get(c_msg.id);
+            f_node.current = true;
+            current_flaw = f_node;
+            updateGraph();
+        }
+            break;
+        case 'resolver_created': {
+            c_msg.label = JSON.parse(c_msg.label);
+            c_msg.cost = c_msg.cost.num / c_msg.cost.den;
+            c_msg.type = 'resolver';
 
-            nodes.push(c_r);
-            node_map.set(c_r.id, c_r);
-            links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
-            c_r.preconditions.filter(pre => !links.find(l => l.source === pre && l.target === c_r.id)).forEach(pre => links.push({ source: pre, target: c_r.id, state: node_map.get(pre).state }));
-        });
-        updateGraph();
-        nodes.filter(n => n.type === 'resolver').forEach(r => update_resolver_cost(r));
-        updateGraph();
-    } else if (msg.data.startsWith('flaw_created ')) {
-        const c_f = JSON.parse(msg.data.substring('flaw_created '.length));
-        c_f.label = JSON.parse(c_f.label);
-        if (c_f.cost)
-            c_f.cost = (c_f.cost.num / c_f.cost.den);
-        else
-            c_f.cost = Number.POSITIVE_INFINITY;
-        c_f.type = 'flaw';
-
-        nodes.push(c_f);
-        node_map.set(c_f.id, c_f);
-        c_f.causes.forEach(c => links.push({ source: c_f.id, target: c, state: c_f.state }));
-        updateGraph();
-        c_f.causes.forEach(c => update_resolver_cost(node_map.get(c)));
-        updateGraph();
-    } else if (msg.data.startsWith('flaw_state_changed ')) {
-        const c_f = JSON.parse(msg.data.substring('flaw_state_changed '.length));
-        node_map.get(c_f.id).state = c_f.state;
-        links.filter(l => l.source.id === c_f.id).forEach(l => l.state = c_f.state);
-        updateGraph();
-    } else if (msg.data.startsWith('flaw_cost_changed ')) {
-        const c_f = JSON.parse(msg.data.substring('flaw_cost_changed '.length));
-        const f_node = node_map.get(c_f.id);
-        f_node.cost = c_f.cost.num / c_f.cost.den;
-        links.filter(l => l.source.id == f_node.id).forEach(out_link => update_resolver_cost(out_link.target));
-        updateGraph();
-    } else if (msg.data.startsWith('flaw_position_changed ')) {
-        const c_f = JSON.parse(msg.data.substring('flaw_position_changed '.length));
-        node_map.get(c_f.id).position = c_f.position;
-        updateGraph();
-    } else if (msg.data.startsWith('current_flaw ')) {
-        const c_f = JSON.parse(msg.data.substring('current_flaw '.length));
-        if (current_flaw) current_flaw.current = false;
-        if (current_resolver) { current_resolver.current = false; current_resolver = undefined; }
-        const f_node = node_map.get(c_f.id);
-        f_node.current = true;
-        current_flaw = f_node;
-        updateGraph();
-    } else if (msg.data.startsWith('resolver_created ')) {
-        const c_r = JSON.parse(msg.data.substring('resolver_created '.length));
-        c_r.label = JSON.parse(c_r.label);
-        c_r.cost = c_r.intrinsic_cost.num / c_r.intrinsic_cost.den;
-        c_r.type = 'resolver';
-
-        nodes.push(c_r);
-        node_map.set(c_r.id, c_r);
-        links.push({ source: c_r.id, target: c_r.effect, state: c_r.state });
-        updateGraph();
-    } else if (msg.data.startsWith('resolver_state_changed ')) {
-        const c_r = JSON.parse(msg.data.substring('resolver_state_changed '.length));
-        node_map.get(c_r.id).state = c_r.state;
-        links.filter(l => l.source.id === c_r.id).forEach(l => l.state = c_r.state);
-        updateGraph();
-    } else if (msg.data.startsWith('current_resolver ')) {
-        const c_r = JSON.parse(msg.data.substring('current_resolver '.length));
-        if (current_resolver) current_resolver.current = false;
-        const r_node = node_map.get(c_r.id);
-        r_node.current = true;
-        current_resolver = r_node;
-        updateGraph();
-    } else if (msg.data.startsWith('causal_link_added ')) {
-        const c_l = JSON.parse(msg.data.substring('causal_link_added '.length));
-        links.push({ source: c_l.flaw_id, target: c_l.resolver_id, state: node_map.get(c_l.flaw_id).state });
-        updateGraph();
-        update_resolver_cost(node_map.get(c_l.resolver_id));
-        updateGraph();
-    } else if (msg.data.startsWith('timelines ')) {
-        const ts = JSON.parse(msg.data.substring('timelines '.length));
-        timelines.splice(0, timelines.length - ts.length);
-        ts.forEach((tl, i) => {
-            console.log(tl);
-            timelines[i] = tl;
-            timelines[i].id = i;
-            timelines[i].values.forEach((v, j) => v.id = j);
-            if (timelines[i].type === 'reusable-resource' && timelines[i].values.length) timelines[i].values.push({ usage: 0, from: timelines[i].values[timelines[i].values.length - 1].to, id: timelines[i].values.length });
-            if (timelines[i].type === 'agent') {
-                const ends = [0];
-                timelines[i].values.forEach(v => v.y = values_y(v.from, v.from === v.to ? v.from + 0.1 : v.to, ends));
-            }
-        });
-        horizon = Math.max(d3.max(timelines, d => d.horizon), 1);
-        timelines_x_scale.domain([0, horizon]);
-        timelines_y_scale.domain(d3.range(timelines.length));
-        updateTimelines();
+            nodes.push(c_msg);
+            node_map.set(c_msg.id, c_msg);
+            links.push({ source: c_msg.id, target: c_msg.effect, state: c_msg.state });
+            updateGraph();
+        }
+            break;
+        case 'resolver_state_changed': {
+            node_map.get(c_msg.id).state = c_msg.state;
+            links.filter(l => l.source.id === c_msg.id).forEach(l => l.state = c_msg.state);
+            updateGraph();
+        }
+            break;
+        case 'current_resolver': {
+            if (current_resolver) current_resolver.current = false;
+            const r_node = node_map.get(c_msg.id);
+            r_node.current = true;
+            current_resolver = r_node;
+            updateGraph();
+        }
+            break;
+        case 'causal_link_added': {
+            links.push({ source: c_msg.flaw_id, target: c_msg.resolver_id, state: node_map.get(c_msg.flaw_id).state });
+            updateGraph();
+            update_resolver_cost(node_map.get(c_msg.resolver_id));
+            updateGraph();
+        }
+            break;
+        case 'timelines': {
+            timelines.splice(0, timelines.length - c_msg.timelines.length);
+            c_msg.timelines.forEach((tl, i) => {
+                console.log(tl);
+                timelines[i] = tl;
+                timelines[i].id = i;
+                timelines[i].values.forEach((v, j) => v.id = j);
+                if (timelines[i].type === 'reusable-resource' && timelines[i].values.length) timelines[i].values.push({ usage: 0, from: timelines[i].values[timelines[i].values.length - 1].to, id: timelines[i].values.length });
+                if (timelines[i].type === 'agent') {
+                    const ends = [0];
+                    timelines[i].values.forEach(v => v.y = values_y(v.from, v.from === v.to ? v.from + 0.1 : v.to, ends));
+                }
+            });
+            horizon = Math.max(d3.max(timelines, d => d.horizon), 1);
+            timelines_x_scale.domain([0, horizon]);
+            timelines_y_scale.domain(d3.range(timelines.length));
+            updateTimelines();
+        }
+            break;
+        default:
+            break;
     }
 };
 
@@ -410,7 +423,7 @@ function update_resolver_cost(resolver) {
         if (c_cost < in_link.source.cost)
             c_cost = in_link.source.cost;
     });
-    resolver.cost = c_cost == Number.NEGATIVE_INFINITY ? resolver.intrinsic_cost.num / resolver.intrinsic_cost.den : resolver.intrinsic_cost.num / resolver.intrinsic_cost.den + c_cost;
+    resolver.cost = c_cost == Number.NEGATIVE_INFINITY ? resolver.cost.num / resolver.cost.den : resolver.cost.num / resolver.cost.den + c_cost;
 }
 
 function node_color(n) {

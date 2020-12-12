@@ -1,14 +1,18 @@
 package it.cnr.istc.pst.oratio.gui;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +23,9 @@ import it.cnr.istc.pst.oratio.Context;
 
 public class App {
 
-    static final Logger LOG = LoggerFactory.getLogger(App.class);
+    private static final Logger LOG = LoggerFactory.getLogger(App.class);
     static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
-    static final Gson GSON = new GsonBuilder().registerTypeAdapter(CausalGraph.class, new CausalGraph.GraphSerializer())
-            .registerTypeAdapter(CausalGraph.Flaw.class, new CausalGraph.FlawSerializer())
-            .registerTypeAdapter(CausalGraph.Resolver.class, new CausalGraph.ResolverSerializer()).create();
+    static final ObjectMapper MAPPER = new ObjectMapper();
     static final SolverState STATE = new SolverState();
     static final CausalGraph GRAPH = new CausalGraph();
     private static Set<WsContext> contexts = new HashSet<>();
@@ -51,8 +53,12 @@ public class App {
                 EXECUTOR.execute(() -> {
                     LOG.info("New connection..");
                     contexts.add(ctx);
-                    broadcast("timelines " + App.GSON.toJson(STATE.getTimelines()));
-                    broadcast("graph " + GSON.toJson(GRAPH));
+                    try {
+                        broadcast(MAPPER.writeValueAsString(new Message.Timelines(STATE.getTimelines())));
+                        broadcast(MAPPER.writeValueAsString(new Message.Graph(GRAPH)));
+                    } catch (JsonProcessingException e) {
+                        LOG.error("Cannot serialize", e);
+                    }
                 });
             });
             ws.onClose(ctx -> {
@@ -68,5 +74,39 @@ public class App {
 
     static void broadcast(final String message) {
         contexts.forEach(session -> session.send(message));
+    }
+
+    @SuppressWarnings({ "unused" })
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "message_type")
+    @JsonSubTypes({ @Type(value = Message.Log.class, name = "log"), @Type(value = Message.Graph.class, name = "graph"),
+            @Type(value = Message.Timelines.class, name = "timelines") })
+    public static abstract class Message {
+
+        public static class Log extends Message {
+
+            public final String log;
+
+            public Log(final String log) {
+                this.log = log;
+            }
+        }
+
+        public static class Graph extends Message {
+
+            public final CausalGraph graph;
+
+            public Graph(final CausalGraph graph) {
+                this.graph = graph;
+            }
+        }
+
+        public static class Timelines extends Message {
+
+            public final Collection<Object> timelines;
+
+            public Timelines(final Collection<Object> timelines) {
+                this.timelines = timelines;
+            }
+        }
     }
 }

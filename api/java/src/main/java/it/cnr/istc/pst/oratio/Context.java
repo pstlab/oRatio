@@ -3,9 +3,8 @@ package it.cnr.istc.pst.oratio;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,55 +13,44 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonReader;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.cnr.istc.pst.oratio.GraphListener.CausalLinkAdded;
-import it.cnr.istc.pst.oratio.GraphListener.CurrentFlaw;
-import it.cnr.istc.pst.oratio.GraphListener.CurrentResolver;
-import it.cnr.istc.pst.oratio.GraphListener.FlawCostChanged;
-import it.cnr.istc.pst.oratio.GraphListener.FlawCreated;
-import it.cnr.istc.pst.oratio.GraphListener.FlawPositionChanged;
-import it.cnr.istc.pst.oratio.GraphListener.FlawStateChanged;
-import it.cnr.istc.pst.oratio.GraphListener.ResolverCreated;
-import it.cnr.istc.pst.oratio.GraphListener.ResolverStateChanged;
+import it.cnr.istc.pst.oratio.Context.Message.CausalLinkAdded;
+import it.cnr.istc.pst.oratio.Context.Message.CurrentFlaw;
+import it.cnr.istc.pst.oratio.Context.Message.CurrentResolver;
+import it.cnr.istc.pst.oratio.Context.Message.FlawCostChanged;
+import it.cnr.istc.pst.oratio.Context.Message.FlawCreated;
+import it.cnr.istc.pst.oratio.Context.Message.FlawPositionChanged;
+import it.cnr.istc.pst.oratio.Context.Message.FlawStateChanged;
+import it.cnr.istc.pst.oratio.Context.Message.Log;
+import it.cnr.istc.pst.oratio.Context.Message.ReadFiles;
+import it.cnr.istc.pst.oratio.Context.Message.ReadScript;
+import it.cnr.istc.pst.oratio.Context.Message.ResolverCreated;
+import it.cnr.istc.pst.oratio.Context.Message.ResolverStateChanged;
+import it.cnr.istc.pst.oratio.Context.Message.StateChanged;
 import it.cnr.istc.pst.oratio.riddle.Core;
-import it.cnr.istc.pst.oratio.riddle.CoreDeserializer;
+import it.cnr.istc.pst.oratio.riddle.Rational;
 import it.cnr.istc.pst.oratio.timelines.Timeline;
 import it.cnr.istc.pst.oratio.timelines.TimelinesList;
 
 public class Context {
 
+    public static final int INF = Integer.MAX_VALUE / 2 - 1;
     private static final Logger LOG = LoggerFactory.getLogger(Context.class.getName());
     private static Context context;
-
-    private static final String LOG_MESSAGE = "log ";
-    private static final String STATE_CHANGED = "state_changed ";
-    private static final String READ_0 = "read0";
-    private static final String READ_1 = "read1";
-
-    private static final String FLAW_CREATED = "flaw_created ";
-    private static final String FLAW_STATE_CHANGED = "flaw_state_changed ";
-    private static final String FLAW_COST_CHANGED = "flaw_cost_changed ";
-    private static final String FLAW_POSITION_CHANGED = "flaw_position_changed ";
-    private static final String CURRENT_FLAW = "current_flaw ";
-    private static final String RESOLVER_CREATED = "resolver_created ";
-    private static final String RESOLVER_STATE_CHANGED = "resolver_state_changed ";
-    private static final String CURRENT_RESOLVER = "current_resolver ";
-    private static final String CAUSAL_LINK_ADDED = "causal_link_added ";
 
     private final Core core = new Core();
     private final TimelinesList timelines = new TimelinesList(core);
     private final Collection<GraphListener> graph_listeners = new ArrayList<>();
     private final Collection<StateListener> state_listeners = new ArrayList<>();
-    private final Gson gson;
-    private final CoreDeserializer deserializer = new CoreDeserializer();
+    private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * @return the context
@@ -74,10 +62,6 @@ public class Context {
     }
 
     private Context() {
-        final GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(Core.class, deserializer);
-        gson = builder.create();
-
         state_listeners.add(timelines);
     }
 
@@ -112,12 +96,11 @@ public class Context {
     }
 
     public void readState(File state) {
-        deserializer.setCore(core);
         try {
-            gson.fromJson(new JsonReader(new FileReader(state)), Core.class);
+            mapper.readValue(state, Core.class);
             for (StateListener l : state_listeners)
                 l.stateChanged(core);
-        } catch (JsonIOException | JsonSyntaxException | FileNotFoundException e) {
+        } catch (IOException e) {
             LOG.error("Failed at reading state", e);
         }
     }
@@ -130,101 +113,210 @@ public class Context {
                     BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"))) {
 
                 LOG.info("Initializing the core..");
-                deserializer.setCore(core);
+                core.clear();
                 for (StateListener l : state_listeners)
                     l.init();
 
                 LOG.info("Waiting for input..");
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
-                    if (inputLine.startsWith(LOG_MESSAGE)) {
-                        for (StateListener l : state_listeners)
-                            l.log(inputLine.substring(LOG_MESSAGE.length()));
-                    } else if (inputLine.startsWith(STATE_CHANGED)) {
-                        deserializer.setCore(core);
-                        gson.fromJson(inputLine.substring(STATE_CHANGED.length()), Core.class);
-                        for (StateListener l : state_listeners)
-                            l.stateChanged(core);
-                    } else if (inputLine.equals(READ_0)) {
-                        StringBuilder script = new StringBuilder();
-                        while ((inputLine = in.readLine()) != null && !inputLine.equals("EOS"))
-                            script.append(inputLine).append('\n');
-                        if (inputLine == null)
-                            throw new RuntimeException("Connection lost..");
-                        core.read(script.toString());
-                        for (StateListener l : state_listeners)
-                            l.stateChanged(core);
-                    } else if (inputLine.equals(READ_1)) {
-                        deserializer.setCore(core);
-                        List<File> files = new ArrayList<>();
-                        while (true) {
-                            File file = File.createTempFile("script_" + System.currentTimeMillis(), ".tmp");
-                            try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
-                                while ((inputLine = in.readLine()) != null && !inputLine.equals("EOF")
-                                        && !inputLine.equals("EOS")) {
-                                    writer.write(inputLine + '\n');
-                                }
-                                if (inputLine == null)
-                                    throw new RuntimeException("Connection lost..");
-                            }
-                            files.add(file);
-                            if (inputLine.equals("EOS"))
-                                break;
+                    JsonNode tree_message = mapper.readTree(inputLine);
+                    switch (tree_message.get("message_type").asText()) {
+                        case "log": {
+                            Log log = mapper.treeToValue(tree_message, Log.class);
+                            for (StateListener l : state_listeners)
+                                l.log(log.log);
                         }
-                        core.read(files.toArray(new File[files.size()]));
-                        for (StateListener l : state_listeners)
-                            l.stateChanged(core);
-                    } else if (inputLine.startsWith(FLAW_CREATED)) {
-                        FlawCreated fc = gson.fromJson(inputLine.substring(FLAW_CREATED.length()), FlawCreated.class);
-                        for (GraphListener l : graph_listeners)
-                            l.flawCreated(fc);
-                    } else if (inputLine.startsWith(FLAW_STATE_CHANGED)) {
-                        FlawStateChanged fsc = gson.fromJson(inputLine.substring(FLAW_STATE_CHANGED.length()),
-                                FlawStateChanged.class);
-                        for (GraphListener l : graph_listeners)
-                            l.flawStateChanged(fsc);
-                    } else if (inputLine.startsWith(FLAW_COST_CHANGED)) {
-                        FlawCostChanged fsc = gson.fromJson(inputLine.substring(FLAW_COST_CHANGED.length()),
-                                FlawCostChanged.class);
-                        for (GraphListener l : graph_listeners)
-                            l.flawCostChanged(fsc);
-                    } else if (inputLine.startsWith(FLAW_POSITION_CHANGED)) {
-                        FlawPositionChanged fpc = gson.fromJson(inputLine.substring(FLAW_POSITION_CHANGED.length()),
-                                FlawPositionChanged.class);
-                        for (GraphListener l : graph_listeners)
-                            l.flawPositionChanged(fpc);
-                    } else if (inputLine.startsWith(CURRENT_FLAW)) {
-                        CurrentFlaw cf = gson.fromJson(inputLine.substring(CURRENT_FLAW.length()), CurrentFlaw.class);
-                        for (GraphListener l : graph_listeners)
-                            l.currentFlaw(cf);
-                    } else if (inputLine.startsWith(RESOLVER_CREATED)) {
-                        ResolverCreated rc = gson.fromJson(inputLine.substring(RESOLVER_CREATED.length()),
-                                ResolverCreated.class);
-                        for (GraphListener l : graph_listeners)
-                            l.resolverCreated(rc);
-                    } else if (inputLine.startsWith(RESOLVER_STATE_CHANGED)) {
-                        ResolverStateChanged rsc = gson.fromJson(inputLine.substring(RESOLVER_STATE_CHANGED.length()),
-                                ResolverStateChanged.class);
-                        for (GraphListener l : graph_listeners)
-                            l.resolverStateChanged(rsc);
-                    } else if (inputLine.startsWith(CURRENT_RESOLVER)) {
-                        CurrentResolver cr = gson.fromJson(inputLine.substring(CURRENT_RESOLVER.length()),
-                                CurrentResolver.class);
-                        for (GraphListener l : graph_listeners)
-                            l.currentResolver(cr);
-                    } else if (inputLine.startsWith(CAUSAL_LINK_ADDED)) {
-                        CausalLinkAdded cla = gson.fromJson(inputLine.substring(CAUSAL_LINK_ADDED.length()),
-                                CausalLinkAdded.class);
-                        for (GraphListener l : graph_listeners)
-                            l.causalLinkAdded(cla);
-                    } else
-                        LOG.info("Cannot handle message: {}", inputLine);
+                            break;
+                        case "read_script": {
+                            ReadScript read_script = mapper.treeToValue(tree_message, ReadScript.class);
+                            core.read(read_script.script.replace("\\n", "\n"));
+                        }
+                            break;
+                        case "read_files": {
+                            ReadFiles read_files = mapper.treeToValue(tree_message, ReadFiles.class);
+                            List<File> files = new ArrayList<>(read_files.files.length);
+                            for (String file : read_files.files) {
+                                File c_file = File.createTempFile("script_" + System.currentTimeMillis(), ".tmp");
+                                try (BufferedWriter writer = new BufferedWriter(new FileWriter(c_file))) {
+                                    writer.write(file.replace("\\n", "\n"));
+                                }
+                                files.add(c_file);
+                            }
+                            core.read(files.toArray(new File[files.size()]));
+                        }
+                            break;
+                        case "state_changed": {
+                            mapper.treeToValue(tree_message, StateChanged.class);
+                            for (StateListener l : state_listeners)
+                                l.stateChanged(core);
+                        }
+                            break;
+                        case "flaw_created": {
+                            FlawCreated flaw_created = mapper.treeToValue(tree_message, FlawCreated.class);
+                            for (GraphListener l : graph_listeners)
+                                l.flawCreated(flaw_created);
+                        }
+                            break;
+                        case "flaw_state_changed": {
+                            FlawStateChanged flaw_state_changed = mapper.treeToValue(tree_message,
+                                    FlawStateChanged.class);
+                            for (GraphListener l : graph_listeners)
+                                l.flawStateChanged(flaw_state_changed);
+                        }
+                            break;
+                        case "flaw_cost_changed": {
+                            FlawCostChanged flaw_cost_changed = mapper.treeToValue(tree_message, FlawCostChanged.class);
+                            for (GraphListener l : graph_listeners)
+                                l.flawCostChanged(flaw_cost_changed);
+                        }
+                            break;
+                        case "flaw_position_changed": {
+                            FlawPositionChanged flaw_position_changed = mapper.treeToValue(tree_message,
+                                    FlawPositionChanged.class);
+                            for (GraphListener l : graph_listeners)
+                                l.flawPositionChanged(flaw_position_changed);
+                        }
+                            break;
+                        case "current_flaw": {
+                            CurrentFlaw current_flaw = mapper.treeToValue(tree_message, CurrentFlaw.class);
+                            for (GraphListener l : graph_listeners)
+                                l.currentFlaw(current_flaw);
+                        }
+                            break;
+                        case "resolver_created": {
+                            ResolverCreated resolver_created = mapper.treeToValue(tree_message, ResolverCreated.class);
+                            for (GraphListener l : graph_listeners)
+                                l.resolverCreated(resolver_created);
+                        }
+                            break;
+                        case "resolver_state_changed": {
+                            ResolverStateChanged resolver_state_changed = mapper.treeToValue(tree_message,
+                                    ResolverStateChanged.class);
+                            for (GraphListener l : graph_listeners)
+                                l.resolverStateChanged(resolver_state_changed);
+                        }
+                            break;
+                        case "current_resolver": {
+                            CurrentResolver current_resolver = mapper.treeToValue(tree_message, CurrentResolver.class);
+                            for (GraphListener l : graph_listeners)
+                                l.currentResolver(current_resolver);
+                        }
+                            break;
+                        case "causal_link": {
+                            CausalLinkAdded causal_link = mapper.treeToValue(tree_message, CausalLinkAdded.class);
+                            for (GraphListener l : graph_listeners)
+                                l.causalLinkAdded(causal_link);
+                        }
+                            break;
+                        default:
+                            LOG.info("Cannot handle message: {}", tree_message.get("message_type").asText());
+                            break;
+                    }
                 }
                 if (inputLine == null)
                     throw new RuntimeException("Connection lost..");
             } catch (Exception ex) {
                 LOG.error("Cannot read socket", ex);
             }
+        }
+    }
+
+    @SuppressWarnings({ "unused" })
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "message_type")
+    @JsonSubTypes({ @Type(value = Message.Log.class, name = "log"),
+            @Type(value = Message.ReadScript.class, name = "read_script"),
+            @Type(value = Message.ReadFiles.class, name = "read_files"),
+            @Type(value = Message.StateChanged.class, name = "state_changed"),
+            @Type(value = Message.FlawCreated.class, name = "flaw_created"),
+            @Type(value = Message.FlawStateChanged.class, name = "flaw_state_changed"),
+            @Type(value = Message.FlawCostChanged.class, name = "flaw_cost_changed"),
+            @Type(value = Message.FlawPositionChanged.class, name = "flaw_position_changed"),
+            @Type(value = Message.CurrentFlaw.class, name = "current_flaw"),
+            @Type(value = Message.ResolverCreated.class, name = "resolver_created"),
+            @Type(value = Message.ResolverStateChanged.class, name = "resolver_state_changed"),
+            @Type(value = Message.CurrentResolver.class, name = "current_resolver"),
+            @Type(value = Message.CausalLinkAdded.class, name = "causal_link") })
+    public static abstract class Message {
+
+        public static class Log extends Message {
+            public String log;
+        }
+
+        public static class StateChanged extends Message {
+            public Core state;
+        }
+
+        public static class ReadScript extends Message {
+            public String script;
+        }
+
+        public static class ReadFiles extends Message {
+            public String[] files;
+        }
+
+        public static class FlawCreated extends Message {
+            public String id;
+            public String[] causes;
+            public String label;
+            public int state;
+            public Bound position;
+        }
+
+        public static class FlawStateChanged extends Message {
+            public String id;
+            public int state;
+        }
+
+        public static class FlawCostChanged extends Message {
+            public String id;
+            public Rational cost;
+        }
+
+        public static class FlawPositionChanged extends Message {
+            public String id;
+            public Bound position;
+        }
+
+        public static class CurrentFlaw extends Message {
+            public String id;
+        }
+
+        public static class ResolverCreated extends Message {
+            public String id;
+            public String effect;
+            public Rational cost;
+            public String label;
+            public int state;
+        }
+
+        public static class ResolverStateChanged extends Message {
+            public String id;
+            public int state;
+        }
+
+        public static class CurrentResolver extends Message {
+            public String id;
+        }
+
+        public static class CausalLinkAdded extends Message {
+            public String flaw;
+            public String resolver;
+        }
+    }
+
+    public static class Bound {
+
+        public int min = -INF, max = INF;
+
+        @Override
+        public String toString() {
+            if (min == max)
+                return Integer.toString(min);
+
+            String c_min = min == -INF ? "-inf" : Integer.toString(min);
+            String c_max = max == INF ? "+inf" : Integer.toString(max);
+            return "[" + c_min + ", " + c_max + "]";
         }
     }
 }

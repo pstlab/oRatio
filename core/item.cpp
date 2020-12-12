@@ -164,6 +164,7 @@ namespace ratio
             }
             j_num_val->set("lb", j_ub_bound);
         }
+        j_val->set("val", j_num_val);
 
         return j_val;
     }

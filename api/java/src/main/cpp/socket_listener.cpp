@@ -10,6 +10,8 @@
 #include <fstream>
 #include <iostream>
 
+using namespace smt;
+
 namespace ratio
 {
     std::string replace_all(std::string str, const std::string &from, const std::string &to)
@@ -61,6 +63,10 @@ namespace ratio
 
     void socket_listener::log(const std::string &msg)
     {
+        json j_msg;
+        j_msg->set("message_type", new string_val("log"));
+        j_msg->set("log", new string_val(msg));
+
         std::stringstream ss;
         ss << "log " << msg << '\n';
         send_message(ss.str());
@@ -68,11 +74,10 @@ namespace ratio
 
     void socket_listener::read(const std::string &script)
     {
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("read-script"));
-        std::string c_script = script;
-        replace_all(c_script, "\"", "\\\"");
-        j_msg->set("script", new smt::string_val(c_script));
+        json j_msg;
+        j_msg->set("message_type", new string_val("read_script"));
+        std::string c_script = replace_all(replace_all(script, "\"", "\\\""), "\n", "\\n");
+        j_msg->set("script", new string_val(c_script));
 
         std::stringstream ss;
         ss << j_msg << '\n';
@@ -81,16 +86,16 @@ namespace ratio
 
     void socket_listener::read(const std::vector<std::string> &files)
     {
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("read-files"));
-        std::vector<smt::json> j_files;
+        json j_msg;
+        j_msg->set("message_type", new string_val("read_files"));
+        std::vector<json> j_files;
         for (const auto &file : files)
         {
-            std::string c_file = file;
-            replace_all(c_file, "\"", "\\\"");
-            j_files.push_back(new smt::string_val(c_file));
+            std::stringstream ss;
+            ss << std::ifstream(file).rdbuf();
+            j_files.push_back(new string_val(replace_all(replace_all(ss.str(), "\"", "\\\""), "\n", "\\n")));
         }
-        j_msg->set("files", new smt::array_val(j_files));
+        j_msg->set("files", new array_val(j_files));
 
         std::stringstream ss;
         ss << j_msg << '\n';
@@ -99,23 +104,21 @@ namespace ratio
 
     void socket_listener::flaw_created(const flaw &f)
     {
-        std::string label = f.get_label();
-        replace_all(label, "\"", "\\\"");
-        std::pair<smt::I, smt::I> bound = slv.get_idl_theory().bounds(f.get_position());
+        std::pair<I, I> bound = slv.get_idl_theory().bounds(f.get_position());
 
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("flaw-created"));
-        j_msg->set("id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
-        std::vector<smt::json> j_causes;
+        json j_msg;
+        j_msg->set("message_type", new string_val("flaw_created"));
+        j_msg->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
+        std::vector<json> j_causes;
         for (const auto &cause : f.get_causes())
-            j_causes.push_back(new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(cause)))));
-        j_msg->set("causes", new smt::array_val(j_causes));
-        j_msg->set("label", new smt::string_val(label));
-        j_msg->set("state", new smt::string_val(std::to_string(slv.get_sat_core().value(f.get_phi()))));
-        smt::json j_pos;
-        j_pos->set("min", new smt::string_val(std::to_string(bound.first)));
-        j_pos->set("max", new smt::string_val(std::to_string(bound.second)));
-        j_msg->set("pos", j_pos);
+            j_causes.push_back(new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(cause)))));
+        j_msg->set("causes", new array_val(j_causes));
+        j_msg->set("label", new string_val(replace_all(f.get_label(), "\"", "\\\"")));
+        j_msg->set("state", new string_val(std::to_string(slv.get_sat_core().value(f.get_phi()))));
+        json j_pos;
+        j_pos->set("min", new long_val(bound.first));
+        j_pos->set("max", new long_val(bound.second));
+        j_msg->set("position", j_pos);
 
         std::stringstream ss;
         ss << j_msg << '\n';
@@ -123,10 +126,10 @@ namespace ratio
     }
     void socket_listener::flaw_state_changed(const flaw &f)
     {
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("flaw-state-changed"));
-        j_msg->set("id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
-        j_msg->set("state", new smt::string_val(std::to_string(slv.get_sat_core().value(f.get_phi()))));
+        json j_msg;
+        j_msg->set("message_type", new string_val("flaw_state_changed"));
+        j_msg->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
+        j_msg->set("state", new string_val(std::to_string(slv.get_sat_core().value(f.get_phi()))));
 
         std::stringstream ss;
         ss << j_msg << '\n';
@@ -134,14 +137,14 @@ namespace ratio
     }
     void socket_listener::flaw_cost_changed(const flaw &f)
     {
-        smt::rational est_cost = f.get_estimated_cost();
+        rational est_cost = f.get_estimated_cost();
 
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("flaw-cost-changed"));
-        j_msg->set("id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
-        smt::json j_cost;
-        j_cost->set("num", new smt::string_val(std::to_string(est_cost.numerator())));
-        j_cost->set("den", new smt::string_val(std::to_string(est_cost.denominator())));
+        json j_msg;
+        j_msg->set("message_type", new string_val("flaw_cost_changed"));
+        j_msg->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
+        json j_cost;
+        j_cost->set("num", new long_val(est_cost.numerator()));
+        j_cost->set("den", new long_val(est_cost.denominator()));
         j_msg->set("cost", j_cost);
 
         std::stringstream ss;
@@ -150,15 +153,15 @@ namespace ratio
     }
     void socket_listener::flaw_position_changed(const flaw &f)
     {
-        std::pair<smt::I, smt::I> bound = slv.get_idl_theory().bounds(f.get_position());
+        std::pair<I, I> bound = slv.get_idl_theory().bounds(f.get_position());
 
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("flaw-position-changed"));
-        j_msg->set("id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
-        smt::json j_pos;
-        j_pos->set("min", new smt::string_val(std::to_string(bound.first)));
-        j_pos->set("max", new smt::string_val(std::to_string(bound.second)));
-        j_msg->set("pos", j_pos);
+        json j_msg;
+        j_msg->set("message_type", new string_val("flaw_position_changed"));
+        j_msg->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
+        json j_pos;
+        j_pos->set("min", new long_val(bound.first));
+        j_pos->set("max", new long_val(bound.second));
+        j_msg->set("position", j_pos);
 
         std::stringstream ss;
         ss << j_msg << '\n';
@@ -166,9 +169,9 @@ namespace ratio
     }
     void socket_listener::current_flaw(const flaw &f)
     {
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("current-flaw"));
-        j_msg->set("id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
+        json j_msg;
+        j_msg->set("message_type", new string_val("current_flaw"));
+        j_msg->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
 
         std::stringstream ss;
         ss << j_msg << '\n';
@@ -177,19 +180,17 @@ namespace ratio
 
     void socket_listener::resolver_created(const resolver &r)
     {
-        smt::rational est_cost = r.get_estimated_cost();
-        std::string label = r.get_label();
-        replace_all(label, "\"", "\\\"");
+        rational est_cost = r.get_estimated_cost();
 
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("resolver-created"));
-        j_msg->set("id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(&r)))));
-        j_msg->set("effect", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&r.get_effect())))));
-        j_msg->set("label", new smt::string_val(label));
-        j_msg->set("state", new smt::string_val(std::to_string(slv.get_sat_core().value(r.get_rho()))));
-        smt::json j_cost;
-        j_cost->set("num", new smt::string_val(std::to_string(est_cost.numerator())));
-        j_cost->set("den", new smt::string_val(std::to_string(est_cost.denominator())));
+        json j_msg;
+        j_msg->set("message_type", new string_val("resolver_created"));
+        j_msg->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(&r)))));
+        j_msg->set("effect", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&r.get_effect())))));
+        j_msg->set("label", new string_val(replace_all(r.get_label(), "\"", "\\\"")));
+        j_msg->set("state", new string_val(std::to_string(slv.get_sat_core().value(r.get_rho()))));
+        json j_cost;
+        j_cost->set("num", new long_val(est_cost.numerator()));
+        j_cost->set("den", new long_val(est_cost.denominator()));
         j_msg->set("cost", j_cost);
 
         std::stringstream ss;
@@ -198,10 +199,10 @@ namespace ratio
     }
     void socket_listener::resolver_state_changed(const resolver &r)
     {
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("resolver-state-changed"));
-        j_msg->set("id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(&r)))));
-        j_msg->set("state", new smt::string_val(std::to_string(slv.get_sat_core().value(r.get_rho()))));
+        json j_msg;
+        j_msg->set("message_type", new string_val("resolver_state_changed"));
+        j_msg->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(&r)))));
+        j_msg->set("state", new string_val(std::to_string(slv.get_sat_core().value(r.get_rho()))));
 
         std::stringstream ss;
         ss << j_msg << '\n';
@@ -209,9 +210,9 @@ namespace ratio
     }
     void socket_listener::current_resolver(const resolver &r)
     {
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("current-resolver"));
-        j_msg->set("id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(&r)))));
+        json j_msg;
+        j_msg->set("message_type", new string_val("current_resolver"));
+        j_msg->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(&r)))));
 
         std::stringstream ss;
         ss << j_msg << '\n';
@@ -220,10 +221,10 @@ namespace ratio
 
     void socket_listener::causal_link_added(const flaw &f, const resolver &r)
     {
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("causal-link"));
-        j_msg->set("flaw-id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
-        j_msg->set("resolver-id", new smt::string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(&r)))));
+        json j_msg;
+        j_msg->set("message_type", new string_val("causal_link"));
+        j_msg->set("flaw", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const flaw *>(&f)))));
+        j_msg->set("resolver", new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const resolver *>(&r)))));
 
         std::stringstream ss;
         ss << j_msg << '\n';
@@ -232,8 +233,8 @@ namespace ratio
 
     void socket_listener::state_changed()
     {
-        smt::json j_msg;
-        j_msg->set("message-type", new smt::string_val("state-changed"));
+        json j_msg;
+        j_msg->set("message_type", new string_val("state_changed"));
         j_msg->set("state", slv.to_json());
 
         std::stringstream ss;

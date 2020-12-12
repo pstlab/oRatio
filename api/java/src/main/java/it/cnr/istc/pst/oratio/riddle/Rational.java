@@ -1,5 +1,16 @@
 package it.cnr.istc.pst.oratio.riddle;
 
+import java.io.IOException;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+@JsonAutoDetect(fieldVisibility = Visibility.ANY)
+@JsonSerialize(using = Rational.RationalSerializer.class)
 public class Rational extends Number implements Comparable<Rational> {
 
     private static final long serialVersionUID = 1L;
@@ -481,5 +492,22 @@ public class Rational extends Number implements Comparable<Rational> {
             v = -v;
         }
         return u * (v / gcd(u, v));
+    }
+
+    static class RationalSerializer extends StdSerializer<Rational> {
+
+        private static final long serialVersionUID = 1L;
+
+        private RationalSerializer() {
+            super(Rational.class);
+        }
+
+        @Override
+        public void serialize(Rational rat, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            gen.writeStartObject();
+            gen.writeNumberField("num", rat.num);
+            gen.writeNumberField("den", rat.den);
+            gen.writeEndObject();
+        }
     }
 }

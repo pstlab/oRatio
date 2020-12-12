@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
@@ -13,7 +14,10 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStreams;
@@ -28,6 +32,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@JsonDeserialize(using = CoreDeserializer.class)
 public class Core implements Scope {
 
     private static final Logger LOG = LoggerFactory.getLogger(Core.class.getName());
@@ -223,6 +228,22 @@ public class Core implements Scope {
         for (CodeSnippet snippet : snippets) {
             ParseTreeWalker.DEFAULT.walk(new TypeDeclarationListener(this), snippet.cu);
             ParseTreeWalker.DEFAULT.walk(new TypeRefinementListener(this), snippet.cu);
+        }
+    }
+
+    public void clear() {
+        items.clear();
+        atoms.clear();
+        exprs.clear();
+        expr_names.clear();
+        Queue<Type> q = new ArrayDeque<>();
+        q.addAll(types.values());
+        q.addAll(predicates.values());
+        while (!q.isEmpty()) {
+            Type t = q.poll();
+            t.instances.clear();
+            q.addAll(t.types.values());
+            q.addAll(t.predicates.values());
         }
     }
 

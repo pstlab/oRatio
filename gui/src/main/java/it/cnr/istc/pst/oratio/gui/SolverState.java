@@ -5,6 +5,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import it.cnr.istc.pst.oratio.Context;
 import it.cnr.istc.pst.oratio.StateListener;
 import it.cnr.istc.pst.oratio.riddle.Core;
@@ -15,16 +22,24 @@ import it.cnr.istc.pst.oratio.timelines.Timeline;
 
 public class SolverState implements StateListener {
 
-    private static final String TIMELINES = "timelines ";
+    private static final Logger LOG = LoggerFactory.getLogger(SolverState.class);
 
     @Override
     public void log(String log) {
-        // TODO Auto-generated method stub
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Log(log)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
     public void stateChanged(Core core) {
-        App.broadcast(TIMELINES + App.GSON.toJson(getTimelines()));
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(getTimelines())));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     Collection<Object> getTimelines() {
@@ -66,11 +81,16 @@ public class SolverState implements StateListener {
 
     @Override
     public void init() {
-        App.broadcast(TIMELINES + App.GSON.toJson(getTimelines()));
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(getTimelines())));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
         App.GRAPH.clear();
     }
 
     @SuppressWarnings("unused")
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     private static class SVTimeline {
 
         private final String type = "state-variable";
@@ -85,6 +105,7 @@ public class SolverState implements StateListener {
             this.values = values;
         }
 
+        @JsonAutoDetect(fieldVisibility = Visibility.ANY)
         private static class Value {
 
             private final String name;
@@ -101,6 +122,7 @@ public class SolverState implements StateListener {
     }
 
     @SuppressWarnings("unused")
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     private static class RRTimeline {
 
         private final String type = "reusable-resource";
@@ -118,6 +140,7 @@ public class SolverState implements StateListener {
             this.values = values;
         }
 
+        @JsonAutoDetect(fieldVisibility = Visibility.ANY)
         private static class Value {
 
             private final double usage;
@@ -134,6 +157,7 @@ public class SolverState implements StateListener {
     }
 
     @SuppressWarnings("unused")
+    @JsonAutoDetect(fieldVisibility = Visibility.ANY)
     private static class Agent {
 
         private final String type = "agent";
@@ -148,6 +172,7 @@ public class SolverState implements StateListener {
             this.values = values;
         }
 
+        @JsonAutoDetect(fieldVisibility = Visibility.ANY)
         private static class Value {
 
             private final String name;
