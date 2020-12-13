@@ -1,5 +1,5 @@
 #include "json.h"
-#include <strstream>
+#include <sstream>
 #include <cassert>
 
 using namespace smt;
@@ -25,7 +25,7 @@ void test_json_0()
 
 void test_json_1()
 {
-    std::istrstream s("{\"a\": \"a\", \"b\": 1, \"c\": 1.500000, \"d\": true, \"e\": [true, false], \"f\": null, \"g\": {\"a\": true, \"b\": 1}}");
+    std::stringstream s("{\"a\": \"a\", \"b\": 1, \"c\": 1.500000, \"d\": true, \"e\": [true, false], \"f\": null, \"g\": {\"a\": true, \"b\": 1}}");
     json j_obj = json::from_json(s);
 }
 
