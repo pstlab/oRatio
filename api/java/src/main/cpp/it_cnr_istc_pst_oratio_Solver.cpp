@@ -3,8 +3,7 @@
 #ifdef BUILD_GUI
 #include "socket_listener.h"
 #endif
-#include <iostream>
-#include <fstream>
+#include <sstream>
 
 using namespace ratio;
 
@@ -45,4 +44,9 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_oratio_Solver_read___3Ljava_lang_String_
 
 JNIEXPORT void JNICALL Java_it_cnr_istc_oratio_Solver_solve(JNIEnv *env, jobject obj) { get_solver(env, obj)->solve(); }
 
-JNIEXPORT jstring JNICALL Java_it_cnr_istc_oratio_Solver_getState(JNIEnv *env, jobject obj) { return env->NewStringUTF(get_solver(env, obj)->to_string().c_str()); }
+JNIEXPORT jstring JNICALL Java_it_cnr_istc_oratio_Solver_getState(JNIEnv *env, jobject obj)
+{
+  std::stringstream ss;
+  ss << get_solver(env, obj);
+  return env->NewStringUTF(ss.str().c_str());
+}
