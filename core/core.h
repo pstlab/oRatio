@@ -25,7 +25,7 @@ namespace ratio
 
   class atom;
   class disjunction;
-#ifdef BUILD_GUI
+#ifdef BUILD_LISTENERS
   class core_listener;
 #endif
 
@@ -50,7 +50,7 @@ namespace ratio
     friend class ast::typedef_declaration;
     friend class ast::enum_declaration;
     friend class ast::class_declaration;
-#ifdef BUILD_GUI
+#ifdef BUILD_LISTENERS
     friend class core_listener;
     friend class type;
     friend class scope;
@@ -177,7 +177,7 @@ namespace ratio
     smt::lit tmp_ni;             // the temporary controlling literal, used for restoring the controlling literal..
     smt::lit ni = smt::TRUE_var; // the controlling literal..
 
-#ifdef BUILD_GUI
+#ifdef BUILD_LISTENERS
   private:
     std::vector<core_listener *> listeners; // the core listeners..
 
