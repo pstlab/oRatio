@@ -31,11 +31,17 @@ const timelines_g = timelines_svg.append('g');
 const timelines_box = timelines_svg.node().getBoundingClientRect();
 const timelines_width = timelines_box.width, timelines_height = timelines_box.height;
 
-const timelines_zoom = d3.zoom().on('zoom', event => timelines_g.attr('transform', event.transform));
-timelines_svg.call(timelines_zoom);
-
 const timelines_x_scale = d3.scaleLinear().range([0, timelines_width]);
 const timelines_y_scale = d3.scaleBand().rangeRound([0, timelines_height]).padding(0.1);
+
+const timelines_axis_g = timelines_svg.append('g');
+const timelines_x_axis = d3.axisBottom(timelines_x_scale);
+
+const timelines_zoom = d3.zoom().on('zoom', event => {
+    timelines_axis_g.call(timelines_x_axis.scale(event.transform.rescaleX(timelines_x_scale)));
+    timelines_g.attr('transform', event.transform);
+});
+timelines_svg.call(timelines_zoom);
 
 const graph_svg = d3.select('#graph').append('svg');
 const graph_g = graph_svg.append('g');
@@ -196,6 +202,7 @@ ws.onmessage = msg => {
             timelines_x_scale.domain([0, horizon]);
             timelines_y_scale.domain(d3.range(timelines.length));
             updateTimelines();
+            timelines_axis_g.call(timelines_x_axis);
         }
             break;
         default:
