@@ -1,5 +1,6 @@
 #pragma once
 
+#include "solver_listener.h"
 #include "inf_rational.h"
 #include "lit.h"
 #include <vector>
@@ -14,7 +15,7 @@ namespace ratio
   class predicate;
   class atom;
 
-  class executor
+  class executor : public solver_listener
   {
 
   public:
@@ -38,10 +39,11 @@ namespace ratio
     void dont_start(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
     void dont_end(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
 
+    void flaw_created(const flaw &f) override;
+
   private:
-    solver &slv;
-    predicate &int_pred;
-    predicate &imp_pred;
+    predicate &int_pred;                        // the interval predicate..
+    predicate &imp_pred;                        // the impulse predicate..
     const size_t tick_duration;                 // the duration of the ticks in milliseconds..
     const smt::rational units_for_milliseconds; // the number of plan units for a millisecond (e.g., 1/1000 means one unit for second)..
     std::mutex mtx;                             // a mutex for the critical sections..

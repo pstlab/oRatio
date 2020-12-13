@@ -38,7 +38,8 @@ namespace ratio
         json j_itm;
         j_itm->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(this))));
         j_itm->set("type", new string_val(tp.get_full_name()));
-        j_itm->set("exprs", env::to_json());
+        if (!env::exprs.empty())
+            j_itm->set("exprs", env::to_json());
         return j_itm;
     }
 

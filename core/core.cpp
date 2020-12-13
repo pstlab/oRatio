@@ -498,17 +498,24 @@ namespace ratio
 
         json j_core;
 
-        std::vector<json> j_itms;
-        for (const auto &itm : all_items)
-            j_itms.push_back(itm->to_json());
-        j_core->set("items", new array_val(j_itms));
+        if (!all_items.empty())
+        {
+            std::vector<json> j_itms;
+            for (const auto &itm : all_items)
+                j_itms.push_back(itm->to_json());
+            j_core->set("items", new array_val(j_itms));
+        }
 
-        std::vector<json> j_atms;
-        for (const auto &atm : all_atoms)
-            j_atms.push_back(atm->to_json());
-        j_core->set("atoms", new array_val(j_atms));
+        if (!all_atoms.empty())
+        {
+            std::vector<json> j_atms;
+            for (const auto &atm : all_atoms)
+                j_atms.push_back(atm->to_json());
+            j_core->set("atoms", new array_val(j_atms));
+        }
 
-        j_core->set("exprs", env::to_json());
+        if (!env::exprs.empty())
+            j_core->set("exprs", env::to_json());
         return j_core;
     }
 

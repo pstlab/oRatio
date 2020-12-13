@@ -2,6 +2,7 @@
 #include "solver.h"
 #include "predicate.h"
 #include "atom.h"
+#include "atom_flaw.h"
 #include <thread>
 #include <chrono>
 
@@ -13,7 +14,7 @@ using namespace smt;
 
 namespace ratio
 {
-    executor::executor(solver &slv, const size_t &tick_dur, const rational &units_for_millis) : slv(slv), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")), tick_duration(tick_dur), units_for_milliseconds(units_for_millis) {}
+    executor::executor(solver &slv, const size_t &tick_dur, const rational &units_for_millis) : solver_listener(slv), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")), tick_duration(tick_dur), units_for_milliseconds(units_for_millis) {}
     executor::~executor() {}
 
     void executor::start()
@@ -81,24 +82,24 @@ namespace ratio
                     { // we have to delay something..
                         for (const auto &atm : not_starting)
                             if (int_pred.is_assignable_from(atm->get_type()))
-                            {
+                            { // we have an interval atom..
                                 arith_expr s_expr = atm->get(START);
                                 pending_facts.push_back(slv.geq(s_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
                             }
                             else if (imp_pred.is_assignable_from(atm->get_type()))
-                            {
+                            { // we have an impulsive atom..
                                 arith_expr at_expr = atm->get(AT);
                                 pending_facts.push_back(slv.geq(at_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
                             }
 
                         for (const auto &atm : not_ending)
                             if (int_pred.is_assignable_from(atm->get_type()))
-                            {
+                            { // we have an interval atom..
                                 arith_expr e_expr = atm->get(END);
                                 pending_facts.push_back(slv.geq(e_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
                             }
                             else if (imp_pred.is_assignable_from(atm->get_type()))
-                            {
+                            { // we have an impulsive atom..
                                 arith_expr at_expr = atm->get(AT);
                                 pending_facts.push_back(slv.geq(at_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
                             }
@@ -124,6 +125,21 @@ namespace ratio
             }
         });
         t.detach();
+    }
+
+    void executor::flaw_created(const flaw &f)
+    { // we cannot plan in the past..
+        if (const atom_flaw *af = dynamic_cast<const atom_flaw *>(&f))
+            if (int_pred.is_assignable_from(af->get_atom().get_type()))
+            { // we have an interval atom..
+                arith_expr s_expr = af->get_atom().get(START);
+                slv.get_sat_core().new_clause({lit(af->get_atom().get_sigma(), false), slv.geq(s_expr, slv.new_real(static_cast<I>(current_time)))->l});
+            }
+            else if (imp_pred.is_assignable_from(af->get_atom().get_type()))
+            { // we have an impulsive atom..
+                arith_expr at_expr = af->get_atom().get(AT);
+                slv.get_sat_core().new_clause({lit(af->get_atom().get_sigma(), false), slv.geq(at_expr, slv.new_real(static_cast<I>(current_time)))->l});
+            }
     }
 
     void executor::stop()

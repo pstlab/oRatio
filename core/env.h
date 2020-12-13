@@ -29,6 +29,7 @@ namespace ratio
     friend class constructor;
     friend class method;
     friend class predicate;
+    friend class item;
     friend class var_item;
     friend class ast::local_field_statement;
     friend class ast::assignment_statement;

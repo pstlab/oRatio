@@ -26,11 +26,14 @@ public class CoreDeserializer extends StdDeserializer<Core> {
 
     @Override
     public Core deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
-        Core core = Context.getContext().getCore();
+        final Core core = Context.getContext().getCore();
         // we clear all the instances..
         core.clear();
 
-        JsonNode tree = p.getCodec().readTree(p);
+        final Map<String, Item> items = new HashMap<>(); // all the items, indexed by their id..
+        final Map<String, Atom> atoms = new HashMap<>(); // all the atoms, indexed by their id..
+
+        final JsonNode tree = p.getCodec().readTree(p);
 
         JsonNode items_array = tree.get("items");
         if (items_array != null)
@@ -53,7 +56,7 @@ public class CoreDeserializer extends StdDeserializer<Core> {
                     st.instances.add(item);
                     q.addAll(st.superclasses);
                 }
-                core.items.put(itm_obj.get("id").asText(), item);
+                items.put(itm_obj.get("id").asText(), item);
             }
 
         JsonNode atoms_array = tree.get("atoms");
@@ -77,7 +80,7 @@ public class CoreDeserializer extends StdDeserializer<Core> {
                 JsonNode pars = atm_obj.get("pars");
                 if (pars != null)
                     for (int j = 0; j < pars.size(); j++)
-                        c_pars.put(pars.get(j).get("name").asText(), toItem(core, pars.get(j)));
+                        c_pars.put(pars.get(j).get("name").asText(), toItem(core, items, atoms, pars.get(j)));
                 final Atom atom = new Atom(core, pred, atm_obj.get("sigma").asLong(),
                         Atom.AtomState.valueOf(atm_obj.get("state").asText()), c_pars);
                 pred.instances.add(atom);
@@ -89,36 +92,38 @@ public class CoreDeserializer extends StdDeserializer<Core> {
                     st.instances.add(atom);
                     q.addAll(st.superclasses);
                 }
-                core.atoms.put(atm_obj.get("id").asText(), atom);
+                atoms.put(atm_obj.get("id").asText(), atom);
             }
 
-        JsonNode exprs = tree.get("exprs");
-        if (exprs != null) {
-            if (items_array != null)
-                // we refine the items' parameters..
-                for (int i = 0; i < items_array.size(); i++) {
-                    Item item = core.items.get(items_array.get(i).get("id").asText());
+        if (items_array != null)
+            // we refine the items' parameters..
+            for (int i = 0; i < items_array.size(); i++) {
+                Item item = items.get(items_array.get(i).get("id").asText());
+                JsonNode exprs = items_array.get(i).get("exprs");
+                if (exprs != null)
                     for (int j = 0; j < exprs.size(); j++) {
                         String name = exprs.get(j).get("name").asText();
-                        Item itm = toItem(core, exprs.get(j));
+                        Item itm = toItem(core, items, atoms, exprs.get(j));
                         item.exprs.put(name, itm);
                         core.expr_names.putIfAbsent(itm, name);
                     }
-                }
+            }
 
+        JsonNode exprs = tree.get("exprs");
+        if (exprs != null)
             // we set the core's expressions..
             for (int i = 0; i < exprs.size(); i++) {
                 String name = exprs.get(i).get("name").asText();
-                Item itm = toItem(core, exprs.get(i));
+                Item itm = toItem(core, items, atoms, exprs.get(i));
                 core.exprs.put(name, itm);
                 core.expr_names.put(itm, name);
             }
-        }
 
         return core;
     }
 
-    private Item toItem(final Core core, final JsonNode obj) {
+    private Item toItem(final Core core, final Map<String, Item> items, final Map<String, Atom> atoms,
+            final JsonNode obj) {
         JsonNode value = obj.get("value");
         if (value.isObject()) {
             String[] c_type = obj.get("type").asText().split(":");
@@ -142,28 +147,28 @@ public class CoreDeserializer extends StdDeserializer<Core> {
                     JsonNode vals_array = value.get("vals");
                     Collection<Item> c_vals = new ArrayList<>();
                     for (int j = 0; j < vals_array.size(); j++)
-                        c_vals.add(core.items.get(vals_array.get(j).asText()));
+                        c_vals.add(items.get(vals_array.get(j).asText()));
                     return new Item.EnumItem(core, t, value.get("var").asText(),
                             c_vals.toArray(new Item[c_vals.size()]));
             }
         } else {
             String val = value.asText();
-            Item item = core.items.get(val);
+            Item item = items.get(val);
             if (item != null)
                 return item;
-            Atom atom = core.atoms.get(val);
+            Atom atom = atoms.get(val);
             if (atom != null)
                 return atom;
             return new Item.StringItem(core, val);
         }
     }
 
-    private InfRational toInfRational(JsonNode obj) {
+    private InfRational toInfRational(final JsonNode obj) {
         return (obj.get("inf") != null) ? new InfRational(toRational(obj), toRational(obj.get("inf")))
                 : new InfRational(toRational(obj));
     }
 
-    private Rational toRational(JsonNode obj) {
+    private Rational toRational(final JsonNode obj) {
         return new Rational(obj.get("num").asLong(), obj.get("den").asLong());
     }
 }
