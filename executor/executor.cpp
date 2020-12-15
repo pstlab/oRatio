@@ -50,9 +50,25 @@ namespace ratio
 
                     for (const auto &atm : starting_atms->second)
                         if (!not_starting.count(atm))
-                        {
-                            // todo: we freeze the parameters of the starting atoms..
-                            // wait! we do not need to do it now!! we can store the information and apply when backtracking for some reason..
+                        { // we freeze the parameters of the starting atoms..
+                            if (int_pred.is_assignable_from(atm->get_type()))
+                            { // we have an interval atom..
+                                for (const auto &expr : atm->get_exprs())
+                                    if (expr.first.compare(END))
+                                        if (arith_item *ai = dynamic_cast<arith_item *>(&*expr.second))
+                                            frozen_nums.emplace(ai, slv.arith_value(expr.second));
+                                        else if (var_item *vi = dynamic_cast<var_item *>(&*expr.second))
+                                            frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(expr.second).begin()));
+                            }
+                            if (int_pred.is_assignable_from(atm->get_type()))
+                            { // we have an impulsive atom..
+                                for (const auto &expr : atm->get_exprs())
+                                    if (expr.first.compare(AT))
+                                        if (arith_item *ai = dynamic_cast<arith_item *>(&*expr.second))
+                                            frozen_nums.emplace(ai, slv.arith_value(expr.second));
+                                        else if (var_item *vi = dynamic_cast<var_item *>(&*expr.second))
+                                            frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(expr.second).begin()));
+                            }
                         }
                     for (const auto &atm : ending_atms->second)
                         if (!not_ending.count(atm))
@@ -60,16 +76,12 @@ namespace ratio
                             if (int_pred.is_assignable_from(atm->get_type()))
                             { // we have an interval atom..
                                 arith_expr e_expr = atm->get(END);
-                                const auto e_lin = e_expr->l * units_for_milliseconds;
-                                pending_facts.push_back(slv.get_lra_theory().new_geq(e_lin, rational(static_cast<I>(current_time))));
-                                pending_facts.push_back(slv.get_lra_theory().new_leq(e_lin, rational(static_cast<I>(current_time + tick_duration))));
+                                frozen_nums.emplace(&*e_expr, slv.arith_value(e_expr));
                             }
                             else if (imp_pred.is_assignable_from(atm->get_type()))
                             { // we have an impulsive atom..
                                 arith_expr at_expr = atm->get(AT);
-                                const auto at_lin = at_expr->l * units_for_milliseconds;
-                                pending_facts.push_back(slv.get_lra_theory().new_geq(at_lin, rational(static_cast<I>(current_time))));
-                                pending_facts.push_back(slv.get_lra_theory().new_leq(at_lin, rational(static_cast<I>(current_time + tick_duration))));
+                                frozen_nums.emplace(&*at_expr, slv.arith_value(at_expr));
                             }
                         }
 

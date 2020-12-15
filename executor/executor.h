@@ -31,13 +31,15 @@ namespace ratio
 
     void reset_timelines();
 
+  protected:
+    void dont_start(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
+    void dont_end(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
+    void failure(const std::set<atom *> &atoms) {}
+
   private:
     virtual void tick() {}
     virtual void starting(const std::set<atom *> &atoms) {}
     virtual void ending(const std::set<atom *> &atoms) {}
-
-    void dont_start(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
-    void dont_end(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
 
     void flaw_created(const flaw &f) override;
 
@@ -50,6 +52,8 @@ namespace ratio
     bool executing = false;
     size_t current_time;
     std::vector<smt::lit> pending_facts;
+    std::unordered_map<item *, smt::inf_rational> frozen_nums;
+    std::unordered_map<item *, smt::lit> frozen_vals;
     std::set<atom *> not_starting, not_ending;
     std::map<smt::inf_rational, std::set<atom *>> s_atms, e_atms; // for each pulse (in milliseconds), the atoms starting/ending at that pulse..
     std::set<smt::inf_rational> pulses;                           // all the pulses (in milliseconds) of the plan..
