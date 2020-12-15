@@ -1,4 +1,5 @@
 const timelines = [];
+let current_time = 0;
 let horizon;
 
 const nodes = [];
@@ -71,8 +72,6 @@ const simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink().id(d => d.id).distance(70))
     .force('charge', d3.forceManyBody().strength(-70))
     .force('center', d3.forceCenter(graph_width / 2, graph_height / 2));
-
-updateGraph();
 
 const ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/graph');
 ws.onmessage = msg => {
@@ -203,6 +202,12 @@ ws.onmessage = msg => {
             timelines_y_scale.domain(d3.range(timelines.length));
             updateTimelines();
             timelines_axis_g.call(timelines_x_axis);
+            updateTime();
+        }
+            break;
+        case 'current_time': {
+            current_time = c_msg.current_time;
+            updateTime();
         }
             break;
         default:
@@ -221,8 +226,7 @@ function updateTimelines() {
         update => {
             update.select('rect').transition().duration(200).attr('width', timelines_x_scale(horizon) + 20);
             return update;
-        }
-    );
+        });
     timelines.forEach((tl, i) => updateTimeline(tl, i));
 }
 
@@ -264,12 +268,12 @@ function updateTimeline(tl, i) {
             );
             rr_g.selectAll('line').data([tl.capacity]).join(
                 enter => {
-                    const line_g = enter.append('line').attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke', 'darkslategray');
+                    const line_g = enter.append('line').attr('stroke-width', 2).attr('stroke-opacity', 0.8).attr('stroke-linecap', 'round').attr('stroke', 'darkslategray');
                     line_g.attr('x1', timelines_x_scale(0)).attr('y1', d => rr_y_scale(d)).attr('x2', timelines_x_scale(horizon)).attr('y2', d => rr_y_scale(d));
                     return line_g;
                 },
                 update => {
-                    update.transition().duration(200).attr('y1', d => rr_y_scale(d)).attr('y2', d => rr_y_scale(d));
+                    update.transition().duration(200).attr('y1', d => rr_y_scale(d)).attr('x2', timelines_x_scale(horizon)).attr('y2', d => rr_y_scale(d));
                     return update;
                 }
             );
@@ -295,6 +299,19 @@ function updateTimeline(tl, i) {
         default:
             break;
     }
+}
+
+function updateTime() {
+    timelines_g.selectAll('g.time').data([current_time]).join(
+        enter => {
+            const t_g = enter.append('g').attr('class', 'time');
+            t_g.append('line').attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke', 'lavender').attr('stroke-opacity', 0.4).attr('x1', timelines_x_scale(current_time)).attr('y1', 0).attr('x2', timelines_x_scale(current_time)).attr('y2', timelines_height);
+            return t_g;
+        },
+        update => {
+            update.select('line').transition().duration(200).attr('x1', timelines_x_scale(current_time)).attr('x2', timelines_x_scale(current_time));
+            return update;
+        });
 }
 
 function updateGraph() {
