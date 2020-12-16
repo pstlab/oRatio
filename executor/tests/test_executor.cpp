@@ -1,11 +1,31 @@
 #include "solver.h"
+#include "executor_listener.h"
+#include "atom.h"
 #ifdef BUILD_GUI
 #include "socket_listener.h"
 #endif
-#include <iostream>
-#include <fstream>
 
 using namespace ratio;
+
+class simple_executor : public executor_listener
+{
+public:
+    simple_executor(executor &e) : executor_listener(e) {}
+    ~simple_executor() {}
+
+    void starting(const std::set<atom *> &atoms) override
+    {
+        LOG("starting atoms:\n");
+        for (const auto &atm : atoms)
+            LOG(atm->to_json() << '\n');
+    }
+    void ending(const std::set<atom *> &atoms) override
+    {
+        LOG("ending atoms:\n");
+        for (const auto &atm : atoms)
+            LOG(atm->to_json() << '\n');
+    }
+};
 
 int main(int argc, char *argv[])
 {
@@ -23,14 +43,6 @@ int main(int argc, char *argv[])
     // the solution file..
     std::string sol_name = argv[argc - 1];
 
-#ifdef NDEBUG
-    if (std::ifstream(sol_name).good())
-    {
-        std::cout << "The solution file '" << sol_name << "' already exists! Please, specify a different solution file..";
-        return -1;
-    }
-#endif
-
     std::cout << "starting oRatio";
 #ifdef BUILD_GUI
     std::cout << " in debug mode";
@@ -42,10 +54,10 @@ int main(int argc, char *argv[])
     socket_listener l(s, HOST, PORT);
 #endif
 
+    s.init();
+    executor exec(s, 5000);
     try
     {
-        s.init();
-
         std::cout << "parsing input files.." << std::endl;
         s.read(prob_names);
 
@@ -53,10 +65,9 @@ int main(int argc, char *argv[])
         s.solve();
         std::cout << "hurray!! we have found a solution.." << std::endl;
 
-        std::ofstream sol_file;
-        sol_file.open(sol_name);
-        sol_file << s;
-        sol_file.close();
+        exec.reset_timelines();
+        std::thread exec_th = exec.start();
+        exec_th.join();
     }
     catch (const std::exception &ex)
     {

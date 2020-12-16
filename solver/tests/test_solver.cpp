@@ -5,10 +5,10 @@
 #include <iostream>
 #include <fstream>
 
+using namespace ratio;
+
 int main(int argc, char *argv[])
 {
-    using namespace ratio;
-
     if (argc < 3)
     {
         std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>" << std::endl;

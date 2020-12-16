@@ -11,8 +11,6 @@ namespace ratio
 
   class atom_flaw : public flaw
   {
-    friend class smart_type;
-    friend class graph;
 
   public:
     atom_flaw(graph &gr, resolver *const cause, atom &a, const bool is_fact);
@@ -26,6 +24,7 @@ namespace ratio
   private:
     void compute_resolvers() override;
 
+  public:
     class activate_fact : public resolver
     {
     public:
