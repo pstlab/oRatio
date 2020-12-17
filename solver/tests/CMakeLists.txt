@@ -1,7 +1,7 @@
 file(GLOB SOLVER_SOURCES test_solver.cpp ${CMAKE_SOURCE_DIR}/smt/*.cpp ${CMAKE_SOURCE_DIR}/smt/lra/*.cpp ${CMAKE_SOURCE_DIR}/smt/ov/*.cpp ${CMAKE_SOURCE_DIR}/smt/dl/*.cpp ${CMAKE_SOURCE_DIR}/riddle/*.cpp ${CMAKE_SOURCE_DIR}/core/*.cpp ${CMAKE_SOURCE_DIR}/solver/*.cpp ${CMAKE_SOURCE_DIR}/solver/types/*.cpp)
 
 if(BUILD_GUI)
-    list(APPEND SOLVER_SOURCES ${CMAKE_SOURCE_DIR}/api/java/src/main/cpp/socket_listener.cpp)
+    list(APPEND SOLVER_SOURCES ${CMAKE_SOURCE_DIR}/api/java/src/main/cpp/solver_socket_listener.cpp)
 endif()
 
 add_executable(solver_tests ${SOLVER_SOURCES})

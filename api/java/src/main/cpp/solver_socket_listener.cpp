@@ -1,4 +1,4 @@
-#include "socket_listener.h"
+#include "solver_socket_listener.h"
 #include "core.h"
 #include "method.h"
 #include "type.h"
@@ -14,18 +14,7 @@ using namespace smt;
 
 namespace ratio
 {
-    std::string replace_all(std::string str, const std::string &from, const std::string &to)
-    {
-        size_t start_pos = 0;
-        while ((start_pos = str.find(from, start_pos)) != std::string::npos)
-        {
-            str.replace(start_pos, from.length(), to);
-            start_pos += to.length();
-        }
-        return str;
-    }
-
-    socket_listener::socket_listener(solver &slv, const std::string &host, const unsigned short &port) : core_listener(slv), solver_listener(slv)
+    solver_socket_listener::solver_socket_listener(solver &slv, const std::string &host, const unsigned short &port) : core_listener(slv), solver_listener(slv)
     {
 #ifdef _WIN32
         WSADATA wsa_data;
@@ -51,7 +40,7 @@ namespace ratio
         if (connect(skt, (struct sockaddr *)&sa, sizeof(sa)) < 0)
             std::cerr << "unable to connect to server.." << std::endl;
     }
-    socket_listener::~socket_listener()
+    solver_socket_listener::~solver_socket_listener()
     {
 #ifdef _WIN32
         closesocket(skt);
@@ -61,18 +50,18 @@ namespace ratio
 #endif
     }
 
-    void socket_listener::log(const std::string &msg)
+    void solver_socket_listener::log(const std::string &msg)
     {
         json j_msg;
         j_msg->set("message_type", new string_val("log"));
         j_msg->set("log", new string_val(msg));
 
         std::stringstream ss;
-        ss << "log " << msg << '\n';
+        ss << j_msg << '\n';
         send_message(ss.str());
     }
 
-    void socket_listener::read(const std::string &script)
+    void solver_socket_listener::read(const std::string &script)
     {
         json j_msg;
         j_msg->set("message_type", new string_val("read_script"));
@@ -84,7 +73,7 @@ namespace ratio
         send_message(ss.str());
     }
 
-    void socket_listener::read(const std::vector<std::string> &files)
+    void solver_socket_listener::read(const std::vector<std::string> &files)
     {
         json j_msg;
         j_msg->set("message_type", new string_val("read_files"));
@@ -102,7 +91,7 @@ namespace ratio
         send_message(ss.str());
     }
 
-    void socket_listener::flaw_created(const flaw &f)
+    void solver_socket_listener::flaw_created(const flaw &f)
     {
         std::pair<I, I> bound = slv.get_idl_theory().bounds(f.get_position());
 
@@ -124,7 +113,7 @@ namespace ratio
         ss << j_msg << '\n';
         send_message(ss.str());
     }
-    void socket_listener::flaw_state_changed(const flaw &f)
+    void solver_socket_listener::flaw_state_changed(const flaw &f)
     {
         json j_msg;
         j_msg->set("message_type", new string_val("flaw_state_changed"));
@@ -135,7 +124,7 @@ namespace ratio
         ss << j_msg << '\n';
         send_message(ss.str());
     }
-    void socket_listener::flaw_cost_changed(const flaw &f)
+    void solver_socket_listener::flaw_cost_changed(const flaw &f)
     {
         rational est_cost = f.get_estimated_cost();
 
@@ -151,7 +140,7 @@ namespace ratio
         ss << j_msg << '\n';
         send_message(ss.str());
     }
-    void socket_listener::flaw_position_changed(const flaw &f)
+    void solver_socket_listener::flaw_position_changed(const flaw &f)
     {
         std::pair<I, I> bound = slv.get_idl_theory().bounds(f.get_position());
 
@@ -167,7 +156,7 @@ namespace ratio
         ss << j_msg << '\n';
         send_message(ss.str());
     }
-    void socket_listener::current_flaw(const flaw &f)
+    void solver_socket_listener::current_flaw(const flaw &f)
     {
         json j_msg;
         j_msg->set("message_type", new string_val("current_flaw"));
@@ -178,7 +167,7 @@ namespace ratio
         send_message(ss.str());
     }
 
-    void socket_listener::resolver_created(const resolver &r)
+    void solver_socket_listener::resolver_created(const resolver &r)
     {
         rational est_cost = r.get_estimated_cost();
 
@@ -197,7 +186,7 @@ namespace ratio
         ss << j_msg << '\n';
         send_message(ss.str());
     }
-    void socket_listener::resolver_state_changed(const resolver &r)
+    void solver_socket_listener::resolver_state_changed(const resolver &r)
     {
         json j_msg;
         j_msg->set("message_type", new string_val("resolver_state_changed"));
@@ -208,7 +197,7 @@ namespace ratio
         ss << j_msg << '\n';
         send_message(ss.str());
     }
-    void socket_listener::current_resolver(const resolver &r)
+    void solver_socket_listener::current_resolver(const resolver &r)
     {
         json j_msg;
         j_msg->set("message_type", new string_val("current_resolver"));
@@ -219,7 +208,7 @@ namespace ratio
         send_message(ss.str());
     }
 
-    void socket_listener::causal_link_added(const flaw &f, const resolver &r)
+    void solver_socket_listener::causal_link_added(const flaw &f, const resolver &r)
     {
         json j_msg;
         j_msg->set("message_type", new string_val("causal_link"));
@@ -231,7 +220,7 @@ namespace ratio
         send_message(ss.str());
     }
 
-    void socket_listener::state_changed()
+    void solver_socket_listener::state_changed()
     {
         json j_msg;
         j_msg->set("message_type", new string_val("state_changed"));
@@ -242,7 +231,7 @@ namespace ratio
         send_message(ss.str());
     }
 
-    void socket_listener::send_message(const std::string &msg)
+    void solver_socket_listener::send_message(const std::string &msg)
     {
         int total = 0;
         int len = static_cast<int>(msg.size());

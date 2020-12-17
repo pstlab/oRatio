@@ -16,12 +16,12 @@
 namespace ratio
 {
 
-  class socket_listener : public core_listener, public solver_listener
+  class solver_socket_listener : public core_listener, public solver_listener
   {
   public:
-    socket_listener(solver &slv, const std::string &host, const unsigned short &port);
-    socket_listener(const socket_listener &orig) = delete;
-    virtual ~socket_listener();
+    solver_socket_listener(solver &slv, const std::string &host, const unsigned short &port);
+    solver_socket_listener(const solver_socket_listener &orig) = delete;
+    virtual ~solver_socket_listener();
 
   private:
     void log(const std::string &msg) override;
@@ -43,6 +43,17 @@ namespace ratio
     void state_changed() override;
 
     void send_message(const std::string &msg);
+
+    static std::string replace_all(std::string str, const std::string &from, const std::string &to)
+    {
+      size_t start_pos = 0;
+      while ((start_pos = str.find(from, start_pos)) != std::string::npos)
+      {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+      }
+      return str;
+    }
 
 #ifdef _WIN32
     SOCKET skt;

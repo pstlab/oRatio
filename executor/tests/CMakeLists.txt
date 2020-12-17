@@ -2,7 +2,7 @@ file(GLOB EXECUTOR_SOURCES test_executor.cpp ${CMAKE_SOURCE_DIR}/smt/*.cpp ${CMA
 
 if(BUILD_GUI)
     add_compile_definitions(BUILD_GUI BUILD_LISTENERS)
-    list(APPEND EXECUTOR_SOURCES ${CMAKE_SOURCE_DIR}/api/java/src/main/cpp/socket_listener.cpp)
+    list(APPEND EXECUTOR_SOURCES ${CMAKE_SOURCE_DIR}/api/java/src/main/cpp/solver_socket_listener.cpp ${CMAKE_SOURCE_DIR}/api/java/src/main/cpp/executor_socket_listener.cpp)
 endif()
 
 add_executable(executor_tests ${EXECUTOR_SOURCES})

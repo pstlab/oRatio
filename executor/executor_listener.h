@@ -15,9 +15,10 @@ namespace ratio
     virtual ~executor_listener() { exec.listeners.erase(std::find(exec.listeners.begin(), exec.listeners.end(), this)); }
 
   protected:
-    void dont_start_yet(const std::set<atom *> &atoms) {}
-    void dont_end_yet(const std::set<atom *> &atoms) {}
-    void failure(const std::set<atom *> &atoms) {}
+    executor &get_executor() const noexcept { return exec; }
+    void dont_start_yet(const std::set<atom *> &atoms) { exec.dont_start_yet(atoms); }
+    void dont_end_yet(const std::set<atom *> &atoms) { exec.dont_end_yet(atoms); }
+    void failure(const std::set<atom *> &atoms) { exec.failure(atoms); }
 
   private:
     virtual void tick() { LOG("current time: " << exec.current_time); }

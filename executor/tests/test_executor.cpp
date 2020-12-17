@@ -2,30 +2,11 @@
 #include "executor_listener.h"
 #include "atom.h"
 #ifdef BUILD_GUI
-#include "socket_listener.h"
+#include "solver_socket_listener.h"
+#include "executor_socket_listener.h"
 #endif
 
 using namespace ratio;
-
-class simple_executor : public executor_listener
-{
-public:
-    simple_executor(executor &e) : executor_listener(e) {}
-    ~simple_executor() {}
-
-    void starting(const std::set<atom *> &atoms) override
-    {
-        LOG("starting atoms:\n");
-        for (const auto &atm : atoms)
-            LOG(atm->to_json() << '\n');
-    }
-    void ending(const std::set<atom *> &atoms) override
-    {
-        LOG("ending atoms:\n");
-        for (const auto &atm : atoms)
-            LOG(atm->to_json() << '\n');
-    }
-};
 
 int main(int argc, char *argv[])
 {
@@ -50,12 +31,14 @@ int main(int argc, char *argv[])
     std::cout << ".." << std::endl;
 
     solver s;
+    executor exec(s, 5000);
+
 #ifdef BUILD_GUI
-    socket_listener l(s, HOST, PORT);
+    solver_socket_listener sl(s, HOST, SOLVER_PORT);
+    executor_socket_listener el(exec, HOST, EXECUTOR_PORT);
 #endif
 
     s.init();
-    executor exec(s, 5000);
     try
     {
         std::cout << "parsing input files.." << std::endl;
@@ -66,6 +49,8 @@ int main(int argc, char *argv[])
         std::cout << "hurray!! we have found a solution.." << std::endl;
 
         std::thread exec_th = exec.start();
+
+        // we wait for the execution to finish..
         exec_th.join();
     }
     catch (const std::exception &ex)

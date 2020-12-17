@@ -1,6 +1,6 @@
 #include "solver.h"
 #ifdef BUILD_GUI
-#include "socket_listener.h"
+#include "solver_socket_listener.h"
 #endif
 #include <iostream>
 #include <fstream>
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
     solver s;
 #ifdef BUILD_GUI
-    socket_listener l(s, HOST, PORT);
+    solver_socket_listener l(s, HOST, SOLVER_PORT);
 #endif
 
     try
