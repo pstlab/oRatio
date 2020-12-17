@@ -14,12 +14,13 @@ using namespace smt;
 
 namespace ratio
 {
-    executor::executor(solver &slv, const size_t &tick_dur, const rational &units_per_tick) : solver_listener(slv), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")), tick_duration(tick_dur), units_per_tick(units_per_tick) {}
+    executor::executor(solver &slv, const size_t &tick_dur, const rational &units_per_tick) : solver_listener(slv), tick_duration(tick_dur), units_per_tick(units_per_tick) {}
     executor::~executor() {}
 
     std::thread executor::start()
     {
         LOG("current time: " << current_time);
+        reset_timelines();
         mtx.lock();
         executing = true;
         mtx.unlock();
@@ -59,6 +60,9 @@ namespace ratio
 
         if (!pulses.empty())
             LOG("next thing to do at: " << to_string(*pulses.begin()));
+
+        const auto &int_pred = slv.get_predicate("Interval");
+        const auto &imp_pred = slv.get_predicate("Impulse");
 
         if (*pulses.begin() < static_cast<I>(current_time))
         { // we have something to do..
@@ -165,25 +169,12 @@ namespace ratio
     void executor::dont_end_yet(const std::set<atom *> &atoms) { not_ending.insert(atoms.begin(), atoms.end()); }
     void executor::failure(const std::set<atom *> &atoms) {}
 
-    void executor::flaw_created(const flaw &f)
-    { // we cannot plan in the past..
-        if (const atom_flaw *af = dynamic_cast<const atom_flaw *>(&f))
-            if (int_pred.is_assignable_from(af->get_atom().get_type()))
-            { // we have an interval atom..
-                arith_expr s_expr = af->get_atom().get(START);
-                slv.get_sat_core().new_clause({lit(af->get_atom().get_sigma(), false), slv.geq(s_expr, slv.new_real(current_time))->l});
-            }
-            else if (imp_pred.is_assignable_from(af->get_atom().get_type()))
-            { // we have an impulsive atom..
-                arith_expr at_expr = af->get_atom().get(AT);
-                slv.get_sat_core().new_clause({lit(af->get_atom().get_sigma(), false), slv.geq(at_expr, slv.new_real(current_time))->l});
-            }
-    }
-
     void executor::resolver_created(const resolver &r)
     { // we cannot plan in the past..
         if (const atom_flaw::activate_goal *ag = dynamic_cast<const atom_flaw::activate_goal *>(&r))
         {
+            const auto &int_pred = slv.get_predicate("Interval");
+            const auto &imp_pred = slv.get_predicate("Impulse");
             const atom &atm = dynamic_cast<const atom_flaw *>(&ag->get_effect())->get_atom();
             if (int_pred.is_assignable_from(atm.get_type()))
             { // we have an interval atom..
@@ -224,6 +215,8 @@ namespace ratio
             q.pop();
         }
 
+        const auto &int_pred = slv.get_predicate("Interval");
+        const auto &imp_pred = slv.get_predicate("Impulse");
         for (const auto &atm : all_atoms)
         {
             if (int_pred.is_assignable_from(atm->get_type()))

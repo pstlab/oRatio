@@ -31,20 +31,17 @@ namespace ratio
     std::thread start();
     void stop();
 
-    void reset_timelines();
-
   private:
     void tick();
     void dont_start_yet(const std::set<atom *> &atoms);
     void dont_end_yet(const std::set<atom *> &atoms);
     void failure(const std::set<atom *> &atoms);
 
-    void flaw_created(const flaw &f) override;
     void resolver_created(const resolver &r) override;
 
+    void reset_timelines();
+
   private:
-    predicate &int_pred;                // the interval predicate..
-    predicate &imp_pred;                // the impulse predicate..
     const size_t tick_duration;         // the duration of each tick in milliseconds..
     smt::rational current_time;         // the current time in plan units..
     const smt::rational units_per_tick; // the number of plan units for each tick..

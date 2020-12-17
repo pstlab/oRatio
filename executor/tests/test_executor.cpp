@@ -65,7 +65,6 @@ int main(int argc, char *argv[])
         s.solve();
         std::cout << "hurray!! we have found a solution.." << std::endl;
 
-        exec.reset_timelines();
         std::thread exec_th = exec.start();
         exec_th.join();
     }
