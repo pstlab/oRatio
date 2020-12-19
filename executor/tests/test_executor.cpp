@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
     std::cout << ".." << std::endl;
 
     solver s;
-    executor exec(s, 5000);
+    executor exec(s, 1000);
 
 #ifdef BUILD_GUI
     solver_socket_listener sl(s, HOST, SOLVER_PORT);

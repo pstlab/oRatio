@@ -24,8 +24,8 @@ namespace ratio
         mtx.lock();
         executing = true;
         mtx.unlock();
-        std::chrono::high_resolution_clock::time_point tick_time = std::chrono::high_resolution_clock::now() + std::chrono::milliseconds(tick_duration);
-        std::thread t([this, &tick_time]() {
+        tick_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(tick_duration);
+        std::thread t([this]() {
             while (true)
             {
                 if (!executing)

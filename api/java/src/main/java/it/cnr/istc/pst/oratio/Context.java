@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import it.cnr.istc.pst.oratio.Context.Message.CausalLinkAdded;
 import it.cnr.istc.pst.oratio.Context.Message.CurrentFlaw;
 import it.cnr.istc.pst.oratio.Context.Message.CurrentResolver;
+import it.cnr.istc.pst.oratio.Context.Message.EndingAtoms;
 import it.cnr.istc.pst.oratio.Context.Message.FlawCostChanged;
 import it.cnr.istc.pst.oratio.Context.Message.FlawCreated;
 import it.cnr.istc.pst.oratio.Context.Message.FlawPositionChanged;
@@ -34,7 +35,9 @@ import it.cnr.istc.pst.oratio.Context.Message.ReadFiles;
 import it.cnr.istc.pst.oratio.Context.Message.ReadScript;
 import it.cnr.istc.pst.oratio.Context.Message.ResolverCreated;
 import it.cnr.istc.pst.oratio.Context.Message.ResolverStateChanged;
+import it.cnr.istc.pst.oratio.Context.Message.StartingAtoms;
 import it.cnr.istc.pst.oratio.Context.Message.StateChanged;
+import it.cnr.istc.pst.oratio.Context.Message.Tick;
 import it.cnr.istc.pst.oratio.riddle.Core;
 import it.cnr.istc.pst.oratio.riddle.Rational;
 import it.cnr.istc.pst.oratio.timelines.Timeline;
@@ -50,6 +53,7 @@ public class Context {
     private final TimelinesList timelines = new TimelinesList(core);
     private final Collection<GraphListener> graph_listeners = new ArrayList<>();
     private final Collection<StateListener> state_listeners = new ArrayList<>();
+    private final Collection<ExecutorListener> executor_listeners = new ArrayList<>();
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
@@ -95,6 +99,14 @@ public class Context {
         state_listeners.remove(l);
     }
 
+    public void addExecutorListener(ExecutorListener l) {
+        executor_listeners.add(l);
+    }
+
+    public void removeExecutorListener(ExecutorListener l) {
+        executor_listeners.remove(l);
+    }
+
     public void readState(File state) {
         try {
             mapper.readValue(state, Core.class);
@@ -105,8 +117,8 @@ public class Context {
         }
     }
 
-    public void startServer(int port) {
-        LOG.info("Starting the server..");
+    public void startSolverServer(int port) {
+        LOG.info("Starting solver the server..");
         while (true) {
             try (ServerSocket ss = new ServerSocket(port);
                     Socket client = ss.accept();
@@ -150,65 +162,108 @@ public class Context {
                             mapper.treeToValue(tree_message, StateChanged.class);
                             for (StateListener l : state_listeners)
                                 l.stateChanged(core);
-                        }
                             break;
+                        }
                         case "flaw_created": {
                             FlawCreated flaw_created = mapper.treeToValue(tree_message, FlawCreated.class);
                             for (GraphListener l : graph_listeners)
                                 l.flawCreated(flaw_created);
-                        }
                             break;
+                        }
                         case "flaw_state_changed": {
                             FlawStateChanged flaw_state_changed = mapper.treeToValue(tree_message,
                                     FlawStateChanged.class);
                             for (GraphListener l : graph_listeners)
                                 l.flawStateChanged(flaw_state_changed);
-                        }
                             break;
+                        }
                         case "flaw_cost_changed": {
                             FlawCostChanged flaw_cost_changed = mapper.treeToValue(tree_message, FlawCostChanged.class);
                             for (GraphListener l : graph_listeners)
                                 l.flawCostChanged(flaw_cost_changed);
-                        }
                             break;
+                        }
                         case "flaw_position_changed": {
                             FlawPositionChanged flaw_position_changed = mapper.treeToValue(tree_message,
                                     FlawPositionChanged.class);
                             for (GraphListener l : graph_listeners)
                                 l.flawPositionChanged(flaw_position_changed);
-                        }
                             break;
+                        }
                         case "current_flaw": {
                             CurrentFlaw current_flaw = mapper.treeToValue(tree_message, CurrentFlaw.class);
                             for (GraphListener l : graph_listeners)
                                 l.currentFlaw(current_flaw);
-                        }
                             break;
+                        }
                         case "resolver_created": {
                             ResolverCreated resolver_created = mapper.treeToValue(tree_message, ResolverCreated.class);
                             for (GraphListener l : graph_listeners)
                                 l.resolverCreated(resolver_created);
-                        }
                             break;
+                        }
                         case "resolver_state_changed": {
                             ResolverStateChanged resolver_state_changed = mapper.treeToValue(tree_message,
                                     ResolverStateChanged.class);
                             for (GraphListener l : graph_listeners)
                                 l.resolverStateChanged(resolver_state_changed);
-                        }
                             break;
+                        }
                         case "current_resolver": {
                             CurrentResolver current_resolver = mapper.treeToValue(tree_message, CurrentResolver.class);
                             for (GraphListener l : graph_listeners)
                                 l.currentResolver(current_resolver);
-                        }
                             break;
+                        }
                         case "causal_link": {
                             CausalLinkAdded causal_link = mapper.treeToValue(tree_message, CausalLinkAdded.class);
                             for (GraphListener l : graph_listeners)
                                 l.causalLinkAdded(causal_link);
-                        }
                             break;
+                        }
+                        default:
+                            LOG.info("Cannot handle message: {}", tree_message.get("message_type").asText());
+                            break;
+                    }
+                }
+                if (inputLine == null)
+                    throw new RuntimeException("Connection lost..");
+            } catch (Exception ex) {
+                LOG.error("Cannot read socket", ex);
+            }
+        }
+    }
+
+    public void startExecutorServer(int port) {
+        LOG.info("Starting executor the server..");
+        while (true) {
+            try (ServerSocket ss = new ServerSocket(port);
+                    Socket client = ss.accept();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream(), "UTF-8"))) {
+
+                LOG.info("Waiting for input..");
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    JsonNode tree_message = mapper.readTree(inputLine);
+                    switch (tree_message.get("message_type").asText()) {
+                        case "tick": {
+                            Tick tick = mapper.treeToValue(tree_message, Tick.class);
+                            for (ExecutorListener l : executor_listeners)
+                                l.tick(tick);
+                            break;
+                        }
+                        case "starting_atoms": {
+                            StartingAtoms starting_atoms = mapper.treeToValue(tree_message, StartingAtoms.class);
+                            for (ExecutorListener l : executor_listeners)
+                                l.startingAtoms(starting_atoms);
+                            break;
+                        }
+                        case "ending_atoms": {
+                            EndingAtoms causal_link = mapper.treeToValue(tree_message, EndingAtoms.class);
+                            for (ExecutorListener l : executor_listeners)
+                                l.endingAtoms(causal_link);
+                            break;
+                        }
                         default:
                             LOG.info("Cannot handle message: {}", tree_message.get("message_type").asText());
                             break;
@@ -236,7 +291,10 @@ public class Context {
             @Type(value = Message.ResolverCreated.class, name = "resolver_created"),
             @Type(value = Message.ResolverStateChanged.class, name = "resolver_state_changed"),
             @Type(value = Message.CurrentResolver.class, name = "current_resolver"),
-            @Type(value = Message.CausalLinkAdded.class, name = "causal_link") })
+            @Type(value = Message.CausalLinkAdded.class, name = "causal_link"),
+            @Type(value = Message.Tick.class, name = "tick"),
+            @Type(value = Message.StartingAtoms.class, name = "starting_atoms"),
+            @Type(value = Message.EndingAtoms.class, name = "ending_atoms") })
     public static abstract class Message {
 
         public static class Log extends Message {
@@ -302,6 +360,18 @@ public class Context {
         public static class CausalLinkAdded extends Message {
             public String flaw;
             public String resolver;
+        }
+
+        public static class Tick extends Message {
+            public Rational current_time;
+        }
+
+        public static class StartingAtoms extends Message {
+            public String[] atoms;
+        }
+
+        public static class EndingAtoms extends Message {
+            public String[] atoms;
         }
     }
 

@@ -30,9 +30,6 @@ public class CoreDeserializer extends StdDeserializer<Core> {
         // we clear all the instances..
         core.clear();
 
-        final Map<String, Item> items = new HashMap<>(); // all the items, indexed by their id..
-        final Map<String, Atom> atoms = new HashMap<>(); // all the atoms, indexed by their id..
-
         final JsonNode tree = p.getCodec().readTree(p);
 
         JsonNode items_array = tree.get("items");
@@ -56,7 +53,7 @@ public class CoreDeserializer extends StdDeserializer<Core> {
                     st.instances.add(item);
                     q.addAll(st.superclasses);
                 }
-                items.put(itm_obj.get("id").asText(), item);
+                core.items.put(itm_obj.get("id").asText(), item);
             }
 
         JsonNode atoms_array = tree.get("atoms");
@@ -80,7 +77,7 @@ public class CoreDeserializer extends StdDeserializer<Core> {
                 JsonNode pars = atm_obj.get("pars");
                 if (pars != null)
                     for (int j = 0; j < pars.size(); j++)
-                        c_pars.put(pars.get(j).get("name").asText(), toItem(core, items, atoms, pars.get(j)));
+                        c_pars.put(pars.get(j).get("name").asText(), toItem(core, pars.get(j)));
                 final Atom atom = new Atom(core, pred, atm_obj.get("sigma").asLong(),
                         Atom.AtomState.valueOf(atm_obj.get("state").asText()), c_pars);
                 pred.instances.add(atom);
@@ -92,18 +89,18 @@ public class CoreDeserializer extends StdDeserializer<Core> {
                     st.instances.add(atom);
                     q.addAll(st.superclasses);
                 }
-                atoms.put(atm_obj.get("id").asText(), atom);
+                core.atoms.put(atm_obj.get("id").asText(), atom);
             }
 
         if (items_array != null)
             // we refine the items' parameters..
             for (int i = 0; i < items_array.size(); i++) {
-                Item item = items.get(items_array.get(i).get("id").asText());
+                Item item = core.items.get(items_array.get(i).get("id").asText());
                 JsonNode exprs = items_array.get(i).get("exprs");
                 if (exprs != null)
                     for (int j = 0; j < exprs.size(); j++) {
                         String name = exprs.get(j).get("name").asText();
-                        Item itm = toItem(core, items, atoms, exprs.get(j));
+                        Item itm = toItem(core, exprs.get(j));
                         item.exprs.put(name, itm);
                         core.expr_names.putIfAbsent(itm, name);
                     }
@@ -114,7 +111,7 @@ public class CoreDeserializer extends StdDeserializer<Core> {
             // we set the core's expressions..
             for (int i = 0; i < exprs.size(); i++) {
                 String name = exprs.get(i).get("name").asText();
-                Item itm = toItem(core, items, atoms, exprs.get(i));
+                Item itm = toItem(core, exprs.get(i));
                 core.exprs.put(name, itm);
                 core.expr_names.put(itm, name);
             }
@@ -122,8 +119,7 @@ public class CoreDeserializer extends StdDeserializer<Core> {
         return core;
     }
 
-    private Item toItem(final Core core, final Map<String, Item> items, final Map<String, Atom> atoms,
-            final JsonNode obj) {
+    private Item toItem(final Core core, final JsonNode obj) {
         JsonNode value = obj.get("value");
         if (value.isObject()) {
             String[] c_type = obj.get("type").asText().split(":");
@@ -147,16 +143,16 @@ public class CoreDeserializer extends StdDeserializer<Core> {
                     JsonNode vals_array = value.get("vals");
                     Collection<Item> c_vals = new ArrayList<>();
                     for (int j = 0; j < vals_array.size(); j++)
-                        c_vals.add(items.get(vals_array.get(j).asText()));
+                        c_vals.add(core.items.get(vals_array.get(j).asText()));
                     return new Item.EnumItem(core, t, value.get("var").asText(),
                             c_vals.toArray(new Item[c_vals.size()]));
             }
         } else {
             String val = value.asText();
-            Item item = items.get(val);
+            Item item = core.items.get(val);
             if (item != null)
                 return item;
-            Atom atom = atoms.get(val);
+            Atom atom = core.atoms.get(val);
             if (atom != null)
                 return atom;
             return new Item.StringItem(core, val);

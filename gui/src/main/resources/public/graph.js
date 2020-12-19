@@ -1,5 +1,5 @@
 const timelines = [];
-let current_time = 0;
+let current_time;
 let horizon;
 
 const nodes = [];
@@ -107,8 +107,8 @@ ws.onmessage = msg => {
             updateGraph();
             nodes.filter(n => n.type === 'resolver').forEach(r => update_resolver_cost(r));
             updateGraph();
-        }
             break;
+        }
         case 'flaw_created': {
             c_msg.label = JSON.parse(c_msg.label);
             if (c_msg.cost)
@@ -123,26 +123,26 @@ ws.onmessage = msg => {
             updateGraph();
             c_msg.causes.forEach(c => update_resolver_cost(node_map.get(c)));
             updateGraph();
-        }
             break;
+        }
         case 'flaw_state_changed': {
             node_map.get(c_msg.id).state = c_msg.state;
             links.filter(l => l.source.id === c_msg.id).forEach(l => l.state = c_msg.state);
             updateGraph();
-        }
             break;
+        }
         case 'flaw_cost_changed': {
             const f_node = node_map.get(c_msg.id);
             f_node.cost = c_msg.cost.num / c_msg.cost.den;
             links.filter(l => l.source.id == f_node.id).forEach(out_link => update_resolver_cost(out_link.target));
             updateGraph();
-        }
             break;
+        }
         case 'flaw_position_changed': {
             node_map.get(c_msg.id).position = c_msg.position;
             updateGraph();
-        }
             break;
+        }
         case 'current_flaw': {
             if (current_flaw) current_flaw.current = false;
             if (current_resolver) { current_resolver.current = false; current_resolver = undefined; }
@@ -150,8 +150,8 @@ ws.onmessage = msg => {
             f_node.current = true;
             current_flaw = f_node;
             updateGraph();
-        }
             break;
+        }
         case 'resolver_created': {
             c_msg.label = JSON.parse(c_msg.label);
             c_msg.cost = c_msg.cost.num / c_msg.cost.den;
@@ -161,29 +161,29 @@ ws.onmessage = msg => {
             node_map.set(c_msg.id, c_msg);
             links.push({ source: c_msg.id, target: c_msg.effect, state: c_msg.state });
             updateGraph();
-        }
             break;
+        }
         case 'resolver_state_changed': {
             node_map.get(c_msg.id).state = c_msg.state;
             links.filter(l => l.source.id === c_msg.id).forEach(l => l.state = c_msg.state);
             updateGraph();
-        }
             break;
+        }
         case 'current_resolver': {
             if (current_resolver) current_resolver.current = false;
             const r_node = node_map.get(c_msg.id);
             r_node.current = true;
             current_resolver = r_node;
             updateGraph();
-        }
             break;
+        }
         case 'causal_link_added': {
             links.push({ source: c_msg.flaw_id, target: c_msg.resolver_id, state: node_map.get(c_msg.flaw_id).state });
             updateGraph();
             update_resolver_cost(node_map.get(c_msg.resolver_id));
             updateGraph();
-        }
             break;
+        }
         case 'timelines': {
             timelines.splice(0, timelines.length - c_msg.timelines.length);
             c_msg.timelines.forEach((tl, i) => {
@@ -197,18 +197,32 @@ ws.onmessage = msg => {
                     timelines[i].values.forEach(v => v.y = values_y(v.from, v.from === v.to ? v.from + 0.1 : v.to, ends));
                 }
             });
-            horizon = Math.max(d3.max(timelines, d => d.horizon), 1);
-            timelines_x_scale.domain([0, horizon]);
-            timelines_y_scale.domain(d3.range(timelines.length));
-            updateTimelines();
+            if (timelines.length) {
+                horizon = Math.max(d3.max(timelines, d => d.horizon), 1);
+                timelines_x_scale.domain([0, horizon]);
+                timelines_y_scale.domain(d3.range(timelines.length));
+                updateTimelines();
+            }
             timelines_axis_g.call(timelines_x_axis);
-            updateTime();
-        }
             break;
-        case 'current_time': {
-            current_time = c_msg.current_time;
-            updateTime();
         }
+        case 'time': {
+            current_time = c_msg.current_time.num / c_msg.current_time.den;
+            if (timelines.length)
+                updateTime();
+            break;
+        }
+        case 'tick': {
+            current_time = c_msg.current_time.num / c_msg.current_time.den;
+            if (timelines.length)
+                updateTime();
+            break;
+        }
+        case 'starting_atoms':
+            console.log('starting atoms: ' + c_msg.atoms);
+            break;
+        case 'ending_atoms':
+            console.log('ending atoms: ' + c_msg.atoms);
             break;
         default:
             break;

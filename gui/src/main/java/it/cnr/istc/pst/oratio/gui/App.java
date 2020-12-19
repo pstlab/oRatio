@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import io.javalin.Javalin;
 import io.javalin.websocket.WsContext;
 import it.cnr.istc.pst.oratio.Context;
+import it.cnr.istc.pst.oratio.riddle.Rational;
 
 public class App {
 
@@ -28,6 +29,7 @@ public class App {
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final SolverState STATE = new SolverState();
     static final CausalGraph GRAPH = new CausalGraph();
+    static final PlanExecutor PLAN_EXEC = new PlanExecutor();
     private static Set<WsContext> contexts = new HashSet<>();
 
     public static void main(final String[] args) {
@@ -40,10 +42,12 @@ public class App {
 
         Context.getContext().addStateListener(STATE);
         Context.getContext().addGraphListener(GRAPH);
+        Context.getContext().addExecutorListener(PLAN_EXEC);
 
-        new Thread(
-                () -> Context.getContext().startServer(Integer.parseInt(properties.getProperty("server.port", "1100"))))
-                        .start();
+        new Thread(() -> Context.getContext()
+                .startSolverServer(Integer.parseInt(properties.getProperty("server.solver.port", "1100")))).start();
+        new Thread(() -> Context.getContext()
+                .startExecutorServer(Integer.parseInt(properties.getProperty("server.executor.port", "1101")))).start();
 
         final Javalin app = Javalin.create(config -> {
             config.addStaticFiles("/public");
@@ -56,6 +60,7 @@ public class App {
                     try {
                         broadcast(MAPPER.writeValueAsString(new Message.Timelines(STATE.getTimelines())));
                         broadcast(MAPPER.writeValueAsString(new Message.Graph(GRAPH)));
+                        broadcast(MAPPER.writeValueAsString(new Message.Time(PLAN_EXEC.getCurrentTime())));
                     } catch (JsonProcessingException e) {
                         LOG.error("Cannot serialize", e);
                     }
@@ -79,7 +84,8 @@ public class App {
     @SuppressWarnings({ "unused" })
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "message_type")
     @JsonSubTypes({ @Type(value = Message.Log.class, name = "log"), @Type(value = Message.Graph.class, name = "graph"),
-            @Type(value = Message.Timelines.class, name = "timelines") })
+            @Type(value = Message.Timelines.class, name = "timelines"),
+            @Type(value = Message.Time.class, name = "time") })
     public static abstract class Message {
 
         public static class Log extends Message {
@@ -106,6 +112,15 @@ public class App {
 
             public Timelines(final Collection<Object> timelines) {
                 this.timelines = timelines;
+            }
+        }
+
+        public static class Time extends Message {
+
+            public final Rational current_time;
+
+            public Time(final Rational current_time) {
+                this.current_time = current_time;
             }
         }
     }

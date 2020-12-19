@@ -64,7 +64,7 @@ namespace ratio
 
         std::vector<json> j_atms;
         for (const auto &atm : atoms)
-            j_atms.push_back(atm->to_json());
+            j_atms.push_back(new string_val(std::to_string(reinterpret_cast<uintptr_t>(atm))));
         j_msg->set("atoms", new array_val(j_atms));
 
         std::stringstream ss;
@@ -79,7 +79,7 @@ namespace ratio
 
         std::vector<json> j_atms;
         for (const auto &atm : atoms)
-            j_atms.push_back(atm->to_json());
+            j_atms.push_back(new string_val(std::to_string(reinterpret_cast<uintptr_t>(atm))));
         j_msg->set("atoms", new array_val(j_atms));
 
         std::stringstream ss;
