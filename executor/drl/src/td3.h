@@ -77,8 +77,8 @@ namespace drl
 
   private:
     torch::Device device;
-    td3::actor actor_model, actor_target;
-    td3::critic critic_model, critic_target;
+    actor actor_model, actor_target;
+    critic critic_model, critic_target;
     reply_buffer buffer;
   };
 } // namespace drl

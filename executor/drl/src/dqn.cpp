@@ -1,21 +1,19 @@
-#include "td3.h"
+#include "dqn.h"
 
 using namespace torch;
 
 namespace drl
 {
-    td3::td3(const size_t state_dim, const size_t action_dim) : device(torch::cuda::is_available() ? kCUDA : kCPU), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim)
+    dqn::dqn(const size_t state_dim, const size_t action_dim) : device(torch::cuda::is_available() ? kCUDA : kCPU), agent_model(state_dim, action_dim), agent_target(state_dim, action_dim)
     {
-        save(actor_model, "actor.pt");
-        load(actor_target, "actor.pt");
-        save(critic_model, "critic.pt");
-        load(critic_target, "critic.pt");
+        save(agent_model, "agent.pt");
+        load(agent_target, "agent.pt");
     }
-    td3::~td3() {}
+    dqn::~dqn() {}
 
-    Tensor td3::select_action(Tensor state) { return actor_model->forward(state).to(device); }
+    Tensor dqn::select_action(Tensor state) { return agent_model->forward(state).to(device); }
 
-    void td3::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &tau, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
+    void dqn::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &tau, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
     {
         for (size_t it = 0; it < iterations; ++it)
         {
@@ -40,7 +38,7 @@ namespace drl
             const auto action = stack(actions).to(device);
             const auto reward = stack(rewards).to(device);
 
-            const auto next_action = actor_target->forward(next_state).to(device);
+            const auto next_action = agent_target->forward(next_state).to(device);
         }
     }
 } // namespace drl
