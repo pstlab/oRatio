@@ -68,7 +68,7 @@ namespace drl
   class td3 final
   {
   public:
-    td3(const size_t state_dim, const size_t action_dim);
+    td3(const size_t &state_dim, const size_t &action_dim, const double &max_action);
     ~td3();
 
     torch::Tensor select_action(torch::Tensor state);
@@ -76,6 +76,7 @@ namespace drl
     void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &tau = 0.005, const double &policy_noise = 0.2, const double &noise_clip = 0.5, const size_t &policy_freq = 2);
 
   private:
+    const double max_action;
     torch::Device device;
     actor actor_model, actor_target;
     critic critic_model, critic_target;

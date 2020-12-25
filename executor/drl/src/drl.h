@@ -7,13 +7,10 @@ namespace drl
 {
   class transition final
   {
-    friend class reply_buffer;
-
   public:
     transition(const std::vector<double> &state, const std::vector<double> &next_state, const std::vector<double> &action, const double &reward) : state(state), next_state(next_state), action(action), reward(reward) {}
     ~transition() {}
 
-  private:
     std::vector<double> state;
     std::vector<double> next_state;
     std::vector<double> action;
@@ -22,13 +19,10 @@ namespace drl
 
   class transition_batch final
   {
-    friend class td3;
-
   public:
     transition_batch(std::vector<std::vector<double>> states, std::vector<std::vector<double>> next_states, std::vector<std::vector<double>> actions, std::vector<double> rewards) : states(states), next_states(next_states), actions(actions), rewards(rewards) {}
     ~transition_batch() {}
 
-  private:
     std::vector<std::vector<double>> states;
     std::vector<std::vector<double>> next_states;
     std::vector<std::vector<double>> actions;

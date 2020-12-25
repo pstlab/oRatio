@@ -13,7 +13,7 @@ namespace drl
 
     Tensor dqn::select_action(Tensor state) { return agent_model->forward(state).to(device); }
 
-    void dqn::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &tau, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
+    void dqn::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &tau, const size_t &policy_freq)
     {
         for (size_t it = 0; it < iterations; ++it)
         {

@@ -4,7 +4,7 @@ using namespace torch;
 
 namespace drl
 {
-    td3::td3(const size_t state_dim, const size_t action_dim) : device(torch::cuda::is_available() ? kCUDA : kCPU), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim)
+    td3::td3(const size_t &state_dim, const size_t &action_dim, const double &max_action) : max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim)
     {
         save(actor_model, "actor.pt");
         load(actor_target, "actor.pt");
@@ -19,6 +19,7 @@ namespace drl
     {
         for (size_t it = 0; it < iterations; ++it)
         {
+            // we get a sample from the experience replay memory..
             const auto c_sample = buffer.sample(batch_size);
             std::vector<Tensor> states;
             states.reserve(batch_size);
@@ -40,7 +41,12 @@ namespace drl
             const auto action = stack(actions).to(device);
             const auto reward = stack(rewards).to(device);
 
-            const auto next_action = actor_target->forward(next_state).to(device);
+            // we select the best action for the next state..
+            auto next_action = actor_target->forward(next_state).to(device);
+
+            // we add some noice to the action so as to manage exploration/exploitation..
+            auto noise = next_action.data().normal_(0, policy_noise).to(device).clamp(-noise_clip, noise_clip);
+            next_action = (next_action + noise).clamp(-max_action, max_action);
         }
     }
 } // namespace drl
