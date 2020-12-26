@@ -45,8 +45,12 @@ namespace drl
             auto next_action = actor_target->forward(next_state).to(device);
 
             // we add some noice to the action so as to manage exploration/exploitation..
-            auto noise = next_action.data().normal_(0, policy_noise).to(device).clamp(-noise_clip, noise_clip);
+            const auto noise = next_action.data().normal_(0, policy_noise).to(device).clamp(-noise_clip, noise_clip);
             next_action = (next_action + noise).clamp(-max_action, max_action);
+
+            // we get the minimun of the predicted qs for the next actions executed in the next states..
+            const auto qs = critic_target->forward(next_state, next_action);
+            const auto q = reward + (discount * torch::min(qs.first, qs.second)).detach();
         }
     }
 } // namespace drl

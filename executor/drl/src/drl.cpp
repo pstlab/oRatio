@@ -27,7 +27,7 @@ namespace drl
         std::vector<double> rewards;
         rewards.reserve(batch_size);
 
-        const auto rnd_ids = torch::randint(size, batch_size);
+        const auto rnd_ids = torch::randint(size, batch_size).detach();
         size_t *ptr = reinterpret_cast<size_t *>(rnd_ids.data_ptr());
         for (size_t i = 0; i < batch_size; ++i)
         {

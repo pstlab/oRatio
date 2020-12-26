@@ -38,7 +38,7 @@ namespace drl
       register_module("layer_5", layer_5);
     }
 
-    torch::Tensor forward(torch::Tensor x, torch::Tensor y)
+    std::pair<torch::Tensor, torch::Tensor> forward(torch::Tensor x, torch::Tensor y)
     {
       auto xy = torch::cat({x, y}, 1);
       x = torch::relu(layer_0(xy));
@@ -47,7 +47,7 @@ namespace drl
       y = torch::relu(layer_3(xy));
       y = torch::relu(layer_4(x));
       y = layer_5(x);
-      return x, y;
+      return {x, y};
     }
 
     torch::Tensor q1(torch::Tensor x, torch::Tensor y)
