@@ -70,6 +70,18 @@ namespace drl
                 actor_optimizer.zero_grad(); // we first set the gradients at zero..
                 actor_loss.backward();       // we then compute the gradients according to the loss..
                 actor_optimizer.step();      // we finally update the parameters of the critic model..
+
+                // we update the actor target's parameters by polyak avareging..
+                const auto actor_model_pars = actor_model->parameters();
+                const auto actor_target_pars = actor_target->parameters();
+                for (size_t i = 0; i < actor_model_pars.size(); i++)
+                    actor_target_pars.at(i).data().copy_(tau * actor_model_pars.at(i) + (1 - tau) * actor_target_pars.at(i));
+
+                // we update the critic target's parameters by polyak avareging..
+                const auto critic_model_pars = critic_model->parameters();
+                const auto critic_target_pars = critic_target->parameters();
+                for (size_t i = 0; i < critic_model_pars.size(); i++)
+                    critic_target_pars.at(i).data().copy_(tau * critic_model_pars.at(i) + (1 - tau) * critic_target_pars.at(i));
             }
         }
     }
