@@ -79,7 +79,9 @@ namespace drl
     const double max_action;
     torch::Device device;
     actor actor_model, actor_target;
+    torch::optim::Adam actor_optimizer;
     critic critic_model, critic_target;
+    torch::optim::Adam critic_optimizer;
     reply_buffer buffer;
   };
 } // namespace drl

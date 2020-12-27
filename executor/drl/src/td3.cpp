@@ -4,7 +4,7 @@ using namespace torch;
 
 namespace drl
 {
-    td3::td3(const size_t &state_dim, const size_t &action_dim, const double &max_action) : max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim)
+    td3::td3(const size_t &state_dim, const size_t &action_dim, const double &max_action) : max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), actor_optimizer(actor_model->parameters()), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim), critic_optimizer(critic_model->parameters())
     {
         save(actor_model, "actor.pt");
         load(actor_target, "actor.pt");
@@ -16,7 +16,7 @@ namespace drl
     Tensor td3::select_action(Tensor state) { return actor_model->forward(state).to(device); }
 
     void td3::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &tau, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
-    {
+    { // we implement the Twin-Delayed DDPG (TD3) algorithm..
         for (size_t it = 0; it < iterations; ++it)
         {
             // we get a sample from the experience replay memory..
@@ -49,8 +49,28 @@ namespace drl
             next_action = (next_action + noise).clamp(-max_action, max_action);
 
             // we get the minimun of the predicted qs for the next actions executed in the next states..
-            const auto qs = critic_target->forward(next_state, next_action);
-            const auto q = reward + (discount * torch::min(qs.first, qs.second)).detach();
+            const auto next_qs = critic_target->forward(next_state, next_action);
+            const auto next_q = reward + (discount * torch::min(next_qs.first, next_qs.second)).detach();
+
+            // we get the currents qs..
+            const auto current_qs = critic_model(state, action);
+
+            // we compute the loss..
+            const auto critic_loss = torch::nn::functional::mse_loss(current_qs.first, next_q) + torch::nn::functional::mse_loss(current_qs.second, next_q);
+
+            // we use this loss to backpropagate through SGD..
+            critic_optimizer.zero_grad(); // we first set the gradients at zero..
+            critic_loss.backward();       // we then compute the gradients according to the loss..
+            critic_optimizer.step();      // we finally update the parameters of the critic model..
+
+            // once every 'policy_freq' iterations we update the actor model by performing gradient ascent..
+            if (it % policy_freq == 0)
+            { // The Deep Deterministic Policy Gradient..
+                const auto actor_loss = -critic_model->q1(state, actor_model->forward(state)).mean();
+                actor_optimizer.zero_grad(); // we first set the gradients at zero..
+                actor_loss.backward();       // we then compute the gradients according to the loss..
+                actor_optimizer.step();      // we finally update the parameters of the critic model..
+            }
         }
     }
 } // namespace drl
