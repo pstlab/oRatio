@@ -36,9 +36,12 @@ namespace drl
 
     void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &tau = 0.005, const size_t &policy_freq = 2);
 
+    void save() const;
+    void load();
+
   private:
     torch::Device device;
-    agent agent_model, agent_target;
+    agent policy, target;
     reply_buffer buffer;
   };
 } // namespace drl

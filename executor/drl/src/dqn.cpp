@@ -4,19 +4,23 @@ using namespace torch;
 
 namespace drl
 {
-    dqn::dqn(const size_t state_dim, const size_t action_dim) : device(torch::cuda::is_available() ? kCUDA : kCPU), agent_model(state_dim, action_dim), agent_target(state_dim, action_dim)
+    dqn::dqn(const size_t state_dim, const size_t action_dim) : device(torch::cuda::is_available() ? kCUDA : kCPU), policy(state_dim, action_dim), target(state_dim, action_dim)
     {
-        save(agent_model, "agent.pt");
-        load(agent_target, "agent.pt");
+        // we copy the policy parameters into the target network..
+        const auto policy_pars = policy->parameters();
+        const auto target_pars = target->parameters();
+        for (size_t i = 0; i < policy_pars.size(); i++)
+            target_pars.at(i).data().copy_(policy_pars.at(i));
     }
     dqn::~dqn() {}
 
-    Tensor dqn::select_action(Tensor state) { return agent_model->forward(state).to(device); }
+    Tensor dqn::select_action(Tensor state) { return policy->forward(state).to(device); }
 
     void dqn::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &tau, const size_t &policy_freq)
     {
         for (size_t it = 0; it < iterations; ++it)
         {
+            // we get a sample from the experience replay memory..
             const auto c_sample = buffer.sample(batch_size);
             std::vector<Tensor> states;
             states.reserve(batch_size);
@@ -38,7 +42,12 @@ namespace drl
             const auto action = stack(actions).to(device);
             const auto reward = stack(rewards).to(device);
 
-            const auto next_action = agent_target->forward(next_state).to(device);
+            // we select the best action for the next state..
+            const auto next_action = target->forward(next_state).to(device);
         }
     }
+
+    void dqn::save() const { torch::save(policy, "actor.pt"); }
+
+    void dqn::load() { torch::load(policy, "actor.pt"); }
 } // namespace drl

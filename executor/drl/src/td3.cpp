@@ -6,10 +6,17 @@ namespace drl
 {
     td3::td3(const size_t &state_dim, const size_t &action_dim, const double &max_action) : max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), actor_optimizer(actor_model->parameters()), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim), critic_optimizer(critic_model->parameters())
     {
-        save(actor_model, "actor.pt");
-        load(actor_target, "actor.pt");
-        save(critic_model, "critic.pt");
-        load(critic_target, "critic.pt");
+        // we copy the actor model parameters into the actor target network..
+        const auto actor_model_pars = actor_model->parameters();
+        const auto actor_target_pars = actor_target->parameters();
+        for (size_t i = 0; i < actor_model_pars.size(); i++)
+            actor_target_pars.at(i).data().copy_(actor_model_pars.at(i));
+
+        // we copy the critic model parameters into the critic target network..
+        const auto critic_model_pars = critic_model->parameters();
+        const auto critic_target_pars = critic_target->parameters();
+        for (size_t i = 0; i < critic_model_pars.size(); i++)
+            critic_target_pars.at(i).data().copy_(critic_model_pars.at(i));
     }
     td3::~td3() {}
 
@@ -84,5 +91,17 @@ namespace drl
                     critic_target_pars.at(i).data().copy_(tau * critic_model_pars.at(i) + (1 - tau) * critic_target_pars.at(i));
             }
         }
+    }
+
+    void td3::save() const
+    {
+        torch::save(actor_model, "actor.pt");
+        torch::save(critic_model, "critic.pt");
+    }
+
+    void td3::load()
+    {
+        torch::load(actor_target, "actor.pt");
+        torch::load(critic_target, "critic.pt");
     }
 } // namespace drl

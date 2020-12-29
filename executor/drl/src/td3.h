@@ -75,6 +75,9 @@ namespace drl
 
     void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &tau = 0.005, const double &policy_noise = 0.2, const double &noise_clip = 0.5, const size_t &policy_freq = 2);
 
+    void save() const;
+    void load();
+
   private:
     const double max_action;
     torch::Device device;
