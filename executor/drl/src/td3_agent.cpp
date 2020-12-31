@@ -1,11 +1,15 @@
-#include "td3.h"
+#include "td3_agent.h"
 
 using namespace torch;
 
 namespace drl
 {
-    td3::td3(const size_t &state_dim, const size_t &action_dim, const double &max_action) : max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), actor_optimizer(actor_model->parameters()), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim), critic_optimizer(critic_model->parameters())
+    td3_agent::td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state) : state_dim(state_dim), action_dim(action_dim), max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), state(init_state), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), actor_optimizer(actor_model->parameters()), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim), critic_optimizer(critic_model->parameters())
     {
+        // we set the actor target network and the actor critic network in eval mode (these networks will not be trained)..
+        actor_target->eval();
+        critic_target->eval();
+
         // we copy the actor model parameters into the actor target network..
         const auto actor_model_pars = actor_model->parameters();
         const auto actor_target_pars = actor_target->parameters();
@@ -18,12 +22,12 @@ namespace drl
         for (size_t i = 0; i < critic_model_pars.size(); i++)
             critic_target_pars.at(i).data().copy_(critic_model_pars.at(i));
     }
-    td3::~td3() {}
+    td3_agent::~td3_agent() {}
 
-    Tensor td3::select_action(Tensor state) { return actor_model->forward(state).to(device); }
+    Tensor td3_agent::select_action() { return actor_model->forward(state).to(device); }
 
-    void td3::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &tau, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
-    { // we implement the Twin-Delayed DDPG (TD3) algorithm..
+    void td3_agent::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &alpha, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
+    { // we implement the Twin-Delayed DDPG (td3_agent) algorithm..
         for (size_t it = 0; it < iterations; ++it)
         {
             // we get a sample from the experience replay memory..
@@ -60,7 +64,7 @@ namespace drl
             const auto next_q = reward + (discount * torch::min(next_qs.first, next_qs.second)).detach();
 
             // we get the currents qs..
-            const auto current_qs = critic_model(state, action);
+            const auto current_qs = critic_model->forward(state, action);
 
             // we compute the loss..
             const auto critic_loss = torch::nn::functional::mse_loss(current_qs.first, next_q) + torch::nn::functional::mse_loss(current_qs.second, next_q);
@@ -82,26 +86,64 @@ namespace drl
                 const auto actor_model_pars = actor_model->parameters();
                 const auto actor_target_pars = actor_target->parameters();
                 for (size_t i = 0; i < actor_model_pars.size(); i++)
-                    actor_target_pars.at(i).data().copy_(tau * actor_model_pars.at(i) + (1 - tau) * actor_target_pars.at(i));
+                    actor_target_pars.at(i).data().copy_(alpha * actor_model_pars.at(i) + (1 - alpha) * actor_target_pars.at(i));
 
                 // we update the critic target's parameters by polyak avareging..
                 const auto critic_model_pars = critic_model->parameters();
                 const auto critic_target_pars = critic_target->parameters();
                 for (size_t i = 0; i < critic_model_pars.size(); i++)
-                    critic_target_pars.at(i).data().copy_(tau * critic_model_pars.at(i) + (1 - tau) * critic_target_pars.at(i));
+                    critic_target_pars.at(i).data().copy_(alpha * critic_model_pars.at(i) + (1 - alpha) * critic_target_pars.at(i));
             }
         }
     }
 
-    void td3::save() const
+    void td3_agent::save() const
     {
         torch::save(actor_model, "actor.pt");
         torch::save(critic_model, "critic.pt");
     }
 
-    void td3::load()
+    void td3_agent::load()
     {
         torch::load(actor_target, "actor.pt");
         torch::load(critic_target, "critic.pt");
+    }
+
+    td3_agent::reply_buffer::reply_buffer(const size_t &size) : size(size) {}
+    td3_agent::reply_buffer::~reply_buffer() {}
+
+    void td3_agent::reply_buffer::add(const transition &tr)
+    {
+        if (storage.size() == size)
+        {
+            storage[ptr] = tr;
+            ptr = (ptr + 1) % size;
+        }
+        else
+            storage.push_back(tr);
+    }
+
+    td3_agent::transition_batch td3_agent::reply_buffer::sample(const size_t &batch_size) const
+    {
+        std::vector<std::vector<double>> states;
+        states.reserve(batch_size);
+        std::vector<std::vector<double>> next_states;
+        next_states.reserve(batch_size);
+        std::vector<std::vector<double>> actions;
+        actions.reserve(batch_size);
+        std::vector<double> rewards;
+        rewards.reserve(batch_size);
+
+        const auto rnd_ids = torch::randint(size, batch_size).detach();
+        size_t *ptr = reinterpret_cast<size_t *>(rnd_ids.data_ptr());
+        for (size_t i = 0; i < batch_size; ++i)
+        {
+            states.push_back(storage.at(*ptr).state);
+            next_states.push_back(storage.at(*ptr).next_state);
+            actions.push_back(storage.at(*ptr).action);
+            rewards.push_back(storage.at(*ptr).reward);
+            ptr++;
+        }
+        return transition_batch(states, next_states, actions, rewards);
     }
 } // namespace drl

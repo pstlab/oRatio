@@ -1,6 +1,6 @@
 #pragma once
 
-#include "drl.h"
+#include <torch/torch.h>
 
 namespace drl
 {
@@ -65,22 +65,66 @@ namespace drl
   };
   TORCH_MODULE(critic);
 
-  class td3 final
+  class td3_agent final
   {
   public:
-    td3(const size_t &state_dim, const size_t &action_dim, const double &max_action);
-    ~td3();
+    td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state);
+    ~td3_agent();
 
-    torch::Tensor select_action(torch::Tensor state);
+    torch::Tensor select_action();
+    virtual std::pair<std::vector<double>, double> execute_action(const torch::Tensor &action) noexcept { return {std::vector<double>(state_dim, 0), 0}; }
 
-    void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &tau = 0.005, const double &policy_noise = 0.2, const double &noise_clip = 0.5, const size_t &policy_freq = 2);
+    void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &alpha = 0.005, const double &policy_noise = 0.2, const double &noise_clip = 0.5, const size_t &policy_freq = 2);
 
     void save() const;
     void load();
 
   private:
+    class transition final
+    {
+    public:
+      transition(const std::vector<double> &state, const std::vector<double> &next_state, const std::vector<double> &action, const double &reward) : state(state), next_state(next_state), action(action), reward(reward) {}
+      ~transition() {}
+
+      std::vector<double> state;
+      std::vector<double> next_state;
+      std::vector<double> action;
+      double reward;
+    };
+
+    class transition_batch final
+    {
+    public:
+      transition_batch(std::vector<std::vector<double>> states, std::vector<std::vector<double>> next_states, std::vector<std::vector<double>> actions, std::vector<double> rewards) : states(states), next_states(next_states), actions(actions), rewards(rewards) {}
+      ~transition_batch() {}
+
+      std::vector<std::vector<double>> states;
+      std::vector<std::vector<double>> next_states;
+      std::vector<std::vector<double>> actions;
+      std::vector<double> rewards;
+    };
+
+    class reply_buffer final
+    {
+    public:
+      reply_buffer(const size_t &size = 1e6);
+      ~reply_buffer();
+
+      void add(const transition &tr);
+
+      transition_batch sample(const size_t &batch_size) const;
+
+    private:
+      const size_t size;
+      size_t ptr = 0;
+      std::vector<transition> storage;
+    };
+
+  private:
+    const size_t state_dim, action_dim;
     const double max_action;
     torch::Device device;
+    torch::Tensor state;
     actor actor_model, actor_target;
     torch::optim::Adam actor_optimizer;
     critic critic_model, critic_target;
