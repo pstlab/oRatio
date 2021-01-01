@@ -25,7 +25,7 @@ namespace rl
         }
     }
 
-    void ql_agent::train(const size_t &iterations, const double &discount, const double &alpha) noexcept
+    void ql_agent::train(const size_t &iterations, const double &discount, const double &alpha, const double &eps_decay) noexcept
     {
         for (size_t it = 0; it < iterations; ++it)
         {
@@ -36,15 +36,18 @@ namespace rl
             // this is the current q value for the current state and the selected action..
             double q = q_table.at(state).at(c_action);
             // this is the max among the qs for the resulting state and the selected action..
-            double max_q = *std::max_element(q_table.at(result.first).begin(), q_table.at(result.first).end());
+            double max_q = *std::max_element(q_table.at(std::get<0>(result)).begin(), q_table.at(std::get<0>(result)).end());
             // this is the expected q..
-            double expected_q = result.second + max_q * discount;
+            double expected_q = std::get<1>(result) + max_q * discount;
             // we update the q table..
             q_table[state][c_action] += alpha * (expected_q - q);
-            // we update the current state..
-            state = result.first;
+
+            if (std::get<2>(result)) // we have done with our task..
+                break;
+            else // we update the current state..
+                state = std::get<0>(result);
         }
-        eps *= .9;
+        eps *= 1 - eps_decay;
     }
 
     std::ostream &operator<<(std::ostream &os, const ql_agent &ql)

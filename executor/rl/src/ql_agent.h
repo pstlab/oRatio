@@ -2,6 +2,7 @@
 
 #include <random>
 #include <vector>
+#include <tuple>
 #include <iostream>
 
 namespace rl
@@ -18,9 +19,9 @@ namespace rl
     size_t get_action_dim() const { return action_dim; }
 
     size_t select_action() noexcept;
-    virtual std::pair<size_t, double> execute_action(const size_t &action) noexcept { return {0, 0}; }
+    virtual std::tuple<size_t, double, bool> execute_action(const size_t &action) noexcept { return {0, 0, true}; }
 
-    void train(const size_t &iterations, const double &discount = 0.99, const double &alpha = 0.005) noexcept;
+    void train(const size_t &iterations, const double &discount = 0.99, const double &alpha = 0.005, const double &eps_decay = 0.001) noexcept;
 
     friend std::ostream &operator<<(std::ostream &os, const ql_agent &ql);
 

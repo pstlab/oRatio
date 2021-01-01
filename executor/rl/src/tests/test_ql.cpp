@@ -2,7 +2,7 @@
 #include <sstream>
 #include <cassert>
 
-#define DEF_REWARD -0.1
+constexpr double act_rew = -0.01;
 
 using namespace rl;
 
@@ -12,7 +12,7 @@ public:
     maze_agent() : ql_agent(11, 4, 0) {}
     ~maze_agent() {}
 
-    std::pair<size_t, double> execute_action(const size_t &action) noexcept override
+    std::tuple<size_t, double, bool> execute_action(const size_t &action) noexcept override
     {
         const auto c_nondet = unif(gen);
         switch (get_state())
@@ -22,32 +22,32 @@ public:
             {
             case 0:
                 if (c_nondet <= 0.1)
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
                 else
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
             case 1:
                 if (c_nondet <= 0.1)
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
                 else
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
             case 2:
                 if (c_nondet <= 0.1)
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
                 else
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
             case 3:
                 if (c_nondet <= 0.1)
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
                 else
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
             default:
                 break;
             }
@@ -57,32 +57,32 @@ public:
             {
             case 0:
                 if (c_nondet <= 0.1)
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
                 else
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
             case 1:
                 if (c_nondet <= 0.1)
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
                 else
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
             case 2:
                 if (c_nondet <= 0.1)
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
                 else
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
             case 3:
                 if (c_nondet <= 0.1)
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
                 else
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
             default:
                 break;
             }
@@ -92,32 +92,32 @@ public:
             {
             case 0:
                 if (c_nondet <= 0.1)
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
                 else
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
             case 1:
                 if (c_nondet <= 0.1)
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
                 else
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
             case 2:
                 if (c_nondet <= 0.1)
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
                 else
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
             case 3:
                 if (c_nondet <= 0.1)
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
                 else
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
             default:
                 break;
             }
@@ -127,32 +127,32 @@ public:
             {
             case 0:
                 if (c_nondet <= 0.1)
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
                 else
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
             case 1:
                 if (c_nondet <= 0.1)
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
                 else
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
             case 2:
                 if (c_nondet <= 0.1)
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
                 else
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
             case 3:
                 if (c_nondet <= 0.1)
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {0, DEF_REWARD};
+                    return {0, act_rew, false};
                 else
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
             default:
                 break;
             }
@@ -162,32 +162,32 @@ public:
             {
             case 0:
                 if (c_nondet <= 0.1)
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
                 else
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
             case 1:
                 if (c_nondet <= 0.1)
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {7, DEF_REWARD};
+                    return {7, act_rew, false};
                 else
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
             case 2:
                 if (c_nondet <= 0.1)
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
                 else
-                    return {7, DEF_REWARD};
+                    return {7, act_rew, false};
             case 3:
                 if (c_nondet <= 0.1)
-                    return {7, DEF_REWARD};
+                    return {7, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {2, DEF_REWARD};
+                    return {2, act_rew, false};
                 else
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
             default:
                 break;
             }
@@ -197,32 +197,32 @@ public:
             {
             case 0:
                 if (c_nondet <= 0.1)
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {6, DEF_REWARD};
+                    return {6, act_rew, false};
                 else
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
             case 1:
                 if (c_nondet <= 0.1)
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {8, DEF_REWARD};
+                    return {8, act_rew, false};
                 else
-                    return {6, DEF_REWARD};
+                    return {6, act_rew, false};
             case 2:
                 if (c_nondet <= 0.1)
-                    return {6, DEF_REWARD};
+                    return {6, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
                 else
-                    return {8, DEF_REWARD};
+                    return {8, act_rew, false};
             case 3:
                 if (c_nondet <= 0.1)
-                    return {8, DEF_REWARD};
+                    return {8, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {3, DEF_REWARD};
+                    return {3, act_rew, false};
                 else
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
             default:
                 break;
             }
@@ -232,32 +232,32 @@ public:
             {
             case 0:
                 if (c_nondet <= 0.1)
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {7, DEF_REWARD};
+                    return {7, act_rew, false};
                 else
-                    return {6, DEF_REWARD};
+                    return {6, act_rew, false};
             case 1:
                 if (c_nondet <= 0.1)
-                    return {6, DEF_REWARD};
+                    return {6, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {9, -1};
+                    return {9, -1, true};
                 else
-                    return {7, DEF_REWARD};
+                    return {7, act_rew, false};
             case 2:
                 if (c_nondet <= 0.1)
-                    return {7, DEF_REWARD};
+                    return {7, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
                 else
-                    return {9, -1};
+                    return {9, -1, true};
             case 3:
                 if (c_nondet <= 0.1)
-                    return {9, -1};
+                    return {9, -1, true};
                 else if (c_nondet >= 0.9)
-                    return {6, DEF_REWARD};
+                    return {6, act_rew, false};
                 else
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
             default:
                 break;
             }
@@ -267,32 +267,32 @@ public:
             {
             case 0:
                 if (c_nondet <= 0.1)
-                    return {6, DEF_REWARD};
+                    return {6, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {7, DEF_REWARD};
+                    return {7, act_rew, false};
                 else
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
             case 1:
                 if (c_nondet <= 0.1)
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {10, 1};
+                    return {10, 1, true};
                 else
-                    return {1, DEF_REWARD};
+                    return {1, act_rew, false};
             case 2:
                 if (c_nondet <= 0.1)
-                    return {7, DEF_REWARD};
+                    return {7, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {6, DEF_REWARD};
+                    return {6, act_rew, false};
                 else
-                    return {10, 1};
+                    return {10, 1, true};
             case 3:
                 if (c_nondet <= 0.1)
-                    return {10, 1};
+                    return {10, 1, true};
                 else if (c_nondet >= 0.9)
-                    return {4, DEF_REWARD};
+                    return {4, act_rew, false};
                 else
-                    return {6, DEF_REWARD};
+                    return {6, act_rew, false};
             default:
                 break;
             }
@@ -302,109 +302,40 @@ public:
             {
             case 0:
                 if (c_nondet <= 0.1)
-                    return {8, DEF_REWARD};
+                    return {8, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {9, -1};
+                    return {9, -1, true};
                 else
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
             case 1:
                 if (c_nondet <= 0.1)
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {8, DEF_REWARD};
+                    return {8, act_rew, false};
                 else
-                    return {9, -1};
+                    return {9, -1, true};
             case 2:
                 if (c_nondet <= 0.1)
-                    return {9, -1};
+                    return {9, -1, true};
                 else if (c_nondet >= 0.9)
-                    return {8, DEF_REWARD};
+                    return {8, act_rew, false};
                 else
-                    return {8, DEF_REWARD};
+                    return {8, act_rew, false};
             case 3:
                 if (c_nondet <= 0.1)
-                    return {8, DEF_REWARD};
+                    return {8, act_rew, false};
                 else if (c_nondet >= 0.9)
-                    return {5, DEF_REWARD};
+                    return {5, act_rew, false};
                 else
-                    return {8, DEF_REWARD};
+                    return {8, act_rew, false};
             default:
                 break;
             }
             break;
-        case 9:
-            switch (action)
-            {
-            case 0:
-                if (c_nondet <= 0.1)
-                    return {8, DEF_REWARD};
-                else if (c_nondet >= 0.9)
-                    return {10, 1};
-                else
-                    return {6, DEF_REWARD};
-            case 1:
-                if (c_nondet <= 0.1)
-                    return {6, DEF_REWARD};
-                else if (c_nondet >= 0.9)
-                    return {9, -1};
-                else
-                    return {10, 1};
-            case 2:
-                if (c_nondet <= 0.1)
-                    return {10, 1};
-                else if (c_nondet >= 0.9)
-                    return {8, DEF_REWARD};
-                else
-                    return {9, -1};
-            case 3:
-                if (c_nondet <= 0.1)
-                    return {9, -1};
-                else if (c_nondet >= 0.9)
-                    return {6, DEF_REWARD};
-                else
-                    return {8, DEF_REWARD};
-            default:
-                break;
-            }
-            break;
-        case 10:
-            switch (action)
-            {
-            case 0:
-                if (c_nondet <= 0.1)
-                    return {9, -1};
-                else if (c_nondet >= 0.9)
-                    return {10, 1};
-                else
-                    return {7, DEF_REWARD};
-            case 1:
-                if (c_nondet <= 0.1)
-                    return {7, DEF_REWARD};
-                else if (c_nondet >= 0.9)
-                    return {10, 1};
-                else
-                    return {10, 1};
-            case 2:
-                if (c_nondet <= 0.1)
-                    return {10, 1};
-                else if (c_nondet >= 0.9)
-                    return {9, -1};
-                else
-                    return {10, 1};
-            case 3:
-                if (c_nondet <= 0.1)
-                    return {10, 1};
-                else if (c_nondet >= 0.9)
-                    return {7, DEF_REWARD};
-                else
-                    return {9, -1};
-            default:
-                break;
-            }
         default:
             break;
         }
-        return {0, DEF_REWARD};
+        return {0, act_rew, false};
     }
 };
 
