@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
-project(drl)
+project(rl)
 
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
@@ -9,7 +9,7 @@ include_directories(src)
 
 add_library (${PROJECT_NAME} SHARED ${SOURCES})
 target_link_libraries(${PROJECT_NAME} "${TORCH_LIBRARIES}")
-set_property(TARGET drl PROPERTY CXX_STANDARD 14)
+set_property(TARGET rl PROPERTY CXX_STANDARD 14)
 
 # The following code block is suggested to be used on Windows.
 # According to https://github.com/pytorch/pytorch/issues/25457,

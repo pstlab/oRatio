@@ -1,10 +1,10 @@
-#include "dqn_agent.h"
+#include "dql_agent.h"
 
 using namespace torch;
 
-namespace drl
+namespace rl
 {
-    dqn_agent::dqn_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state) : state_dim(state_dim), action_dim(action_dim), device(torch::cuda::is_available() ? kCUDA : kCPU), state(init_state), policy(state_dim, action_dim), policy_optimizer(policy->parameters()), target(state_dim, action_dim)
+    dql_agent::dql_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state) : state_dim(state_dim), action_dim(action_dim), device(torch::cuda::is_available() ? kCUDA : kCPU), state(init_state), policy(state_dim, action_dim), policy_optimizer(policy->parameters()), target(state_dim, action_dim)
     {
         // we set the target network in eval mode (this network will not be trained)..
         target->eval();
@@ -15,9 +15,9 @@ namespace drl
         for (size_t i = 0; i < policy_pars.size(); i++)
             target_pars.at(i).data().copy_(policy_pars.at(i));
     }
-    dqn_agent::~dqn_agent() {}
+    dql_agent::~dql_agent() {}
 
-    size_t dqn_agent::select_action()
+    size_t dql_agent::select_action()
     {
         if (rand() < eps) // we randomly select actions (exploration)..
             return policy->forward(state).to(device).multinomial(1).squeeze().item().toLong();
@@ -25,7 +25,7 @@ namespace drl
             return policy->forward(state).to(device).argmax(1).item().toLong();
     }
 
-    void dqn_agent::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &alpha, const size_t &policy_freq)
+    void dql_agent::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &alpha, const size_t &policy_freq)
     {
         for (size_t it = 0; it < iterations; ++it)
         {
@@ -66,14 +66,14 @@ namespace drl
         }
     }
 
-    void dqn_agent::save() const { torch::save(policy, "actor.pt"); }
+    void dql_agent::save() const { torch::save(policy, "actor.pt"); }
 
-    void dqn_agent::load() { torch::load(policy, "actor.pt"); }
+    void dql_agent::load() { torch::load(policy, "actor.pt"); }
 
-    dqn_agent::reply_buffer::reply_buffer(const size_t &size) : size(size) {}
-    dqn_agent::reply_buffer::~reply_buffer() {}
+    dql_agent::reply_buffer::reply_buffer(const size_t &size) : size(size) {}
+    dql_agent::reply_buffer::~reply_buffer() {}
 
-    void dqn_agent::reply_buffer::add(const transition &tr)
+    void dql_agent::reply_buffer::add(const transition &tr)
     {
         if (storage.size() == size)
         {
@@ -84,7 +84,7 @@ namespace drl
             storage.push_back(tr);
     }
 
-    dqn_agent::transition_batch dqn_agent::reply_buffer::sample(const size_t &batch_size) const
+    dql_agent::transition_batch dql_agent::reply_buffer::sample(const size_t &batch_size) const
     {
         std::vector<std::vector<double>> states;
         states.reserve(batch_size);
@@ -107,4 +107,4 @@ namespace drl
         }
         return transition_batch(states, next_states, actions, rewards);
     }
-} // namespace drl
+} // namespace rl

@@ -2,7 +2,7 @@
 
 #include <torch/torch.h>
 
-namespace drl
+namespace rl
 {
   struct agentImpl : torch::nn::Module
   {
@@ -26,11 +26,11 @@ namespace drl
   };
   TORCH_MODULE(agent);
 
-  class dqn_agent final
+  class dql_agent final
   {
   public:
-    dqn_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state);
-    ~dqn_agent();
+    dql_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state);
+    ~dql_agent();
 
     size_t select_action();
     virtual std::pair<std::vector<double>, double> execute_action(const size_t &action) noexcept { return {std::vector<double>(state_dim, 0), 0}; }
@@ -91,4 +91,4 @@ namespace drl
     agent target;
     reply_buffer buffer;
   };
-} // namespace drl
+} // namespace rl

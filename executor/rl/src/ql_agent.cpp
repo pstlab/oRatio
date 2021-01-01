@@ -1,11 +1,11 @@
-#include "rl_agent.h"
+#include "ql_agent.h"
 
-namespace drl
+namespace rl
 {
-    rl_agent::rl_agent(const size_t &state_dim, const size_t &action_dim, const size_t &c_state) : q_table(state_dim, std::vector<double>(action_dim, 0)), c_state(c_state) {}
-    rl_agent::~rl_agent() {}
+    ql_agent::ql_agent(const size_t &state_dim, const size_t &action_dim, const size_t &c_state) : q_table(state_dim, std::vector<double>(action_dim, 0)), c_state(c_state) {}
+    ql_agent::~ql_agent() {}
 
-    size_t rl_agent::select_action() noexcept
+    size_t ql_agent::select_action() noexcept
     {
         if (rand() < eps)
         { // we randomly select actions (exploration)..
@@ -27,7 +27,7 @@ namespace drl
         }
     }
 
-    void rl_agent::train(const size_t &iterations, const double &discount, const double &alpha) noexcept
+    void ql_agent::train(const size_t &iterations, const double &discount, const double &alpha) noexcept
     {
         for (size_t it = 0; it < iterations; ++it)
         {
@@ -47,4 +47,4 @@ namespace drl
             c_state = result.first;
         }
     }
-} // namespace drl
+} // namespace rl

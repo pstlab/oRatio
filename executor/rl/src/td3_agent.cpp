@@ -2,7 +2,7 @@
 
 using namespace torch;
 
-namespace drl
+namespace rl
 {
     td3_agent::td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state) : state_dim(state_dim), action_dim(action_dim), max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), state(init_state), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), actor_optimizer(actor_model->parameters()), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim), critic_optimizer(critic_model->parameters())
     {
@@ -146,4 +146,4 @@ namespace drl
         }
         return transition_batch(states, next_states, actions, rewards);
     }
-} // namespace drl
+} // namespace rl

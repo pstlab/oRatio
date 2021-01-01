@@ -2,7 +2,7 @@
 
 #include <torch/torch.h>
 
-namespace drl
+namespace rl
 {
   struct actorImpl : torch::nn::Module
   {
@@ -131,4 +131,4 @@ namespace drl
     torch::optim::Adam critic_optimizer;
     reply_buffer buffer;
   };
-} // namespace drl
+} // namespace rl
