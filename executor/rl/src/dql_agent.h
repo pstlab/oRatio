@@ -1,6 +1,7 @@
 #pragma once
 
 #include <torch/torch.h>
+#include <random>
 
 namespace rl
 {
@@ -31,6 +32,11 @@ namespace rl
   public:
     dql_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state);
     ~dql_agent();
+
+    torch::Tensor get_state() const { return state; }
+    void set_state(const torch::Tensor &c_state) { state = c_state; }
+    size_t get_state_dim() const { return state_dim; }
+    size_t get_action_dim() const { return action_dim; }
 
     size_t select_action();
     virtual std::pair<std::vector<double>, double> execute_action(const size_t &action) noexcept { return {std::vector<double>(state_dim, 0), 0}; }
@@ -81,8 +87,12 @@ namespace rl
       std::vector<transition> storage;
     };
 
-  private:
+  protected:
     const size_t state_dim, action_dim;
+    std::default_random_engine gen;
+    std::uniform_real_distribution<double> unif = std::uniform_real_distribution<double>(0, 1);
+
+  private:
     torch::Device device;
     torch::Tensor state;
     double eps = 1;

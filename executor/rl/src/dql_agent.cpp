@@ -19,7 +19,7 @@ namespace rl
 
     size_t dql_agent::select_action()
     {
-        if (rand() < eps) // we randomly select actions (exploration)..
+        if (unif(gen) < eps) // we randomly select actions (exploration)..
             return policy->forward(state).to(device).multinomial(1).squeeze().item().toLong();
         else // we select our currently best actions (exploitation)..
             return policy->forward(state).to(device).argmax(1).item().toLong();

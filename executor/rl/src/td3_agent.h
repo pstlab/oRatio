@@ -6,7 +6,7 @@ namespace rl
 {
   struct actorImpl : torch::nn::Module
   {
-    actorImpl(const size_t state_dim, const size_t action_dim) : layer_0(torch::nn::Linear(state_dim, 400)), layer_1(torch::nn::Linear(400, 300)), layer_2(torch::nn::Linear(300, action_dim))
+    actorImpl(const size_t &state_dim, const size_t &action_dim) : layer_0(torch::nn::Linear(state_dim, 400)), layer_1(torch::nn::Linear(400, 300)), layer_2(torch::nn::Linear(300, action_dim))
     {
       register_module("layer_0", layer_0);
       register_module("layer_1", layer_1);
@@ -28,7 +28,7 @@ namespace rl
 
   struct criticImpl : torch::nn::Module
   {
-    criticImpl(const size_t state_dim, const size_t action_dim) : layer_0(torch::nn::Linear(state_dim + action_dim, 400)), layer_1(torch::nn::Linear(400, 300)), layer_2(torch::nn::Linear(300, 1)), layer_3(torch::nn::Linear(state_dim + action_dim, 400)), layer_4(torch::nn::Linear(400, 300)), layer_5(torch::nn::Linear(300, 1))
+    criticImpl(const size_t &state_dim, const size_t &action_dim) : layer_0(torch::nn::Linear(state_dim + action_dim, 400)), layer_1(torch::nn::Linear(400, 300)), layer_2(torch::nn::Linear(300, 1)), layer_3(torch::nn::Linear(state_dim + action_dim, 400)), layer_4(torch::nn::Linear(400, 300)), layer_5(torch::nn::Linear(300, 1))
     {
       register_module("layer_0", layer_0);
       register_module("layer_1", layer_1);
@@ -70,6 +70,11 @@ namespace rl
   public:
     td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state);
     ~td3_agent();
+
+    torch::Tensor get_state() const { return state; }
+    void set_state(const torch::Tensor &c_state) { state = c_state; }
+    size_t get_state_dim() const { return state_dim; }
+    size_t get_action_dim() const { return action_dim; }
 
     torch::Tensor select_action();
     virtual std::pair<std::vector<double>, double> execute_action(const torch::Tensor &action) noexcept { return {std::vector<double>(state_dim, 0), 0}; }
@@ -120,9 +125,11 @@ namespace rl
       std::vector<transition> storage;
     };
 
-  private:
+  protected:
     const size_t state_dim, action_dim;
     const double max_action;
+
+  private:
     torch::Device device;
     torch::Tensor state;
     actor actor_model, actor_target;

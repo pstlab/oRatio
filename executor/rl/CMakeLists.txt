@@ -4,6 +4,9 @@ project(rl)
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
+include(CTest)
+enable_testing()
+
 file(GLOB SOURCES main.cpp src/*.cpp)
 include_directories(src)
 
@@ -18,3 +21,5 @@ if (MSVC)
   file(GLOB TORCH_DLLS "${TORCH_INSTALL_PREFIX}/lib/*.dll")
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different ${TORCH_DLLS} $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endif (MSVC)
+
+add_subdirectory(src/tests)
