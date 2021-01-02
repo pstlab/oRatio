@@ -6,6 +6,30 @@ namespace rl
     ql_agent::ql_agent(const size_t &state_dim, const size_t &action_dim, const size_t &init_state) : state_dim(state_dim), action_dim(action_dim), q_table(state_dim, std::vector<double>(action_dim, 0)), state(init_state) {}
     ql_agent::~ql_agent() {}
 
+    double ql_agent::evaluate(const size_t &init_state, const size_t &eval_episodes) noexcept
+    {
+        double avg_reward = 0;
+        for (size_t i = 0; i < eval_episodes; ++i)
+        {
+            set_state(init_state);
+            bool done = false;
+            while (!done)
+            {
+                const auto action = select_action();
+                const auto result = execute_action(action);
+                avg_reward += std::get<1>(result);
+                if (std::get<2>(result))
+                { // we reset the initial state..
+                    done = true;
+                    set_state(init_state);
+                }
+                else // we mode to the next state..
+                    set_state(std::get<0>(result));
+            }
+        }
+        return avg_reward / eval_episodes;
+    }
+
     size_t ql_agent::select_action() noexcept
     {
         if (unif(gen) < eps) // we randomly select actions (exploration)..

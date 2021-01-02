@@ -24,10 +24,34 @@ namespace rl
     }
     td3_agent::~td3_agent() {}
 
+    double td3_agent::evaluate(const torch::Tensor &init_state, const size_t &eval_episodes) noexcept
+    {
+        double avg_reward = 0;
+        for (size_t i = 0; i < eval_episodes; ++i)
+        {
+            set_state(init_state);
+            bool done = false;
+            while (!done)
+            {
+                const auto action = select_action();
+                const auto result = execute_action(action);
+                avg_reward += std::get<1>(result);
+                if (std::get<2>(result))
+                { // we reset the initial state..
+                    done = true;
+                    set_state(init_state);
+                }
+                else // we mode to the next state..
+                    set_state(std::get<0>(result));
+            }
+        }
+        return avg_reward / eval_episodes;
+    }
+
     Tensor td3_agent::select_action() { return actor_model->forward(state).to(device); }
 
     void td3_agent::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &alpha, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
-    { // we implement the Twin-Delayed DDPG (td3_agent) algorithm..
+    { // the Twin-Delayed DDPG (TD3) algorithm..
         for (size_t it = 0; it < iterations; ++it)
         {
             // we get a sample from the experience replay memory..
@@ -50,25 +74,25 @@ namespace rl
                 rewards.push_back(torch::tensor(c_sample.rewards.at(i)).to(device));
                 dones.push_back(torch::tensor(c_sample.dones.at(i)).to(device));
             }
-            const auto state = stack(states).to(device);
-            const auto action = stack(actions).to(device);
-            const auto next_state = stack(next_states).to(device);
-            const auto reward = stack(rewards).to(device);
-            const auto done = stack(dones).to(device);
+            const auto c_states = stack(states).to(device);
+            const auto c_actions = stack(actions).to(device);
+            const auto c_next_states = stack(next_states).to(device);
+            const auto c_rewards = stack(rewards).to(device);
+            const auto c_dones = stack(dones).to(device);
 
             // we select the best action for the next state..
-            auto next_action = actor_target->forward(next_state).to(device);
+            auto next_action = actor_target->forward(c_next_states).to(device);
 
             // we add some noice to the action so as to manage exploration/exploitation..
             const auto noise = next_action.data().normal_(0, policy_noise).to(device).clamp(-noise_clip, noise_clip);
             next_action = (next_action + noise).clamp(-max_action, max_action);
 
             // we get the minimun of the predicted qs for the next actions executed in the next states..
-            const auto next_qs = critic_target->forward(next_state, next_action);
-            const auto next_q = reward + ((1 - done) * discount * torch::min(next_qs.first, next_qs.second)).detach();
+            const auto next_qs = critic_target->forward(c_next_states, next_action);
+            const auto next_q = c_rewards + ((1 - c_dones) * discount * torch::min(next_qs.first, next_qs.second)).detach();
 
             // we get the currents qs..
-            const auto current_qs = critic_model->forward(state, action);
+            const auto current_qs = critic_model->forward(c_states, c_actions);
 
             // we compute the loss..
             const auto critic_loss = torch::nn::functional::mse_loss(current_qs.first, next_q) + torch::nn::functional::mse_loss(current_qs.second, next_q);
@@ -81,7 +105,7 @@ namespace rl
             // once every 'policy_freq' iterations we update the actor model by performing gradient ascent..
             if (it % policy_freq == 0)
             { // The Deep Deterministic Policy Gradient..
-                const auto actor_loss = -critic_model->q1(state, actor_model->forward(state)).mean();
+                const auto actor_loss = -critic_model->q1(c_states, actor_model->forward(c_states)).mean();
                 actor_optimizer.zero_grad(); // we first set the gradients at zero..
                 actor_loss.backward();       // we then compute the gradients according to the loss..
                 actor_optimizer.step();      // we finally update the parameters of the critic model..

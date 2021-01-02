@@ -8,7 +8,7 @@ namespace rl
 {
   struct agentImpl : torch::nn::Module
   {
-    agentImpl(const size_t &state_dim, const size_t &action_dim) : layer_0(torch::nn::Linear(state_dim, 400)), layer_1(torch::nn::Linear(400, 300)), layer_2(torch::nn::Linear(300, action_dim))
+    agentImpl(const size_t &state_dim, const size_t &action_dim) : layer_0(torch::nn::Linear(state_dim, 40)), layer_1(torch::nn::Linear(40, 30)), layer_2(torch::nn::Linear(30, action_dim))
     {
       register_module("layer_0", layer_0);
       register_module("layer_1", layer_1);
@@ -43,10 +43,14 @@ namespace rl
 
     reply_buffer &get_buffer() noexcept { return buffer; }
 
+    torch::Tensor get_qs(const torch::Tensor &state) noexcept { return policy->forward(state); }
+
+    double evaluate(const torch::Tensor &init_state, const size_t &eval_episodes = 10) noexcept;
+
     size_t select_action();
     virtual std::tuple<torch::Tensor, double, bool> execute_action(const size_t &action) noexcept { return {torch::tensor(std::vector<double>(state_dim, 0)), 0, true}; }
 
-    void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &alpha = 0.005, const size_t &policy_freq = 2);
+    void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &alpha = 0.005, const double &eps_decay = 0.001, const size_t &policy_freq = 10);
 
     void save() const;
     void load();
@@ -68,14 +72,14 @@ namespace rl
     class transition_batch final
     {
     public:
-      transition_batch(const std::vector<torch::Tensor> &states, const std::vector<long> &actions, const std::vector<torch::Tensor> &next_states, const std::vector<double> &rewards, const std::vector<bool> &dones) : states(states), next_states(next_states), actions(actions), rewards(rewards), dones(dones) {}
+      transition_batch(const std::vector<torch::Tensor> &states, const std::vector<long> &actions, const std::vector<torch::Tensor> &next_states, const std::vector<double> &rewards, const std::vector<int> &dones) : states(states), next_states(next_states), actions(actions), rewards(rewards), dones(dones) {}
       ~transition_batch() {}
 
       std::vector<torch::Tensor> states;
       std::vector<long> actions;
       std::vector<torch::Tensor> next_states;
       std::vector<double> rewards;
-      std::vector<bool> dones;
+      std::vector<int> dones;
     };
 
     class reply_buffer final

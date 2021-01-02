@@ -18,6 +18,8 @@ namespace rl
     size_t get_state_dim() const noexcept { return state_dim; }
     size_t get_action_dim() const noexcept { return action_dim; }
 
+    double evaluate(const size_t &init_state, const size_t &eval_episodes = 10) noexcept;
+
     size_t select_action() noexcept;
     virtual std::tuple<size_t, double, bool> execute_action(const size_t &action) noexcept { return {0, 0, true}; }
 

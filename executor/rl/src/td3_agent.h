@@ -81,6 +81,8 @@ namespace rl
 
     reply_buffer &get_buffer() noexcept { return buffer; }
 
+    double evaluate(const torch::Tensor &init_state, const size_t &eval_episodes = 10) noexcept;
+
     torch::Tensor select_action();
     virtual std::tuple<torch::Tensor, double, bool> execute_action(const torch::Tensor &action) noexcept { return {torch::tensor(std::vector<double>(state_dim, 0)), 0, true}; }
 
