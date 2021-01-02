@@ -9,7 +9,7 @@ using namespace rl;
 class maze_agent : public dql_agent
 {
 public:
-    maze_agent() : dql_agent(2, 4, torch::tensor({0.0, 0.0}).detach()) {}
+    maze_agent(const torch::Tensor &init_state) : dql_agent(2, 4, init_state) {}
     ~maze_agent() {}
 
     std::tuple<torch::Tensor, double, bool> execute_action(const size_t &action) noexcept override
@@ -420,24 +420,38 @@ std::ostream &operator<<(std::ostream &os, dql_agent &ql)
 
 void test_ql_0()
 {
-    maze_agent a;
+    const auto init_state = torch::tensor({0.0, 0.0}).detach();
+    maze_agent a(init_state);
 
+    // we fill the buffer with random actions..
     for (size_t i = 0; i < a.get_buffer().get_size(); ++i)
     {
         const auto action = a.select_action();
         const auto result = a.execute_action(action);
         a.get_buffer().add(a.get_state(), action, std::get<0>(result), std::get<1>(result), std::get<2>(result));
         if (std::get<2>(result)) // we reset the initial state..
-            a.set_state(torch::tensor({0.0, 0.0}).detach());
-        else
+            a.set_state(init_state);
+        else // we move to the next state..
             a.set_state(std::get<0>(result));
     }
 
     for (size_t i = 0; i < 1000; ++i)
     {
+        // we select an action..
+        const auto action = a.select_action();
+        // we execute the action..
+        const auto result = a.execute_action(action);
+        // we store the transition in the buffer..
+        a.get_buffer().add(a.get_state(), action, std::get<0>(result), std::get<1>(result), std::get<2>(result));
+        if (std::get<2>(result)) // we reset the initial state..
+            a.set_state(init_state);
+        else // we move to the next state..
+            a.set_state(std::get<0>(result));
+
+        // we perform an optimization step..
         a.train(100);
-        a.set_state(torch::tensor({0.0, 0.0}).detach());
-        std::cout << "average reward over the evaluation step " << i << ": " << a.evaluate(torch::tensor({0.0, 0.0}).detach()) << std::endl;
+        a.set_state(init_state);
+        std::cout << "average reward over the evaluation step " << i << ": " << a.evaluate(init_state) << std::endl;
 
         if (i % 10 == 0)
             std::cout << a << std::endl;

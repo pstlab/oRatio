@@ -9,7 +9,7 @@ using namespace rl;
 class maze_agent : public ql_agent
 {
 public:
-    maze_agent() : ql_agent(11, 4, 0) {}
+    maze_agent(const size_t &init_state) : ql_agent(11, 4, init_state) {}
     ~maze_agent() {}
 
     std::tuple<size_t, double, bool> execute_action(const size_t &action) noexcept override
@@ -341,12 +341,13 @@ public:
 
 void test_ql_0()
 {
-    maze_agent a;
+    const size_t init_state = 0;
+    maze_agent a(init_state);
 
     for (size_t i = 0; i < 1000; ++i)
     {
         a.train(100);
-        a.set_state(0);
+        a.set_state(init_state);
         std::cout << "average reward over the evaluation step " << i << ": " << a.evaluate(0) << std::endl;
     }
     std::cout << a << std::endl;

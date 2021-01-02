@@ -48,9 +48,10 @@ namespace rl
     double evaluate(const torch::Tensor &init_state, const size_t &eval_episodes = 10) noexcept;
 
     size_t select_action();
+
     virtual std::tuple<torch::Tensor, double, bool> execute_action(const size_t &action) noexcept { return {torch::tensor(std::vector<double>(state_dim, 0)), 0, true}; }
 
-    void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &alpha = 0.005, const double &eps_decay = 0.001, const size_t &policy_freq = 10);
+    void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &alpha = 0.005, const double &eps_decay = 0.01, const size_t &policy_freq = 10);
 
     void save() const;
     void load();

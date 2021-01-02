@@ -23,7 +23,7 @@ namespace rl
                     done = true;
                     set_state(init_state);
                 }
-                else // we mode to the next state..
+                else // we move to the next state..
                     set_state(std::get<0>(result));
             }
         }
