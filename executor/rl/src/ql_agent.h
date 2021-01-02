@@ -13,10 +13,10 @@ namespace rl
     ql_agent(const size_t &state_dim, const size_t &action_dim, const size_t &init_state);
     ~ql_agent();
 
-    size_t get_state() const { return state; }
-    void set_state(const size_t &c_state) { state = c_state; }
-    size_t get_state_dim() const { return state_dim; }
-    size_t get_action_dim() const { return action_dim; }
+    size_t get_state() const noexcept { return state; }
+    void set_state(const size_t &c_state) noexcept { state = c_state; }
+    size_t get_state_dim() const noexcept { return state_dim; }
+    size_t get_action_dim() const noexcept { return action_dim; }
 
     size_t select_action() noexcept;
     virtual std::tuple<size_t, double, bool> execute_action(const size_t &action) noexcept { return {0, 0, true}; }

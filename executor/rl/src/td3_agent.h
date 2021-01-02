@@ -1,6 +1,7 @@
 #pragma once
 
 #include <torch/torch.h>
+#include <tuple>
 
 namespace rl
 {
@@ -67,17 +68,21 @@ namespace rl
 
   class td3_agent final
   {
+    class reply_buffer;
+
   public:
     td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state);
     ~td3_agent();
 
-    torch::Tensor get_state() const { return state; }
-    void set_state(const torch::Tensor &c_state) { state = c_state; }
-    size_t get_state_dim() const { return state_dim; }
-    size_t get_action_dim() const { return action_dim; }
+    torch::Tensor get_state() const noexcept { return state; }
+    void set_state(const torch::Tensor &c_state) noexcept { state = c_state; }
+    size_t get_state_dim() const noexcept { return state_dim; }
+    size_t get_action_dim() const noexcept { return action_dim; }
+
+    reply_buffer &get_buffer() noexcept { return buffer; }
 
     torch::Tensor select_action();
-    virtual std::pair<std::vector<double>, double> execute_action(const torch::Tensor &action) noexcept { return {std::vector<double>(state_dim, 0), 0}; }
+    virtual std::tuple<torch::Tensor, double, bool> execute_action(const torch::Tensor &action) noexcept { return {torch::tensor(std::vector<double>(state_dim, 0)), 0, true}; }
 
     void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &alpha = 0.005, const double &policy_noise = 0.2, const double &noise_clip = 0.5, const size_t &policy_freq = 2);
 
@@ -88,32 +93,36 @@ namespace rl
     class transition final
     {
     public:
-      transition(const std::vector<double> &state, const std::vector<double> &next_state, const std::vector<double> &action, const double &reward) : state(state), next_state(next_state), action(action), reward(reward) {}
+      transition(const torch::Tensor &state, const torch::Tensor &action, const torch::Tensor &next_state, const double &reward, const bool &done) : state(state), next_state(next_state), action(action), reward(reward), done(done) {}
       ~transition() {}
 
-      std::vector<double> state;
-      std::vector<double> next_state;
-      std::vector<double> action;
+      torch::Tensor state;
+      torch::Tensor action;
+      torch::Tensor next_state;
       double reward;
+      bool done;
     };
 
     class transition_batch final
     {
     public:
-      transition_batch(std::vector<std::vector<double>> states, std::vector<std::vector<double>> next_states, std::vector<std::vector<double>> actions, std::vector<double> rewards) : states(states), next_states(next_states), actions(actions), rewards(rewards) {}
+      transition_batch(std::vector<torch::Tensor> states, std::vector<torch::Tensor> actions, std::vector<torch::Tensor> next_states, std::vector<double> rewards, const std::vector<bool> &dones) : states(states), next_states(next_states), actions(actions), rewards(rewards), dones(dones) {}
       ~transition_batch() {}
 
-      std::vector<std::vector<double>> states;
-      std::vector<std::vector<double>> next_states;
-      std::vector<std::vector<double>> actions;
+      std::vector<torch::Tensor> states;
+      std::vector<torch::Tensor> actions;
+      std::vector<torch::Tensor> next_states;
       std::vector<double> rewards;
+      std::vector<bool> dones;
     };
 
     class reply_buffer final
     {
     public:
-      reply_buffer(const size_t &size = 1e6);
+      reply_buffer(const size_t &size = 1e5);
       ~reply_buffer();
+
+      size_t get_size() const noexcept { return size; }
 
       void add(const transition &tr);
 

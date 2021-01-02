@@ -34,23 +34,27 @@ namespace rl
             const auto c_sample = buffer.sample(batch_size);
             std::vector<Tensor> states;
             states.reserve(batch_size);
-            std::vector<Tensor> next_states;
-            next_states.reserve(batch_size);
             std::vector<Tensor> actions;
             actions.reserve(batch_size);
+            std::vector<Tensor> next_states;
+            next_states.reserve(batch_size);
             std::vector<Tensor> rewards;
             rewards.reserve(batch_size);
+            std::vector<Tensor> dones;
+            dones.reserve(batch_size);
             for (size_t i = 0; i < batch_size; ++i)
             {
-                states.push_back(torch::tensor(c_sample.states.at(i)).to(device));
-                next_states.push_back(torch::tensor(c_sample.next_states.at(i)).to(device));
-                actions.push_back(torch::tensor(c_sample.actions.at(i)).to(device));
+                states.push_back(c_sample.states.at(i));
+                actions.push_back(c_sample.actions.at(i));
+                next_states.push_back(c_sample.next_states.at(i));
                 rewards.push_back(torch::tensor(c_sample.rewards.at(i)).to(device));
+                dones.push_back(torch::tensor(c_sample.dones.at(i)).to(device));
             }
             const auto state = stack(states).to(device);
-            const auto next_state = stack(next_states).to(device);
             const auto action = stack(actions).to(device);
+            const auto next_state = stack(next_states).to(device);
             const auto reward = stack(rewards).to(device);
+            const auto done = stack(dones).to(device);
 
             // we select the best action for the next state..
             auto next_action = actor_target->forward(next_state).to(device);
@@ -61,7 +65,7 @@ namespace rl
 
             // we get the minimun of the predicted qs for the next actions executed in the next states..
             const auto next_qs = critic_target->forward(next_state, next_action);
-            const auto next_q = reward + (discount * torch::min(next_qs.first, next_qs.second)).detach();
+            const auto next_q = reward + ((1 - done) * discount * torch::min(next_qs.first, next_qs.second)).detach();
 
             // we get the currents qs..
             const auto current_qs = critic_model->forward(state, action);
@@ -109,7 +113,7 @@ namespace rl
         torch::load(critic_target, "critic.pt");
     }
 
-    td3_agent::reply_buffer::reply_buffer(const size_t &size) : size(size) {}
+    td3_agent::reply_buffer::reply_buffer(const size_t &size) : size(size) { storage.reserve(size); }
     td3_agent::reply_buffer::~reply_buffer() {}
 
     void td3_agent::reply_buffer::add(const transition &tr)
@@ -125,25 +129,27 @@ namespace rl
 
     td3_agent::transition_batch td3_agent::reply_buffer::sample(const size_t &batch_size) const
     {
-        std::vector<std::vector<double>> states;
+        std::vector<torch::Tensor> states;
         states.reserve(batch_size);
-        std::vector<std::vector<double>> next_states;
-        next_states.reserve(batch_size);
-        std::vector<std::vector<double>> actions;
+        std::vector<torch::Tensor> actions;
         actions.reserve(batch_size);
+        std::vector<torch::Tensor> next_states;
+        next_states.reserve(batch_size);
         std::vector<double> rewards;
         rewards.reserve(batch_size);
+        std::vector<bool> dones;
+        dones.reserve(batch_size);
 
         const auto rnd_ids = torch::randint(size, batch_size).detach();
-        size_t *ptr = reinterpret_cast<size_t *>(rnd_ids.data_ptr());
         for (size_t i = 0; i < batch_size; ++i)
         {
-            states.push_back(storage.at(*ptr).state);
-            next_states.push_back(storage.at(*ptr).next_state);
-            actions.push_back(storage.at(*ptr).action);
-            rewards.push_back(storage.at(*ptr).reward);
-            ptr++;
+            const auto id = rnd_ids[i].item<int>();
+            states.push_back(storage.at(id).state);
+            actions.push_back(storage.at(id).action);
+            next_states.push_back(storage.at(id).next_state);
+            rewards.push_back(storage.at(id).reward);
+            dones.push_back(storage.at(id).done);
         }
-        return transition_batch(states, next_states, actions, rewards);
+        return transition_batch(states, next_states, actions, rewards, dones);
     }
 } // namespace rl
