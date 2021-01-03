@@ -18,12 +18,12 @@ namespace rl
     size_t get_state_dim() const noexcept { return state_dim; }
     size_t get_action_dim() const noexcept { return action_dim; }
 
-    double evaluate(const size_t &init_state, const size_t &eval_episodes = 10) noexcept;
+    double evaluate(const size_t &init_state, const size_t &max_steps, const size_t &eval_episodes = 10) noexcept;
 
     size_t select_action() noexcept;
     virtual std::tuple<size_t, double, bool> execute_action(const size_t &action) noexcept { return {0, 0, true}; }
 
-    void train(const size_t &iterations, const double &discount = 0.99, const double &alpha = 0.005, const double &eps_decay = 0.001) noexcept;
+    void train(const size_t &iterations, const double &gamma = 0.95, const double &alpha = 0.005, const double &eps_decay = 0.001) noexcept;
 
     friend std::ostream &operator<<(std::ostream &os, const ql_agent &ql);
 
@@ -33,7 +33,8 @@ namespace rl
     std::uniform_real_distribution<double> unif = std::uniform_real_distribution<double>(0, 1);
 
   private:
-    double eps = 1;
+    const float eps_start = 0.9, eps_end = 0.05, eps_decay = 200;
+    size_t steps_done = 0;
     size_t state;
     std::vector<std::vector<double>> q_table;
   };

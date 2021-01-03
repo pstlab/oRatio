@@ -426,7 +426,7 @@ void test_ql_0()
     // we fill the buffer with random actions..
     for (size_t i = 0; i < a.get_buffer().get_size(); ++i)
     {
-        const auto action = a.select_action();
+        const auto action = a.select_action(false);
         const auto result = a.execute_action(action);
         a.get_buffer().add(a.get_state(), action, std::get<0>(result), std::get<1>(result), std::get<2>(result));
         if (std::get<2>(result)) // we reset the initial state..
@@ -449,9 +449,10 @@ void test_ql_0()
             a.set_state(std::get<0>(result));
 
         // we perform an optimization step..
-        a.train(100);
+        a.train(10);
         a.set_state(init_state);
-        std::cout << "average reward over the evaluation step " << i << ": " << a.evaluate(init_state) << std::endl;
+        if (i % 5 == 0)
+            std::cout << "average reward over the evaluation step " << i << ": " << a.evaluate(init_state, 100) << std::endl;
 
         if (i % 10 == 0)
             std::cout << a << std::endl;

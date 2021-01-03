@@ -4,7 +4,7 @@ using namespace torch;
 
 namespace rl
 {
-    dql_agent::dql_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state) : state_dim(state_dim), action_dim(action_dim), device(torch::cuda::is_available() ? kCUDA : kCPU), state(init_state), policy(state_dim, action_dim), policy_optimizer(policy->parameters()), target(state_dim, action_dim)
+    dql_agent::dql_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state, const size_t &buffer_size) : state_dim(state_dim), action_dim(action_dim), device(torch::cuda::is_available() ? kCUDA : kCPU), state(init_state), policy(state_dim, action_dim), policy_optimizer(policy->parameters()), target(state_dim, action_dim), buffer(buffer_size)
     {
         // we set the target network in eval mode (this network will not be trained)..
         target->eval();
@@ -17,19 +17,20 @@ namespace rl
     }
     dql_agent::~dql_agent() {}
 
-    double dql_agent::evaluate(const torch::Tensor &init_state, const size_t &eval_episodes) noexcept
+    double dql_agent::evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes) noexcept
     {
         double avg_reward = 0;
         for (size_t i = 0; i < eval_episodes; ++i)
         {
             set_state(init_state);
+            size_t c_step = 0;
             bool done = false;
             while (!done)
             {
                 const auto action = select_action();
                 const auto result = execute_action(action);
                 avg_reward += std::get<1>(result);
-                if (std::get<2>(result))
+                if (std::get<2>(result) || c_step++ == max_steps)
                 { // we reset the initial state..
                     done = true;
                     set_state(init_state);
@@ -41,15 +42,21 @@ namespace rl
         return avg_reward / eval_episodes;
     }
 
-    size_t dql_agent::select_action()
+    size_t dql_agent::select_action(const bool &count_step)
     {
-        if (unif(gen) < eps) // we randomly select actions (exploration)..
+        const float eps_threshold = eps_end + (eps_start - eps_end) * exp(-1. * steps_done / eps_decay);
+        if (count_step)
+            steps_done++;
+        if (unif(gen) < eps_threshold) // we randomly select an action (exploration)..
             return std::uniform_int_distribution<size_t>(0, action_dim - 1)(gen);
-        else // we select our currently best actions (exploitation)..
+        else
+        { // we select our currently best action (exploitation)..
+            torch::NoGradGuard no_grad;
             return policy->forward(state).to(device).argmax().item<long long>();
+        }
     }
 
-    void dql_agent::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &alpha, const double &eps_decay, const size_t &policy_freq)
+    void dql_agent::train(const size_t &iterations, const size_t &batch_size, const double &gamma, const size_t &policy_freq)
     { // the Deep Q-Learning (DQL) algorithm..
         for (size_t it = 0; it < iterations; ++it)
         {
@@ -82,7 +89,7 @@ namespace rl
             // we get the current qs for the current states and actions..
             const auto current_qs = policy->forward(c_states).to(device).gather(-1, c_actions.unsqueeze(-1)).squeeze();
             const auto max_qs = std::get<0>(target->forward(c_next_states).to(device).max(1)).detach();
-            const auto expected_qs = c_rewards + (1 - c_dones) * max_qs * discount;
+            const auto expected_qs = c_rewards + (1 - c_dones) * max_qs * gamma;
 
             // we compute the loss..
             const auto policy_loss = torch::nn::functional::mse_loss(current_qs, expected_qs);
@@ -92,7 +99,7 @@ namespace rl
             policy_loss.backward();       // we then compute the gradients according to the loss..
             policy_optimizer.step();      // we finally update the parameters of the critic model..
 
-            if (it % policy_freq == 0)
+            if (it != 0 && it % policy_freq == 0)
             { // we copy the policy parameters into the target network..
                 const auto policy_pars = policy->parameters();
                 const auto target_pars = target->parameters();
@@ -100,7 +107,6 @@ namespace rl
                     target_pars.at(i).data().copy_(policy_pars.at(i));
             }
         }
-        eps *= 1 - eps_decay;
     }
 
     void dql_agent::save() const { torch::save(policy, "actor.pt"); }

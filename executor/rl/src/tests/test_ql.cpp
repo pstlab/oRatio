@@ -348,7 +348,7 @@ void test_ql_0()
     {
         a.train(100);
         a.set_state(init_state);
-        std::cout << "average reward over the evaluation step " << i << ": " << a.evaluate(0) << std::endl;
+        std::cout << "average reward over the evaluation step " << i << ": " << a.evaluate(0, 100) << std::endl;
     }
     std::cout << a << std::endl;
 }

@@ -4,7 +4,7 @@ using namespace torch;
 
 namespace rl
 {
-    td3_agent::td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state) : state_dim(state_dim), action_dim(action_dim), max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), state(init_state), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), actor_optimizer(actor_model->parameters()), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim), critic_optimizer(critic_model->parameters())
+    td3_agent::td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state, const size_t &buffer_size) : state_dim(state_dim), action_dim(action_dim), max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), state(init_state), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), actor_optimizer(actor_model->parameters()), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim), critic_optimizer(critic_model->parameters()), buffer(buffer_size)
     {
         // we set the actor target network and the actor critic network in eval mode (these networks will not be trained)..
         actor_target->eval();
@@ -24,19 +24,20 @@ namespace rl
     }
     td3_agent::~td3_agent() {}
 
-    double td3_agent::evaluate(const torch::Tensor &init_state, const size_t &eval_episodes) noexcept
+    double td3_agent::evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes) noexcept
     {
         double avg_reward = 0;
         for (size_t i = 0; i < eval_episodes; ++i)
         {
             set_state(init_state);
+            size_t c_step = 0;
             bool done = false;
             while (!done)
             {
                 const auto action = select_action();
                 const auto result = execute_action(action);
                 avg_reward += std::get<1>(result);
-                if (std::get<2>(result))
+                if (std::get<2>(result) || c_step++ == max_steps)
                 { // we reset the initial state..
                     done = true;
                     set_state(init_state);
@@ -50,7 +51,7 @@ namespace rl
 
     Tensor td3_agent::select_action() { return actor_model->forward(state).to(device); }
 
-    void td3_agent::train(const size_t &iterations, const size_t &batch_size, const double &discount, const double &alpha, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
+    void td3_agent::train(const size_t &iterations, const size_t &batch_size, const double &gamma, const double &alpha, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
     { // the Twin-Delayed DDPG (TD3) algorithm..
         for (size_t it = 0; it < iterations; ++it)
         {
@@ -89,7 +90,7 @@ namespace rl
 
             // we get the minimun of the predicted qs for the next actions executed in the next states..
             const auto next_qs = critic_target->forward(c_next_states, next_action);
-            const auto next_q = c_rewards + ((1 - c_dones) * discount * torch::min(next_qs.first, next_qs.second)).detach();
+            const auto next_q = c_rewards + ((1 - c_dones) * gamma * torch::min(next_qs.first, next_qs.second)).detach();
 
             // we get the currents qs..
             const auto current_qs = critic_model->forward(c_states, c_actions);
@@ -103,7 +104,7 @@ namespace rl
             critic_optimizer.step();      // we finally update the parameters of the critic model..
 
             // once every 'policy_freq' iterations we update the actor model by performing gradient ascent..
-            if (it % policy_freq == 0)
+            if (it != 0 && it % policy_freq == 0)
             { // The Deep Deterministic Policy Gradient..
                 const auto actor_loss = -critic_model->q1(c_states, actor_model->forward(c_states)).mean();
                 actor_optimizer.zero_grad(); // we first set the gradients at zero..

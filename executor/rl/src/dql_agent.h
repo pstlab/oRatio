@@ -33,7 +33,7 @@ namespace rl
     class reply_buffer;
 
   public:
-    dql_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state);
+    dql_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state, const size_t &buffer_size = 1e3);
     ~dql_agent();
 
     torch::Tensor get_state() const noexcept { return state; }
@@ -45,13 +45,13 @@ namespace rl
 
     torch::Tensor get_qs(const torch::Tensor &state) noexcept { return policy->forward(state); }
 
-    double evaluate(const torch::Tensor &init_state, const size_t &eval_episodes = 10) noexcept;
+    double evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes = 10) noexcept;
 
-    size_t select_action();
+    size_t select_action(const bool &count_step = true);
 
     virtual std::tuple<torch::Tensor, double, bool> execute_action(const size_t &action) noexcept { return {torch::tensor(std::vector<double>(state_dim, 0)), 0, true}; }
 
-    void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &alpha = 0.005, const double &eps_decay = 0.01, const size_t &policy_freq = 10);
+    void train(const size_t &iterations, const size_t &batch_size = 10, const double &gamma = 0.95, const size_t &policy_freq = 10);
 
     void save() const;
     void load();
@@ -110,7 +110,8 @@ namespace rl
   private:
     torch::Device device;
     torch::Tensor state;
-    double eps = 1;
+    const float eps_start = 0.9, eps_end = 0.05, eps_decay = 200;
+    size_t steps_done = 0;
     agent policy;
     torch::optim::Adam policy_optimizer;
     agent target;

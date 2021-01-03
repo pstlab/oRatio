@@ -6,19 +6,20 @@ namespace rl
     ql_agent::ql_agent(const size_t &state_dim, const size_t &action_dim, const size_t &init_state) : state_dim(state_dim), action_dim(action_dim), q_table(state_dim, std::vector<double>(action_dim, 0)), state(init_state) {}
     ql_agent::~ql_agent() {}
 
-    double ql_agent::evaluate(const size_t &init_state, const size_t &eval_episodes) noexcept
+    double ql_agent::evaluate(const size_t &init_state, const size_t &max_steps, const size_t &eval_episodes) noexcept
     {
         double avg_reward = 0;
         for (size_t i = 0; i < eval_episodes; ++i)
         {
             set_state(init_state);
+            size_t c_step = 0;
             bool done = false;
             while (!done)
             {
                 const auto action = select_action();
                 const auto result = execute_action(action);
                 avg_reward += std::get<1>(result);
-                if (std::get<2>(result))
+                if (std::get<2>(result) || c_step++ == max_steps)
                 { // we reset the initial state..
                     done = true;
                     set_state(init_state);
@@ -32,7 +33,8 @@ namespace rl
 
     size_t ql_agent::select_action() noexcept
     {
-        if (unif(gen) < eps) // we randomly select actions (exploration)..
+        const float eps_threshold = eps_end + (eps_start - eps_end) * exp(-1. * steps_done / eps_decay);
+        if (unif(gen) < eps_threshold) // we randomly select an action (exploration)..
             return std::uniform_int_distribution<size_t>(0, action_dim - 1)(gen);
         else
         { // we select our currently best actions (exploitation)..
@@ -49,12 +51,13 @@ namespace rl
         }
     }
 
-    void ql_agent::train(const size_t &iterations, const double &discount, const double &alpha, const double &eps_decay) noexcept
+    void ql_agent::train(const size_t &iterations, const double &gamma, const double &alpha, const double &eps_decay) noexcept
     {
         for (size_t it = 0; it < iterations; ++it)
         {
             // we select an action..
             const auto c_action = select_action();
+            steps_done++;
             // we execute the action, getting the resulting state and the reward..
             const auto result = execute_action(c_action);
             // this is the current q value for the current state and the selected action..
@@ -62,7 +65,7 @@ namespace rl
             // this is the max among the qs for the resulting state and the selected action..
             double max_q = *std::max_element(q_table.at(std::get<0>(result)).begin(), q_table.at(std::get<0>(result)).end());
             // this is the expected q..
-            double expected_q = std::get<1>(result) + max_q * discount;
+            double expected_q = std::get<1>(result) + max_q * gamma;
             // we update the q table..
             q_table[state][c_action] += alpha * (expected_q - q);
 
@@ -71,7 +74,6 @@ namespace rl
             else // we update the current state..
                 state = std::get<0>(result);
         }
-        eps *= 1 - eps_decay;
     }
 
     std::ostream &operator<<(std::ostream &os, const ql_agent &ql)

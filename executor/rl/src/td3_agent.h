@@ -71,7 +71,7 @@ namespace rl
     class reply_buffer;
 
   public:
-    td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state);
+    td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state, const size_t &buffer_size = 1e3);
     ~td3_agent();
 
     torch::Tensor get_state() const noexcept { return state; }
@@ -81,12 +81,12 @@ namespace rl
 
     reply_buffer &get_buffer() noexcept { return buffer; }
 
-    double evaluate(const torch::Tensor &init_state, const size_t &eval_episodes = 10) noexcept;
+    double evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes = 10) noexcept;
 
     torch::Tensor select_action();
     virtual std::tuple<torch::Tensor, double, bool> execute_action(const torch::Tensor &action) noexcept { return {torch::tensor(std::vector<double>(state_dim, 0)), 0, true}; }
 
-    void train(const size_t &iterations, const size_t &batch_size = 100, const double &discount = 0.99, const double &alpha = 0.005, const double &policy_noise = 0.2, const double &noise_clip = 0.5, const size_t &policy_freq = 2);
+    void train(const size_t &iterations, const size_t &batch_size = 100, const double &gamma = 0.99, const double &alpha = 0.005, const double &policy_noise = 0.2, const double &noise_clip = 0.5, const size_t &policy_freq = 2);
 
     void save() const;
     void load();
