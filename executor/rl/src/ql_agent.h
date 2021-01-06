@@ -20,7 +20,14 @@ namespace rl
 
     double evaluate(const size_t &init_state, const size_t &max_steps, const size_t &eval_episodes = 10) noexcept;
 
-    size_t select_action() noexcept;
+    size_t select_action(const bool &count_step = true) noexcept;
+
+  private:
+    size_t select_best_action();
+    size_t select_random_action();
+    size_t select_softmax_action(const double &t = 1);
+
+  public:
     virtual std::tuple<size_t, double, bool> execute_action(const size_t &action) noexcept { return {0, 0, true}; }
 
     void train(const size_t &iterations, const double &gamma = 0.95, const double &alpha = 0.005, const double &eps_decay = 0.001) noexcept;

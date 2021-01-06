@@ -27,7 +27,7 @@ namespace rl
             bool done = false;
             while (!done)
             {
-                const auto action = select_action();
+                const auto action = select_action(false);
                 const auto result = execute_action(action);
                 avg_reward += std::get<1>(result);
                 if (std::get<2>(result) || c_step++ == max_steps)
@@ -44,16 +44,27 @@ namespace rl
 
     size_t dql_agent::select_action(const bool &count_step)
     {
-        const float eps_threshold = eps_end + (eps_start - eps_end) * exp(-1. * steps_done / eps_decay);
+        const float eps_threshold = eps_end + (eps_start - eps_end) * std::exp(-1. * steps_done / eps_decay);
         if (count_step)
             steps_done++;
         if (unif(gen) < eps_threshold) // we randomly select an action (exploration)..
-            return std::uniform_int_distribution<size_t>(0, action_dim - 1)(gen);
-        else
-        { // we select our currently best action (exploitation)..
-            torch::NoGradGuard no_grad;
-            return policy->forward(state).to(device).argmax().item<long long>();
-        }
+            return select_random_action();
+        else // we select our currently best actions (exploitation)..
+            return select_best_action();
+    }
+
+    size_t dql_agent::select_best_action()
+    {
+        torch::NoGradGuard no_grad;
+        return policy->forward(state).to(device).argmax().item<long long>();
+    }
+
+    size_t dql_agent::select_random_action() { return std::uniform_int_distribution<>(0, action_dim - 1)(gen); }
+
+    size_t dql_agent::select_softmax_action(const double &t)
+    {
+        torch::NoGradGuard no_grad;
+        return (policy->forward(state) / t).softmax(0).multinomial(1).item<long long>();
     }
 
     void dql_agent::train(const size_t &iterations, const size_t &batch_size, const double &gamma, const size_t &policy_freq)

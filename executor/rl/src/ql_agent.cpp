@@ -16,7 +16,7 @@ namespace rl
             bool done = false;
             while (!done)
             {
-                const auto action = select_action();
+                const auto action = select_action(false);
                 const auto result = execute_action(action);
                 avg_reward += std::get<1>(result);
                 if (std::get<2>(result) || c_step++ == max_steps)
@@ -31,24 +31,47 @@ namespace rl
         return avg_reward / eval_episodes;
     }
 
-    size_t ql_agent::select_action() noexcept
+    size_t ql_agent::select_action(const bool &count_step) noexcept
     {
-        const float eps_threshold = eps_end + (eps_start - eps_end) * exp(-1. * steps_done / eps_decay);
+        const float eps_threshold = eps_end + (eps_start - eps_end) * std::exp(-1. * steps_done / eps_decay);
+        if (count_step)
+            steps_done++;
         if (unif(gen) < eps_threshold) // we randomly select an action (exploration)..
-            return std::uniform_int_distribution<size_t>(0, action_dim - 1)(gen);
-        else
-        { // we select our currently best actions (exploitation)..
-            const auto &c_actions = q_table.at(state);
-            size_t best_action = 0;
-            double q = -std::numeric_limits<double>::infinity();
-            for (size_t i = 0; i < c_actions.size(); i++)
-                if (c_actions.at(i) > q)
-                {
-                    q = c_actions.at(i);
-                    best_action = i;
-                }
-            return best_action;
+            return select_random_action();
+        else // we select our currently best actions (exploitation)..
+            return select_best_action();
+    }
+
+    size_t ql_agent::select_best_action()
+    {
+        const auto &c_actions = q_table.at(state);
+        size_t best_action = 0;
+        double q = -std::numeric_limits<double>::infinity();
+        for (size_t i = 0; i < c_actions.size(); i++)
+            if (c_actions.at(i) > q)
+            {
+                q = c_actions.at(i);
+                best_action = i;
+            }
+        return best_action;
+    }
+
+    size_t ql_agent::select_random_action() { return std::uniform_int_distribution<>(0, action_dim - 1)(gen); }
+
+    size_t ql_agent::select_softmax_action(const double &t)
+    {
+        double den = 0;
+        std::vector<double> softmax(action_dim, 0);
+        const auto &c_actions = q_table.at(state);
+        for (size_t i = 0; i < c_actions.size(); i++)
+        {
+            const double c_exp = std::exp(c_actions.at(i) / t);
+            softmax[i] = c_exp;
+            den += c_exp;
         }
+        for (size_t i = 0; i < c_actions.size(); i++)
+            softmax[i] /= den;
+        return std::discrete_distribution<>(softmax.begin(), softmax.end())(gen);
     }
 
     void ql_agent::train(const size_t &iterations, const double &gamma, const double &alpha, const double &eps_decay) noexcept
@@ -57,7 +80,6 @@ namespace rl
         {
             // we select an action..
             const auto c_action = select_action();
-            steps_done++;
             // we execute the action, getting the resulting state and the reward..
             const auto result = execute_action(c_action);
             // this is the current q value for the current state and the selected action..

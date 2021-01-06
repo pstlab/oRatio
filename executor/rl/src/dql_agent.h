@@ -49,9 +49,15 @@ namespace rl
 
     size_t select_action(const bool &count_step = true);
 
+  private:
+    size_t select_best_action();
+    size_t select_random_action();
+    size_t select_softmax_action(const double &t = 1);
+
+  public:
     virtual std::tuple<torch::Tensor, double, bool> execute_action(const size_t &action) noexcept { return {torch::tensor(std::vector<double>(state_dim, 0)), 0, true}; }
 
-    void train(const size_t &iterations, const size_t &batch_size = 10, const double &gamma = 0.95, const size_t &policy_freq = 10);
+    void train(const size_t &iterations, const size_t &batch_size = 100, const double &gamma = 0.95, const size_t &policy_freq = 5);
 
     void save() const;
     void load();

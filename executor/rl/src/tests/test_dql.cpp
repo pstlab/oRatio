@@ -435,7 +435,7 @@ void test_ql_0()
             a.set_state(std::get<0>(result));
     }
 
-    for (size_t i = 0; i < 1000; ++i)
+    for (size_t i = 0; i < 2000; ++i)
     {
         // we select an action..
         const auto action = a.select_action();
