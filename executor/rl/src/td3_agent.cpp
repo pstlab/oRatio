@@ -1,10 +1,12 @@
 #include "td3_agent.h"
+#include "td3_environment.h"
 
 using namespace torch;
 
 namespace rl
 {
-    td3_agent::td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state, const size_t &buffer_size) : state_dim(state_dim), action_dim(action_dim), max_action(max_action), device(torch::cuda::is_available() ? kCUDA : kCPU), state(init_state), actor_model(state_dim, action_dim), actor_target(state_dim, action_dim), actor_optimizer(actor_model->parameters()), critic_model(state_dim, action_dim), critic_target(state_dim, action_dim), critic_optimizer(critic_model->parameters()), buffer(buffer_size)
+
+    td3_agent::td3_agent(td3_environment &env, const size_t &buffer_size) : env(env), actor_model(env.get_state_dim(), env.get_action_dim()), actor_target(env.get_state_dim(), env.get_action_dim()), actor_optimizer(actor_model->parameters()), critic_model(env.get_state_dim(), env.get_action_dim()), critic_target(env.get_state_dim(), env.get_action_dim()), critic_optimizer(critic_model->parameters()), buffer(buffer_size)
     {
         // we set the actor target network and the actor critic network in eval mode (these networks will not be trained)..
         actor_target->eval();
@@ -24,32 +26,7 @@ namespace rl
     }
     td3_agent::~td3_agent() {}
 
-    double td3_agent::evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes) noexcept
-    {
-        double avg_reward = 0;
-        for (size_t i = 0; i < eval_episodes; ++i)
-        {
-            set_state(init_state);
-            size_t c_step = 0;
-            bool done = false;
-            while (!done)
-            {
-                const auto action = select_action();
-                const auto result = execute_action(action);
-                avg_reward += std::get<1>(result);
-                if (std::get<2>(result) || c_step++ == max_steps)
-                { // we reset the initial state..
-                    done = true;
-                    set_state(init_state);
-                }
-                else // we move to the next state..
-                    set_state(std::get<0>(result));
-            }
-        }
-        return avg_reward / eval_episodes;
-    }
-
-    Tensor td3_agent::select_action() { return actor_model->forward(state).to(device); }
+    Tensor td3_agent::select_action() noexcept { return actor_model->forward(env.get_state()).to(device); }
 
     void td3_agent::train(const size_t &iterations, const size_t &batch_size, const double &gamma, const double &alpha, const double &policy_noise, const double &noise_clip, const size_t &policy_freq)
     { // the Twin-Delayed DDPG (TD3) algorithm..
@@ -86,7 +63,7 @@ namespace rl
 
             // we add some noice to the action so as to manage exploration/exploitation..
             const auto noise = next_action.data().normal_(0, policy_noise).to(device).clamp(-noise_clip, noise_clip);
-            next_action = (next_action + noise).clamp(-max_action, max_action);
+            next_action = (next_action + noise).clamp(-env.get_max_action(), env.get_max_action());
 
             // we get the minimun of the predicted qs for the next actions executed in the next states..
             const auto next_qs = critic_target->forward(c_next_states, next_action);
@@ -124,6 +101,29 @@ namespace rl
                     critic_target_pars.at(i).data().copy_(alpha * critic_model_pars.at(i) + (1 - alpha) * critic_target_pars.at(i));
             }
         }
+    }
+
+    double td3_agent::evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes) noexcept
+    {
+        double avg_reward = 0;
+        for (size_t i = 0; i < eval_episodes; ++i)
+        {
+            env.set_state(init_state);
+            size_t c_step = 0;
+            bool done = false;
+            while (!done)
+            {
+                const auto action = select_action();
+                const auto result = env.execute_action(action);
+                avg_reward += result.reward;
+                if (result.done || c_step++ == max_steps)
+                { // we reset the initial state..
+                    done = true;
+                    env.set_state(init_state);
+                }
+            }
+        }
+        return avg_reward / eval_episodes;
     }
 
     void td3_agent::save() const

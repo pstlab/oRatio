@@ -1,10 +1,13 @@
 #pragma once
 
 #include <torch/torch.h>
-#include <tuple>
+#include <random>
 
 namespace rl
 {
+
+  class td3_environment;
+
   struct actorImpl : torch::nn::Module
   {
     actorImpl(const size_t &state_dim, const size_t &action_dim) : layer_0(torch::nn::Linear(state_dim, 400)), layer_1(torch::nn::Linear(400, 300)), layer_2(torch::nn::Linear(300, action_dim))
@@ -71,22 +74,16 @@ namespace rl
     class reply_buffer;
 
   public:
-    td3_agent(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state, const size_t &buffer_size = 1e3);
+    td3_agent(td3_environment &env, const size_t &buffer_size = 1e3);
     ~td3_agent();
-
-    torch::Tensor get_state() const noexcept { return state; }
-    void set_state(const torch::Tensor &c_state) noexcept { state = c_state; }
-    size_t get_state_dim() const noexcept { return state_dim; }
-    size_t get_action_dim() const noexcept { return action_dim; }
 
     reply_buffer &get_buffer() noexcept { return buffer; }
 
-    double evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes = 10) noexcept;
-
-    torch::Tensor select_action();
-    virtual std::tuple<torch::Tensor, double, bool> execute_action(const torch::Tensor &action) noexcept { return {torch::tensor(std::vector<double>(state_dim, 0)), 0, true}; }
+    torch::Tensor select_action() noexcept;
 
     void train(const size_t &iterations, const size_t &batch_size = 100, const double &gamma = 0.99, const double &alpha = 0.005, const double &policy_noise = 0.2, const double &noise_clip = 0.5, const size_t &policy_freq = 2);
+
+    double evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes = 10) noexcept;
 
     void save() const;
     void load();
@@ -136,13 +133,9 @@ namespace rl
       std::vector<transition> storage;
     };
 
-  protected:
-    const size_t state_dim, action_dim;
-    const double max_action;
-
   private:
-    torch::Device device;
-    torch::Tensor state;
+    td3_environment &env;
+    torch::Device device = torch::cuda::is_available() ? torch::kCUDA : torch::kCPU;
     actor actor_model, actor_target;
     torch::optim::Adam actor_optimizer;
     critic critic_model, critic_target;

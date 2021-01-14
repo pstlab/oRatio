@@ -1,11 +1,13 @@
 #pragma once
 
 #include <torch/torch.h>
-#include <tuple>
 #include <random>
 
 namespace rl
 {
+
+  class dql_environment;
+
   struct agentImpl : torch::nn::Module
   {
     agentImpl(const size_t &state_dim, const size_t &action_dim) : layer_0(torch::nn::Linear(state_dim, 40)), layer_1(torch::nn::Linear(40, 30)), layer_2(torch::nn::Linear(30, action_dim))
@@ -28,36 +30,28 @@ namespace rl
   };
   TORCH_MODULE(agent);
 
-  class dql_agent
+  class dql_agent final
   {
     class reply_buffer;
 
   public:
-    dql_agent(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state, const size_t &buffer_size = 1e3);
+    dql_agent(dql_environment &env, const size_t &buffer_size = 1e3);
     ~dql_agent();
-
-    torch::Tensor get_state() const noexcept { return state; }
-    void set_state(const torch::Tensor &c_state) noexcept { state = c_state; }
-    size_t get_state_dim() const noexcept { return state_dim; }
-    size_t get_action_dim() const noexcept { return action_dim; }
 
     reply_buffer &get_buffer() noexcept { return buffer; }
 
-    torch::Tensor get_qs(const torch::Tensor &state) noexcept { return policy->forward(state); }
-
-    double evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes = 10) noexcept;
-
-    size_t select_action(const bool &count_step = true);
+    size_t select_best_action() noexcept;
+    size_t select_random_action() noexcept;
+    size_t select_softmax_action(const double &t = 1) noexcept;
 
   private:
-    size_t select_best_action();
-    size_t select_random_action();
-    size_t select_softmax_action(const double &t = 1);
+    size_t select_action() noexcept;
+    void optimize(const size_t &batch_size, const double &gamma) noexcept;
 
   public:
-    virtual std::tuple<torch::Tensor, double, bool> execute_action(const size_t &action) noexcept { return {torch::tensor(std::vector<double>(state_dim, 0)), 0, true}; }
+    void train(const torch::Tensor &init_state, const size_t &iterations, const size_t &batch_size = 100, const double &gamma = 0.95, const size_t &policy_freq = 5) noexcept;
 
-    void train(const size_t &iterations, const size_t &batch_size = 100, const double &gamma = 0.95, const size_t &policy_freq = 5);
+    double evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes = 10) noexcept;
 
     void save() const;
     void load();
@@ -96,6 +90,7 @@ namespace rl
       ~reply_buffer();
 
       size_t get_size() const noexcept { return size; }
+      bool is_full() const noexcept { return storage.size() == size; }
 
       void add(const torch::Tensor &state, const long &action, const torch::Tensor &next_state, const double &reward, const bool &done);
       void add(const transition &tr);
@@ -108,19 +103,16 @@ namespace rl
       std::vector<transition> storage;
     };
 
-  protected:
-    const size_t state_dim, action_dim;
+  private:
     std::default_random_engine gen;
     std::uniform_real_distribution<double> unif = std::uniform_real_distribution<double>(0, 1);
-
-  private:
-    torch::Device device;
-    torch::Tensor state;
-    const float eps_start = 0.9, eps_end = 0.05, eps_decay = 200;
-    size_t steps_done = 0;
+    dql_environment &env;
+    torch::Device device = torch::cuda::is_available() ? torch::kCUDA : torch::kCPU;
     agent policy;
     torch::optim::Adam policy_optimizer;
     agent target;
     reply_buffer buffer;
+    const float eps_start = 0.9, eps_end = 0.05, eps_decay = 200;
+    size_t steps_done = 0;
   };
 } // namespace rl
