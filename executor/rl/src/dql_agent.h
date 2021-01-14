@@ -45,11 +45,10 @@ namespace rl
     size_t select_softmax_action(const double &t = 1) noexcept;
 
   private:
-    size_t select_action() noexcept;
     void optimize(const size_t &batch_size, const double &gamma) noexcept;
 
   public:
-    void train(const torch::Tensor &init_state, const size_t &iterations, const size_t &batch_size = 100, const double &gamma = 0.95, const size_t &policy_freq = 5) noexcept;
+    void train(const torch::Tensor &init_state, const size_t &iterations, const size_t &batch_size = 100, const double &gamma = 0.95, const double &eps_decay = 200, const size_t &policy_freq = 5) noexcept;
 
     double evaluate(const torch::Tensor &init_state, const size_t &max_steps, const size_t &eval_episodes = 10) noexcept;
 
@@ -112,7 +111,7 @@ namespace rl
     torch::optim::Adam policy_optimizer;
     agent target;
     reply_buffer buffer;
-    const float eps_start = 0.9, eps_end = 0.05, eps_decay = 200;
+    const float eps_start = 0.9, eps_end = 0.05;
     size_t steps_done = 0;
   };
 } // namespace rl

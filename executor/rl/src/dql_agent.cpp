@@ -32,18 +32,6 @@ namespace rl
         return (policy->forward(env.get_state()) / t).softmax(0).multinomial(1).item<long long>();
     }
 
-    size_t dql_agent::select_action() noexcept
-    {
-        if (buffer.is_full())
-        {
-            const float eps_threshold = eps_end + (eps_start - eps_end) * std::exp(-1. * steps_done / eps_decay);
-            steps_done++;
-            return unif(gen) < eps_threshold ? select_random_action() : select_best_action();
-        }
-        else
-            return select_random_action();
-    }
-
     void dql_agent::optimize(const size_t &batch_size, const double &gamma) noexcept
     { // the Deep Q-Learning (DQL) algorithm..
         // we get a sample from the experience replay memory..
@@ -86,14 +74,22 @@ namespace rl
         policy_optimizer.step();      // we finally update the parameters of the critic model..
     }
 
-    void dql_agent::train(const torch::Tensor &init_state, const size_t &iterations, const size_t &batch_size, const double &gamma, const size_t &policy_freq) noexcept
+    void dql_agent::train(const torch::Tensor &init_state, const size_t &iterations, const size_t &batch_size, const double &gamma, const double &eps_decay, const size_t &policy_freq) noexcept
     {
         for (size_t i = 0; i < iterations; ++i)
         {
             // the current state..
             const auto c_state = env.get_state();
             // we select an action..
-            const auto c_action = select_action();
+            size_t c_action;
+            if (buffer.is_full())
+            {
+                const float eps_threshold = eps_end + (eps_start - eps_end) * std::exp(-1. * steps_done / eps_decay);
+                steps_done++;
+                c_action = unif(gen) < eps_threshold ? select_random_action() : select_best_action();
+            }
+            else
+                c_action = select_random_action();
             // we execute the action..
             const auto result = env.execute_action(c_action);
             // we store the transition in the buffer..
