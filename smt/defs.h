@@ -5,13 +5,13 @@
 namespace smt
 {
   typedef size_t var;
-  static const var FALSE_var = 0;
-  static const var TRUE_var = 1;
+  constexpr var FALSE_var = 0;
+  constexpr var TRUE_var = 1;
 
   typedef unsigned short int lbool;
-  static const lbool False = 0;
-  static const lbool True = 1;
-  static const lbool Undefined = 2;
+  constexpr lbool False = 0;
+  constexpr lbool True = 1;
+  constexpr lbool Undefined = 2;
 
   typedef long I;
 } // namespace smt
