@@ -98,13 +98,13 @@ namespace ratio
     bool_expr core::new_bool() noexcept { return new bool_item(*this, lit(sat_cr.new_var())); }
     bool_expr core::new_bool(const bool &val) noexcept { return new bool_item(*this, val ? TRUE_lit : FALSE_lit); }
 
-    arith_expr core::new_int() noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(lra_th.new_var(), 1)); }
-    arith_expr core::new_int(const I &val) noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(val)); }
+    arith_expr core::new_int() noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(lra_th.new_var(), rational::ONE)); }
+    arith_expr core::new_int(const I &val) noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(rational(val))); }
 
-    arith_expr core::new_real() noexcept { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(lra_th.new_var(), 1)); }
+    arith_expr core::new_real() noexcept { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(lra_th.new_var(), rational::ONE)); }
     arith_expr core::new_real(const rational &val) noexcept { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(val)); }
 
-    arith_expr core::new_tp() noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(rdl_th.new_var(), 1)); }
+    arith_expr core::new_tp() noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(rdl_th.new_var(), rational::ONE)); }
     arith_expr core::new_tp(const rational &val) noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(val)); }
 
     string_expr core::new_string() noexcept { return new string_item(*this, ""); }

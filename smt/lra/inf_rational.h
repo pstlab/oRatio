@@ -8,12 +8,12 @@ namespace smt
   class inf_rational
   {
   public:
-    inf_rational() {}
-    inf_rational(I nun) : rat(nun) {}
-    inf_rational(const rational &rat) : rat(rat) {}
-    inf_rational(I nun, I den) : rat(nun, den) {}
-    inf_rational(const rational &rat, I inf) : rat(rat), inf(inf) {}
-    inf_rational(const rational &rat, const rational &inf) : rat(rat), inf(inf) {}
+    explicit inf_rational() {}
+    explicit inf_rational(I nun) : rat(nun) {}
+    explicit inf_rational(const rational &rat) : rat(rat) {}
+    explicit inf_rational(I nun, I den) : rat(nun, den) {}
+    explicit inf_rational(const rational &rat, I inf) : rat(rat), inf(inf) {}
+    explicit inf_rational(const rational &rat, const rational &inf) : rat(rat), inf(inf) {}
 
     rational get_rational() const noexcept { return rat; }
     rational get_infinitesimal() const noexcept { return inf; }

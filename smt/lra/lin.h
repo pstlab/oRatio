@@ -9,9 +9,9 @@ namespace smt
   class lin
   {
   public:
-    lin();
-    lin(const rational &known_term);
-    lin(const var v, const rational &c);
+    explicit lin();
+    explicit lin(const rational &known_term);
+    explicit lin(const var v, const rational &c);
 
   public:
     lin operator+(const lin &rhs) const noexcept;

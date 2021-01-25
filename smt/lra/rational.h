@@ -14,9 +14,9 @@ namespace smt
     static const rational POSITIVE_INFINITY;
     static const rational NEGATIVE_INFINITY;
 
-    rational();
-    rational(I n);
-    rational(I n, I d);
+    explicit rational();
+    explicit rational(I n);
+    explicit rational(I n, I d);
 
     operator double() const noexcept { return static_cast<double>(num) / den; }
     I numerator() const noexcept { return num; }

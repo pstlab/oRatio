@@ -7,11 +7,11 @@
 namespace smt
 {
 
-    rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<inf_rational>>(size, std::vector<inf_rational>(size, rational::POSITIVE_INFINITY))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
+    rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<inf_rational>>(size, std::vector<inf_rational>(size, inf_rational(rational::POSITIVE_INFINITY)))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
     {
         for (size_t i = 0; i < size; ++i)
         {
-            _dists[i][i] = 0;
+            _dists[i][i] = inf_rational(rational::ZERO);
             std::fill(_preds[i].begin(), _preds[i].end(), i);
             _preds[i][i] = -1;
         }
@@ -102,12 +102,12 @@ namespace smt
             if (expr.vars.begin()->second < rational::ZERO)
             {
                 expr = expr / expr.vars.begin()->second;
-                return new_distance(expr.vars.begin()->first, 0, expr.known_term);
+                return new_distance(expr.vars.begin()->first, 0, inf_rational(expr.known_term));
             }
             else
             {
                 expr = expr / expr.vars.begin()->second;
-                return new_distance(0, expr.vars.begin()->first, -expr.known_term);
+                return new_distance(0, expr.vars.begin()->first, -inf_rational(expr.known_term));
             }
         case 2:
             if (expr.vars.begin()->second < rational::ZERO)
@@ -119,7 +119,7 @@ namespace smt
                 const auto second_term = *it;
                 if (second_term.second != -rational::ONE)
                     throw std::invalid_argument("not a valid real difference logic constraint..");
-                return new_distance(first_term.first, second_term.first, expr.known_term);
+                return new_distance(first_term.first, second_term.first, inf_rational(expr.known_term));
             }
             else
             {
@@ -130,7 +130,7 @@ namespace smt
                 const auto second_term = *it;
                 if (second_term.second != -rational::ONE)
                     throw std::invalid_argument("not a valid real difference logic constraint..");
-                return new_distance(second_term.first, first_term.first, -expr.known_term);
+                return new_distance(second_term.first, first_term.first, -inf_rational(expr.known_term));
             }
         default:
             throw std::invalid_argument("not a valid real difference logic constraint..");
@@ -149,7 +149,7 @@ namespace smt
             expr = expr / expr.vars.begin()->second;
             const auto dist = distance(expr.vars.begin()->first, 0);
             if (dist.first <= expr.known_term && dist.second >= expr.known_term)
-                return sat.new_conj({new_distance(expr.vars.begin()->first, 0, expr.known_term), new_distance(0, expr.vars.begin()->first, -expr.known_term)});
+                return sat.new_conj({new_distance(expr.vars.begin()->first, 0, inf_rational(expr.known_term)), new_distance(0, expr.vars.begin()->first, -inf_rational(expr.known_term))});
             else
                 return FALSE_lit;
         }
@@ -164,7 +164,7 @@ namespace smt
                 throw std::invalid_argument("not a valid real difference logic constraint..");
             const auto dist = distance(first_term.first, second_term.first);
             if (dist.first <= expr.known_term && dist.second >= expr.known_term)
-                return sat.new_conj({new_distance(first_term.first, second_term.first, expr.known_term), new_distance(second_term.first, first_term.first, -expr.known_term)});
+                return sat.new_conj({new_distance(first_term.first, second_term.first, inf_rational(expr.known_term)), new_distance(second_term.first, first_term.first, -inf_rational(expr.known_term))});
             else
                 return FALSE_lit;
         }
@@ -184,12 +184,12 @@ namespace smt
             if (expr.vars.begin()->second < rational::ZERO)
             {
                 expr = expr / expr.vars.begin()->second;
-                return new_distance(0, expr.vars.begin()->first, -expr.known_term);
+                return new_distance(0, expr.vars.begin()->first, -inf_rational(expr.known_term));
             }
             else
             {
                 expr = expr / expr.vars.begin()->second;
-                return new_distance(expr.vars.begin()->first, 0, expr.known_term);
+                return new_distance(expr.vars.begin()->first, 0, inf_rational(expr.known_term));
             }
         case 2:
         {
@@ -202,7 +202,7 @@ namespace smt
                 const auto second_term = *it;
                 if (second_term.second != -rational::ONE)
                     throw std::invalid_argument("not a valid real difference logic constraint..");
-                return new_distance(second_term.first, first_term.first, -expr.known_term);
+                return new_distance(second_term.first, first_term.first, -inf_rational(expr.known_term));
             }
             else
             {
@@ -213,7 +213,7 @@ namespace smt
                 const auto second_term = *it;
                 if (second_term.second != -rational::ONE)
                     throw std::invalid_argument("not a valid real difference logic constraint..");
-                return new_distance(first_term.first, second_term.first, expr.known_term);
+                return new_distance(first_term.first, second_term.first, inf_rational(expr.known_term));
             }
         }
         default:
@@ -310,7 +310,7 @@ namespace smt
         switch (expr.vars.size())
         {
         case 0:
-            return std::make_pair(expr.known_term, expr.known_term);
+            return std::make_pair(inf_rational(expr.known_term), inf_rational(expr.known_term));
         case 1:
         {
             expr = expr / expr.vars.begin()->second;
@@ -578,10 +578,10 @@ namespace smt
     {
         const size_t c_size = _dists.size();
         for (auto &row : _dists)
-            row.resize(size, rational::POSITIVE_INFINITY);
-        _dists.resize(size, std::vector<inf_rational>(size, rational::POSITIVE_INFINITY));
+            row.resize(size, inf_rational(rational::POSITIVE_INFINITY));
+        _dists.resize(size, std::vector<inf_rational>(size, inf_rational(rational::POSITIVE_INFINITY)));
         for (size_t i = c_size; i < size; ++i)
-            _dists[i][i] = 0;
+            _dists[i][i] = inf_rational(rational::ZERO);
 
         for (size_t i = 0; i < c_size; ++i)
             _preds[i].resize(size, i);

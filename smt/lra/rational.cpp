@@ -37,7 +37,7 @@ namespace smt
         if (rhs.num == 0 || is_infinite(*this))
             return *this;
         if (den == 1 && rhs.den == 1)
-            return num + rhs.num;
+            return rational(num + rhs.num);
 
         I f = std::gcd(num, rhs.num);
         I g = std::gcd(den, rhs.den);
@@ -60,7 +60,7 @@ namespace smt
         if (operator==(ONE))
             return rhs;
         if (den == 1 && rhs.den == 1)
-            return num * rhs.num;
+            return rational(num * rhs.num);
         if (is_infinite(*this) || is_infinite(rhs))
             return ((num >= 0 && rhs.num >= 0) || (num <= 0 && rhs.num <= 0)) ? POSITIVE_INFINITY : NEGATIVE_INFINITY;
 
@@ -89,11 +89,11 @@ namespace smt
     {
         // special cases..
         if (num == 0)
-            return rhs;
+            return rational(rhs);
         if (rhs == 0 || is_infinite(*this))
             return *this;
         if (den == 1)
-            return num + rhs;
+            return rational(num + rhs);
 
         rational res;
         res.num = num + rhs * den;
@@ -111,9 +111,9 @@ namespace smt
         if (rhs == 1)
             return *this;
         if (operator==(ONE))
-            return rhs;
+            return rational(rhs);
         if (den == 1)
-            return num * rhs;
+            return rational(num * rhs);
         if (is_infinite(*this))
             return ((num >= 0 && rhs >= 0) || (num <= 0 && rhs <= 0)) ? POSITIVE_INFINITY : NEGATIVE_INFINITY;
 

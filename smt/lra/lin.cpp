@@ -147,7 +147,7 @@ namespace smt
         if (right == rational::ZERO)
         {
             vars.clear();
-            known_term = 0;
+            known_term = rational::ZERO;
         }
         else
             for (auto &&term : vars)
@@ -161,7 +161,7 @@ namespace smt
         if (is_infinite(right))
         {
             vars.clear();
-            known_term = 0;
+            known_term = rational::ZERO;
         }
         else
             for (auto &&term : vars)

@@ -14,9 +14,9 @@ namespace smt
     {
         // we create a new arithmetic variable..
         const var id = vals.size();
-        c_bounds.push_back({rational::NEGATIVE_INFINITY, TRUE_lit}); // we set the lower bound at -inf..
-        c_bounds.push_back({rational::POSITIVE_INFINITY, TRUE_lit}); // we set the upper bound at +inf..
-        vals.push_back(rational::ZERO);                              // we set the current value at 0..
+        c_bounds.push_back({inf_rational(rational::NEGATIVE_INFINITY), TRUE_lit}); // we set the lower bound at -inf..
+        c_bounds.push_back({inf_rational(rational::POSITIVE_INFINITY), TRUE_lit}); // we set the upper bound at +inf..
+        vals.push_back(inf_rational(rational::ZERO));                              // we set the current value at 0..
         exprs.emplace("x" + std::to_string(id), id);
         a_watches.resize(vals.size());
         t_watches.resize(vals.size());
@@ -57,7 +57,7 @@ namespace smt
             }
 
         const inf_rational c_right = inf_rational(-expr.known_term, -1);
-        expr.known_term = 0;
+        expr.known_term = rational::ZERO;
 
         if (ub(expr) <= c_right)
             return TRUE_lit; // the constraint is already satisfied..
@@ -99,8 +99,8 @@ namespace smt
                 expr += at_v->second->l * c;
             }
 
-        const inf_rational c_right = -expr.known_term;
-        expr.known_term = 0;
+        const inf_rational c_right = -inf_rational(expr.known_term);
+        expr.known_term = rational::ZERO;
 
         if (ub(expr) <= c_right)
             return TRUE_lit; // the constraint is already satisfied..
@@ -142,8 +142,8 @@ namespace smt
                 expr += at_v->second->l * c;
             }
 
-        const inf_rational c_right = -expr.known_term;
-        expr.known_term = 0;
+        const inf_rational c_right = -inf_rational(expr.known_term);
+        expr.known_term = rational::ZERO;
 
         if (lb(expr) >= c_right)
             return TRUE_lit; // the constraint is already satisfied..
@@ -186,7 +186,7 @@ namespace smt
             }
 
         const inf_rational c_right = inf_rational(-expr.known_term, 1);
-        expr.known_term = 0;
+        expr.known_term = rational::ZERO;
 
         if (lb(expr) >= c_right)
             return TRUE_lit; // the constraint is already satisfied..
@@ -253,7 +253,7 @@ namespace smt
             const row *f_row = (*x_i_it).second;
             if (value(x_i) < lb(x_i))
             {
-                const auto &x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, inf_rational> &v) { return (is_positive(f_row->l.vars.at(v.first)) && value(v.first) < ub(v.first)) || (is_negative(f_row->l.vars.at(v.first)) && value(v.first) > lb(v.first)); });
+                const auto &x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, rational> &v) { return (is_positive(f_row->l.vars.at(v.first)) && value(v.first) < ub(v.first)) || (is_negative(f_row->l.vars.at(v.first)) && value(v.first) > lb(v.first)); });
                 if (x_j_it != f_row->l.vars.end()) // var x_j can be used to increase the value of x_i..
                     pivot_and_update(x_i, (*x_j_it).first, lb(x_i));
                 else
@@ -269,7 +269,7 @@ namespace smt
             }
             else if (value(x_i) > ub(x_i))
             {
-                const auto &x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, inf_rational> &v) { return (is_negative(f_row->l.vars.at(v.first)) && value(v.first) < ub(v.first)) || (is_positive(f_row->l.vars.at(v.first)) && value(v.first) > lb(v.first)); });
+                const auto &x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, rational> &v) { return (is_negative(f_row->l.vars.at(v.first)) && value(v.first) < ub(v.first)) || (is_positive(f_row->l.vars.at(v.first)) && value(v.first) > lb(v.first)); });
                 if (x_j_it != f_row->l.vars.end()) // var x_j can be used to decrease the value of x_i..
                     pivot_and_update(x_i, (*x_j_it).first, ub(x_i));
                 else
