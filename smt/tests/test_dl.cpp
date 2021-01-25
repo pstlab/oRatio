@@ -133,7 +133,7 @@ void test_real_distance_logic()
     assert(prop);
 
     lit tp2_after_40 = rdl.new_distance(tp2, origin, -40);
-    assert(tp2_after_40 == FALSE_var);
+    assert(tp2_after_40 == FALSE_lit);
 
     lit tp2_after_20 = rdl.new_distance(tp2, origin, -20);
     lit tp2_before_20 = rdl.new_distance(origin, tp2, 20);

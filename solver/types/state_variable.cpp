@@ -158,7 +158,7 @@ namespace ratio
         atom &atm = f.get_atom();
         if (f.is_fact)
         { // we apply interval-predicate whenever the fact becomes active..
-            set_ni(atm.get_sigma());
+            set_ni(lit(atm.get_sigma()));
             get_core().get_predicate("Interval").apply_rule(atm);
             restore_ni();
         }

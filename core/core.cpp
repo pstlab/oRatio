@@ -95,8 +95,8 @@ namespace ratio
 #endif
     }
 
-    bool_expr core::new_bool() noexcept { return new bool_item(*this, sat_cr.new_var()); }
-    bool_expr core::new_bool(const bool &val) noexcept { return new bool_item(*this, val); }
+    bool_expr core::new_bool() noexcept { return new bool_item(*this, lit(sat_cr.new_var())); }
+    bool_expr core::new_bool(const bool &val) noexcept { return new bool_item(*this, val ? TRUE_lit : FALSE_lit); }
 
     arith_expr core::new_int() noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(lra_th.new_var(), 1)); }
     arith_expr core::new_int(const I &val) noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(val)); }

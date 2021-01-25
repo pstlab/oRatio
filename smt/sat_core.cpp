@@ -12,13 +12,9 @@ namespace smt
     sat_core::sat_core()
     {
         var c_false = new_var(); // the false constant..
-        var c_true = new_var();  // the true constant..
         assert(c_false == FALSE_var);
-        assert(c_true == TRUE_var);
         assigns[FALSE_var] = False;
-        assigns[TRUE_var] = True;
         level[FALSE_var] = 0;
-        level[TRUE_var] = 0;
     }
 
     sat_core::~sat_core()
@@ -83,9 +79,9 @@ namespace smt
             switch (value(right))
             {
             case True:
-                return TRUE_var; // the variables assume the same value..
+                return TRUE_lit; // the variables assume the same value..
             case False:
-                return FALSE_var; // the variables cannot assume the same value..
+                return FALSE_lit; // the variables cannot assume the same value..
             case Undefined:
                 return sign(left) == sign(right) ? right : !right;
             }
@@ -93,9 +89,9 @@ namespace smt
             switch (value(right))
             {
             case True:
-                return FALSE_var; // the variables cannot assume the same value..
+                return FALSE_lit; // the variables cannot assume the same value..
             case False:
-                return TRUE_var; // the variables assume the same value..
+                return TRUE_lit; // the variables assume the same value..
             case Undefined:
                 return sign(left) == sign(right) ? !right : right;
             }
@@ -116,13 +112,13 @@ namespace smt
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const lit ctr = new_var();
+            const lit ctr = lit(new_var());
             if (!new_clause({!ctr, !left, right}))
-                return FALSE_var;
+                return FALSE_lit;
             if (!new_clause({!ctr, left, !right}))
-                return FALSE_var;
+                return FALSE_lit;
             if (!new_clause({ctr, !left, !right}))
-                return FALSE_var;
+                return FALSE_lit;
             exprs.emplace(s_expr, ctr);
             return ctr;
         }
@@ -139,7 +135,7 @@ namespace smt
         std::string s_expr = "&";
         for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
             if (value(*it) == False || *it == !p)
-                return FALSE_var; // the conjunction cannot be satisfied..
+                return FALSE_lit; // the conjunction cannot be satisfied..
             else if (value(*it) != True && *it != p)
             { // we need to include this literal in the conjunction..
                 p = *it;
@@ -149,25 +145,25 @@ namespace smt
         c_lits.resize(j);
 
         if (c_lits.empty()) // an empty conjunction is assumed to be satisfied..
-            return TRUE_var;
+            return TRUE_lit;
         else if (c_lits.size() == 1)
             return c_lits[0];
         else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const lit ctr = new_var();
+            const lit ctr = lit(new_var());
             std::vector<lit> lits;
             lits.reserve(c_lits.size() + 1);
             lits.push_back(ctr);
             for (const auto &l : c_lits)
             {
                 if (!new_clause({!ctr, l}))
-                    return FALSE_var;
+                    return FALSE_lit;
                 lits.push_back(!l);
             }
             if (!new_clause(lits))
-                return FALSE_var;
+                return FALSE_lit;
             exprs.emplace(s_expr, ctr);
             return ctr;
         }
@@ -184,7 +180,7 @@ namespace smt
         std::string s_expr = "|";
         for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
             if (value(*it) == True || *it == !p)
-                return TRUE_var; // the disjunction is already satisfied..
+                return TRUE_lit; // the disjunction is already satisfied..
             else if (value(*it) != False && *it != p)
             { // we need to include this literal in the conjunction..
                 p = *it;
@@ -194,25 +190,25 @@ namespace smt
         c_lits.resize(j);
 
         if (c_lits.empty()) // an empty disjunction is assumed to be unsatisfable..
-            return FALSE_var;
+            return FALSE_lit;
         else if (c_lits.size() == 1)
             return c_lits[0];
         else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const lit ctr = new_var();
+            const lit ctr = lit(new_var());
             std::vector<lit> lits;
             lits.reserve(c_lits.size() + 1);
             lits.push_back(!ctr);
             for (const auto &l : c_lits)
             {
                 if (!new_clause({!l, ctr}))
-                    return FALSE_var;
+                    return FALSE_lit;
                 lits.push_back(l);
             }
             if (!new_clause(lits))
-                return FALSE_var;
+                return FALSE_lit;
             exprs.emplace(s_expr, ctr);
             return ctr;
         }
@@ -232,7 +228,7 @@ namespace smt
                 for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
                 {
                     if (value(*it1) == True || *it1 == !p)
-                        return FALSE_var; // the at-most-one cannot be satisfied..
+                        return FALSE_lit; // the at-most-one cannot be satisfied..
                     else if (value(*it1) != False && *it1 != p)
                     { // we need to include this literal in the at-most-one..
                         p = *it1;
@@ -249,18 +245,18 @@ namespace smt
         c_lits.resize(j);
 
         if (c_lits.empty() || c_lits.size() == 1) // an empty or a singleton at-most-one is assumed to be satisfied..
-            return TRUE_var;
+            return TRUE_lit;
         else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
             if (ls.size() < 4)
             { // we use the standard encoding..
-                const lit ctr = new_var();
+                const lit ctr = lit(new_var());
                 for (size_t i = 0; i < ls.size(); ++i)
                     for (size_t j = i + 1; j < ls.size(); ++j)
                         if (!new_clause({!ls[i], !ls[j], !ctr}))
-                            return FALSE_var;
+                            return FALSE_lit;
                 exprs.emplace(s_expr, ctr);
                 return ctr;
             }
@@ -271,9 +267,9 @@ namespace smt
 
                 std::vector<lit> u, v;
                 for (size_t i = 0; i < ps; ++i)
-                    u.push_back(new_var());
+                    u.push_back(lit(new_var()));
                 for (size_t j = 0; j < qs; ++j)
-                    v.push_back(new_var());
+                    v.push_back(lit(new_var()));
 
                 const lit ctr = new_conj({new_at_most_one(u), new_at_most_one(v)});
 
@@ -281,7 +277,7 @@ namespace smt
                     for (size_t j = 0; j < qs; ++j)
                         if (size_t k = static_cast<size_t>(i * qs + j); k < ls.size())
                             if (!new_clause({!ls[k], u[i], !ctr}) || !new_clause({!ls[k], v[j], !ctr}))
-                                return FALSE_var;
+                                return FALSE_lit;
 
                 exprs.emplace(s_expr, ctr);
                 return ctr;
@@ -303,7 +299,7 @@ namespace smt
                 for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
                 {
                     if (value(*it1) == True || *it1 == !p)
-                        return FALSE_var; // the exact-one cannot be satisfied..
+                        return FALSE_lit; // the exact-one cannot be satisfied..
                     else if (value(*it1) != False && *it1 != p)
                     { // we need to include this literal in the exact-one..
                         p = *it1;
@@ -320,7 +316,7 @@ namespace smt
         c_lits.resize(j);
 
         if (c_lits.empty()) // an empty exact-one is assumed to be unsatisfable..
-            return FALSE_var;
+            return FALSE_lit;
         else if (c_lits.size() == 1 && sign(c_lits[0]))
             return c_lits[0];
         else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
@@ -330,7 +326,7 @@ namespace smt
             const lit ctr = new_at_most_one(c_lits);
             c_lits.push_back(!ctr);
             if (!new_clause(c_lits))
-                return FALSE_var;
+                return FALSE_lit;
             exprs.emplace(s_expr, ctr);
             return ctr;
         }

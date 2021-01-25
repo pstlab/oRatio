@@ -14,8 +14,8 @@ namespace smt
     {
         // we create a new arithmetic variable..
         const var id = vals.size();
-        c_bounds.push_back({rational::NEGATIVE_INFINITY, TRUE_var}); // we set the lower bound at -inf..
-        c_bounds.push_back({rational::POSITIVE_INFINITY, TRUE_var}); // we set the upper bound at +inf..
+        c_bounds.push_back({rational::NEGATIVE_INFINITY, TRUE_lit}); // we set the lower bound at -inf..
+        c_bounds.push_back({rational::POSITIVE_INFINITY, TRUE_lit}); // we set the upper bound at +inf..
         vals.push_back(rational::ZERO);                              // we set the current value at 0..
         exprs.emplace("x" + std::to_string(id), id);
         a_watches.resize(vals.size());
@@ -33,8 +33,8 @@ namespace smt
             assert(sat.root_level());
             const var slack = new_var();
             exprs.emplace(s_expr, slack);
-            c_bounds[lb_index(slack)] = {lb(l), TRUE_var}; // we set the lower bound at the lower bound of the given linear expression..
-            c_bounds[ub_index(slack)] = {ub(l), TRUE_var}; // we set the upper bound at the upper bound of the given linear expression..
+            c_bounds[lb_index(slack)] = {lb(l), TRUE_lit}; // we set the lower bound at the lower bound of the given linear expression..
+            c_bounds[ub_index(slack)] = {ub(l), TRUE_lit}; // we set the upper bound at the upper bound of the given linear expression..
             vals[slack] = value(l);                        // we set the initial value of the new slack variable at the value of the given linear expression..
             new_row(slack, l);                             // we add a new row into the tableau..
             return slack;
@@ -60,26 +60,27 @@ namespace smt
         expr.known_term = 0;
 
         if (ub(expr) <= c_right)
-            return TRUE_var; // the constraint is already satisfied..
+            return TRUE_lit; // the constraint is already satisfied..
         else if (lb(expr) > c_right)
-            return FALSE_var; // the constraint is unsatisfable..
+            return FALSE_lit; // the constraint is unsatisfable..
 
         // we create a slack variable from the current expression (notice that the variable can be reused)..
         const var slack = new_var(expr);
         if (ub(slack) <= c_right)
-            return TRUE_var; // the constraint is already satisfied..
+            return TRUE_lit; // the constraint is already satisfied..
         else if (lb(slack) > c_right)
-            return FALSE_var; // the constraint is unsatisfable..
+            return FALSE_lit; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " <= " + to_string(c_right);
         if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
             return at_asrt->second;
         else
         { // we need to create a new control variable..
             const var ctr = sat.new_var();
+            const lit ctr_lit(ctr);
             bind(ctr);
-            s_asrts.emplace(s_assertion, ctr);
-            v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr, slack, c_right));
-            return ctr;
+            s_asrts.emplace(s_assertion, ctr_lit);
+            v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr_lit, slack, c_right));
+            return ctr_lit;
         }
     }
 
@@ -102,26 +103,27 @@ namespace smt
         expr.known_term = 0;
 
         if (ub(expr) <= c_right)
-            return TRUE_var; // the constraint is already satisfied..
+            return TRUE_lit; // the constraint is already satisfied..
         else if (lb(expr) > c_right)
-            return FALSE_var; // the constraint is unsatisfable..
+            return FALSE_lit; // the constraint is unsatisfable..
 
         // we create a slack variable from the current expression (notice that the variable can be reused)..
         const var slack = new_var(expr);
         if (ub(slack) <= c_right)
-            return TRUE_var; // the constraint is already satisfied..
+            return TRUE_lit; // the constraint is already satisfied..
         else if (lb(slack) > c_right)
-            return FALSE_var; // the constraint is unsatisfable..
+            return FALSE_lit; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " <= " + to_string(c_right);
         if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
             return at_asrt->second;
         else
         { // we need to create a new control variable..
             const var ctr = sat.new_var();
+            const lit ctr_lit(ctr);
             bind(ctr);
-            s_asrts.emplace(s_assertion, ctr);
-            v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr, slack, c_right));
-            return ctr;
+            s_asrts.emplace(s_assertion, ctr_lit);
+            v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr_lit, slack, c_right));
+            return ctr_lit;
         }
     }
 
@@ -144,26 +146,27 @@ namespace smt
         expr.known_term = 0;
 
         if (lb(expr) >= c_right)
-            return TRUE_var; // the constraint is already satisfied..
+            return TRUE_lit; // the constraint is already satisfied..
         else if (ub(expr) < c_right)
-            return FALSE_var; // the constraint is unsatisfable..
+            return FALSE_lit; // the constraint is unsatisfable..
 
         // we create a slack variable from the current expression (notice that the variable can be reused)..
         const var slack = new_var(expr);
         if (lb(slack) >= c_right)
-            return TRUE_var; // the constraint is already satisfied..
+            return TRUE_lit; // the constraint is already satisfied..
         else if (ub(slack) < c_right)
-            return FALSE_var; // the constraint is unsatisfable..
+            return FALSE_lit; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " >= " + to_string(c_right);
         if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
             return at_asrt->second;
         else
         { // we need to create a new control variable..
             const var ctr = sat.new_var();
+            const lit ctr_lit(ctr);
             bind(ctr);
-            s_asrts.emplace(s_assertion, ctr);
-            v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr, slack, c_right));
-            return ctr;
+            s_asrts.emplace(s_assertion, ctr_lit);
+            v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr_lit, slack, c_right));
+            return ctr_lit;
         }
     }
 
@@ -186,26 +189,27 @@ namespace smt
         expr.known_term = 0;
 
         if (lb(expr) >= c_right)
-            return TRUE_var; // the constraint is already satisfied..
+            return TRUE_lit; // the constraint is already satisfied..
         else if (ub(expr) < c_right)
-            return FALSE_var; // the constraint is unsatisfable..
+            return FALSE_lit; // the constraint is unsatisfable..
 
         // we create a slack variable from the current expression (notice that the variable can be reused)..
         const var slack = new_var(expr);
         if (lb(slack) >= c_right)
-            return TRUE_var; // the constraint is already satisfied..
+            return TRUE_lit; // the constraint is already satisfied..
         else if (ub(slack) < c_right)
-            return FALSE_var; // the constraint is unsatisfable..
+            return FALSE_lit; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " >= " + to_string(c_right);
         if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
             return at_asrt->second;
         else
         { // we need to create a new control variable..
             const var ctr = sat.new_var();
+            const lit ctr_lit(ctr);
             bind(ctr);
-            s_asrts.emplace(s_assertion, ctr);
-            v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr, slack, c_right));
-            return ctr;
+            s_asrts.emplace(s_assertion, ctr_lit);
+            v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr_lit, slack, c_right));
+            return ctr_lit;
         }
     }
 

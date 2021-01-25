@@ -13,7 +13,7 @@ namespace smt
   class lit
   {
   public:
-    lit(var v = -1, bool sign = true) : x((v << 1) + sign) {}
+    explicit lit(var v = -1, bool sign = true) : x((v << 1) + sign) {}
     virtual ~lit() {}
 
     friend var variable(const lit &p) noexcept { return p.x >> 1; }
@@ -36,4 +36,7 @@ namespace smt
   private:
     size_t x;
   };
+
+  const lit FALSE_lit = lit(FALSE_var);
+  const lit TRUE_lit = !FALSE_lit;
 } // namespace smt

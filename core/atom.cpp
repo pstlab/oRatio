@@ -15,9 +15,9 @@ namespace ratio
     lit atom::new_eq(item &i) noexcept
     {
         if (this == &i)
-            return TRUE_var;
+            return TRUE_lit;
         if (get_type().get_name().compare(i.get_type().get_name()) != 0)
-            return FALSE_var;
+            return FALSE_lit;
         else if (var_item *ei = dynamic_cast<var_item *>(&i))
             return ei->new_eq(*this);
         else
@@ -38,7 +38,7 @@ namespace ratio
             switch (eqs.size())
             {
             case 0:
-                return TRUE_var;
+                return TRUE_lit;
             case 1:
                 return *eqs.begin();
             default:

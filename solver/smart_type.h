@@ -40,8 +40,8 @@ namespace ratio
     virtual void new_atom(atom_flaw &);
 
   protected:
-    void set_ni(const smt::var &v) noexcept; // temporally sets the solver's 'ni' variable..
-    void restore_ni() noexcept;              // restores the solver's 'ni' variable..
+    void set_ni(const smt::lit &v) noexcept; // temporally sets the solver's 'ni' literal..
+    void restore_ni() noexcept;              // restores the solver's 'ni' literal..
 
     void store_flaw(flaw &f) noexcept; // stores the flaw waiting for its initialization at root-level..
 

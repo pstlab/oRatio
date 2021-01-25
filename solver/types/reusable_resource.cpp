@@ -201,12 +201,12 @@ namespace ratio
         assert(f.is_fact);
         atom &atm = f.get_atom();
         // we apply interval-predicate whenever the fact becomes active..
-        set_ni(atm.get_sigma());
+        set_ni(lit(atm.get_sigma()));
         static_cast<predicate &>(get_predicate(REUSABLE_RESOURCE_USE_PREDICATE_NAME)).apply_rule(atm);
         restore_ni();
 
         // we avoid unification..
-        if (!get_core().get_sat_core().new_clause({!f.get_phi(), atm.get_sigma()}))
+        if (!get_core().get_sat_core().new_clause({!f.get_phi(), lit(atm.get_sigma())}))
             throw unsolvable_exception();
 
         // we store the variables for on-line flaw resolution..

@@ -30,17 +30,18 @@ namespace smt
     lit idl_theory::new_distance(const var &from, const var &to, const I &dist) noexcept
     {
         if (_dists[to][from] < -dist)
-            return FALSE_var; // the constraint is inconsistent..
+            return FALSE_lit; // the constraint is inconsistent..
         else if (_dists[from][to] <= dist)
-            return TRUE_var; // the constraint is redundant..
+            return TRUE_lit; // the constraint is redundant..
         else
         { // we need to create a new propositional variable..
             const var ctr = sat.new_var();
+            const lit ctr_lit(ctr);
             bind(ctr);
-            const auto dst_cnst = new idl_distance(ctr, from, to, dist);
+            const auto dst_cnst = new idl_distance(ctr_lit, from, to, dist);
             var_dists[ctr].push_back(dst_cnst);
             dist_constrs[{from, to}].push_back(dst_cnst);
-            return ctr;
+            return ctr_lit;
         }
     }
 
@@ -50,7 +51,7 @@ namespace smt
         switch (expr.vars.size())
         {
         case 0:
-            return expr.known_term < rational::ZERO ? TRUE_var : FALSE_var;
+            return expr.known_term < rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
             if (expr.vars.begin()->second < rational::ZERO)
             {
@@ -100,7 +101,7 @@ namespace smt
         switch (expr.vars.size())
         {
         case 0:
-            return expr.known_term <= rational::ZERO ? TRUE_var : FALSE_var;
+            return expr.known_term <= rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
             if (expr.vars.begin()->second < rational::ZERO)
             {
@@ -150,7 +151,7 @@ namespace smt
         switch (expr.vars.size())
         {
         case 0:
-            return expr.known_term == rational::ZERO ? TRUE_var : FALSE_var;
+            return expr.known_term == rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
         {
             expr = expr / expr.vars.begin()->second;
@@ -160,7 +161,7 @@ namespace smt
             if (dist.first <= expr.known_term.numerator() && dist.second >= expr.known_term.numerator())
                 return sat.new_conj({new_distance(expr.vars.begin()->first, 0, expr.known_term.numerator()), new_distance(0, expr.vars.begin()->first, -expr.known_term.numerator())});
             else
-                return FALSE_var;
+                return FALSE_lit;
         }
         case 2:
         {
@@ -175,7 +176,7 @@ namespace smt
             if (dist.first <= expr.known_term.numerator() && dist.second >= expr.known_term.numerator())
                 return sat.new_conj({new_distance(first_term.first, second_term.first, expr.known_term.numerator()), new_distance(second_term.first, first_term.first, -expr.known_term.numerator())});
             else
-                return FALSE_var;
+                return FALSE_lit;
         }
         default:
             throw std::invalid_argument("not a valid integer difference logic constraint..");
@@ -188,7 +189,7 @@ namespace smt
         switch (expr.vars.size())
         {
         case 0:
-            return expr.known_term >= rational::ZERO ? TRUE_var : FALSE_var;
+            return expr.known_term >= rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
             if (expr.vars.begin()->second < rational::ZERO)
             {
@@ -238,7 +239,7 @@ namespace smt
         switch (expr.vars.size())
         {
         case 0:
-            return expr.known_term > rational::ZERO ? TRUE_var : FALSE_var;
+            return expr.known_term > rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
             if (expr.vars.begin()->second < rational::ZERO)
             {

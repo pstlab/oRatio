@@ -175,7 +175,7 @@ namespace ratio
     std::map<std::string, predicate *> predicates;              // the predicates, indexed by their name, defined within this core..
 
     smt::lit tmp_ni;             // the temporary controlling literal, used for restoring the controlling literal..
-    smt::lit ni = smt::TRUE_var; // the controlling literal..
+    smt::lit ni = smt::TRUE_lit; // the controlling literal..
 
 #ifdef BUILD_LISTENERS
   private:

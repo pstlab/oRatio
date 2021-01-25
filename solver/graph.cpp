@@ -243,7 +243,7 @@ namespace ratio
         { // the graph has been invalidated..
             LOG("search has exhausted the graph..");
             // we create a new graph var..
-            gamma = slv.get_sat_core().new_var();
+            gamma = lit(slv.get_sat_core().new_var());
             LOG("γ is" << to_string(gamma));
             already_closed.clear();
             add_layer(); // we add a layer to the current graph..

@@ -16,11 +16,11 @@ namespace ratio
     lit item::new_eq(item &i) noexcept
     {
         if (this == &i)
-            return TRUE_var;
+            return TRUE_lit;
         else if (var_item *ei = dynamic_cast<var_item *>(&i))
             return ei->new_eq(*this);
         else
-            return FALSE_var;
+            return FALSE_lit;
     }
 
     bool item::equates(const item &i) const noexcept
@@ -51,11 +51,11 @@ namespace ratio
     lit bool_item::new_eq(item &i) noexcept
     {
         if (this == &i)
-            return TRUE_var;
+            return TRUE_lit;
         else if (bool_item *be = dynamic_cast<bool_item *>(&i))
             return get_core().get_sat_core().new_eq(l, be->l);
         else
-            return FALSE_var;
+            return FALSE_lit;
     }
 
     bool bool_item::equates(const item &i) const noexcept
@@ -97,14 +97,14 @@ namespace ratio
     lit arith_item::new_eq(item &i) noexcept
     {
         if (this == &i)
-            return TRUE_var;
+            return TRUE_lit;
         else if (arith_item *ae = dynamic_cast<arith_item *>(&i))
             if (get_type().get_name().compare(TP_KEYWORD) == 0 || ae->get_type().get_name().compare(TP_KEYWORD) == 0)
                 return get_core().get_rdl_theory().new_eq(l, ae->l);
             else
                 return get_core().get_lra_theory().new_eq(l, ae->l);
         else
-            return FALSE_var;
+            return FALSE_lit;
     }
 
     bool arith_item::equates(const item &i) const noexcept
@@ -222,7 +222,7 @@ namespace ratio
     lit var_item::new_eq(item &i) noexcept
     {
         if (this == &i)
-            return TRUE_var;
+            return TRUE_lit;
         else if (var_item *ee = dynamic_cast<var_item *>(&i))
             return get_core().get_ov_theory().new_eq(ev, ee->ev);
         else
@@ -267,11 +267,11 @@ namespace ratio
     lit string_item::new_eq(item &i) noexcept
     {
         if (this == &i)
-            return TRUE_var;
+            return TRUE_lit;
         else if (string_item *se = dynamic_cast<string_item *>(&i))
-            return l.compare(se->l) == 0 ? TRUE_var : FALSE_var;
+            return l.compare(se->l) == 0 ? TRUE_lit : FALSE_lit;
         else
-            return FALSE_var;
+            return FALSE_lit;
     }
 
     bool string_item::equates(const item &i) const noexcept

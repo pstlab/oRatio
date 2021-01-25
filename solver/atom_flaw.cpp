@@ -56,7 +56,7 @@ namespace ratio
                 if (get_graph().get_solver().get_sat_core().value(eq_lit) == False)
                     continue; // the two atoms cannot unify, hence, we skip this instance..
 
-                unify_atom *u_res = new unify_atom(get_graph(), *this, atm, t_atm, {lit(atm.get_sigma(), false), t_atm.get_sigma(), eq_lit});
+                unify_atom *u_res = new unify_atom(get_graph(), *this, atm, t_atm, {lit(atm.get_sigma(), false), lit(t_atm.get_sigma()), eq_lit});
                 assert(get_graph().get_solver().get_sat_core().value(u_res->get_rho()) != False);
                 add_resolver(*u_res);
                 get_graph().new_causal_link(t_flaw, *u_res);
@@ -74,7 +74,7 @@ namespace ratio
     }
 
     atom_flaw::activate_fact::activate_fact(graph &gr, atom_flaw &f, atom &a) : resolver(gr, 0, f), atm(a) {}
-    atom_flaw::activate_fact::activate_fact(graph &gr, const smt::lit &r, atom_flaw &f, atom &a) : resolver(gr, r, 0, f), atm(a) {}
+    atom_flaw::activate_fact::activate_fact(graph &gr, const lit &r, atom_flaw &f, atom &a) : resolver(gr, r, 0, f), atm(a) {}
     atom_flaw::activate_fact::~activate_fact() {}
 
     std::string atom_flaw::activate_fact::get_label() const noexcept { return "{\"type\":\"activate\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
@@ -82,11 +82,11 @@ namespace ratio
     void atom_flaw::activate_fact::apply()
     {
         // activating this resolver activates the fact..
-        get_graph().get_solver().get_sat_core().new_clause({!get_rho(), atm.get_sigma()});
+        get_graph().get_solver().get_sat_core().new_clause({!get_rho(), lit(atm.get_sigma())});
     }
 
     atom_flaw::activate_goal::activate_goal(graph &gr, atom_flaw &f, atom &a) : resolver(gr, 1, f), atm(a) {}
-    atom_flaw::activate_goal::activate_goal(graph &gr, const smt::lit &r, atom_flaw &f, atom &a) : resolver(gr, r, 1, f), atm(a) {}
+    atom_flaw::activate_goal::activate_goal(graph &gr, const lit &r, atom_flaw &f, atom &a) : resolver(gr, r, 1, f), atm(a) {}
     atom_flaw::activate_goal::~activate_goal() {}
 
     std::string atom_flaw::activate_goal::get_label() const noexcept { return "{\"type\":\"activate\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
@@ -94,7 +94,7 @@ namespace ratio
     void atom_flaw::activate_goal::apply()
     {
         // activating this resolver activates the goal..
-        get_graph().get_solver().get_sat_core().new_clause({!get_rho(), atm.get_sigma()});
+        get_graph().get_solver().get_sat_core().new_clause({!get_rho(), lit(atm.get_sigma())});
         // we also apply the rule..
         static_cast<const predicate &>(atm.get_type()).apply_rule(atm);
     }

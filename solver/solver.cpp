@@ -144,7 +144,7 @@ namespace ratio
     bool_expr solver::new_bool() noexcept
     {
         // we create a new boolean expression..
-        bool_expr xp = new bool_item(*this, get_sat_core().new_var());
+        bool_expr xp = new bool_item(*this, lit(get_sat_core().new_var()));
         // we create a new boolean flaw..
         gr.new_flaw(*new bool_flaw(gr, gr.res, *xp));
         return xp;

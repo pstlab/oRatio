@@ -15,7 +15,7 @@ namespace smt
         const var id = assigns.size();
         assigns.push_back(std::unordered_map<const var_value *, lit>());
         if (items.size() == 1)
-            assigns.back().emplace(*items.begin(), TRUE_var);
+            assigns.back().emplace(*items.begin(), TRUE_lit);
         else
         {
             for (const auto &i : items)
@@ -57,13 +57,13 @@ namespace smt
         if (const auto at_right = assigns[v].find(&val); at_right != assigns[v].end())
             return at_right->second;
         else
-            return FALSE_var;
+            return FALSE_lit;
     }
 
     lit ov_theory::new_eq(const var &left, const var &right) noexcept
     {
         if (left == right)
-            return TRUE_var;
+            return TRUE_lit;
 
         if (left > right)
             return new_eq(right, left);
@@ -79,10 +79,10 @@ namespace smt
                     intersection.insert(v.first);
 
             if (intersection.empty())
-                return FALSE_var;
+                return FALSE_lit;
 
             // we need to create a new variable..
-            const lit eq_lit = sat.new_var(); // the equality variable..
+            const lit eq_lit = lit(sat.new_var()); // the equality literal..
 
             bool nc;
             // the values outside the intersection are pruned if the equality control variable becomes true..
