@@ -1,7 +1,7 @@
 #include "predicate.h"
 #include "field.h"
 #include "atom.h"
-#include "riddle_parser.h"
+#include "core_parser.h"
 #include <queue>
 
 namespace ratio

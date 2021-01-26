@@ -3,7 +3,7 @@
 #include "atom.h"
 #include "field.h"
 #include "method.h"
-#include "riddle_parser.h"
+#include "core_parser.h"
 #ifdef BUILD_LISTENERS
 #include "core_listener.h"
 #endif

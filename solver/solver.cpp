@@ -6,7 +6,7 @@
 #include "atom_flaw.h"
 #include "disjunction_flaw.h"
 #include "smart_type.h"
-#include "lexer.h"
+#include "riddle_lexer.h"
 #include "atom.h"
 #include "state_variable.h"
 #include "reusable_resource.h"

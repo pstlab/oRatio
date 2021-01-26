@@ -1,6 +1,6 @@
 #include "conjunction.h"
 #include "env.h"
-#include "riddle_parser.h"
+#include "core_parser.h"
 
 namespace ratio
 {

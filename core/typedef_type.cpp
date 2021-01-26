@@ -1,5 +1,5 @@
 #include "typedef_type.h"
-#include "riddle_parser.h"
+#include "core_parser.h"
 #include "context.h"
 
 namespace ratio

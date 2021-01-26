@@ -3,7 +3,7 @@
 #include "atom.h"
 #include "field.h"
 #include "atom_flaw.h"
-#include "riddle_parser.h"
+#include "core_parser.h"
 #include <cassert>
 
 namespace ratio

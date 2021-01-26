@@ -2,7 +2,7 @@
 #include "core.h"
 #include "type.h"
 #include "field.h"
-#include "lexer.h"
+#include "riddle_lexer.h"
 #include <cassert>
 
 using namespace smt;

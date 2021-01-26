@@ -2,7 +2,7 @@
 #include "field.h"
 #include "type.h"
 #include "item.h"
-#include "riddle_parser.h"
+#include "core_parser.h"
 #include <cassert>
 
 namespace ratio

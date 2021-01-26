@@ -1,6 +1,6 @@
 #pragma once
 
-#include "parser.h"
+#include "riddle_parser.h"
 
 namespace ratio
 {

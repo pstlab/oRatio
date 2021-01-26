@@ -5,7 +5,7 @@
 #include "constructor.h"
 #include "method.h"
 #include "predicate.h"
-#include "lexer.h"
+#include "riddle_lexer.h"
 #include <algorithm>
 #include <stdexcept>
 #include <cassert>

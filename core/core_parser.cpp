@@ -1,4 +1,4 @@
-#include "riddle_parser.h"
+#include "core_parser.h"
 #include "core.h"
 #include "field.h"
 #include "atom.h"

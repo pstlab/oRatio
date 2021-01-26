@@ -1,4 +1,4 @@
-#include "lexer.h"
+#include "riddle_lexer.h"
 
 namespace riddle
 {

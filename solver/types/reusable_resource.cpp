@@ -4,7 +4,7 @@
 #include "field.h"
 #include "atom_flaw.h"
 #include "combinations.h"
-#include "riddle_parser.h"
+#include "core_parser.h"
 #include <stdexcept>
 #include <list>
 
