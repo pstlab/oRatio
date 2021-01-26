@@ -24,7 +24,7 @@ namespace ratio
 {
 
   class atom;
-  class disjunction;
+  class conjunction;
 #ifdef BUILD_LISTENERS
   class core_listener;
 #endif
@@ -144,7 +144,7 @@ namespace ratio
 
   private:
     virtual void new_atom(atom &atm, const bool &is_fact) = 0;
-    virtual void new_disjunction(context &ctx, const disjunction &disj) = 0;
+    virtual void new_disjunction(context &ctx, const std::vector<const conjunction *> &conjs) = 0;
 
   protected:
     smt::lit get_ni() noexcept { return ni; }

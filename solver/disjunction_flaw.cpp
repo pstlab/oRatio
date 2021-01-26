@@ -1,5 +1,4 @@
 #include "disjunction_flaw.h"
-#include "disjunction.h"
 #include "conjunction.h"
 #include "solver.h"
 
@@ -14,14 +13,14 @@ namespace ratio
             return {};
     }
 
-    disjunction_flaw::disjunction_flaw(graph &gr, resolver *const cause, const context &ctx, const disjunction &disj) : flaw(gr, cause_to_vector(cause), false), ctx(ctx), disj(disj) {}
+    disjunction_flaw::disjunction_flaw(graph &gr, resolver *const cause, const context &ctx, const std::vector<const conjunction *> &conjs) : flaw(gr, cause_to_vector(cause), false), ctx(ctx), conjs(conjs) {}
     disjunction_flaw::~disjunction_flaw() {}
 
     std::string disjunction_flaw::get_label() const noexcept { return "{\"type\":\"disjunction\", \"phi\":\"" + to_string(get_phi()) + "\", \"position\":" + std::to_string(get_position()) + "}"; }
 
     void disjunction_flaw::compute_resolvers()
     {
-        for (const auto &cnj : disj.get_conjunctions())
+        for (const auto &cnj : conjs)
         {
             context cnj_ctx(new env(get_graph().get_solver(), context(ctx)));
             add_resolver(*new choose_conjunction(get_graph(), *this, cnj_ctx, *cnj));

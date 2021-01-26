@@ -53,8 +53,8 @@ namespace ratio
     bool root_level() const noexcept { return trail.empty(); }      // checks whether the current decision level is root level..
 
   private:
-    void new_atom(atom &atm, const bool &is_fact) override;                 // notifies the creation of a new atom..
-    void new_disjunction(context &d_ctx, const disjunction &disj) override; // notifies the creation of a new disjunction..
+    void new_atom(atom &atm, const bool &is_fact) override;                                       // notifies the creation of a new atom..
+    void new_disjunction(context &d_ctx, const std::vector<const conjunction *> &conjs) override; // notifies the creation of a new disjunction..
 
     void take_decision(const smt::lit &ch);
     void next();

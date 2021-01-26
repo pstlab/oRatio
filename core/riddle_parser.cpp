@@ -8,7 +8,6 @@
 #include "constructor.h"
 #include "method.h"
 #include "conjunction.h"
-#include "disjunction.h"
 
 namespace ratio
 {
@@ -308,8 +307,7 @@ namespace ratio
                 }
                 cs.push_back(new conjunction(scp.get_core(), const_cast<scope &>(scp), cost, c.first));
             }
-            disjunction *d = new disjunction(scp.get_core(), const_cast<scope &>(scp), cs);
-            scp.get_core().new_disjunction(ctx, *d);
+            scp.get_core().new_disjunction(ctx, cs);
         }
 
         conjunction_statement::conjunction_statement(const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::conjunction_statement(stmnts) {}

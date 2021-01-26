@@ -204,10 +204,10 @@ namespace ratio
         }
     }
 
-    void solver::new_disjunction(context &d_ctx, const disjunction &disj)
+    void solver::new_disjunction(context &d_ctx, const std::vector<const conjunction *> &conjs)
     {
         // we create a new disjunction flaw..
-        disjunction_flaw *df = new disjunction_flaw(gr, gr.res, d_ctx, disj);
+        disjunction_flaw *df = new disjunction_flaw(gr, gr.res, d_ctx, conjs);
         gr.new_flaw(*df);
     }
 

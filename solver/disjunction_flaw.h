@@ -13,7 +13,7 @@ namespace ratio
   class disjunction_flaw : public flaw
   {
   public:
-    disjunction_flaw(graph &gr, resolver *const cause, const context &ctx, const disjunction &disj);
+    disjunction_flaw(graph &gr, resolver *const cause, const context &ctx, const std::vector<const conjunction *> &conjs);
     disjunction_flaw(const disjunction_flaw &orig) = delete;
     virtual ~disjunction_flaw();
 
@@ -41,6 +41,6 @@ namespace ratio
 
   private:
     context ctx;             // the context for executing the disjunction..
-    const disjunction &disj; // the disjunction to execute..
+    const std::vector<const conjunction *> conjs; // the disjunction to execute..
   };
 } // namespace ratio
