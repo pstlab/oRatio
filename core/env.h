@@ -41,8 +41,7 @@ namespace ratio
     env(const env &orig) = delete;
     ~env();
 
-    core &get_core() const { return cr; }   // returns the core in which this environment is created..
-    context get_ctx() const { return ctx; } // returns the context in which this environment is created (notice that this method returns a new context, incrementing the number of references to this environment)..
+    core &get_core() const { return cr; } // returns the core in which this environment is created..
 
     virtual expr get(const std::string &name) const;                         // returns the expression having the given name, checks in the enclosing environment if the name is not found (notice that this method returns a new expression, incrementing the number of references to the expression having the given name)..
     std::map<std::string, expr> get_exprs() const noexcept { return exprs; } // returns a map of names and their corresponding expressions directly accessible from this environment..

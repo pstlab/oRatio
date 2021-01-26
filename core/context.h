@@ -17,7 +17,7 @@ namespace ratio
   class string_expr;
 
   /**
-   * This class is intended to implement a kinf of smart pointer infrastructure.
+   * @brief This class is intended to implement a kinf of smart pointer infrastructure.
    * This simple implementation allows an efficient management of memory for the expressions.
    * 
    * Roughly speaking, a context is a reference to an environment. It can be used to manage the environment's lifecycle.
@@ -26,8 +26,8 @@ namespace ratio
   class context
   {
   public:
-    context(env *const ptr);
-    context(const context &orig);
+    explicit context(env *const ptr);
+    explicit context(const context &orig);
     virtual ~context();
 
     env &operator*() const { return *ptr; }

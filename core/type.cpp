@@ -55,7 +55,7 @@ namespace ratio
 
     expr type::new_instance(context &ctx)
     {
-        expr i = new item(cr, ctx, *this);
+        expr i = new item(cr, context(ctx), *this);
         std::queue<type *> q;
         q.push(this);
         while (!q.empty())

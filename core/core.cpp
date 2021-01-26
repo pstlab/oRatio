@@ -18,7 +18,7 @@ using namespace smt;
 namespace ratio
 {
 
-    core::core() : scope(*this, *this), env(*this, this), sat_cr(), lra_th(sat_cr), ov_th(sat_cr), idl_th(sat_cr), rdl_th(sat_cr) { new_types({new bool_type(*this), new int_type(*this), new real_type(*this), new tp_type(*this), new string_type(*this)}); }
+    core::core() : scope(*this, *this), env(*this, context(this)), sat_cr(), lra_th(sat_cr), ov_th(sat_cr), idl_th(sat_cr), rdl_th(sat_cr) { new_types({new bool_type(*this), new int_type(*this), new real_type(*this), new tp_type(*this), new string_type(*this)}); }
 
     core::~core()
     {

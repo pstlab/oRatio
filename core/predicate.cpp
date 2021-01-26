@@ -18,7 +18,7 @@ namespace ratio
 
     expr predicate::new_instance(context &ctx) noexcept
     {
-        atom *a = new atom(get_core(), ctx, *this);
+        atom *a = new atom(get_core(), context(ctx), *this);
         // we add the new atom to the instances of this predicate and to the instances of all the super-predicates..
         std::queue<predicate *> q;
         q.push(this);
@@ -38,7 +38,7 @@ namespace ratio
         for (const auto &sp : supertypes)
             static_cast<predicate *>(sp)->apply_rule(a);
 
-        context ctx(new env(get_core(), &a));
+        context ctx(new env(get_core(), context(&a)));
         ctx->exprs.emplace(THIS_KEYWORD, &a);
         for (const auto &s : statements)
             dynamic_cast<const ast::statement *>(s)->execute(*this, ctx);

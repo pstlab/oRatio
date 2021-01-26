@@ -373,12 +373,12 @@ namespace ratio
             atom *a;
             if (!assgnments.count(TAU))
             { // the new atom's scope is the core..
-                context c_scope = &scp.get_core();
+                context c_scope(&scp.get_core());
                 a = static_cast<atom *>(&*p->new_instance(c_scope));
             }
             else
             { // we have computed the new atom's scope above..
-                context c_scope = assgnments.at(TAU);
+                context c_scope(assgnments.at(TAU));
                 a = static_cast<atom *>(&*p->new_instance(c_scope));
             }
 

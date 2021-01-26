@@ -23,7 +23,7 @@ namespace ratio
     {
         for (const auto &cnj : disj.get_conjunctions())
         {
-            context cnj_ctx(new env(get_graph().get_solver(), ctx));
+            context cnj_ctx(new env(get_graph().get_solver(), context(ctx)));
             add_resolver(*new choose_conjunction(get_graph(), *this, cnj_ctx, *cnj));
         }
     }

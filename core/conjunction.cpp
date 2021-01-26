@@ -10,7 +10,7 @@ namespace ratio
 
     void conjunction::apply(context &ctx) const
     {
-        context c_ctx(new env(get_core(), ctx));
+        context c_ctx(new env(get_core(), context(ctx)));
         for (const auto &s : statements)
             dynamic_cast<const ast::statement *>(s)->execute(*this, c_ctx);
     }
