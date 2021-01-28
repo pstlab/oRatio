@@ -32,6 +32,7 @@ endif()
 message(STATUS "Build executor listener:    ${BUILD_EXECUTOR_LISTENER}")
 if(BUILD_EXECUTOR_LISTENER)
     message(STATUS "Executor listener port:     ${EXECUTOR_PORT}")
+    add_subdirectory(executor)
     add_subdirectory(api/java/src/main/cpp/listener/executor)
 endif()
 
