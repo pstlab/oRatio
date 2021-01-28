@@ -1,13 +1,13 @@
 file(GLOB EXECUTOR_SOURCES test_executor.cpp ${CMAKE_SOURCE_DIR}/smt/*.cpp ${CMAKE_SOURCE_DIR}/smt/lra/*.cpp ${CMAKE_SOURCE_DIR}/smt/ov/*.cpp ${CMAKE_SOURCE_DIR}/smt/dl/*.cpp ${CMAKE_SOURCE_DIR}/riddle/*.cpp ${CMAKE_SOURCE_DIR}/core/*.cpp ${CMAKE_SOURCE_DIR}/solver/*.cpp ${CMAKE_SOURCE_DIR}/solver/types/*.cpp ${CMAKE_SOURCE_DIR}/executor/*.cpp)
 
-if(BUILD_GUI)
-    add_compile_definitions(BUILD_GUI BUILD_LISTENERS)
+if(BUILD_SOLVER_LISTENER)
+    add_compile_definitions(BUILD_SOLVER_LISTENER BUILD_EXECUTOR_LISTENER)
     list(APPEND EXECUTOR_SOURCES ${CMAKE_SOURCE_DIR}/api/java/src/main/cpp/solver_socket_listener.cpp ${CMAKE_SOURCE_DIR}/api/java/src/main/cpp/executor_socket_listener.cpp)
 endif()
 
 add_executable(executor_tests ${EXECUTOR_SOURCES})
 
-if(BUILD_GUI AND WIN32)
+if(BUILD_SOLVER_LISTENER AND WIN32)
     target_link_libraries(executor_tests PRIVATE wsock32 ws2_32 #[[-PROFILE]])
 endif()
 

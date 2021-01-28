@@ -1,13 +1,22 @@
-file(GLOB SAT_SOURCES test_sat.cpp ${CMAKE_SOURCE_DIR}/smt/*.cpp)
-file(GLOB LRA_SOURCES test_lra.cpp ${CMAKE_SOURCE_DIR}/smt/*.cpp ${CMAKE_SOURCE_DIR}/smt/lra/*.cpp)
-file(GLOB OV_SOURCES test_ov.cpp ${CMAKE_SOURCE_DIR}/smt/*.cpp ${CMAKE_SOURCE_DIR}/smt/ov/*.cpp)
-file(GLOB DL_SOURCES test_dl.cpp ${CMAKE_SOURCE_DIR}/smt/*.cpp ${CMAKE_SOURCE_DIR}/smt/dl/*.cpp ${CMAKE_SOURCE_DIR}/smt/lra/rational.cpp ${CMAKE_SOURCE_DIR}/smt/lra/lin.cpp)
+add_executable(json_lib_tests test_json.cpp)
+target_include_directories(json_lib_tests PRIVATE ..)
+target_link_libraries(json_lib_tests PRIVATE smt)
 
-add_executable(json_lib_tests test_json.cpp ${CMAKE_SOURCE_DIR}/smt/json.cpp)
-add_executable(sat_lib_tests ${SAT_SOURCES})
-add_executable(lra_lib_tests ${LRA_SOURCES})
-add_executable(ov_lib_tests ${OV_SOURCES})
-add_executable(dl_lib_tests ${DL_SOURCES})
+add_executable(sat_lib_tests test_sat.cpp)
+target_include_directories(sat_lib_tests PRIVATE ..)
+target_link_libraries(sat_lib_tests PRIVATE smt)
+
+add_executable(lra_lib_tests test_lra.cpp)
+target_include_directories(lra_lib_tests PRIVATE .. ../lra)
+target_link_libraries(lra_lib_tests PRIVATE smt)
+
+add_executable(ov_lib_tests test_ov.cpp)
+target_include_directories(ov_lib_tests PRIVATE .. ../ov)
+target_link_libraries(ov_lib_tests PRIVATE smt)
+
+add_executable(dl_lib_tests test_dl.cpp)
+target_include_directories(dl_lib_tests PRIVATE .. ../lra ../dl)
+target_link_libraries(dl_lib_tests PRIVATE smt)
 
 add_test(NAME JSON_LibTest COMMAND json_lib_tests WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME SAT_LibTest COMMAND sat_lib_tests WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

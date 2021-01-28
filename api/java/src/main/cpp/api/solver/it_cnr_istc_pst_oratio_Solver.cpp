@@ -1,6 +1,6 @@
 #include "it_cnr_istc_pst_oratio_Solver.h"
 #include "solver.h"
-#ifdef BUILD_GUI
+#ifdef BUILD_SOLVER_LISTENER
 #include "solver_socket_listener.h"
 #endif
 #include <sstream>
@@ -12,7 +12,7 @@ inline solver *get_solver(JNIEnv *env, jobject obj) { return reinterpret_cast<so
 JNIEXPORT jlong JNICALL Java_it_cnr_istc_oratio_Solver_new_1instance(JNIEnv *env, jobject obj)
 {
   solver *s = new solver();
-#ifdef BUILD_GUI
+#ifdef BUILD_SOLVER_LISTENER
   solver_socket_listener *l = new solver_socket_listener(*s, HOST, PORT);
   env->SetLongField(obj, env->GetFieldID(env->GetObjectClass(obj), "native_listener_handle", "J"), reinterpret_cast<jlong>(l));
 #endif
@@ -23,7 +23,7 @@ JNIEXPORT jlong JNICALL Java_it_cnr_istc_oratio_Solver_new_1instance(JNIEnv *env
 
 JNIEXPORT void JNICALL Java_it_cnr_istc_oratio_Solver_dispose(JNIEnv *env, jobject obj)
 {
-#ifdef BUILD_GUI
+#ifdef BUILD_SOLVER_LISTENER
   delete reinterpret_cast<solver_socket_listener *>(env->GetLongField(obj, env->GetFieldID(env->GetObjectClass(obj), "native_listener_handle", "J")));
   env->SetLongField(obj, env->GetFieldID(env->GetObjectClass(obj), "native_listener_handle", "J"), 0);
 #endif

@@ -4,7 +4,7 @@
 #include "field.h"
 #include "method.h"
 #include "core_parser.h"
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
 #include "core_listener.h"
 #endif
 #include <algorithm>
@@ -51,13 +51,13 @@ namespace ratio
         cu->refine(*this);
         context c_ctx(this);
         cu->execute(*this, c_ctx);
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
         fire_read(script);
 #endif
 
         if (!sat_cr.propagate())
             throw unsolvable_exception();
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
         fire_state_changed();
 #endif
     }
@@ -84,13 +84,13 @@ namespace ratio
         context c_ctx(this);
         for (const auto &cu : c_cus)
             cu->execute(*this, c_ctx);
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
         fire_read(files);
 #endif
 
         if (!sat_cr.propagate())
             throw std::runtime_error("the input problem is inconsistent..");
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
         fire_state_changed();
 #endif
     }
@@ -525,7 +525,7 @@ namespace ratio
         return os;
     }
 
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
     void core::fire_log(const std::string msg) const noexcept
     {
         for (const auto &l : listeners)

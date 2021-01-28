@@ -1,7 +1,7 @@
 #include "solver.h"
 #include "executor_listener.h"
 #include "atom.h"
-#ifdef BUILD_GUI
+#ifdef BUILD_SOLVER_LISTENER
 #include "solver_socket_listener.h"
 #include "executor_socket_listener.h"
 #endif
@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     std::string sol_name = argv[argc - 1];
 
     std::cout << "starting oRatio";
-#ifdef BUILD_GUI
+#ifdef BUILD_SOLVER_LISTENER
     std::cout << " in debug mode";
 #endif
     std::cout << ".." << std::endl;
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     solver s;
     executor exec(s, 1000);
 
-#ifdef BUILD_GUI
+#ifdef BUILD_SOLVER_LISTENER
     solver_socket_listener sl(s, HOST, SOLVER_PORT);
     executor_socket_listener el(exec, HOST, EXECUTOR_PORT);
 #endif

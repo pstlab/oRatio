@@ -17,7 +17,7 @@ namespace ratio
     {
         // we initialize the flaw..
         f.init(); // flaws' initialization requires being at root-level..
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
         slv.fire_new_flaw(f);
 #endif
 
@@ -41,7 +41,7 @@ namespace ratio
 
     void graph::new_resolver(resolver &r)
     {
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
         slv.fire_new_resolver(r);
 #endif
         if (slv.sat.value(r.rho) == Undefined) // we do not have a top-level (a landmark) resolver, nor an infeasible one..
@@ -62,7 +62,7 @@ namespace ratio
         // we introduce an ordering constraint..
         bool new_dist = slv.sat.new_clause({!r.rho, slv.get_idl_theory().new_distance(r.effect.position, f.position, 0)});
         assert(new_dist);
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
         slv.fire_causal_link_added(f, r);
 #endif
     }
@@ -92,7 +92,7 @@ namespace ratio
 
         // we update the flaw's estimated cost..
         f.est_cost = c_cost;
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
         slv.fire_flaw_cost_changed(f);
 #endif
 

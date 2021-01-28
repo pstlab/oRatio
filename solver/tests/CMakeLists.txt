@@ -1,12 +1,8 @@
-file(GLOB SOLVER_SOURCES test_solver.cpp ${CMAKE_SOURCE_DIR}/smt/*.cpp ${CMAKE_SOURCE_DIR}/smt/lra/*.cpp ${CMAKE_SOURCE_DIR}/smt/ov/*.cpp ${CMAKE_SOURCE_DIR}/smt/dl/*.cpp ${CMAKE_SOURCE_DIR}/riddle/*.cpp ${CMAKE_SOURCE_DIR}/core/*.cpp ${CMAKE_SOURCE_DIR}/solver/*.cpp ${CMAKE_SOURCE_DIR}/solver/types/*.cpp)
+add_executable(solver_tests test_solver.cpp)
+target_include_directories(solver_tests PRIVATE ${oRatio_SOURCE_DIR}/smt ${oRatio_SOURCE_DIR}/smt/lra ${oRatio_SOURCE_DIR}/smt/ov ${oRatio_SOURCE_DIR}/smt/dl ${oRatio_SOURCE_DIR}/core ${oRatio_SOURCE_DIR}/solver)
+target_link_libraries(solver_tests PRIVATE solver)
 
-if(BUILD_GUI)
-    list(APPEND SOLVER_SOURCES ${CMAKE_SOURCE_DIR}/api/java/src/main/cpp/solver_socket_listener.cpp)
-endif()
-
-add_executable(solver_tests ${SOLVER_SOURCES})
-
-if(BUILD_GUI AND WIN32)
+if(BUILD_SOLVER_LISTENER AND WIN32)
     target_link_libraries(solver_tests PRIVATE wsock32 ws2_32 #[[-PROFILE]])
 endif()
 

@@ -7,7 +7,7 @@
 #include "ov_theory.h"
 #include "idl_theory.h"
 #include "rdl_theory.h"
-#ifdef BUILD_GUI
+#ifdef VERBOSE_LOG
 #include <iostream>
 
 #define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << std::endl
@@ -25,7 +25,7 @@ namespace ratio
 
   class atom;
   class conjunction;
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
   class core_listener;
 #endif
 
@@ -50,7 +50,7 @@ namespace ratio
     friend class ast::typedef_declaration;
     friend class ast::enum_declaration;
     friend class ast::class_declaration;
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
     friend class core_listener;
     friend class type;
     friend class scope;
@@ -177,7 +177,7 @@ namespace ratio
     smt::lit tmp_ni;             // the temporary controlling literal, used for restoring the controlling literal..
     smt::lit ni = smt::TRUE_lit; // the controlling literal..
 
-#ifdef BUILD_LISTENERS
+#ifdef BUILD_SOLVER_LISTENER
   private:
     std::vector<core_listener *> listeners; // the core listeners..
 
