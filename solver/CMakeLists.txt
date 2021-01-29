@@ -6,6 +6,9 @@ set(HEURISTIC_TYPES h_max h_add)
 set(HEURISTIC_TYPE "h_max" CACHE STRING "Heuristic type")
 set_property(CACHE HEURISTIC_TYPE PROPERTY STRINGS "h_max" "h_add")
 
+option(DEFERRABLE_FLAWS "Check for deferrable flaws" ON)
+option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
+
 file(GLOB SOLVER_SOURCES *.cpp types/*.cpp)
 
 add_library(solver ${SOLVER_SOURCES})
@@ -21,6 +24,25 @@ elseif(TEMPORAL_NETWORK_TYPE MATCHES LA)
     configure_file(init_la.rddl ${CMAKE_BINARY_DIR}/init.rddl COPYONLY)
 else()
     message(FATAL_ERROR "TEMPORAL_NETWORK_TYPE must be one of ${TEMPORAL_NETWORK_TYPES}")
+endif()
+
+message(STATUS "Heuristic type:             ${HEURISTIC_TYPE}")
+if(HEURISTIC_TYPE MATCHES h_max)
+    add_compile_definitions(H_MAX)
+elseif(HEURISTIC_TYPE MATCHES h_add)
+    add_compile_definitions(H_ADD)
+else()
+    message(FATAL_ERROR "HEURISTIC_TYPE must be one of ${HEURISTIC_TYPES}")
+endif()
+
+message(STATUS "Deferrable flaws:           ${DEFERRABLE_FLAWS}")
+if(DEFERRABLE_FLAWS)
+    add_compile_definitions(DEFERRABLE_FLAWS)
+endif()
+
+message(STATUS "Check inconsistencies:      ${CHECK_INCONSISTENCIES}")
+if(CHECK_INCONSISTENCIES)
+    add_compile_definitions(CHECK_INCONSISTENCIES)
 endif()
 
 if(BUILD_TESTING)
