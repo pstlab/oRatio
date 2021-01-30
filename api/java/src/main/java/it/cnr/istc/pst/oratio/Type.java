@@ -1,28 +1,69 @@
-package it.cnr.istc.pst.oratio.riddle;
+package it.cnr.istc.pst.oratio;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class Type extends BaseScope {
+public class Type implements Scope {
 
+    final Solver solver;
+    final Scope scope;
+    final Map<String, Field> fields = new LinkedHashMap<>();
     final String name;
     final Collection<Type> superclasses = new ArrayList<>();
     final Collection<Constructor> constructors = new ArrayList<>();
-    final Map<String, Collection<Method>> methods = new HashMap<>();
+    final Map<String, Collection<Method>> methods = new LinkedHashMap<>();
     final Map<String, Type> types = new LinkedHashMap<>();
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
     final Collection<Item> instances = new ArrayList<>();
 
-    Type(final Core core, final Scope scope, final String name) {
-        super(core, scope);
+    Type(final Solver solver, final Scope scope, final String name) {
+        this.solver = solver;
+        this.scope = scope;
         this.name = name;
+    }
+
+    @Override
+    public Solver getSolver() {
+        return solver;
+    }
+
+    @Override
+    public Scope getScope() {
+        return scope;
+    }
+
+    @Override
+    public Field getField(final String name) throws NoSuchFieldException {
+        Field field = fields.get(name);
+        if (field != null)
+            return field;
+
+        // if not here, check any enclosing scope
+        try {
+            return scope.getField(name);
+        } catch (NoSuchFieldException e) {
+            // if not in any enclosing scope, check any superclass
+            for (Type superclass : superclasses) {
+                try {
+                    return superclass.getField(name);
+                } catch (NoSuchFieldException ex) {
+                }
+            }
+        }
+
+        // not found
+        throw new NoSuchFieldException(name);
+    }
+
+    @Override
+    public Map<String, Field> getFields() {
+        return Collections.unmodifiableMap(fields);
     }
 
     public String getName() {
@@ -48,29 +89,6 @@ public class Type extends BaseScope {
 
     public Collection<Type> getSuperclasses() {
         return Collections.unmodifiableCollection(superclasses);
-    }
-
-    @Override
-    public Field getField(final String name) throws NoSuchFieldException {
-        Field field = fields.get(name);
-        if (field != null)
-            return field;
-
-        // if not here, check any enclosing scope
-        try {
-            return scope.getField(name);
-        } catch (NoSuchFieldException e) {
-            // if not in any enclosing scope, check any superclass
-            for (Type superclass : superclasses) {
-                try {
-                    return superclass.getField(name);
-                } catch (NoSuchFieldException ex) {
-                }
-            }
-        }
-
-        // not found
-        throw new NoSuchFieldException(name);
     }
 
     public Constructor getConstructor(final Type... parameter_types) throws NoSuchMethodException {

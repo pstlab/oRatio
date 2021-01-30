@@ -1,25 +1,26 @@
-package it.cnr.istc.pst.oratio.riddle;
+package it.cnr.istc.pst.oratio;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Item {
+public class Item implements Env {
 
-    final Core core;
+    final Solver solver;
     final Type type;
     final Map<String, Item> exprs = new HashMap<>();
 
-    Item(final Core core, final Type type) {
-        this.core = core;
+    Item(final Solver solver, final Type type) {
+        this.solver = solver;
         this.type = type;
     }
 
     /**
-     * @return the core.
+     * @return the solver.
      */
-    public Core getCore() {
-        return core;
+    @Override
+    public Solver getSolver() {
+        return solver;
     }
 
     /**
@@ -29,19 +30,22 @@ public class Item {
         return type;
     }
 
-    /**
-     * @return the items.
-     */
-    public Map<String, Item> getExprs() {
-        return Collections.unmodifiableMap(exprs);
+    @Override
+    public Item get(String name) throws NoSuchFieldException {
+        Item item = exprs.get(name);
+        if (item != null)
+            return item;
+
+        // not found
+        throw new NoSuchFieldException(name);
     }
 
     /**
-     * @param name the name of the field identifying the desired item.
-     * @return the item having the given name
+     * @return the items.
      */
-    public Item getExpr(final String name) {
-        return exprs.get(name);
+    @Override
+    public Map<String, Item> getExprs() {
+        return Collections.unmodifiableMap(exprs);
     }
 
     public static class BoolItem extends Item {
@@ -49,8 +53,8 @@ public class Item {
         private final String lit;
         private final LBool val;
 
-        BoolItem(final Core core, final String lit, final LBool val) {
-            super(core, core.types.get(Core.BOOL));
+        BoolItem(final Solver solver, final String lit, final LBool val) {
+            super(solver, solver.types.get(Solver.BOOL));
             this.lit = lit;
             this.val = val;
         }
@@ -73,9 +77,9 @@ public class Item {
         private final String lin;
         private final InfRational lb, ub, val;
 
-        ArithItem(Core core, Type type, final String lin, final InfRational lb, final InfRational ub,
+        ArithItem(final Solver solver, Type type, final String lin, final InfRational lb, final InfRational ub,
                 final InfRational val) {
-            super(core, type);
+            super(solver, type);
             this.lin = lin;
             this.lb = lb;
             this.ub = ub;
@@ -103,8 +107,8 @@ public class Item {
 
         private final String val;
 
-        StringItem(Core core, final String val) {
-            super(core, core.types.get(Core.STRING));
+        StringItem(final Solver solver, final String val) {
+            super(solver, solver.types.get(Solver.STRING));
             this.val = val;
         }
 
@@ -118,8 +122,8 @@ public class Item {
         private final String var;
         private final Item[] vals;
 
-        EnumItem(Core core, Type type, final String var, final Item[] vals) {
-            super(core, type);
+        EnumItem(final Solver solver, Type type, final String var, final Item[] vals) {
+            super(solver, type);
             this.var = var;
             this.vals = vals;
         }

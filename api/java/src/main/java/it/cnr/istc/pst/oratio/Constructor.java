@@ -1,27 +1,28 @@
-package it.cnr.istc.pst.oratio.riddle;
+package it.cnr.istc.pst.oratio;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class BaseScope implements Scope {
+public class Constructor implements Scope {
 
-    final Core core;
+    final Solver solver;
     final Scope scope;
     final Map<String, Field> fields = new LinkedHashMap<>();
+    final Field[] pars;
 
-    BaseScope(final Core core, final Scope scope) {
-        if (core == null)
-            throw new IllegalArgumentException("core cannot be null");
-        if (scope == null)
-            throw new IllegalArgumentException("scope cannot be null");
-        this.core = core;
+    Constructor(final Solver solver, final Scope scope, final Field... parameters) {
+        this.solver = solver;
         this.scope = scope;
+        this.pars = parameters;
+
+        for (Field par : parameters)
+            fields.put(par.getName(), par);
     }
 
     @Override
-    public Core getCore() {
-        return core;
+    public Solver getSolver() {
+        return solver;
     }
 
     @Override
@@ -55,5 +56,9 @@ public class BaseScope implements Scope {
     @Override
     public Map<String, Field> getFields() {
         return Collections.unmodifiableMap(fields);
+    }
+
+    public Field[] getParemeters() {
+        return pars;
     }
 }

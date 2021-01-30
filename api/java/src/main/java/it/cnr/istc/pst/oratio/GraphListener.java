@@ -1,32 +1,28 @@
 package it.cnr.istc.pst.oratio;
 
-import it.cnr.istc.pst.oratio.Context.Message.CausalLinkAdded;
-import it.cnr.istc.pst.oratio.Context.Message.CurrentFlaw;
-import it.cnr.istc.pst.oratio.Context.Message.CurrentResolver;
-import it.cnr.istc.pst.oratio.Context.Message.FlawCostChanged;
-import it.cnr.istc.pst.oratio.Context.Message.FlawCreated;
-import it.cnr.istc.pst.oratio.Context.Message.FlawPositionChanged;
-import it.cnr.istc.pst.oratio.Context.Message.FlawStateChanged;
-import it.cnr.istc.pst.oratio.Context.Message.ResolverCreated;
-import it.cnr.istc.pst.oratio.Context.Message.ResolverStateChanged;
-
 public interface GraphListener {
 
-    public void flawCreated(final FlawCreated flaw);
+    public void flawCreated(final String id, final String[] causes, final String label, final State state,
+            final Bound position);
 
-    public void flawStateChanged(final FlawStateChanged flaw);
+    public void flawStateChanged(final String id, final State state);
 
-    public void flawCostChanged(final FlawCostChanged flaw);
+    public void flawCostChanged(final String id, final Rational cost);
 
-    public void flawPositionChanged(final FlawPositionChanged fpc);
+    public void flawPositionChanged(final String id, final Bound position);
 
-    public void currentFlaw(final CurrentFlaw flaw);
+    public void currentFlaw(final String id);
 
-    public void resolverCreated(final ResolverCreated resolver);
+    public void resolverCreated(final String id, final String effect, final Rational cost, final String label,
+            final State state);
 
-    public void resolverStateChanged(final ResolverStateChanged resolver);
+    public void resolverStateChanged(final String id, final State state);
 
-    public void currentResolver(final CurrentResolver resolver);
+    public void currentResolver(final String id);
 
-    public void causalLinkAdded(final CausalLinkAdded causal_link);
+    public void causalLinkAdded(final String flaw, final String resolver);
+
+    enum State {
+        Active, Forbidden, Inactive
+    }
 }

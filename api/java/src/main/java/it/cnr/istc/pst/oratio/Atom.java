@@ -1,4 +1,4 @@
-package it.cnr.istc.pst.oratio.riddle;
+package it.cnr.istc.pst.oratio;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,8 +9,9 @@ public class Atom extends Item {
     private final long sigma;
     private final AtomState state;
 
-    Atom(Core core, Predicate predicate, final long sigma, final AtomState state, final Map<String, Item> pars) {
-        super(core, predicate);
+    Atom(final Solver solver, final Predicate predicate, final long sigma, final AtomState state,
+            final Map<String, Item> pars) {
+        super(solver, predicate);
         exprs.putAll(pars);
         this.sigma = sigma;
         this.state = state;
@@ -44,24 +45,24 @@ public class Atom extends Item {
     public String toString() {
         return "σ" + sigma + " " + type.getName() + "(" + exprs.entrySet().stream().map(expr -> {
             switch (expr.getValue().getType().getName()) {
-                case Core.BOOL:
+                case Solver.BOOL:
                     return expr.getKey() + " = " + ((Item.BoolItem) expr.getValue()).getValue();
-                case Core.INT:
-                case Core.REAL:
-                case Core.TP:
+                case Solver.INT:
+                case Solver.REAL:
+                case Solver.TP:
                     return expr.getKey() + " = " + ((Item.ArithItem) expr.getValue()).getValue();
-                case Core.STRING:
+                case Solver.STRING:
                     return expr.getKey() + " = " + ((Item.StringItem) expr.getValue()).getValue();
                 default:
                     String val = expr.getKey() + " = ";
                     if (expr.getValue() instanceof EnumItem) {
                         if (((EnumItem) expr.getValue()).getVals().length == 1)
-                            val += core.guessName(((EnumItem) expr.getValue()).getVals()[0]);
+                            val += solver.guessName(((EnumItem) expr.getValue()).getVals()[0]);
                         else
-                            val += Stream.of(((EnumItem) expr.getValue()).getVals()).map(itm -> core.guessName(itm))
+                            val += Stream.of(((EnumItem) expr.getValue()).getVals()).map(itm -> solver.guessName(itm))
                                     .collect(Collectors.joining(", "));
                     } else
-                        val += core.guessName(expr.getValue());
+                        val += solver.guessName(expr.getValue());
                     return val;
             }
         }).collect(Collectors.joining(", ")) + ")";

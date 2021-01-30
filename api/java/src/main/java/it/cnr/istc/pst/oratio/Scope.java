@@ -1,4 +1,4 @@
-package it.cnr.istc.pst.oratio.riddle;
+package it.cnr.istc.pst.oratio;
 
 import java.util.Collection;
 import java.util.Map;
@@ -8,11 +8,11 @@ import java.util.stream.Stream;
 public interface Scope {
 
     /**
-     * Returns the core enclosing this scope.
+     * Returns the solver enclosing this scope.
      *
-     * @return the core enclosing this scope.
+     * @return the solver enclosing this scope.
      */
-    public Core getCore();
+    public Solver getSolver();
 
     /**
      * Returns the immediately enclosing scope of the underlying scope. If the
@@ -23,12 +23,12 @@ public interface Scope {
     public Scope getScope();
 
     /**
-     * Returns an {@code IField} object that reflects the specified public member
-     * field of this {@code IScope} object.The {@code name} parameter is a
+     * Returns a {@code Field} object that reflects the specified public member
+     * field of this {@code Scope} object.The {@code name} parameter is a
      * {@code String} specifying the simple name of the desired field.
      *
      * @param name the field name.
-     * @return the {@code IField} object of this class specified by {@code name}.
+     * @return the {@code Field} object of this class specified by {@code name}.
      * @throws java.lang.NoSuchFieldException if the given field cannot be found.
      */
     public Field getField(final String name) throws NoSuchFieldException;
@@ -42,18 +42,18 @@ public interface Scope {
     public Map<String, Field> getFields();
 
     /**
-     * Returns a {@code IMethod} object that reflects the specified public member
-     * method of the class or interface represented by this {@code IScope}
-     * object.The {@code name} parameter is a {@code String} specifying the simple
-     * name of the desired method. The {@code parameterTypes} parameter is an array
-     * of {@code IType} objects that identify the method's formal parameter types,
-     * in declared order. If {@code parameterTypes} is {@code null}, it is treated
-     * as if it were an empty array.
+     * Returns a {@code Method} object that reflects the specified public member
+     * method of the class or interface represented by this {@code Scope} object.The
+     * {@code name} parameter is a {@code String} specifying the simple name of the
+     * desired method. The {@code parameterTypes} parameter is an array of
+     * {@code Type} objects that identify the method's formal parameter types, in
+     * declared order. If {@code parameterTypes} is {@code null}, it is treated as
+     * if it were an empty array.
      *
      * @param name            the name of the method.
      * @param parameter_types the list of parameters.
-     * @return the {@code IMethod} object that matches the specified {@code name}
-     *         and {@code parameterTypes}.
+     * @return the {@code Method} object that matches the specified {@code name} and
+     *         {@code parameterTypes}.
      * @throws java.lang.NoSuchMethodException if the given method cannot be found.
      */
     public default Method getMethod(final String name, final Type... parameter_types) throws NoSuchMethodException {
@@ -63,11 +63,11 @@ public interface Scope {
     }
 
     /**
-     * Returns a collection containing {@code IMethod} objects reflecting all the
+     * Returns a collection containing {@code Method} objects reflecting all the
      * public methods of the class or interface represented by this {@code
-     * IScope} object.
+     * Scope} object.
      *
-     * @return the collection of {@code IMethod} objects representing the public
+     * @return the collection of {@code Method} objects representing the public
      *         methods of this object.
      */
     public default Collection<Method> getMethods() {
@@ -75,8 +75,8 @@ public interface Scope {
     }
 
     /**
-     * Returns a predicate whose scope is within this {@code IType} object scope.If
-     * a predicate is not found within this scope, the enclosing scope is checked.
+     * Returns a predicate whose scope is within this {@code Type} object scope.If a
+     * predicate is not found within this scope, the enclosing scope is checked.
      *
      * @param name the name of the predicate to find.
      * @return a predicate having the given name.
@@ -88,7 +88,7 @@ public interface Scope {
     }
 
     /**
-     * Returns all the predicates enclosed by this {@code IType} object mapped by
+     * Returns all the predicates enclosed by this {@code Type} object mapped by
      * their names.
      *
      * @return a map containing all the predicates enclosed by this type having type
@@ -99,7 +99,7 @@ public interface Scope {
     }
 
     /**
-     * Returns a type whose scope is within this {@code IScope} object scope.If a
+     * Returns a type whose scope is within this {@code Scope} object scope.If a
      * type is not found within this scope, the enclosing scope is checked.
      *
      * @param name the name of the type to find.
@@ -111,7 +111,7 @@ public interface Scope {
     }
 
     /**
-     * Returns all the types enclosed by this {@code IScope} object mapped by their
+     * Returns all the types enclosed by this {@code Scope} object mapped by their
      * names.
      *
      * @return a map containing all the types enclosed by this type having type

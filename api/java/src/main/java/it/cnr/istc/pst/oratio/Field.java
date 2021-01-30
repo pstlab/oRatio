@@ -1,7 +1,7 @@
-package it.cnr.istc.pst.oratio.riddle;
+package it.cnr.istc.pst.oratio;
 
 public class Field {
-    
+
     final Type type;
     final String name;
 

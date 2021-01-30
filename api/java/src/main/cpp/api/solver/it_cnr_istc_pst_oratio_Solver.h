@@ -43,13 +43,6 @@ extern "C"
    */
   JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_solve(JNIEnv *, jobject);
 
-  /*
-   * Class:     it_cnr_istc_pst_oratio_Solver
-   * Method:    getState
-   * Signature: ()Ljava/lang/String;
-   */
-  JNIEXPORT jstring JNICALL Java_it_cnr_istc_pst_oratio_Solver_getState(JNIEnv *, jobject);
-
 #ifdef __cplusplus
 }
 #endif
