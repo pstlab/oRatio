@@ -161,41 +161,49 @@ public class Solver implements Scope, Env {
 
     public native void solve();
 
-    private void fireFlawCreated(final String id, final String[] causes, final String label, final State state,
-            final Bound position) {
-        graph_listeners.stream().forEach(l -> l.flawCreated(id, causes, label, state, position));
+    private void fireFlawCreated(final long id, final long[] causes, final String label, final byte state,
+            final int position_lb, final int position_ub) {
+        State c_state = State.values()[state];
+        Bound position = new Bound(position_lb, position_ub);
+        graph_listeners.stream().forEach(l -> l.flawCreated(id, causes, label, c_state, position));
     }
 
-    private void fireFlawStateChanged(final String id, final State state) {
-        graph_listeners.stream().forEach(l -> l.flawStateChanged(id, state));
+    private void fireFlawStateChanged(final long id, final byte state) {
+        State c_state = State.values()[state];
+        graph_listeners.stream().forEach(l -> l.flawStateChanged(id, c_state));
     }
 
-    private void fireFlawCostChanged(final String id, final Rational cost) {
+    private void fireFlawCostChanged(final long id, final long cost_num, final long cost_den) {
+        Rational cost = new Rational(cost_num, cost_den);
         graph_listeners.stream().forEach(l -> l.flawCostChanged(id, cost));
     }
 
-    private void fireFlawPositionChanged(final String id, final Bound position) {
+    private void fireFlawPositionChanged(final long id, final int position_lb, final int position_ub) {
+        Bound position = new Bound(position_lb, position_ub);
         graph_listeners.stream().forEach(l -> l.flawPositionChanged(id, position));
     }
 
-    private void fireCurrentFlaw(final String id) {
+    private void fireCurrentFlaw(final long id) {
         graph_listeners.stream().forEach(l -> l.currentFlaw(id));
     }
 
-    private void fireResolverCreated(final String id, final String effect, final Rational cost, final String label,
-            final State state) {
-        graph_listeners.stream().forEach(l -> l.resolverCreated(id, effect, cost, label, state));
+    private void fireResolverCreated(final long id, final long effect, final String label, final long cost_num,
+            final long cost_den, final byte state) {
+        State c_state = State.values()[state];
+        Rational cost = new Rational(cost_num, cost_den);
+        graph_listeners.stream().forEach(l -> l.resolverCreated(id, effect, cost, label, c_state));
     }
 
-    private void fireResolverStateChanged(final String id, final State state) {
-        graph_listeners.stream().forEach(l -> l.resolverStateChanged(id, state));
+    private void fireResolverStateChanged(final long id, final byte state) {
+        State c_state = State.values()[state];
+        graph_listeners.stream().forEach(l -> l.resolverStateChanged(id, c_state));
     }
 
-    private void fireCurrentResolver(final String id) {
+    private void fireCurrentResolver(final long id) {
         graph_listeners.stream().forEach(l -> l.currentResolver(id));
     }
 
-    private void fireCausalLinkAdded(final String flaw, final String resolver) {
+    private void fireCausalLinkAdded(final long flaw, final long resolver) {
         graph_listeners.stream().forEach(l -> l.causalLinkAdded(flaw, resolver));
     }
 
@@ -211,15 +219,16 @@ public class Solver implements Scope, Env {
         state_listeners.stream().forEach(l -> l.stateChanged());
     }
 
-    private void fireTick(final Rational current_time) {
+    private void fireTick(final long current_time_num, final long current_time_den) {
+        Rational current_time = new Rational(current_time_num, current_time_den);
         executor_listeners.stream().forEach(l -> l.tick(current_time));
     }
 
-    private void fireStartingAtoms(final String[] atoms) {
+    private void fireStartingAtoms(final long[] atoms) {
         executor_listeners.stream().forEach(l -> l.startingAtoms(atoms));
     }
 
-    private void fireEndingAtoms(final String[] atoms) {
+    private void fireEndingAtoms(final long[] atoms) {
         executor_listeners.stream().forEach(l -> l.endingAtoms(atoms));
     }
 

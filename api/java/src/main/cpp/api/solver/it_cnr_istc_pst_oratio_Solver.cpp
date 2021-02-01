@@ -1,5 +1,6 @@
 #include "it_cnr_istc_pst_oratio_Solver.h"
 #include "solver.h"
+#include "java_solver_listener.h"
 
 using namespace ratio;
 
@@ -8,6 +9,7 @@ inline solver *get_solver(JNIEnv *env, jobject obj) { return reinterpret_cast<so
 JNIEXPORT jlong JNICALL Java_it_cnr_istc_oratio_Solver_new_1instance(JNIEnv *env, jobject obj)
 {
   solver *s = new solver();
+  java_solver_listener *jsl = new java_solver_listener(*s, env, obj);
   s->init();
   return reinterpret_cast<jlong>(s);
 }

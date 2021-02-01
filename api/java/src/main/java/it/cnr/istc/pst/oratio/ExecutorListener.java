@@ -4,7 +4,7 @@ public interface ExecutorListener {
 
     public void tick(final Rational current_time);
 
-    public void startingAtoms(final String[] atoms);
+    public void startingAtoms(final long[] atoms);
 
-    public void endingAtoms(final String[] atoms);
+    public void endingAtoms(final long[] atoms);
 }

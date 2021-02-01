@@ -3,7 +3,12 @@ package it.cnr.istc.pst.oratio;
 public class Bound {
 
     public static final int INF = Integer.MAX_VALUE / 2 - 1;
-    public int min = -INF, max = INF;
+    public final int min, max;
+
+    public Bound(final int min, final int max) {
+        this.min = min;
+        this.max = max;
+    }
 
     @Override
     public String toString() {

@@ -1,0 +1,135 @@
+#include "java_solver_listener.h"
+
+using namespace ratio;
+
+namespace ratio
+{
+
+    java_solver_listener::java_solver_listener(solver &s, JNIEnv *env, jobject obj) : solver_listener(s), env(env), obj(obj), solver_cls(env->GetObjectClass(obj)),
+                                                                                      flaw_created_mthd_id(env->GetMethodID(solver_cls, "fireFlawCreated", "(J[JLjava/lang/String;BII)V")),
+                                                                                      flaw_state_changed_mthd_id(env->GetMethodID(solver_cls, "fireFlawStateChanged", "(JB)V")),
+                                                                                      flaw_cost_changed_mthd_id(env->GetMethodID(solver_cls, "fireFlawCostChanged", "(JJJ)V")),
+                                                                                      flaw_position_changed_mthd_id(env->GetMethodID(solver_cls, "fireFlawPositionChanged", "(JII)V")),
+                                                                                      current_flaw_mthd_id(env->GetMethodID(solver_cls, "fireCurrentFlaw", "(J)V")),
+                                                                                      resolver_created_mthd_id(env->GetMethodID(solver_cls, "fireResolverCreated", "(JJLjava/lang/String;JJB)V")),
+                                                                                      resolver_state_changed_mthd_id(env->GetMethodID(solver_cls, "fireResolverStateChanged", "(JB)V")),
+                                                                                      current_resolver_mthd_id(env->GetMethodID(solver_cls, "fireCurrentResolver", "(J)V")),
+                                                                                      causal_link_added_mthd_id(env->GetMethodID(solver_cls, "fireCausalLinkAdded", "(JJ)V")) {}
+    java_solver_listener::~java_solver_listener() {}
+
+    void java_solver_listener::flaw_created(const flaw &f)
+    {
+        // the flaw's id..
+        jlong id = reinterpret_cast<jlong>(&f);
+
+        // the flaw's cause..
+        std::vector<jlong> c_causes;
+        c_causes.reserve(f.get_causes().size());
+        for (const auto &c : f.get_causes())
+            c_causes.push_back(reinterpret_cast<jlong>(c));
+        jlongArray causes = env->NewLongArray(static_cast<jsize>(c_causes.size()));
+        env->SetLongArrayRegion(causes, 0, static_cast<jsize>(c_causes.size()), &c_causes[0]);
+
+        // the flaw's label..
+        jstring label = env->NewStringUTF(f.get_label().c_str());
+
+        // the flaw's state..
+        jbyte state = static_cast<jbyte>(slv.get_sat_core().value(f.get_phi()));
+
+        // the flaw's position..
+        const auto pos = slv.get_idl_theory().bounds(f.get_position());
+        jint pos_lb = pos.first, pos_ub = pos.second;
+
+        env->CallVoidMethod(obj, flaw_created_mthd_id, id, causes, label, state, pos_lb, pos_ub);
+        env->DeleteLocalRef(label);
+    }
+    void java_solver_listener::flaw_state_changed(const flaw &f)
+    {
+        // the flaw's id..
+        jlong id = reinterpret_cast<jlong>(&f);
+
+        // the flaw's state..
+        jbyte state = static_cast<jbyte>(slv.get_sat_core().value(f.get_phi()));
+
+        env->CallVoidMethod(obj, flaw_state_changed_mthd_id, id, state);
+    }
+    void java_solver_listener::flaw_cost_changed(const flaw &f)
+    {
+        // the flaw's id..
+        jlong id = reinterpret_cast<jlong>(&f);
+
+        // the flaw's current estimated cost..
+        const auto est_cost = f.get_estimated_cost();
+        jlong cost_num = est_cost.numerator(), cost_den = est_cost.denominator();
+
+        env->CallVoidMethod(obj, flaw_cost_changed_mthd_id, id, cost_num, cost_den);
+    }
+    void java_solver_listener::flaw_position_changed(const flaw &f)
+    {
+        // the flaw's id..
+        jlong id = reinterpret_cast<jlong>(&f);
+
+        // the flaw's position..
+        const auto pos = slv.get_idl_theory().bounds(f.get_position());
+        jint pos_lb = pos.first, pos_ub = pos.second;
+
+        env->CallVoidMethod(obj, flaw_position_changed_mthd_id, id, pos_lb, pos_ub);
+    }
+    void java_solver_listener::current_flaw(const flaw &f)
+    {
+        // the flaw's id..
+        jlong id = reinterpret_cast<jlong>(&f);
+
+        env->CallVoidMethod(obj, current_flaw_mthd_id, id);
+    }
+
+    void java_solver_listener::resolver_created(const resolver &r)
+    {
+        // the resolver's id..
+        jlong id = reinterpret_cast<jlong>(&r);
+
+        // the resolver's effect..
+        jlong effect = reinterpret_cast<jlong>(&r.get_effect());
+
+        // the resolver's label..
+        jstring label = env->NewStringUTF(r.get_label().c_str());
+
+        // the resolver's intrinsic cost..
+        const auto est_cost = r.get_intrinsic_cost();
+        jlong cost_num = est_cost.numerator(), cost_den = est_cost.denominator();
+
+        // the resolver's state..
+        jbyte state = static_cast<jbyte>(slv.get_sat_core().value(r.get_rho()));
+
+        env->CallVoidMethod(obj, resolver_created_mthd_id, id, effect, label, cost_num, cost_den, state);
+        env->DeleteLocalRef(label);
+    }
+    void java_solver_listener::resolver_state_changed(const resolver &r)
+    {
+        // the resolver's id..
+        jlong id = reinterpret_cast<jlong>(&r);
+
+        // the resolver's state..
+        jbyte state = static_cast<jbyte>(slv.get_sat_core().value(r.get_rho()));
+
+        env->CallVoidMethod(obj, resolver_state_changed_mthd_id, id, state);
+    }
+    void java_solver_listener::current_resolver(const resolver &r)
+    {
+        // the resolver's id..
+        jlong id = reinterpret_cast<jlong>(&r);
+
+        env->CallVoidMethod(obj, current_resolver_mthd_id, id);
+    }
+
+    void java_solver_listener::causal_link_added(const flaw &f, const resolver &r)
+    {
+        // the flaw's id..
+        jlong flaw_id = reinterpret_cast<jlong>(&f);
+
+        // the resolver's id..
+        jlong resolver_id = reinterpret_cast<jlong>(&r);
+
+        env->CallVoidMethod(obj, causal_link_added_mthd_id, flaw_id, resolver_id);
+    }
+} // namespace ratio
