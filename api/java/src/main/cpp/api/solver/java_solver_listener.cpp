@@ -28,7 +28,7 @@ namespace ratio
         for (const auto &c : f.get_causes())
             c_causes.push_back(reinterpret_cast<jlong>(c));
         jlongArray causes = env->NewLongArray(static_cast<jsize>(c_causes.size()));
-        env->SetLongArrayRegion(causes, 0, static_cast<jsize>(c_causes.size()), &c_causes[0]);
+        env->SetLongArrayRegion(causes, 0, static_cast<jsize>(c_causes.size()), c_causes.data());
 
         // the flaw's label..
         jstring label = env->NewStringUTF(f.get_label().c_str());
