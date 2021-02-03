@@ -9,6 +9,7 @@ option(VERBOSE_LOG "Makes log more verbose" OFF)
 option(BUILD_EXECUTOR "Builds the executor" OFF)
 
 option(BUILD_JAVA_SOLVER_API "Builds the Java Solver API" OFF)
+option(BUILD_SERVER "Builds the server" OFF)
 
 option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
 
@@ -28,6 +29,11 @@ endif()
 message(STATUS "Build Java bindings:      ${BUILD_JAVA_SOLVER_API}")
 if(BUILD_JAVA_SOLVER_API)
     add_subdirectory(api/java/src/main/cpp/api/solver)
+endif()
+
+message(STATUS "Build server:             ${BUILD_SERVER}")
+if(BUILD_SERVER)
+    add_subdirectory(gui/src/main/cpp)
 endif()
 
 message(STATUS "Verbose log:              ${VERBOSE_LOG}")

@@ -2,6 +2,7 @@ package it.cnr.istc.pst.oratio.gui;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -17,29 +18,24 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.cnr.istc.pst.oratio.Context;
-import it.cnr.istc.pst.oratio.Context.Bound;
-import it.cnr.istc.pst.oratio.Context.Message.CausalLinkAdded;
-import it.cnr.istc.pst.oratio.Context.Message.CurrentFlaw;
-import it.cnr.istc.pst.oratio.Context.Message.CurrentResolver;
-import it.cnr.istc.pst.oratio.Context.Message.FlawCostChanged;
-import it.cnr.istc.pst.oratio.Context.Message.FlawCreated;
-import it.cnr.istc.pst.oratio.Context.Message.FlawPositionChanged;
-import it.cnr.istc.pst.oratio.Context.Message.FlawStateChanged;
-import it.cnr.istc.pst.oratio.Context.Message.ResolverCreated;
-import it.cnr.istc.pst.oratio.Context.Message.ResolverStateChanged;
+import it.cnr.istc.pst.oratio.Bound;
 import it.cnr.istc.pst.oratio.GraphListener;
+import it.cnr.istc.pst.oratio.Rational;
+import it.cnr.istc.pst.oratio.Solver;
 import it.cnr.istc.pst.oratio.gui.App.Message;
-import it.cnr.istc.pst.oratio.riddle.Rational;
 
-@JsonSerialize(using = CausalGraph.GraphSerializer.class)
 public class CausalGraph implements GraphListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(CausalGraph.class);
-    private final Map<String, Flaw> flaws = new HashMap<>();
+    private final Solver solver;
+    private final Map<Long, Flaw> flaws = new HashMap<>();
     private Flaw current_flaw = null;
-    private final Map<String, Resolver> resolvers = new HashMap<>();
+    private final Map<Long, Resolver> resolvers = new HashMap<>();
     private Resolver current_resolver = null;
+
+    public CausalGraph(Solver solver) {
+        this.solver = solver;
+    }
 
     void clear() {
         flaws.clear();
@@ -53,137 +49,142 @@ public class CausalGraph implements GraphListener {
         }
     }
 
-    @Override
-    public void flawCreated(final FlawCreated flaw) {
-        App.EXECUTOR.execute(() -> {
-            Flaw c_flaw = new Flaw(flaw.id,
-                    Stream.of(flaw.causes).map(id -> resolvers.get(id)).toArray(Resolver[]::new), flaw.label,
-                    flaw.state, flaw.position);
-            Stream.of(c_flaw.causes).forEach(c -> c.preconditions.add(c_flaw));
-            flaws.put(flaw.id, c_flaw);
-            try {
-                App.broadcast(App.MAPPER.writeValueAsString(flaw));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public Collection<Flaw> getFlaws() {
+        return flaws.values();
+    }
+
+    public Flaw getCurrentFlaw() {
+        return current_flaw;
+    }
+
+    public Collection<Resolver> getResolvers() {
+        return resolvers.values();
+    }
+
+    public Resolver getCurrentResolver() {
+        return current_resolver;
+    }
+
+    public void flawCreated(final long id, final long[] causes, final String label, final State state,
+            final Bound position) {
+
+        Flaw c_flaw = new Flaw(id, Arrays.stream(causes).mapToObj(r_id -> resolvers.get(r_id)).toArray(Resolver[]::new),
+                label, state, position);
+        Stream.of(c_flaw.causes).forEach(c -> c.preconditions.add(c_flaw));
+        flaws.put(id, c_flaw);
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(c_flaw));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void flawStateChanged(final FlawStateChanged flaw) {
-        App.EXECUTOR.execute(() -> {
-            flaws.get(flaw.id).state = flaw.state;
-            try {
-                App.broadcast(App.MAPPER.writeValueAsString(flaw));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public void flawStateChanged(final long id, final State state) {
+        final Flaw flaw = flaws.get(id);
+        flaw.state = state;
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(flaw));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void flawCostChanged(final FlawCostChanged flaw) {
-        App.EXECUTOR.execute(() -> {
-            flaws.get(flaw.id).cost = flaw.cost;
-            try {
-                App.broadcast(App.MAPPER.writeValueAsString(flaw));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public void flawCostChanged(final long id, final Rational cost) {
+        final Flaw flaw = flaws.get(id);
+        flaw.cost = cost;
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(flaw));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void flawPositionChanged(FlawPositionChanged fpc) {
-        App.EXECUTOR.execute(() -> {
-            flaws.get(fpc.id).position = fpc.position;
-            try {
-                App.broadcast(App.MAPPER.writeValueAsString(fpc));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public void flawPositionChanged(final long id, final Bound position) {
+        final Flaw flaw = flaws.get(id);
+        flaw.position = position;
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(flaw));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void currentFlaw(final CurrentFlaw flaw) {
-        App.EXECUTOR.execute(() -> {
-            if (current_flaw != null)
-                current_flaw.current = false;
-            current_flaw = flaws.get(flaw.id);
-            current_flaw.current = true;
-            try {
-                App.broadcast(App.MAPPER.writeValueAsString(flaw));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public void currentFlaw(final long id) {
+        if (current_flaw != null)
+            current_flaw.current = false;
+        final Flaw flaw = flaws.get(id);
+        current_flaw = flaw;
+        current_flaw.current = true;
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(flaw));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void resolverCreated(final ResolverCreated resolver) {
-        App.EXECUTOR.execute(() -> {
-            resolvers.put(resolver.id, new Resolver(resolver.id, flaws.get(resolver.effect), resolver.label,
-                    resolver.state, resolver.cost));
-            try {
-                App.broadcast(App.MAPPER.writeValueAsString(resolver));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public void resolverCreated(final long id, final long effect, final Rational cost, final String label,
+            final State state) {
+        final Resolver resolver = new Resolver(id, flaws.get(effect), label, state, cost);
+        resolvers.put(id, resolver);
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(resolver));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void resolverStateChanged(final ResolverStateChanged resolver) {
-        App.EXECUTOR.execute(() -> {
-            resolvers.get(resolver.id).state = resolver.state;
-            try {
-                App.broadcast(App.MAPPER.writeValueAsString(resolver));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public void resolverStateChanged(final long id, final State state) {
+        final Resolver resolver = resolvers.get(id);
+        resolver.state = state;
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(resolver));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void currentResolver(final CurrentResolver resolver) {
-        App.EXECUTOR.execute(() -> {
-            if (current_resolver != null)
-                current_resolver.current = false;
-            current_resolver = resolvers.get(resolver.id);
-            current_resolver.current = true;
-            try {
-                App.broadcast(App.MAPPER.writeValueAsString(resolver));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public void currentResolver(final long id) {
+        if (current_resolver != null)
+            current_resolver.current = false;
+        final Resolver resolver = resolvers.get(id);
+        current_resolver = resolver;
+        current_resolver.current = true;
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(resolver));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void causalLinkAdded(final CausalLinkAdded causal_link) {
-        App.EXECUTOR.execute(() -> {
-            resolvers.get(causal_link.resolver).preconditions.add(flaws.get(causal_link.flaw));
-            try {
-                App.broadcast(App.MAPPER.writeValueAsString(causal_link));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public void causalLinkAdded(final long flaw, final long resolver) {
+        resolvers.get(resolver).preconditions.add(flaws.get(flaw));
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(null));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @JsonSerialize(using = FlawSerializer.class)
     class Flaw {
 
-        private final String id;
+        private final long id;
         private final Resolver[] causes;
         private final String label;
-        private int state;
+        private State state;
         private Bound position;
         private Rational cost = Rational.POSITIVE_INFINITY;
         private boolean current = false;
 
-        private Flaw(String id, Resolver[] causes, String label, int state, Bound position) {
+        private Flaw(long id, Resolver[] causes, String label, State state, Bound position) {
             this.id = id;
             this.causes = causes;
             this.label = label;
@@ -192,7 +193,7 @@ public class CausalGraph implements GraphListener {
         }
     }
 
-    static class FlawSerializer extends StdSerializer<Flaw> {
+    private static class FlawSerializer extends StdSerializer<Flaw> {
 
         private static final long serialVersionUID = 1L;
 
@@ -203,25 +204,25 @@ public class CausalGraph implements GraphListener {
         @Override
         public void serialize(Flaw flaw, JsonGenerator gen, SerializerProvider provider) throws IOException {
             gen.writeStartObject();
-            gen.writeStringField("id", flaw.id);
+            gen.writeNumberField("id", flaw.id);
             gen.writeArrayFieldStart("causes");
             Arrays.stream(flaw.causes).forEach(c -> {
                 try {
-                    gen.writeString(c.id);
+                    gen.writeNumber(c.id);
                 } catch (IOException e) {
                     LOG.error("Cannot serialize", e);
                 }
             });
             gen.writeEndArray();
             gen.writeStringField("label", flaw.label);
-            gen.writeNumberField("state", flaw.state);
+            gen.writeNumberField("state", flaw.state.ordinal());
 
-            if (flaw.position.min != -Context.INF || flaw.position.max != Context.INF) {
+            if (flaw.position.min != -Bound.INF || flaw.position.max != Bound.INF) {
                 gen.writeFieldName("position");
                 gen.writeStartObject();
-                if (flaw.position.min != -Context.INF)
+                if (flaw.position.min != -Bound.INF)
                     gen.writeNumberField("min", flaw.position.min);
-                if (flaw.position.max != Context.INF)
+                if (flaw.position.max != Bound.INF)
                     gen.writeNumberField("max", flaw.position.max);
                 gen.writeEndObject();
             }
@@ -241,15 +242,15 @@ public class CausalGraph implements GraphListener {
     @JsonSerialize(using = ResolverSerializer.class)
     class Resolver {
 
-        private final String id;
+        private final long id;
         private final Flaw effect;
         private final String label;
-        private int state;
+        private State state;
         private final Rational cost;
         private final Set<Flaw> preconditions = new HashSet<>();
         private boolean current = false;
 
-        private Resolver(String id, Flaw effect, String label, int state, Rational cost) {
+        private Resolver(long id, Flaw effect, String label, State state, Rational cost) {
             this.id = id;
             this.effect = effect;
             this.label = label;
@@ -258,9 +259,9 @@ public class CausalGraph implements GraphListener {
         }
     }
 
-    static class ResolverSerializer extends StdSerializer<Resolver> {
+    private static class ResolverSerializer extends StdSerializer<Resolver> {
 
-        protected ResolverSerializer() {
+        private ResolverSerializer() {
             super(Resolver.class);
         }
 
@@ -272,10 +273,10 @@ public class CausalGraph implements GraphListener {
         @Override
         public void serialize(Resolver resolver, JsonGenerator gen, SerializerProvider provider) throws IOException {
             gen.writeStartObject();
-            gen.writeStringField("id", resolver.id);
-            gen.writeStringField("effect", resolver.effect.id);
+            gen.writeNumberField("id", resolver.id);
+            gen.writeNumberField("effect", resolver.effect.id);
             gen.writeStringField("label", resolver.label);
-            gen.writeNumberField("state", resolver.state);
+            gen.writeNumberField("state", resolver.state.ordinal());
 
             gen.writeFieldName("cost");
             gen.writeStartObject();
@@ -285,7 +286,7 @@ public class CausalGraph implements GraphListener {
             gen.writeArrayFieldStart("preconditions");
             resolver.preconditions.stream().forEach(pre -> {
                 try {
-                    gen.writeString(pre.id);
+                    gen.writeNumber(pre.id);
                 } catch (IOException e) {
                     LOG.error("Cannot serialize", e);
                 }
@@ -294,43 +295,6 @@ public class CausalGraph implements GraphListener {
 
             gen.writeBooleanField("current", resolver.current);
 
-            gen.writeEndObject();
-        }
-    }
-
-    static class GraphSerializer extends StdSerializer<CausalGraph> {
-
-        private static final long serialVersionUID = 1L;
-
-        private GraphSerializer() {
-            super(CausalGraph.class);
-        }
-
-        @Override
-        public void serialize(CausalGraph graph, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeStartObject();
-            gen.writeArrayFieldStart("flaws");
-            graph.flaws.values().stream().forEach(f -> {
-                try {
-                    gen.writeObject(f);
-                } catch (IOException e) {
-                    LOG.error("Cannot serialize", e);
-                }
-            });
-            gen.writeEndArray();
-            if (graph.current_flaw != null)
-                gen.writeStringField("current_flaw", graph.current_flaw.id);
-            gen.writeArrayFieldStart("resolvers");
-            graph.resolvers.values().stream().forEach(r -> {
-                try {
-                    gen.writeObject(r);
-                } catch (IOException e) {
-                    LOG.error("Cannot serialize", e);
-                }
-            });
-            gen.writeEndArray();
-            if (graph.current_resolver != null)
-                gen.writeStringField("current_resolver", graph.current_resolver.id);
             gen.writeEndObject();
         }
     }

@@ -12,9 +12,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import it.cnr.istc.pst.oratio.Context;
+import it.cnr.istc.pst.oratio.Solver;
 import it.cnr.istc.pst.oratio.StateListener;
-import it.cnr.istc.pst.oratio.riddle.Core;
 import it.cnr.istc.pst.oratio.timelines.PropositionalAgent;
 import it.cnr.istc.pst.oratio.timelines.ReusableResource;
 import it.cnr.istc.pst.oratio.timelines.StateVariable;
@@ -23,6 +22,11 @@ import it.cnr.istc.pst.oratio.timelines.Timeline;
 public class SolverState implements StateListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(SolverState.class);
+    private final Solver solver;
+
+    public SolverState(final Solver solver) {
+        this.solver = solver;
+    }
 
     @Override
     public void log(String log) {
@@ -34,9 +38,19 @@ public class SolverState implements StateListener {
     }
 
     @Override
-    public void stateChanged(Core core) {
+    public void init() {
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(getTimelines())));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(null)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
+        App.GRAPH.clear();
+    }
+
+    @Override
+    public void stateChanged() {
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(null)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -44,7 +58,7 @@ public class SolverState implements StateListener {
 
     Collection<Object> getTimelines() {
         Collection<Object> timelines = new ArrayList<>();
-        for (Timeline<?> timeline : Context.getContext().getTimelines()) {
+        for (Timeline<?> timeline : solver.getTimelines()) {
             if (timeline instanceof StateVariable) {
                 StateVariable sv = (StateVariable) timeline;
                 timelines
@@ -77,16 +91,6 @@ public class SolverState implements StateListener {
             }
         }
         return timelines;
-    }
-
-    @Override
-    public void init() {
-        try {
-            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(getTimelines())));
-        } catch (JsonProcessingException e) {
-            LOG.error("Cannot serialize", e);
-        }
-        App.GRAPH.clear();
     }
 
     @SuppressWarnings("unused")

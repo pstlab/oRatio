@@ -6,43 +6,46 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import it.cnr.istc.pst.oratio.ExecutorListener;
-import it.cnr.istc.pst.oratio.Context.Message.EndingAtoms;
-import it.cnr.istc.pst.oratio.Context.Message.StartingAtoms;
-import it.cnr.istc.pst.oratio.Context.Message.Tick;
-import it.cnr.istc.pst.oratio.riddle.Rational;
+import it.cnr.istc.pst.oratio.Rational;
+import it.cnr.istc.pst.oratio.Solver;
 
 public class PlanExecutor implements ExecutorListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlanExecutor.class);
+    private final Solver solver;
     private Rational current_time = new Rational();
+
+    public PlanExecutor(Solver solver) {
+        this.solver = solver;
+    }
 
     public Rational getCurrentTime() {
         return current_time;
     }
 
     @Override
-    public void tick(Tick tick) {
-        current_time = tick.current_time;
+    public void tick(final Rational current_time) {
+        this.current_time = current_time;
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(tick));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Tick(current_time)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
 
     @Override
-    public void startingAtoms(StartingAtoms starting_atoms) {
+    public void startingAtoms(final long[] atoms) {
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(starting_atoms));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.StartingAtoms(atoms)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
 
     @Override
-    public void endingAtoms(EndingAtoms ending_atoms) {
+    public void endingAtoms(final long[] atoms) {
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(ending_atoms));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.EndingAtoms(atoms)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
