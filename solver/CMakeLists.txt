@@ -11,8 +11,8 @@ option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
 
 file(GLOB SOLVER_SOURCES *.cpp types/*.cpp)
 
-add_library(solver STATIC ${SOLVER_SOURCES})
-target_include_directories(solver PRIVATE . ../smt ../smt/lra ../smt/ov ../smt/dl ../core ../riddle types)
+add_library(solver ${SOLVER_SOURCES})
+target_include_directories(solver PUBLIC . ../smt ../smt/lra ../smt/ov ../smt/dl ../core ../riddle types)
 target_link_libraries(solver PUBLIC core)
 
 message(STATUS "Temporal network type:    ${TEMPORAL_NETWORK_TYPE}")
