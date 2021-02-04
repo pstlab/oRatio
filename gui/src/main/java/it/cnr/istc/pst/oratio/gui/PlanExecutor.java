@@ -19,6 +19,10 @@ public class PlanExecutor implements ExecutorListener {
         this.solver = solver;
     }
 
+    public Solver getSolver() {
+        return solver;
+    }
+
     public Rational getCurrentTime() {
         return current_time;
     }

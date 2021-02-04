@@ -1,5 +1,5 @@
-#include <jni.h>
 #include "solver_listener.h"
+#include <jni.h>
 
 namespace ratio
 {
@@ -10,6 +10,7 @@ namespace ratio
     java_solver_listener(ratio::solver &s, JNIEnv *env, jobject obj);
     ~java_solver_listener();
 
+  private:
     void flaw_created(const flaw &f) override;
     void flaw_state_changed(const flaw &f) override;
     void flaw_cost_changed(const flaw &f) override;

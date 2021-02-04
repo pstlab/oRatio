@@ -493,6 +493,8 @@ namespace ratio
             for (const auto &p : q.front()->get_predicates())
                 for (const auto &a : p.second->get_instances())
                     all_atoms.insert(static_cast<atom *>(&*a));
+            for (const auto &t : q.front()->get_types())
+                q.push(t.second);
             q.pop();
         }
 

@@ -28,6 +28,10 @@ public class SolverState implements StateListener {
         this.solver = solver;
     }
 
+    public Solver getSolver() {
+        return solver;
+    }
+
     @Override
     public void log(String log) {
         try {
@@ -35,6 +39,14 @@ public class SolverState implements StateListener {
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
+    }
+
+    @Override
+    public void read(String arg0) {
+    }
+
+    @Override
+    public void read(String[] arg0) {
     }
 
     @Override

@@ -46,6 +46,16 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
     }
 
     @Override
+    public void read(String script) {
+        // nothing to do here..
+    }
+
+    @Override
+    public void read(String[] files) {
+        // nothing to do here..
+    }
+
+    @Override
     public void stateChanged() {
         clear();
 

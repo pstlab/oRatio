@@ -6,5 +6,9 @@ public interface StateListener {
 
     public void init();
 
+    public void read(String script);
+
+    public void read(String[] files);
+
     public void stateChanged();
 }

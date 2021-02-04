@@ -28,7 +28,7 @@ endif()
 
 message(STATUS "Build Java bindings:      ${BUILD_JAVA_SOLVER_API}")
 if(BUILD_JAVA_SOLVER_API)
-    add_subdirectory(api/java/src/main/cpp/api/solver)
+    add_subdirectory(api/java/src/main/cpp/solver)
 endif()
 
 message(STATUS "Build server:             ${BUILD_SERVER}")
