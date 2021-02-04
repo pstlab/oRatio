@@ -13,7 +13,7 @@ file(GLOB SOLVER_SOURCES *.cpp types/*.cpp)
 
 add_library(solver STATIC ${SOLVER_SOURCES})
 target_include_directories(solver PRIVATE . ../smt ../smt/lra ../smt/ov ../smt/dl ../core ../riddle types)
-target_link_libraries(solver PRIVATE core)
+target_link_libraries(solver PUBLIC core)
 
 message(STATUS "Temporal network type:    ${TEMPORAL_NETWORK_TYPE}")
 if(TEMPORAL_NETWORK_TYPE MATCHES DL)
