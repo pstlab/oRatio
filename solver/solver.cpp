@@ -10,6 +10,8 @@
 #include "atom.h"
 #include "state_variable.h"
 #include "reusable_resource.h"
+#include "propositional_agent.h"
+#include "propositional_state.h"
 #ifdef BUILD_LISTENERS
 #include "solver_listener.h"
 #endif
@@ -29,7 +31,9 @@ namespace ratio
     {
         read(std::vector<std::string>({"init.rddl"}));
         new_types({new state_variable(*this),
-                   new reusable_resource(*this)});
+                   new reusable_resource(*this),
+                   new propositional_agent(*this),
+                   new propositional_state(*this)});
 
         FIRE_STATE_CHANGED();
     }
