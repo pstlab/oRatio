@@ -1,5 +1,3 @@
-add_compile_definitions(BUILD_SOLVER_LISTENER BUILD_EXECUTOR_LISTENER)
-
 find_package(JNI)
 
 add_library(solver-api SHARED it_cnr_istc_pst_oratio_Solver.cpp java_core_listener.cpp java_solver_listener.cpp)

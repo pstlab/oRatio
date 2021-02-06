@@ -58,9 +58,6 @@ namespace ratio
         for (const auto &l : listeners)
             l->tick();
 
-        if (!pulses.empty())
-            LOG("next thing to do at: " << to_string(*pulses.begin()));
-
         const auto &int_pred = slv.get_predicate("Interval");
         const auto &imp_pred = slv.get_predicate("Impulse");
 

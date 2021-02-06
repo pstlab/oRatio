@@ -10,7 +10,7 @@
 #include "atom.h"
 #include "state_variable.h"
 #include "reusable_resource.h"
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
 #include "solver_listener.h"
 #endif
 #include <algorithm>
@@ -52,7 +52,7 @@ namespace ratio
         // we set the gamma variable..
         gr.check_gamma();
 
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
         fire_state_changed();
 #endif
 
@@ -69,7 +69,7 @@ namespace ratio
             auto f_next = std::min_element(flaws.begin(), flaws.end(), [](flaw *const f0, flaw *const f1) { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
             assert(f_next != flaws.end());
 
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
             fire_current_flaw(**f_next);
 #endif
             if (is_infinite((*f_next)->get_estimated_cost()))
@@ -84,7 +84,7 @@ namespace ratio
 
             // this is the next resolver (i.e. the cheapest one) to be applied..
             auto *res = (*f_next)->get_best_resolver();
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
             fire_current_resolver(*res);
 #endif
             assert(!is_infinite(res->get_estimated_cost()));
@@ -107,7 +107,7 @@ namespace ratio
                 auto f_next = std::min_element(flaws.begin(), flaws.end(), [](flaw *const f0, flaw *const f1) { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
                 assert(f_next != flaws.end());
 
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
                 fire_current_flaw(**f_next);
 #endif
                 if (is_infinite((*f_next)->get_estimated_cost()))
@@ -120,7 +120,7 @@ namespace ratio
 
                 // this is the next resolver (i.e. the cheapest one) to be applied..
                 auto *res = (*f_next)->get_best_resolver();
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
                 fire_current_resolver(*res);
 #endif
                 assert(!is_infinite(res->get_estimated_cost()));
@@ -136,7 +136,7 @@ namespace ratio
 
         // Hurray!! we have found a solution..
         LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
         fire_state_changed();
 #endif
     }
@@ -222,7 +222,7 @@ namespace ratio
         assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
         assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
 
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
         fire_state_changed();
 #endif
 
@@ -256,7 +256,7 @@ namespace ratio
         assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
         assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
 
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
         fire_state_changed();
 #endif
 
@@ -357,7 +357,7 @@ namespace ratio
         {
             // assert(f.first->est_cost != f.second);
             f.first->est_cost = f.second;
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
             fire_flaw_cost_changed(*f.first);
 #endif
         }
@@ -440,7 +440,7 @@ namespace ratio
         return incs;
     }
 
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
     void solver::fire_new_flaw(const flaw &f) const
     {
         for (const auto &l : listeners)

@@ -2,7 +2,7 @@ add_executable(solver_tests test_solver.cpp)
 target_include_directories(solver_tests PRIVATE ${oRatio_SOURCE_DIR}/smt ${oRatio_SOURCE_DIR}/smt/lra ${oRatio_SOURCE_DIR}/smt/ov ${oRatio_SOURCE_DIR}/smt/dl ${oRatio_SOURCE_DIR}/core ${oRatio_SOURCE_DIR}/solver)
 target_link_libraries(solver_tests PRIVATE solver)
 
-if(BUILD_SOLVER_LISTENER AND WIN32)
+if(BUILD_LISTENERS AND WIN32)
     target_link_libraries(solver_tests PRIVATE wsock32 ws2_32 #[[-PROFILE]])
 endif()
 

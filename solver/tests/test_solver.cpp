@@ -1,7 +1,4 @@
 #include "solver.h"
-#ifdef BUILD_SOLVER_LISTENER
-#include "solver_socket_listener.h"
-#endif
 #include <iostream>
 #include <fstream>
 
@@ -24,15 +21,12 @@ int main(int argc, char *argv[])
     std::string sol_name = argv[argc - 1];
 
     std::cout << "starting oRatio";
-#ifdef BUILD_SOLVER_LISTENER
+#ifndef NDEBUG
     std::cout << " in debug mode";
 #endif
     std::cout << ".." << std::endl;
 
     solver s;
-#ifdef BUILD_SOLVER_LISTENER
-    solver_socket_listener l(s, HOST, SOLVER_PORT);
-#endif
 
     s.init();
     try

@@ -11,7 +11,7 @@ namespace ratio
 {
 
   class smart_type;
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
   class solver_listener;
 #endif
   class executor;
@@ -20,7 +20,7 @@ namespace ratio
   {
     friend class graph;
     friend class smart_type;
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
     friend class solver_listener;
 #endif
     friend class executor;
@@ -86,7 +86,7 @@ namespace ratio
     smt::lit current_decision;                            // the decision which has just been taken..
     std::vector<layer> trail;                             // the list of taken decisions, with the associated changes made, in chronological order..
 
-#ifdef BUILD_SOLVER_LISTENER
+#ifdef BUILD_LISTENERS
   private:
     std::vector<solver_listener *> listeners; // the solver listeners..
 

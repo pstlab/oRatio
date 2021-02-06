@@ -1,5 +1,3 @@
-add_compile_definitions(BUILD_SOLVER_LISTENER)
-
 find_package(Threads)
 
 add_library(executor executor.cpp)
