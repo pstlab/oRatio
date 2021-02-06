@@ -35,10 +35,6 @@ public class App {
     private static Set<WsContext> contexts = new HashSet<>();
 
     public static void main(final String[] args) {
-        SOLVER.addStateListener(STATE);
-        SOLVER.addGraphListener(GRAPH);
-        SOLVER.addExecutorListener(PLAN_EXEC);
-
         final Javalin app = Javalin.create(config -> {
             config.addStaticFiles("/public");
         });

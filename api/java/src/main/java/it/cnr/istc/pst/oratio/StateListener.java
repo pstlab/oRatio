@@ -4,8 +4,6 @@ public interface StateListener {
 
     public void log(String log);
 
-    public void init();
-
     public void read(String script);
 
     public void read(String[] files);

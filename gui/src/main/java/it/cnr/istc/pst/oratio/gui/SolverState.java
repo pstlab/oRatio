@@ -26,6 +26,7 @@ public class SolverState implements StateListener {
 
     public SolverState(final Solver solver) {
         this.solver = solver;
+        solver.addStateListener(this);
     }
 
     public Solver getSolver() {
@@ -47,16 +48,6 @@ public class SolverState implements StateListener {
 
     @Override
     public void read(String[] arg0) {
-    }
-
-    @Override
-    public void init() {
-        try {
-            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(null)));
-        } catch (JsonProcessingException e) {
-            LOG.error("Cannot serialize", e);
-        }
-        App.GRAPH.clear();
     }
 
     @Override

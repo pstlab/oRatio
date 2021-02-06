@@ -7,6 +7,26 @@
 #define START "start"
 #define END "end"
 
+#ifdef BUILD_LISTENERS
+#define S_FIRE_NEW_FLAW(f) fire_new_flaw(f)
+#define S_FIRE_FLAW_STATE_CHANGED(f) fire_flaw_state_changed(f)
+#define S_FIRE_FLAW_COST_CHANGED(f) fire_flaw_cost_changed(f)
+#define S_FIRE_CURRENT_FLAW(f) fire_current_flaw(f)
+#define S_FIRE_NEW_RESOLVER(r) fire_new_resolver(r)
+#define S_FIRE_RESOLVER_STATE_CHANGED(r) fire_resolver_state_changed(r)
+#define S_FIRE_CURRENT_RESOLVER(r) fire_current_resolver(r)
+#define S_FIRE_CAUSAL_LINK_ADDED(f, r) fire_causal_link_added(f, r)
+#else
+#define S_FIRE_NEW_FLAW(f)
+#define S_FIRE_FLAW_STATE_CHANGED(f)
+#define S_FIRE_FLAW_COST_CHANGED(f)
+#define S_FIRE_CURRENT_FLAW(f)
+#define S_FIRE_NEW_RESOLVER(r)
+#define S_FIRE_RESOLVER_STATE_CHANGED(r)
+#define S_FIRE_CURRENT_RESOLVER(r)
+#define S_FIRE_CAUSAL_LINK_ADDED(f, r)
+#endif
+
 namespace ratio
 {
 

@@ -35,6 +35,7 @@ public class CausalGraph implements GraphListener {
 
     public CausalGraph(Solver solver) {
         this.solver = solver;
+        solver.addGraphListener(this);
     }
 
     public Solver getSolver() {

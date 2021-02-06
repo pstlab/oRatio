@@ -25,6 +25,7 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
 
     public TimelinesList(final Solver solver) {
         this.solver = solver;
+        solver.addStateListener(this);
         try {
             BUILDERS.put(solver.getType("StateVariable"), StateVariable.BUILDER);
             BUILDERS.put(solver.getType("ReusableResource"), ReusableResource.BUILDER);
@@ -38,11 +39,6 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
     @Override
     public void log(String log) {
         // nothing to do here..
-    }
-
-    @Override
-    public void init() {
-        clear();
     }
 
     @Override

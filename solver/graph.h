@@ -10,6 +10,26 @@
 #include <unordered_set>
 #include <vector>
 
+#ifdef BUILD_LISTENERS
+#define G_FIRE_NEW_FLAW(f) slv.fire_new_flaw(f)
+#define G_FIRE_FLAW_STATE_CHANGED(f) slv.fire_flaw_state_changed(f)
+#define G_FIRE_FLAW_COST_CHANGED(f) slv.fire_flaw_cost_changed(f)
+#define G_FIRE_CURRENT_FLAW(f) slv.fire_current_flaw(f)
+#define G_FIRE_NEW_RESOLVER(r) slv.fire_new_resolver(r)
+#define G_FIRE_RESOLVER_STATE_CHANGED(r) slv.fire_resolver_state_changed(r)
+#define G_FIRE_CURRENT_RESOLVER(r) slv.fire_current_resolver(r)
+#define G_FIRE_CAUSAL_LINK_ADDED(f, r) slv.fire_causal_link_added(f, r)
+#else
+#define G_FIRE_NEW_FLAW(f)
+#define G_FIRE_FLAW_STATE_CHANGED(f)
+#define G_FIRE_FLAW_COST_CHANGED(f)
+#define G_FIRE_CURRENT_FLAW(f)
+#define G_FIRE_NEW_RESOLVER(r)
+#define G_FIRE_RESOLVER_STATE_CHANGED(r)
+#define G_FIRE_CURRENT_RESOLVER(r)
+#define G_FIRE_CAUSAL_LINK_ADDED(f, r)
+#endif
+
 namespace ratio
 {
 

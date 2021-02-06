@@ -224,10 +224,6 @@ public class Solver implements Scope, Env {
         state_listeners.stream().forEach(l -> l.log(log));
     }
 
-    private void fireInit() {
-        state_listeners.stream().forEach(l -> l.init());
-    }
-
     private void fireRead(final String script) {
         state_listeners.stream().forEach(l -> l.read(script));
     }

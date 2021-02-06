@@ -15,6 +15,16 @@
 #define LOG(msg)
 #endif
 
+#ifdef BUILD_LISTENERS
+#define FIRE_LOG(msg) fire_log(msg)
+#define FIRE_READ(rddl) fire_read(rddl)
+#define FIRE_STATE_CHANGED() fire_state_changed()
+#else
+#define FIRE_LOG(msg)
+#define FIRE_READ(rddl)
+#define FIRE_STATE_CHANGED()
+#endif
+
 namespace riddle::ast
 {
   class compilation_unit;

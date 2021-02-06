@@ -51,15 +51,11 @@ namespace ratio
         cu->refine(*this);
         context c_ctx(this);
         cu->execute(*this, c_ctx);
-#ifdef BUILD_LISTENERS
-        fire_read(script);
-#endif
+        FIRE_READ(script);
 
         if (!sat_cr.propagate())
             throw unsolvable_exception();
-#ifdef BUILD_LISTENERS
-        fire_state_changed();
-#endif
+        FIRE_STATE_CHANGED();
     }
 
     void core::read(const std::vector<std::string> &files)
@@ -84,15 +80,11 @@ namespace ratio
         context c_ctx(this);
         for (const auto &cu : c_cus)
             cu->execute(*this, c_ctx);
-#ifdef BUILD_LISTENERS
-        fire_read(files);
-#endif
+        FIRE_READ(files);
 
         if (!sat_cr.propagate())
             throw std::runtime_error("the input problem is inconsistent..");
-#ifdef BUILD_LISTENERS
-        fire_state_changed();
-#endif
+        FIRE_STATE_CHANGED();
     }
 
     bool_expr core::new_bool() noexcept { return new bool_item(*this, lit(sat_cr.new_var())); }
