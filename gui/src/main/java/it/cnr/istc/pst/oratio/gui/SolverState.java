@@ -18,15 +18,18 @@ import it.cnr.istc.pst.oratio.timelines.PropositionalAgent;
 import it.cnr.istc.pst.oratio.timelines.ReusableResource;
 import it.cnr.istc.pst.oratio.timelines.StateVariable;
 import it.cnr.istc.pst.oratio.timelines.Timeline;
+import it.cnr.istc.pst.oratio.timelines.TimelinesList;
 
 public class SolverState implements StateListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(SolverState.class);
     private final Solver solver;
+    private final TimelinesList timelines;
 
     public SolverState(final Solver solver) {
         this.solver = solver;
         solver.addStateListener(this);
+        timelines = new TimelinesList(solver);
     }
 
     public Solver getSolver() {
@@ -53,47 +56,51 @@ public class SolverState implements StateListener {
     @Override
     public void stateChanged() {
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(null)));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(getTimelines())));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
 
     Collection<Object> getTimelines() {
-        Collection<Object> timelines = new ArrayList<>();
-        for (Timeline<?> timeline : solver.getTimelines()) {
-            if (timeline instanceof StateVariable) {
-                StateVariable sv = (StateVariable) timeline;
-                timelines
-                        .add(new SVTimeline(
-                                sv.getName(), sv.getOrigin().doubleValue(), sv.getHorizon().doubleValue(), sv
-                                        .getValues().stream().map(
-                                                val -> new SVTimeline.Value(
-                                                        val.getAtoms().stream().map(atm -> atm.toString())
-                                                                .collect(Collectors.joining(", ")),
-                                                        val.getFrom().doubleValue(), val.getTo().doubleValue(),
-                                                        val.getAtoms().stream().map(atm -> atm.getSigma())
-                                                                .collect(Collectors.toList())))
-                                        .collect(Collectors.toList())));
-            } else if (timeline instanceof ReusableResource) {
-                ReusableResource rr = (ReusableResource) timeline;
-                timelines
-                        .add(new RRTimeline(rr.getName(), rr.getCapacity().doubleValue(), rr.getOrigin().doubleValue(),
-                                rr.getHorizon().doubleValue(),
-                                rr.getValues().stream().map(val -> new RRTimeline.Value(val.getUsage().doubleValue(),
-                                        val.getFrom().doubleValue(), val.getTo().doubleValue(), val.getAtoms().stream()
-                                                .map(atm -> atm.getSigma()).collect(Collectors.toList())))
-                                        .collect(Collectors.toList())));
-            } else if (timeline instanceof PropositionalAgent) {
-                PropositionalAgent pa = (PropositionalAgent) timeline;
-                timelines.add(new Agent(pa.getName(), pa.getOrigin().doubleValue(), pa.getHorizon().doubleValue(),
-                        pa.getValues().stream()
-                                .map(val -> new Agent.Value(val.getAtom().toString(), val.getFrom().doubleValue(),
-                                        val.getTo().doubleValue(), val.getAtom().getSigma()))
-                                .collect(Collectors.toList())));
+        Collection<Object> c_tls = new ArrayList<>();
+        for (Timeline<?> tl : timelines) {
+            if (tl instanceof StateVariable) {
+                c_tls.add(toTimeline((StateVariable) tl));
+            } else if (tl instanceof ReusableResource) {
+                c_tls.add(toTimeline((ReusableResource) tl));
+            } else if (tl instanceof PropositionalAgent) {
+                c_tls.add(toTimeline((PropositionalAgent) tl));
             }
         }
-        return timelines;
+        return c_tls;
+    }
+
+    private static SVTimeline toTimeline(StateVariable sv) {
+        return new SVTimeline(sv.getName(), sv.getOrigin().doubleValue(), sv.getHorizon().doubleValue(),
+                sv.getValues().stream()
+                        .map(val -> new SVTimeline.Value(
+                                val.getAtoms().stream().map(atm -> atm.toString()).collect(Collectors.joining(", ")),
+                                val.getFrom().doubleValue(), val.getTo().doubleValue(),
+                                val.getAtoms().stream().map(atm -> atm.getSigma()).collect(Collectors.toList())))
+                        .collect(Collectors.toList()));
+    }
+
+    private static RRTimeline toTimeline(ReusableResource rr) {
+        return new RRTimeline(rr.getName(), rr.getCapacity().doubleValue(), rr.getOrigin().doubleValue(),
+                rr.getHorizon().doubleValue(),
+                rr.getValues().stream()
+                        .map(val -> new RRTimeline.Value(val.getUsage().doubleValue(), val.getFrom().doubleValue(),
+                                val.getTo().doubleValue(),
+                                val.getAtoms().stream().map(atm -> atm.getSigma()).collect(Collectors.toList())))
+                        .collect(Collectors.toList()));
+    }
+
+    private static Agent toTimeline(PropositionalAgent pa) {
+        return new Agent(pa.getName(), pa.getOrigin().doubleValue(), pa.getHorizon().doubleValue(),
+                pa.getValues().stream().map(val -> new Agent.Value(val.getAtom().toString(),
+                        val.getFrom().doubleValue(), val.getTo().doubleValue(), val.getAtom().getSigma()))
+                        .collect(Collectors.toList()));
     }
 
     @SuppressWarnings("unused")

@@ -11,7 +11,6 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import it.cnr.istc.pst.oratio.GraphListener.State;
-import it.cnr.istc.pst.oratio.timelines.TimelinesList;
 
 public class Solver implements Scope, Env {
 
@@ -37,7 +36,6 @@ public class Solver implements Scope, Env {
     final Map<String, Type> types = new LinkedHashMap<>();
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
     final Map<String, Item> exprs = new LinkedHashMap<>();
-    private final TimelinesList timelines = new TimelinesList(this);
     final Map<Item, String> expr_names = new IdentityHashMap<>();
     private final Map<String, Item> all_items = new HashMap<>();
     private final Map<String, Type> all_types = new HashMap<>();
@@ -162,10 +160,6 @@ public class Solver implements Scope, Env {
      */
     public String guessName(final Item itm) {
         return expr_names.get(itm);
-    }
-
-    public TimelinesList getTimelines() {
-        return timelines;
     }
 
     public native void read(String script);
