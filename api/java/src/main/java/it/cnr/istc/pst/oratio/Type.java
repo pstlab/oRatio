@@ -66,6 +66,12 @@ public class Type implements Scope {
         return Collections.unmodifiableMap(fields);
     }
 
+    @SuppressWarnings("unused")
+    private void defineField(Field field) {
+        assert (!fields.containsKey(field.name));
+        fields.put(field.name, field);
+    }
+
     public String getName() {
         return name;
     }
@@ -114,6 +120,16 @@ public class Type implements Scope {
         throw new NoSuchMethodException(name);
     }
 
+    public Collection<Constructor> getConstructors() {
+        return Collections.unmodifiableCollection(constructors);
+    }
+
+    @SuppressWarnings("unused")
+    private void defineConstructor(final Constructor constructor) {
+        assert (!constructors.contains(constructor));
+        constructors.add(constructor);
+    }
+
     @Override
     public Method getMethod(final String name, final Type... parameter_types) throws NoSuchMethodException {
         if (Stream.of(parameter_types).anyMatch(Objects::isNull))
@@ -156,9 +172,11 @@ public class Type implements Scope {
         return Collections.unmodifiableCollection(c_methods);
     }
 
-    void defineMethod(final Method method) {
+    @SuppressWarnings("unused")
+    private void defineMethod(final Method method) {
         if (!methods.containsKey(method.name))
             methods.put(method.name, new ArrayList<>());
+        assert (!methods.get(method.name).contains(method));
         methods.get(method.name).add(method);
     }
 
@@ -189,6 +207,12 @@ public class Type implements Scope {
         return Collections.unmodifiableMap(types);
     }
 
+    @SuppressWarnings("unused")
+    private void defineType(Type type) {
+        assert (!types.containsKey(type.name));
+        types.put(type.name, type);
+    }
+
     @Override
     public Predicate getPredicate(final String name) throws ClassNotFoundException {
         Predicate predicate = predicates.get(name);
@@ -215,5 +239,11 @@ public class Type implements Scope {
     @Override
     public Map<String, Predicate> getPredicates() {
         return Collections.unmodifiableMap(predicates);
+    }
+
+    @SuppressWarnings("unused")
+    private void definePredicate(Predicate predicate) {
+        assert (!predicates.containsKey(predicate.name));
+        predicates.put(predicate.name, predicate);
     }
 }

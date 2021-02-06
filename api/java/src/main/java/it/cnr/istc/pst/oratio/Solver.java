@@ -71,6 +71,12 @@ public class Solver implements Scope, Env {
         return Collections.unmodifiableMap(fields);
     }
 
+    @SuppressWarnings("unused")
+    private void defineField(Field field) {
+        assert (!fields.containsKey(field.name));
+        fields.put(field.name, field);
+    }
+
     @Override
     public Method getMethod(final String name, final Type... parameter_types) throws NoSuchMethodException {
         if (Stream.of(parameter_types).anyMatch(Objects::isNull))
@@ -100,9 +106,11 @@ public class Solver implements Scope, Env {
         return Collections.unmodifiableCollection(c_methods);
     }
 
-    void defineMethod(final Method method) {
+    @SuppressWarnings("unused")
+    private void defineMethod(final Method method) {
         if (!methods.containsKey(method.name))
             methods.put(method.name, new ArrayList<>());
+        assert (!methods.get(method.name).contains(method));
         methods.get(method.name).add(method);
     }
 
@@ -121,6 +129,12 @@ public class Solver implements Scope, Env {
         return Collections.unmodifiableMap(types);
     }
 
+    @SuppressWarnings("unused")
+    private void defineType(Type type) {
+        assert (!types.containsKey(type.name));
+        types.put(type.name, type);
+    }
+
     @Override
     public Predicate getPredicate(final String name) throws ClassNotFoundException {
         Predicate predicate = predicates.get(name);
@@ -136,6 +150,12 @@ public class Solver implements Scope, Env {
         return Collections.unmodifiableMap(predicates);
     }
 
+    @SuppressWarnings("unused")
+    private void definePredicate(Predicate predicate) {
+        assert (!predicates.containsKey(predicate.name));
+        predicates.put(predicate.name, predicate);
+    }
+
     @Override
     public Item get(String name) throws NoSuchFieldException {
         Item item = exprs.get(name);
@@ -149,6 +169,12 @@ public class Solver implements Scope, Env {
     @Override
     public Map<String, Item> getExprs() {
         return Collections.unmodifiableMap(exprs);
+    }
+
+    @SuppressWarnings("unused")
+    private void set(String id, Item itm) {
+        exprs.put(id, itm);
+        expr_names.put(itm, id);
     }
 
     /**

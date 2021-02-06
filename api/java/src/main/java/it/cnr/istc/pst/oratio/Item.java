@@ -48,6 +48,12 @@ public class Item implements Env {
         return Collections.unmodifiableMap(exprs);
     }
 
+    @SuppressWarnings("unused")
+    private void set(String id, Item itm) {
+        exprs.put(id, itm);
+        solver.expr_names.put(itm, id);
+    }
+
     public static class BoolItem extends Item {
 
         private final String lit;
