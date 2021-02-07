@@ -1,5 +1,5 @@
 #include <jni.h>
-#include <iostream>
+#include <mutex>
 
 int main(int argc, char const *argv[])
 {
@@ -20,8 +20,15 @@ int main(int argc, char const *argv[])
     delete options; // we then no longer need the initialisation options.
     if (rc == JNI_OK)
     {
-        jclass app = env->FindClass("it/cnr/istc/pst/oratio/gui/App");
-        std::cout << app << std::endl;
+        jclass app_class = env->FindClass("it/cnr/istc/pst/oratio/gui/App");
+        jmethodID main_mthd = env->GetStaticMethodID(app_class, "main", "([Ljava/lang/String;)V");
+        jobjectArray args_array = env->NewObjectArray(0, env->FindClass("java/lang/String"), NULL);
+        env->CallStaticVoidMethod(app_class, main_mthd, args_array);
+
+        std::condition_variable cv;
+        std::mutex m;
+        std::unique_lock<std::mutex> lock(m);
+        cv.wait(lock, [] { return false; });
     }
 
     return 0;
