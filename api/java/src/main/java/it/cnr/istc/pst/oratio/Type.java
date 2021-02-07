@@ -15,6 +15,7 @@ public class Type implements Scope {
     final Scope scope;
     final Map<String, Field> fields = new LinkedHashMap<>();
     final String name;
+    private final boolean primitive;
     final Collection<Type> superclasses = new ArrayList<>();
     final Collection<Constructor> constructors = new ArrayList<>();
     final Map<String, Collection<Method>> methods = new LinkedHashMap<>();
@@ -22,10 +23,11 @@ public class Type implements Scope {
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
     final Collection<Item> instances = new ArrayList<>();
 
-    Type(final Solver solver, final Scope scope, final String name) {
+    Type(final Solver solver, final Scope scope, final String name, final boolean primitive) {
         this.solver = solver;
         this.scope = scope;
         this.name = name;
+        this.primitive = primitive;
     }
 
     @Override
@@ -76,6 +78,10 @@ public class Type implements Scope {
         return name;
     }
 
+    public boolean isPrimitive() {
+        return primitive;
+    }
+
     public Collection<Item> getInstances() {
         return Collections.unmodifiableCollection(instances);
     }
@@ -95,6 +101,12 @@ public class Type implements Scope {
 
     public Collection<Type> getSuperclasses() {
         return Collections.unmodifiableCollection(superclasses);
+    }
+
+    @SuppressWarnings("unused")
+    private void defineSuperclass(final Type superclass) {
+        assert (!superclasses.contains(superclass));
+        superclasses.add(superclass);
     }
 
     public Constructor getConstructor(final Type... parameter_types) throws NoSuchMethodException {

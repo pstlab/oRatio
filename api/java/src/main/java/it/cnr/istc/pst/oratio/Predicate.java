@@ -5,7 +5,7 @@ public class Predicate extends Type {
     final Field[] pars;
 
     Predicate(final Solver solver, final Scope scope, final String name, final Field... parameters) {
-        super(solver, scope, name);
+        super(solver, scope, name, false);
         this.pars = parameters;
 
         for (Field par : parameters)
