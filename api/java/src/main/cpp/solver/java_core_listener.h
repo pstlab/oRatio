@@ -3,9 +3,12 @@
 #include "core_listener.h"
 #include <jni.h>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace ratio
 {
+  class type;
+  class predicate;
 
   class java_core_listener : public core_listener
   {
@@ -20,6 +23,11 @@ namespace ratio
 
     void state_changed() override;
 
+    void new_type(const type &t);
+    void revise_type(const type &t);
+    void new_predicate(const predicate &p);
+    void revise_predicate(const predicate &p);
+
   private:
     JNIEnv *env;
     jobject slv_obj;   // the java solver instance..
@@ -29,6 +37,10 @@ namespace ratio
     jclass type_cls; // the java type class..
     jmethodID type_ctr_id;
     jmethodID t_dfn_constructor_mthd_id, t_dfn_superclass_mthd_id, t_dfn_field_mthd_id, t_dfn_method_mthd_id, t_dfn_type_mthd_id, t_dfn_pred_mthd_id;
+    jclass ctr_cls;             // the java constructor class..
+    jmethodID ctr_ctr_id;       // the constructor constructor..
+    jclass mthd_cls;            // the java method class..
+    jmethodID mthd_ctr_id;      // the method constructor..
     jclass field_cls;           // the java field class..
     jmethodID field_ctr_id;     // the field constructor..
     jclass predicate_cls;       // the java predicate class..
@@ -38,5 +50,6 @@ namespace ratio
     jmethodID i_set_mthd_id;
     std::unordered_map<jlong, jobject> all_types;
     std::unordered_map<jlong, jobject> all_items;
+    std::unordered_set<jlong> all_methods;
   };
 } // namespace ratio
