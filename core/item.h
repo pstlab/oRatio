@@ -93,7 +93,7 @@ namespace ratio
     string_item(const string_item &that) = delete;
     virtual ~string_item();
 
-    std::string get_value() { return l; }
+    std::string get_value() const { return l; }
 
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;

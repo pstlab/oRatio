@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 public class Atom extends Item {
 
     private final long sigma;
-    private final AtomState state;
+    private AtomState state;
 
     @SuppressWarnings("unused")
     private Atom(final Solver solver, final Predicate predicate, final long sigma, final byte state) {
@@ -33,6 +33,11 @@ public class Atom extends Item {
 
     public AtomState getState() {
         return state;
+    }
+
+    @SuppressWarnings("unused")
+    private void setState(final byte state) {
+        this.state = AtomState.values()[state];
     }
 
     public Item getTau() {

@@ -55,7 +55,8 @@ namespace ratio
                                                                                  string_item_ctr_id(env->GetMethodID(string_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Ljava/lang/String;B)V")),
                                                                                  string_item_set_mthd_id(env->GetMethodID(string_item_cls, "setValue", "(Ljava/lang/String;)V")),
                                                                                  atm_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Atom")))),
-                                                                                 atm_ctr_id(env->GetMethodID(atm_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Predicate;JB)V"))
+                                                                                 atm_ctr_id(env->GetMethodID(atm_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Predicate;JB)V")),
+                                                                                 atm_set_state_mthd_id(env->GetMethodID(atm_cls, "setState", "(B)V"))
     {
     }
     java_core_listener::~java_core_listener()
@@ -152,28 +153,14 @@ namespace ratio
         {
             jstring m_name = env->NewStringUTF(mthd->get_name().c_str());
             jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
-            std::vector<jobject> c_fields;
-            c_fields.reserve(mthd->get_fields().size());
-            for (const auto &f : mthd->get_fields())
-            {
-                jstring f_name = env->NewStringUTF(f.first.c_str());
-                jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
-                c_fields.push_back(c_field);
-                env->DeleteLocalRef(f_name);
-            }
-
-            jobjectArray fields_array = env->NewObjectArray(static_cast<jsize>(c_fields.size()), field_cls, NULL);
-            for (size_t i = 0; i < c_fields.size(); ++i)
-                env->SetObjectArrayElement(fields_array, static_cast<jsize>(i), c_fields[i]);
+            jobjectArray fields_array = new_fields_array(mthd->get_args());
 
             jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, slv_obj, m_name, rt, fields_array);
             env->CallVoidMethod(slv_obj, s_dfn_method_mthd_id, c_method);
 
-            env->DeleteLocalRef(m_name);
-            for (size_t i = 0; i < c_fields.size(); ++i)
-                env->DeleteLocalRef(c_fields[i]);
-            env->DeleteLocalRef(fields_array);
             env->DeleteLocalRef(c_method);
+            env->DeleteLocalRef(fields_array);
+            env->DeleteLocalRef(m_name);
         }
 
         // we add the predicates..
@@ -229,98 +216,15 @@ namespace ratio
             q.pop();
         }
 
-        for (const auto &xpr : cr.get_exprs())
+        for (const auto &c_itm : all_items)
         {
-            item &itm = *xpr.second;
-            const auto i_it = all_items.find(&itm);
-            if (bool_item *bi = dynamic_cast<bool_item *>(&itm))
-            { // the expression represents a primitive bool type..
-                const auto c_val = cr.get_sat_core().value(bi->l);
-                if (i_it == all_items.end())
-                { // we create a new boolean..
-                    jstring lit_s = env->NewStringUTF(((sign(bi->l) ? "b" : "!b") + std::to_string(variable(bi->l))).c_str());
-                    jobject c_bool = env->NewGlobalRef(env->NewObject(bool_item_cls, bool_item_ctr_id, slv_obj, lit_s, c_val));
-                    jstring i_name = env->NewStringUTF(xpr.first.c_str());
-                    env->CallVoidMethod(slv_obj, s_set_mthd_id, i_name, c_bool);
-                    all_items.emplace(bi, c_bool);
-                    env->DeleteLocalRef(i_name);
-                    env->DeleteLocalRef(lit_s);
-                }
-                else // we update the value..
-                    env->CallVoidMethod(i_it->second, bool_item_set_mthd_id, c_val);
-            }
-            else if (arith_item *ai = dynamic_cast<arith_item *>(&itm))
-            { // the expression represents a primitive arithmetic type..
-                const auto lb = cr.get_lra_theory().lb(ai->l);
-                const auto ub = cr.get_lra_theory().ub(ai->l);
-                const auto val = cr.get_lra_theory().value(ai->l);
-                jobject c_lb = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, lb.get_rational().numerator(), lb.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, lb.get_infinitesimal().numerator(), lb.get_infinitesimal().denominator()));
-                jobject c_ub = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, ub.get_rational().numerator(), ub.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, ub.get_infinitesimal().numerator(), ub.get_infinitesimal().denominator()));
-                jobject c_val = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, val.get_rational().numerator(), val.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, val.get_infinitesimal().numerator(), val.get_infinitesimal().denominator()));
-
-                if (i_it == all_items.end())
-                { // we create a new arith..
-                    jobject c_type = all_types.at(&itm.get_type());
-                    jstring lit_s = env->NewStringUTF(to_string(ai->l).c_str());
-                    jstring i_name = env->NewStringUTF(xpr.first.c_str());
-                    jobject c_arith = env->NewGlobalRef(env->NewObject(arith_item_cls, arith_item_ctr_id, slv_obj, c_type, lit_s, c_lb, c_ub, c_val));
-                    env->CallVoidMethod(slv_obj, s_set_mthd_id, i_name, c_arith);
-                    all_items.emplace(ai, c_arith);
-                    env->DeleteLocalRef(i_name);
-                    env->DeleteLocalRef(lit_s);
-                }
-                else // we update the value..
-                    env->CallVoidMethod(i_it->second, arith_item_set_mthd_id, c_lb, c_ub, c_val);
-
-                env->DeleteLocalRef(c_val);
-                env->DeleteLocalRef(c_ub);
-                env->DeleteLocalRef(c_lb);
-            }
-            else if (var_item *ei = dynamic_cast<var_item *>(&itm))
-            { // the expression represents an enum type..
-                const auto vals = cr.get_ov_theory().value(ei->ev);
-                jobjectArray vals_array = env->NewObjectArray(static_cast<jsize>(vals.size()), field_cls, NULL);
-                size_t i = 0;
-                for (const auto &v : vals)
-                    env->SetObjectArrayElement(vals_array, static_cast<jsize>(i++), all_items.at(static_cast<const item *>(v)));
-
-                if (i_it == all_items.end())
-                { // we create a new enum..
-                    jobject c_type = all_types.at(&itm.get_type());
-                    jstring lit_s = env->NewStringUTF(("e" + std::to_string(ei->ev)).c_str());
-                    jstring i_name = env->NewStringUTF(xpr.first.c_str());
-                    jobject c_enum = env->NewGlobalRef(env->NewObject(enum_item_cls, enum_item_ctr_id, slv_obj, c_type, lit_s, vals_array));
-                    env->CallVoidMethod(slv_obj, s_set_mthd_id, i_name, c_enum);
-                    all_items.emplace(ei, c_enum);
-                    env->DeleteLocalRef(i_name);
-                    env->DeleteLocalRef(lit_s);
-                }
-                else // we update the value..
-                    env->CallVoidMethod(i_it->second, enum_item_set_mthd_id, vals_array);
-
-                env->DeleteLocalRef(vals_array);
-            }
-            else if (string_item *si = dynamic_cast<string_item *>(&itm))
-            { // the expression represents a primitive string type..
-                jstring c_val = env->NewStringUTF(si->get_value().c_str());
-                if (i_it == all_items.end())
-                {
-                    jstring i_name = env->NewStringUTF(xpr.first.c_str());
-                    jobject c_str = env->NewGlobalRef(env->NewObject(string_item_cls, string_item_ctr_id, slv_obj, c_val));
-                    all_items.emplace(si, c_str);
-                    env->DeleteLocalRef(i_name);
-                }
-                else // we update the value..
-                    env->CallVoidMethod(i_it->second, string_item_set_mthd_id, c_val);
-                env->DeleteLocalRef(c_val);
-            }
-            else
-            { // the expression represents an item..
-                jstring i_name = env->NewStringUTF(xpr.first.c_str());
-                env->CallVoidMethod(slv_obj, s_set_mthd_id, i_name, i_it->second);
-                env->DeleteLocalRef(i_name);
-            }
+            const auto j_it = all_items.at(&*c_itm.first);
+            for (const auto &xpr : c_itm.first->get_exprs())
+                set(j_it, i_set_mthd_id, xpr.first, *xpr.second);
         }
+
+        for (const auto &xpr : cr.get_exprs())
+            set(slv_obj, s_set_mthd_id, xpr.first, *xpr.second);
 
         env->CallVoidMethod(slv_obj, state_changed_mthd_id);
     }
@@ -367,25 +271,11 @@ namespace ratio
         // we add the constructors..
         for (const auto &ctr : t.get_constructors())
         {
-            std::vector<jobject> c_fields;
-            c_fields.reserve(ctr->get_fields().size());
-            for (const auto &f : ctr->get_fields())
-            {
-                jstring f_name = env->NewStringUTF(f.first.c_str());
-                jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
-                c_fields.push_back(c_field);
-                env->DeleteLocalRef(f_name);
-            }
-
-            jobjectArray fields_array = env->NewObjectArray(static_cast<jsize>(c_fields.size()), field_cls, NULL);
-            for (size_t i = 0; i < c_fields.size(); ++i)
-                env->SetObjectArrayElement(fields_array, static_cast<jsize>(i), c_fields[i]);
+            jobjectArray fields_array = new_fields_array(ctr->get_args());
 
             jobject c_constructor = env->NewObject(ctr_cls, ctr_ctr_id, slv_obj, c_type, fields_array);
             env->CallVoidMethod(c_type, t_dfn_constructor_mthd_id, c_constructor);
 
-            for (size_t i = 0; i < c_fields.size(); ++i)
-                env->DeleteLocalRef(c_fields[i]);
             env->DeleteLocalRef(fields_array);
             env->DeleteLocalRef(c_constructor);
         }
@@ -395,48 +285,21 @@ namespace ratio
         {
             jstring m_name = env->NewStringUTF(mthd->get_name().c_str());
             jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
-            std::vector<jobject> c_fields;
-            c_fields.reserve(mthd->get_fields().size());
-            for (const auto &f : mthd->get_fields())
-            {
-                jstring f_name = env->NewStringUTF(f.first.c_str());
-                jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
-                c_fields.push_back(c_field);
-                env->DeleteLocalRef(f_name);
-            }
-
-            jobjectArray fields_array = env->NewObjectArray(static_cast<jsize>(c_fields.size()), field_cls, NULL);
-            for (size_t i = 0; i < c_fields.size(); ++i)
-                env->SetObjectArrayElement(fields_array, static_cast<jsize>(i), c_fields[i]);
+            jobjectArray fields_array = new_fields_array(mthd->get_args());
 
             jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, c_type, m_name, rt, fields_array);
             env->CallVoidMethod(c_type, t_dfn_method_mthd_id, c_method);
 
-            env->DeleteLocalRef(m_name);
-            for (size_t i = 0; i < c_fields.size(); ++i)
-                env->DeleteLocalRef(c_fields[i]);
-            env->DeleteLocalRef(fields_array);
             env->DeleteLocalRef(c_method);
+            env->DeleteLocalRef(fields_array);
+            env->DeleteLocalRef(m_name);
         }
     }
 
     void java_core_listener::new_predicate(const predicate &p)
     {
         jstring p_name = env->NewStringUTF(p.get_name().c_str());
-
-        std::vector<jobject> c_fields;
-        c_fields.reserve(p.get_fields().size());
-        for (const auto &f : p.get_fields())
-        {
-            jstring f_name = env->NewStringUTF(f.first.c_str());
-            jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
-            c_fields.push_back(c_field);
-            env->DeleteLocalRef(f_name);
-        }
-
-        jobjectArray fields_array = env->NewObjectArray(static_cast<jsize>(c_fields.size()), field_cls, NULL);
-        for (size_t i = 0; i < c_fields.size(); ++i)
-            env->SetObjectArrayElement(fields_array, static_cast<jsize>(i), c_fields[i]);
+        jobjectArray fields_array = new_fields_array(p.get_args());
 
         jobject c_predicate;
         if (const core *c = dynamic_cast<const core *>(&p.get_scope()))
@@ -452,10 +315,8 @@ namespace ratio
         }
         all_types.emplace(&p, c_predicate);
 
-        env->DeleteLocalRef(p_name);
-        for (size_t i = 0; i < c_fields.size(); ++i)
-            env->DeleteLocalRef(c_fields[i]);
         env->DeleteLocalRef(fields_array);
+        env->DeleteLocalRef(p_name);
     }
 
     void java_core_listener::revise_predicate(const predicate &p)
@@ -481,5 +342,122 @@ namespace ratio
         jobject c_atom = env->NewGlobalRef(env->NewObject(atm_cls, atm_ctr_id, slv_obj, c_pred, atm.get_sigma(), cr.get_sat_core().value(atm.get_sigma())));
         env->CallVoidMethod(c_pred, t_new_instnc, c_atom);
         all_items.emplace(&atm, c_atom);
+    }
+
+    jobject java_core_listener::new_field(const std::string &name, const type &tp)
+    {
+        jstring f_name = env->NewStringUTF(name.c_str());
+        jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&tp), f_name);
+        env->DeleteLocalRef(f_name);
+        return c_field;
+    }
+
+    jobjectArray java_core_listener::new_fields_array(const std::vector<const field *> &args)
+    {
+        std::vector<jobject> c_fields;
+        c_fields.reserve(args.size());
+        for (const auto &f : args)
+            c_fields.push_back(new_field(f->get_name(), f->get_type()));
+
+        jobjectArray fields_array = env->NewObjectArray(static_cast<jsize>(c_fields.size()), field_cls, NULL);
+        for (size_t i = 0; i < c_fields.size(); ++i)
+            env->SetObjectArrayElement(fields_array, static_cast<jsize>(i), c_fields[i]);
+
+        for (size_t i = 0; i < c_fields.size(); ++i)
+            env->DeleteLocalRef(c_fields[i]);
+
+        return fields_array;
+    }
+
+    void java_core_listener::set(jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm)
+    {
+        const auto i_it = all_items.find(&itm);
+        if (const bool_item *bi = dynamic_cast<const bool_item *>(&itm))
+        { // the expression represents a primitive bool type..
+            const auto c_val = cr.get_sat_core().value(bi->l);
+            if (i_it == all_items.end())
+            { // we create a new boolean..
+                jstring lit_s = env->NewStringUTF(((sign(bi->l) ? "b" : "!b") + std::to_string(variable(bi->l))).c_str());
+                jobject c_bool = env->NewGlobalRef(env->NewObject(bool_item_cls, bool_item_ctr_id, slv_obj, lit_s, c_val));
+                jstring i_name = env->NewStringUTF(name.c_str());
+                env->CallVoidMethod(c_obj, mthd_id, i_name, c_bool);
+                all_items.emplace(bi, c_bool);
+                env->DeleteLocalRef(i_name);
+                env->DeleteLocalRef(lit_s);
+            }
+            else // we update the value..
+                env->CallVoidMethod(i_it->second, bool_item_set_mthd_id, c_val);
+        }
+        else if (const arith_item *ai = dynamic_cast<const arith_item *>(&itm))
+        { // the expression represents a primitive arithmetic type..
+            const auto lb = cr.get_lra_theory().lb(ai->l);
+            const auto ub = cr.get_lra_theory().ub(ai->l);
+            const auto val = cr.get_lra_theory().value(ai->l);
+            jobject c_lb = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, lb.get_rational().numerator(), lb.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, lb.get_infinitesimal().numerator(), lb.get_infinitesimal().denominator()));
+            jobject c_ub = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, ub.get_rational().numerator(), ub.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, ub.get_infinitesimal().numerator(), ub.get_infinitesimal().denominator()));
+            jobject c_val = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, val.get_rational().numerator(), val.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, val.get_infinitesimal().numerator(), val.get_infinitesimal().denominator()));
+
+            if (i_it == all_items.end())
+            { // we create a new arith..
+                jobject c_type = all_types.at(&itm.get_type());
+                jstring lit_s = env->NewStringUTF(to_string(ai->l).c_str());
+                jstring i_name = env->NewStringUTF(name.c_str());
+                jobject c_arith = env->NewGlobalRef(env->NewObject(arith_item_cls, arith_item_ctr_id, slv_obj, c_type, lit_s, c_lb, c_ub, c_val));
+                env->CallVoidMethod(c_obj, mthd_id, i_name, c_arith);
+                all_items.emplace(ai, c_arith);
+                env->DeleteLocalRef(i_name);
+                env->DeleteLocalRef(lit_s);
+            }
+            else // we update the value..
+                env->CallVoidMethod(i_it->second, arith_item_set_mthd_id, c_lb, c_ub, c_val);
+
+            env->DeleteLocalRef(c_val);
+            env->DeleteLocalRef(c_ub);
+            env->DeleteLocalRef(c_lb);
+        }
+        else if (const var_item *ei = dynamic_cast<const var_item *>(&itm))
+        { // the expression represents an enum type..
+            const auto vals = cr.get_ov_theory().value(ei->ev);
+            jobjectArray vals_array = env->NewObjectArray(static_cast<jsize>(vals.size()), field_cls, NULL);
+            size_t i = 0;
+            for (const auto &v : vals)
+                env->SetObjectArrayElement(vals_array, static_cast<jsize>(i++), all_items.at(static_cast<const item *>(v)));
+
+            if (i_it == all_items.end())
+            { // we create a new enum..
+                jobject c_type = all_types.at(&itm.get_type());
+                jstring lit_s = env->NewStringUTF(("e" + std::to_string(ei->ev)).c_str());
+                jstring i_name = env->NewStringUTF(name.c_str());
+                jobject c_enum = env->NewGlobalRef(env->NewObject(enum_item_cls, enum_item_ctr_id, slv_obj, c_type, lit_s, vals_array));
+                env->CallVoidMethod(c_obj, mthd_id, i_name, c_enum);
+                all_items.emplace(ei, c_enum);
+                env->DeleteLocalRef(i_name);
+                env->DeleteLocalRef(lit_s);
+            }
+            else // we update the value..
+                env->CallVoidMethod(i_it->second, enum_item_set_mthd_id, vals_array);
+
+            env->DeleteLocalRef(vals_array);
+        }
+        else if (const string_item *si = dynamic_cast<const string_item *>(&itm))
+        { // the expression represents a primitive string type..
+            jstring c_val = env->NewStringUTF(si->get_value().c_str());
+            if (i_it == all_items.end())
+            {
+                jstring i_name = env->NewStringUTF(name.c_str());
+                jobject c_str = env->NewGlobalRef(env->NewObject(string_item_cls, string_item_ctr_id, slv_obj, c_val));
+                all_items.emplace(si, c_str);
+                env->DeleteLocalRef(i_name);
+            }
+            else // we update the value..
+                env->CallVoidMethod(i_it->second, string_item_set_mthd_id, c_val);
+            env->DeleteLocalRef(c_val);
+        }
+        else
+        { // the expression represents an item..
+            jstring i_name = env->NewStringUTF(name.c_str());
+            env->CallVoidMethod(c_obj, mthd_id, i_name, i_it->second);
+            env->DeleteLocalRef(i_name);
+        }
     }
 } // namespace ratio

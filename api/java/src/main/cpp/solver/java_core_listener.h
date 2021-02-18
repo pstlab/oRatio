@@ -31,6 +31,10 @@ namespace ratio
     void new_item(const item &itm);
     void new_atom(const atom &atm);
 
+    jobject new_field(const std::string &name, const type &tp);
+    jobjectArray new_fields_array(const std::vector<const field *> &args);
+    void set(jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm);
+
   private:
     JNIEnv *env;
     jobject slv_obj;   // the java solver instance..
@@ -69,6 +73,7 @@ namespace ratio
     jmethodID string_item_set_mthd_id;
     jclass atm_cls;       // the java atom class..
     jmethodID atm_ctr_id; // the atom constructor..
+    jmethodID atm_set_state_mthd_id;
     std::unordered_map<const type *, jobject> all_types;
     std::unordered_map<const item *, jobject> all_items;
     std::unordered_set<jlong> all_methods;
