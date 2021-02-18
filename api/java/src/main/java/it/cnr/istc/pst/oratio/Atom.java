@@ -1,6 +1,5 @@
 package it.cnr.istc.pst.oratio;
 
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -9,10 +8,13 @@ public class Atom extends Item {
     private final long sigma;
     private final AtomState state;
 
-    Atom(final Solver solver, final Predicate predicate, final long sigma, final AtomState state,
-            final Map<String, Item> pars) {
+    @SuppressWarnings("unused")
+    private Atom(final Solver solver, final Predicate predicate, final long sigma, final byte state) {
+        this(solver, predicate, sigma, AtomState.values()[state]);
+    }
+
+    Atom(final Solver solver, final Predicate predicate, final long sigma, final AtomState state) {
         super(solver, predicate);
-        exprs.putAll(pars);
         this.sigma = sigma;
         this.state = state;
     }

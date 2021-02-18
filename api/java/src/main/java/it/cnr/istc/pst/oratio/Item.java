@@ -49,7 +49,7 @@ public class Item implements Env {
     }
 
     @SuppressWarnings("unused")
-    private void set(String id, Item itm) {
+    private void set(final String id, final Item itm) {
         exprs.put(id, itm);
         solver.expr_names.put(itm, id);
     }
@@ -57,7 +57,12 @@ public class Item implements Env {
     public static class BoolItem extends Item {
 
         private final String lit;
-        private final LBool val;
+        private LBool val;
+
+        @SuppressWarnings("unused")
+        private BoolItem(final Solver solver, final String lit, final byte val) {
+            this(solver, lit, LBool.values()[val]);
+        }
 
         BoolItem(final Solver solver, final String lit, final LBool val) {
             super(solver, solver.types.get(Solver.BOOL));
@@ -73,6 +78,11 @@ public class Item implements Env {
             return val;
         }
 
+        @SuppressWarnings("unused")
+        private void setValue(final byte val) {
+            this.val = LBool.values()[val];
+        }
+
         public enum LBool {
             False, True, Undefined
         }
@@ -81,7 +91,7 @@ public class Item implements Env {
     public static class ArithItem extends Item {
 
         private final String lin;
-        private final InfRational lb, ub, val;
+        private InfRational lb, ub, val;
 
         ArithItem(final Solver solver, Type type, final String lin, final InfRational lb, final InfRational ub,
                 final InfRational val) {
@@ -107,26 +117,19 @@ public class Item implements Env {
         public InfRational getValue() {
             return val;
         }
-    }
 
-    public static class StringItem extends Item {
-
-        private final String val;
-
-        StringItem(final Solver solver, final String val) {
-            super(solver, solver.types.get(Solver.STRING));
+        @SuppressWarnings("unused")
+        private void setValue(final InfRational lb, final InfRational ub, final InfRational val) {
+            this.lb = lb;
+            this.ub = ub;
             this.val = val;
-        }
-
-        public String getValue() {
-            return val;
         }
     }
 
     public static class EnumItem extends Item {
 
         private final String var;
-        private final Item[] vals;
+        private Item[] vals;
 
         EnumItem(final Solver solver, Type type, final String var, final Item[] vals) {
             super(solver, type);
@@ -140,6 +143,30 @@ public class Item implements Env {
 
         public Item[] getVals() {
             return vals;
+        }
+
+        @SuppressWarnings("unused")
+        private void setVals(final Item[] vals) {
+            this.vals = vals;
+        }
+    }
+
+    public static class StringItem extends Item {
+
+        private String val;
+
+        StringItem(final Solver solver, final String val) {
+            super(solver, solver.types.get(Solver.STRING));
+            this.val = val;
+        }
+
+        public String getValue() {
+            return val;
+        }
+
+        @SuppressWarnings("unused")
+        private void setValue(final String val) {
+            this.val = val;
         }
     }
 }

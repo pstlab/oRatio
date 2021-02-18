@@ -3,7 +3,6 @@ package it.cnr.istc.pst.oratio;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -37,8 +36,6 @@ public class Solver implements Scope, Env {
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
     final Map<String, Item> exprs = new LinkedHashMap<>();
     final Map<Item, String> expr_names = new IdentityHashMap<>();
-    private final Map<String, Item> all_items = new HashMap<>();
-    private final Map<String, Type> all_types = new HashMap<>();
     private final Collection<GraphListener> graph_listeners = new ArrayList<>();
     private final Collection<StateListener> state_listeners = new ArrayList<>();
     private final Collection<ExecutorListener> executor_listeners = new ArrayList<>();
@@ -72,7 +69,7 @@ public class Solver implements Scope, Env {
     }
 
     @SuppressWarnings("unused")
-    private void defineField(Field field) {
+    private void defineField(final Field field) {
         assert (!fields.containsKey(field.name));
         fields.put(field.name, field);
     }
@@ -130,7 +127,7 @@ public class Solver implements Scope, Env {
     }
 
     @SuppressWarnings("unused")
-    private void defineType(Type type) {
+    private void defineType(final Type type) {
         assert (!types.containsKey(type.name));
         types.put(type.name, type);
     }
@@ -151,7 +148,7 @@ public class Solver implements Scope, Env {
     }
 
     @SuppressWarnings("unused")
-    private void definePredicate(Predicate predicate) {
+    private void definePredicate(final Predicate predicate) {
         assert (!predicates.containsKey(predicate.name));
         predicates.put(predicate.name, predicate);
     }
@@ -172,7 +169,7 @@ public class Solver implements Scope, Env {
     }
 
     @SuppressWarnings("unused")
-    private void set(String id, Item itm) {
+    private void set(final String id, final Item itm) {
         exprs.put(id, itm);
         expr_names.put(itm, id);
     }

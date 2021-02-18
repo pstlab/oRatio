@@ -69,7 +69,7 @@ public class Type implements Scope {
     }
 
     @SuppressWarnings("unused")
-    private void defineField(Field field) {
+    private void defineField(final Field field) {
         assert (!fields.containsKey(field.name));
         fields.put(field.name, field);
     }
@@ -84,6 +84,12 @@ public class Type implements Scope {
 
     public Collection<Item> getInstances() {
         return Collections.unmodifiableCollection(instances);
+    }
+
+    @SuppressWarnings("unused")
+    private void newInstance(final Item item) {
+        assert (!instances.contains(item));
+        instances.add(item);
     }
 
     public boolean isAssignableFrom(final Type type) {
@@ -220,7 +226,7 @@ public class Type implements Scope {
     }
 
     @SuppressWarnings("unused")
-    private void defineType(Type type) {
+    private void defineType(final Type type) {
         assert (!types.containsKey(type.name));
         types.put(type.name, type);
     }
@@ -254,7 +260,7 @@ public class Type implements Scope {
     }
 
     @SuppressWarnings("unused")
-    private void definePredicate(Predicate predicate) {
+    private void definePredicate(final Predicate predicate) {
         assert (!predicates.containsKey(predicate.name));
         predicates.put(predicate.name, predicate);
     }

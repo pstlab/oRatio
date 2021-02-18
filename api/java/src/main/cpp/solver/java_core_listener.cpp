@@ -3,6 +3,7 @@
 #include "field.h"
 #include "constructor.h"
 #include "method.h"
+#include "atom.h"
 
 namespace ratio
 {
@@ -25,6 +26,7 @@ namespace ratio
                                                                                  t_dfn_method_mthd_id(env->GetMethodID(type_cls, "defineMethod", "(Lit/cnr/istc/pst/oratio/Method;)V")),
                                                                                  t_dfn_type_mthd_id(env->GetMethodID(type_cls, "defineType", "(Lit/cnr/istc/pst/oratio/Type;)V")),
                                                                                  t_dfn_pred_mthd_id(env->GetMethodID(type_cls, "definePredicate", "(Lit/cnr/istc/pst/oratio/Predicate;)V")),
+                                                                                 t_new_instnc(env->GetMethodID(type_cls, "newInstance", "(Lit/cnr/istc/pst/oratio/Item;)V")),
                                                                                  ctr_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Constructor")))),
                                                                                  ctr_ctr_id(env->GetMethodID(ctr_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Scope;[Lit/cnr/istc/pst/oratio/Field;)V")),
                                                                                  mthd_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Method")))),
@@ -35,7 +37,25 @@ namespace ratio
                                                                                  predicate_ctr_id(env->GetMethodID(predicate_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Scope;Ljava/lang/String;[Lit/cnr/istc/pst/oratio/Field;)V")),
                                                                                  item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item")))),
                                                                                  item_ctr_id(env->GetMethodID(item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Type;)V")),
-                                                                                 i_set_mthd_id(env->GetMethodID(item_cls, "set", "(Ljava/lang/String;Lit/cnr/istc/pst/oratio/Item;)V"))
+                                                                                 i_set_mthd_id(env->GetMethodID(item_cls, "set", "(Ljava/lang/String;Lit/cnr/istc/pst/oratio/Item;)V")),
+                                                                                 bool_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$BoolItem")))),
+                                                                                 bool_item_ctr_id(env->GetMethodID(bool_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Ljava/lang/String;B)V")),
+                                                                                 bool_item_set_mthd_id(env->GetMethodID(bool_item_cls, "setValue", "(B)V")),
+                                                                                 rat_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Rational")))),
+                                                                                 rat_ctr_id(env->GetMethodID(rat_cls, "<init>", "(JJ)V")),
+                                                                                 inf_rat_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/InfRational")))),
+                                                                                 inf_rat_ctr_id(env->GetMethodID(inf_rat_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Rational;Lit/cnr/istc/pst/oratio/Rational;)V")),
+                                                                                 arith_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$ArithItem")))),
+                                                                                 arith_item_ctr_id(env->GetMethodID(arith_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Type;Ljava/lang/String;Lit/cnr/istc/pst/oratio/InfRational;Lit/cnr/istc/pst/oratio/InfRational;Lit/cnr/istc/pst/oratio/InfRational;)V")),
+                                                                                 arith_item_set_mthd_id(env->GetMethodID(arith_item_cls, "setValue", "(Lit/cnr/istc/pst/oratio/InfRational;Lit/cnr/istc/pst/oratio/InfRational;Lit/cnr/istc/pst/oratio/InfRational;)V")),
+                                                                                 enum_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$EnumItem")))),
+                                                                                 enum_item_ctr_id(env->GetMethodID(enum_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Type;Ljava/lang/String;[Lit/cnr/istc/pst/oratio/Item;)V")),
+                                                                                 enum_item_set_mthd_id(env->GetMethodID(enum_item_cls, "setVals", "([Lit/cnr/istc/pst/oratio/Item;)V")),
+                                                                                 string_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$String")))),
+                                                                                 string_item_ctr_id(env->GetMethodID(string_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Ljava/lang/String;B)V")),
+                                                                                 string_item_set_mthd_id(env->GetMethodID(string_item_cls, "setValue", "(Ljava/lang/String;)V")),
+                                                                                 atm_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Atom")))),
+                                                                                 atm_ctr_id(env->GetMethodID(atm_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Predicate;JB)V"))
     {
     }
     java_core_listener::~java_core_listener()
@@ -102,8 +122,8 @@ namespace ratio
             type &t = *q.front();
             q.pop();
 
-            jlong t_id = reinterpret_cast<jlong>(&t);
-            if (!all_types.count(t_id))
+            const auto t_it = all_types.find(&t);
+            if (t_it == all_types.end())
             { // we have a new type..
                 if (!t.is_primitive())
                     new_types.insert(&t);
@@ -131,13 +151,13 @@ namespace ratio
         for (const auto &mthd : cr.get_methods())
         {
             jstring m_name = env->NewStringUTF(mthd->get_name().c_str());
-            jobject rt = mthd->get_return_type() ? all_types.at(reinterpret_cast<jlong>(mthd->get_return_type())) : NULL;
+            jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
             std::vector<jobject> c_fields;
             c_fields.reserve(mthd->get_fields().size());
             for (const auto &f : mthd->get_fields())
             {
                 jstring f_name = env->NewStringUTF(f.first.c_str());
-                jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(reinterpret_cast<jlong>(&f.second->get_type())), f_name);
+                jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
                 c_fields.push_back(c_field);
                 env->DeleteLocalRef(f_name);
             }
@@ -159,8 +179,8 @@ namespace ratio
         // we add the predicates..
         for (const auto &pred : cr.get_predicates())
         {
-            jlong p_id = reinterpret_cast<jlong>(pred.second);
-            if (!all_types.count(p_id))
+            const auto p_it = all_types.find(pred.second);
+            if (p_it == all_types.end())
             {
                 new_predicates.insert(pred.second);
                 new_predicate(*pred.second);
@@ -170,6 +190,137 @@ namespace ratio
         // we revise the predicates..
         for (const auto &pred : new_predicates)
             revise_predicate(*pred);
+
+        // we add items and atoms..
+        std::unordered_set<item *> c_items;
+        for (const auto &p : cr.get_predicates())
+            for (const auto &a : p.second->get_instances())
+            {
+                atom &atm = static_cast<atom &>(*a);
+                c_items.insert(&atm);
+                const auto i_it = all_items.find(&atm);
+                if (i_it == all_items.end())
+                    new_atom(atm);
+            }
+        for (const auto &t : cr.get_types())
+            if (!t.second->is_primitive())
+                q.push(t.second);
+        while (!q.empty())
+        {
+            for (const auto &i : q.front()->get_instances())
+            {
+                item &itm = *i;
+                c_items.insert(&itm);
+                const auto i_it = all_items.find(&itm);
+                if (i_it == all_items.end())
+                    new_item(itm);
+            }
+            for (const auto &p : q.front()->get_predicates())
+                for (const auto &a : p.second->get_instances())
+                {
+                    atom &atm = static_cast<atom &>(*a);
+                    c_items.insert(&atm);
+                    const auto a_it = all_items.find(&atm);
+                    if (a_it == all_items.end())
+                        new_atom(atm);
+                }
+            for (const auto &t : q.front()->get_types())
+                q.push(t.second);
+            q.pop();
+        }
+
+        for (const auto &xpr : cr.get_exprs())
+        {
+            item &itm = *xpr.second;
+            const auto i_it = all_items.find(&itm);
+            if (bool_item *bi = dynamic_cast<bool_item *>(&itm))
+            { // the expression represents a primitive bool type..
+                const auto c_val = cr.get_sat_core().value(bi->l);
+                if (i_it == all_items.end())
+                { // we create a new boolean..
+                    jstring lit_s = env->NewStringUTF(((sign(bi->l) ? "b" : "!b") + std::to_string(variable(bi->l))).c_str());
+                    jobject c_bool = env->NewGlobalRef(env->NewObject(bool_item_cls, bool_item_ctr_id, slv_obj, lit_s, c_val));
+                    jstring i_name = env->NewStringUTF(xpr.first.c_str());
+                    env->CallVoidMethod(slv_obj, s_set_mthd_id, i_name, c_bool);
+                    all_items.emplace(bi, c_bool);
+                    env->DeleteLocalRef(i_name);
+                    env->DeleteLocalRef(lit_s);
+                }
+                else // we update the value..
+                    env->CallVoidMethod(i_it->second, bool_item_set_mthd_id, c_val);
+            }
+            else if (arith_item *ai = dynamic_cast<arith_item *>(&itm))
+            { // the expression represents a primitive arithmetic type..
+                const auto lb = cr.get_lra_theory().lb(ai->l);
+                const auto ub = cr.get_lra_theory().ub(ai->l);
+                const auto val = cr.get_lra_theory().value(ai->l);
+                jobject c_lb = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, lb.get_rational().numerator(), lb.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, lb.get_infinitesimal().numerator(), lb.get_infinitesimal().denominator()));
+                jobject c_ub = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, ub.get_rational().numerator(), ub.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, ub.get_infinitesimal().numerator(), ub.get_infinitesimal().denominator()));
+                jobject c_val = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, val.get_rational().numerator(), val.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, val.get_infinitesimal().numerator(), val.get_infinitesimal().denominator()));
+
+                if (i_it == all_items.end())
+                { // we create a new arith..
+                    jobject c_type = all_types.at(&itm.get_type());
+                    jstring lit_s = env->NewStringUTF(to_string(ai->l).c_str());
+                    jstring i_name = env->NewStringUTF(xpr.first.c_str());
+                    jobject c_arith = env->NewGlobalRef(env->NewObject(arith_item_cls, arith_item_ctr_id, slv_obj, c_type, lit_s, c_lb, c_ub, c_val));
+                    env->CallVoidMethod(slv_obj, s_set_mthd_id, i_name, c_arith);
+                    all_items.emplace(ai, c_arith);
+                    env->DeleteLocalRef(i_name);
+                    env->DeleteLocalRef(lit_s);
+                }
+                else // we update the value..
+                    env->CallVoidMethod(i_it->second, arith_item_set_mthd_id, c_lb, c_ub, c_val);
+
+                env->DeleteLocalRef(c_val);
+                env->DeleteLocalRef(c_ub);
+                env->DeleteLocalRef(c_lb);
+            }
+            else if (var_item *ei = dynamic_cast<var_item *>(&itm))
+            { // the expression represents an enum type..
+                const auto vals = cr.get_ov_theory().value(ei->ev);
+                jobjectArray vals_array = env->NewObjectArray(static_cast<jsize>(vals.size()), field_cls, NULL);
+                size_t i = 0;
+                for (const auto &v : vals)
+                    env->SetObjectArrayElement(vals_array, static_cast<jsize>(i++), all_items.at(static_cast<const item *>(v)));
+
+                if (i_it == all_items.end())
+                { // we create a new enum..
+                    jobject c_type = all_types.at(&itm.get_type());
+                    jstring lit_s = env->NewStringUTF(("e" + std::to_string(ei->ev)).c_str());
+                    jstring i_name = env->NewStringUTF(xpr.first.c_str());
+                    jobject c_enum = env->NewGlobalRef(env->NewObject(enum_item_cls, enum_item_ctr_id, slv_obj, c_type, lit_s, vals_array));
+                    env->CallVoidMethod(slv_obj, s_set_mthd_id, i_name, c_enum);
+                    all_items.emplace(ei, c_enum);
+                    env->DeleteLocalRef(i_name);
+                    env->DeleteLocalRef(lit_s);
+                }
+                else // we update the value..
+                    env->CallVoidMethod(i_it->second, enum_item_set_mthd_id, vals_array);
+
+                env->DeleteLocalRef(vals_array);
+            }
+            else if (string_item *si = dynamic_cast<string_item *>(&itm))
+            { // the expression represents a primitive string type..
+                jstring c_val = env->NewStringUTF(si->get_value().c_str());
+                if (i_it == all_items.end())
+                {
+                    jstring i_name = env->NewStringUTF(xpr.first.c_str());
+                    jobject c_str = env->NewGlobalRef(env->NewObject(string_item_cls, string_item_ctr_id, slv_obj, c_val));
+                    all_items.emplace(si, c_str);
+                    env->DeleteLocalRef(i_name);
+                }
+                else // we update the value..
+                    env->CallVoidMethod(i_it->second, string_item_set_mthd_id, c_val);
+                env->DeleteLocalRef(c_val);
+            }
+            else
+            { // the expression represents an item..
+                jstring i_name = env->NewStringUTF(xpr.first.c_str());
+                env->CallVoidMethod(slv_obj, s_set_mthd_id, i_name, i_it->second);
+                env->DeleteLocalRef(i_name);
+            }
+        }
 
         env->CallVoidMethod(slv_obj, state_changed_mthd_id);
     }
@@ -186,22 +337,22 @@ namespace ratio
         }
         else
         {
-            jobject c_scope = all_types.at(reinterpret_cast<jlong>(&t.get_scope()));
+            jobject c_scope = all_types.at(static_cast<type *>(&t.get_scope()));
             c_type = env->NewGlobalRef(env->NewObject(type_cls, type_ctr_id, slv_obj, c_scope, t_name, t.is_primitive()));
             env->CallVoidMethod(c_scope, t_dfn_type_mthd_id, c_type);
         }
-        all_types.emplace(reinterpret_cast<jlong>(&t), c_type);
+        all_types.emplace(&t, c_type);
         env->DeleteLocalRef(t_name);
     }
 
     void java_core_listener::revise_type(const type &t)
     {
-        jobject c_type = all_types.at(reinterpret_cast<jlong>(&t));
+        jobject c_type = all_types.at(&t);
         // we add the type fields..
         for (const auto &f : t.get_fields())
         {
             jstring f_name = env->NewStringUTF(f.first.c_str());
-            jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(reinterpret_cast<jlong>(&f.second->get_type())), f_name);
+            jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
 
             env->CallVoidMethod(c_type, t_dfn_field_mthd_id, c_field);
 
@@ -211,7 +362,7 @@ namespace ratio
 
         // we add the supertypes..
         for (const auto &st : t.get_supertypes())
-            env->CallVoidMethod(c_type, t_dfn_superclass_mthd_id, all_types.at(reinterpret_cast<jlong>(st)));
+            env->CallVoidMethod(c_type, t_dfn_superclass_mthd_id, all_types.at(st));
 
         // we add the constructors..
         for (const auto &ctr : t.get_constructors())
@@ -221,7 +372,7 @@ namespace ratio
             for (const auto &f : ctr->get_fields())
             {
                 jstring f_name = env->NewStringUTF(f.first.c_str());
-                jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(reinterpret_cast<jlong>(&f.second->get_type())), f_name);
+                jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
                 c_fields.push_back(c_field);
                 env->DeleteLocalRef(f_name);
             }
@@ -243,13 +394,13 @@ namespace ratio
         for (const auto &mthd : t.get_methods())
         {
             jstring m_name = env->NewStringUTF(mthd->get_name().c_str());
-            jobject rt = mthd->get_return_type() ? all_types.at(reinterpret_cast<jlong>(mthd->get_return_type())) : NULL;
+            jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
             std::vector<jobject> c_fields;
             c_fields.reserve(mthd->get_fields().size());
             for (const auto &f : mthd->get_fields())
             {
                 jstring f_name = env->NewStringUTF(f.first.c_str());
-                jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(reinterpret_cast<jlong>(&f.second->get_type())), f_name);
+                jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
                 c_fields.push_back(c_field);
                 env->DeleteLocalRef(f_name);
             }
@@ -278,7 +429,7 @@ namespace ratio
         for (const auto &f : p.get_fields())
         {
             jstring f_name = env->NewStringUTF(f.first.c_str());
-            jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(reinterpret_cast<jlong>(&f.second->get_type())), f_name);
+            jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
             c_fields.push_back(c_field);
             env->DeleteLocalRef(f_name);
         }
@@ -295,11 +446,11 @@ namespace ratio
         }
         else
         {
-            jobject c_scope = all_types.at(reinterpret_cast<jlong>(&p.get_scope()));
+            jobject c_scope = all_types.at(static_cast<type *>(&p.get_scope()));
             c_predicate = env->NewGlobalRef(env->NewObject(predicate_cls, predicate_ctr_id, slv_obj, c_scope, p_name, fields_array));
             env->CallVoidMethod(c_scope, t_dfn_pred_mthd_id, c_predicate);
         }
-        all_types.emplace(reinterpret_cast<jlong>(&p), c_predicate);
+        all_types.emplace(&p, c_predicate);
 
         env->DeleteLocalRef(p_name);
         for (size_t i = 0; i < c_fields.size(); ++i)
@@ -309,8 +460,26 @@ namespace ratio
 
     void java_core_listener::revise_predicate(const predicate &p)
     {
-        jobject c_pred = all_types.at(reinterpret_cast<jlong>(&p));
+        jobject c_pred = all_types.at(&p);
         for (const auto &sp : p.get_supertypes())
-            env->CallVoidMethod(c_pred, t_dfn_superclass_mthd_id, all_types.at(reinterpret_cast<jlong>(sp)));
+            env->CallVoidMethod(c_pred, t_dfn_superclass_mthd_id, all_types.at(sp));
+    }
+
+    void java_core_listener::new_item(const item &itm)
+    {
+        jobject c_type = all_types.at(&itm.get_type());
+
+        jobject c_item = env->NewGlobalRef(env->NewObject(item_cls, item_ctr_id, slv_obj, c_type));
+        env->CallVoidMethod(c_type, t_new_instnc, c_item);
+        all_items.emplace(&itm, c_item);
+    }
+
+    void java_core_listener::new_atom(const atom &atm)
+    {
+        jobject c_pred = all_types.at(&atm.get_type());
+
+        jobject c_atom = env->NewGlobalRef(env->NewObject(atm_cls, atm_ctr_id, slv_obj, c_pred, atm.get_sigma(), cr.get_sat_core().value(atm.get_sigma())));
+        env->CallVoidMethod(c_pred, t_new_instnc, c_atom);
+        all_items.emplace(&atm, c_atom);
     }
 } // namespace ratio

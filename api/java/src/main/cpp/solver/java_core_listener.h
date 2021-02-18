@@ -28,6 +28,9 @@ namespace ratio
     void new_predicate(const predicate &p);
     void revise_predicate(const predicate &p);
 
+    void new_item(const item &itm);
+    void new_atom(const atom &atm);
+
   private:
     JNIEnv *env;
     jobject slv_obj;   // the java solver instance..
@@ -36,7 +39,7 @@ namespace ratio
     jmethodID s_dfn_field_mthd_id, s_dfn_method_mthd_id, s_dfn_type_mthd_id, s_dfn_pred_mthd_id, s_set_mthd_id;
     jclass type_cls; // the java type class..
     jmethodID type_ctr_id;
-    jmethodID t_dfn_constructor_mthd_id, t_dfn_superclass_mthd_id, t_dfn_field_mthd_id, t_dfn_method_mthd_id, t_dfn_type_mthd_id, t_dfn_pred_mthd_id;
+    jmethodID t_dfn_constructor_mthd_id, t_dfn_superclass_mthd_id, t_dfn_field_mthd_id, t_dfn_method_mthd_id, t_dfn_type_mthd_id, t_dfn_pred_mthd_id, t_new_instnc;
     jclass ctr_cls;             // the java constructor class..
     jmethodID ctr_ctr_id;       // the constructor constructor..
     jclass mthd_cls;            // the java method class..
@@ -48,8 +51,26 @@ namespace ratio
     jclass item_cls;            // the java item class..
     jmethodID item_ctr_id;      // the item constructor..
     jmethodID i_set_mthd_id;
-    std::unordered_map<jlong, jobject> all_types;
-    std::unordered_map<jlong, jobject> all_items;
+    jclass bool_item_cls;       // the java bool item class..
+    jmethodID bool_item_ctr_id; // the bool item constructor..
+    jmethodID bool_item_set_mthd_id;
+    jclass rat_cls;              // the java rational class..
+    jmethodID rat_ctr_id;        // the rational constructor..
+    jclass inf_rat_cls;          // the java inf rational class..
+    jmethodID inf_rat_ctr_id;    // the inf rational constructor..
+    jclass arith_item_cls;       // the java arith item class..
+    jmethodID arith_item_ctr_id; // the bool arith constructor..
+    jmethodID arith_item_set_mthd_id;
+    jclass enum_item_cls;       // the java enum item class..
+    jmethodID enum_item_ctr_id; // the enum item constructor..
+    jmethodID enum_item_set_mthd_id;
+    jclass string_item_cls;       // the java string item class..
+    jmethodID string_item_ctr_id; // the string item constructor..
+    jmethodID string_item_set_mthd_id;
+    jclass atm_cls;       // the java atom class..
+    jmethodID atm_ctr_id; // the atom constructor..
+    std::unordered_map<const type *, jobject> all_types;
+    std::unordered_map<const item *, jobject> all_items;
     std::unordered_set<jlong> all_methods;
   };
 } // namespace ratio
