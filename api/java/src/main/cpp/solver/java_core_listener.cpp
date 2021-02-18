@@ -221,6 +221,9 @@ namespace ratio
             const auto j_it = all_items.at(&*c_itm.first);
             for (const auto &xpr : c_itm.first->get_exprs())
                 set(j_it, i_set_mthd_id, xpr.first, *xpr.second);
+
+            if (const atom *a = dynamic_cast<const atom *>(&*c_itm.first))
+                env->CallVoidMethod(j_it, atm_set_state_mthd_id, cr.get_sat_core().value(a->get_sigma()));
         }
 
         for (const auto &xpr : cr.get_exprs())
