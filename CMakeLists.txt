@@ -42,7 +42,7 @@ endif()
 
 message(STATUS "Verbose log:              ${VERBOSE_LOG}")
 if(VERBOSE_LOG)
-    target_compile_definitions(core PRIVATE VERBOSE_LOG)
+    target_compile_definitions(core PUBLIC VERBOSE_LOG)
 endif()
 
 if(BUILD_EXECUTOR OR BUILD_JAVA_SOLVER_API OR BUILD_SERVER)
