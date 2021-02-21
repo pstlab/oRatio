@@ -51,7 +51,7 @@ namespace ratio
                                                                                  enum_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$EnumItem")))),
                                                                                  enum_item_ctr_id(env->GetMethodID(enum_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Type;Ljava/lang/String;[Lit/cnr/istc/pst/oratio/Item;)V")),
                                                                                  enum_item_set_mthd_id(env->GetMethodID(enum_item_cls, "setVals", "([Lit/cnr/istc/pst/oratio/Item;)V")),
-                                                                                 string_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$String")))),
+                                                                                 string_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$StringItem")))),
                                                                                  string_item_ctr_id(env->GetMethodID(string_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Ljava/lang/String;B)V")),
                                                                                  string_item_set_mthd_id(env->GetMethodID(string_item_cls, "setValue", "(Ljava/lang/String;)V")),
                                                                                  atm_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Atom")))),
