@@ -12,7 +12,7 @@ export class Graph {
         const graph_box = svg.node().getBoundingClientRect();
         const graph_width = graph_box.width, graph_height = graph_box.height;
 
-        const graph_zoom = d3.zoom().on('zoom', event => graph_g.attr('transform', event.transform));
+        const graph_zoom = d3.zoom().on('zoom', event => this.graph_g.attr('transform', event.transform));
         svg.call(graph_zoom);
 
         svg.append('svg:defs').append('svg:marker')
@@ -41,12 +41,14 @@ export class Graph {
 
         graph.flaws.forEach(f => {
             f.type = 'flaw';
+            f.graph = this;
             this.nodes.push(f);
             this.node_map.set(f.id, f);
             f.causes.forEach(c => this.links.push({ source: f.id, target: c, state: f.state }));
         });
         graph.resolvers.forEach(r => {
             r.type = 'resolver';
+            r.graph = this;
             this.nodes.push(r);
             this.node_map.set(r.id, r);
             this.links.push({ source: r.id, target: r.effect, state: r.state });
@@ -54,17 +56,18 @@ export class Graph {
         });
 
         this.update();
-        this.nodes.filter(n => n.type === 'resolver').forEach(r => update_resolver_cost(r));
+        this.nodes.filter(n => n.type === 'resolver').forEach(r => this.update_resolver_cost(r));
         this.update();
     }
 
     flaw_created(flaw) {
-        this.flaw.type = 'flaw';
+        flaw.type = 'flaw';
+        flaw.graph = this;
         this.nodes.push(flaw);
         this.node_map.set(flaw.id, flaw);
         flaw.causes.forEach(c => links.push({ source: flaw.id, target: c, state: flaw.state }));
         this.update();
-        flaw.causes.forEach(c => update_resolver_cost(node_map.get(c)));
+        flaw.causes.forEach(c => this.update_resolver_cost(node_map.get(c)));
         this.update();
     }
 
@@ -77,7 +80,7 @@ export class Graph {
     flaw_cost_changed(change) {
         const f_node = this.node_map.get(change.id);
         f_node.cost = change.cost;
-        this.links.filter(l => l.source.id == f_node.id).forEach(out_link => update_resolver_cost(out_link.target));
+        this.links.filter(l => l.source.id == f_node.id).forEach(out_link => this.update_resolver_cost(out_link.target));
         this.update();
     }
 
@@ -97,6 +100,7 @@ export class Graph {
 
     resolver_created(resolver) {
         resolver.type = 'resolver';
+        resolver.graph = this;
         this.nodes.push(resolver);
         this.node_map.set(resolver.id, resolver);
         this.links.push({ source: resolver.id, target: resolver.effect, state: resolver.state });
@@ -120,8 +124,17 @@ export class Graph {
     causal_link_added(link) {
         this.links.push({ source: link.flaw_id, target: link.resolver_id, state: this.node_map.get(link.flaw_id).state });
         this.update();
-        update_resolver_cost(this.node_map.get(link.resolver_id));
+        this.update_resolver_cost(this.node_map.get(link.resolver_id));
         this.update();
+    }
+
+    update_resolver_cost(resolver) {
+        let c_cost = Number.NEGATIVE_INFINITY;
+        this.links.filter(l => l.target.id == resolver.id).forEach(in_link => {
+            if (c_cost < in_link.source.cost)
+                c_cost = in_link.source.cost;
+        });
+        resolver.cost = c_cost == Number.NEGATIVE_INFINITY ? resolver.cost : resolver.cost + c_cost;
     }
 
     update() {
@@ -189,24 +202,6 @@ export class Graph {
     }
 }
 
-function dragstarted(event, d) {
-    if (!event.active) this.simulation.alphaTarget(0.3).restart();
-    d3.select(this).attr('cursor', 'grabbing');
-}
-
-function dragged(event, d) {
-    d.fx = event.x;
-    d.fy = event.y;
-    this.tooltip.style('left', (event.x) + 'px').style('top', (event.y - 28) + 'px');
-}
-
-function dragended(event, d) {
-    if (!event.active) this.simulation.alphaTarget(0);
-    d.fx = d.x;
-    d.fy = d.y;
-    d3.select(this).attr('cursor', 'grab');
-}
-
 function intersection(p0, p1, p2, p3) {
     const s1_x = p1.x - p0.x, s1_y = p1.y - p0.y, s2_x = p3.x - p2.x, s2_y = p3.y - p2.y;
 
@@ -251,13 +246,22 @@ function stroke_dasharray(n) {
     }
 }
 
-function update_resolver_cost(resolver) {
-    let c_cost = Number.NEGATIVE_INFINITY;
-    this.links.filter(l => l.target.id == resolver.id).forEach(in_link => {
-        if (c_cost < in_link.source.cost)
-            c_cost = in_link.source.cost;
-    });
-    resolver.cost = c_cost == Number.NEGATIVE_INFINITY ? resolver.cost : resolver.cost + c_cost;
+function dragstarted(event, d) {
+    if (!event.active) d.graph.simulation.alphaTarget(0.3).restart();
+    d3.select(this).attr('cursor', 'grabbing');
+}
+
+function dragged(event, d) {
+    d.fx = event.x;
+    d.fy = event.y;
+    d.graph.tooltip.style('left', (event.x) + 'px').style('top', (event.y - 28) + 'px');
+}
+
+function dragended(event, d) {
+    if (!event.active) d.graph.simulation.alphaTarget(0);
+    d.fx = d.x;
+    d.fy = d.y;
+    d3.select(this).attr('cursor', 'grab');
 }
 
 function node_color(n) {

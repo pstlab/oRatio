@@ -36,8 +36,8 @@ export class Timelines {
         this.timelines_x_axis = d3.axisBottom(this.timelines_x_scale);
 
         const timelines_zoom = d3.zoom().on('zoom', event => {
-            timelines_axis_g.call(timelines_x_axis.scale(event.transform.rescaleX(timelines_x_scale)));
-            timelines_g.attr('transform', event.transform);
+            this.timelines_axis_g.call(this.timelines_x_axis.scale(event.transform.rescaleX(this.timelines_x_scale)));
+            this.timelines_g.attr('transform', event.transform);
         });
         svg.call(timelines_zoom);
 
@@ -52,7 +52,7 @@ export class Timelines {
                 this.timelines[i] = tl;
                 this.timelines[i].id = i;
                 this.timelines[i].values.forEach((v, j) => v.id = j);
-                if (this.timelines[i].type === 'reusable-resource' && this.timelines[i].values.length) this.timelines[i].values.push({ usage: 0, from: this.timelines[i].values[timelines[i].values.length - 1].to, id: this.timelines[i].values.length });
+                if (this.timelines[i].type === 'reusable-resource' && this.timelines[i].values.length) this.timelines[i].values.push({ usage: 0, from: this.timelines[i].values[this.timelines[i].values.length - 1].to, id: this.timelines[i].values.length });
                 if (this.timelines[i].type === 'agent') {
                     const ends = [0];
                     this.timelines[i].values.forEach(v => v.y = values_y(v.from, v.from === v.to ? v.from + 0.1 : v.to, ends));
@@ -63,7 +63,7 @@ export class Timelines {
             this.horizon = Math.max(d3.max(this.timelines, d => d.horizon), 1);
             this.timelines_x_scale.domain([0, this.horizon]);
             this.timelines_y_scale.domain(d3.range(this.timelines.length));
-            this.updateTimelines();
+            this.update();
         }
         this.timelines_axis_g.call(this.timelines_x_axis);
     }
@@ -86,8 +86,8 @@ export class Timelines {
         this.timelines_g.selectAll('g.timeline').data(this.timelines, d => d.id).join(
             enter => {
                 const tl_g = enter.append('g').attr('class', 'timeline').attr('id', d => 'tl-' + d.id);
-                tl_g.append('rect').attr('x', -10).attr('y', d => timelines_y_scale(this.timelines.indexOf(d))).attr('width', this.timelines_x_scale(this.horizon) + 20).attr('height', this.timelines_y_scale.bandwidth()).style('fill', 'floralwhite');
-                tl_g.append('text').attr('x', 0).attr('y', d => timelines_y_scale(this.timelines.indexOf(d)) + this.timelines_y_scale.bandwidth() * 0.08).text(d => d.name).style('text-anchor', 'start');
+                tl_g.append('rect').attr('x', -10).attr('y', d => this.timelines_y_scale(this.timelines.indexOf(d))).attr('width', this.timelines_x_scale(this.horizon) + 20).attr('height', this.timelines_y_scale.bandwidth()).style('fill', 'floralwhite');
+                tl_g.append('text').attr('x', 0).attr('y', d => this.timelines_y_scale(this.timelines.indexOf(d)) + this.timelines_y_scale.bandwidth() * 0.08).text(d => d.name).style('text-anchor', 'start');
                 return tl_g;
             },
             update => {
@@ -129,18 +129,18 @@ export class Timelines {
                         return tl_val_g;
                     },
                     update => {
-                        update.transition().duration(200).attr('d', d3.area().curve(d3.curveStepAfter).x(d => timelines_x_scale(d.from)).y0(timelines_y_scale(i) + timelines_y_scale.bandwidth()).y1(d => rr_y_scale(d.usage)));
+                        update.transition().duration(200).attr('d', d3.area().curve(d3.curveStepAfter).x(d => this.timelines_x_scale(d.from)).y0(this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth()).y1(d => rr_y_scale(d.usage)));
                         return update;
                     }
                 );
                 rr_g.selectAll('line').data([tl.capacity]).join(
                     enter => {
                         const line_g = enter.append('line').attr('stroke-width', 2).attr('stroke-opacity', 0.8).attr('stroke-linecap', 'round').attr('stroke', 'darkslategray');
-                        line_g.attr('x1', timelines_x_scale(0)).attr('y1', d => rr_y_scale(d)).attr('x2', this.timelines_x_scale(horizon)).attr('y2', d => rr_y_scale(d));
+                        line_g.attr('x1', this.timelines_x_scale(0)).attr('y1', d => rr_y_scale(d)).attr('x2', this.timelines_x_scale(this.horizon)).attr('y2', d => rr_y_scale(d));
                         return line_g;
                     },
                     update => {
-                        update.transition().duration(200).attr('y1', d => rr_y_scale(d)).attr('x2', this.timelines_x_scale(horizon)).attr('y2', d => rr_y_scale(d));
+                        update.transition().duration(200).attr('y1', d => rr_y_scale(d)).attr('x2', this.timelines_x_scale(this.horizon)).attr('y2', d => rr_y_scale(d));
                         return update;
                     }
                 );
