@@ -47,7 +47,9 @@ namespace ratio
                                                                                  inf_rat_ctr_id(env->GetMethodID(inf_rat_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Rational;Lit/cnr/istc/pst/oratio/Rational;)V")),
                                                                                  arith_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$ArithItem")))),
                                                                                  arith_item_ctr_id(env->GetMethodID(arith_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Type;Ljava/lang/String;Lit/cnr/istc/pst/oratio/InfRational;Lit/cnr/istc/pst/oratio/InfRational;Lit/cnr/istc/pst/oratio/InfRational;)V")),
-                                                                                 arith_item_set_mthd_id(env->GetMethodID(arith_item_cls, "setValue", "(Lit/cnr/istc/pst/oratio/InfRational;Lit/cnr/istc/pst/oratio/InfRational;Lit/cnr/istc/pst/oratio/InfRational;)V")),
+                                                                                 arith_item_set_lb_mthd_id(env->GetMethodID(arith_item_cls, "setLb", "(JJJJ)V")),
+                                                                                 arith_item_set_ub_mthd_id(env->GetMethodID(arith_item_cls, "setUb", "(JJJJ)V")),
+                                                                                 arith_item_set_val_mthd_id(env->GetMethodID(arith_item_cls, "setVal", "(JJJJ)V")),
                                                                                  enum_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$EnumItem")))),
                                                                                  enum_item_ctr_id(env->GetMethodID(enum_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Type;Ljava/lang/String;[Lit/cnr/istc/pst/oratio/Item;)V")),
                                                                                  enum_item_set_mthd_id(env->GetMethodID(enum_item_cls, "setVals", "([Lit/cnr/istc/pst/oratio/Item;)V")),
@@ -396,9 +398,12 @@ namespace ratio
             const auto lb = cr.get_lra_theory().lb(ai->l);
             const auto ub = cr.get_lra_theory().ub(ai->l);
             const auto val = cr.get_lra_theory().value(ai->l);
-            jobject c_lb = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, lb.get_rational().numerator(), lb.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, lb.get_infinitesimal().numerator(), lb.get_infinitesimal().denominator()));
-            jobject c_ub = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, ub.get_rational().numerator(), ub.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, ub.get_infinitesimal().numerator(), ub.get_infinitesimal().denominator()));
-            jobject c_val = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, val.get_rational().numerator(), val.get_rational().denominator()), env->NewObject(rat_cls, rat_ctr_id, val.get_infinitesimal().numerator(), val.get_infinitesimal().denominator()));
+            jlong lb_rat_num = lb.get_rational().numerator(), lb_rat_den = lb.get_rational().denominator(), lb_inf_num = lb.get_infinitesimal().numerator(), lb_inf_den = lb.get_infinitesimal().denominator();
+            jlong ub_rat_num = ub.get_rational().numerator(), ub_rat_den = ub.get_rational().denominator(), ub_inf_num = ub.get_infinitesimal().numerator(), ub_inf_den = ub.get_infinitesimal().denominator();
+            jlong val_rat_num = val.get_rational().numerator(), val_rat_den = val.get_rational().denominator(), val_inf_num = val.get_infinitesimal().numerator(), val_inf_den = val.get_infinitesimal().denominator();
+            jobject c_lb = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, lb_rat_num, lb_rat_den), env->NewObject(rat_cls, rat_ctr_id, lb_inf_num, lb_inf_den));
+            jobject c_ub = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, ub_rat_num, ub_rat_den), env->NewObject(rat_cls, rat_ctr_id, ub_inf_num, ub_inf_den));
+            jobject c_val = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, val_rat_num, val_rat_den), env->NewObject(rat_cls, rat_ctr_id, val_inf_num, val_inf_den));
 
             if (i_it == all_items.end())
             { // we create a new arith..
@@ -411,8 +416,12 @@ namespace ratio
                 env->DeleteLocalRef(i_name);
                 env->DeleteLocalRef(lit_s);
             }
-            else // we update the value..
-                env->CallVoidMethod(i_it->second, arith_item_set_mthd_id, c_lb, c_ub, c_val);
+            else
+            { // we update the value..
+                env->CallVoidMethod(i_it->second, arith_item_set_lb_mthd_id, lb_rat_num, lb_rat_den, lb_inf_num, lb_inf_den);
+                env->CallVoidMethod(i_it->second, arith_item_set_ub_mthd_id, ub_rat_num, ub_rat_den, ub_inf_num, ub_inf_den);
+                env->CallVoidMethod(i_it->second, arith_item_set_val_mthd_id, val_rat_num, val_rat_den, val_inf_num, val_inf_den);
+            }
 
             env->DeleteLocalRef(c_val);
             env->DeleteLocalRef(c_ub);

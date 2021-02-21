@@ -119,10 +119,27 @@ public class Item implements Env {
         }
 
         @SuppressWarnings("unused")
-        private void setValue(final InfRational lb, final InfRational ub, final InfRational val) {
-            this.lb = lb;
-            this.ub = ub;
-            this.val = val;
+        private void setLb(final long lb_rat_num, final long lb_rat_den, final long lb_inf_num, final long lb_inf_den) {
+            this.lb.rat.num = lb_rat_num;
+            this.lb.rat.den = lb_rat_den;
+            this.lb.inf.num = lb_inf_num;
+            this.lb.inf.den = lb_inf_den;
+        }
+
+        @SuppressWarnings("unused")
+        private void setUb(final long ub_rat_num, final long ub_rat_den, final long ub_inf_num, final long ub_inf_den) {
+            this.ub.rat.num = ub_rat_num;
+            this.ub.rat.den = ub_rat_den;
+            this.ub.inf.num = ub_inf_num;
+            this.ub.inf.den = ub_inf_den;
+        }
+
+        @SuppressWarnings("unused")
+        private void setVal(final long val_rat_num, final long val_rat_den, final long val_inf_num, final long val_inf_den) {
+            this.val.rat.num = val_rat_num;
+            this.val.rat.den = val_rat_den;
+            this.val.inf.num = val_inf_num;
+            this.val.inf.den = val_inf_den;
         }
     }
 

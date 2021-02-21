@@ -64,7 +64,7 @@ namespace ratio
     jmethodID inf_rat_ctr_id;    // the inf rational constructor..
     jclass arith_item_cls;       // the java arith item class..
     jmethodID arith_item_ctr_id; // the bool arith constructor..
-    jmethodID arith_item_set_mthd_id;
+    jmethodID arith_item_set_lb_mthd_id, arith_item_set_ub_mthd_id, arith_item_set_val_mthd_id;
     jclass enum_item_cls;       // the java enum item class..
     jmethodID enum_item_ctr_id; // the enum item constructor..
     jmethodID enum_item_set_mthd_id;
