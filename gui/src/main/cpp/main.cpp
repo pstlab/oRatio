@@ -38,9 +38,8 @@ int main(int argc, char const *argv[])
     if (rc == JNI_OK)
     {
         jclass app_class = env->FindClass("it/cnr/istc/pst/oratio/gui/App");
-        jmethodID main_mthd = env->GetStaticMethodID(app_class, "main", "([Ljava/lang/String;)V");
-        jobjectArray args_array = env->NewObjectArray(0, env->FindClass("java/lang/String"), NULL);
-        env->CallStaticVoidMethod(app_class, main_mthd, args_array);
+        jmethodID main_mthd = env->GetStaticMethodID(app_class, "start_server", "()V");
+        env->CallStaticVoidMethod(app_class, main_mthd);
 
         jfieldID slv_field = env->GetStaticFieldID(app_class, "SOLVER", "Lit/cnr/istc/pst/oratio/Solver;");
         jobject j_solver = env->GetStaticObjectField(app_class, slv_field);

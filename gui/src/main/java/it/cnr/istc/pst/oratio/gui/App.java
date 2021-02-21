@@ -40,6 +40,13 @@ public class App {
     private static Set<WsContext> contexts = new HashSet<>();
 
     public static void main(final String[] args) {
+        start_server();
+
+        SOLVER.read(args);
+        SOLVER.solve();
+    }
+
+    public static void start_server() {
         SimpleModule module = new SimpleModule();
         module.addSerializer(Rational.class, new StdSerializer<Rational>(Rational.class) {
 
