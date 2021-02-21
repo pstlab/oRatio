@@ -1,8 +1,25 @@
 #include <jni.h>
 #include <mutex>
+#include "solver.h"
+
+using namespace ratio;
 
 int main(int argc, char const *argv[])
 {
+    if (argc < 3)
+    {
+        std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>" << std::endl;
+        return -1;
+    }
+
+    // the problem files..
+    std::vector<std::string> prob_names;
+    for (int i = 1; i < argc - 1; i++)
+        prob_names.push_back(argv[i]);
+
+    // the solution file..
+    std::string sol_name = argv[argc - 1];
+
     JavaVM *jvm; // Pointer to the JVM (Java Virtual Machine)
     JNIEnv *env; // Pointer to native interface
 
@@ -24,6 +41,17 @@ int main(int argc, char const *argv[])
         jmethodID main_mthd = env->GetStaticMethodID(app_class, "main", "([Ljava/lang/String;)V");
         jobjectArray args_array = env->NewObjectArray(0, env->FindClass("java/lang/String"), NULL);
         env->CallStaticVoidMethod(app_class, main_mthd, args_array);
+
+        jfieldID slv_field = env->GetStaticFieldID(app_class, "SOLVER", "Lit/cnr/istc/pst/oratio/Solver;");
+        jobject j_solver = env->GetStaticObjectField(app_class, slv_field);
+        solver *s = reinterpret_cast<solver *>(env->GetLongField(j_solver, env->GetFieldID(env->GetObjectClass(j_solver), "native_handle", "J")));
+
+        std::cout << "parsing input files.." << std::endl;
+        s->read(prob_names);
+
+        std::cout << "solving the problem.." << std::endl;
+        s->solve();
+        std::cout << "hurray!! we have found a solution.." << std::endl;
 
         std::condition_variable cv;
         std::mutex m;
