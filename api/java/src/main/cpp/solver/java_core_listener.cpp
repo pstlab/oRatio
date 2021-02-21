@@ -66,7 +66,6 @@ namespace ratio
         for (const auto &t : all_types)
             env->DeleteGlobalRef(t.second);
 
-        env->DeleteGlobalRef(solver_cls);
         env->DeleteGlobalRef(type_cls);
         env->DeleteGlobalRef(ctr_cls);
         env->DeleteGlobalRef(mthd_cls);
@@ -74,6 +73,7 @@ namespace ratio
         env->DeleteGlobalRef(predicate_cls);
         env->DeleteGlobalRef(item_cls);
         env->DeleteGlobalRef(slv_obj);
+        env->DeleteGlobalRef(solver_cls);
     }
 
     void java_core_listener::log(const std::string &msg)

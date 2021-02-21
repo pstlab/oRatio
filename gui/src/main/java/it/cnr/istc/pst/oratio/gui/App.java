@@ -96,9 +96,6 @@ public class App {
             ws.onMessage(ctx -> EXECUTOR.execute(() -> LOG.info("Received message {}..", ctx)));
         });
         app.start();
-
-        SOLVER.read(args);
-        SOLVER.solve();
     }
 
     static void broadcast(final String message) {
