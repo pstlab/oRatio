@@ -222,21 +222,10 @@ public class CausalGraph implements GraphListener {
             gen.writeStringField("label", flaw.label);
             gen.writeNumberField("state", flaw.state.ordinal());
 
-            if (flaw.position.min != -Bound.INF || flaw.position.max != Bound.INF) {
-                gen.writeFieldName("position");
-                gen.writeStartObject();
-                if (flaw.position.min != -Bound.INF)
-                    gen.writeNumberField("min", flaw.position.min);
-                if (flaw.position.max != Bound.INF)
-                    gen.writeNumberField("max", flaw.position.max);
-                gen.writeEndObject();
-            }
+            if (flaw.position.min != -Bound.INF || flaw.position.max != Bound.INF)
+                gen.writeObjectField("position", flaw.position);
 
-            gen.writeFieldName("cost");
-            gen.writeStartObject();
-            gen.writeNumberField("num", flaw.cost.getNumerator());
-            gen.writeNumberField("den", flaw.cost.getDenominator());
-            gen.writeEndObject();
+            gen.writeObjectField("cost", flaw.cost);
 
             gen.writeBooleanField("current", flaw.current);
 
@@ -283,11 +272,8 @@ public class CausalGraph implements GraphListener {
             gen.writeStringField("label", resolver.label);
             gen.writeNumberField("state", resolver.state.ordinal());
 
-            gen.writeFieldName("cost");
-            gen.writeStartObject();
-            gen.writeNumberField("num", resolver.cost.getNumerator());
-            gen.writeNumberField("den", resolver.cost.getDenominator());
-            gen.writeEndObject();
+            gen.writeObjectField("cost", resolver.cost);
+
             gen.writeArrayFieldStart("preconditions");
             resolver.preconditions.stream().forEach(pre -> {
                 try {

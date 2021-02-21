@@ -1,5 +1,6 @@
 package it.cnr.istc.pst.oratio.gui;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -9,8 +10,12 @@ import java.util.concurrent.Executors;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +40,40 @@ public class App {
     private static Set<WsContext> contexts = new HashSet<>();
 
     public static void main(final String[] args) {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Rational.class, new StdSerializer<Rational>(Rational.class) {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void serialize(Rational value, JsonGenerator gen, SerializerProvider serializers)
+                    throws IOException {
+                gen.writeStartObject();
+                gen.writeNumberField("num", value.getNumerator());
+                gen.writeNumberField("den", value.getDenominator());
+                gen.writeEndObject();
+            }
+        });
+        module.addSerializer(Bound.class, new StdSerializer<Bound>(Bound.class) {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public void serialize(Bound value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+                gen.writeStartObject();
+                if (value.min != -Bound.INF)
+                    gen.writeNumberField("min", value.min);
+                if (value.max != Bound.INF)
+                    gen.writeNumberField("max", value.max);
+                gen.writeEndObject();
+            }
+        });
+        MAPPER.registerModule(module);
+
         final Javalin app = Javalin.create(config -> {
             config.addStaticFiles("/public");
         });
-        app.ws("/graph", ws -> {
+        app.ws("/solver", ws -> {
             ws.onConnect(ctx -> {
                 EXECUTOR.execute(() -> {
                     LOG.info("New connection..");
@@ -87,7 +122,7 @@ public class App {
 
         static class Log extends Message {
 
-            final String log;
+            public final String log;
 
             Log(final String log) {
                 this.log = log;
@@ -96,10 +131,10 @@ public class App {
 
         static class Graph extends Message {
 
-            final Collection<Flaw> flaws;
-            final Flaw current_flaw;
-            final Collection<Resolver> resolvers;
-            final Resolver current_resolver;
+            public final Collection<Flaw> flaws;
+            public final Flaw current_flaw;
+            public final Collection<Resolver> resolvers;
+            public final Resolver current_resolver;
 
             Graph(final CausalGraph graph) {
                 this.flaws = graph.getFlaws();
@@ -111,11 +146,11 @@ public class App {
 
         static class FlawCreated extends Message {
 
-            final long id;
-            final long[] causes;
-            final String label;
-            final byte state;
-            final Bound position;
+            public final long id;
+            public final long[] causes;
+            public final String label;
+            public final byte state;
+            public final Bound position;
 
             FlawCreated(long id, long[] causes, String label, byte state, Bound position) {
                 this.id = id;
@@ -128,8 +163,8 @@ public class App {
 
         static class FlawStateChanged extends Message {
 
-            final long id;
-            final byte state;
+            public final long id;
+            public final byte state;
 
             FlawStateChanged(long id, byte state) {
                 this.id = id;
@@ -139,8 +174,8 @@ public class App {
 
         static class FlawCostChanged extends Message {
 
-            final long id;
-            final Rational cost;
+            public final long id;
+            public final Rational cost;
 
             FlawCostChanged(long id, Rational cost) {
                 this.id = id;
@@ -150,8 +185,8 @@ public class App {
 
         static class FlawPositionChanged extends Message {
 
-            final long id;
-            final Bound position;
+            public final long id;
+            public final Bound position;
 
             FlawPositionChanged(long id, Bound position) {
                 this.id = id;
@@ -161,7 +196,7 @@ public class App {
 
         static class CurrentFlaw extends Message {
 
-            final long id;
+            public final long id;
 
             CurrentFlaw(long id) {
                 this.id = id;
@@ -170,11 +205,11 @@ public class App {
 
         static class ResolverCreated extends Message {
 
-            final long id;
-            final long effect;
-            final Rational cost;
-            final long label;
-            final byte state;
+            public final long id;
+            public final long effect;
+            public final Rational cost;
+            public final long label;
+            public final byte state;
 
             ResolverCreated(long id, long effect, Rational cost, long label, byte state) {
                 this.id = id;
@@ -187,8 +222,8 @@ public class App {
 
         static class ResolverStateChanged extends Message {
 
-            final long id;
-            final byte state;
+            public final long id;
+            public final byte state;
 
             ResolverStateChanged(long id, byte state) {
                 this.id = id;
@@ -198,7 +233,7 @@ public class App {
 
         static class CurrentResolver extends Message {
 
-            final long id;
+            public final long id;
 
             CurrentResolver(long id) {
                 this.id = id;
@@ -207,8 +242,8 @@ public class App {
 
         static class CausalLinkAdded extends Message {
 
-            final long flaw;
-            final long resolver;
+            public final long flaw;
+            public final long resolver;
 
             CausalLinkAdded(long flaw, long resolver) {
                 this.flaw = flaw;
@@ -218,7 +253,7 @@ public class App {
 
         static class Timelines extends Message {
 
-            final Collection<Object> timelines;
+            public final Collection<Object> timelines;
 
             Timelines(final Collection<Object> timelines) {
                 this.timelines = timelines;
@@ -227,7 +262,7 @@ public class App {
 
         static class Tick extends Message {
 
-            final Rational current_time;
+            public final Rational current_time;
 
             Tick(Rational current_time) {
                 this.current_time = current_time;
@@ -236,7 +271,7 @@ public class App {
 
         static class StartingAtoms extends Message {
 
-            final long[] atoms;
+            public final long[] atoms;
 
             StartingAtoms(long[] atoms) {
                 this.atoms = atoms;
@@ -245,7 +280,7 @@ public class App {
 
         static class EndingAtoms extends Message {
 
-            final long[] atoms;
+            public final long[] atoms;
 
             EndingAtoms(long[] atoms) {
                 this.atoms = atoms;

@@ -1,5 +1,5 @@
-import { Graph } from "./modules/graph";
-import { Timelines } from "./modules/timelines";
+import { Graph } from "./modules/graph.js";
+import { Timelines } from "./modules/timelines.js";
 
 const tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 
@@ -11,14 +11,14 @@ ws.onmessage = msg => {
     const c_msg = JSON.parse(msg.data);
     switch (c_msg.message_type) {
         case 'graph':
-            c_msg.graph.flaws.forEach(f => {
+            c_msg.flaws.forEach(f => {
                 f.label = JSON.parse(f.label);
                 if (f.cost)
                     f.cost = (f.cost.num / f.cost.den);
                 else
                     f.cost = Number.POSITIVE_INFINITY;
             });
-            c_msg.graph.resolvers.forEach(r => {
+            c_msg.resolvers.forEach(r => {
                 r.label = JSON.parse(r.label);
                 r.cost = r.cost.num / r.cost.den;
             });
@@ -63,9 +63,8 @@ ws.onmessage = msg => {
         case 'timelines':
             timelines.reset(c_msg);
             break;
-        case 'time':
-            c_msg = c_msg.current_time.num / c_msg.current_time.den;
-            timelines.tick(c_msg);
+        case 'tick':
+            timelines.tick(c_msg.current_time.num / c_msg.current_time.den);
             break;
         case 'starting_atoms':
             timelines.starting_atoms(c_msg);
