@@ -430,7 +430,7 @@ namespace ratio
         else if (const var_item *ei = dynamic_cast<const var_item *>(&itm))
         { // the expression represents an enum type..
             const auto vals = cr.get_ov_theory().value(ei->ev);
-            jobjectArray vals_array = env->NewObjectArray(static_cast<jsize>(vals.size()), field_cls, NULL);
+            jobjectArray vals_array = env->NewObjectArray(static_cast<jsize>(vals.size()), item_cls, NULL);
             size_t i = 0;
             for (const auto &v : vals)
                 env->SetObjectArrayElement(vals_array, static_cast<jsize>(i++), all_items.at(static_cast<const item *>(v)));
