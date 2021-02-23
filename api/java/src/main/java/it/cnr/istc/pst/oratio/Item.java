@@ -51,7 +51,6 @@ public class Item implements Env {
     @SuppressWarnings("unused")
     private void set(final String id, final Item itm) {
         exprs.put(id, itm);
-        solver.expr_names.put(itm, id);
     }
 
     public static class BoolItem extends Item {

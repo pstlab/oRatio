@@ -28,7 +28,6 @@ public class SolverState implements StateListener {
 
     public SolverState(final Solver solver) {
         this.solver = solver;
-        solver.addStateListener(this);
         timelines = new TimelinesList(solver);
     }
 
@@ -55,6 +54,7 @@ public class SolverState implements StateListener {
 
     @Override
     public void stateChanged() {
+        timelines.stateChanged();
         try {
             App.broadcast(App.MAPPER.writeValueAsString(new App.Message.Timelines(getTimelines())));
         } catch (JsonProcessingException e) {

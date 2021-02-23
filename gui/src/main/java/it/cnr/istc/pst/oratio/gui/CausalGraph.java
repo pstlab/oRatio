@@ -35,7 +35,6 @@ public class CausalGraph implements GraphListener {
 
     public CausalGraph(Solver solver) {
         this.solver = solver;
-        solver.addGraphListener(this);
     }
 
     public Solver getSolver() {
@@ -78,7 +77,8 @@ public class CausalGraph implements GraphListener {
         Stream.of(c_flaw.causes).forEach(c -> c.preconditions.add(c_flaw));
         flaws.put(id, c_flaw);
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(c_flaw));
+            App.broadcast(App.MAPPER.writeValueAsString(
+                    new App.Message.FlawCreated(id, causes, label, (byte) state.ordinal(), position)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -89,7 +89,7 @@ public class CausalGraph implements GraphListener {
         final Flaw flaw = flaws.get(id);
         flaw.state = state;
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(flaw));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.FlawStateChanged(id, (byte) state.ordinal())));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -100,7 +100,7 @@ public class CausalGraph implements GraphListener {
         final Flaw flaw = flaws.get(id);
         flaw.cost = cost;
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(flaw));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.FlawCostChanged(id, cost)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -111,7 +111,7 @@ public class CausalGraph implements GraphListener {
         final Flaw flaw = flaws.get(id);
         flaw.position = position;
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(flaw));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.FlawPositionChanged(id, position)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -125,7 +125,7 @@ public class CausalGraph implements GraphListener {
         current_flaw = flaw;
         current_flaw.current = true;
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(flaw));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.CurrentFlaw(id)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -137,7 +137,8 @@ public class CausalGraph implements GraphListener {
         final Resolver resolver = new Resolver(id, flaws.get(effect), label, state, cost);
         resolvers.put(id, resolver);
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(resolver));
+            App.broadcast(App.MAPPER.writeValueAsString(
+                    new App.Message.ResolverCreated(id, effect, cost, label, (byte) state.ordinal())));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -148,7 +149,8 @@ public class CausalGraph implements GraphListener {
         final Resolver resolver = resolvers.get(id);
         resolver.state = state;
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(resolver));
+            App.broadcast(
+                    App.MAPPER.writeValueAsString(new App.Message.ResolverStateChanged(id, (byte) state.ordinal())));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -162,7 +164,7 @@ public class CausalGraph implements GraphListener {
         current_resolver = resolver;
         current_resolver.current = true;
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(resolver));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.CurrentResolver(id)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -172,7 +174,7 @@ public class CausalGraph implements GraphListener {
     public void causalLinkAdded(final long flaw, final long resolver) {
         resolvers.get(resolver).preconditions.add(flaws.get(flaw));
         try {
-            App.broadcast(App.MAPPER.writeValueAsString(null));
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.CausalLinkAdded(flaw, resolver)));
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }

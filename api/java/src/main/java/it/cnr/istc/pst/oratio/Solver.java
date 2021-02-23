@@ -1,5 +1,6 @@
 package it.cnr.istc.pst.oratio;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -7,6 +8,7 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.stream.Stream;
 
 import it.cnr.istc.pst.oratio.GraphListener.State;
@@ -171,7 +173,6 @@ public class Solver implements Scope, Env {
     @SuppressWarnings("unused")
     private void set(final String id, final Item itm) {
         exprs.put(id, itm);
-        expr_names.put(itm, id);
     }
 
     /**
@@ -250,6 +251,20 @@ public class Solver implements Scope, Env {
     }
 
     private void fireStateChanged() {
+        expr_names.clear();
+        Queue<Map.Entry<String, Item>> q = new ArrayDeque<>();
+        for (Map.Entry<String, Item> c_expr : exprs.entrySet()) {
+            expr_names.putIfAbsent(c_expr.getValue(), c_expr.getKey());
+            if (!(c_expr.getValue() instanceof Atom))
+                q.add(c_expr);
+        }
+        while (!q.isEmpty()) {
+            Map.Entry<String, Item> expr = q.poll();
+            for (Map.Entry<String, Item> c_expr : expr.getValue().getExprs().entrySet())
+                if (expr_names.putIfAbsent(c_expr.getValue(),
+                        expr_names.get(expr.getValue()) + "." + c_expr.getKey()) == null)
+                    q.add(c_expr);
+        }
         state_listeners.stream().forEach(l -> l.stateChanged());
     }
 

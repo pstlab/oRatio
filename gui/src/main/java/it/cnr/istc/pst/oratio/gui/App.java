@@ -37,6 +37,11 @@ public class App {
     static final SolverState STATE = new SolverState(SOLVER);
     static final CausalGraph GRAPH = new CausalGraph(SOLVER);
     static final PlanExecutor PLAN_EXEC = new PlanExecutor(SOLVER);
+    static {
+        SOLVER.addStateListener(STATE);
+        SOLVER.addGraphListener(GRAPH);
+        SOLVER.addExecutorListener(PLAN_EXEC);
+    }
     private static Set<WsContext> contexts = new HashSet<>();
 
     public static void main(final String[] args) {
@@ -215,10 +220,10 @@ public class App {
             public final long id;
             public final long effect;
             public final Rational cost;
-            public final long label;
+            public final String label;
             public final byte state;
 
-            ResolverCreated(long id, long effect, Rational cost, long label, byte state) {
+            ResolverCreated(long id, long effect, Rational cost, String label, byte state) {
                 this.id = id;
                 this.effect = effect;
                 this.cost = cost;

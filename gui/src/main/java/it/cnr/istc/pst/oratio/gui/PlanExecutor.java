@@ -17,7 +17,6 @@ public class PlanExecutor implements ExecutorListener {
 
     public PlanExecutor(Solver solver) {
         this.solver = solver;
-        solver.addExecutorListener(this);
     }
 
     public Solver getSolver() {

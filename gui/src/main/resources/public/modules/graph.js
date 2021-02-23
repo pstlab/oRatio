@@ -65,9 +65,9 @@ export class Graph {
         flaw.graph = this;
         this.nodes.push(flaw);
         this.node_map.set(flaw.id, flaw);
-        flaw.causes.forEach(c => links.push({ source: flaw.id, target: c, state: flaw.state }));
+        flaw.causes.forEach(c => this.links.push({ source: flaw.id, target: c, state: flaw.state }));
         this.update();
-        flaw.causes.forEach(c => this.update_resolver_cost(node_map.get(c)));
+        flaw.causes.forEach(c => this.update_resolver_cost(this.node_map.get(c)));
         this.update();
     }
 
@@ -90,11 +90,11 @@ export class Graph {
     }
 
     current_flaw(current) {
-        if (this.current_flaw) this.current_flaw.current = false;
-        if (this.current_resolver) { this.current_resolver.current = false; this.current_resolver = undefined; }
-        const f_node = node_map.get(current.id);
+        if (this.c_flaw) this.c_flaw.current = false;
+        if (this.c_resolver) { this.c_resolver.current = false; this.c_resolver = undefined; }
+        const f_node = this.node_map.get(current.id);
         f_node.current = true;
-        this.current_flaw = f_node;
+        this.c_flaw = f_node;
         this.update();
     }
 
@@ -114,17 +114,17 @@ export class Graph {
     }
 
     current_resolver(current) {
-        if (this.current_resolver) this.current_resolver.current = false;
-        const r_node = node_map.get(current.id);
+        if (this.c_resolver) this.c_resolver.current = false;
+        const r_node = this.node_map.get(current.id);
         r_node.current = true;
-        this.current_resolver = r_node;
+        this.c_resolver = r_node;
         this.update();
     }
 
     causal_link_added(link) {
-        this.links.push({ source: link.flaw_id, target: link.resolver_id, state: this.node_map.get(link.flaw_id).state });
+        this.links.push({ source: link.flaw, target: link.resolver, state: this.node_map.get(link.flaw).state });
         this.update();
-        this.update_resolver_cost(this.node_map.get(link.resolver_id));
+        this.update_resolver_cost(this.node_map.get(link.resolver));
         this.update();
     }
 

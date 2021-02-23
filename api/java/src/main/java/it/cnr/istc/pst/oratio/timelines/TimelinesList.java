@@ -13,11 +13,10 @@ import it.cnr.istc.pst.oratio.Atom;
 import it.cnr.istc.pst.oratio.Item;
 import it.cnr.istc.pst.oratio.Predicate;
 import it.cnr.istc.pst.oratio.Solver;
-import it.cnr.istc.pst.oratio.StateListener;
 import it.cnr.istc.pst.oratio.Type;
 import it.cnr.istc.pst.oratio.Item.EnumItem;
 
-public class TimelinesList extends ArrayList<Timeline<?>> implements StateListener {
+public class TimelinesList extends ArrayList<Timeline<?>> {
 
     private static final long serialVersionUID = 1L;
     private static final Map<Type, TimelineBuilder> BUILDERS = new IdentityHashMap<>();
@@ -25,7 +24,6 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
 
     public TimelinesList(final Solver solver) {
         this.solver = solver;
-        solver.addStateListener(this);
         try {
             BUILDERS.put(solver.getType("StateVariable"), StateVariable.BUILDER);
             BUILDERS.put(solver.getType("ReusableResource"), ReusableResource.BUILDER);
@@ -36,22 +34,6 @@ public class TimelinesList extends ArrayList<Timeline<?>> implements StateListen
         }
     }
 
-    @Override
-    public void log(String log) {
-        // nothing to do here..
-    }
-
-    @Override
-    public void read(String script) {
-        // nothing to do here..
-    }
-
-    @Override
-    public void read(String[] files) {
-        // nothing to do here..
-    }
-
-    @Override
     public void stateChanged() {
         clear();
 
