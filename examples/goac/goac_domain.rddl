@@ -1,8 +1,4 @@
 class Location {
-
-    real id;
-
-    Location(real id) : id(id) {}
 }
 
 class Map {

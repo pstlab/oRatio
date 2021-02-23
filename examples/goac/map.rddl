@@ -1,13 +1,13 @@
-Location l_a = new Location(0.0);
-Location l_b = new Location(1.0);
-Location l_c = new Location(2.0);
-Location l_d = new Location(3.0);
-Location l_e = new Location(4.0);
-Location l_f = new Location(5.0);
-Location l_g = new Location(6.0);
-Location l_h = new Location(7.0);
-Location l_i = new Location(8.0);
-Location l_j = new Location(9.0);
+Location l_a = new Location();
+Location l_b = new Location();
+Location l_c = new Location();
+Location l_d = new Location();
+Location l_e = new Location();
+Location l_f = new Location();
+Location l_g = new Location();
+Location l_h = new Location();
+Location l_i = new Location();
+Location l_j = new Location();
 
 Map map = new Map();
 
