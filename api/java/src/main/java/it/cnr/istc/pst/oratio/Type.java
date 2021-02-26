@@ -3,6 +3,7 @@ package it.cnr.istc.pst.oratio;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -21,7 +22,7 @@ public class Type implements Scope {
     final Map<String, Collection<Method>> methods = new LinkedHashMap<>();
     final Map<String, Type> types = new LinkedHashMap<>();
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
-    final Collection<Item> instances = new ArrayList<>();
+    final Collection<Item> instances = new HashSet<>();
 
     Type(final Solver solver, final Scope scope, final String name, final boolean primitive) {
         this.solver = solver;
@@ -90,6 +91,8 @@ public class Type implements Scope {
     private void newInstance(final Item item) {
         assert (!instances.contains(item));
         instances.add(item);
+        for (Type type : superclasses)
+            type.newInstance(item);
     }
 
     public boolean isAssignableFrom(final Type type) {

@@ -45,7 +45,7 @@ public class Atom extends Item {
     }
 
     public enum AtomState {
-        Active, Inactive, Unified
+        Unified, Active, Inactive
     }
 
     @Override
