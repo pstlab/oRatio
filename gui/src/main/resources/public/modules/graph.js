@@ -284,11 +284,25 @@ function flaw_label(flaw) {
         case 'bool':
             return 'bool';
         default:
-            return '\u03C6' + flaw.label.phi + ' ' + flaw.label.type;
+            switch (flaw.label.phi) {
+                case 'b0':
+                case '\u00ACb0':
+                    return flaw.label.type;
+                default:
+                    return flaw.label.phi.replace('b', '\u03C6') + ' ' + flaw.label.type;
+            }
     }
 }
 
-function flaw_tooltip(flaw) { return '\u03C6' + flaw.label.phi + ', cost: ' + flaw.cost + ', pos: ' + flaw.position.min; }
+function flaw_tooltip(flaw) {
+    switch (flaw.label.phi) {
+        case 'b0':
+        case '\u00ACb0':
+            return 'cost: ' + flaw.cost + ', pos: ' + flaw.position.min;
+        default:
+            return flaw.label.phi.replace('b', '\u03C6') + ', cost: ' + flaw.cost + ', pos: ' + flaw.position.min;
+    }
+}
 
 function resolver_label(resolver) {
     if (resolver.label.type)
@@ -298,9 +312,30 @@ function resolver_label(resolver) {
             case 'unify':
                 return 'unify';
             default:
-                return '\u03C1' + resolver.label.rho + ' ' + resolver.label.type;
+                switch (resolver.label.rho) {
+                    case 'b0':
+                    case '\u00ACb0':
+                        return resolver.label.type;
+                    default:
+                        return resolver.label.rho.replace('b', '\u03C1') + ' ' + resolver.label.type;
+                }
         }
-    return '\u03C1' + resolver.label.rho;
+    switch (resolver.label.rho) {
+        case 'b0':
+            return '\u22A4';
+        case '\u00ACb0':
+            return '\u22A5';
+        default:
+            return resolver.label.rho.replace('b', '\u03C1');
+    }
 }
 
-function resolver_tooltip(resolver) { return '\u03C1' + resolver.label.rho + ', cost: ' + resolver.cost; }
+function resolver_tooltip(resolver) {
+    switch (resolver.label.rho) {
+        case 'b0':
+        case '\u00ACb0':
+            return  'cost: ' + resolver.cost;
+        default:
+            return resolver.label.rho.replace('b', '\u03C1') + ', cost: ' + resolver.cost;
+    }
+}
