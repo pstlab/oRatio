@@ -91,9 +91,9 @@ public class App {
                     LOG.info("New connection..");
                     contexts.add(ctx);
                     try {
-                        broadcast(MAPPER.writeValueAsString(new Message.Graph(GRAPH)));
-                        broadcast(MAPPER.writeValueAsString(new Message.Timelines(STATE.getTimelines())));
-                        broadcast(MAPPER.writeValueAsString(new Message.Tick(PLAN_EXEC.getCurrentTime())));
+                        ctx.send(MAPPER.writeValueAsString(new Message.Graph(GRAPH)));
+                        ctx.send(MAPPER.writeValueAsString(new Message.Timelines(STATE.getTimelines())));
+                        ctx.send(MAPPER.writeValueAsString(new Message.Tick(PLAN_EXEC.getCurrentTime())));
                     } catch (JsonProcessingException e) {
                         LOG.error("Cannot serialize", e);
                     }
