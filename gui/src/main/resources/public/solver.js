@@ -20,7 +20,8 @@ ws.onmessage = msg => {
             });
             c_msg.resolvers.forEach(r => {
                 r.label = JSON.parse(r.label);
-                r.cost = r.cost.num / r.cost.den;
+                r.intrinsic_cost = r.cost.num / r.cost.den;
+                r.cost = r.intrinsic_cost;
             });
             graph.reset(c_msg);
             break;
