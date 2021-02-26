@@ -37,7 +37,7 @@ ws.onmessage = msg => {
             break;
         case 'flaw_cost_changed':
             c_msg.cost = c_msg.cost.num / c_msg.cost.den;
-            graph.flaw_state_changed(c_msg);
+            graph.flaw_cost_changed(c_msg);
             break;
         case 'flaw_position_changed':
             graph.flaw_position_changed(c_msg);
@@ -48,7 +48,8 @@ ws.onmessage = msg => {
         }
         case 'resolver_created':
             c_msg.label = JSON.parse(c_msg.label);
-            c_msg.cost = c_msg.cost.num / c_msg.cost.den;
+            c_msg.intrinsic_cost = c_msg.cost.num / c_msg.cost.den;
+            c_msg.cost = c_msg.intrinsic_cost;
             graph.resolver_created(c_msg);
             break;
         case 'resolver_state_changed':

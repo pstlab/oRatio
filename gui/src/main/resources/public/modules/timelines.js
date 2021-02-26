@@ -123,9 +123,9 @@ export class Timelines {
                     enter => {
                         const tl_val_g = enter.append('path').attr('fill', 'aliceblue').attr('stroke', 'lightblue')
                             .attr('d', d3.area().curve(d3.curveStepAfter).x(d => this.timelines_x_scale(d.from)).y0(this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth()).y1(d => rr_y_scale(d.usage)));
-                        tl_val_g.on('mouseover', (event, d) => tooltip.html(rr_value_tooltip(d)).transition().duration(200).style('opacity', .9))
-                            .on('mousemove', event => tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
-                            .on('mouseout', event => tooltip.transition().duration(500).style('opacity', 0));
+                        tl_val_g.on('mouseover', (event, d) => this.tooltip.html(rr_value_tooltip(d)).transition().duration(200).style('opacity', .9))
+                            .on('mousemove', event => this.tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
+                            .on('mouseout', event => this.tooltip.transition().duration(500).style('opacity', 0));
                         return tl_val_g;
                     },
                     update => {

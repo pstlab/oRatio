@@ -134,7 +134,7 @@ export class Graph {
             if (c_cost < in_link.source.cost)
                 c_cost = in_link.source.cost;
         });
-        resolver.cost = c_cost == Number.NEGATIVE_INFINITY ? resolver.cost : resolver.cost + c_cost;
+        resolver.cost = c_cost == Number.NEGATIVE_INFINITY ? resolver.intrinsic_cost : resolver.intrinsic_cost + c_cost;
     }
 
     update() {
