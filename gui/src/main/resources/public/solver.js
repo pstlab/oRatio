@@ -25,7 +25,16 @@ ws.onmessage = msg => {
             });
             graph.reset(c_msg);
             break;
-        case 'start_solving': break;
+        case 'started_solving':
+            console.log("solving the problem..");
+            break;
+        case 'solution_found':
+            console.log("hurray!! we have found a solution..");
+            graph.solution_found();
+            break;
+        case 'inconsistent_problem':
+            console.log("unsolvable problem..");
+            break;
         case 'flaw_created':
             c_msg.label = JSON.parse(c_msg.label);
             if (c_msg.cost)

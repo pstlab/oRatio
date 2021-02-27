@@ -62,6 +62,12 @@ export class Graph {
         this.update();
     }
 
+    solution_found() {
+        if (this.c_flaw) this.c_flaw.current = false;
+        if (this.c_resolver) { this.c_resolver.current = false; this.c_resolver = undefined; }
+        this.update();
+    }
+
     flaw_created(flaw) {
         flaw.type = 'flaw';
         flaw.graph = this;
@@ -345,7 +351,7 @@ function resolver_tooltip(resolver) {
     switch (resolver.label.rho) {
         case 'b0':
         case '\u00ACb0':
-            return  'cost: ' + resolver.cost;
+            return 'cost: ' + resolver.cost;
         default:
             return resolver.label.rho.replace('b', '\u03C1') + ', cost: ' + resolver.cost;
     }

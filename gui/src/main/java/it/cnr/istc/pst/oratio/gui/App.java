@@ -113,7 +113,11 @@ public class App {
 
     @SuppressWarnings({ "unused" })
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "message_type")
-    @JsonSubTypes({ @Type(value = Message.Log.class, name = "log"), @Type(value = Message.Graph.class, name = "graph"),
+    @JsonSubTypes({ @Type(value = Message.Log.class, name = "log"),
+            @Type(value = Message.StartedSolving.class, name = "started_solving"),
+            @Type(value = Message.SolutionFound.class, name = "solution_found"),
+            @Type(value = Message.InconsistentProblem.class, name = "inconsistent_problem"),
+            @Type(value = Message.Graph.class, name = "graph"),
             @Type(value = Message.FlawCreated.class, name = "flaw_created"),
             @Type(value = Message.FlawStateChanged.class, name = "flaw_state_changed"),
             @Type(value = Message.FlawCostChanged.class, name = "flaw_cost_changed"),
@@ -124,7 +128,6 @@ public class App {
             @Type(value = Message.CurrentResolver.class, name = "current_resolver"),
             @Type(value = Message.CausalLinkAdded.class, name = "causal_link_added"),
             @Type(value = Message.Timelines.class, name = "timelines"),
-            @Type(value = Message.StartSolving.class, name = "start_solving"),
             @Type(value = Message.Tick.class, name = "tick"),
             @Type(value = Message.StartingAtoms.class, name = "starting_atoms"),
             @Type(value = Message.EndingAtoms.class, name = "ending_atoms") })
@@ -137,6 +140,15 @@ public class App {
             Log(final String log) {
                 this.log = log;
             }
+        }
+
+        static class StartedSolving extends Message {
+        }
+
+        static class SolutionFound extends Message {
+        }
+
+        static class InconsistentProblem extends Message {
         }
 
         static class Graph extends Message {
@@ -264,9 +276,6 @@ public class App {
             Timelines(final Collection<Object> timelines) {
                 this.timelines = timelines;
             }
-        }
-
-        static class StartSolving extends Message {
         }
 
         static class Tick extends Message {
