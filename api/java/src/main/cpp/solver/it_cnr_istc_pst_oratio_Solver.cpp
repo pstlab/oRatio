@@ -2,6 +2,8 @@
 #include "solver.h"
 #include "java_core_listener.h"
 #include "java_solver_listener.h"
+#include "java_executor_listener.h"
+#include "timer.h"
 
 using namespace ratio;
 

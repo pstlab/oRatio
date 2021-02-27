@@ -4,10 +4,10 @@
 namespace ratio
 {
 
-  class java_solver_listener : public ratio::solver_listener
+  class java_solver_listener : public solver_listener
   {
   public:
-    java_solver_listener(ratio::solver &s, JNIEnv *env, jobject obj);
+    java_solver_listener(solver &s, JNIEnv *env, jobject obj);
     ~java_solver_listener();
 
   private:

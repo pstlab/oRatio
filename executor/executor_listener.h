@@ -14,14 +14,12 @@ namespace ratio
     executor_listener(const executor_listener &that) = delete;
     virtual ~executor_listener() { exec.listeners.erase(std::find(exec.listeners.begin(), exec.listeners.end(), this)); }
 
-  protected:
-    executor &get_executor() const noexcept { return exec; }
-    void dont_start_yet(const std::set<atom *> &atoms) { exec.dont_start_yet(atoms); }
-    void dont_end_yet(const std::set<atom *> &atoms) { exec.dont_end_yet(atoms); }
-    void failure(const std::set<atom *> &atoms) { exec.failure(atoms); }
-
   private:
-    virtual void tick() { LOG("current time: " << exec.current_time); }
+    virtual void startedSolving() {}
+    virtual void solutionFound() {}
+    virtual void inconsistentProblem() {}
+
+    virtual void tick(const smt::rational time) { LOG("current time: " << to_string(time)); }
     virtual void starting(const std::set<atom *> &atoms) {}
     virtual void ending(const std::set<atom *> &atoms) {}
 

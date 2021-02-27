@@ -268,6 +268,18 @@ public class Solver implements Scope, Env {
         state_listeners.stream().forEach(l -> l.stateChanged());
     }
 
+    private void fireStartedSolving() {
+        executor_listeners.stream().forEach(l -> l.startedSolving());
+    }
+
+    private void fireSolutionFound() {
+        executor_listeners.stream().forEach(l -> l.solutionFound());
+    }
+
+    private void fireInconsistentProblem() {
+        executor_listeners.stream().forEach(l -> l.inconsistentProblem());
+    }
+
     private void fireTick(final long current_time_num, final long current_time_den) {
         Rational current_time = new Rational(current_time_num, current_time_den);
         executor_listeners.stream().forEach(l -> l.tick(current_time));

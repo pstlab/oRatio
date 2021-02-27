@@ -25,6 +25,7 @@ ws.onmessage = msg => {
             });
             graph.reset(c_msg);
             break;
+        case 'start_solving': break;
         case 'flaw_created':
             c_msg.label = JSON.parse(c_msg.label);
             if (c_msg.cost)

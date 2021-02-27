@@ -28,6 +28,15 @@ public class PlanExecutor implements ExecutorListener {
     }
 
     @Override
+    public void startedSolving() {
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.StartSolving()));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
+    }
+
+    @Override
     public void tick(final Rational current_time) {
         this.current_time = current_time;
         try {
@@ -53,5 +62,17 @@ public class PlanExecutor implements ExecutorListener {
         } catch (JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
+    }
+
+    @Override
+    public void solutionFound() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void inconsistentProblem() {
+        // TODO Auto-generated method stub
+
     }
 }

@@ -127,6 +127,7 @@ public class App {
             @Type(value = Message.CurrentResolver.class, name = "current_resolver"),
             @Type(value = Message.CausalLinkAdded.class, name = "causal_link_added"),
             @Type(value = Message.Timelines.class, name = "timelines"),
+            @Type(value = Message.StartSolving.class, name = "start_solving"),
             @Type(value = Message.Tick.class, name = "tick"),
             @Type(value = Message.StartingAtoms.class, name = "starting_atoms"),
             @Type(value = Message.EndingAtoms.class, name = "ending_atoms") })
@@ -266,6 +267,9 @@ public class App {
             Timelines(final Collection<Object> timelines) {
                 this.timelines = timelines;
             }
+        }
+
+        static class StartSolving extends Message {
         }
 
         static class Tick extends Message {

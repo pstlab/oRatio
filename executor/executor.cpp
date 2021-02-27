@@ -56,7 +56,7 @@ namespace ratio
 
         // we notify that a tick as arised..
         for (const auto &l : listeners)
-            l->tick();
+            l->tick(current_time);
 
         const auto &int_pred = slv.get_predicate("Interval");
         const auto &imp_pred = slv.get_predicate("Impulse");
