@@ -14,47 +14,15 @@ using namespace smt;
 
 namespace ratio
 {
-    executor::executor(solver &slv, const size_t &tick_dur, const rational &units_per_tick) : solver_listener(slv), tick_duration(tick_dur), units_per_tick(units_per_tick) {}
+    executor::executor(solver &slv, const rational &units_per_tick) : solver_listener(slv), units_per_tick(units_per_tick) {}
     executor::~executor() {}
-
-    std::thread executor::start()
-    {
-        LOG("current time: " << current_time);
-        reset_timelines();
-        mtx.lock();
-        executing = true;
-        mtx.unlock();
-        tick_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(tick_duration);
-        std::thread t([this]() {
-            while (true)
-            {
-                if (!executing)
-                    return;
-                std::this_thread::sleep_until(tick_time);
-                if (!executing)
-                    return;
-                tick_time += std::chrono::milliseconds(tick_duration);
-                mtx.lock();
-                tick();
-                mtx.unlock();
-            }
-        });
-        return t;
-    }
-
-    void executor::stop()
-    {
-        mtx.lock();
-        executing = false;
-        mtx.unlock();
-    }
 
     void executor::tick()
     {
         current_time += units_per_tick;
         LOG("current time: " << current_time);
 
-        // we notify that a tick as arised..
+        // we notify that a tick has arised..
         for (const auto &l : listeners)
             l->tick(current_time);
 
@@ -188,7 +156,6 @@ namespace ratio
 
     void executor::reset_timelines()
     {
-        mtx.lock();
         s_atms.clear();
         e_atms.clear();
         pulses.clear();
@@ -240,6 +207,5 @@ namespace ratio
                 pulses.insert(at);
             }
         }
-        mtx.unlock();
     }
 } // namespace ratio
