@@ -169,6 +169,7 @@ export class Graph {
             },
             update => {
                 update.select('rect').style('fill', d => node_color(d)).style('fill-opacity', d => node_opacity(d)).style('stroke-dasharray', d => stroke_dasharray(d)).style('opacity', d => node_opacity(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
+                update.select('text').style('opacity', d => node_opacity(d));
                 return update;
             }
         );
