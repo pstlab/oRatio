@@ -144,15 +144,11 @@ public class App {
         static class Graph extends Message {
 
             public final Collection<Flaw> flaws;
-            public final Flaw current_flaw;
             public final Collection<Resolver> resolvers;
-            public final Resolver current_resolver;
 
             Graph(final CausalGraph graph) {
                 this.flaws = graph.getFlaws();
-                this.current_flaw = graph.getCurrentFlaw();
                 this.resolvers = graph.getResolvers();
-                this.current_resolver = graph.getCurrentResolver();
             }
         }
 

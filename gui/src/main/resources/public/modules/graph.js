@@ -24,7 +24,9 @@ export class Graph {
             .attr('markerHeight', 7)
             .attr('orient', 'auto')
             .append('path')
-            .attr('d', 'M0,-5L10,0L0,5');
+            .attr('d', 'M0,-5L10,0L0,5')
+            .attr('stroke', 'dimgray')
+            .attr('fill', 'dimgray');
 
         this.simulation = d3.forceSimulation(this.nodes)
             .force('link', d3.forceLink().id(d => d.id).distance(70))
@@ -138,11 +140,20 @@ export class Graph {
     }
 
     update() {
+        const l_group = this.graph_g.selectAll('line').data(this.links).join(
+            enter => {
+                return enter.append('line').attr('stroke', 'dimgray').style('stroke-dasharray', d => stroke_dasharray(d));
+            },
+            update => {
+                update.style('stroke-dasharray', d => stroke_dasharray(d));
+                return update;
+            }
+        );
         const n_group = this.graph_g.selectAll('g').data(this.nodes, d => d.id).join(
             enter => {
                 const g = enter.append('g').attr('cursor', 'grab');
-                g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
-                g.append('text').attr('y', -7).text(d => d.type === 'flaw' ? flaw_label(d) : resolver_label(d)).style('text-anchor', 'middle');;
+                g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('fill-opacity', d => node_opacity(d)).style('stroke-dasharray', d => stroke_dasharray(d)).style('opacity', d => node_opacity(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
+                g.append('text').attr('y', -8).text(d => d.type === 'flaw' ? flaw_label(d) : resolver_label(d)).style('text-anchor', 'middle').style('opacity', d => node_opacity(d));
                 g.on('mouseover', (event, d) => this.tooltip.html(d.type === 'flaw' ? flaw_tooltip(d) : resolver_tooltip(d)).transition().duration(200).style('opacity', .9))
                     .on('mousemove', event => this.tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                     .on('mouseout', event => this.tooltip.transition().duration(500).style('opacity', 0))
@@ -151,16 +162,7 @@ export class Graph {
                 return g;
             },
             update => {
-                update.select('rect').style('fill', d => node_color(d)).style('stroke-dasharray', d => stroke_dasharray(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
-                return update;
-            }
-        );
-        const l_group = this.graph_g.selectAll('line').data(this.links).join(
-            enter => {
-                return enter.append('line').attr('stroke', 'black').style('stroke-dasharray', d => stroke_dasharray(d));
-            },
-            update => {
-                update.style('stroke-dasharray', d => stroke_dasharray(d));
+                update.select('rect').style('fill', d => node_color(d)).style('fill-opacity', d => node_opacity(d)).style('stroke-dasharray', d => stroke_dasharray(d)).style('opacity', d => node_opacity(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
                 return update;
             }
         );
@@ -226,7 +228,7 @@ function radius(n) {
 }
 
 function stroke(n) {
-    return n.current ? '#ff00ff' : 'black';
+    return n.current ? '#ff00ff' : '#262626';
 }
 
 function stroke_width(n) {
@@ -270,6 +272,15 @@ function node_color(n) {
             return '#d9d9d9';
         default:
             return color_interpolator(n.cost);
+    }
+}
+
+function node_opacity(n) {
+    switch (n.state) {
+        case 0: // False
+            return 0.5;
+        default:
+            return 1;
     }
 }
 
