@@ -540,5 +540,20 @@ namespace ratio
         for (const auto &l : listeners)
             l->state_changed();
     }
+    void core::fire_started_solving() const noexcept
+    {
+        for (const auto &l : listeners)
+            l->started_solving();
+    }
+    void core::fire_solution_found() const noexcept
+    {
+        for (const auto &l : listeners)
+            l->solution_found();
+    }
+    void core::fire_inconsistent_problem() const noexcept
+    {
+        for (const auto &l : listeners)
+            l->inconsistent_problem();
+    }
 #endif
 } // namespace ratio

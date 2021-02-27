@@ -19,10 +19,16 @@
 #define FIRE_LOG(msg) fire_log(msg)
 #define FIRE_READ(rddl) fire_read(rddl)
 #define FIRE_STATE_CHANGED() fire_state_changed()
+#define FIRE_STARTED_SOLVING() fire_started_solving()
+#define FIRE_SOLUTION_FOUND() fire_solution_found()
+#define FIRE_INCONSISTENT_PROBLEM() fire_inconsistent_problem()
 #else
 #define FIRE_LOG(msg)
 #define FIRE_READ(rddl)
 #define FIRE_STATE_CHANGED()
+#define FIRE_STARTED_SOLVING()
+#define FIRE_SOLUTION_FOUND()
+#define FIRE_INCONSISTENT_PROBLEM()
 #endif
 
 namespace riddle::ast
@@ -196,6 +202,9 @@ namespace ratio
     void fire_read(const std::string &script) const noexcept;
     void fire_read(const std::vector<std::string> &files) const noexcept;
     void fire_state_changed() const noexcept;
+    void fire_started_solving() const noexcept;
+    void fire_solution_found() const noexcept;
+    void fire_inconsistent_problem() const noexcept;
 #endif
   };
 

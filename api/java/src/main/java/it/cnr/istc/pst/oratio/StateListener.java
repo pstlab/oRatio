@@ -9,4 +9,10 @@ public interface StateListener {
     public void read(String[] files);
 
     public void stateChanged();
+
+    public void startedSolving();
+
+    public void solutionFound();
+
+    public void inconsistentProblem();
 }

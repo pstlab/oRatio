@@ -40,7 +40,6 @@ public class Solver implements Scope, Env {
     final Map<Item, String> expr_names = new IdentityHashMap<>();
     private final Collection<GraphListener> graph_listeners = new ArrayList<>();
     private final Collection<StateListener> state_listeners = new ArrayList<>();
-    private final Collection<ExecutorListener> executor_listeners = new ArrayList<>();
 
     public Solver() {
         native_handle = new_instance();
@@ -269,28 +268,15 @@ public class Solver implements Scope, Env {
     }
 
     private void fireStartedSolving() {
-        executor_listeners.stream().forEach(l -> l.startedSolving());
+        state_listeners.stream().forEach(l -> l.startedSolving());
     }
 
     private void fireSolutionFound() {
-        executor_listeners.stream().forEach(l -> l.solutionFound());
+        state_listeners.stream().forEach(l -> l.solutionFound());
     }
 
     private void fireInconsistentProblem() {
-        executor_listeners.stream().forEach(l -> l.inconsistentProblem());
-    }
-
-    private void fireTick(final long current_time_num, final long current_time_den) {
-        Rational current_time = new Rational(current_time_num, current_time_den);
-        executor_listeners.stream().forEach(l -> l.tick(current_time));
-    }
-
-    private void fireStartingAtoms(final long[] atoms) {
-        executor_listeners.stream().forEach(l -> l.startingAtoms(atoms));
-    }
-
-    private void fireEndingAtoms(final long[] atoms) {
-        executor_listeners.stream().forEach(l -> l.endingAtoms(atoms));
+        state_listeners.stream().forEach(l -> l.inconsistentProblem());
     }
 
     public void addGraphListener(GraphListener l) {
@@ -307,13 +293,5 @@ public class Solver implements Scope, Env {
 
     public void removeStateListener(StateListener l) {
         state_listeners.remove(l);
-    }
-
-    public void addExecutorListener(ExecutorListener l) {
-        executor_listeners.add(l);
-    }
-
-    public void removeExecutorListener(ExecutorListener l) {
-        executor_listeners.remove(l);
     }
 }

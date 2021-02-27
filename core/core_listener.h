@@ -22,6 +22,10 @@ namespace ratio
 
     virtual void state_changed() {}
 
+    virtual void started_solving() {}
+    virtual void solution_found() {}
+    virtual void inconsistent_problem() {}
+
   protected:
     core &cr;
   };

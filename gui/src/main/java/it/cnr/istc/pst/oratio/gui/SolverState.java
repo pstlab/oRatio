@@ -62,6 +62,23 @@ public class SolverState implements StateListener {
         }
     }
 
+    @Override
+    public void startedSolving() {
+        try {
+            App.broadcast(App.MAPPER.writeValueAsString(new App.Message.StartSolving()));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
+    }
+
+    @Override
+    public void solutionFound() {
+    }
+
+    @Override
+    public void inconsistentProblem() {
+    }
+
     Collection<Object> getTimelines() {
         Collection<Object> c_tls = new ArrayList<>();
         for (Timeline<?> tl : timelines) {

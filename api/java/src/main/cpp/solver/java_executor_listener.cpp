@@ -4,9 +4,6 @@ namespace ratio
 {
 
     java_executor_listener::java_executor_listener(executor &e, JNIEnv *env, jobject obj) : executor_listener(e), env(env), slv_obj(env->NewGlobalRef(obj)), solver_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->GetObjectClass(obj)))),
-                                                                                            started_solving_mthd_id(env->GetMethodID(solver_cls, "fireStartedSolving", "()V")),
-                                                                                            solution_found_mthd_id(env->GetMethodID(solver_cls, "fireSolutionFound", "()V")),
-                                                                                            inconsistent_problem_mthd_id(env->GetMethodID(solver_cls, "fireInconsistentProblem", "()V")),
                                                                                             tick_mthd_id(env->GetMethodID(solver_cls, "fireTick", "(JJ)V")),
                                                                                             starting_mthd_id(env->GetMethodID(solver_cls, "fireStartingAtoms", "([J)V")),
                                                                                             ending_mthd_id(env->GetMethodID(solver_cls, "fireEndingAtoms", "([J)V"))
@@ -17,10 +14,6 @@ namespace ratio
         env->DeleteGlobalRef(slv_obj);
         env->DeleteGlobalRef(solver_cls);
     }
-
-    void java_executor_listener::startedSolving() { env->CallVoidMethod(slv_obj, started_solving_mthd_id); }
-    void java_executor_listener::solutionFound() { env->CallVoidMethod(slv_obj, solution_found_mthd_id); }
-    void java_executor_listener::inconsistentProblem() { env->CallVoidMethod(slv_obj, inconsistent_problem_mthd_id); }
 
     void java_executor_listener::tick(const smt::rational time)
     {

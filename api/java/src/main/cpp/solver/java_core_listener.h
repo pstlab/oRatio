@@ -23,6 +23,10 @@ namespace ratio
 
     void state_changed() override;
 
+    void started_solving() override;
+    void solution_found() override;
+    void inconsistent_problem() override;
+
     void new_type(const type &t);
     void revise_type(const type &t);
     void new_predicate(const predicate &p);
@@ -41,6 +45,7 @@ namespace ratio
     jclass solver_cls; // the java solver class..
     jmethodID log_mthd_id, read0_mthd_id, read1_mthd_id, state_changed_mthd_id;
     jmethodID s_dfn_field_mthd_id, s_dfn_method_mthd_id, s_dfn_type_mthd_id, s_dfn_pred_mthd_id, s_set_mthd_id;
+    jmethodID s_strtd_slvng_mthd_id, s_sol_found_mthd_id, s_inc_prblm_mthd_id;
     jclass type_cls; // the java type class..
     jmethodID type_ctr_id;
     jmethodID t_dfn_constructor_mthd_id, t_dfn_superclass_mthd_id, t_dfn_field_mthd_id, t_dfn_method_mthd_id, t_dfn_type_mthd_id, t_dfn_pred_mthd_id, t_new_instnc;

@@ -18,6 +18,9 @@ namespace ratio
                                                                                  s_dfn_type_mthd_id(env->GetMethodID(solver_cls, "defineType", "(Lit/cnr/istc/pst/oratio/Type;)V")),
                                                                                  s_dfn_pred_mthd_id(env->GetMethodID(solver_cls, "definePredicate", "(Lit/cnr/istc/pst/oratio/Predicate;)V")),
                                                                                  s_set_mthd_id(env->GetMethodID(solver_cls, "set", "(Ljava/lang/String;Lit/cnr/istc/pst/oratio/Item;)V")),
+                                                                                 s_strtd_slvng_mthd_id(env->GetMethodID(solver_cls, "fireStartedSolving", "()V")),
+                                                                                 s_sol_found_mthd_id(env->GetMethodID(solver_cls, "fireSolutionFound", "()V")),
+                                                                                 s_inc_prblm_mthd_id(env->GetMethodID(solver_cls, "fireInconsistentProblem", "()V")),
                                                                                  type_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Type")))),
                                                                                  type_ctr_id(env->GetMethodID(type_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Scope;Ljava/lang/String;Z)V")),
                                                                                  t_dfn_constructor_mthd_id(env->GetMethodID(type_cls, "defineConstructor", "(Lit/cnr/istc/pst/oratio/Constructor;)V")),
@@ -233,6 +236,10 @@ namespace ratio
 
         env->CallVoidMethod(slv_obj, state_changed_mthd_id);
     }
+
+    void java_core_listener::started_solving() { env->CallVoidMethod(slv_obj, s_strtd_slvng_mthd_id); }
+    void java_core_listener::solution_found() { env->CallVoidMethod(slv_obj, s_sol_found_mthd_id); }
+    void java_core_listener::inconsistent_problem() { env->CallVoidMethod(slv_obj, s_inc_prblm_mthd_id); }
 
     void java_core_listener::new_type(const type &t)
     {

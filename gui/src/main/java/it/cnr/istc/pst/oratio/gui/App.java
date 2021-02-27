@@ -36,11 +36,9 @@ public class App {
     static final Solver SOLVER = new Solver();
     static final SolverState STATE = new SolverState(SOLVER);
     static final CausalGraph GRAPH = new CausalGraph(SOLVER);
-    static final PlanExecutor PLAN_EXEC = new PlanExecutor(SOLVER);
     static {
         SOLVER.addStateListener(STATE);
         SOLVER.addGraphListener(GRAPH);
-        SOLVER.addExecutorListener(PLAN_EXEC);
     }
     private static Set<WsContext> contexts = new HashSet<>();
 
@@ -93,7 +91,6 @@ public class App {
                     try {
                         ctx.send(MAPPER.writeValueAsString(new Message.Graph(GRAPH)));
                         ctx.send(MAPPER.writeValueAsString(new Message.Timelines(STATE.getTimelines())));
-                        ctx.send(MAPPER.writeValueAsString(new Message.Tick(PLAN_EXEC.getCurrentTime())));
                     } catch (JsonProcessingException e) {
                         LOG.error("Cannot serialize", e);
                     }

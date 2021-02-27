@@ -15,10 +15,6 @@ namespace ratio
     virtual ~executor_listener() { exec.listeners.erase(std::find(exec.listeners.begin(), exec.listeners.end(), this)); }
 
   private:
-    virtual void startedSolving() {}
-    virtual void solutionFound() {}
-    virtual void inconsistentProblem() {}
-
     virtual void tick(const smt::rational time) { LOG("current time: " << to_string(time)); }
     virtual void starting(const std::set<atom *> &atoms) {}
     virtual void ending(const std::set<atom *> &atoms) {}
