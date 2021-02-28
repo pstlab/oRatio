@@ -5,43 +5,47 @@
 #ifndef _Included_it_cnr_istc_pst_oratio_Solver
 #define _Included_it_cnr_istc_pst_oratio_Solver
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-  /*
-   * Class:     it_cnr_istc_pst_oratio_Solver
-   * Method:    new_instance
-   * Signature: ()J
-   */
-  JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_Solver_new_1instance(JNIEnv *, jobject);
+/*
+ * Class:     it_cnr_istc_pst_oratio_Solver
+ * Method:    new_instance
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_Solver_new_1instance
+  (JNIEnv *, jobject);
 
-  /*
-   * Class:     it_cnr_istc_pst_oratio_Solver
-   * Method:    dispose
-   * Signature: ()V
-   */
-  JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_dispose(JNIEnv *, jobject);
+/*
+ * Class:     it_cnr_istc_pst_oratio_Solver
+ * Method:    dispose
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_dispose
+  (JNIEnv *, jobject);
 
-  /*
-   * Class:     it_cnr_istc_pst_oratio_Solver
-   * Method:    read
-   * Signature: (Ljava/lang/String;)V
-   */
-  JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_read__Ljava_lang_String_2(JNIEnv *, jobject, jstring);
+/*
+ * Class:     it_cnr_istc_pst_oratio_Solver
+ * Method:    read
+ * Signature: (Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_read__Ljava_lang_String_2
+  (JNIEnv *, jobject, jstring);
 
-  /*
-   * Class:     it_cnr_istc_pst_oratio_Solver
-   * Method:    read
-   * Signature: ([Ljava/lang/String;)V
-   */
-  JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_read___3Ljava_lang_String_2(JNIEnv *, jobject, jobjectArray);
+/*
+ * Class:     it_cnr_istc_pst_oratio_Solver
+ * Method:    read
+ * Signature: ([Ljava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_read___3Ljava_lang_String_2
+  (JNIEnv *, jobject, jobjectArray);
 
-  /*
-   * Class:     it_cnr_istc_pst_oratio_Solver
-   * Method:    solve
-   * Signature: ()V
-   */
-  JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_solve(JNIEnv *, jobject);
+/*
+ * Class:     it_cnr_istc_pst_oratio_Solver
+ * Method:    solve
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_solve
+  (JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

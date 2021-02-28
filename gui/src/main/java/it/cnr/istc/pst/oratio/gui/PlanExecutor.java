@@ -7,19 +7,19 @@ import org.slf4j.LoggerFactory;
 
 import it.cnr.istc.pst.oratio.ExecutorListener;
 import it.cnr.istc.pst.oratio.Rational;
-import it.cnr.istc.pst.oratio.Solver;
+import it.cnr.istc.pst.oratio.timelines.TimelinesExecutor;
 
 public class PlanExecutor implements ExecutorListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(PlanExecutor.class);
-    private final Solver solver;
+    private final TimelinesExecutor solver;
     private Rational current_time = new Rational();
 
-    public PlanExecutor(Solver solver) {
+    public PlanExecutor(TimelinesExecutor solver) {
         this.solver = solver;
     }
 
-    public Solver getSolver() {
+    public TimelinesExecutor getExecutor() {
         return solver;
     }
 

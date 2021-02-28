@@ -1,4 +1,4 @@
-find_package(JNI)
+find_package(JNI REQUIRED)
 
 add_executable(solver-server main.cpp)
 

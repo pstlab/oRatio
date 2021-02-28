@@ -27,6 +27,7 @@ import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
 import it.cnr.istc.pst.oratio.gui.CausalGraph.Flaw;
 import it.cnr.istc.pst.oratio.gui.CausalGraph.Resolver;
+import it.cnr.istc.pst.oratio.timelines.TimelinesExecutor;
 
 public class App {
 
@@ -34,11 +35,14 @@ public class App {
     static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final Solver SOLVER = new Solver();
+    static final TimelinesExecutor TL_EXEC = new TimelinesExecutor(SOLVER, new Rational(1));
     static final SolverState STATE = new SolverState(SOLVER);
     static final CausalGraph GRAPH = new CausalGraph(SOLVER);
+    static final PlanExecutor PLAN_EXEC = new PlanExecutor(TL_EXEC);
     static {
         SOLVER.addStateListener(STATE);
         SOLVER.addGraphListener(GRAPH);
+        TL_EXEC.addExecutorListener(PLAN_EXEC);
     }
     private static Set<WsContext> contexts = new HashSet<>();
 

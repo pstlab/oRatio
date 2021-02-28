@@ -14,7 +14,7 @@ using namespace smt;
 
 namespace ratio
 {
-    executor::executor(solver &slv, const rational &units_per_tick) : solver_listener(slv), units_per_tick(units_per_tick) {}
+    executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), units_per_tick(units_per_tick) { reset_timelines(); }
     executor::~executor() {}
 
     void executor::tick()
@@ -133,6 +133,14 @@ namespace ratio
     void executor::dont_start_yet(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
     void executor::dont_end_yet(const std::set<atom *> &atoms) { not_ending.insert(atoms.begin(), atoms.end()); }
     void executor::failure(const std::set<atom *> &atoms) {}
+
+    void executor::solution_found() { reset_timelines(); }
+    void executor::inconsistent_problem()
+    {
+        s_atms.clear();
+        e_atms.clear();
+        pulses.clear();
+    }
 
     void executor::resolver_created(const resolver &r)
     { // we cannot plan in the past..

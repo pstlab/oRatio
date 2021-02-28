@@ -8,7 +8,7 @@ option(VERBOSE_LOG "Makes log more verbose" OFF)
 
 option(BUILD_EXECUTOR "Builds the executor" OFF)
 
-option(BUILD_JAVA_SOLVER_API "Builds the Java Solver API" OFF)
+option(BUILD_JAVA_API "Builds the Java API" OFF)
 option(BUILD_SERVER "Builds the server" OFF)
 
 option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
@@ -30,8 +30,8 @@ if(BUILD_EXECUTOR)
     add_subdirectory(executor)
 endif()
 
-message(STATUS "Build Java bindings:      ${BUILD_JAVA_SOLVER_API}")
-if(BUILD_JAVA_SOLVER_API)
+message(STATUS "Build Java API:           ${BUILD_JAVA_API}")
+if(BUILD_JAVA_API)
     add_subdirectory(api/java/src/main/cpp/solver)
 endif()
 
@@ -45,7 +45,7 @@ if(VERBOSE_LOG)
     target_compile_definitions(core PUBLIC VERBOSE_LOG)
 endif()
 
-if(BUILD_EXECUTOR OR BUILD_JAVA_SOLVER_API OR BUILD_SERVER)
+if(BUILD_EXECUTOR OR BUILD_JAVA_API OR BUILD_SERVER)
     message(STATUS "Building listeners..")
     target_compile_definitions(core PUBLIC BUILD_LISTENERS)
     target_compile_definitions(solver PUBLIC BUILD_LISTENERS)

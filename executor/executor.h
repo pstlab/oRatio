@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core_listener.h"
 #include "solver_listener.h"
 #include "inf_rational.h"
 #include "lit.h"
@@ -15,7 +16,7 @@ namespace ratio
   class atom;
   class executor_listener;
 
-  class executor : public solver_listener
+  class executor : public core_listener, public solver_listener
   {
     friend class executor_listener;
 
@@ -26,11 +27,14 @@ namespace ratio
 
     smt::rational get_current_time() const { return current_time; };
 
-  private:
     void tick();
     void dont_start_yet(const std::set<atom *> &atoms);
     void dont_end_yet(const std::set<atom *> &atoms);
     void failure(const std::set<atom *> &atoms);
+
+  private:
+    void solution_found() override;
+    void inconsistent_problem() override;
 
     void resolver_created(const resolver &r) override;
 
