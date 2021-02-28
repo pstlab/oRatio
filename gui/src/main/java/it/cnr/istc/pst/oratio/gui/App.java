@@ -25,8 +25,8 @@ import io.javalin.websocket.WsContext;
 import it.cnr.istc.pst.oratio.Bound;
 import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
-import it.cnr.istc.pst.oratio.gui.CausalGraph.Flaw;
-import it.cnr.istc.pst.oratio.gui.CausalGraph.Resolver;
+import it.cnr.istc.pst.oratio.gui.SolverListener.Flaw;
+import it.cnr.istc.pst.oratio.gui.SolverListener.Resolver;
 import it.cnr.istc.pst.oratio.timelines.TimelinesExecutor;
 
 public class App {
@@ -36,13 +36,11 @@ public class App {
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final Solver SOLVER = new Solver();
     static final TimelinesExecutor TL_EXEC = new TimelinesExecutor(SOLVER, new Rational(1));
-    static final SolverState STATE = new SolverState(SOLVER);
-    static final CausalGraph GRAPH = new CausalGraph(SOLVER);
-    static final PlanExecutor PLAN_EXEC = new PlanExecutor(TL_EXEC);
+    static final SolverListener SLV_LISTENER = new SolverListener(SOLVER, TL_EXEC);
     static {
-        SOLVER.addStateListener(STATE);
-        SOLVER.addGraphListener(GRAPH);
-        TL_EXEC.addExecutorListener(PLAN_EXEC);
+        SOLVER.addStateListener(SLV_LISTENER);
+        SOLVER.addGraphListener(SLV_LISTENER);
+        TL_EXEC.addExecutorListener(SLV_LISTENER);
     }
     private static Set<WsContext> contexts = new HashSet<>();
 
@@ -93,8 +91,9 @@ public class App {
                     LOG.info("New connection..");
                     contexts.add(ctx);
                     try {
-                        ctx.send(MAPPER.writeValueAsString(new Message.Graph(GRAPH)));
-                        ctx.send(MAPPER.writeValueAsString(new Message.Timelines(STATE.getTimelines())));
+                        ctx.send(MAPPER.writeValueAsString(
+                                new Message.Graph(SLV_LISTENER.getFlaws(), SLV_LISTENER.getResolvers())));
+                        ctx.send(MAPPER.writeValueAsString(new Message.Timelines(SLV_LISTENER.getTimelines())));
                     } catch (JsonProcessingException e) {
                         LOG.error("Cannot serialize", e);
                     }
@@ -160,9 +159,9 @@ public class App {
             public final Collection<Flaw> flaws;
             public final Collection<Resolver> resolvers;
 
-            Graph(final CausalGraph graph) {
-                this.flaws = graph.getFlaws();
-                this.resolvers = graph.getResolvers();
+            Graph(final Collection<Flaw> flaws, Collection<Resolver> resolvers) {
+                this.flaws = flaws;
+                this.resolvers = resolvers;
             }
         }
 

@@ -40,6 +40,8 @@ namespace ratio
 
     void solver::solve()
     {
+        FIRE_STARTED_SOLVING();
+
         // some cleanings..
         sts.clear();
         std::queue<type *> q;
@@ -57,8 +59,6 @@ namespace ratio
 
         // we set the gamma variable..
         gr.check_gamma();
-
-        FIRE_STATE_CHANGED();
 
 #ifdef CHECK_INCONSISTENCIES
         // we solve all the current inconsistencies..
@@ -134,7 +134,7 @@ namespace ratio
 
         // Hurray!! we have found a solution..
         LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
-        FIRE_STATE_CHANGED();
+        FIRE_SOLUTION_FOUND();
     }
 
     bool_expr solver::new_bool() noexcept
