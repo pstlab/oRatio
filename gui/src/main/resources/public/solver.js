@@ -1,6 +1,8 @@
 import { Graph } from "./modules/graph.js";
 import { Timelines } from "./modules/timelines.js";
 
+document.querySelector('#tick').addEventListener('click', () => ws.send("tick"));
+
 const tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 
 const timelines = new Timelines(d3.select('#timelines').append('svg'), tooltip);

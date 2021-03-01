@@ -17,6 +17,7 @@ JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_
 {
     solver *s = get_solver(env, obj);
     executor *exec = new executor(*s, rational(static_cast<I>(units_per_tick_num), static_cast<I>(units_per_tick_den)));
+    java_executor_listener *jel = new java_executor_listener(*exec, env, obj);
     return reinterpret_cast<jlong>(exec);
 }
 

@@ -17,8 +17,8 @@ namespace ratio
 
   private:
     JNIEnv *env;
-    jobject slv_obj;   // the java solver instance..
-    jclass solver_cls; // the java solver class..
+    jobject exec_obj; // the java executor instance..
+    jclass exec_cls;  // the java executor class..
     jmethodID tick_mthd_id, starting_mthd_id, ending_mthd_id;
   };
 } // namespace ratio

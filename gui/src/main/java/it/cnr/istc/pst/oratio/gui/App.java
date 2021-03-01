@@ -105,7 +105,17 @@ public class App {
                     contexts.remove(ctx);
                 });
             });
-            ws.onMessage(ctx -> EXECUTOR.execute(() -> LOG.info("Received message {}..", ctx)));
+            ws.onMessage(ctx -> {
+                final String message = ctx.message();
+                LOG.info("Received message {}..", message);
+                switch (message) {
+                    case "tick":
+                        EXECUTOR.execute(() -> TL_EXEC.tick());
+                        break;
+                    default:
+                        break;
+                }
+            });
         });
         app.start();
     }
