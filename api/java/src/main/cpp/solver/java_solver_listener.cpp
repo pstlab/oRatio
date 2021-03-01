@@ -5,7 +5,7 @@ using namespace ratio;
 namespace ratio
 {
 
-    java_solver_listener::java_solver_listener(solver &s, JNIEnv *env, jobject obj) : solver_listener(s), env(env), slv_obj(env->NewGlobalRef(obj)), solver_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->GetObjectClass(obj)))),
+    java_solver_listener::java_solver_listener(solver &s, JNIEnv *env, jobject obj) : scoped_env(env), solver_listener(s), slv_obj(env->NewGlobalRef(obj)), solver_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->GetObjectClass(obj)))),
                                                                                       flaw_created_mthd_id(env->GetMethodID(solver_cls, "fireFlawCreated", "(J[JLjava/lang/String;BII)V")),
                                                                                       flaw_state_changed_mthd_id(env->GetMethodID(solver_cls, "fireFlawStateChanged", "(JB)V")),
                                                                                       flaw_cost_changed_mthd_id(env->GetMethodID(solver_cls, "fireFlawCostChanged", "(JJJ)V")),
@@ -17,12 +17,14 @@ namespace ratio
                                                                                       causal_link_added_mthd_id(env->GetMethodID(solver_cls, "fireCausalLinkAdded", "(JJ)V")) {}
     java_solver_listener::~java_solver_listener()
     {
+        const auto env = get_env();
         env->DeleteGlobalRef(slv_obj);
         env->DeleteGlobalRef(solver_cls);
     }
 
     void java_solver_listener::flaw_created(const flaw &f)
     {
+        const auto env = get_env();
         // the flaw's id..
         jlong id = reinterpret_cast<jlong>(&f);
 
@@ -55,7 +57,7 @@ namespace ratio
         // the flaw's state..
         jbyte state = static_cast<jbyte>(slv.get_sat_core().value(f.get_phi()));
 
-        env->CallVoidMethod(slv_obj, flaw_state_changed_mthd_id, id, state);
+        get_env()->CallVoidMethod(slv_obj, flaw_state_changed_mthd_id, id, state);
     }
     void java_solver_listener::flaw_cost_changed(const flaw &f)
     {
@@ -66,7 +68,7 @@ namespace ratio
         const auto est_cost = f.get_estimated_cost();
         jlong cost_num = est_cost.numerator(), cost_den = est_cost.denominator();
 
-        env->CallVoidMethod(slv_obj, flaw_cost_changed_mthd_id, id, cost_num, cost_den);
+        get_env()->CallVoidMethod(slv_obj, flaw_cost_changed_mthd_id, id, cost_num, cost_den);
     }
     void java_solver_listener::flaw_position_changed(const flaw &f)
     {
@@ -77,18 +79,19 @@ namespace ratio
         const auto pos = slv.get_idl_theory().bounds(f.get_position());
         jint pos_lb = pos.first, pos_ub = pos.second;
 
-        env->CallVoidMethod(slv_obj, flaw_position_changed_mthd_id, id, pos_lb, pos_ub);
+        get_env()->CallVoidMethod(slv_obj, flaw_position_changed_mthd_id, id, pos_lb, pos_ub);
     }
     void java_solver_listener::current_flaw(const flaw &f)
     {
         // the flaw's id..
         jlong id = reinterpret_cast<jlong>(&f);
 
-        env->CallVoidMethod(slv_obj, current_flaw_mthd_id, id);
+        get_env()->CallVoidMethod(slv_obj, current_flaw_mthd_id, id);
     }
 
     void java_solver_listener::resolver_created(const resolver &r)
     {
+        const auto env = get_env();
         // the resolver's id..
         jlong id = reinterpret_cast<jlong>(&r);
 
@@ -116,14 +119,14 @@ namespace ratio
         // the resolver's state..
         jbyte state = static_cast<jbyte>(slv.get_sat_core().value(r.get_rho()));
 
-        env->CallVoidMethod(slv_obj, resolver_state_changed_mthd_id, id, state);
+        get_env()->CallVoidMethod(slv_obj, resolver_state_changed_mthd_id, id, state);
     }
     void java_solver_listener::current_resolver(const resolver &r)
     {
         // the resolver's id..
         jlong id = reinterpret_cast<jlong>(&r);
 
-        env->CallVoidMethod(slv_obj, current_resolver_mthd_id, id);
+        get_env()->CallVoidMethod(slv_obj, current_resolver_mthd_id, id);
     }
 
     void java_solver_listener::causal_link_added(const flaw &f, const resolver &r)
@@ -134,6 +137,6 @@ namespace ratio
         // the resolver's id..
         jlong resolver_id = reinterpret_cast<jlong>(&r);
 
-        env->CallVoidMethod(slv_obj, causal_link_added_mthd_id, flaw_id, resolver_id);
+        get_env()->CallVoidMethod(slv_obj, causal_link_added_mthd_id, flaw_id, resolver_id);
     }
 } // namespace ratio

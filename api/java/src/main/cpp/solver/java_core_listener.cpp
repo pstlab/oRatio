@@ -8,7 +8,7 @@
 namespace ratio
 {
 
-    java_core_listener::java_core_listener(core &cr, JNIEnv *env, jobject obj) : core_listener(cr), env(env), slv_obj(env->NewGlobalRef(obj)), solver_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->GetObjectClass(obj)))),
+    java_core_listener::java_core_listener(core &cr, JNIEnv *env, jobject obj) : scoped_env(env), core_listener(cr), slv_obj(env->NewGlobalRef(obj)), solver_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->GetObjectClass(obj)))),
                                                                                  log_mthd_id(env->GetMethodID(solver_cls, "fireLog", "(Ljava/lang/String;)V")),
                                                                                  read0_mthd_id(env->GetMethodID(solver_cls, "fireRead", "(Ljava/lang/String;)V")),
                                                                                  read1_mthd_id(env->GetMethodID(solver_cls, "fireRead", "([Ljava/lang/String;)V")),
@@ -66,6 +66,7 @@ namespace ratio
     }
     java_core_listener::~java_core_listener()
     {
+        const auto env = get_env();
         for (const auto &t : all_items)
             env->DeleteGlobalRef(t.second);
         for (const auto &t : all_types)
@@ -83,6 +84,7 @@ namespace ratio
 
     void java_core_listener::log(const std::string &msg)
     {
+        const auto env = get_env();
         // the message..
         jstring c_msg = env->NewStringUTF(msg.c_str());
 
@@ -92,6 +94,7 @@ namespace ratio
 
     void java_core_listener::read(const std::string &script)
     {
+        const auto env = get_env();
         // the script..
         jstring c_script = env->NewStringUTF(script.c_str());
 
@@ -101,6 +104,7 @@ namespace ratio
 
     void java_core_listener::read(const std::vector<std::string> &files)
     {
+        const auto env = get_env();
         std::vector<jstring> c_files;
         c_files.reserve(files.size());
         for (const auto &f : files)
@@ -118,6 +122,7 @@ namespace ratio
 
     void java_core_listener::state_changed()
     {
+        const auto env = get_env();
         std::unordered_set<type *> new_types;
         std::unordered_set<predicate *> new_predicates;
         std::queue<type *> q;
@@ -133,7 +138,7 @@ namespace ratio
             { // we have a new type..
                 if (!t.is_primitive())
                     new_types.insert(&t);
-                new_type(t);
+                new_type(env, t);
             }
 
             for (const auto &t : t.get_types())
@@ -143,13 +148,13 @@ namespace ratio
         // we revise the types..
         for (const auto &t : new_types)
         {
-            revise_type(*t);
+            revise_type(env, *t);
 
             // we add the predicates..
             for (const auto &pred : t->get_predicates())
             {
                 new_predicates.insert(pred.second);
-                new_predicate(*pred.second);
+                new_predicate(env, *pred.second);
             }
         }
 
@@ -158,7 +163,7 @@ namespace ratio
         {
             jstring m_name = env->NewStringUTF(mthd->get_name().c_str());
             jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
-            jobjectArray fields_array = new_fields_array(mthd->get_args());
+            jobjectArray fields_array = new_fields_array(env, mthd->get_args());
 
             jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, slv_obj, m_name, rt, fields_array);
             env->CallVoidMethod(slv_obj, s_dfn_method_mthd_id, c_method);
@@ -175,13 +180,13 @@ namespace ratio
             if (p_it == all_types.end())
             {
                 new_predicates.insert(pred.second);
-                new_predicate(*pred.second);
+                new_predicate(env, *pred.second);
             }
         }
 
         // we revise the predicates..
         for (const auto &pred : new_predicates)
-            revise_predicate(*pred);
+            revise_predicate(env, *pred);
 
         // we add items and atoms..
         std::unordered_set<item *> c_items;
@@ -192,7 +197,7 @@ namespace ratio
                 c_items.insert(&atm);
                 const auto i_it = all_items.find(&atm);
                 if (i_it == all_items.end())
-                    new_atom(atm);
+                    new_atom(env, atm);
             }
         for (const auto &t : cr.get_types())
             if (!t.second->is_primitive())
@@ -205,7 +210,7 @@ namespace ratio
                 c_items.insert(&itm);
                 const auto i_it = all_items.find(&itm);
                 if (i_it == all_items.end())
-                    new_item(itm);
+                    new_item(env, itm);
             }
             for (const auto &p : q.front()->get_predicates())
                 for (const auto &a : p.second->get_instances())
@@ -214,7 +219,7 @@ namespace ratio
                     c_items.insert(&atm);
                     const auto a_it = all_items.find(&atm);
                     if (a_it == all_items.end())
-                        new_atom(atm);
+                        new_atom(env, atm);
                 }
             for (const auto &t : q.front()->get_types())
                 q.push(t.second);
@@ -225,23 +230,23 @@ namespace ratio
         {
             const auto j_it = all_items.at(&*c_itm.first);
             for (const auto &xpr : c_itm.first->get_exprs())
-                set(j_it, i_set_mthd_id, xpr.first, *xpr.second);
+                set(env, j_it, i_set_mthd_id, xpr.first, *xpr.second);
 
             if (const atom *a = dynamic_cast<const atom *>(&*c_itm.first))
                 env->CallVoidMethod(j_it, atm_set_state_mthd_id, cr.get_sat_core().value(a->get_sigma()));
         }
 
         for (const auto &xpr : cr.get_exprs())
-            set(slv_obj, s_set_mthd_id, xpr.first, *xpr.second);
+            set(env, slv_obj, s_set_mthd_id, xpr.first, *xpr.second);
 
         env->CallVoidMethod(slv_obj, state_changed_mthd_id);
     }
 
-    void java_core_listener::started_solving() { env->CallVoidMethod(slv_obj, s_strtd_slvng_mthd_id); }
-    void java_core_listener::solution_found() { env->CallVoidMethod(slv_obj, s_sol_found_mthd_id); }
-    void java_core_listener::inconsistent_problem() { env->CallVoidMethod(slv_obj, s_inc_prblm_mthd_id); }
+    void java_core_listener::started_solving() { get_env()->CallVoidMethod(slv_obj, s_strtd_slvng_mthd_id); }
+    void java_core_listener::solution_found() { get_env()->CallVoidMethod(slv_obj, s_sol_found_mthd_id); }
+    void java_core_listener::inconsistent_problem() { get_env()->CallVoidMethod(slv_obj, s_inc_prblm_mthd_id); }
 
-    void java_core_listener::new_type(const type &t)
+    void java_core_listener::new_type(JNIEnv *env, const type &t)
     {
         jstring t_name = env->NewStringUTF(t.get_name().c_str());
         jobject c_type;
@@ -261,7 +266,7 @@ namespace ratio
         env->DeleteLocalRef(t_name);
     }
 
-    void java_core_listener::revise_type(const type &t)
+    void java_core_listener::revise_type(JNIEnv *env, const type &t)
     {
         jobject c_type = all_types.at(&t);
         // we add the type fields..
@@ -283,7 +288,7 @@ namespace ratio
         // we add the constructors..
         for (const auto &ctr : t.get_constructors())
         {
-            jobjectArray fields_array = new_fields_array(ctr->get_args());
+            jobjectArray fields_array = new_fields_array(env, ctr->get_args());
 
             jobject c_constructor = env->NewObject(ctr_cls, ctr_ctr_id, slv_obj, c_type, fields_array);
             env->CallVoidMethod(c_type, t_dfn_constructor_mthd_id, c_constructor);
@@ -297,7 +302,7 @@ namespace ratio
         {
             jstring m_name = env->NewStringUTF(mthd->get_name().c_str());
             jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
-            jobjectArray fields_array = new_fields_array(mthd->get_args());
+            jobjectArray fields_array = new_fields_array(env, mthd->get_args());
 
             jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, c_type, m_name, rt, fields_array);
             env->CallVoidMethod(c_type, t_dfn_method_mthd_id, c_method);
@@ -308,10 +313,10 @@ namespace ratio
         }
     }
 
-    void java_core_listener::new_predicate(const predicate &p)
+    void java_core_listener::new_predicate(JNIEnv *env, const predicate &p)
     {
         jstring p_name = env->NewStringUTF(p.get_name().c_str());
-        jobjectArray fields_array = new_fields_array(p.get_args());
+        jobjectArray fields_array = new_fields_array(env, p.get_args());
 
         jobject c_predicate;
         if (const core *c = dynamic_cast<const core *>(&p.get_scope()))
@@ -331,14 +336,14 @@ namespace ratio
         env->DeleteLocalRef(p_name);
     }
 
-    void java_core_listener::revise_predicate(const predicate &p)
+    void java_core_listener::revise_predicate(JNIEnv *env, const predicate &p)
     {
         jobject c_pred = all_types.at(&p);
         for (const auto &sp : p.get_supertypes())
             env->CallVoidMethod(c_pred, t_dfn_superclass_mthd_id, all_types.at(sp));
     }
 
-    void java_core_listener::new_item(const item &itm)
+    void java_core_listener::new_item(JNIEnv *env, const item &itm)
     {
         jobject c_type = all_types.at(&itm.get_type());
 
@@ -347,7 +352,7 @@ namespace ratio
         all_items.emplace(&itm, c_item);
     }
 
-    void java_core_listener::new_atom(const atom &atm)
+    void java_core_listener::new_atom(JNIEnv *env, const atom &atm)
     {
         jobject c_pred = all_types.at(&atm.get_type());
 
@@ -356,7 +361,7 @@ namespace ratio
         all_items.emplace(&atm, c_atom);
     }
 
-    jobject java_core_listener::new_field(const std::string &name, const type &tp)
+    jobject java_core_listener::new_field(JNIEnv *env, const std::string &name, const type &tp)
     {
         jstring f_name = env->NewStringUTF(name.c_str());
         jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&tp), f_name);
@@ -364,12 +369,12 @@ namespace ratio
         return c_field;
     }
 
-    jobjectArray java_core_listener::new_fields_array(const std::vector<const field *> &args)
+    jobjectArray java_core_listener::new_fields_array(JNIEnv *env, const std::vector<const field *> &args)
     {
         std::vector<jobject> c_fields;
         c_fields.reserve(args.size());
         for (const auto &f : args)
-            c_fields.push_back(new_field(f->get_name(), f->get_type()));
+            c_fields.push_back(new_field(env, f->get_name(), f->get_type()));
 
         jobjectArray fields_array = env->NewObjectArray(static_cast<jsize>(c_fields.size()), field_cls, NULL);
         for (size_t i = 0; i < c_fields.size(); ++i)
@@ -381,7 +386,7 @@ namespace ratio
         return fields_array;
     }
 
-    void java_core_listener::set(jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm)
+    void java_core_listener::set(JNIEnv *env, jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm)
     {
         const auto i_it = all_items.find(&itm);
         jstring i_name = env->NewStringUTF(name.c_str());

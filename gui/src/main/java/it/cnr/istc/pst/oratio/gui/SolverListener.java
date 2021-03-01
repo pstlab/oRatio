@@ -50,6 +50,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     private Flaw current_flaw = null;
     private final Map<Long, Resolver> resolvers = new HashMap<>();
     private Resolver current_resolver = null;
+    private SolverState state = SolverState.Idle;
 
     public SolverListener(final Solver solver, final TimelinesExecutor executor) {
         this.solver = solver;
@@ -63,6 +64,10 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
 
     public TimelinesExecutor getExecutor() {
         return executor;
+    }
+
+    public SolverState getState() {
+        return state;
     }
 
     @Override
@@ -99,6 +104,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     @Override
     public void startedSolving() {
         App.EXECUTOR.execute(() -> {
+            state = SolverState.Solving;
             try {
                 App.broadcast(MAPPER.writeValueAsString(new Message.StartedSolving()));
             } catch (JsonProcessingException e) {
@@ -110,6 +116,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     @Override
     public void solutionFound() {
         App.EXECUTOR.execute(() -> {
+            state = SolverState.Solved;
             if (current_flaw != null)
                 current_flaw.current = false;
             current_flaw = null;
@@ -118,6 +125,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
             current_resolver = null;
             try {
                 App.broadcast(MAPPER.writeValueAsString(new Message.SolutionFound()));
+                App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
             } catch (JsonProcessingException e) {
                 LOG.error("Cannot serialize", e);
             }
@@ -127,6 +135,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     @Override
     public void inconsistentProblem() {
         App.EXECUTOR.execute(() -> {
+            state = SolverState.Inconsistent;
             if (current_flaw != null)
                 current_flaw.current = false;
             current_flaw = null;
@@ -272,7 +281,6 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     @Override
     public void tick(final Rational current_time) {
         App.EXECUTOR.execute(() -> {
-            LOG.info("current time: " + current_time);
             this.current_time = current_time;
             try {
                 App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
@@ -586,5 +594,9 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
 
             gen.writeEndObject();
         }
+    }
+
+    public enum SolverState {
+        Idle, Solving, Solved, Inconsistent;
     }
 }

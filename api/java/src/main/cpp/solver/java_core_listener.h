@@ -1,7 +1,7 @@
 #pragma once
 
+#include "scoped_env.h"
 #include "core_listener.h"
-#include <jni.h>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -10,7 +10,7 @@ namespace ratio
   class type;
   class predicate;
 
-  class java_core_listener : public core_listener
+  class java_core_listener : public scoped_env, public core_listener
   {
   public:
     java_core_listener(core &cr, JNIEnv *env, jobject obj);
@@ -27,20 +27,19 @@ namespace ratio
     void solution_found() override;
     void inconsistent_problem() override;
 
-    void new_type(const type &t);
-    void revise_type(const type &t);
-    void new_predicate(const predicate &p);
-    void revise_predicate(const predicate &p);
+    void new_type(JNIEnv *env, const type &t);
+    void revise_type(JNIEnv *env, const type &t);
+    void new_predicate(JNIEnv *env, const predicate &p);
+    void revise_predicate(JNIEnv *env, const predicate &p);
 
-    void new_item(const item &itm);
-    void new_atom(const atom &atm);
+    void new_item(JNIEnv *env, const item &itm);
+    void new_atom(JNIEnv *env, const atom &atm);
 
-    jobject new_field(const std::string &name, const type &tp);
-    jobjectArray new_fields_array(const std::vector<const field *> &args);
-    void set(jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm);
+    jobject new_field(JNIEnv *env, const std::string &name, const type &tp);
+    jobjectArray new_fields_array(JNIEnv *env, const std::vector<const field *> &args);
+    void set(JNIEnv *env, jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm);
 
   private:
-    JNIEnv *env;
     jobject slv_obj;   // the java solver instance..
     jclass solver_cls; // the java solver class..
     jmethodID log_mthd_id, read0_mthd_id, read1_mthd_id, state_changed_mthd_id;

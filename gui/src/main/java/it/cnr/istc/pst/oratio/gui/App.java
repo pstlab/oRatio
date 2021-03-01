@@ -27,6 +27,7 @@ import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
 import it.cnr.istc.pst.oratio.gui.SolverListener.Flaw;
 import it.cnr.istc.pst.oratio.gui.SolverListener.Resolver;
+import it.cnr.istc.pst.oratio.gui.SolverListener.SolverState;
 import it.cnr.istc.pst.oratio.timelines.TimelinesExecutor;
 
 public class App {
@@ -94,6 +95,8 @@ public class App {
                         ctx.send(MAPPER.writeValueAsString(
                                 new Message.Graph(SLV_LISTENER.getFlaws(), SLV_LISTENER.getResolvers())));
                         ctx.send(MAPPER.writeValueAsString(new Message.Timelines(SLV_LISTENER.getTimelines())));
+                        if (SLV_LISTENER.getState() == SolverState.Solved)
+                            ctx.send(MAPPER.writeValueAsString(new Message.Tick(SLV_LISTENER.getCurrentTime())));
                     } catch (JsonProcessingException e) {
                         LOG.error("Cannot serialize", e);
                     }
