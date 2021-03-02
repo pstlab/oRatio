@@ -1,6 +1,6 @@
 # oRatio
 
-[![Build Travis-CI Status](https://travis-ci.org/pstlab/oRatio.svg?branch=master)](https://travis-ci.org/pstlab/oRatio)
+[![Build Travis-CI Status](https://travis-ci.com/pstlab/oRatio.svg?branch=master)](https://travis-ci.org/pstlab/oRatio)
 
 > Dum loquimur, fugerit invida aetas: carpe diem, quam minimum credula postero. (Orazio, Odi, I, 11, 7-8)
 
