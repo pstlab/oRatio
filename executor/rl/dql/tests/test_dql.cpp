@@ -18,7 +18,7 @@ void test_ql_0()
         // we reset the initial state..
         env.set_state(init_state);
         // we evaluate the current policy..
-        std::cout << "average reward over the evaluation step " << i << ": " << a.evaluate(init_state, 100) << std::endl;
+        std::cout << "average reward over the evaluation step " << i << ": " << a.evaluate(init_state, 100) << '\n';
     }
 }
 

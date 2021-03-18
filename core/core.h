@@ -10,7 +10,7 @@
 #ifdef VERBOSE_LOG
 #include <iostream>
 
-#define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << std::endl
+#define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << '\n'
 #else
 #define LOG(msg)
 #endif

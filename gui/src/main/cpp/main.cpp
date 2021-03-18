@@ -8,7 +8,7 @@ int main(int argc, char const *argv[])
 {
     if (argc < 3)
     {
-        std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>" << std::endl;
+        std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>\n";
         return -1;
     }
 
@@ -45,12 +45,12 @@ int main(int argc, char const *argv[])
         jobject j_solver = env->GetStaticObjectField(app_class, slv_field);
         solver *s = reinterpret_cast<solver *>(env->GetLongField(j_solver, env->GetFieldID(env->GetObjectClass(j_solver), "native_handle", "J")));
 
-        std::cout << "parsing input files.." << std::endl;
+        std::cout << "parsing input files..\n";
         s->read(prob_names);
 
-        std::cout << "solving the problem.." << std::endl;
+        std::cout << "solving the problem..\n";
         s->solve();
-        std::cout << "hurray!! we have found a solution.." << std::endl;
+        std::cout << "hurray!! we have found a solution..\n";
 
         std::condition_variable cv;
         std::mutex m;

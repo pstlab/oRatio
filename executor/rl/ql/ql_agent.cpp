@@ -52,7 +52,7 @@ namespace rl
             const auto c_state = env.get_state();
             // we select an action..
             const float eps_threshold = eps_end + (eps_start - eps_end) * std::exp(-1. * steps_done / eps_decay);
-            std::cout << eps_threshold << std::endl;
+            std::cout << eps_threshold << '\n';
             steps_done++;
             const auto c_action = unif(gen) < eps_threshold ? select_random_action() : select_best_action();
             // we execute the action, getting the resulting state and the reward..

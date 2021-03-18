@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>" << std::endl;
+        std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>\n";
         return -1;
     }
 
@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 #ifdef BUILD_LISTENERS
     std::cout << " in debug mode";
 #endif
-    std::cout << ".." << std::endl;
+    std::cout << "..\n";
 
     solver s;
     executor exec(s, 1000);
@@ -41,12 +41,12 @@ int main(int argc, char *argv[])
     s.init();
     try
     {
-        std::cout << "parsing input files.." << std::endl;
+        std::cout << "parsing input files..\n";
         s.read(prob_names);
 
-        std::cout << "solving the problem.." << std::endl;
+        std::cout << "solving the problem..\n";
         s.solve();
-        std::cout << "hurray!! we have found a solution.." << std::endl;
+        std::cout << "hurray!! we have found a solution..\n";
 
         std::thread exec_th = exec.start();
 
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     }
     catch (const std::exception &ex)
     {
-        std::cout << ex.what() << std::endl;
+        std::cout << ex.what() << '\n';
         return 1;
     }
 }
