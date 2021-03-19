@@ -1,6 +1,5 @@
 #include "solver.h"
 #include <iostream>
-#include <fstream>
 
 using namespace ratio;
 
@@ -37,11 +36,6 @@ int main(int argc, char *argv[])
         std::cout << "solving the problem..\n";
         s.solve();
         std::cout << "hurray!! we have found a solution..\n";
-
-        std::ofstream sol_file;
-        sol_file.open(sol_name);
-        sol_file << s;
-        sol_file.close();
     }
     catch (const std::exception &ex)
     {

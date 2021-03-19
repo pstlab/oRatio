@@ -20,6 +20,9 @@ namespace smt
         exprs.emplace("x" + std::to_string(id), id);
         a_watches.resize(vals.size());
         t_watches.resize(vals.size());
+#ifdef PARALLELIZE
+        t_mtxs.resize(vals.size());
+#endif
         return id;
     }
 
@@ -414,6 +417,57 @@ namespace smt
         pivot(x_i, x_j);
     }
 
+#ifdef PARALLELIZE
+    void lra_theory::pivot(const var x_i, const var x_j) noexcept
+    {
+        // the exiting row..
+        row *ex_row = tableau[x_i];
+        lin expr = std::move(ex_row->l);
+        tableau.erase(x_i);
+        // we remove the row from the watches..
+        for (const auto &c : expr.vars)
+            t_watches[c.first].erase(ex_row);
+        delete ex_row;
+
+        const rational c = expr.vars[x_j];
+        expr.vars.erase(x_j);
+        expr /= -c;
+        expr.vars.emplace(x_i, rational::ONE / c);
+
+        // these are the rows in which x_j appears..
+        std::unordered_set<row *> x_j_watches;
+        std::swap(x_j_watches, t_watches[x_j]);
+        for (const auto &r : x_j_watches)
+            sat.get_thread_pool().enqueue([this, x_j, expr, r] {
+                rational cc = r->l.vars[x_j];
+                r->l.vars.erase(x_j);
+                for (const auto &term : std::map<const var, rational>(expr.vars))
+                    if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
+                    { // we are adding a new term to 'r'..
+                        r->l.vars.emplace(term.first, term.second * cc);
+                        std::lock_guard<std::mutex> lock(t_mtxs[term.first]);
+                        t_watches[term.first].emplace(r);
+                    }
+                    else
+                    { // we are updating an existing term of 'r'..
+                        assert(trm_it->first == term.first);
+                        trm_it->second += term.second * cc;
+                        if (trm_it->second == rational::ZERO)
+                        { // the updated term's coefficient has become equal to zero, hence we can remove the term..
+                            r->l.vars.erase(trm_it);
+                            std::lock_guard<std::mutex> lock(t_mtxs[term.first]);
+                            t_watches[term.first].erase(r);
+                        }
+                    }
+                r->l.known_term += expr.known_term * cc;
+            });
+        // we wait for all the rows to be updated..
+        sat.get_thread_pool().join();
+
+        // we add a new row into the tableau..
+        new_row(x_j, expr);
+    }
+#else
     void lra_theory::pivot(const var x_i, const var x_j) noexcept
     {
         // the exiting row..
@@ -459,6 +513,7 @@ namespace smt
         // we add a new row into the tableau..
         new_row(x_j, expr);
     }
+#endif
 
     void lra_theory::new_row(const var &x, const lin &l) noexcept
     {

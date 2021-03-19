@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(VERBOSE_LOG "Makes log more verbose" OFF)
+option(PARALLELIZE "Performs some activities in parallel" OFF)
 
 option(BUILD_EXECUTOR "Builds the executor" OFF)
 
@@ -21,9 +22,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE solver core smt smt/lra smt/o
 target_link_libraries(${PROJECT_NAME} PRIVATE solver)
 
 add_subdirectory(smt)
+add_subdirectory(smt/json)
 add_subdirectory(riddle)
 add_subdirectory(core)
 add_subdirectory(solver)
+
+message(STATUS "Parallelize:              ${PARALLELIZE}")
+if(PARALLELIZE)
+    add_subdirectory(smt/concurrent)
+    target_compile_definitions(smt PUBLIC PARALLELIZE)
+endif()
 
 message(STATUS "Build executor:           ${BUILD_EXECUTOR}")
 if(BUILD_EXECUTOR)

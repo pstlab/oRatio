@@ -1,7 +1,13 @@
 file(GLOB SMT_SOURCES *.cpp lra/*.cpp ov/*.cpp dl/*.cpp)
 
 add_library(smt ${SMT_SOURCES})
-target_include_directories(smt PUBLIC . lra ov dl)
+target_include_directories(smt PUBLIC . lra ov dl json)
+target_link_libraries(smt PUBLIC json)
+
+if(PARALLELIZE)
+    target_include_directories(smt PUBLIC concurrent)
+    target_link_libraries(smt PUBLIC concurrent)
+endif()
 
 if(BUILD_TESTING)
     add_subdirectory(tests)

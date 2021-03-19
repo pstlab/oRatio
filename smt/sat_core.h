@@ -1,6 +1,9 @@
 #pragma once
 
 #include "lit.h"
+#ifdef PARALLELIZE
+#include "thread_pool.h"
+#endif
 #include <vector>
 #include <queue>
 #include <string>
@@ -23,6 +26,13 @@ namespace smt
     sat_core();
     sat_core(const sat_core &orig) = delete;
     ~sat_core();
+
+#ifdef PARALLELIZE
+    thread_pool &get_thread_pool()
+    {
+      return th_pool;
+    }
+#endif
 
     var new_var() noexcept;                                 // creates a new propositional variable..
     bool new_clause(const std::vector<lit> &lits) noexcept; // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
@@ -67,6 +77,10 @@ namespace smt
     void listen(const var &v, sat_value_listener &l) noexcept { listening[v].insert(&l); }
 
   private:
+#ifdef PARALLELIZE
+    thread_pool th_pool;
+#endif
+
     std::vector<constr *> constrs;              // the collection of problem constraints..
     std::vector<std::vector<constr *>> watches; // for each literal 'p', a list of constraints watching 'p'..
     std::vector<lbool> assigns;                 // the current assignments..
