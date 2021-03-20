@@ -9,7 +9,7 @@ namespace ratio
   class disj_flaw : public flaw
   {
   public:
-    disj_flaw(graph &gr, resolver *const cause, const std::vector<smt::lit> &lits);
+    disj_flaw(solver &slv, const std::vector<resolver *> &causes, const std::vector<smt::lit> &lits);
     disj_flaw(const disj_flaw &orig) = delete;
     virtual ~disj_flaw();
 
@@ -21,7 +21,7 @@ namespace ratio
     class choose_lit : public resolver
     {
     public:
-      choose_lit(graph &gr, smt::rational cst, disj_flaw &disj_flaw, const smt::lit &p);
+      choose_lit(solver &slv, smt::rational cst, disj_flaw &disj_flaw, const smt::lit &p);
       choose_lit(const choose_lit &that) = delete;
       virtual ~choose_lit();
 

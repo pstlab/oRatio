@@ -7,13 +7,13 @@ using namespace smt;
 namespace ratio
 {
 
-    resolver::resolver(graph &gr, const rational &cost, flaw &eff) : resolver(gr, lit(gr.get_solver().get_sat_core().new_var()), cost, eff) {}
-    resolver::resolver(graph &gr, const lit &r, const rational &cost, flaw &eff) : gr(gr), rho(r), intrinsic_cost(cost), effect(eff) {}
+    resolver::resolver(solver &slv, const rational &cost, flaw &eff) : resolver(slv, lit(slv.get_sat_core().new_var()), cost, eff) {}
+    resolver::resolver(solver &slv, const lit &r, const rational &cost, flaw &eff) : slv(slv), rho(r), intrinsic_cost(cost), effect(eff) {}
     resolver::~resolver() {}
 
     smt::rational resolver::get_estimated_cost() const noexcept
     {
-        if (gr.get_solver().get_sat_core().value(rho) == False)
+        if (get_solver().get_sat_core().value(rho) == False)
             return rational::POSITIVE_INFINITY;
         else if (preconditions.empty())
             return intrinsic_cost;

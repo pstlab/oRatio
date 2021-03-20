@@ -9,10 +9,10 @@ set_property(CACHE HEURISTIC_TYPE PROPERTY STRINGS "h_max" "h_add")
 option(DEFERRABLE_FLAWS "Check for deferrable flaws" ON)
 option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
 
-file(GLOB SOLVER_SOURCES *.cpp types/*.cpp)
+file(GLOB SOLVER_SOURCES *.cpp flaws/*.cpp types/*.cpp)
 
 add_library(solver ${SOLVER_SOURCES})
-target_include_directories(solver PUBLIC . ../smt ../smt/lra ../smt/ov ../smt/dl ../core ../riddle types)
+target_include_directories(solver PUBLIC . ${oRatio_SOURCE_DIR}/smt ${oRatio_SOURCE_DIR}/smt/lra ${oRatio_SOURCE_DIR}/smt/ov ${oRatio_SOURCE_DIR}/smt/dl ${oRatio_SOURCE_DIR}/core ${oRatio_SOURCE_DIR}/riddle flaws types)
 target_link_libraries(solver PUBLIC core)
 
 message(STATUS "Temporal network type:    ${TEMPORAL_NETWORK_TYPE}")

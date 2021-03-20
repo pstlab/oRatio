@@ -18,12 +18,12 @@ namespace ratio
     friend class flaw;
 
   public:
-    resolver(graph &gr, const smt::rational &cost, flaw &eff);
-    resolver(graph &gr, const smt::lit &r, const smt::rational &cost, flaw &eff);
+    resolver(solver &slv, const smt::rational &cost, flaw &eff);
+    resolver(solver &slv, const smt::lit &r, const smt::rational &cost, flaw &eff);
     resolver(const resolver &that) = delete;
     ~resolver();
 
-    graph &get_graph() const noexcept { return gr; }
+    solver &get_solver() const noexcept { return slv; }
     smt::lit get_rho() const noexcept { return rho; }
     smt::rational get_intrinsic_cost() const noexcept { return intrinsic_cost; }
     smt::rational get_estimated_cost() const noexcept;
@@ -41,7 +41,7 @@ namespace ratio
     virtual void apply() = 0;
 
   private:
-    graph &gr;                          // the graph this resolver belongs to..
+    solver &slv;                        // the solver this resolver belongs to..
     const smt::lit rho;                 // the propositional literal indicating whether the resolver is active or not..
     const smt::rational intrinsic_cost; // the intrinsic cost of the resolver..
     flaw &effect;                       // the flaw solved by this resolver..

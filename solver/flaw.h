@@ -18,11 +18,11 @@ namespace ratio
     friend class resolver;
 
   public:
-    flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive = false);
+    flaw(solver &slv, const std::vector<resolver *> &causes, const bool &exclusive = false);
     flaw(const flaw &that) = delete;
     ~flaw();
 
-    graph &get_graph() const noexcept { return gr; }
+    solver &get_solver() const noexcept { return slv; }
     smt::lit get_phi() const noexcept { return phi; }
     smt::var get_position() const noexcept { return position; }
     const std::vector<resolver *> &get_resolvers() const noexcept { return resolvers; }
@@ -59,7 +59,7 @@ namespace ratio
     void add_resolver(resolver &r);
 
   private:
-    graph &gr;                                                 // the graph this flaw belongs to..
+    solver &slv;                                               // the solver this flaw belongs to..
     smt::lit phi;                                              // the propositional literal indicating whether the flaw is active or not (this literal is initialized by the 'init' procedure)..
     smt::var position;                                         // the position variable (i.e., an integer time-point) associated to this flaw..
     smt::rational est_cost = smt::rational::POSITIVE_INFINITY; // the current estimated cost of the flaw..

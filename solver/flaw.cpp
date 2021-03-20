@@ -8,7 +8,7 @@ using namespace smt;
 namespace ratio
 {
 
-    flaw::flaw(graph &gr, const std::vector<resolver *> &causes, const bool &exclusive) : gr(gr), position(gr.slv.get_idl_theory().new_var()), causes(causes), exclusive(exclusive) {}
+    flaw::flaw(solver &slv, const std::vector<resolver *> &causes, const bool &exclusive) : slv(slv), position(slv.get_idl_theory().new_var()), causes(causes), exclusive(exclusive) {}
     flaw::~flaw() {}
 
     resolver *flaw::get_cheapest_resolver() const noexcept
@@ -16,7 +16,7 @@ namespace ratio
         resolver *c_res = nullptr;
         rational c_cost = rational::POSITIVE_INFINITY;
         for (const auto &r : resolvers)
-            if (gr.get_solver().get_sat_core().value(r->get_rho()) != False && r->get_estimated_cost() < c_cost)
+            if (slv.get_sat_core().value(r->get_rho()) != False && r->get_estimated_cost() < c_cost)
             {
                 c_res = r;
                 c_cost = r->get_estimated_cost();
@@ -27,9 +27,9 @@ namespace ratio
     void flaw::init() noexcept
     {
         assert(!expanded);
-        assert(gr.get_solver().root_level());
+        assert(slv.root_level());
 
-        bool add_distance = gr.slv.get_sat_core().new_clause({gr.slv.get_idl_theory().new_distance(position, 0, 0)});
+        bool add_distance = slv.get_sat_core().new_clause({slv.get_idl_theory().new_distance(position, 0, 0)});
         assert(add_distance);
 
         std::vector<lit> cs;
@@ -39,17 +39,17 @@ namespace ratio
             c->preconditions.push_back(this); // this flaw is a precondition of its 'c' cause..
             supports.push_back(c);            // .. and it also supports its 'c' cause..
             cs.push_back(c->rho);
-            bool dist = gr.slv.get_sat_core().new_clause({!c->rho, gr.slv.get_idl_theory().new_distance(c->effect.position, position, -1)});
+            bool dist = slv.get_sat_core().new_clause({!c->rho, slv.get_idl_theory().new_distance(c->effect.position, position, -1)});
             assert(dist);
         }
         // we initialize the phi variable as the conjunction of the causes' rho variables..
-        phi = gr.get_solver().get_sat_core().new_conj(cs);
+        phi = slv.get_sat_core().new_conj(cs);
     }
 
     void flaw::expand()
     {
         assert(!expanded);
-        assert(gr.get_solver().root_level());
+        assert(slv.root_level());
         expanded = true; // the flaw is now expanded..
 
         // we compute the resolvers..
@@ -58,7 +58,7 @@ namespace ratio
         // we add causal relations between the flaw and its resolvers (i.e., if the flaw is phi exactly one of its resolvers should be in plan)..
         if (resolvers.empty())
         { // there is no way for solving this flaw: we force the phi variable at false..
-            if (!gr.get_solver().get_sat_core().new_clause({!phi}))
+            if (!slv.get_sat_core().new_clause({!phi}))
                 throw unsolvable_exception();
         }
         else
@@ -70,13 +70,13 @@ namespace ratio
                 r_chs.push_back(r->rho);
 
             // we link the phi variable to the resolvers' rho variables..
-            if (!gr.get_solver().get_sat_core().new_clause(r_chs))
+            if (!slv.get_sat_core().new_clause(r_chs))
                 throw unsolvable_exception();
 
             if (exclusive) // we make the resolvers mutually exclusive..
                 for (size_t i = 0; i < resolvers.size(); ++i)
                     for (size_t j = i + 1; j < resolvers.size(); ++j)
-                        if (!gr.get_solver().get_sat_core().new_clause({!resolvers[i]->rho, !resolvers[j]->rho}))
+                        if (!slv.get_sat_core().new_clause({!resolvers[i]->rho, !resolvers[j]->rho}))
                             throw unsolvable_exception();
         }
     }
@@ -84,9 +84,9 @@ namespace ratio
     void flaw::add_resolver(resolver &r)
     {
         // the activation of the resolver activates (and solves!) the flaw..
-        if (!gr.get_solver().get_sat_core().new_clause({!r.rho, phi}))
+        if (!slv.get_sat_core().new_clause({!r.rho, phi}))
             throw unsolvable_exception();
         resolvers.push_back(&r);
-        gr.new_resolver(r);
+        slv.new_resolver(r);
     }
 } // namespace ratio

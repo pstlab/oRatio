@@ -286,7 +286,7 @@ namespace ratio
         }
     }
 
-    state_variable::sv_flaw::sv_flaw(state_variable &sv, const std::set<atom *> &atms) : flaw(sv.get_solver().get_graph(), smart_type::get_resolvers(sv.get_solver(), atms), {}), sv(sv), overlapping_atoms(atms) {}
+    state_variable::sv_flaw::sv_flaw(state_variable &sv, const std::set<atom *> &atms) : flaw(sv.get_solver(), smart_type::get_resolvers(sv.get_solver(), atms), {}), sv(sv), overlapping_atoms(atms) {}
     state_variable::sv_flaw::~sv_flaw() {}
 
     std::string state_variable::sv_flaw::get_label() const
@@ -309,12 +309,12 @@ namespace ratio
         {
             if (auto a0_it = sv.leqs.find(as[0]); a0_it != sv.leqs.end())
                 if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.end())
-                    if (get_graph().get_solver().get_sat_core().value(a0_a1_it->second) != False)
+                    if (get_solver().get_sat_core().value(a0_a1_it->second) != False)
                         add_resolver(*new order_resolver(*this, a0_a1_it->second, *as[0], *as[1]));
 
             if (auto a1_it = sv.leqs.find(as[1]); a1_it != sv.leqs.end())
                 if (auto a1_a0_it = a1_it->second.find(as[0]); a1_a0_it != a1_it->second.end())
-                    if (get_graph().get_solver().get_sat_core().value(a1_a0_it->second) != False)
+                    if (get_solver().get_sat_core().value(a1_a0_it->second) != False)
                         add_resolver(*new order_resolver(*this, a1_a0_it->second, *as[1], *as[0]));
 
             expr a0_tau = as[0]->get(TAU);
@@ -327,29 +327,29 @@ namespace ratio
                 add_resolver(*new forbid_resolver(*this, *as[1], *a0_tau));
             else if (auto a0_a1_it = sv.plcs.find({as[0], as[1]}); a0_a1_it != sv.plcs.end())
                 for (const auto &a0_a1_disp : a0_a1_it->second)
-                    if (get_graph().get_solver().get_sat_core().value(a0_a1_disp.first) != False)
+                    if (get_solver().get_sat_core().value(a0_a1_disp.first) != False)
                         add_resolver(*new place_resolver(*this, a0_a1_disp.first, *as[0], *a0_a1_disp.second, *as[1]));
         }
     }
 
-    state_variable::order_resolver::order_resolver(sv_flaw &flw, const lit &r, const atom &before, const atom &after) : resolver(flw.get_graph(), r, rational::ZERO, flw), before(before), after(after) {}
+    state_variable::order_resolver::order_resolver(sv_flaw &flw, const lit &r, const atom &before, const atom &after) : resolver(flw.get_solver(), r, rational::ZERO, flw), before(before), after(after) {}
     state_variable::order_resolver::~order_resolver() {}
 
     std::string state_variable::order_resolver::get_label() const { return "{\"type\":\"order\", \"rho\":\"" + to_string(get_rho()) + "\", \"before_sigma\":" + std::to_string(before.get_sigma()) + ", \"after_sigma\":" + std::to_string(after.get_sigma()) + ", \"before_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&before)) + "\", \"after_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&after)) + "\"}"; }
 
     void state_variable::order_resolver::apply() {}
 
-    state_variable::place_resolver::place_resolver(sv_flaw &flw, const lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm) : resolver(flw.get_graph(), r, rational::ZERO, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
+    state_variable::place_resolver::place_resolver(sv_flaw &flw, const lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm) : resolver(flw.get_solver(), r, rational::ZERO, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
     state_variable::place_resolver::~place_resolver() {}
 
     std::string state_variable::place_resolver::get_label() const { return "{\"type\":\"place\", \"rho\":\"" + to_string(get_rho()) + "\", \"place_sigma\":" + std::to_string(plc_atm.get_sigma()) + ", \"forbid_sigma\":" + std::to_string(frbd_atm.get_sigma()) + ", \"place_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&plc_atm)) + "\", \"forbid_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&frbd_atm)) + "\"}"; }
 
     void state_variable::place_resolver::apply() {}
 
-    state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, atom &atm, item &itm) : resolver(flw.get_graph(), rational::ZERO, flw), atm(atm), itm(itm) {}
+    state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, atom &atm, item &itm) : resolver(flw.get_solver(), rational::ZERO, flw), atm(atm), itm(itm) {}
     state_variable::forbid_resolver::~forbid_resolver() {}
 
     std::string state_variable::forbid_resolver::get_label() const { return "{\"type\":\"forbid\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
 
-    void state_variable::forbid_resolver::apply() { get_graph().get_solver().get_sat_core().new_clause({!get_rho(), !get_graph().get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
+    void state_variable::forbid_resolver::apply() { get_solver().get_sat_core().new_clause({!get_rho(), !get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
 } // namespace ratio

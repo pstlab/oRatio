@@ -137,12 +137,30 @@ namespace ratio
         FIRE_SOLUTION_FOUND();
     }
 
+    void solver::take_decision(const lit &ch)
+    {
+        assert(get_sat_core().value(ch) == Undefined);
+        current_decision = ch;
+
+        // we take the decision..
+        if (!get_sat_core().assume(ch))
+            throw unsolvable_exception();
+        assert(std::all_of(phis.begin(), phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(rhos.begin(), rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
+
+        FIRE_STATE_CHANGED();
+
+        // we check if we need to expand the graph..
+        if (root_level())
+            gr.check_gamma();
+    }
+
     bool_expr solver::new_bool() noexcept
     {
         // we create a new boolean expression..
         bool_expr xp = new bool_item(*this, lit(get_sat_core().new_var()));
         // we create a new boolean flaw..
-        gr.new_flaw(*new bool_flaw(gr, gr.res, *xp));
+        new_flaw(*new bool_flaw(*this, get_cause(), *xp));
         return xp;
     }
 
@@ -157,7 +175,7 @@ namespace ratio
         // notice that we do not enforce the exct_one constraint!
         var_expr xp = new var_item(*this, tp, get_ov_theory().new_var(std::vector<var_value *>(allowed_vals.begin(), allowed_vals.end()), false));
         if (allowed_vals.size() > 1) // we create a new var flaw..
-            gr.new_flaw(*new var_flaw(gr, gr.res, *xp));
+            new_flaw(*new var_flaw(*this, get_cause(), *xp));
         return xp;
     }
 
@@ -170,7 +188,7 @@ namespace ratio
         bool_expr xp = new bool_item(*this, get_sat_core().new_disj(lits));
 
         if (exprs.size() > 1) // we create a new var flaw..
-            gr.new_flaw(*new disj_flaw(gr, gr.res, lits));
+            new_flaw(*new disj_flaw(*this, get_cause(), lits));
 
         return xp;
     }
@@ -178,8 +196,8 @@ namespace ratio
     void solver::new_atom(atom &atm, const bool &is_fact)
     {
         // we create a new atom flaw..
-        atom_flaw *af = new atom_flaw(gr, gr.res, atm, is_fact);
-        gr.new_flaw(*af);
+        atom_flaw *af = new atom_flaw(*this, get_cause(), atm, is_fact);
+        new_flaw(*af);
 
         // we associate the flaw to the atom..
         reason.emplace(&atm, af);
@@ -203,26 +221,96 @@ namespace ratio
     void solver::new_disjunction(context &d_ctx, const std::vector<const conjunction *> &conjs)
     {
         // we create a new disjunction flaw..
-        disjunction_flaw *df = new disjunction_flaw(gr, gr.res, d_ctx, conjs);
-        gr.new_flaw(*df);
+        disjunction_flaw *df = new disjunction_flaw(*this, get_cause(), d_ctx, conjs);
+        new_flaw(*df);
     }
 
-    void solver::take_decision(const lit &ch)
+    void solver::new_flaw(flaw &f, const bool &enqueue)
     {
-        assert(get_sat_core().value(ch) == Undefined);
-        current_decision = ch;
+        // we initialize the flaw..
+        f.init(); // flaws' initialization requires being at root-level..
+        S_FIRE_NEW_FLAW(f);
 
-        // we take the decision..
-        if (!get_sat_core().assume(ch))
+        if (enqueue) // we enqueue the flaw..
+            gr.enqueue(f);
+        else // we directly expand the flaw..
+            expand_flaw(f);
+
+        switch (sat.value(f.get_phi()))
+        {
+        case True: // we have a top-level (a landmark) flaw..
+            if (enqueue || std::none_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
+                flaws.insert(&f); // the flaw has not yet already been solved (e.g. it has a single resolver)..
+            break;
+        case Undefined: // we listen for the flaw to become active..
+            phis[variable(f.get_phi())].push_back(&f);
+            bind(variable(f.get_phi()));
+            break;
+        }
+    }
+
+    void solver::new_resolver(resolver &r)
+    {
+        S_FIRE_NEW_RESOLVER(r);
+        if (sat.value(r.rho) == Undefined) // we do not have a top-level (a landmark) resolver, nor an infeasible one..
+        {
+            // we listen for the resolver to become inactive..
+            rhos[variable(r.rho)].push_back(&r);
+            bind(variable(r.rho));
+        }
+    }
+
+    void solver::new_causal_link(flaw &f, resolver &r)
+    {
+        S_FIRE_CAUSAL_LINK_ADDED(f, r);
+        r.preconditions.push_back(&f);
+        f.supports.push_back(&r);
+        // activating the resolver requires the activation of the flaw..
+        bool new_clause = sat.new_clause({!r.rho, f.get_phi()});
+        assert(new_clause);
+        // we introduce an ordering constraint..
+        bool new_dist = sat.new_clause({!r.rho, get_idl_theory().new_distance(r.effect.position, f.position, 0)});
+        assert(new_dist);
+    }
+
+    void solver::expand_flaw(flaw &f)
+    {
+        assert(!f.expanded);
+
+        // we expand the flaw..
+        f.expand();
+
+        // we apply the flaw's resolvers..
+        for (const auto &r : f.resolvers)
+            apply_resolver(*r);
+
+        if (!get_sat_core().propagate())
             throw unsolvable_exception();
-        assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
 
-        FIRE_STATE_CHANGED();
+        // we propagate the costs starting from the currently expanded flaw..
+        gr.propagate_costs(f);
 
-        // we check if we need to expand the graph..
-        if (root_level())
-            gr.check_gamma();
+        // we clean up already solved flaws..
+        if (sat.value(f.get_phi()) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
+            flaws.erase(&f); // this flaw has already been solved..
+    }
+
+    void solver::apply_resolver(resolver &r)
+    {
+        res = &r;
+        set_ni(r.rho);
+        try
+        {
+            r.apply();
+        }
+        catch (const inconsistency_exception &)
+        { // the resolver is inapplicable..
+            if (!get_sat_core().new_clause({!r.rho}))
+                throw unsolvable_exception();
+        }
+
+        restore_ni();
+        res = nullptr;
     }
 
     void solver::next()
@@ -247,8 +335,8 @@ namespace ratio
 
         if (!get_sat_core().propagate())
             throw unsolvable_exception();
-        assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
+        assert(std::all_of(phis.begin(), phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(rhos.begin(), rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
 
         FIRE_STATE_CHANGED();
 
@@ -260,9 +348,9 @@ namespace ratio
     bool solver::propagate(const lit &p)
     {
         assert(cnfl.empty());
-        assert(gr.phis.count(variable(p)) || gr.rhos.count(variable(p)));
+        assert(phis.count(variable(p)) || rhos.count(variable(p)));
 
-        if (const auto at_phis_p = gr.phis.find(variable(p)); at_phis_p != gr.phis.end())
+        if (const auto at_phis_p = phis.find(variable(p)); at_phis_p != phis.end())
             switch (sat.value(at_phis_p->first))
             {
             case True:
@@ -277,7 +365,7 @@ namespace ratio
                         trail.back().solved_flaws.insert(f); // this flaw has been accidentally solved..
                 }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
-                    gr.phis.erase(at_phis_p);
+                    phis.erase(at_phis_p);
                 break;
             case False:
                 for (const auto &f : at_phis_p->second)
@@ -286,11 +374,11 @@ namespace ratio
                     gr.propagate_costs(*f);
                 }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
-                    gr.phis.erase(at_phis_p);
+                    phis.erase(at_phis_p);
                 break;
             }
 
-        if (const auto at_rhos_p = gr.rhos.find(variable(p)); at_rhos_p != gr.rhos.end())
+        if (const auto at_rhos_p = rhos.find(variable(p)); at_rhos_p != rhos.end())
             switch (sat.value(at_rhos_p->first))
             {
             case True:
@@ -298,14 +386,14 @@ namespace ratio
                     if (flaws.erase(&r->effect) && !root_level()) // this resolver has been activated, hence its effect flaw has been resolved (notice that we remove its effect only in case it was already active)..
                         trail.back().solved_flaws.insert(&r->effect);
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
-                    gr.rhos.erase(at_rhos_p);
+                    rhos.erase(at_rhos_p);
                 break;
             case False:
                 for (const auto &r : at_rhos_p->second)    // 'r' is a forbidden resolver..
                     if (sat.value(r->effect.phi) != False) // we update the cost of the resolver's effect..
                         gr.propagate_costs(r->effect);
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
-                    gr.rhos.erase(at_rhos_p);
+                    rhos.erase(at_rhos_p);
                 break;
             }
 
@@ -316,9 +404,9 @@ namespace ratio
     {
         assert(cnfl.empty());
         assert(std::all_of(flaws.begin(), flaws.end(), [this](flaw *f) { return sat.value(f->phi) == True; }));
-        assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return sat.value(f->phi) != True || (flaws.count(f) || std::any_of(trail.begin(), trail.end(), [this, f](layer l) { return l.solved_flaws.count(f); })); }); }));
-        assert(std::all_of(gr.phis.begin(), gr.phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return sat.value(f->phi) != False || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(gr.rhos.begin(), gr.rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return sat.value(r->rho) != False || is_positive_infinite(r->get_estimated_cost()); }); }));
+        assert(std::all_of(phis.begin(), phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return sat.value(f->phi) != True || (flaws.count(f) || std::any_of(trail.begin(), trail.end(), [this, f](layer l) { return l.solved_flaws.count(f); })); }); }));
+        assert(std::all_of(phis.begin(), phis.end(), [this](std::pair<smt::var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return sat.value(f->phi) != False || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(rhos.begin(), rhos.end(), [this](std::pair<smt::var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return sat.value(r->rho) != False || is_positive_infinite(r->get_estimated_cost()); }); }));
         return true;
     }
 

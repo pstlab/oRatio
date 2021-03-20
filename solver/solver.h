@@ -38,8 +38,10 @@ namespace ratio
 
   class solver : public core, private smt::theory
   {
+    friend class flaw;
     friend class graph;
     friend class smart_type;
+    friend class atom_flaw;
 #ifdef BUILD_LISTENERS
     friend class solver_listener;
 #endif
@@ -61,22 +63,35 @@ namespace ratio
      * Solves the given problem.
      */
     void solve() override;
+    void take_decision(const smt::lit &ch);
 
     bool_expr new_bool() noexcept override;
     expr new_enum(const type &tp, const std::vector<item *> &allowed_vals) override;
-
     bool_expr disj(const std::vector<bool_expr> &exprs) noexcept override;
-
-    atom_flaw &get_reason(const atom &atm) const noexcept { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
 
     size_t decision_level() const noexcept { return trail.size(); } // returns the current decision level..
     bool root_level() const noexcept { return trail.empty(); }      // checks whether the current decision level is root level..
 
   private:
+    atom_flaw &get_reason(const atom &atm) const noexcept { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
+    inline const std::vector<resolver *> get_cause()
+    {
+      if (res)
+        return {res};
+      else
+        return {};
+    }
+
     void new_atom(atom &atm, const bool &is_fact) override;                                       // notifies the creation of a new atom..
     void new_disjunction(context &d_ctx, const std::vector<const conjunction *> &conjs) override; // notifies the creation of a new disjunction..
 
-    void take_decision(const smt::lit &ch);
+    void new_flaw(flaw &f, const bool &enqueue = true); // notifies the solver that a new flaw 'f' has been created..
+    void new_resolver(resolver &r);                     // notifies the solver that a new resolver 'r' has been created..
+    void new_causal_link(flaw &f, resolver &r);         // notifies the solver that a new causal link between a flaw 'f' and a resolver 'r' has been created..
+
+    void expand_flaw(flaw &f);        // expands the given flaw into the planning graph..
+    void apply_resolver(resolver &r); // applies the given resolver into the planning graph..
+
     void next();
 
     bool propagate(const smt::lit &p) override;
@@ -98,13 +113,16 @@ namespace ratio
       std::unordered_set<flaw *> new_flaws;                  // the just activated flaws..
       std::unordered_set<flaw *> solved_flaws;               // the just solved flaws..
     };
-    graph gr;                                             // the causal graph..
-    std::vector<smart_type *> sts;                        // the smart-types..
-    std::vector<flaw *> pending_flaws;                    // pending flaws, waiting root-level for being initialized..
-    std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
-    std::unordered_set<flaw *> flaws;                     // the currently active flaws..
-    smt::lit current_decision;                            // the decision which has just been taken..
-    std::vector<layer> trail;                             // the list of taken decisions, with the associated changes made, in chronological order..
+    graph gr;                                                   // the causal graph..
+    std::vector<smart_type *> sts;                              // the smart-types..
+    resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
+    std::vector<flaw *> pending_flaws;                          // pending flaws, waiting root-level for being initialized..
+    std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
+    std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
+    std::unordered_map<const atom *, atom_flaw *> reason;       // the reason for having introduced an atom..
+    std::unordered_set<flaw *> flaws;                           // the currently active flaws..
+    smt::lit current_decision;                                  // the decision which has just been taken..
+    std::vector<layer> trail;                                   // the list of taken decisions, with the associated changes made, in chronological order..
 
 #ifdef BUILD_LISTENERS
   private:

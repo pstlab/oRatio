@@ -11,7 +11,7 @@ namespace ratio
   class bool_flaw : public flaw
   {
   public:
-    bool_flaw(graph &gr, resolver *const cause, bool_item &b_itm);
+    bool_flaw(solver &slv, const std::vector<resolver *> &causes, bool_item &b_itm);
     bool_flaw(const bool_flaw &orig) = delete;
     virtual ~bool_flaw();
 
@@ -23,7 +23,7 @@ namespace ratio
     class choose_value : public resolver
     {
     public:
-      choose_value(graph &gr, smt::rational cst, bool_flaw &bl_flaw, const smt::lit &val);
+      choose_value(solver &slv, smt::rational cst, bool_flaw &bl_flaw, const smt::lit &val);
       choose_value(const choose_value &that) = delete;
       virtual ~choose_value();
 

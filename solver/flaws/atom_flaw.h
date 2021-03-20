@@ -13,7 +13,7 @@ namespace ratio
   {
 
   public:
-    atom_flaw(graph &gr, resolver *const cause, atom &a, const bool is_fact);
+    atom_flaw(solver &slv, const std::vector<resolver *> &causes, atom &a, const bool is_fact);
     atom_flaw(const atom_flaw &orig) = delete;
     virtual ~atom_flaw();
 
@@ -28,8 +28,8 @@ namespace ratio
     class activate_fact : public resolver
     {
     public:
-      activate_fact(graph &gr, atom_flaw &f, atom &a);
-      activate_fact(graph &gr, const smt::lit &r, atom_flaw &f, atom &a);
+      activate_fact(solver &slv, atom_flaw &f, atom &a);
+      activate_fact(solver &slv, const smt::lit &r, atom_flaw &f, atom &a);
       activate_fact(const activate_fact &that) = delete;
       virtual ~activate_fact();
 
@@ -45,8 +45,8 @@ namespace ratio
     class activate_goal : public resolver
     {
     public:
-      activate_goal(graph &gr, atom_flaw &f, atom &a);
-      activate_goal(graph &gr, const smt::lit &r, atom_flaw &f, atom &a);
+      activate_goal(solver &slv, atom_flaw &f, atom &a);
+      activate_goal(solver &slv, const smt::lit &r, atom_flaw &f, atom &a);
       activate_goal(const activate_goal &that) = delete;
       virtual ~activate_goal();
 
@@ -62,7 +62,7 @@ namespace ratio
     class unify_atom : public resolver
     {
     public:
-      unify_atom(graph &gr, atom_flaw &atm_flaw, atom &atm, atom &trgt, const std::vector<smt::lit> &unif_lits);
+      unify_atom(solver &slv, atom_flaw &atm_flaw, atom &atm, atom &trgt, const std::vector<smt::lit> &unif_lits);
       unify_atom(const unify_atom &that) = delete;
       virtual ~unify_atom();
 
