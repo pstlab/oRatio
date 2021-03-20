@@ -40,6 +40,11 @@ if(DEFERRABLE_FLAWS)
     target_compile_definitions(solver PRIVATE DEFERRABLE_FLAWS)
 endif()
 
+message(STATUS "Check inconsistencies:    ${CHECK_INCONSISTENCIES}")
+if(CHECK_INCONSISTENCIES)
+    target_compile_definitions(solver PRIVATE CHECK_INCONSISTENCIES)
+endif()
+
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
