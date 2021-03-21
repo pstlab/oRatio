@@ -35,12 +35,7 @@ namespace ratio
                 return; // nothing to propagate..
         }
 
-        if (!slv.trail.empty()) // we store the current flaw's estimated cost, if not already stored, for allowing backtracking..
-            slv.trail.back().old_f_costs.try_emplace(&f, f.est_cost);
-
-        // we update the flaw's estimated cost..
-        f.est_cost = c_cost;
-        G_FIRE_FLAW_COST_CHANGED(f);
+        slv.set_cost(f, c_cost);
 
         // we (try to) update the estimated costs of the supports' effects and enqueue them for cost propagation..
         visited.insert(&f);
