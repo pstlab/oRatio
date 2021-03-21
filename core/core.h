@@ -195,7 +195,11 @@ namespace ratio
     smt::rdl_theory rdl_th; // the real difference logic theory..
 
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    std::unordered_map<item *, std::string> expr_names;
+  public:
+    const std::string &guess_name(const item *itm) const noexcept { return expr_names.at(itm); }
+
+  private:
+    std::unordered_map<const item *, const std::string> expr_names;
 #endif
 
     std::vector<riddle::ast::compilation_unit *> cus; // the compilation units..
