@@ -1,0 +1,31 @@
+Airplane apn = new Airplane();
+
+Truck tru1 = new Truck();
+Truck tru2 = new Truck();
+
+City city1 = new City();
+Airport apt1 = new Airport(city1);
+Location pos1 = new Location(city1);
+
+City city2 = new City();
+Airport apt2 = new Airport(city2);
+Location pos2 = new Location(city2);
+
+Package obj11 = new Package();
+Package obj12 = new Package();
+Package obj13 = new Package();
+Package obj21 = new Package();
+Package obj22 = new Package();
+Package obj23 = new Package();
+
+fact at_apn1_apt2 = new apn.At(a:apt2, start:origin);  at_apn1_apt2.duration >= 1.0;
+fact at_tru1_pos1 = new tru1.At(l:pos1, start:origin);  at_tru1_pos1.duration >= 1.0;
+fact at_tru2_pos2 = new tru2.At(l:pos2, start:origin);  at_tru2_pos2.duration >= 1.0;
+fact at_obj11_pos1 = new obj11.At(l:pos1, start:origin);  at_obj11_pos1.duration >= 1.0;
+fact at_obj12_pos1 = new obj12.At(l:pos1, start:origin);  at_obj12_pos1.duration >= 1.0;
+fact at_obj13_pos1 = new obj13.At(l:pos1, start:origin);  at_obj13_pos1.duration >= 1.0;
+fact at_obj21_pos2 = new obj21.At(l:pos2, start:origin);  at_obj21_pos2.duration >= 1.0;
+fact at_obj22_pos2 = new obj22.At(l:pos2, start:origin);  at_obj22_pos2.duration >= 1.0;
+fact at_obj23_pos2 = new obj23.At(l:pos2, start:origin);  at_obj23_pos2.duration >= 1.0;
+
+goal at_obj11_apt1 = new obj11.At(l:apt1, end:horizon);
