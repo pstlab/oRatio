@@ -20,7 +20,7 @@ namespace smt
             for (const auto &i : items)
             {
                 const var bv = sat.new_var();
-                assigns.back().emplace(i, bv);
+                assigns.back().emplace(i, lit(bv));
                 bind(bv);
                 is_contained_in[bv].insert(id);
             }
