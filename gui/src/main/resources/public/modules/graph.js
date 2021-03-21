@@ -329,6 +329,8 @@ function resolver_label(resolver) {
                 return 'activate';
             case 'unify':
                 return 'unify';
+            case 'assignment':
+                return resolver.label.val;
             default:
                 switch (resolver.label.rho) {
                     case 'b0':

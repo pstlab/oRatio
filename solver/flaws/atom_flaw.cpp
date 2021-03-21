@@ -71,9 +71,9 @@ namespace ratio
     std::string atom_flaw::activate_fact::get_label() const noexcept { return "{\"type\":\"activate\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
 
     void atom_flaw::activate_fact::apply()
-    {
-        // activating this resolver activates the fact..
-        get_solver().get_sat_core().new_clause({!get_rho(), lit(atm.get_sigma())});
+    { // activating this resolver activates the fact..
+        if (!get_solver().get_sat_core().new_clause({!get_rho(), lit(atm.get_sigma())}))
+            throw unsolvable_exception();
     }
 
     atom_flaw::activate_goal::activate_goal(solver &slv, atom_flaw &f, atom &a) : resolver(slv, rational::ONE, f), atm(a) {}
@@ -83,9 +83,9 @@ namespace ratio
     std::string atom_flaw::activate_goal::get_label() const noexcept { return "{\"type\":\"activate\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
 
     void atom_flaw::activate_goal::apply()
-    {
-        // activating this resolver activates the goal..
-        get_solver().get_sat_core().new_clause({!get_rho(), lit(atm.get_sigma())});
+    { // activating this resolver activates the goal..
+        if (!get_solver().get_sat_core().new_clause({!get_rho(), lit(atm.get_sigma())}))
+            throw unsolvable_exception();
         // we also apply the rule..
         static_cast<const predicate &>(atm.get_type()).apply_rule(atm);
     }
