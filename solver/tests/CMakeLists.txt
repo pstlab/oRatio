@@ -53,3 +53,6 @@ add_test(NAME GOAC_5Pic_2Wind COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples
 add_test(NAME GOAC_5Pic_3Wind COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/goac/goac_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/goac/map.rddl" "${CMAKE_SOURCE_DIR}/examples/goac/goac_5pic_3wind.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME GOAC_5Pic_4Wind COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/goac/goac_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/goac/map.rddl" "${CMAKE_SOURCE_DIR}/examples/goac/goac_5pic_4wind.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME GOAC_5Pic_5Wind COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/goac/goac_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/goac/map.rddl" "${CMAKE_SOURCE_DIR}/examples/goac/goac_5pic_5wind.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+add_test(NAME Logistics_0 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/logistics/logistics_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/logistics/logistics_problem_0.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME Logistics_1 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/logistics/logistics_domain.rddl" "${CMAKE_SOURCE_DIR}/examples/logistics/logistics_problem_1.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
