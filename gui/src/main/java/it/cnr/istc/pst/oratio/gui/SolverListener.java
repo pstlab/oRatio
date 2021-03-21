@@ -71,245 +71,210 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     }
 
     @Override
-    public void log(String log) {
-        App.EXECUTOR.execute(() -> {
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.Log(log)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void log(String log) {
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.Log(log)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void read(String arg0) {
+    public synchronized void read(String arg0) {
     }
 
     @Override
-    public void read(String[] arg0) {
+    public synchronized void read(String[] arg0) {
     }
 
     @Override
-    public void stateChanged() {
-        App.EXECUTOR.execute(() -> {
-            timelines.stateChanged();
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.Timelines(getTimelines())));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void stateChanged() {
+        timelines.stateChanged();
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.Timelines(getTimelines())));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void startedSolving() {
-        App.EXECUTOR.execute(() -> {
-            state = SolverState.Solving;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.StartedSolving()));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void startedSolving() {
+        state = SolverState.Solving;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.StartedSolving()));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void solutionFound() {
-        App.EXECUTOR.execute(() -> {
-            state = SolverState.Solved;
-            if (current_flaw != null)
-                current_flaw.current = false;
-            current_flaw = null;
-            if (current_resolver != null)
-                current_resolver.current = false;
-            current_resolver = null;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.SolutionFound()));
-                App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void solutionFound() {
+        state = SolverState.Solved;
+        if (current_flaw != null)
+            current_flaw.current = false;
+        current_flaw = null;
+        if (current_resolver != null)
+            current_resolver.current = false;
+        current_resolver = null;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.SolutionFound()));
+            App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void inconsistentProblem() {
-        App.EXECUTOR.execute(() -> {
-            state = SolverState.Inconsistent;
-            if (current_flaw != null)
-                current_flaw.current = false;
-            current_flaw = null;
-            if (current_resolver != null)
-                current_resolver.current = false;
-            current_resolver = null;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.InconsistentProblem()));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void inconsistentProblem() {
+        state = SolverState.Inconsistent;
+        if (current_flaw != null)
+            current_flaw.current = false;
+        current_flaw = null;
+        if (current_resolver != null)
+            current_resolver.current = false;
+        current_resolver = null;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.InconsistentProblem()));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void flawCreated(long id, long[] causes, String label, State state, Bound position) {
-        App.EXECUTOR.execute(() -> {
-            Flaw c_flaw = new Flaw(id,
-                    Arrays.stream(causes).mapToObj(r_id -> resolvers.get(r_id)).toArray(Resolver[]::new), label, state,
-                    position);
-            Stream.of(c_flaw.causes).forEach(c -> c.preconditions.add(c_flaw));
-            flaws.put(id, c_flaw);
-            try {
-                App.broadcast(MAPPER.writeValueAsString(
-                        new Message.FlawCreated(id, causes, label, (byte) state.ordinal(), position)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void flawCreated(long id, long[] causes, String label, State state, Bound position) {
+        Flaw c_flaw = new Flaw(id, Arrays.stream(causes).mapToObj(r_id -> resolvers.get(r_id)).toArray(Resolver[]::new),
+                label, state, position);
+        Stream.of(c_flaw.causes).forEach(c -> c.preconditions.add(c_flaw));
+        flaws.put(id, c_flaw);
+        try {
+            App.broadcast(MAPPER
+                    .writeValueAsString(new Message.FlawCreated(id, causes, label, (byte) state.ordinal(), position)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void flawStateChanged(final long id, final State state) {
-        App.EXECUTOR.execute(() -> {
-            final Flaw flaw = flaws.get(id);
-            flaw.state = state;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.FlawStateChanged(id, (byte) state.ordinal())));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void flawStateChanged(final long id, final State state) {
+        final Flaw flaw = flaws.get(id);
+        flaw.state = state;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.FlawStateChanged(id, (byte) state.ordinal())));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void flawCostChanged(final long id, final Rational cost) {
-        App.EXECUTOR.execute(() -> {
-            final Flaw flaw = flaws.get(id);
-            flaw.cost = cost;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.FlawCostChanged(id, cost)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void flawCostChanged(final long id, final Rational cost) {
+        final Flaw flaw = flaws.get(id);
+        flaw.cost = cost;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.FlawCostChanged(id, cost)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void flawPositionChanged(final long id, final Bound position) {
-        App.EXECUTOR.execute(() -> {
-            final Flaw flaw = flaws.get(id);
-            flaw.position = position;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.FlawPositionChanged(id, position)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void flawPositionChanged(final long id, final Bound position) {
+        final Flaw flaw = flaws.get(id);
+        flaw.position = position;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.FlawPositionChanged(id, position)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void currentFlaw(final long id) {
-        App.EXECUTOR.execute(() -> {
-            if (current_flaw != null)
-                current_flaw.current = false;
-            final Flaw flaw = flaws.get(id);
-            current_flaw = flaw;
-            current_flaw.current = true;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.CurrentFlaw(id)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void currentFlaw(final long id) {
+        if (current_flaw != null)
+            current_flaw.current = false;
+        final Flaw flaw = flaws.get(id);
+        current_flaw = flaw;
+        current_flaw.current = true;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.CurrentFlaw(id)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void resolverCreated(final long id, final long effect, final Rational cost, final String label,
+    public synchronized void resolverCreated(final long id, final long effect, final Rational cost, final String label,
             final State state) {
-        App.EXECUTOR.execute(() -> {
-            final Resolver resolver = new Resolver(id, flaws.get(effect), label, state, cost);
-            resolvers.put(id, resolver);
-            try {
-                App.broadcast(MAPPER.writeValueAsString(
-                        new Message.ResolverCreated(id, effect, cost, label, (byte) state.ordinal())));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+        final Resolver resolver = new Resolver(id, flaws.get(effect), label, state, cost);
+        resolvers.put(id, resolver);
+        try {
+            App.broadcast(MAPPER
+                    .writeValueAsString(new Message.ResolverCreated(id, effect, cost, label, (byte) state.ordinal())));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void resolverStateChanged(final long id, final State state) {
-        App.EXECUTOR.execute(() -> {
-            final Resolver resolver = resolvers.get(id);
-            resolver.state = state;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.ResolverStateChanged(id, (byte) state.ordinal())));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void resolverStateChanged(final long id, final State state) {
+        final Resolver resolver = resolvers.get(id);
+        resolver.state = state;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.ResolverStateChanged(id, (byte) state.ordinal())));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void currentResolver(final long id) {
-        App.EXECUTOR.execute(() -> {
-            if (current_resolver != null)
-                current_resolver.current = false;
-            final Resolver resolver = resolvers.get(id);
-            current_resolver = resolver;
-            current_resolver.current = true;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.CurrentResolver(id)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void currentResolver(final long id) {
+        if (current_resolver != null)
+            current_resolver.current = false;
+        final Resolver resolver = resolvers.get(id);
+        current_resolver = resolver;
+        current_resolver.current = true;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.CurrentResolver(id)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void causalLinkAdded(final long flaw, final long resolver) {
-        App.EXECUTOR.execute(() -> {
-            resolvers.get(resolver).preconditions.add(flaws.get(flaw));
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.CausalLinkAdded(flaw, resolver)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void causalLinkAdded(final long flaw, final long resolver) {
+        resolvers.get(resolver).preconditions.add(flaws.get(flaw));
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.CausalLinkAdded(flaw, resolver)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void tick(final Rational current_time) {
-        App.EXECUTOR.execute(() -> {
-            this.current_time = current_time;
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void tick(final Rational current_time) {
+        this.current_time = current_time;
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void startingAtoms(final long[] atoms) {
-        App.EXECUTOR.execute(() -> {
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.StartingAtoms(atoms)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void startingAtoms(final long[] atoms) {
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.StartingAtoms(atoms)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     @Override
-    public void endingAtoms(final long[] atoms) {
-        App.EXECUTOR.execute(() -> {
-            try {
-                App.broadcast(MAPPER.writeValueAsString(new Message.EndingAtoms(atoms)));
-            } catch (JsonProcessingException e) {
-                LOG.error("Cannot serialize", e);
-            }
-        });
+    public synchronized void endingAtoms(final long[] atoms) {
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.EndingAtoms(atoms)));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
     }
 
     void clear() {

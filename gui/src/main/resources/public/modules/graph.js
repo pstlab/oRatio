@@ -117,7 +117,7 @@ export class Graph {
 
     resolver_state_changed(change) {
         this.node_map.get(change.id).state = change.state;
-        this.links.filter(l => l.source.id === change.id).forEach(l => l.state = change.state);
+        this.links.filter(l => l.source.id === change.id || l.target.id === change.id).forEach(l => l.state = change.state);
         this.update();
     }
 

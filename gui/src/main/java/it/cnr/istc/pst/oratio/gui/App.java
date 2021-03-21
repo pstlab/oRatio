@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -22,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.Javalin;
 import io.javalin.websocket.WsContext;
+import io.javalin.websocket.WsMessageContext;
 import it.cnr.istc.pst.oratio.Bound;
 import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
@@ -33,7 +32,6 @@ import it.cnr.istc.pst.oratio.timelines.TimelinesExecutor;
 public class App {
 
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
-    static final Executor EXECUTOR = Executors.newSingleThreadExecutor();
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final Solver SOLVER = new Solver();
     static final TimelinesExecutor TL_EXEC = new TimelinesExecutor(SOLVER, new Rational(1));
@@ -87,40 +85,42 @@ public class App {
             config.addStaticFiles("/public");
         });
         app.ws("/solver", ws -> {
-            ws.onConnect(ctx -> {
-                EXECUTOR.execute(() -> {
-                    LOG.info("New connection..");
-                    contexts.add(ctx);
-                    try {
-                        ctx.send(MAPPER.writeValueAsString(
-                                new Message.Graph(SLV_LISTENER.getFlaws(), SLV_LISTENER.getResolvers())));
-                        ctx.send(MAPPER.writeValueAsString(new Message.Timelines(SLV_LISTENER.getTimelines())));
-                        if (SLV_LISTENER.getState() == SolverState.Solved)
-                            ctx.send(MAPPER.writeValueAsString(new Message.Tick(SLV_LISTENER.getCurrentTime())));
-                    } catch (JsonProcessingException e) {
-                        LOG.error("Cannot serialize", e);
-                    }
-                });
-            });
-            ws.onClose(ctx -> {
-                EXECUTOR.execute(() -> {
-                    LOG.info("Lost connection..");
-                    contexts.remove(ctx);
-                });
-            });
-            ws.onMessage(ctx -> {
-                final String message = ctx.message();
-                LOG.info("Received message {}..", message);
-                switch (message) {
-                    case "tick":
-                        EXECUTOR.execute(() -> TL_EXEC.tick());
-                        break;
-                    default:
-                        break;
-                }
-            });
+            ws.onConnect(ctx -> on_connect(ctx));
+            ws.onClose(ctx -> on_close(ctx));
+            ws.onMessage(ctx -> on_message(ctx));
         });
         app.start();
+    }
+
+    static synchronized void on_connect(WsContext ctx) {
+        LOG.info("New connection..");
+        contexts.add(ctx);
+        try {
+            ctx.send(
+                    MAPPER.writeValueAsString(new Message.Graph(SLV_LISTENER.getFlaws(), SLV_LISTENER.getResolvers())));
+            ctx.send(MAPPER.writeValueAsString(new Message.Timelines(SLV_LISTENER.getTimelines())));
+            if (SLV_LISTENER.getState() == SolverState.Solved)
+                ctx.send(MAPPER.writeValueAsString(new Message.Tick(SLV_LISTENER.getCurrentTime())));
+        } catch (JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
+    }
+
+    static synchronized void on_close(WsContext ctx) {
+        LOG.info("Lost connection..");
+        contexts.remove(ctx);
+    }
+
+    static synchronized void on_message(WsMessageContext ctx) {
+        final String message = ctx.message();
+        LOG.info("Received message {}..", message);
+        switch (message) {
+        case "tick":
+            TL_EXEC.tick();
+            break;
+        default:
+            break;
+        }
     }
 
     static void broadcast(final String message) {
