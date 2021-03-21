@@ -71,7 +71,7 @@ namespace ratio
             // this is the next flaw (i.e. the most expensive one) to be solved..
             auto f_next = std::min_element(flaws.begin(), flaws.end(), [](flaw *const f0, flaw *const f1) { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
             assert(f_next != flaws.end());
-            S_FIRE_CURRENT_FLAW(**f_next);
+            FIRE_CURRENT_FLAW(**f_next);
 
             if (is_infinite((*f_next)->get_estimated_cost()))
             { // we don't know how to solve this flaw: we search..
@@ -85,7 +85,7 @@ namespace ratio
 
             // this is the next resolver (i.e. the cheapest one) to be applied..
             auto *res = (*f_next)->get_best_resolver();
-            S_FIRE_CURRENT_RESOLVER(*res);
+            FIRE_CURRENT_RESOLVER(*res);
 
             assert(!is_infinite(res->get_estimated_cost()));
 
@@ -365,7 +365,7 @@ namespace ratio
             {
             case True:
                 for (const auto &f : at_phis_p->second)
-                {   // 'f' is an activated flaw..
+                { // 'f' is an activated flaw..
                     //  FIRE_FLAW_STATE_CHANGED(*f);
                     assert(!flaws.count(f));
                     if (!root_level())
@@ -380,7 +380,7 @@ namespace ratio
                 break;
             case False:
                 for (const auto &f : at_phis_p->second)
-                {   // 'f' will never appear in any incoming partial solutions..
+                { // 'f' will never appear in any incoming partial solutions..
                     //  FIRE_FLAW_STATE_CHANGED(*f);
                     assert(!flaws.count(f));
                     gr.propagate_costs(*f);
