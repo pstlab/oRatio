@@ -23,7 +23,7 @@ namespace ratio
     {
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
         if (const auto itm = dynamic_cast<const item *>(&val))
-            return "{\"type\":\"assignment\", \"rho\":\"" + to_string(get_rho()) + "\", \"val\":\"" + get_solver().guess_name(itm) + "\"}";
+            return "{\"type\":\"assignment\", \"rho\":\"" + to_string(get_rho()) + "\", \"val\":\"" + get_solver().guess_name(*itm) + "\"}";
         else
 #endif
             return "{\"type\":\"assignment\", \"rho\":\"" + to_string(get_rho()) + "\"}";

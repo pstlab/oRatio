@@ -195,7 +195,7 @@ namespace ratio
 
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
   public:
-    const std::string &guess_name(const item *itm) const noexcept { return expr_names.at(itm); }
+    const std::string &guess_name(const item &itm) const noexcept { return expr_names.at(&itm); }
 
   private:
     std::unordered_map<const item *, const std::string> expr_names;
