@@ -3,6 +3,9 @@
 #include "type.h"
 #include "item.h"
 #include "core_parser.h"
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+#include "core.h"
+#endif
 #include <cassert>
 
 namespace ratio
@@ -61,6 +64,9 @@ namespace ratio
         {
             assert(init_list[il_idx].second.size() == 1);
             itm.exprs.emplace(init_list[il_idx].first, dynamic_cast<const ast::expression *>(init_list[il_idx].second[0])->evaluate(*this, ctx));
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+            get_core().expr_names.emplace(&*itm.exprs.at(init_list[il_idx].first), init_list[il_idx].first);
+#endif
         }
 
         // we instantiate the uninstantiated fields..
@@ -78,6 +84,9 @@ namespace ratio
                     else
                         itm.exprs.emplace(f.second->get_name(), tp.new_existential());
                 }
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+                get_core().expr_names.emplace(&*itm.exprs.at(f.second->get_name()), f.second->get_name());
+#endif
             }
 
         // finally, we execute the constructor body..

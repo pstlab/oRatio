@@ -44,6 +44,9 @@ namespace ratio
 #ifdef BUILD_LISTENERS
   class core_listener;
 #endif
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+  class constructor;
+#endif
 
   namespace ast
   {
@@ -54,6 +57,9 @@ namespace ratio
     class typedef_declaration;
     class enum_declaration;
     class class_declaration;
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    class local_field_statement;
+#endif
   } // namespace ast
 
   class core : public scope, public env
@@ -70,6 +76,10 @@ namespace ratio
     friend class core_listener;
     friend class type;
     friend class scope;
+#endif
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    friend class ast::local_field_statement;
+    friend class constructor;
 #endif
 
   public:
@@ -183,6 +193,10 @@ namespace ratio
     smt::ov_theory ov_th;   // the object-variable theory..
     smt::idl_theory idl_th; // the integer difference logic theory..
     smt::rdl_theory rdl_th; // the real difference logic theory..
+
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    std::unordered_map<item *, std::string> expr_names;
+#endif
 
     std::vector<riddle::ast::compilation_unit *> cus; // the compilation units..
 
