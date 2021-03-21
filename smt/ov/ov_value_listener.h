@@ -4,7 +4,6 @@
 
 namespace smt
 {
-
   class ov_value_listener
   {
     friend class ov_theory;

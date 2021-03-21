@@ -8,7 +8,6 @@
 
 namespace smt
 {
-
   class rdl_value_listener;
 
   class rdl_theory : public theory

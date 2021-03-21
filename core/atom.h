@@ -4,7 +4,6 @@
 
 namespace ratio
 {
-
   class predicate;
 
   class atom : public item

@@ -10,7 +10,6 @@
 
 namespace smt
 {
-
   class ov_value_listener;
 
   class ov_theory : public theory

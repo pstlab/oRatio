@@ -38,7 +38,6 @@ namespace riddle::ast
 
 namespace ratio
 {
-
   class atom;
   class conjunction;
 #ifdef BUILD_LISTENERS

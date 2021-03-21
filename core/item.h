@@ -7,7 +7,6 @@
 
 namespace ratio
 {
-
   class type;
 
   class item : public env, public smt::var_value

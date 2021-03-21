@@ -3,7 +3,6 @@
 
 namespace riddle
 {
-
     using namespace ast;
 
     parser::parser(std::istream &is) : lex(is) {}

@@ -9,7 +9,6 @@ using namespace smt;
 
 namespace ratio
 {
-
     propositional_state::propositional_state(solver &slv) : smart_type(slv, slv, PROPOSITIONAL_STATE_NAME)
     {
         new_constructors({new ps_constructor(*this)});

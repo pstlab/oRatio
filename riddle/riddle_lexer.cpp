@@ -2,7 +2,6 @@
 
 namespace riddle
 {
-
     lexer::lexer(std::istream &is)
     {
         char buffer[1024];

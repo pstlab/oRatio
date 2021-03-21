@@ -32,7 +32,6 @@ namespace smt
             });
         }
     }
-
     thread_pool::~thread_pool()
     {
         {

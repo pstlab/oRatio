@@ -9,7 +9,6 @@
 
 namespace ratio
 {
-
   class order_resolver;
 
   class state_variable : public smart_type

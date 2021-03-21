@@ -9,7 +9,6 @@
 
 namespace smt
 {
-
   class thread_pool
   {
   public:

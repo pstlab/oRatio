@@ -2,7 +2,6 @@
 
 namespace ratio
 {
-
   class env;
   class item;
   class bool_item;

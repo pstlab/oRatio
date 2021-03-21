@@ -8,7 +8,6 @@
 
 namespace ratio
 {
-
   class propositional_agent : public smart_type
   {
   public:

@@ -4,7 +4,6 @@
 
 namespace rl
 {
-
   class dql_environment
   {
   public:

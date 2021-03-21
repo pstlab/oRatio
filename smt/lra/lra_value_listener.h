@@ -4,7 +4,6 @@
 
 namespace smt
 {
-
   class lra_value_listener
   {
     friend class lra_theory;

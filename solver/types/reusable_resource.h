@@ -13,7 +13,6 @@
 
 namespace ratio
 {
-
   class reusable_resource : public smart_type
   {
   public:

@@ -3,7 +3,6 @@
 
 namespace ratio
 {
-
     context::context(env *const ptr) : ptr(ptr) { ptr->ref_count++; }
     context::context(const context &orig) : ptr(orig.ptr) { ptr->ref_count++; }
     context::~context()

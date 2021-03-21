@@ -6,7 +6,6 @@
 
 namespace smt
 {
-
     idl_theory::idl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<I>>(size, std::vector<I>(size, inf()))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
     {
         for (size_t i = 0; i < size; ++i)
@@ -16,7 +15,6 @@ namespace smt
             _preds[i][i] = -1;
         }
     }
-
     idl_theory::~idl_theory() {}
 
     var idl_theory::new_var() noexcept

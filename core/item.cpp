@@ -9,7 +9,6 @@ using namespace smt;
 
 namespace ratio
 {
-
     item::item(core &cr, const context ctx, const type &tp) : env(cr, context(ctx)), tp(tp) {}
     item::~item() {}
 

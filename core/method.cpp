@@ -7,7 +7,6 @@
 
 namespace ratio
 {
-
     method::method(core &cr, scope &scp, const type *const return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts) : scope(cr, scp), return_type(return_type), name(name), args(args), statements(stmnts)
     {
         if (type *t = dynamic_cast<type *>(&scp))
@@ -16,7 +15,6 @@ namespace ratio
             new_fields({new field(*return_type, RETURN_KEYWORD, nullptr, true)});
         new_fields(args);
     }
-
     method::~method() {}
 
     item *method::invoke(context &ctx, const std::vector<expr> &exprs) const

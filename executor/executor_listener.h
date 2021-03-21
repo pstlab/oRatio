@@ -4,7 +4,6 @@
 
 namespace ratio
 {
-
   class executor_listener
   {
     friend class executor;

@@ -4,14 +4,12 @@
 
 namespace ratio
 {
-
   class scope;
   class context;
   class expr;
 
   namespace ast
   {
-
     class expression : public riddle::ast::expression
     {
     public:

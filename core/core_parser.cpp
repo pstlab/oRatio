@@ -11,10 +11,8 @@
 
 namespace ratio
 {
-
     namespace ast
     {
-
         expression::expression() {}
         expression::~expression() {}
 

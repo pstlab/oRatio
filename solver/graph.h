@@ -12,7 +12,6 @@
 
 namespace ratio
 {
-
   class solver;
   class flaw;
   class resolver;

@@ -5,7 +5,6 @@
 
 namespace ratio
 {
-
   class bool_item;
 
   class bool_flaw : public flaw

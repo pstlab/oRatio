@@ -5,7 +5,6 @@
 
 namespace smt
 {
-
     assertion::assertion(lra_theory &th, const op o, const lit b, const var x, const inf_rational &v) : th(th), o(o), b(b), x(x), v(v) { th.a_watches[x].push_back(this); }
     assertion::~assertion() {}
 

@@ -5,7 +5,6 @@ using namespace torch;
 
 namespace rl
 {
-
     td3_agent::td3_agent(td3_environment &env, const size_t &buffer_size) : env(env), actor_model(env.get_state_dim(), env.get_action_dim()), actor_target(env.get_state_dim(), env.get_action_dim()), actor_optimizer(actor_model->parameters()), critic_model(env.get_state_dim(), env.get_action_dim()), critic_target(env.get_state_dim(), env.get_action_dim()), critic_optimizer(critic_model->parameters()), buffer(buffer_size)
     {
         // we set the actor target network and the actor critic network in eval mode (these networks will not be trained)..

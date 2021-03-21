@@ -4,7 +4,6 @@
 
 namespace smt
 {
-
   class rdl_value_listener
   {
     friend class rdl_theory;

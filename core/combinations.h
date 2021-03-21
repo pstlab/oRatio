@@ -6,7 +6,6 @@
 
 namespace ratio
 {
-
     template <typename T>
     std::vector<std::vector<T>> combinations(const std::vector<T> &v, const size_t &n) noexcept
     {

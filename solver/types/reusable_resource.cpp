@@ -12,7 +12,6 @@ using namespace smt;
 
 namespace ratio
 {
-
     reusable_resource::reusable_resource(solver &slv) : smart_type(slv, slv, REUSABLE_RESOURCE_NAME)
     {
         new_fields(*this, {new field(slv.get_type(STRING_KEYWORD), REUSABLE_RESOURCE_CAPACITY)}); // we add the 'capacity' field..

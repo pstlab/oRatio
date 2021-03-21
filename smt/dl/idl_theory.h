@@ -8,7 +8,6 @@
 
 namespace smt
 {
-
   class idl_value_listener;
 
   class idl_theory : public theory

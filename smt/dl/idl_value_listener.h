@@ -4,7 +4,6 @@
 
 namespace smt
 {
-
   class idl_value_listener
   {
     friend class idl_theory;

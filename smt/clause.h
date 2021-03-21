@@ -4,7 +4,6 @@
 
 namespace smt
 {
-
   class sat_core;
 
   /**

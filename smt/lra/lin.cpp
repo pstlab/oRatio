@@ -4,7 +4,6 @@
 
 namespace smt
 {
-
     lin::lin() {}
     lin::lin(const rational &known_term) : known_term(known_term) {}
     lin::lin(const var v, const rational &c) { vars.emplace(v, c); }

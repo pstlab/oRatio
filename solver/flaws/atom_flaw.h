@@ -6,7 +6,6 @@
 
 namespace ratio
 {
-
   class atom;
 
   class atom_flaw : public flaw

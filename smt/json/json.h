@@ -7,7 +7,6 @@
 
 namespace smt
 {
-
   class json_core;
 
   class json

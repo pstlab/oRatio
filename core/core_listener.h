@@ -5,7 +5,6 @@
 
 namespace ratio
 {
-
   class core_listener
   {
     friend class core;

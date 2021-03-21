@@ -6,7 +6,6 @@
 
 namespace ratio
 {
-
     template <typename T>
     std::vector<std::vector<T>> cartesian_product(const std::vector<std::vector<T>> &vs) noexcept
     {

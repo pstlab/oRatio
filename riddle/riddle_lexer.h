@@ -13,7 +13,6 @@
 
 namespace riddle
 {
-
   enum symbol
   {
     BOOL_ID,          // 'bool'

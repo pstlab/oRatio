@@ -5,7 +5,6 @@
 
 namespace smt
 {
-
     ov_theory::ov_theory(sat_core &sat) : theory(sat) {}
     ov_theory::~ov_theory() {}
 

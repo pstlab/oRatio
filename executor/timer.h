@@ -6,7 +6,6 @@
 
 namespace ratio
 {
-
   template <typename function>
   class timer
   {

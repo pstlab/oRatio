@@ -40,6 +40,7 @@ int main(int argc, char const *argv[])
         jclass app_class = env->FindClass("it/cnr/istc/pst/oratio/gui/App");
         jmethodID main_mthd = env->GetStaticMethodID(app_class, "start_server", "()V");
         env->CallStaticVoidMethod(app_class, main_mthd);
+        std::this_thread::sleep_for(std::chrono::seconds(5));
 
         jfieldID slv_field = env->GetStaticFieldID(app_class, "SOLVER", "Lit/cnr/istc/pst/oratio/Solver;");
         jobject j_solver = env->GetStaticObjectField(app_class, slv_field);

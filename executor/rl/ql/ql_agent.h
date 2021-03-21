@@ -5,7 +5,6 @@
 
 namespace rl
 {
-
   class ql_environment;
 
   class ql_agent final

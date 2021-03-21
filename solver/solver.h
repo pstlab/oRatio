@@ -25,7 +25,6 @@
 
 namespace ratio
 {
-
   class smart_type;
 #ifdef BUILD_LISTENERS
   class solver_listener;

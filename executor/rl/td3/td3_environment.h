@@ -4,7 +4,6 @@
 
 namespace rl
 {
-
   class td3_environment
   {
   public:

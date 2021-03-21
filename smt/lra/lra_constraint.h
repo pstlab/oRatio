@@ -8,7 +8,6 @@
 
 namespace smt
 {
-
   class lra_theory;
   class row;
 

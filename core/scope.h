@@ -10,7 +10,6 @@
 
 namespace ratio
 {
-
   class core;
   class field;
   class method;

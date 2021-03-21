@@ -8,7 +8,6 @@
 
 namespace smt
 {
-
     sat_core::sat_core()
     {
         var c_false = new_var(); // the false constant..
@@ -16,7 +15,6 @@ namespace smt
         assigns[FALSE_var] = False;
         level[FALSE_var] = 0;
     }
-
     sat_core::~sat_core()
     {
         // we delete all the constraints..

@@ -9,7 +9,6 @@ namespace riddle::ast
 
 namespace ratio
 {
-
   class expr;
   class atom;
 

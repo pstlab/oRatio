@@ -5,10 +5,8 @@
 
 namespace riddle
 {
-
   namespace ast
   {
-
     class expression
     {
     public:

@@ -8,7 +8,6 @@
 
 namespace ratio
 {
-
     smart_type::smart_type(solver &slv, scope &scp, const std::string &name) : type(slv, scp, name, false), slv(slv) {}
     smart_type::~smart_type() {}
 

@@ -8,7 +8,6 @@ using namespace smt;
 
 namespace ratio
 {
-
     propositional_agent::propositional_agent(solver &slv) : smart_type(slv, slv, PROPOSITIONAL_AGENT_NAME) { new_constructors({new agnt_constructor(*this)}); }
     propositional_agent::~propositional_agent() {}
 

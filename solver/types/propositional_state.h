@@ -11,7 +11,6 @@
 
 namespace ratio
 {
-
   class propositional_state : public smart_type
   {
   public:

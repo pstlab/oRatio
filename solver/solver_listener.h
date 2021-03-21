@@ -9,7 +9,6 @@
 
 namespace ratio
 {
-
   class solver_listener
   {
     friend class solver;

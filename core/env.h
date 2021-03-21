@@ -7,7 +7,6 @@
 
 namespace ratio
 {
-
   class core;
   class context;
   class constructor;

@@ -4,7 +4,6 @@
 
 namespace smt
 {
-
   class inf_rational
   {
   public:

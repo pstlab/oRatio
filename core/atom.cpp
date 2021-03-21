@@ -8,7 +8,6 @@ using namespace smt;
 
 namespace ratio
 {
-
     atom::atom(core &cr, const context ctx, const predicate &pred) : item(cr, context(ctx), pred), sigma(cr.get_sat_core().new_var()) {}
     atom::~atom() {}
 

@@ -6,7 +6,6 @@
 
 namespace smt
 {
-
     rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<inf_rational>>(size, std::vector<inf_rational>(size, inf_rational(rational::POSITIVE_INFINITY)))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
     {
         for (size_t i = 0; i < size; ++i)
@@ -16,7 +15,6 @@ namespace smt
             _preds[i][i] = -1;
         }
     }
-
     rdl_theory::~rdl_theory() {}
 
     var rdl_theory::new_var() noexcept

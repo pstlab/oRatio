@@ -5,7 +5,6 @@
 
 namespace smt
 {
-
   class sat_value_listener
   {
     friend class sat_core;

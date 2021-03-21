@@ -5,7 +5,6 @@
 
 namespace smt
 {
-
   class lin
   {
   public:

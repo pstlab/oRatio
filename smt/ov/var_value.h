@@ -2,7 +2,6 @@
 
 namespace smt
 {
-
   class var_value
   {
   public:

@@ -6,7 +6,6 @@
 
 namespace smt
 {
-
     lra_theory::lra_theory(sat_core &sat) : theory(sat) {}
     lra_theory::~lra_theory() {}
 

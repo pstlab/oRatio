@@ -23,7 +23,6 @@ using namespace smt;
 
 namespace ratio
 {
-
     solver::solver() : core(), theory(get_sat_core()), gr(*this) {}
     solver::~solver() {}
 
@@ -366,8 +365,8 @@ namespace ratio
             {
             case True:
                 for (const auto &f : at_phis_p->second)
-                { // 'f' is an activated flaw..
-                  //  FIRE_FLAW_STATE_CHANGED(*f);
+                {   // 'f' is an activated flaw..
+                    //  FIRE_FLAW_STATE_CHANGED(*f);
                     assert(!flaws.count(f));
                     if (!root_level())
                         trail.back().new_flaws.insert(f);
@@ -381,8 +380,8 @@ namespace ratio
                 break;
             case False:
                 for (const auto &f : at_phis_p->second)
-                { // 'f' will never appear in any incoming partial solutions..
-                  //  FIRE_FLAW_STATE_CHANGED(*f);
+                {   // 'f' will never appear in any incoming partial solutions..
+                    //  FIRE_FLAW_STATE_CHANGED(*f);
                     assert(!flaws.count(f));
                     gr.propagate_costs(*f);
                 }
@@ -396,8 +395,8 @@ namespace ratio
             {
             case True:
                 for (const auto &r : at_rhos_p->second)
-                { // 'r' is an activated resolver..
-                  //  FIRE_RESOLVER_STATE_CHANGED(*r);
+                {                                                 // 'r' is an activated resolver..
+                                                                  //  FIRE_RESOLVER_STATE_CHANGED(*r);
                     if (flaws.erase(&r->effect) && !root_level()) // this resolver has been activated, hence its effect flaw has been resolved (notice that we remove its effect only in case it was already active)..
                         trail.back().solved_flaws.insert(&r->effect);
                 }
@@ -406,8 +405,8 @@ namespace ratio
                 break;
             case False:
                 for (const auto &r : at_rhos_p->second)
-                { // 'r' is a forbidden resolver..
-                  //  FIRE_RESOLVER_STATE_CHANGED(*r);
+                {                                          // 'r' is a forbidden resolver..
+                                                           //  FIRE_RESOLVER_STATE_CHANGED(*r);
                     if (sat.value(r->effect.phi) != False) // we update the cost of the resolver's effect..
                         gr.propagate_costs(r->effect);
                 }

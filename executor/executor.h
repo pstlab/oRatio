@@ -10,7 +10,6 @@
 
 namespace ratio
 {
-
   class solver;
   class predicate;
   class atom;

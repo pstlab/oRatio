@@ -6,7 +6,6 @@
 
 namespace smt
 {
-
   /**
    * This class is used for representing propositional literals.
    */

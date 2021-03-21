@@ -3,7 +3,6 @@
 
 namespace ratio
 {
-
     enum_type::enum_type(core &cr, scope &scp, std::string name) : type(cr, scp, name) {}
     enum_type::~enum_type() {}
 

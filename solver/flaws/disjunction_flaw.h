@@ -6,7 +6,6 @@
 
 namespace ratio
 {
-
   class disjunction;
   class conjunction;
 

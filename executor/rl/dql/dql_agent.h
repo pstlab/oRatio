@@ -5,7 +5,6 @@
 
 namespace rl
 {
-
   class dql_environment;
 
   struct agentImpl : torch::nn::Module

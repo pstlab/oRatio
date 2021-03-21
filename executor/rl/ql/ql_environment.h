@@ -2,7 +2,6 @@
 
 namespace rl
 {
-
   class ql_environment
   {
   public:

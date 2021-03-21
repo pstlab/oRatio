@@ -5,7 +5,6 @@
 
 namespace rl
 {
-
   class td3_environment;
 
   struct actorImpl : torch::nn::Module

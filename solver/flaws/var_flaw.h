@@ -10,7 +10,6 @@ namespace smt
 
 namespace ratio
 {
-
   class var_item;
 
   class var_flaw : public flaw

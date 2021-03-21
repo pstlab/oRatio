@@ -9,7 +9,6 @@
 
 namespace ratio
 {
-
   class solver;
   class graph;
   class atom;

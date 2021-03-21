@@ -4,7 +4,6 @@
 
 namespace ratio
 {
-
   class expr;
   class context;
   class constructor;

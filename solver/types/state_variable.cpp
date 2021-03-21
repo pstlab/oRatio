@@ -10,7 +10,6 @@ using namespace smt;
 
 namespace ratio
 {
-
     state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME) { new_constructors({new sv_constructor(*this)}); }
     state_variable::~state_variable()
     {

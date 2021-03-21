@@ -5,7 +5,6 @@
 
 namespace ratio
 {
-
   class disj_flaw : public flaw
   {
   public:
