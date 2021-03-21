@@ -77,11 +77,11 @@ namespace smt
         json j_cl;
 
         std::vector<json> j_lits;
-        for (std::vector<lit>::const_iterator it = lits.cbegin(); it != lits.cend(); ++it)
+        for (const auto &l : lits)
         {
             json j_lit;
-            j_lit->set("lit", new string_val(to_string(*it)));
-            switch (value(*it))
+            j_lit->set("lit", new string_val(to_string(l)));
+            switch (value(l))
             {
             case True:
                 j_lit->set("val", new string_val("T"));

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "constr.h"
-#include "json.h"
 
 namespace smt
 {
@@ -29,7 +28,7 @@ namespace smt
     void remove() noexcept override;
     void get_reason(const lit &p, std::vector<lit> &out_reason) const noexcept override;
 
-    json to_json() const noexcept;
+    json to_json() const noexcept override;
 
   private:
     std::vector<lit> lits;
