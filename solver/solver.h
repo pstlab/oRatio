@@ -9,20 +9,16 @@
 
 #ifdef BUILD_LISTENERS
 #define FIRE_NEW_FLAW(f) fire_new_flaw(f)
-#define FIRE_FLAW_STATE_CHANGED(f) fire_flaw_state_changed(f)
 #define FIRE_FLAW_COST_CHANGED(f) fire_flaw_cost_changed(f)
 #define FIRE_CURRENT_FLAW(f) fire_current_flaw(f)
 #define FIRE_NEW_RESOLVER(r) fire_new_resolver(r)
-#define FIRE_RESOLVER_STATE_CHANGED(r) fire_resolver_state_changed(r)
 #define FIRE_CURRENT_RESOLVER(r) fire_current_resolver(r)
 #define FIRE_CAUSAL_LINK_ADDED(f, r) fire_causal_link_added(f, r)
 #else
 #define FIRE_NEW_FLAW(f)
-#define FIRE_FLAW_STATE_CHANGED(f)
 #define FIRE_FLAW_COST_CHANGED(f)
 #define FIRE_CURRENT_FLAW(f)
 #define FIRE_NEW_RESOLVER(r)
-#define FIRE_RESOLVER_STATE_CHANGED(r)
 #define FIRE_CURRENT_RESOLVER(r)
 #define FIRE_CAUSAL_LINK_ADDED(f, r)
 #endif
