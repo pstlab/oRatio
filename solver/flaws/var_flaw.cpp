@@ -16,7 +16,7 @@ namespace ratio
             add_resolver(*new choose_value(get_solver(), smt::rational(1, static_cast<smt::I>(vals.size())), *this, *v));
     }
 
-    var_flaw::choose_value::choose_value(solver &slv, smt::rational cst, var_flaw &enm_flaw, const smt::var_value &val) : resolver(slv, cst, enm_flaw), v(enm_flaw.v_itm.ev), val(val) {}
+    var_flaw::choose_value::choose_value(solver &slv, smt::rational cst, var_flaw &enm_flaw, const smt::var_value &val) : resolver(slv, slv.get_ov_theory().allows(enm_flaw.v_itm.ev, val), cst, enm_flaw), v(enm_flaw.v_itm.ev), val(val) {}
     var_flaw::choose_value::~choose_value() {}
 
     std::string var_flaw::choose_value::get_label() const noexcept
