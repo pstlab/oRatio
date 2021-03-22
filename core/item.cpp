@@ -197,17 +197,27 @@ namespace ratio
                     return (static_cast<const item *>(*vs.begin()))->get(name);
                 else
                 {
+                    std::unordered_map<item *, std::vector<lit>> val_vars;
+                    for (const auto &val : vs)
+                        val_vars[&*static_cast<const item *>(val)->get(name)].push_back(get_core().get_ov_theory().allows(ev, *val));
+                    if (val_vars.size() == 1)
+                        return val_vars.begin()->first;
+
                     std::vector<lit> c_vars;
                     std::vector<item *> c_vals;
-                    std::unordered_set<item *> vals_set;
-                    for (const auto &val : vs)
+                    for (const auto &val : val_vars)
                     {
-                        c_vars.push_back(get_core().get_ov_theory().allows(ev, *val));
-                        c_vals.push_back(&*static_cast<const item *>(val)->get(name));
-                        vals_set.insert(c_vals.back());
+                        const auto var = get_core().get_sat_core().new_disj(val.second);
+                        c_vars.push_back(var);
+                        c_vals.push_back(val.first);
+                        for (const auto &val_not : val_vars)
+                            if (val != val_not)
+                                for (const auto &v : val_not.second)
+                                {
+                                    bool nc = cr.get_sat_core().new_clause({!var, !v});
+                                    assert(nc);
+                                }
                     }
-                    if (vals_set.size() == 1)
-                        return *vals_set.begin();
                     var_expr e = get_core().new_enum(get_type().get_field(name).get_type(), c_vars, c_vals);
                     const_cast<var_item *>(this)->exprs.insert({name, e});
                     return e;

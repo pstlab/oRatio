@@ -1,0 +1,19 @@
+class City {}
+
+class Location {
+
+    City city;
+
+    Location(City city) : city(city) {}
+}
+
+City city0 = new City();
+Location l0 = new Location(city0);
+Location l1 = new Location(city0);
+
+City city1 = new City();
+Location l2 = new Location(city1);
+Location l3 = new Location(city1);
+
+Location l;
+l.city == city1;

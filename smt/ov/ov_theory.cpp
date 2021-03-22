@@ -12,15 +12,15 @@ namespace smt
     {
         assert(!items.empty());
         const var id = assigns.size();
-        assigns.push_back(std::unordered_map<const var_value *, lit>());
+        auto c_vals = std::unordered_map<const var_value *, lit>();
         if (items.size() == 1)
-            assigns.back().emplace(*items.begin(), TRUE_lit);
+            c_vals.emplace(*items.begin(), TRUE_lit);
         else
         {
             for (const auto &i : items)
             {
                 const var bv = sat.new_var();
-                assigns.back().emplace(i, lit(bv));
+                c_vals.emplace(i, lit(bv));
                 bind(bv);
                 is_contained_in[bv].insert(id);
             }
@@ -29,25 +29,27 @@ namespace smt
                 std::vector<lit> lits;
                 lits.reserve(items.size());
                 for (const auto &i : items)
-                    lits.push_back(assigns.back().find(i)->second);
+                    lits.push_back(c_vals.find(i)->second);
                 bool exct_one = sat.new_clause({sat.new_exct_one(lits)});
                 assert(exct_one);
             }
         }
+        assigns.push_back(c_vals);
         return id;
     }
 
     var ov_theory::new_var(const std::vector<lit> &lits, const std::vector<var_value *> &vals) noexcept
     {
         assert(!lits.empty());
-        assert(std::all_of(lits.begin(), lits.end(), [this](lit p) { return is_contained_in.count(variable(p)); }));
+        assert(lits.size() == vals.size());
         const var id = assigns.size();
-        assigns.push_back(std::unordered_map<const var_value *, lit>());
+        auto c_vals = std::unordered_map<const var_value *, lit>();
         for (size_t i = 0; i < lits.size(); ++i)
         {
-            assigns.back().emplace(vals[i], lits[i]);
-            is_contained_in.at(variable(lits[i])).insert(id);
+            c_vals.emplace(vals[i], lits[i]);
+            is_contained_in[variable(lits[i])].insert(id);
         }
+        assigns.push_back(c_vals);
         return id;
     }
 
