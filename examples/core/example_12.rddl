@@ -1,0 +1,26 @@
+/*
+* This example aims to demonstrate the use of recursive predicates.
+*/
+
+class Node {}
+
+predicate Path(Node from, Node to, real dist) {
+    goal src = new Path(from:from);
+    goal dst = new Path(from: src.to, to:to);
+    dist == src.dist + dst.dist;
+}
+
+Node n0 = new Node();
+Node n1 = new Node();
+Node n2 = new Node();
+Node n3 = new Node();
+Node n4 = new Node();
+
+fact n0_n1 = new Path(from:n0, to:n1, dist:5.0);
+fact n1_n2 = new Path(from:n1, to:n2, dist:5.0);
+fact n2_n4 = new Path(from:n2, to:n4, dist:5.0);
+fact n2_n3 = new Path(from:n2, to:n3, dist:5.0);
+fact n3_n4 = new Path(from:n3, to:n4, dist:5.0);
+fact n4_n0 = new Path(from:n4, to:n0, dist:5.0);
+
+goal n0_n4 = new Path(from:n0, to:n4);

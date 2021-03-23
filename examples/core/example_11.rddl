@@ -1,3 +1,7 @@
+/*
+* This example aims to demonstrate the use of enum variables and how their parameters can be constrained.
+*/
+
 class City {}
 
 class Location {
