@@ -26,7 +26,7 @@ namespace ratio
     smart_type(const smart_type &that) = delete;
     virtual ~smart_type();
 
-    solver &get_solver() const noexcept { return slv; }
+    inline solver &get_solver() const noexcept { return slv; }
 
   private:
     /**

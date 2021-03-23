@@ -18,7 +18,7 @@ namespace ratio
     item(const item &orig) = delete;
     virtual ~item();
 
-    const type &get_type() const noexcept { return tp; }
+    inline const type &get_type() const noexcept { return tp; }
 
     virtual smt::lit new_eq(item &i) noexcept;
     virtual bool equates(const item &i) const noexcept;
@@ -92,7 +92,7 @@ namespace ratio
     string_item(const string_item &that) = delete;
     virtual ~string_item();
 
-    std::string get_value() const { return l; }
+    inline std::string get_value() const { return l; }
 
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;

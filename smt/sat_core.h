@@ -49,8 +49,8 @@ namespace smt
     bool propagate() noexcept;
     bool check(const std::vector<lit> &lits) noexcept;
 
-    lbool value(const var &x) const noexcept { return assigns.at(x); } // returns the value of variable 'x'..
-    lbool value(const lit &p) const noexcept
+    inline lbool value(const var &x) const noexcept { return assigns.at(x); } // returns the value of variable 'x'..
+    inline lbool value(const lit &p) const noexcept
     {
       switch (value(variable(p)))
       {
@@ -61,9 +61,9 @@ namespace smt
       default:
         return Undefined;
       }
-    }                                                                   // returns the value of literal 'p'..
-    size_t decision_level() const noexcept { return trail_lim.size(); } // returns the current decision level..
-    bool root_level() const noexcept { return trail_lim.empty(); }      // checks whether the current decision level is root level..
+    }                                                                          // returns the value of literal 'p'..
+    inline size_t decision_level() const noexcept { return trail_lim.size(); } // returns the current decision level..
+    inline bool root_level() const noexcept { return trail_lim.empty(); }      // checks whether the current decision level is root level..
 
   private:
     void analyze(constr &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel) noexcept;
@@ -72,9 +72,9 @@ namespace smt
     bool enqueue(const lit &p, constr *const c = nullptr) noexcept;
     void pop_one() noexcept;
 
-    void add_theory(theory &th) noexcept { theories.push_back(&th); }
-    void bind(const var &v, theory &th) noexcept { bounds[v].insert(&th); }
-    void listen(const var &v, sat_value_listener &l) noexcept { listening[v].insert(&l); }
+    inline void add_theory(theory &th) noexcept { theories.push_back(&th); }
+    inline void bind(const var &v, theory &th) noexcept { bounds[v].insert(&th); }
+    inline void listen(const var &v, sat_value_listener &l) noexcept { listening[v].insert(&l); }
 
   private:
 #ifdef PARALLELIZE

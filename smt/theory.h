@@ -16,7 +16,7 @@ namespace smt
     theory(const theory &orig) = delete;
     virtual ~theory();
 
-    sat_core &get_core() const noexcept { return sat; }
+    inline sat_core &get_core() const noexcept { return sat; }
 
   protected:
     void bind(const var &v) noexcept;

@@ -23,9 +23,9 @@ namespace ratio
     method(const method &orig) = delete;
     virtual ~method();
 
-    const type *get_return_type() const noexcept { return return_type; }        // returns the return type of this method (can be nullptr)..
-    std::string get_name() const noexcept { return name; }                      // returns the name of this method..
-    const std::vector<const field *> get_args() const noexcept { return args; } // returns the list of arguments of this method..
+    inline const type *get_return_type() const noexcept { return return_type; }        // returns the return type of this method (can be nullptr)..
+    inline std::string get_name() const noexcept { return name; }                      // returns the name of this method..
+    inline const std::vector<const field *> get_args() const noexcept { return args; } // returns the list of arguments of this method..
 
     item *invoke(context &ctx, const std::vector<expr> &exprs) const;
 

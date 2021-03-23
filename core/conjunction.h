@@ -19,7 +19,7 @@ namespace ratio
     conjunction(const conjunction &that) = delete;
     virtual ~conjunction();
 
-    smt::rational get_cost() const noexcept { return cost; } // returns the cost of applying this conjunction..
+    inline smt::rational get_cost() const noexcept { return cost; } // returns the cost of applying this conjunction..
 
     void apply(context &ctx) const; // applies this conjunction within the given context..
 

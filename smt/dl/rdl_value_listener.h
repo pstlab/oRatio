@@ -14,7 +14,7 @@ namespace smt
     virtual ~rdl_value_listener() {}
 
   protected:
-    void listen_rdl(var v) noexcept { th.listen(v, this); }
+    inline void listen_rdl(var v) noexcept { th.listen(v, this); }
 
   private:
     virtual void rdl_value_change(const var &) {}

@@ -40,10 +40,10 @@ namespace ratio
     env(const env &orig) = delete;
     ~env();
 
-    core &get_core() const { return cr; } // returns the core in which this environment is created..
+    inline core &get_core() const { return cr; } // returns the core in which this environment is created..
 
-    virtual expr get(const std::string &name) const;                         // returns the expression having the given name, checks in the enclosing environment if the name is not found (notice that this method returns a new expression, incrementing the number of references to the expression having the given name)..
-    std::map<std::string, expr> get_exprs() const noexcept { return exprs; } // returns a map of names and their corresponding expressions directly accessible from this environment..
+    virtual expr get(const std::string &name) const;                                // returns the expression having the given name, checks in the enclosing environment if the name is not found (notice that this method returns a new expression, incrementing the number of references to the expression having the given name)..
+    inline std::map<std::string, expr> get_exprs() const noexcept { return exprs; } // returns a map of names and their corresponding expressions directly accessible from this environment..
 
     virtual smt::json to_json() const noexcept;
 

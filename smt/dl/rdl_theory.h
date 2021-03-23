@@ -30,10 +30,10 @@ namespace smt
     lit new_geq(const lin &left, const lin &right);
     lit new_gt(const lin &left, const lin &right);
 
-    inf_rational lb(const var &v) const noexcept { return -_dists[v][0]; }
-    inf_rational ub(const var &v) const noexcept { return _dists[0][v]; }
-    std::pair<inf_rational, inf_rational> bounds(const var &v) const noexcept { return std::make_pair(-_dists[v][0], _dists[0][v]); }
-    std::pair<inf_rational, inf_rational> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
+    inline inf_rational lb(const var &v) const noexcept { return -_dists[v][0]; }
+    inline inf_rational ub(const var &v) const noexcept { return _dists[0][v]; }
+    inline std::pair<inf_rational, inf_rational> bounds(const var &v) const noexcept { return std::make_pair(-_dists[v][0], _dists[0][v]); }
+    inline std::pair<inf_rational, inf_rational> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
 
     std::pair<inf_rational, inf_rational> bounds(const lin &l) const;
     std::pair<inf_rational, inf_rational> distance(const lin &from, const lin &to) const;
@@ -54,7 +54,7 @@ namespace smt
 
     void resize(const size_t &size) noexcept;
 
-    void listen(const var &v, rdl_value_listener *const l) noexcept { listening[v].insert(l); }
+    inline void listen(const var &v, rdl_value_listener *const l) noexcept { listening[v].insert(l); }
 
   private:
     class rdl_distance

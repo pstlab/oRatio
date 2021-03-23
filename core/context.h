@@ -29,8 +29,8 @@ namespace ratio
     explicit context(const context &orig);
     virtual ~context();
 
-    env &operator*() const { return *ptr; }
-    env *operator->() const { return ptr; }
+    inline env &operator*() const { return *ptr; }
+    inline env *operator->() const { return ptr; }
 
     operator expr() const;
     operator bool_expr() const;
@@ -38,8 +38,8 @@ namespace ratio
     operator var_expr() const;
     operator string_expr() const;
 
-    bool operator==(const context &right) const noexcept { return ptr == right.ptr; }
-    bool operator!=(const context &right) const noexcept { return !(*this == right); }
+    inline bool operator==(const context &right) const noexcept { return ptr == right.ptr; }
+    inline bool operator!=(const context &right) const noexcept { return !(*this == right); }
 
   protected:
     env *const ptr;

@@ -30,7 +30,7 @@ namespace smt
     var new_var() noexcept;             // creates and returns a new numeric variable..
     var new_var(const lin &l) noexcept; // creates and returns a new numeric variable and makes it equal to the given linear expression..
 
-    bool is_basic(const var &v) const noexcept { return tableau.count(v); }
+    inline bool is_basic(const var &v) const noexcept { return tableau.count(v); }
 
     lit new_lt(const lin &left, const lin &right) noexcept;
     lit new_leq(const lin &left, const lin &right) noexcept;
@@ -38,25 +38,25 @@ namespace smt
     lit new_geq(const lin &left, const lin &right) noexcept;
     lit new_gt(const lin &left, const lin &right) noexcept;
 
-    inf_rational lb(const var &v) const noexcept { return c_bounds[lb_index(v)].value; } // the current lower bound of variable 'v'..
-    inf_rational ub(const var &v) const noexcept { return c_bounds[ub_index(v)].value; } // the current upper bound of variable 'v'..
-    inf_rational value(const var &v) const noexcept { return vals[v]; }                  // the current value of variable 'v'..
+    inline inf_rational lb(const var &v) const noexcept { return c_bounds[lb_index(v)].value; } // the current lower bound of variable 'v'..
+    inline inf_rational ub(const var &v) const noexcept { return c_bounds[ub_index(v)].value; } // the current upper bound of variable 'v'..
+    inline inf_rational value(const var &v) const noexcept { return vals[v]; }                  // the current value of variable 'v'..
 
-    inf_rational lb(const lin &l) const noexcept // returns the current lower bound of linear expression 'l'..
+    inline inf_rational lb(const lin &l) const noexcept // returns the current lower bound of linear expression 'l'..
     {
       inf_rational b(l.known_term);
       for (const auto &term : l.vars)
         b += (is_positive(term.second) ? lb(term.first) : ub(term.first)) * term.second;
       return b;
     }
-    inf_rational ub(const lin &l) const noexcept // returns the current upper bound of linear expression 'l'..
+    inline inf_rational ub(const lin &l) const noexcept // returns the current upper bound of linear expression 'l'..
     {
       inf_rational b(l.known_term);
       for (const auto &term : l.vars)
         b += (is_positive(term.second) ? ub(term.first) : lb(term.first)) * term.second;
       return b;
     }
-    std::pair<inf_rational, inf_rational> bounds(const lin &l) const noexcept // returns the current upper bound of linear expression 'l'..
+    inline std::pair<inf_rational, inf_rational> bounds(const lin &l) const noexcept // returns the current upper bound of linear expression 'l'..
     {
       inf_rational c_lb(l.known_term);
       inf_rational c_ub(l.known_term);
@@ -67,7 +67,7 @@ namespace smt
       }
       return std::make_pair(c_lb, c_ub);
     }
-    inf_rational value(const lin &l) const // returns the current value of linear expression 'l'..
+    inline inf_rational value(const lin &l) const // returns the current value of linear expression 'l'..
     {
       inf_rational v(l.known_term);
       for (const auto &term : l.vars)
@@ -90,10 +90,10 @@ namespace smt
     void pivot(const var x_i, const var x_j) noexcept;
     void new_row(const var &x, const lin &l) noexcept;
 
-    void listen(const var &v, lra_value_listener *const l) noexcept { listening[v].insert(l); }
+    inline void listen(const var &v, lra_value_listener *const l) noexcept { listening[v].insert(l); }
 
-    static size_t lb_index(const var &v) noexcept { return v << 1; }       // the index of the lower bound of the 'v' variable..
-    static size_t ub_index(const var &v) noexcept { return (v << 1) ^ 1; } // the index of the upper bound of the 'v' variable..
+    inline static size_t lb_index(const var &v) noexcept { return v << 1; }       // the index of the lower bound of the 'v' variable..
+    inline static size_t ub_index(const var &v) noexcept { return (v << 1) ^ 1; } // the index of the upper bound of the 'v' variable..
 
     json to_json() const noexcept;
 

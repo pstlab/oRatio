@@ -30,10 +30,10 @@ namespace smt
     lit new_geq(const lin &left, const lin &right);
     lit new_gt(const lin &left, const lin &right);
 
-    I lb(const var &v) const noexcept { return -_dists[v][0]; }
-    I ub(const var &v) const noexcept { return _dists[0][v]; }
-    std::pair<I, I> bounds(const var &v) const noexcept { return std::make_pair(-_dists[v][0], _dists[0][v]); }
-    std::pair<I, I> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
+    inline I lb(const var &v) const noexcept { return -_dists[v][0]; }
+    inline I ub(const var &v) const noexcept { return _dists[0][v]; }
+    inline std::pair<I, I> bounds(const var &v) const noexcept { return std::make_pair(-_dists[v][0], _dists[0][v]); }
+    inline std::pair<I, I> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
 
     std::pair<I, I> bounds(const lin &l) const;
     std::pair<I, I> distance(const lin &from, const lin &to) const;
@@ -43,7 +43,7 @@ namespace smt
     size_t size() const noexcept { return n_vars; }
 
   public:
-    static constexpr I inf() noexcept { return std::numeric_limits<I>::max() / 2 - 1; }
+    inline static constexpr I inf() noexcept { return std::numeric_limits<I>::max() / 2 - 1; }
 
   private:
     bool propagate(const lit &p) noexcept override;
@@ -57,7 +57,7 @@ namespace smt
 
     void resize(const size_t &size) noexcept;
 
-    void listen(const var &v, idl_value_listener *const l) noexcept { listening[v].insert(l); }
+    inline void listen(const var &v, idl_value_listener *const l) noexcept { listening[v].insert(l); }
 
   private:
     class idl_distance

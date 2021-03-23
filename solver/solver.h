@@ -64,11 +64,11 @@ namespace ratio
     expr new_enum(const type &tp, const std::vector<item *> &allowed_vals) override;
     bool_expr disj(const std::vector<bool_expr> &exprs) noexcept override;
 
-    size_t decision_level() const noexcept { return trail.size(); } // returns the current decision level..
-    bool root_level() const noexcept { return trail.empty(); }      // checks whether the current decision level is root level..
+    inline size_t decision_level() const noexcept { return trail.size(); } // returns the current decision level..
+    inline bool root_level() const noexcept { return trail.empty(); }      // checks whether the current decision level is root level..
 
   private:
-    atom_flaw &get_reason(const atom &atm) const noexcept { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
+    inline atom_flaw &get_reason(const atom &atm) const noexcept { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
     inline const std::vector<resolver *> get_cause()
     {
       if (res)

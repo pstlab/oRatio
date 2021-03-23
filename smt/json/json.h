@@ -18,7 +18,7 @@ namespace smt
     ~json();
 
     json &operator=(const json &t);
-    json_core *operator->() const { return ptr; }
+    inline json_core *operator->() const { return ptr; }
 
     void to_json(std::ostream &os) const noexcept;
     static json from_json(std::istream &is);
@@ -39,8 +39,8 @@ namespace smt
     json_core(const std::map<std::string, json> &vals);
     ~json_core();
 
-    json &get(const std::string &id) noexcept { return vals.at(id); }
-    void set(const std::string &id, const json &val) noexcept { vals.emplace(id, val); }
+    inline json &get(const std::string &id) noexcept { return vals.at(id); }
+    inline void set(const std::string &id, const json &val) noexcept { vals.emplace(id, val); }
 
     void set_null(const std::string &id);
 
@@ -68,8 +68,8 @@ namespace smt
     bool_val(const bool &val);
     ~bool_val();
 
-    bool get() const noexcept { return val; }
-    void set(const bool &val) noexcept { this->val = val; }
+    inline bool get() const noexcept { return val; }
+    inline void set(const bool &val) noexcept { this->val = val; }
 
     bool operator*() const noexcept { return val; }
 
@@ -86,8 +86,8 @@ namespace smt
     string_val(const std::string &val);
     ~string_val();
 
-    std::string get() const noexcept { return val; }
-    void set(const std::string &val) noexcept { this->val = val; }
+    inline std::string get() const noexcept { return val; }
+    inline void set(const std::string &val) noexcept { this->val = val; }
 
     std::string operator*() const noexcept { return val; }
 
@@ -104,8 +104,8 @@ namespace smt
     long_val(const long &val);
     ~long_val();
 
-    long get() const noexcept { return val; }
-    void set(const long &val) noexcept { this->val = val; }
+    inline long get() const noexcept { return val; }
+    inline void set(const long &val) noexcept { this->val = val; }
 
     long operator*() const noexcept { return val; }
 
@@ -122,8 +122,8 @@ namespace smt
     double_val(const double &val);
     ~double_val();
 
-    double get() const noexcept { return val; }
-    void set(const double &val) noexcept { this->val = val; }
+    inline double get() const noexcept { return val; }
+    inline void set(const double &val) noexcept { this->val = val; }
 
     double operator*() const noexcept { return val; }
 
@@ -140,8 +140,8 @@ namespace smt
     array_val(const std::vector<json> &vals);
     ~array_val();
 
-    json get(const size_t &i) const noexcept { return vals.at(i); }
-    void set(const size_t &i, const json val) noexcept { vals[i] = val; }
+    inline json get(const size_t &i) const noexcept { return vals.at(i); }
+    inline void set(const size_t &i, const json val) noexcept { vals[i] = val; }
 
     void to_json(std::ostream &os) const noexcept override;
 

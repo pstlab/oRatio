@@ -14,119 +14,119 @@ namespace smt
     explicit inf_rational(const rational &rat, I inf) : rat(rat), inf(inf) {}
     explicit inf_rational(const rational &rat, const rational &inf) : rat(rat), inf(inf) {}
 
-    rational get_rational() const noexcept { return rat; }
-    rational get_infinitesimal() const noexcept { return inf; }
+    inline rational get_rational() const noexcept { return rat; }
+    inline rational get_infinitesimal() const noexcept { return inf; }
 
-    friend bool is_positive(const inf_rational &rhs) noexcept { return is_positive(rhs.rat) || (rhs.rat.numerator() == 0 && is_positive(rhs.rat)); }
-    friend bool is_negative(const inf_rational &rhs) noexcept { return is_negative(rhs.rat) || (rhs.rat.numerator() == 0 && is_negative(rhs.rat)); }
-    friend bool is_infinite(const inf_rational &rhs) noexcept { return is_infinite(rhs.rat); }
-    friend bool is_positive_infinite(const inf_rational &rhs) noexcept { return is_positive(rhs) && is_infinite(rhs); }
-    friend bool is_negative_infinite(const inf_rational &rhs) noexcept { return is_negative(rhs) && is_infinite(rhs); }
+    inline friend bool is_positive(const inf_rational &rhs) noexcept { return is_positive(rhs.rat) || (rhs.rat.numerator() == 0 && is_positive(rhs.rat)); }
+    inline friend bool is_negative(const inf_rational &rhs) noexcept { return is_negative(rhs.rat) || (rhs.rat.numerator() == 0 && is_negative(rhs.rat)); }
+    inline friend bool is_infinite(const inf_rational &rhs) noexcept { return is_infinite(rhs.rat); }
+    inline friend bool is_positive_infinite(const inf_rational &rhs) noexcept { return is_positive(rhs) && is_infinite(rhs); }
+    inline friend bool is_negative_infinite(const inf_rational &rhs) noexcept { return is_negative(rhs) && is_infinite(rhs); }
 
-    bool operator!=(const inf_rational &rhs) const noexcept { return rat != rhs.rat && inf != rhs.inf; };
-    bool operator<(const inf_rational &rhs) const noexcept { return rat < rhs.rat || (rat == rhs.rat && inf < rhs.inf); };
-    bool operator<=(const inf_rational &rhs) const noexcept { return rat < rhs.rat || (rat == rhs.rat && inf <= rhs.inf); };
-    bool operator==(const inf_rational &rhs) const noexcept { return rat == rhs.rat && inf == rhs.inf; };
-    bool operator>=(const inf_rational &rhs) const noexcept { return rat > rhs.rat || (rat == rhs.rat && inf >= rhs.inf); };
-    bool operator>(const inf_rational &rhs) const noexcept { return rat > rhs.rat || (rat == rhs.rat && inf > rhs.inf); };
+    inline bool operator!=(const inf_rational &rhs) const noexcept { return rat != rhs.rat && inf != rhs.inf; };
+    inline bool operator<(const inf_rational &rhs) const noexcept { return rat < rhs.rat || (rat == rhs.rat && inf < rhs.inf); };
+    inline bool operator<=(const inf_rational &rhs) const noexcept { return rat < rhs.rat || (rat == rhs.rat && inf <= rhs.inf); };
+    inline bool operator==(const inf_rational &rhs) const noexcept { return rat == rhs.rat && inf == rhs.inf; };
+    inline bool operator>=(const inf_rational &rhs) const noexcept { return rat > rhs.rat || (rat == rhs.rat && inf >= rhs.inf); };
+    inline bool operator>(const inf_rational &rhs) const noexcept { return rat > rhs.rat || (rat == rhs.rat && inf > rhs.inf); };
 
-    bool operator!=(const rational &rhs) const noexcept { return rat != rhs || inf.numerator() != 0; };
-    bool operator<(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() < 0); };
-    bool operator<=(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() <= 0); };
-    bool operator==(const rational &rhs) const noexcept { return rat == rhs && inf.numerator() == 0; };
-    bool operator>=(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() >= 0); };
-    bool operator>(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() > 0); };
+    inline bool operator!=(const rational &rhs) const noexcept { return rat != rhs || inf.numerator() != 0; };
+    inline bool operator<(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() < 0); };
+    inline bool operator<=(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() <= 0); };
+    inline bool operator==(const rational &rhs) const noexcept { return rat == rhs && inf.numerator() == 0; };
+    inline bool operator>=(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() >= 0); };
+    inline bool operator>(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() > 0); };
 
-    bool operator!=(const I &rhs) const noexcept { return rat != rhs || inf.numerator() != 0; };
-    bool operator<(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() < 0); };
-    bool operator<=(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() <= 0); };
-    bool operator==(const I &rhs) const noexcept { return rat == rhs && inf.numerator() == 0; };
-    bool operator>=(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() >= 0); };
-    bool operator>(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() > 0); };
+    inline bool operator!=(const I &rhs) const noexcept { return rat != rhs || inf.numerator() != 0; };
+    inline bool operator<(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() < 0); };
+    inline bool operator<=(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() <= 0); };
+    inline bool operator==(const I &rhs) const noexcept { return rat == rhs && inf.numerator() == 0; };
+    inline bool operator>=(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() >= 0); };
+    inline bool operator>(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() > 0); };
 
-    inf_rational operator+(const inf_rational &rhs) const noexcept { return inf_rational(rat + rhs.rat, inf + rhs.inf); };
-    inf_rational operator-(const inf_rational &rhs) const noexcept { return inf_rational(rat - rhs.rat, inf - rhs.inf); };
+    inline inf_rational operator+(const inf_rational &rhs) const noexcept { return inf_rational(rat + rhs.rat, inf + rhs.inf); };
+    inline inf_rational operator-(const inf_rational &rhs) const noexcept { return inf_rational(rat - rhs.rat, inf - rhs.inf); };
 
-    inf_rational operator+(const rational &rhs) const noexcept { return inf_rational(rat + rhs, inf); };
-    inf_rational operator-(const rational &rhs) const noexcept { return inf_rational(rat - rhs, inf); };
-    inf_rational operator*(const rational &rhs) const noexcept { return inf_rational(rat * rhs, inf * rhs); };
-    inf_rational operator/(const rational &rhs) const noexcept { return inf_rational(rat / rhs, inf / rhs); };
+    inline inf_rational operator+(const rational &rhs) const noexcept { return inf_rational(rat + rhs, inf); };
+    inline inf_rational operator-(const rational &rhs) const noexcept { return inf_rational(rat - rhs, inf); };
+    inline inf_rational operator*(const rational &rhs) const noexcept { return inf_rational(rat * rhs, inf * rhs); };
+    inline inf_rational operator/(const rational &rhs) const noexcept { return inf_rational(rat / rhs, inf / rhs); };
 
-    inf_rational operator+(const I &rhs) const noexcept { return inf_rational(rat + rhs, inf); };
-    inf_rational operator-(const I &rhs) const noexcept { return inf_rational(rat - rhs, inf); };
-    inf_rational operator*(const I &rhs) const noexcept { return inf_rational(rat * rhs, inf * rhs); };
-    inf_rational operator/(const I &rhs) const noexcept { return inf_rational(rat / rhs, inf / rhs); };
+    inline inf_rational operator+(const I &rhs) const noexcept { return inf_rational(rat + rhs, inf); };
+    inline inf_rational operator-(const I &rhs) const noexcept { return inf_rational(rat - rhs, inf); };
+    inline inf_rational operator*(const I &rhs) const noexcept { return inf_rational(rat * rhs, inf * rhs); };
+    inline inf_rational operator/(const I &rhs) const noexcept { return inf_rational(rat / rhs, inf / rhs); };
 
-    inf_rational &operator+=(const inf_rational &rhs) noexcept
+    inline inf_rational &operator+=(const inf_rational &rhs) noexcept
     {
       rat += rhs.rat;
       inf += rhs.inf;
       return *this;
     }
-    inf_rational &operator-=(const inf_rational &rhs) noexcept
+    inline inf_rational &operator-=(const inf_rational &rhs) noexcept
     {
       rat -= rhs.rat;
       inf -= rhs.inf;
       return *this;
     }
 
-    inf_rational &operator+=(const rational &rhs) noexcept
+    inline inf_rational &operator+=(const rational &rhs) noexcept
     {
       rat += rhs;
       return *this;
     }
-    inf_rational &operator-=(const rational &rhs) noexcept
+    inline inf_rational &operator-=(const rational &rhs) noexcept
     {
       rat -= rhs;
       return *this;
     }
-    inf_rational &operator*=(const rational &rhs) noexcept
+    inline inf_rational &operator*=(const rational &rhs) noexcept
     {
       rat *= rhs;
       inf *= rhs;
       return *this;
     }
-    inf_rational &operator/=(const rational &rhs) noexcept
+    inline inf_rational &operator/=(const rational &rhs) noexcept
     {
       rat /= rhs;
       inf /= rhs;
       return *this;
     }
 
-    inf_rational &operator+=(const I &rhs) noexcept
+    inline inf_rational &operator+=(const I &rhs) noexcept
     {
       rat += rhs;
       return *this;
     }
-    inf_rational &operator-=(const I &rhs) noexcept
+    inline inf_rational &operator-=(const I &rhs) noexcept
     {
       rat -= rhs;
       return *this;
     }
-    inf_rational &operator*=(const I &rhs) noexcept
+    inline inf_rational &operator*=(const I &rhs) noexcept
     {
       rat *= rhs;
       inf *= rhs;
       return *this;
     }
-    inf_rational &operator/=(const I &rhs) noexcept
+    inline inf_rational &operator/=(const I &rhs) noexcept
     {
       rat /= rhs;
       inf /= rhs;
       return *this;
     }
 
-    inf_rational operator-() const noexcept { return inf_rational(-rat, -inf); }
+    inline inf_rational operator-() const noexcept { return inf_rational(-rat, -inf); }
 
-    friend inf_rational operator+(const rational &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs + rhs.rat, rhs.inf); }
-    friend inf_rational operator-(const rational &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs - rhs.rat, rhs.inf); }
-    friend inf_rational operator*(const rational &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs * rhs.rat, lhs * rhs.inf); }
-    friend inf_rational operator/(const rational &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs / rhs.rat, lhs / rhs.inf); }
+    inline friend inf_rational operator+(const rational &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs + rhs.rat, rhs.inf); }
+    inline friend inf_rational operator-(const rational &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs - rhs.rat, rhs.inf); }
+    inline friend inf_rational operator*(const rational &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs * rhs.rat, lhs * rhs.inf); }
+    inline friend inf_rational operator/(const rational &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs / rhs.rat, lhs / rhs.inf); }
 
-    friend inf_rational operator+(const I &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs + rhs.rat, rhs.inf); }
-    friend inf_rational operator-(const I &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs - rhs.rat, rhs.inf); }
-    friend inf_rational operator*(const I &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs * rhs.rat, lhs * rhs.inf); }
-    friend inf_rational operator/(const I &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs / rhs.rat, lhs / rhs.inf); }
+    inline friend inf_rational operator+(const I &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs + rhs.rat, rhs.inf); }
+    inline friend inf_rational operator-(const I &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs - rhs.rat, rhs.inf); }
+    inline friend inf_rational operator*(const I &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs * rhs.rat, lhs * rhs.inf); }
+    inline friend inf_rational operator/(const I &lhs, const inf_rational &rhs) noexcept { return inf_rational(lhs / rhs.rat, lhs / rhs.inf); }
 
     friend std::string to_string(const inf_rational &rhs) noexcept
     {

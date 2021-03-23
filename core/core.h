@@ -86,11 +86,11 @@ namespace ratio
     core(const core &orig) = delete;
     ~core();
 
-    smt::sat_core &get_sat_core() noexcept { return sat_cr; }     // returns the sat core..
-    smt::lra_theory &get_lra_theory() noexcept { return lra_th; } // returns the linear-real-arithmetic theory..
-    smt::ov_theory &get_ov_theory() noexcept { return ov_th; }    // returns the object-variable theory..
-    smt::idl_theory &get_idl_theory() noexcept { return idl_th; } // returns the integer difference logic theory..
-    smt::rdl_theory &get_rdl_theory() noexcept { return rdl_th; } // returns the real difference logic theory..
+    inline smt::sat_core &get_sat_core() noexcept { return sat_cr; }     // returns the sat core..
+    inline smt::lra_theory &get_lra_theory() noexcept { return lra_th; } // returns the linear-real-arithmetic theory..
+    inline smt::ov_theory &get_ov_theory() noexcept { return ov_th; }    // returns the object-variable theory..
+    inline smt::idl_theory &get_idl_theory() noexcept { return idl_th; } // returns the integer difference logic theory..
+    inline smt::rdl_theory &get_rdl_theory() noexcept { return rdl_th; } // returns the real difference logic theory..
 
     void read(const std::string &script);             // parses the given riddle script..
     void read(const std::vector<std::string> &files); // parses the given riddle files..
@@ -172,14 +172,14 @@ namespace ratio
     virtual void new_disjunction(context &ctx, const std::vector<const conjunction *> &conjs) = 0;
 
   protected:
-    smt::lit get_ni() noexcept { return ni; }
-    void set_ni(const smt::lit &v) noexcept
+    inline smt::lit get_ni() noexcept { return ni; }
+    inline void set_ni(const smt::lit &v) noexcept
     {
       tmp_ni = ni;
       ni = v;
     }
 
-    void restore_ni() noexcept { ni = tmp_ni; }
+    inline void restore_ni() noexcept { ni = tmp_ni; }
 
   public:
     smt::json to_json() const noexcept;

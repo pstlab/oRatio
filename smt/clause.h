@@ -19,7 +19,7 @@ namespace smt
     ~clause() override;
 
   public:
-    const std::vector<lit> get_lits() const noexcept { return lits; }
+    inline const std::vector<lit> get_lits() const noexcept { return lits; }
 
   private:
     const bool propagate(const lit &p) noexcept override;

@@ -14,7 +14,7 @@ namespace smt
     virtual ~idl_value_listener() {}
 
   protected:
-    void listen_idl(var v) { th.listen(v, this); }
+    inline void listen_idl(var v) { th.listen(v, this); }
 
   private:
     virtual void idl_value_change(const var &) {}

@@ -16,7 +16,7 @@ namespace smt
     thread_pool(const thread_pool &orig) = delete;
     virtual ~thread_pool();
 
-    size_t size() const { return workers.size(); }
+    inline size_t size() const { return workers.size(); }
     void enqueue(std::function<void()> f);
     void join();
 

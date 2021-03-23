@@ -19,7 +19,7 @@ namespace ratio
     predicate(const predicate &orig) = delete;
     virtual ~predicate();
 
-    const std::vector<const field *> get_args() const noexcept { return args; }
+    inline const std::vector<const field *> get_args() const noexcept { return args; }
 
     expr new_instance(context &ctx) noexcept override; // creates a new atom having this predicate within the given context..
 

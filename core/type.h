@@ -35,7 +35,7 @@ namespace ratio
     type(const type &orig) = delete;
     virtual ~type();
 
-    std::string get_name() const noexcept { return name; } // returns the name of this type..
+    inline std::string get_name() const noexcept { return name; } // returns the name of this type..
     std::string get_full_name() const noexcept
     {
       std::string tp_name = name;
@@ -47,7 +47,7 @@ namespace ratio
       }
       return tp_name;
     }                                                                          // returns the full name of this type..
-    bool is_primitive() const noexcept { return primitive; }                   // returns whether this type is primitive..
+    inline bool is_primitive() const noexcept { return primitive; }            // returns whether this type is primitive..
     std::vector<type *> get_supertypes() const noexcept { return supertypes; } // returns the base types of this type..
 
     virtual bool is_assignable_from(const type &t) const noexcept; // checks whether this type is assignable from the 't' type..

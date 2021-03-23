@@ -35,7 +35,7 @@ namespace ratio
     graph(const graph &that) = delete;
     ~graph();
 
-    solver &get_solver() const noexcept { return slv; }
+    inline solver &get_solver() const noexcept { return slv; }
 
   private:
     void enqueue(flaw &f);

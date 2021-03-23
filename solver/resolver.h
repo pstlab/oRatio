@@ -22,12 +22,12 @@ namespace ratio
     resolver(const resolver &that) = delete;
     ~resolver();
 
-    solver &get_solver() const noexcept { return slv; }
-    smt::lit get_rho() const noexcept { return rho; }
-    smt::rational get_intrinsic_cost() const noexcept { return intrinsic_cost; }
+    inline solver &get_solver() const noexcept { return slv; }
+    inline smt::lit get_rho() const noexcept { return rho; }
+    inline smt::rational get_intrinsic_cost() const noexcept { return intrinsic_cost; }
     smt::rational get_estimated_cost() const noexcept;
-    flaw &get_effect() const noexcept { return effect; }
-    const std::vector<flaw *> &get_preconditions() const noexcept { return preconditions; }
+    inline flaw &get_effect() const noexcept { return effect; }
+    inline const std::vector<flaw *> &get_preconditions() const noexcept { return preconditions; }
 
     virtual std::string get_label() const = 0;
 

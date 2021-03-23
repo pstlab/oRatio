@@ -21,15 +21,15 @@ namespace ratio
     flaw(const flaw &that) = delete;
     ~flaw();
 
-    solver &get_solver() const noexcept { return slv; }
-    smt::lit get_phi() const noexcept { return phi; }
-    smt::var get_position() const noexcept { return position; }
-    const std::vector<resolver *> &get_resolvers() const noexcept { return resolvers; }
-    const std::vector<resolver *> &get_causes() const noexcept { return causes; }
-    const std::vector<resolver *> &get_supports() const noexcept { return supports; }
+    inline solver &get_solver() const noexcept { return slv; }
+    inline smt::lit get_phi() const noexcept { return phi; }
+    inline smt::var get_position() const noexcept { return position; }
+    inline const std::vector<resolver *> &get_resolvers() const noexcept { return resolvers; }
+    inline const std::vector<resolver *> &get_causes() const noexcept { return causes; }
+    inline const std::vector<resolver *> &get_supports() const noexcept { return supports; }
 
-    smt::rational get_estimated_cost() const noexcept { return est_cost; }
-    bool is_expanded() const noexcept { return expanded; }
+    inline smt::rational get_estimated_cost() const noexcept { return est_cost; }
+    inline bool is_expanded() const noexcept { return expanded; }
 
     resolver *get_cheapest_resolver() const noexcept;
     virtual resolver *get_best_resolver() const noexcept { return get_cheapest_resolver(); }

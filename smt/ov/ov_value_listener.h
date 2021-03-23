@@ -14,7 +14,7 @@ namespace smt
     virtual ~ov_value_listener() {}
 
   protected:
-    void listen_set(var v) noexcept { th.listen(v, this); }
+    inline void listen_set(var v) noexcept { th.listen(v, this); }
 
   private:
     virtual void ov_value_change(const var &) {}

@@ -16,7 +16,7 @@ namespace ratio
     atom_flaw(const atom_flaw &orig) = delete;
     virtual ~atom_flaw();
 
-    atom &get_atom() const noexcept { return atm; }
+    inline atom &get_atom() const noexcept { return atm; }
 
     std::string get_label() const noexcept override;
 

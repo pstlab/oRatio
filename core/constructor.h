@@ -23,7 +23,7 @@ namespace ratio
     constructor(const constructor &orig) = delete;
     virtual ~constructor();
 
-    const std::vector<const field *> get_args() const noexcept { return args; } // returns the list of arguments of this constructor..
+    inline const std::vector<const field *> get_args() const noexcept { return args; } // returns the list of arguments of this constructor..
 
     expr new_instance(context &ctx, const std::vector<expr> &exprs) const noexcept; // creates a new instance of an item whose type has this constructor invoking this constructor within the given context with the given expressions as arguments of the constructor..
 

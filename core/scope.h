@@ -37,8 +37,8 @@ namespace ratio
     scope(const scope &orig) = delete;
     ~scope();
 
-    core &get_core() const { return cr; }    // returns the core in which this scope is defined..
-    scope &get_scope() const { return scp; } // returns the enclosing scope..
+    inline core &get_core() const { return cr; }    // returns the core in which this scope is defined..
+    inline scope &get_scope() const { return scp; } // returns the enclosing scope..
 
     virtual const field &get_field(const std::string &name) const;    // returns the field having the given name, check in the enclosed scope if the field is not found..
     std::map<std::string, const field *> get_fields() const noexcept; // returns a map of fields defined within this scope having the fields' names as keys..
