@@ -80,6 +80,5 @@ namespace ratio
     jmethodID atm_set_state_mthd_id;
     std::unordered_map<const type *, jobject> all_types;
     std::unordered_map<const item *, jobject> all_items;
-    std::unordered_set<jlong> all_methods;
   };
 } // namespace ratio
