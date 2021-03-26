@@ -43,19 +43,19 @@ public class Type implements Scope {
 
     @Override
     public Field getField(final String name) throws NoSuchFieldException {
-        Field field = fields.get(name);
+        final Field field = fields.get(name);
         if (field != null)
             return field;
 
         // if not here, check any enclosing scope
         try {
             return scope.getField(name);
-        } catch (NoSuchFieldException e) {
+        } catch (final NoSuchFieldException e) {
             // if not in any enclosing scope, check any superclass
-            for (Type superclass : superclasses) {
+            for (final Type superclass : superclasses) {
                 try {
                     return superclass.getField(name);
-                } catch (NoSuchFieldException ex) {
+                } catch (final NoSuchFieldException ex) {
                 }
             }
         }
@@ -91,15 +91,15 @@ public class Type implements Scope {
     private void newInstance(final Item item) {
         assert (!instances.contains(item));
         instances.add(item);
-        for (Type type : superclasses)
+        for (final Type type : superclasses)
             type.newInstance(item);
     }
 
     public boolean isAssignableFrom(final Type type) {
-        LinkedList<Type> queue = new LinkedList<>();
+        final LinkedList<Type> queue = new LinkedList<>();
         queue.add(type);
         while (!queue.isEmpty()) {
-            Type c_type = queue.pollFirst();
+            final Type c_type = queue.pollFirst();
             if (c_type == this) {
                 return true;
             }
@@ -122,7 +122,7 @@ public class Type implements Scope {
         if (Stream.of(parameter_types).anyMatch(Objects::isNull))
             throw new IllegalArgumentException("parameter types cannot be null");
         boolean is_correct;
-        for (Constructor c : constructors) {
+        for (final Constructor c : constructors) {
             if (c.pars.length == parameter_types.length) {
                 is_correct = true;
                 for (int i = 0; i < c.pars.length; i++) {
@@ -157,7 +157,7 @@ public class Type implements Scope {
             throw new IllegalArgumentException("parameter types cannot be null");
         boolean isCorrect;
         if (methods.containsKey(name))
-            for (Method m : methods.get(name))
+            for (final Method m : methods.get(name))
                 if (m.pars.length == parameter_types.length) {
                     isCorrect = true;
                     for (int i = 0; i < m.pars.length; i++)
@@ -172,12 +172,12 @@ public class Type implements Scope {
         try {
             // if not here, check any enclosing scope
             return scope.getMethod(name, parameter_types);
-        } catch (NoSuchMethodException e) {
+        } catch (final NoSuchMethodException e) {
             // if not in any enclosing scope, check any superclass
-            for (Type superclass : superclasses) {
+            for (final Type superclass : superclasses) {
                 try {
                     return superclass.getMethod(name, parameter_types);
-                } catch (NoSuchMethodException ex) {
+                } catch (final NoSuchMethodException ex) {
                 }
             }
         }
@@ -188,7 +188,7 @@ public class Type implements Scope {
 
     @Override
     public Collection<Method> getMethods() {
-        Collection<Method> c_methods = new ArrayList<>(methods.size());
+        final Collection<Method> c_methods = new ArrayList<>(methods.size());
         methods.values().forEach(ms -> c_methods.addAll(ms));
         return Collections.unmodifiableCollection(c_methods);
     }
@@ -202,19 +202,19 @@ public class Type implements Scope {
     }
 
     @Override
-    public Type getType(String name) throws ClassNotFoundException {
-        Type type = types.get(name);
+    public Type getType(final String name) throws ClassNotFoundException {
+        final Type type = types.get(name);
         if (type != null)
             return type;
 
         // if not here, check any enclosing scope
         try {
             return scope.getType(name);
-        } catch (ClassNotFoundException e) {
-            for (Type superclass : superclasses) {
+        } catch (final ClassNotFoundException e) {
+            for (final Type superclass : superclasses) {
                 try {
                     return superclass.getType(name);
-                } catch (ClassNotFoundException ex) {
+                } catch (final ClassNotFoundException ex) {
                 }
             }
         }
@@ -236,19 +236,19 @@ public class Type implements Scope {
 
     @Override
     public Predicate getPredicate(final String name) throws ClassNotFoundException {
-        Predicate predicate = predicates.get(name);
+        final Predicate predicate = predicates.get(name);
         if (predicate != null)
             return predicate;
 
         // if not here, check any enclosing scope
         try {
             return scope.getPredicate(name);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             // if not in any enclosing scope, check any superclass
-            for (Type superclass : superclasses) {
+            for (final Type superclass : superclasses) {
                 try {
                     return superclass.getPredicate(name);
-                } catch (ClassNotFoundException ex) {
+                } catch (final ClassNotFoundException ex) {
                 }
             }
         }

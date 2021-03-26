@@ -15,8 +15,8 @@ public class Bound {
         if (min == max)
             return Integer.toString(min);
 
-        String c_min = min == -INF ? "-inf" : Integer.toString(min);
-        String c_max = max == INF ? "+inf" : Integer.toString(max);
+        final String c_min = min == -INF ? "-inf" : Integer.toString(min);
+        final String c_max = max == INF ? "+inf" : Integer.toString(max);
         return "[" + c_min + ", " + c_max + "]";
     }
 }

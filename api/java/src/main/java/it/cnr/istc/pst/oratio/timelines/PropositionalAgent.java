@@ -93,23 +93,23 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
     private static class PropositionalAgentBuilder implements TimelineBuilder {
 
         @Override
-        public PropositionalAgent build(Item itm, Collection<Atom> atoms) {
+        public PropositionalAgent build(final Item itm, final Collection<Atom> atoms) {
             try {
-                PropositionalAgent pa = new PropositionalAgent(itm.getSolver().guessName(itm),
+                final PropositionalAgent pa = new PropositionalAgent(itm.getSolver().guessName(itm),
                         ((ArithItem) itm.getSolver().get(Solver.ORIGIN)).getValue(),
                         ((ArithItem) itm.getSolver().get(Solver.HORIZON)).getValue());
 
                 atoms.stream()
                         .filter(atm -> atm.getType().getSuperclasses().stream().anyMatch(
                                 t -> t.getName().equals(Solver.IMPULSE) || t.getName().equals(Solver.INTERVAL)))
-                        .sorted((Atom a0, Atom a1) -> {
+                        .sorted((final Atom a0, final Atom a1) -> {
                             try {
-                                ArithItem a0_start = (ArithItem) a0.get(a0.getType().getSuperclasses().stream()
+                                final ArithItem a0_start = (ArithItem) a0.get(a0.getType().getSuperclasses().stream()
                                         .anyMatch(t -> t.getName().equals(Solver.IMPULSE)) ? Solver.AT : Solver.START);
-                                ArithItem a1_start = (ArithItem) a1.get(a1.getType().getSuperclasses().stream()
+                                final ArithItem a1_start = (ArithItem) a1.get(a1.getType().getSuperclasses().stream()
                                         .anyMatch(t -> t.getName().equals(Solver.IMPULSE)) ? Solver.AT : Solver.START);
                                 return a0_start.getValue().compareTo(a1_start.getValue());
-                            } catch (NoSuchFieldException e) {
+                            } catch (final NoSuchFieldException e) {
                                 e.printStackTrace();
                                 return 0;
                             }
@@ -122,13 +122,13 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
                                 else
                                     pa.addValue(((ArithItem) atm.get(Solver.START)).getValue(),
                                             ((ArithItem) atm.get(Solver.END)).getValue(), atm);
-                            } catch (NoSuchFieldException e) {
+                            } catch (final NoSuchFieldException e) {
                                 e.printStackTrace();
                             }
                         });
 
                 return pa;
-            } catch (NoSuchFieldException e) {
+            } catch (final NoSuchFieldException e) {
                 e.printStackTrace();
                 return null;
             }

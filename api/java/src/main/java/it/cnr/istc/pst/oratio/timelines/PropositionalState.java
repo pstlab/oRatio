@@ -50,11 +50,11 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
         return horizon;
     }
 
-    private void addFluent(String name) {
+    private void addFluent(final String name) {
         fluents.put(name, new Fluent(name));
     }
 
-    private Fluent getFluent(String name) {
+    private Fluent getFluent(final String name) {
         return fluents.get(name);
     }
 
@@ -140,7 +140,7 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
         public LBool getPolarity() {
             try {
                 return ((BoolItem) atom.get("polarity")).getValue();
-            } catch (NoSuchFieldException e) {
+            } catch (final NoSuchFieldException e) {
                 e.printStackTrace();
                 return null;
             }
@@ -150,33 +150,33 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
     private static class PropositionalStateBuilder implements TimelineBuilder {
 
         @Override
-        public PropositionalState build(Item itm, Collection<Atom> atoms) {
-            Solver solver = itm.getSolver();
+        public PropositionalState build(final Item itm, final Collection<Atom> atoms) {
+            final Solver solver = itm.getSolver();
             try {
-                PropositionalState ps = new PropositionalState(
+                final PropositionalState ps = new PropositionalState(
                         ((ArithItem) itm.getSolver().get(Solver.ORIGIN)).getValue(),
                         ((ArithItem) itm.getSolver().get(Solver.HORIZON)).getValue());
 
-                for (Predicate p : itm.getType().getPredicates().values()) {
-                    Item[][] itms = new Item[p.getFields().size()][];
+                for (final Predicate p : itm.getType().getPredicates().values()) {
+                    final Item[][] itms = new Item[p.getFields().size()][];
                     int i = 0;
-                    for (Field fld : p.getFields().values())
+                    for (final Field fld : p.getFields().values())
                         itms[i++] = fld.getType().getInstances().toArray(new Item[fld.getType().getInstances().size()]);
 
                     if (itms.length > 0)
-                        for (Item[] c_itms : new CartesianProductGenerator<>(itms))
+                        for (final Item[] c_itms : new CartesianProductGenerator<>(itms))
                             ps.addFluent(p.getName() + "(" + Stream.of(c_itms).map(c_itm -> solver.guessName(c_itm))
                                     .collect(Collectors.joining(", ")) + ")");
                     else
                         ps.addFluent(p.getName() + "()");
                 }
 
-                for (Atom atm : atoms) {
-                    String[][] par_vals = atm.getType().getFields().values().stream()
+                for (final Atom atm : atoms) {
+                    final String[][] par_vals = atm.getType().getFields().values().stream()
                             .filter(fld -> !fld.getName().equals("tau")).map(fld -> {
                                 try {
                                     return atm.get(fld.getName());
-                                } catch (NoSuchFieldException e) {
+                                } catch (final NoSuchFieldException e) {
                                     e.printStackTrace();
                                     return null;
                                 }
@@ -195,7 +195,7 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
                                 ((ArithItem) atm.get(Solver.START)).getValue(),
                                 ((ArithItem) atm.get(Solver.END)).getValue(), atm);
                     else
-                        for (String[] vals : new CartesianProductGenerator<>(par_vals)) {
+                        for (final String[] vals : new CartesianProductGenerator<>(par_vals)) {
                             ps.getFluent(atm.getType().getName() + "("
                                     + Stream.of(vals).collect(Collectors.joining(", ")) + ")")
                                     .addLiteral(((ArithItem) atm.get(Solver.START)).getValue(),
@@ -204,7 +204,7 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
                 }
 
                 return ps;
-            } catch (NoSuchFieldException e) {
+            } catch (final NoSuchFieldException e) {
                 e.printStackTrace();
                 return null;
             }

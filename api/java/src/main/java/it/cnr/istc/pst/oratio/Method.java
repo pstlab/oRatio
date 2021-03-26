@@ -21,7 +21,7 @@ public class Method implements Scope {
         this.return_type = return_type;
         this.pars = parameters;
 
-        for (Field par : parameters)
+        for (final Field par : parameters)
             fields.put(par.name, par);
     }
 
@@ -37,7 +37,7 @@ public class Method implements Scope {
 
     @Override
     public Field getField(final String name) throws NoSuchFieldException {
-        Field field = fields.get(name);
+        final Field field = fields.get(name);
         if (field != null) {
             return field;
         } else {

@@ -100,11 +100,11 @@ public class ReusableResource implements Timeline<ReusableResource.RRValue> {
         }
 
         public InfRational getUsage() {
-            InfRational usage = new InfRational();
-            for (Atom atm : atoms)
+            final InfRational usage = new InfRational();
+            for (final Atom atm : atoms)
                 try {
                     usage.add(((ArithItem) atm.get("amount")).getValue());
-                } catch (NoSuchFieldException e) {
+                } catch (final NoSuchFieldException e) {
                     e.printStackTrace();
                 }
             return usage;
@@ -117,25 +117,25 @@ public class ReusableResource implements Timeline<ReusableResource.RRValue> {
     private static class ReusableResourceBuilder implements TimelineBuilder {
 
         @Override
-        public ReusableResource build(Item itm, Collection<Atom> atoms) {
+        public ReusableResource build(final Item itm, final Collection<Atom> atoms) {
             try {
-                ReusableResource rr = new ReusableResource(itm.getSolver().guessName(itm),
+                final ReusableResource rr = new ReusableResource(itm.getSolver().guessName(itm),
                         ((ArithItem) itm.get("capacity")).getValue(),
                         ((ArithItem) itm.getSolver().get(Solver.ORIGIN)).getValue(),
                         ((ArithItem) itm.getSolver().get(Solver.HORIZON)).getValue());
 
                 // For each pulse the atoms starting at that pulse
-                Map<InfRational, Collection<Atom>> starting_values = new HashMap<>(atoms.size());
+                final Map<InfRational, Collection<Atom>> starting_values = new HashMap<>(atoms.size());
                 // For each pulse the atoms ending at that pulse
-                Map<InfRational, Collection<Atom>> ending_values = new HashMap<>(atoms.size());
+                final Map<InfRational, Collection<Atom>> ending_values = new HashMap<>(atoms.size());
                 // The pulses of the timeline
-                Set<InfRational> c_pulses = new TreeSet<>();
+                final Set<InfRational> c_pulses = new TreeSet<>();
                 c_pulses.add(rr.origin);
                 c_pulses.add(rr.horizon);
 
-                for (Atom atom : atoms) {
-                    InfRational start_pulse = ((ArithItem) atom.get(Solver.START)).getValue();
-                    InfRational end_pulse = ((ArithItem) atom.get(Solver.END)).getValue();
+                for (final Atom atom : atoms) {
+                    final InfRational start_pulse = ((ArithItem) atom.get(Solver.START)).getValue();
+                    final InfRational end_pulse = ((ArithItem) atom.get(Solver.END)).getValue();
                     c_pulses.add(start_pulse);
                     c_pulses.add(end_pulse);
                     if (!starting_values.containsKey(start_pulse))
@@ -146,10 +146,10 @@ public class ReusableResource implements Timeline<ReusableResource.RRValue> {
                     ending_values.get(end_pulse).add(atom);
                 }
 
-                InfRational[] c_pulses_array = c_pulses.toArray(new InfRational[c_pulses.size()]);
+                final InfRational[] c_pulses_array = c_pulses.toArray(new InfRational[c_pulses.size()]);
 
                 // Push values to timeline according to pulses...
-                List<Atom> overlapping_formulas = new ArrayList<>(atoms.size());
+                final List<Atom> overlapping_formulas = new ArrayList<>(atoms.size());
                 if (starting_values.containsKey(c_pulses_array[0]))
                     overlapping_formulas.addAll(starting_values.get(c_pulses_array[0]));
                 if (ending_values.containsKey(c_pulses_array[0]))
@@ -163,7 +163,7 @@ public class ReusableResource implements Timeline<ReusableResource.RRValue> {
                 }
 
                 return rr;
-            } catch (NoSuchFieldException e) {
+            } catch (final NoSuchFieldException e) {
                 e.printStackTrace();
                 return null;
             }

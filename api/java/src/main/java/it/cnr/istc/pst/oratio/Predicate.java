@@ -8,7 +8,7 @@ public class Predicate extends Type {
         super(solver, scope, name, false);
         this.pars = parameters;
 
-        for (Field par : parameters)
+        for (final Field par : parameters)
             fields.put(par.name, par);
     }
 

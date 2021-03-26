@@ -106,7 +106,7 @@ public class Rational extends Number implements Comparable<Rational> {
     }
 
     @Override
-    public int compareTo(Rational o) {
+    public int compareTo(final Rational o) {
         if (eq(o)) {
             return 0;
         }
@@ -136,8 +136,8 @@ public class Rational extends Number implements Comparable<Rational> {
             return;
         }
 
-        long f = gcd(num, rhs.num);
-        long g = gcd(den, rhs.den);
+        final long f = gcd(num, rhs.num);
+        final long g = gcd(den, rhs.den);
 
         num = (num / f) * (rhs.den / g) + (rhs.num / f) * (den / g);
         den = lcm(den, rhs.den);
@@ -172,8 +172,8 @@ public class Rational extends Number implements Comparable<Rational> {
             return;
         }
 
-        Rational c = new Rational(num, rhs.den);
-        Rational d = new Rational(rhs.num, den);
+        final Rational c = new Rational(num, rhs.den);
+        final Rational d = new Rational(rhs.num, den);
 
         num = c.num * d.num;
         den = c.den * d.den;
@@ -181,7 +181,7 @@ public class Rational extends Number implements Comparable<Rational> {
     }
 
     public void div(final Rational rhs) {
-        Rational rec = new Rational();
+        final Rational rec = new Rational();
         rec.num = rhs.den;
         rec.den = rhs.num;
         if (rhs.num >= 0) {
@@ -238,7 +238,7 @@ public class Rational extends Number implements Comparable<Rational> {
     }
 
     public void div(final long rhs) {
-        Rational rec = new Rational();
+        final Rational rec = new Rational();
         rec.num = 1;
         rec.den = rhs;
         if (rhs >= 0) {
@@ -265,10 +265,10 @@ public class Rational extends Number implements Comparable<Rational> {
             return new Rational(num + rhs.num);
         }
 
-        long f = gcd(num, rhs.num);
-        long g = gcd(den, rhs.den);
+        final long f = gcd(num, rhs.num);
+        final long g = gcd(den, rhs.den);
 
-        Rational res = new Rational((num / f) * (rhs.den / g) + (rhs.num / f) * (den / g), lcm(den, rhs.den));
+        final Rational res = new Rational((num / f) * (rhs.den / g) + (rhs.num / f) * (den / g), lcm(den, rhs.den));
         res.num *= f;
         return res;
     }
@@ -295,13 +295,13 @@ public class Rational extends Number implements Comparable<Rational> {
             return ((num >= 0 && rhs.num >= 0) || (num <= 0 && rhs.num <= 0)) ? POSITIVE_INFINITY : NEGATIVE_INFINITY;
         }
 
-        Rational c = new Rational(num, rhs.den);
-        Rational d = new Rational(rhs.num, den);
+        final Rational c = new Rational(num, rhs.den);
+        final Rational d = new Rational(rhs.num, den);
         return new Rational(c.num * d.num, c.den * d.den);
     }
 
     public Rational divide(final Rational rhs) {
-        Rational rec = new Rational();
+        final Rational rec = new Rational();
         if (rhs.num >= 0) {
             rec.num = rhs.den;
             rec.den = rhs.num;
@@ -324,7 +324,7 @@ public class Rational extends Number implements Comparable<Rational> {
             return new Rational(num + rhs);
         }
 
-        Rational res = new Rational();
+        final Rational res = new Rational();
         res.num = num + rhs * den;
         res.den = den;
         return res;
@@ -355,7 +355,7 @@ public class Rational extends Number implements Comparable<Rational> {
     }
 
     public Rational divide(final long rhs) {
-        Rational rec = new Rational();
+        final Rational rec = new Rational();
         rec.num = 1;
         rec.den = rhs;
         if (rhs >= 0) {
@@ -369,7 +369,7 @@ public class Rational extends Number implements Comparable<Rational> {
     }
 
     public Rational minus() {
-        Rational neg = new Rational();
+        final Rational neg = new Rational();
         neg.num = -num;
         neg.den = den;
         return neg;
@@ -384,7 +384,7 @@ public class Rational extends Number implements Comparable<Rational> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -459,7 +459,7 @@ public class Rational extends Number implements Comparable<Rational> {
             v = -v;
         }
         while (v != 0) {
-            long r = u % v;
+            final long r = u % v;
             u = v;
             v = r;
         }

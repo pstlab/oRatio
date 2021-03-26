@@ -31,8 +31,8 @@ public class Item implements Env {
     }
 
     @Override
-    public Item get(String name) throws NoSuchFieldException {
-        Item item = exprs.get(name);
+    public Item get(final String name) throws NoSuchFieldException {
+        final Item item = exprs.get(name);
         if (item != null)
             return item;
 
@@ -90,9 +90,9 @@ public class Item implements Env {
     public static class ArithItem extends Item {
 
         private final String lin;
-        private InfRational lb, ub, val;
+        private final InfRational lb, ub, val;
 
-        ArithItem(final Solver solver, Type type, final String lin, final InfRational lb, final InfRational ub,
+        ArithItem(final Solver solver, final Type type, final String lin, final InfRational lb, final InfRational ub,
                 final InfRational val) {
             super(solver, type);
             this.lin = lin;
@@ -134,7 +134,8 @@ public class Item implements Env {
         }
 
         @SuppressWarnings("unused")
-        private void setVal(final long val_rat_num, final long val_rat_den, final long val_inf_num, final long val_inf_den) {
+        private void setVal(final long val_rat_num, final long val_rat_den, final long val_inf_num,
+                final long val_inf_den) {
             this.val.rat.num = val_rat_num;
             this.val.rat.den = val_rat_den;
             this.val.inf.num = val_inf_num;
@@ -147,7 +148,7 @@ public class Item implements Env {
         private final String var;
         private Item[] vals;
 
-        EnumItem(final Solver solver, Type type, final String var, final Item[] vals) {
+        EnumItem(final Solver solver, final Type type, final String var, final Item[] vals) {
             super(solver, type);
             this.var = var;
             this.vals = vals;

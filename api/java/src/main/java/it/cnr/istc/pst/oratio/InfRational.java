@@ -218,7 +218,7 @@ public class InfRational extends Number implements Comparable<InfRational> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -253,8 +253,8 @@ public class InfRational extends Number implements Comparable<InfRational> {
     }
 
     @Override
-    public int compareTo(InfRational o) {
-        int rat_comp = rat.compareTo(o.rat);
+    public int compareTo(final InfRational o) {
+        final int rat_comp = rat.compareTo(o.rat);
         return rat_comp != 0 ? rat_comp : inf.compareTo(o.inf);
     }
 

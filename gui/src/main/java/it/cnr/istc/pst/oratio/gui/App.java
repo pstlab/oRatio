@@ -51,13 +51,13 @@ public class App {
     }
 
     public static void start_server() {
-        SimpleModule module = new SimpleModule();
+        final SimpleModule module = new SimpleModule();
         module.addSerializer(Rational.class, new StdSerializer<Rational>(Rational.class) {
 
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void serialize(Rational value, JsonGenerator gen, SerializerProvider serializers)
+            public void serialize(final Rational value, final JsonGenerator gen, final SerializerProvider serializers)
                     throws IOException {
                 gen.writeStartObject();
                 gen.writeNumberField("num", value.getNumerator());
@@ -70,7 +70,8 @@ public class App {
             private static final long serialVersionUID = 1L;
 
             @Override
-            public void serialize(Bound value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            public void serialize(final Bound value, final JsonGenerator gen, final SerializerProvider provider)
+                    throws IOException {
                 gen.writeStartObject();
                 if (value.min != -Bound.INF)
                     gen.writeNumberField("min", value.min);
@@ -92,7 +93,7 @@ public class App {
         app.start();
     }
 
-    static synchronized void on_connect(WsContext ctx) {
+    static synchronized void on_connect(final WsContext ctx) {
         LOG.info("New connection..");
         contexts.add(ctx);
         try {
@@ -101,17 +102,17 @@ public class App {
             ctx.send(MAPPER.writeValueAsString(new Message.Timelines(SLV_LISTENER.getTimelines())));
             if (SLV_LISTENER.getState() == SolverState.Solved)
                 ctx.send(MAPPER.writeValueAsString(new Message.Tick(SLV_LISTENER.getCurrentTime())));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
 
-    static synchronized void on_close(WsContext ctx) {
+    static synchronized void on_close(final WsContext ctx) {
         LOG.info("Lost connection..");
         contexts.remove(ctx);
     }
 
-    static synchronized void on_message(WsMessageContext ctx) {
+    static synchronized void on_message(final WsMessageContext ctx) {
         final String message = ctx.message();
         LOG.info("Received message {}..", message);
         switch (message) {
@@ -172,7 +173,7 @@ public class App {
             public final Collection<Flaw> flaws;
             public final Collection<Resolver> resolvers;
 
-            Graph(final Collection<Flaw> flaws, Collection<Resolver> resolvers) {
+            Graph(final Collection<Flaw> flaws, final Collection<Resolver> resolvers) {
                 this.flaws = flaws;
                 this.resolvers = resolvers;
             }
@@ -186,7 +187,8 @@ public class App {
             public final byte state;
             public final Bound position;
 
-            FlawCreated(long id, long[] causes, String label, byte state, Bound position) {
+            FlawCreated(final long id, final long[] causes, final String label, final byte state,
+                    final Bound position) {
                 this.id = id;
                 this.causes = causes;
                 this.label = label;
@@ -200,7 +202,7 @@ public class App {
             public final long id;
             public final byte state;
 
-            FlawStateChanged(long id, byte state) {
+            FlawStateChanged(final long id, final byte state) {
                 this.id = id;
                 this.state = state;
             }
@@ -211,7 +213,7 @@ public class App {
             public final long id;
             public final Rational cost;
 
-            FlawCostChanged(long id, Rational cost) {
+            FlawCostChanged(final long id, final Rational cost) {
                 this.id = id;
                 this.cost = cost;
             }
@@ -222,7 +224,7 @@ public class App {
             public final long id;
             public final Bound position;
 
-            FlawPositionChanged(long id, Bound position) {
+            FlawPositionChanged(final long id, final Bound position) {
                 this.id = id;
                 this.position = position;
             }
@@ -232,7 +234,7 @@ public class App {
 
             public final long id;
 
-            CurrentFlaw(long id) {
+            CurrentFlaw(final long id) {
                 this.id = id;
             }
         }
@@ -245,7 +247,8 @@ public class App {
             public final String label;
             public final byte state;
 
-            ResolverCreated(long id, long effect, Rational cost, String label, byte state) {
+            ResolverCreated(final long id, final long effect, final Rational cost, final String label,
+                    final byte state) {
                 this.id = id;
                 this.effect = effect;
                 this.cost = cost;
@@ -259,7 +262,7 @@ public class App {
             public final long id;
             public final byte state;
 
-            ResolverStateChanged(long id, byte state) {
+            ResolverStateChanged(final long id, final byte state) {
                 this.id = id;
                 this.state = state;
             }
@@ -269,7 +272,7 @@ public class App {
 
             public final long id;
 
-            CurrentResolver(long id) {
+            CurrentResolver(final long id) {
                 this.id = id;
             }
         }
@@ -279,7 +282,7 @@ public class App {
             public final long flaw;
             public final long resolver;
 
-            CausalLinkAdded(long flaw, long resolver) {
+            CausalLinkAdded(final long flaw, final long resolver) {
                 this.flaw = flaw;
                 this.resolver = resolver;
             }
@@ -298,7 +301,7 @@ public class App {
 
             public final Rational current_time;
 
-            Tick(Rational current_time) {
+            Tick(final Rational current_time) {
                 this.current_time = current_time;
             }
         }
@@ -307,7 +310,7 @@ public class App {
 
             public final long[] atoms;
 
-            StartingAtoms(long[] atoms) {
+            StartingAtoms(final long[] atoms) {
                 this.atoms = atoms;
             }
         }
@@ -316,7 +319,7 @@ public class App {
 
             public final long[] atoms;
 
-            EndingAtoms(long[] atoms) {
+            EndingAtoms(final long[] atoms) {
                 this.atoms = atoms;
             }
         }

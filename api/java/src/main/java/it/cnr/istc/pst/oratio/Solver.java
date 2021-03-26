@@ -60,7 +60,7 @@ public class Solver implements Scope, Env {
     }
 
     @Override
-    public Field getField(String name) throws NoSuchFieldException {
+    public Field getField(final String name) throws NoSuchFieldException {
         return fields.get(name);
     }
 
@@ -81,7 +81,7 @@ public class Solver implements Scope, Env {
             throw new IllegalArgumentException("parameter types cannot be null");
         boolean isCorrect;
         if (methods.containsKey(name))
-            for (Method m : methods.get(name))
+            for (final Method m : methods.get(name))
                 if (m.pars.length == parameter_types.length) {
                     isCorrect = true;
                     for (int i = 0; i < m.pars.length; i++)
@@ -99,7 +99,7 @@ public class Solver implements Scope, Env {
 
     @Override
     public Collection<Method> getMethods() {
-        Collection<Method> c_methods = new ArrayList<>(methods.size());
+        final Collection<Method> c_methods = new ArrayList<>(methods.size());
         methods.values().forEach(ms -> c_methods.addAll(ms));
         return Collections.unmodifiableCollection(c_methods);
     }
@@ -113,8 +113,8 @@ public class Solver implements Scope, Env {
     }
 
     @Override
-    public Type getType(String name) throws ClassNotFoundException {
-        Type type = types.get(name);
+    public Type getType(final String name) throws ClassNotFoundException {
+        final Type type = types.get(name);
         if (type != null)
             return type;
 
@@ -135,7 +135,7 @@ public class Solver implements Scope, Env {
 
     @Override
     public Predicate getPredicate(final String name) throws ClassNotFoundException {
-        Predicate predicate = predicates.get(name);
+        final Predicate predicate = predicates.get(name);
         if (predicate != null)
             return predicate;
 
@@ -155,8 +155,8 @@ public class Solver implements Scope, Env {
     }
 
     @Override
-    public Item get(String name) throws NoSuchFieldException {
-        Item item = exprs.get(name);
+    public Item get(final String name) throws NoSuchFieldException {
+        final Item item = exprs.get(name);
         if (item != null)
             return item;
 
@@ -193,23 +193,23 @@ public class Solver implements Scope, Env {
 
     private void fireFlawCreated(final long id, final long[] causes, final String label, final byte state,
             final int position_lb, final int position_ub) {
-        State c_state = State.values()[state];
-        Bound position = new Bound(position_lb, position_ub);
+        final State c_state = State.values()[state];
+        final Bound position = new Bound(position_lb, position_ub);
         graph_listeners.stream().forEach(l -> l.flawCreated(id, causes, label, c_state, position));
     }
 
     private void fireFlawStateChanged(final long id, final byte state) {
-        State c_state = State.values()[state];
+        final State c_state = State.values()[state];
         graph_listeners.stream().forEach(l -> l.flawStateChanged(id, c_state));
     }
 
     private void fireFlawCostChanged(final long id, final long cost_num, final long cost_den) {
-        Rational cost = new Rational(cost_num, cost_den);
+        final Rational cost = new Rational(cost_num, cost_den);
         graph_listeners.stream().forEach(l -> l.flawCostChanged(id, cost));
     }
 
     private void fireFlawPositionChanged(final long id, final int position_lb, final int position_ub) {
-        Bound position = new Bound(position_lb, position_ub);
+        final Bound position = new Bound(position_lb, position_ub);
         graph_listeners.stream().forEach(l -> l.flawPositionChanged(id, position));
     }
 
@@ -219,13 +219,13 @@ public class Solver implements Scope, Env {
 
     private void fireResolverCreated(final long id, final long effect, final String label, final long cost_num,
             final long cost_den, final byte state) {
-        State c_state = State.values()[state];
-        Rational cost = new Rational(cost_num, cost_den);
+        final State c_state = State.values()[state];
+        final Rational cost = new Rational(cost_num, cost_den);
         graph_listeners.stream().forEach(l -> l.resolverCreated(id, effect, cost, label, c_state));
     }
 
     private void fireResolverStateChanged(final long id, final byte state) {
-        State c_state = State.values()[state];
+        final State c_state = State.values()[state];
         graph_listeners.stream().forEach(l -> l.resolverStateChanged(id, c_state));
     }
 
@@ -237,7 +237,7 @@ public class Solver implements Scope, Env {
         graph_listeners.stream().forEach(l -> l.causalLinkAdded(flaw, resolver));
     }
 
-    private void fireLog(String log) {
+    private void fireLog(final String log) {
         state_listeners.stream().forEach(l -> l.log(log));
     }
 
@@ -251,15 +251,15 @@ public class Solver implements Scope, Env {
 
     private void fireStateChanged() {
         expr_names.clear();
-        Queue<Map.Entry<String, Item>> q = new ArrayDeque<>();
-        for (Map.Entry<String, Item> c_expr : exprs.entrySet()) {
+        final Queue<Map.Entry<String, Item>> q = new ArrayDeque<>();
+        for (final Map.Entry<String, Item> c_expr : exprs.entrySet()) {
             expr_names.putIfAbsent(c_expr.getValue(), c_expr.getKey());
             if (!(c_expr.getValue() instanceof Atom))
                 q.add(c_expr);
         }
         while (!q.isEmpty()) {
-            Map.Entry<String, Item> expr = q.poll();
-            for (Map.Entry<String, Item> c_expr : expr.getValue().getExprs().entrySet())
+            final Map.Entry<String, Item> expr = q.poll();
+            for (final Map.Entry<String, Item> c_expr : expr.getValue().getExprs().entrySet())
                 if (expr_names.putIfAbsent(c_expr.getValue(),
                         expr_names.get(expr.getValue()) + "." + c_expr.getKey()) == null)
                     q.add(c_expr);
@@ -279,19 +279,19 @@ public class Solver implements Scope, Env {
         state_listeners.stream().forEach(l -> l.inconsistentProblem());
     }
 
-    public void addGraphListener(GraphListener l) {
+    public void addGraphListener(final GraphListener l) {
         graph_listeners.add(l);
     }
 
-    public void removeGraphListener(GraphListener l) {
+    public void removeGraphListener(final GraphListener l) {
         graph_listeners.remove(l);
     }
 
-    public void addStateListener(StateListener l) {
+    public void addStateListener(final StateListener l) {
         state_listeners.add(l);
     }
 
-    public void removeStateListener(StateListener l) {
+    public void removeStateListener(final StateListener l) {
         state_listeners.remove(l);
     }
 }

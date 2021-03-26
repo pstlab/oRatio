@@ -71,20 +71,20 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     }
 
     @Override
-    public synchronized void log(String log) {
+    public synchronized void log(final String log) {
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.Log(log)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
 
     @Override
-    public synchronized void read(String arg0) {
+    public synchronized void read(final String arg0) {
     }
 
     @Override
-    public synchronized void read(String[] arg0) {
+    public synchronized void read(final String[] arg0) {
     }
 
     @Override
@@ -92,7 +92,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         timelines.stateChanged();
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.Timelines(getTimelines())));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -102,7 +102,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         state = SolverState.Solving;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.StartedSolving()));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -119,7 +119,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.SolutionFound()));
             App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -135,21 +135,23 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         current_resolver = null;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.InconsistentProblem()));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
 
     @Override
-    public synchronized void flawCreated(long id, long[] causes, String label, State state, Bound position) {
-        Flaw c_flaw = new Flaw(id, Arrays.stream(causes).mapToObj(r_id -> resolvers.get(r_id)).toArray(Resolver[]::new),
-                label, state, position);
+    public synchronized void flawCreated(final long id, final long[] causes, final String label, final State state,
+            final Bound position) {
+        final Flaw c_flaw = new Flaw(id,
+                Arrays.stream(causes).mapToObj(r_id -> resolvers.get(r_id)).toArray(Resolver[]::new), label, state,
+                position);
         Stream.of(c_flaw.causes).forEach(c -> c.preconditions.add(c_flaw));
         flaws.put(id, c_flaw);
         try {
             App.broadcast(MAPPER
                     .writeValueAsString(new Message.FlawCreated(id, causes, label, (byte) state.ordinal(), position)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -160,7 +162,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         flaw.state = state;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.FlawStateChanged(id, (byte) state.ordinal())));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -171,7 +173,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         flaw.cost = cost;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.FlawCostChanged(id, cost)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -182,7 +184,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         flaw.position = position;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.FlawPositionChanged(id, position)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -196,7 +198,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         current_flaw.current = true;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.CurrentFlaw(id)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -209,7 +211,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         try {
             App.broadcast(MAPPER
                     .writeValueAsString(new Message.ResolverCreated(id, effect, cost, label, (byte) state.ordinal())));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -220,7 +222,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         resolver.state = state;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.ResolverStateChanged(id, (byte) state.ordinal())));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -234,7 +236,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         current_resolver.current = true;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.CurrentResolver(id)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -244,7 +246,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         resolvers.get(resolver).preconditions.add(flaws.get(flaw));
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.CausalLinkAdded(flaw, resolver)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -254,7 +256,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         this.current_time = current_time;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -263,7 +265,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     public synchronized void startingAtoms(final long[] atoms) {
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.StartingAtoms(atoms)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -272,7 +274,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     public synchronized void endingAtoms(final long[] atoms) {
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.EndingAtoms(atoms)));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -284,7 +286,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         current_resolver = null;
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.Graph(flaws.values(), resolvers.values())));
-        } catch (JsonProcessingException e) {
+        } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
     }
@@ -310,8 +312,8 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     }
 
     Collection<Object> getTimelines() {
-        Collection<Object> c_tls = new ArrayList<>();
-        for (Timeline<?> tl : timelines) {
+        final Collection<Object> c_tls = new ArrayList<>();
+        for (final Timeline<?> tl : timelines) {
             if (tl instanceof StateVariable) {
                 c_tls.add(toTimeline((StateVariable) tl));
             } else if (tl instanceof ReusableResource) {
@@ -323,7 +325,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         return c_tls;
     }
 
-    private static SVTimeline toTimeline(StateVariable sv) {
+    private static SVTimeline toTimeline(final StateVariable sv) {
         return new SVTimeline(sv.getName(), sv.getOrigin().doubleValue(), sv.getHorizon().doubleValue(),
                 sv.getValues().stream()
                         .map(val -> new SVTimeline.Value(
@@ -333,7 +335,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
                         .collect(Collectors.toList()));
     }
 
-    private static RRTimeline toTimeline(ReusableResource rr) {
+    private static RRTimeline toTimeline(final ReusableResource rr) {
         return new RRTimeline(rr.getName(), rr.getCapacity().doubleValue(), rr.getOrigin().doubleValue(),
                 rr.getHorizon().doubleValue(),
                 rr.getValues().stream()
@@ -343,7 +345,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
                         .collect(Collectors.toList()));
     }
 
-    private static Agent toTimeline(PropositionalAgent pa) {
+    private static Agent toTimeline(final PropositionalAgent pa) {
         return new Agent(pa.getName(), pa.getOrigin().doubleValue(), pa.getHorizon().doubleValue(),
                 pa.getValues().stream().map(val -> new Agent.Value(val.getAtom().toString(),
                         val.getFrom().doubleValue(), val.getTo().doubleValue(), val.getAtom().getSigma()))
@@ -460,7 +462,8 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         private Rational cost = Rational.POSITIVE_INFINITY;
         private boolean current = false;
 
-        private Flaw(long id, Resolver[] causes, String label, State state, Bound position) {
+        private Flaw(final long id, final Resolver[] causes, final String label, final State state,
+                final Bound position) {
             this.id = id;
             this.causes = causes;
             this.label = label;
@@ -478,14 +481,15 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         }
 
         @Override
-        public void serialize(Flaw flaw, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        public void serialize(final Flaw flaw, final JsonGenerator gen, final SerializerProvider provider)
+                throws IOException {
             gen.writeStartObject();
             gen.writeNumberField("id", flaw.id);
             gen.writeArrayFieldStart("causes");
             Arrays.stream(flaw.causes).forEach(c -> {
                 try {
                     gen.writeNumber(c.id);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     LOG.error("Cannot serialize", e);
                 }
             });
@@ -515,7 +519,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         private final Set<Flaw> preconditions = new HashSet<>();
         private boolean current = false;
 
-        private Resolver(long id, Flaw effect, String label, State state, Rational cost) {
+        private Resolver(final long id, final Flaw effect, final String label, final State state, final Rational cost) {
             this.id = id;
             this.effect = effect;
             this.label = label;
@@ -536,7 +540,8 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
         private static final long serialVersionUID = 1L;
 
         @Override
-        public void serialize(Resolver resolver, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        public void serialize(final Resolver resolver, final JsonGenerator gen, final SerializerProvider provider)
+                throws IOException {
             gen.writeStartObject();
             gen.writeNumberField("id", resolver.id);
             gen.writeNumberField("effect", resolver.effect.id);
@@ -549,7 +554,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
             resolver.preconditions.stream().forEach(pre -> {
                 try {
                     gen.writeNumber(pre.id);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     LOG.error("Cannot serialize", e);
                 }
             });

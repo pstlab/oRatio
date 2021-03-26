@@ -34,7 +34,7 @@ public class TimelinesExecutor {
     public native void failure(long[] atoms);
 
     private void fireTick(final long current_time_num, final long current_time_den) {
-        Rational current_time = new Rational(current_time_num, current_time_den);
+        final Rational current_time = new Rational(current_time_num, current_time_den);
         executor_listeners.stream().forEach(l -> l.tick(current_time));
     }
 
@@ -46,11 +46,11 @@ public class TimelinesExecutor {
         executor_listeners.stream().forEach(l -> l.endingAtoms(atoms));
     }
 
-    public void addExecutorListener(ExecutorListener l) {
+    public void addExecutorListener(final ExecutorListener l) {
         executor_listeners.add(l);
     }
 
-    public void removeExecutorListener(ExecutorListener l) {
+    public void removeExecutorListener(final ExecutorListener l) {
         executor_listeners.remove(l);
     }
 }

@@ -16,7 +16,7 @@ public class Constructor implements Scope {
         this.scope = scope;
         this.pars = parameters;
 
-        for (Field par : parameters)
+        for (final Field par : parameters)
             fields.put(par.getName(), par);
     }
 
@@ -39,7 +39,7 @@ public class Constructor implements Scope {
      */
     @Override
     public Field getField(final String name) throws NoSuchFieldException {
-        Field field = fields.get(name);
+        final Field field = fields.get(name);
         if (field != null) {
             return field;
         } else {

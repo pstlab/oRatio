@@ -29,7 +29,7 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
             BUILDERS.put(solver.getType("ReusableResource"), ReusableResource.BUILDER);
             BUILDERS.put(solver.getType("PropositionalAgent"), PropositionalAgent.BUILDER);
             BUILDERS.put(solver.getType("PropositionalState"), PropositionalState.BUILDER);
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -37,16 +37,16 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
     public void stateChanged() {
         clear();
 
-        Map<Item, Collection<Atom>> atoms = new IdentityHashMap<>();
-        for (Type t : solver.getTypes().values()) {
+        final Map<Item, Collection<Atom>> atoms = new IdentityHashMap<>();
+        for (final Type t : solver.getTypes().values()) {
             if (getTimelineType(t) != null) {
                 t.getInstances().forEach(i -> atoms.put(i, new ArrayList<>()));
-                for (Predicate p : t.getPredicates().values())
+                for (final Predicate p : t.getPredicates().values())
                     p.getInstances().stream().map(atm -> (Atom) atm)
                             .filter(atm -> (atm.getState() == Atom.AtomState.Active)).forEach(atm -> {
-                                Item tau = atm.getTau();
+                                final Item tau = atm.getTau();
                                 if (tau instanceof Item.EnumItem)
-                                    for (Item val : ((Item.EnumItem) tau).getVals())
+                                    for (final Item val : ((Item.EnumItem) tau).getVals())
                                         atoms.get(val).add(atm);
                                 else
                                     atoms.get(tau).add(atm);
@@ -54,14 +54,14 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
             }
         }
 
-        Set<Item> seen = new HashSet<>();
-        Queue<Map.Entry<String, Item>> q = new ArrayDeque<>();
+        final Set<Item> seen = new HashSet<>();
+        final Queue<Map.Entry<String, Item>> q = new ArrayDeque<>();
         q.addAll(solver.getExprs().entrySet());
         while (!q.isEmpty()) {
-            Map.Entry<String, Item> entry = q.poll();
+            final Map.Entry<String, Item> entry = q.poll();
             if (!seen.contains(entry.getValue()) && !(entry.getValue() instanceof EnumItem)) {
                 seen.add(entry.getValue());
-                Type type = getTimelineType(entry.getValue().getType());
+                final Type type = getTimelineType(entry.getValue().getType());
                 if (type != null)
                     add(BUILDERS.get(type).build(entry.getValue(), atoms.get(entry.getValue())));
                 q.addAll(entry.getValue().getExprs().entrySet());
@@ -69,12 +69,12 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
         }
     }
 
-    private Type getTimelineType(Type t) {
+    private Type getTimelineType(final Type t) {
         try {
-            Queue<Type> q = new ArrayDeque<>();
+            final Queue<Type> q = new ArrayDeque<>();
             q.add(t);
             while (!q.isEmpty()) {
-                Type c_type = q.poll();
+                final Type c_type = q.poll();
                 if (BUILDERS.containsKey(c_type))
                     return c_type;
                 if (c_type.getPredicates().values().stream().anyMatch(p -> p.getSuperclasses().stream()
@@ -82,7 +82,7 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
                     return t.getSolver().getType("PropositionalAgent");
                 q.addAll(c_type.getSuperclasses());
             }
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;
