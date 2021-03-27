@@ -56,7 +56,10 @@ namespace ratio
             gamma = lit(slv.get_sat_core().new_var());
             LOG("γ is" << to_string(gamma));
             already_closed.clear();
-            add_layer(); // we add a layer to the current graph..
+            if (std::any_of(get_flaws().begin(), get_flaws().end(), [](flaw *f) { return is_positive_infinite(f->get_estimated_cost()); }))
+                build(); // we can still build upon the current graph..
+            else
+                add_layer(); // we add a layer to the current graph..
         }
 
         LOG("pruning the graph..");
