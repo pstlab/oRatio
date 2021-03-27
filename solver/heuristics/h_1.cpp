@@ -1,6 +1,7 @@
 #include "h_1.h"
 #include "flaw.h"
 #include "resolver.h"
+#include <algorithm>
 #include <cassert>
 
 using namespace smt;

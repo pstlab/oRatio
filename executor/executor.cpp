@@ -115,7 +115,7 @@ namespace ratio
 
                 // we backtrack at root-level..
                 while (!slv.root_level())
-                    slv.pop();
+                    slv.get_sat_core().pop();
 
                 // we assert the pending facts..
                 slv.assert_facts(pending_facts);

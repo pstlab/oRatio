@@ -28,10 +28,10 @@ namespace ratio
   class flaw;
   class resolver;
   class smart_type;
+  class smart_type;
 #ifdef BUILD_LISTENERS
   class solver_listener;
 #endif
-  class executor;
 
   class solver : public core, private smt::theory
   {
@@ -42,7 +42,6 @@ namespace ratio
 #ifdef BUILD_LISTENERS
     friend class solver_listener;
 #endif
-    friend class executor;
 
   public:
     solver();

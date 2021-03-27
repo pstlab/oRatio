@@ -36,6 +36,7 @@ endif()
 message(STATUS "Build executor:           ${BUILD_EXECUTOR}")
 if(BUILD_EXECUTOR)
     add_subdirectory(executor)
+    target_compile_definitions(solver PUBLIC BUILD_EXECUTOR)
 endif()
 
 message(STATUS "Build Java API:           ${BUILD_JAVA_API}")
