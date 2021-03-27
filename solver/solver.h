@@ -28,7 +28,7 @@ namespace ratio
   class flaw;
   class resolver;
   class smart_type;
-  class smart_type;
+  class atom_flaw;
 #ifdef BUILD_LISTENERS
   class solver_listener;
 #endif
