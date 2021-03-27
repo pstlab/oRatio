@@ -95,7 +95,7 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
         @Override
         public PropositionalAgent build(final Item itm, final Collection<Atom> atoms) {
             try {
-                final PropositionalAgent pa = new PropositionalAgent(itm.getSolver().guessName(itm),
+                final PropositionalAgent pa = new PropositionalAgent(itm.getName(),
                         ((ArithItem) itm.getSolver().get(Solver.ORIGIN)).getValue(),
                         ((ArithItem) itm.getSolver().get(Solver.HORIZON)).getValue());
 

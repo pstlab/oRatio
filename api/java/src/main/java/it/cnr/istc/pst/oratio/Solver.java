@@ -37,7 +37,6 @@ public class Solver implements Scope, Env {
     final Map<String, Type> types = new LinkedHashMap<>();
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
     final Map<String, Item> exprs = new LinkedHashMap<>();
-    final Map<Item, String> expr_names = new IdentityHashMap<>();
     private final Collection<GraphListener> graph_listeners = new ArrayList<>();
     private final Collection<StateListener> state_listeners = new ArrayList<>();
 
@@ -174,17 +173,6 @@ public class Solver implements Scope, Env {
         exprs.put(id, itm);
     }
 
-    /**
-     * Returns the guessed name of the given item. The name is guessed by the name
-     * that is given to the object within the riddle code.
-     * 
-     * @param itm the {@code Item} whose name we want to guess.
-     * @return a String representing the guessed name.
-     */
-    public String guessName(final Item itm) {
-        return expr_names.get(itm);
-    }
-
     public native void read(String script);
 
     public native void read(String[] files);
@@ -250,20 +238,6 @@ public class Solver implements Scope, Env {
     }
 
     private void fireStateChanged() {
-        expr_names.clear();
-        final Queue<Map.Entry<String, Item>> q = new ArrayDeque<>();
-        for (final Map.Entry<String, Item> c_expr : exprs.entrySet()) {
-            expr_names.putIfAbsent(c_expr.getValue(), c_expr.getKey());
-            if (!(c_expr.getValue() instanceof Atom))
-                q.add(c_expr);
-        }
-        while (!q.isEmpty()) {
-            final Map.Entry<String, Item> expr = q.poll();
-            for (final Map.Entry<String, Item> c_expr : expr.getValue().getExprs().entrySet())
-                if (expr_names.putIfAbsent(c_expr.getValue(),
-                        expr_names.get(expr.getValue()) + "." + c_expr.getKey()) == null)
-                    q.add(c_expr);
-        }
         state_listeners.stream().forEach(l -> l.stateChanged());
     }
 

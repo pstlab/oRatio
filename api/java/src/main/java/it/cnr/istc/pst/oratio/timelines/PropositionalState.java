@@ -151,7 +151,6 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
 
         @Override
         public PropositionalState build(final Item itm, final Collection<Atom> atoms) {
-            final Solver solver = itm.getSolver();
             try {
                 final PropositionalState ps = new PropositionalState(
                         ((ArithItem) itm.getSolver().get(Solver.ORIGIN)).getValue(),
@@ -165,8 +164,9 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
 
                     if (itms.length > 0)
                         for (final Item[] c_itms : new CartesianProductGenerator<>(itms))
-                            ps.addFluent(p.getName() + "(" + Stream.of(c_itms).map(c_itm -> solver.guessName(c_itm))
-                                    .collect(Collectors.joining(", ")) + ")");
+                            ps.addFluent(p.getName() + "("
+                                    + Stream.of(c_itms).map(c_itm -> c_itm.getName()).collect(Collectors.joining(", "))
+                                    + ")");
                     else
                         ps.addFluent(p.getName() + "()");
                 }
@@ -183,12 +183,12 @@ public class PropositionalState implements Timeline<PropositionalState.Fluent> {
                             }).map(c_itm -> {
                                 if (c_itm instanceof EnumItem) {
                                     if (((EnumItem) c_itm).getVals().length == 1)
-                                        return new String[] { solver.guessName(((EnumItem) c_itm).getVals()[0]) };
+                                        return new String[] { ((EnumItem) c_itm).getVals()[0].getName() };
                                     else
-                                        return Stream.of(((EnumItem) c_itm).getVals()).map(i -> solver.guessName(i))
+                                        return Stream.of(((EnumItem) c_itm).getVals()).map(i -> i.getName())
                                                 .toArray(String[]::new);
                                 } else
-                                    return new String[] { solver.guessName(c_itm) };
+                                    return new String[] { c_itm.getName() };
                             }).toArray(String[][]::new);
                     if (par_vals.length == 0)
                         ps.getFluent(atm.getType().getName() + "()").addLiteral(

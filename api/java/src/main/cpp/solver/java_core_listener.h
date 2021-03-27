@@ -37,7 +37,7 @@ namespace ratio
 
     jobject new_field(JNIEnv *env, const std::string &name, const type &tp);
     jobjectArray new_fields_array(JNIEnv *env, const std::vector<const field *> &args);
-    void set(JNIEnv *env, jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm);
+    jobject set(JNIEnv *env, jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm);
 
   private:
     jobject slv_obj;   // the java solver instance..
@@ -58,7 +58,7 @@ namespace ratio
     jmethodID predicate_ctr_id; // the predicate constructor..
     jclass item_cls;            // the java item class..
     jmethodID item_ctr_id;      // the item constructor..
-    jmethodID i_set_mthd_id;
+    jmethodID i_set_name_mthd_id, i_set_mthd_id;
     jclass bool_item_cls;       // the java bool item class..
     jmethodID bool_item_ctr_id; // the bool item constructor..
     jmethodID bool_item_set_mthd_id;

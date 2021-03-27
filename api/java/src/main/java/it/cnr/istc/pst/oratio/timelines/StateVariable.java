@@ -95,7 +95,7 @@ public class StateVariable implements Timeline<StateVariable.SVValue> {
         @Override
         public StateVariable build(final Item itm, final Collection<Atom> atoms) {
             try {
-                final StateVariable sv = new StateVariable(itm.getSolver().guessName(itm),
+                final StateVariable sv = new StateVariable(itm.getName(),
                         ((ArithItem) itm.getSolver().get(Solver.ORIGIN)).getValue(),
                         ((ArithItem) itm.getSolver().get(Solver.HORIZON)).getValue());
 

@@ -40,6 +40,7 @@ namespace ratio
                                                                                  predicate_ctr_id(env->GetMethodID(predicate_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Scope;Ljava/lang/String;[Lit/cnr/istc/pst/oratio/Field;)V")),
                                                                                  item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item")))),
                                                                                  item_ctr_id(env->GetMethodID(item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Lit/cnr/istc/pst/oratio/Type;)V")),
+                                                                                 i_set_name_mthd_id(env->GetMethodID(item_cls, "setName", "(Ljava/lang/String;)V")),
                                                                                  i_set_mthd_id(env->GetMethodID(item_cls, "set", "(Ljava/lang/String;Lit/cnr/istc/pst/oratio/Item;)V")),
                                                                                  bool_item_cls(reinterpret_cast<jclass>(env->NewGlobalRef(env->FindClass("it/cnr/istc/pst/oratio/Item$BoolItem")))),
                                                                                  bool_item_ctr_id(env->GetMethodID(bool_item_cls, "<init>", "(Lit/cnr/istc/pst/oratio/Solver;Ljava/lang/String;B)V")),
@@ -237,7 +238,12 @@ namespace ratio
         }
 
         for (const auto &xpr : cr.get_exprs())
-            set(env, slv_obj, s_set_mthd_id, xpr.first, *xpr.second);
+            if (jobject obj = set(env, slv_obj, s_set_mthd_id, xpr.first, *xpr.second))
+            {
+                jstring c_name = env->NewStringUTF(cr.guess_name(*xpr.second).c_str());
+                env->CallVoidMethod(obj, i_set_name_mthd_id, c_name);
+                env->DeleteLocalRef(c_name);
+            }
 
         env->CallVoidMethod(slv_obj, state_changed_mthd_id);
     }
@@ -350,6 +356,10 @@ namespace ratio
         jobject c_item = env->NewGlobalRef(env->NewObject(item_cls, item_ctr_id, slv_obj, c_type));
         env->CallVoidMethod(c_type, t_new_instnc, c_item);
         all_items.emplace(&itm, c_item);
+
+        jstring c_name = env->NewStringUTF(cr.guess_name(itm).c_str());
+        env->CallVoidMethod(c_item, i_set_name_mthd_id, c_name);
+        env->DeleteLocalRef(c_name);
     }
 
     void java_core_listener::new_atom(JNIEnv *env, const atom &atm)
@@ -386,9 +396,10 @@ namespace ratio
         return fields_array;
     }
 
-    void java_core_listener::set(JNIEnv *env, jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm)
+    jobject java_core_listener::set(JNIEnv *env, jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm)
     {
         const auto &i_it = all_items.find(&itm);
+        jobject new_obj = nullptr;
         jstring i_name = env->NewStringUTF(name.c_str());
         if (const bool_item *bi = dynamic_cast<const bool_item *>(&itm))
         { // the expression represents a primitive bool type..
@@ -396,9 +407,9 @@ namespace ratio
             if (i_it == all_items.end())
             { // we create a new boolean..
                 jstring lit_s = env->NewStringUTF(((sign(bi->l) ? "b" : "!b") + std::to_string(variable(bi->l))).c_str());
-                jobject c_bool = env->NewGlobalRef(env->NewObject(bool_item_cls, bool_item_ctr_id, slv_obj, lit_s, c_val));
-                env->CallVoidMethod(c_obj, mthd_id, i_name, c_bool);
-                all_items.emplace(bi, c_bool);
+                new_obj = env->NewGlobalRef(env->NewObject(bool_item_cls, bool_item_ctr_id, slv_obj, lit_s, c_val));
+                env->CallVoidMethod(c_obj, mthd_id, i_name, new_obj);
+                all_items.emplace(bi, new_obj);
                 env->DeleteLocalRef(lit_s);
             }
             else
@@ -423,9 +434,9 @@ namespace ratio
                 jobject c_lb = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, lb_rat_num, lb_rat_den), env->NewObject(rat_cls, rat_ctr_id, lb_inf_num, lb_inf_den));
                 jobject c_ub = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, ub_rat_num, ub_rat_den), env->NewObject(rat_cls, rat_ctr_id, ub_inf_num, ub_inf_den));
                 jobject c_val = env->NewObject(inf_rat_cls, inf_rat_ctr_id, env->NewObject(rat_cls, rat_ctr_id, val_rat_num, val_rat_den), env->NewObject(rat_cls, rat_ctr_id, val_inf_num, val_inf_den));
-                jobject c_arith = env->NewGlobalRef(env->NewObject(arith_item_cls, arith_item_ctr_id, slv_obj, c_type, lit_s, c_lb, c_ub, c_val));
-                env->CallVoidMethod(c_obj, mthd_id, i_name, c_arith);
-                all_items.emplace(ai, c_arith);
+                new_obj = env->NewGlobalRef(env->NewObject(arith_item_cls, arith_item_ctr_id, slv_obj, c_type, lit_s, c_lb, c_ub, c_val));
+                env->CallVoidMethod(c_obj, mthd_id, i_name, new_obj);
+                all_items.emplace(ai, new_obj);
                 env->DeleteLocalRef(c_val);
                 env->DeleteLocalRef(c_ub);
                 env->DeleteLocalRef(c_lb);
@@ -451,9 +462,9 @@ namespace ratio
             { // we create a new enum..
                 jobject c_type = all_types.at(&itm.get_type());
                 jstring lit_s = env->NewStringUTF(("e" + std::to_string(ei->ev)).c_str());
-                jobject c_enum = env->NewGlobalRef(env->NewObject(enum_item_cls, enum_item_ctr_id, slv_obj, c_type, lit_s, vals_array));
-                env->CallVoidMethod(c_obj, mthd_id, i_name, c_enum);
-                all_items.emplace(ei, c_enum);
+                new_obj = env->NewGlobalRef(env->NewObject(enum_item_cls, enum_item_ctr_id, slv_obj, c_type, lit_s, vals_array));
+                env->CallVoidMethod(c_obj, mthd_id, i_name, new_obj);
+                all_items.emplace(ei, new_obj);
                 env->DeleteLocalRef(lit_s);
             }
             else
@@ -469,9 +480,9 @@ namespace ratio
             jstring c_val = env->NewStringUTF(si->get_value().c_str());
             if (i_it == all_items.end())
             {
-                jobject c_str = env->NewGlobalRef(env->NewObject(string_item_cls, string_item_ctr_id, slv_obj, c_val));
-                env->CallVoidMethod(c_obj, mthd_id, i_name, c_str);
-                all_items.emplace(si, c_str);
+                new_obj = env->NewGlobalRef(env->NewObject(string_item_cls, string_item_ctr_id, slv_obj, c_val));
+                env->CallVoidMethod(c_obj, mthd_id, i_name, new_obj);
+                all_items.emplace(si, new_obj);
             }
             else
             { // we update the value..
@@ -483,5 +494,6 @@ namespace ratio
         else // the expression represents an item..
             env->CallVoidMethod(c_obj, mthd_id, i_name, i_it->second);
         env->DeleteLocalRef(i_name);
+        return new_obj;
     }
 } // namespace ratio

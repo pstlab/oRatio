@@ -119,7 +119,7 @@ public class ReusableResource implements Timeline<ReusableResource.RRValue> {
         @Override
         public ReusableResource build(final Item itm, final Collection<Atom> atoms) {
             try {
-                final ReusableResource rr = new ReusableResource(itm.getSolver().guessName(itm),
+                final ReusableResource rr = new ReusableResource(itm.getName(),
                         ((ArithItem) itm.get("capacity")).getValue(),
                         ((ArithItem) itm.getSolver().get(Solver.ORIGIN)).getValue(),
                         ((ArithItem) itm.getSolver().get(Solver.HORIZON)).getValue());

@@ -17,6 +17,7 @@ public class Atom extends Item {
         super(solver, predicate);
         this.sigma = sigma;
         this.state = state;
+        setName("σ" + sigma);
     }
 
     /**
@@ -64,12 +65,12 @@ public class Atom extends Item {
                 String val = expr.getKey() + " = ";
                 if (expr.getValue() instanceof EnumItem) {
                     if (((EnumItem) expr.getValue()).getVals().length == 1)
-                        val += solver.guessName(((EnumItem) expr.getValue()).getVals()[0]);
+                        val += ((EnumItem) expr.getValue()).getVals()[0].getName();
                     else
-                        val += Stream.of(((EnumItem) expr.getValue()).getVals()).map(itm -> solver.guessName(itm))
+                        val += Stream.of(((EnumItem) expr.getValue()).getVals()).map(itm -> itm.getName())
                                 .collect(Collectors.joining(", "));
                 } else
-                    val += solver.guessName(expr.getValue());
+                    val += expr.getValue().getName();
                 return val;
             }
         }).collect(Collectors.joining(", ")) + ")";

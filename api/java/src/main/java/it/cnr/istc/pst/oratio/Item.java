@@ -9,6 +9,7 @@ public class Item implements Env {
     final Solver solver;
     final Type type;
     final Map<String, Item> exprs = new HashMap<>();
+    private String name; // a mnemonic name..
 
     Item(final Solver solver, final Type type) {
         this.solver = solver;
@@ -28,6 +29,17 @@ public class Item implements Env {
      */
     public Type getType() {
         return type;
+    }
+
+    /**
+     * @return the mnemonic name of the item.
+     */
+    public String getName() {
+        return name;
+    }
+
+    protected void setName(String name) {
+        this.name = name;
     }
 
     @Override
