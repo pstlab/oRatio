@@ -1,14 +1,11 @@
 package it.cnr.istc.pst.oratio;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.stream.Stream;
 
 import it.cnr.istc.pst.oratio.GraphListener.State;
