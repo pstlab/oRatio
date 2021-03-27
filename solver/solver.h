@@ -1,7 +1,6 @@
 #pragma once
 
 #include "core.h"
-#include "graph.h"
 
 #define AT "at"
 #define START "start"
@@ -25,6 +24,9 @@
 
 namespace ratio
 {
+  class heuristic;
+  class flaw;
+  class resolver;
   class smart_type;
 #ifdef BUILD_LISTENERS
   class solver_listener;
@@ -33,8 +35,8 @@ namespace ratio
 
   class solver : public core, private smt::theory
   {
+    friend class heuristic;
     friend class flaw;
-    friend class graph;
     friend class smart_type;
     friend class atom_flaw;
 #ifdef BUILD_LISTENERS
@@ -46,8 +48,6 @@ namespace ratio
     solver();
     solver(const solver &orig) = delete;
     ~solver();
-
-    graph &get_graph() noexcept { return gr; }
 
     /**
      * Initializes the solver.
@@ -84,9 +84,16 @@ namespace ratio
     void new_resolver(resolver &r);                     // notifies the solver that a new resolver 'r' has been created..
     void new_causal_link(flaw &f, resolver &r);         // notifies the solver that a new causal link between a flaw 'f' and a resolver 'r' has been created..
 
-    void expand_flaw(flaw &f);                         // expands the given flaw into the planning graph..
-    void apply_resolver(resolver &r);                  // applies the given resolver into the planning graph..
+    void expand_flaw(flaw &f);                         // expands the given flaw..
+    void apply_resolver(resolver &r);                  // applies the given resolver..
     void set_cost(flaw &f, const smt::rational &cost); // sets the cost of the given flaw..
+
+    inline std::vector<flaw *> flush_pending_flaws()
+    {
+      std::vector<flaw *> pndng_flaws;
+      std::swap(pndng_flaws, pending_flaws);
+      return pndng_flaws;
+    }
 
     void next();
 
@@ -101,7 +108,6 @@ namespace ratio
   private:
     struct layer
     {
-
       layer(const smt::lit &dec) : decision(dec) {}
 
       const smt::lit decision;                               // the decision which introduced the new layer..
@@ -109,7 +115,7 @@ namespace ratio
       std::unordered_set<flaw *> new_flaws;                  // the just activated flaws..
       std::unordered_set<flaw *> solved_flaws;               // the just solved flaws..
     };
-    graph gr;                                                   // the causal graph..
+    heuristic &heur;                                            // the used heuristic..
     std::vector<smart_type *> sts;                              // the smart-types..
     resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
     std::vector<flaw *> pending_flaws;                          // pending flaws, waiting root-level for being initialized..

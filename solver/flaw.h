@@ -7,13 +7,11 @@
 namespace ratio
 {
   class solver;
-  class graph;
   class resolver;
 
   class flaw
   {
     friend class solver;
-    friend class graph;
     friend class resolver;
 
   public:

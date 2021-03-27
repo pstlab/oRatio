@@ -2,7 +2,6 @@
 
 #include "smart_type.h"
 #include "constructor.h"
-#include "graph.h"
 
 #define PROPOSITIONAL_AGENT_NAME "PropositionalAgent"
 

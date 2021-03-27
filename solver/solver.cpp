@@ -1,5 +1,8 @@
 #include "solver.h"
-#include "graph.h"
+#if defined(H_MAX) || defined(H_ADD)
+#include "h_1.h"
+#define HEURISTIC *new h_1(*this)
+#endif
 #include "bool_flaw.h"
 #include "disj_flaw.h"
 #include "var_flaw.h"
@@ -23,8 +26,8 @@ using namespace smt;
 
 namespace ratio
 {
-    solver::solver() : core(), theory(get_sat_core()), gr(*this) {}
-    solver::~solver() {}
+    solver::solver() : core(), theory(get_sat_core()), heur(HEURISTIC) {}
+    solver::~solver() { delete &heur; }
 
     void solver::init() noexcept
     {
@@ -57,7 +60,7 @@ namespace ratio
         }
 
         // we set the gamma variable..
-        gr.check_gamma();
+        heur.check();
 
 #ifdef CHECK_INCONSISTENCIES
         // we solve all the current inconsistencies..
@@ -151,7 +154,7 @@ namespace ratio
 
         // we check if we need to expand the graph..
         if (root_level())
-            gr.check_gamma();
+            heur.check();
     }
 
     bool_expr solver::new_bool() noexcept
@@ -231,7 +234,7 @@ namespace ratio
         FIRE_NEW_FLAW(f);
 
         if (enqueue) // we enqueue the flaw..
-            gr.enqueue(f);
+            heur.enqueue(f);
         else // we directly expand the flaw..
             expand_flaw(f);
 
@@ -287,7 +290,7 @@ namespace ratio
             throw unsolvable_exception();
 
         // we propagate the costs starting from the currently expanded flaw..
-        gr.propagate_costs(f);
+        heur.propagate_costs(f);
 
         // we clean up already solved flaws..
         if (sat.value(f.get_phi()) == True && std::any_of(f.resolvers.begin(), f.resolvers.end(), [this](resolver *r) { return sat.value(r->rho) == True; }))
@@ -352,7 +355,7 @@ namespace ratio
 
         // we check if we need to expand the graph..
         if (root_level()) // since we are at root-level, we can reason about flaws..
-            gr.check_gamma();
+            heur.check();
     }
 
     bool solver::propagate(const lit &p)
@@ -383,7 +386,7 @@ namespace ratio
                 { // 'f' will never appear in any incoming partial solutions..
                     //  FIRE_FLAW_STATE_CHANGED(*f);
                     assert(!flaws.count(f));
-                    gr.propagate_costs(*f);
+                    heur.propagate_costs(*f);
                 }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
                     phis.erase(at_phis_p);
@@ -408,7 +411,7 @@ namespace ratio
                 {                                          // 'r' is a forbidden resolver..
                                                            //  FIRE_RESOLVER_STATE_CHANGED(*r);
                     if (sat.value(r->effect.phi) != False) // we update the cost of the resolver's effect..
-                        gr.propagate_costs(r->effect);
+                        heur.propagate_costs(r->effect);
                 }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
                     rhos.erase(at_rhos_p);

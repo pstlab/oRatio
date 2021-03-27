@@ -3,7 +3,6 @@
 #include "smart_type.h"
 #include "constructor.h"
 #include "predicate.h"
-#include "graph.h"
 
 #define PROPOSITIONAL_STATE_NAME "PropositionalState"
 #define PROPOSITIONAL_STATE_PREDICATE_NAME "PropositionalStatePredicate"

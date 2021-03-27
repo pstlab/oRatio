@@ -1,7 +1,6 @@
 #pragma once
 
 #include "type.h"
-#include "graph.h"
 #include "sat_value_listener.h"
 #include "lra_value_listener.h"
 #include "rdl_value_listener.h"
@@ -10,7 +9,6 @@
 namespace ratio
 {
   class solver;
-  class graph;
   class atom;
   class flaw;
   class atom_flaw;
@@ -19,7 +17,6 @@ namespace ratio
   class smart_type : public type
   {
     friend class solver;
-    friend class graph;
 
   public:
     smart_type(solver &slv, scope &scp, const std::string &name);
