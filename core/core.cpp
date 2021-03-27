@@ -49,6 +49,7 @@ namespace ratio
         cu->refine(*this);
         context c_ctx(this);
         cu->execute(*this, c_ctx);
+        RECOMPUTE_NAMES();
         FIRE_READ(script);
 
         if (!sat_cr.propagate())
@@ -78,6 +79,7 @@ namespace ratio
         context c_ctx(this);
         for (const auto &cu : c_cus)
             cu->execute(*this, c_ctx);
+        RECOMPUTE_NAMES();
         FIRE_READ(files);
 
         if (!sat_cr.propagate())
@@ -516,6 +518,31 @@ namespace ratio
         cr.to_json().to_json(os);
         return os;
     }
+
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    void core::recompute_names() noexcept
+    {
+        expr_names.clear();
+
+        std::queue<std::pair<std::string, expr>> q;
+        for (const auto &xpr : exprs)
+        {
+            expr_names.emplace(&*xpr.second, xpr.first);
+            if (!xpr.second->get_type().is_primitive())
+                if (const atom *a = dynamic_cast<const atom *>(&*xpr.second); !a)
+                    q.push(xpr);
+        }
+
+        while (!q.empty())
+        {
+            const auto &c_xpr = q.front();
+            for (const auto &xpr : c_xpr.second->exprs)
+                if (expr_names.emplace(&*xpr.second, expr_names.at(&*c_xpr.second) + '.' + xpr.first).second)
+                    q.push(xpr);
+            q.pop();
+        }
+    }
+#endif
 
 #ifdef BUILD_LISTENERS
     void core::fire_log(const std::string msg) const noexcept

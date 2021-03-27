@@ -266,13 +266,8 @@ namespace ratio
                         throw inconsistency_exception();
                 }
 
-                if (&scp == &scp.get_core())
-                { // we create fields for root items..
+                if (&scp == &scp.get_core()) // we create fields for root items..
                     scp.get_core().fields.emplace(names[i].id, new field(ctx->exprs.at(names[i].id)->get_type(), names[i].id));
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-                    scp.get_core().expr_names.emplace(&*ctx->exprs.at(names[i].id), names[i].id);
-#endif
-                }
             }
         }
 

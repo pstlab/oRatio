@@ -15,6 +15,12 @@
 #define LOG(msg)
 #endif
 
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+#define RECOMPUTE_NAMES() recompute_names()
+#else
+#define RECOMPUTE_NAMES()
+#endif
+
 #ifdef BUILD_LISTENERS
 #define FIRE_LOG(msg) fire_log(msg)
 #define FIRE_READ(rddl) fire_read(rddl)
@@ -43,9 +49,6 @@ namespace ratio
 #ifdef BUILD_LISTENERS
   class core_listener;
 #endif
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-  class constructor;
-#endif
 
   namespace ast
   {
@@ -56,9 +59,6 @@ namespace ratio
     class typedef_declaration;
     class enum_declaration;
     class class_declaration;
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    class local_field_statement;
-#endif
   } // namespace ast
 
   class core : public scope, public env
@@ -75,10 +75,6 @@ namespace ratio
     friend class core_listener;
     friend class type;
     friend class scope;
-#endif
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    friend class ast::local_field_statement;
-    friend class constructor;
 #endif
 
   public:
@@ -198,6 +194,8 @@ namespace ratio
     const std::string &guess_name(const item &itm) const noexcept { return expr_names.at(&itm); }
 
   private:
+    void recompute_names() noexcept;
+
     std::unordered_map<const item *, const std::string> expr_names;
 #endif
 
