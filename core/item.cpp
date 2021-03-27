@@ -179,7 +179,7 @@ namespace ratio
         q.push(&get_type());
         while (!q.empty())
         {
-            const auto flds = q.front()->get_fields();
+            const auto &flds = q.front()->get_fields();
             accessible_fields.insert(flds.cbegin(), flds.cend());
             for (const auto &st : q.front()->get_supertypes())
                 q.push(st);

@@ -11,7 +11,7 @@ namespace ratio
     }
     java_executor_listener::~java_executor_listener()
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         env->DeleteGlobalRef(exec_obj);
         env->DeleteGlobalRef(exec_cls);
     }
@@ -24,7 +24,7 @@ namespace ratio
     }
     void java_executor_listener::starting(const std::set<atom *> &atoms)
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         jlongArray atms_array = env->NewLongArray(static_cast<jsize>(atoms.size()));
         std::vector<jlong> c_atms;
         for (const auto &atm : atoms)
@@ -37,7 +37,7 @@ namespace ratio
     }
     void java_executor_listener::ending(const std::set<atom *> &atoms)
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         jlongArray atms_array = env->NewLongArray(static_cast<jsize>(atoms.size()));
         std::vector<jlong> c_atms;
         for (const auto &atm : atoms)

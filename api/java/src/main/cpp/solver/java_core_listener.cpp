@@ -66,7 +66,7 @@ namespace ratio
     }
     java_core_listener::~java_core_listener()
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         for (const auto &t : all_items)
             env->DeleteGlobalRef(t.second);
         for (const auto &t : all_types)
@@ -84,7 +84,7 @@ namespace ratio
 
     void java_core_listener::log(const std::string &msg)
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         // the message..
         jstring c_msg = env->NewStringUTF(msg.c_str());
 
@@ -94,7 +94,7 @@ namespace ratio
 
     void java_core_listener::read(const std::string &script)
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         // the script..
         jstring c_script = env->NewStringUTF(script.c_str());
 
@@ -104,7 +104,7 @@ namespace ratio
 
     void java_core_listener::read(const std::vector<std::string> &files)
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         std::vector<jstring> c_files;
         c_files.reserve(files.size());
         for (const auto &f : files)
@@ -122,7 +122,7 @@ namespace ratio
 
     void java_core_listener::state_changed()
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         std::unordered_set<type *> new_types;
         std::unordered_set<predicate *> new_predicates;
         std::queue<type *> q;
@@ -133,7 +133,7 @@ namespace ratio
             type &t = *q.front();
             q.pop();
 
-            const auto t_it = all_types.find(&t);
+            const auto &t_it = all_types.find(&t);
             if (t_it == all_types.end())
             { // we have a new type..
                 if (!t.is_primitive())
@@ -176,7 +176,7 @@ namespace ratio
         // we add the predicates..
         for (const auto &pred : cr.get_predicates())
         {
-            const auto p_it = all_types.find(pred.second);
+            const auto &p_it = all_types.find(pred.second);
             if (p_it == all_types.end())
             {
                 new_predicates.insert(pred.second);
@@ -195,7 +195,7 @@ namespace ratio
             {
                 atom &atm = static_cast<atom &>(*a);
                 c_items.insert(&atm);
-                const auto i_it = all_items.find(&atm);
+                const auto &i_it = all_items.find(&atm);
                 if (i_it == all_items.end())
                     new_atom(env, atm);
             }
@@ -208,7 +208,7 @@ namespace ratio
             {
                 item &itm = *i;
                 c_items.insert(&itm);
-                const auto i_it = all_items.find(&itm);
+                const auto &i_it = all_items.find(&itm);
                 if (i_it == all_items.end())
                     new_item(env, itm);
             }
@@ -217,7 +217,7 @@ namespace ratio
                 {
                     atom &atm = static_cast<atom &>(*a);
                     c_items.insert(&atm);
-                    const auto a_it = all_items.find(&atm);
+                    const auto &a_it = all_items.find(&atm);
                     if (a_it == all_items.end())
                         new_atom(env, atm);
                 }
@@ -228,7 +228,7 @@ namespace ratio
 
         for (const auto &c_itm : all_items)
         {
-            const auto j_it = all_items.at(&*c_itm.first);
+            const auto &j_it = all_items.at(&*c_itm.first);
             for (const auto &xpr : c_itm.first->get_exprs())
                 set(env, j_it, i_set_mthd_id, xpr.first, *xpr.second);
 
@@ -388,11 +388,11 @@ namespace ratio
 
     void java_core_listener::set(JNIEnv *env, jobject c_obj, jmethodID mthd_id, const std::string &name, const item &itm)
     {
-        const auto i_it = all_items.find(&itm);
+        const auto &i_it = all_items.find(&itm);
         jstring i_name = env->NewStringUTF(name.c_str());
         if (const bool_item *bi = dynamic_cast<const bool_item *>(&itm))
         { // the expression represents a primitive bool type..
-            const auto c_val = cr.get_sat_core().value(bi->l);
+            const auto &c_val = cr.get_sat_core().value(bi->l);
             if (i_it == all_items.end())
             { // we create a new boolean..
                 jstring lit_s = env->NewStringUTF(((sign(bi->l) ? "b" : "!b") + std::to_string(variable(bi->l))).c_str());

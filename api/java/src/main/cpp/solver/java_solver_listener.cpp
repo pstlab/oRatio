@@ -17,14 +17,14 @@ namespace ratio
                                                                                       causal_link_added_mthd_id(env->GetMethodID(solver_cls, "fireCausalLinkAdded", "(JJ)V")) {}
     java_solver_listener::~java_solver_listener()
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         env->DeleteGlobalRef(slv_obj);
         env->DeleteGlobalRef(solver_cls);
     }
 
     void java_solver_listener::flaw_created(const flaw &f)
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         // the flaw's id..
         jlong id = reinterpret_cast<jlong>(&f);
 
@@ -91,7 +91,7 @@ namespace ratio
 
     void java_solver_listener::resolver_created(const resolver &r)
     {
-        const auto env = get_env();
+        const auto &env = get_env();
         // the resolver's id..
         jlong id = reinterpret_cast<jlong>(&r);
 

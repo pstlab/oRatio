@@ -74,7 +74,7 @@ namespace smt
     lin lin::operator*(const rational &right) const noexcept
     {
         lin res = *this;
-        for (auto &&term : res.vars)
+        for (auto &term : res.vars)
             term.second *= right;
         res.known_term *= right;
         return res;
@@ -83,7 +83,7 @@ namespace smt
     lin operator*(const rational &lhs, const lin &rhs) noexcept
     {
         lin res = rhs;
-        for (auto &&term : res.vars)
+        for (auto &term : res.vars)
             term.second *= lhs;
         res.known_term *= lhs;
         return res;
@@ -92,7 +92,7 @@ namespace smt
     lin lin::operator/(const rational &right) const noexcept
     {
         lin res = *this;
-        for (auto &&term : res.vars)
+        for (auto &term : res.vars)
             term.second /= right;
         res.known_term /= right;
         return res;
@@ -149,7 +149,7 @@ namespace smt
             known_term = rational::ZERO;
         }
         else
-            for (auto &&term : vars)
+            for (auto &term : vars)
                 term.second *= right;
         return *this;
     }
@@ -163,7 +163,7 @@ namespace smt
             known_term = rational::ZERO;
         }
         else
-            for (auto &&term : vars)
+            for (auto &term : vars)
                 term.second /= right;
         known_term /= right;
         return *this;
