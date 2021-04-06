@@ -11,7 +11,7 @@ option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
 
 file(GLOB SOLVER_SOURCES *.cpp flaws/*.cpp types/*.cpp heuristics/*.cpp)
 
-add_library(solver ${SOLVER_SOURCES})
+add_library(solver SHARED ${SOLVER_SOURCES})
 target_include_directories(solver PUBLIC . ${oRatio_SOURCE_DIR}/smt ${oRatio_SOURCE_DIR}/smt/lra ${oRatio_SOURCE_DIR}/smt/ov ${oRatio_SOURCE_DIR}/smt/dl ${oRatio_SOURCE_DIR}/core ${oRatio_SOURCE_DIR}/riddle flaws types heuristics)
 target_link_libraries(solver PUBLIC core)
 

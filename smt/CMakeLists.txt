@@ -1,6 +1,6 @@
 file(GLOB SMT_SOURCES *.cpp lra/*.cpp ov/*.cpp dl/*.cpp)
 
-add_library(smt ${SMT_SOURCES})
+add_library(smt SHARED ${SMT_SOURCES})
 target_include_directories(smt PUBLIC . lra ov dl json)
 target_link_libraries(smt PUBLIC json)
 
