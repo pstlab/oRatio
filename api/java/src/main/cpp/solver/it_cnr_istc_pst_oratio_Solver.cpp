@@ -21,13 +21,27 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_dispose(JNIEnv *env, j
   env->SetLongField(obj, env->GetFieldID(env->GetObjectClass(obj), "native_handle", "J"), 0);
 }
 
-JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_read__Ljava_lang_String_2(JNIEnv *env, jobject obj, jstring script) { get_solver(env, obj)->read(env->GetStringUTFChars(script, (jboolean) false)); }
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_read__Ljava_lang_String_2(JNIEnv *env, jobject obj, jstring script)
+{
+  jboolean is_copy;
+  const char *utf_script = env->GetStringUTFChars(script, &is_copy);
+  get_solver(env, obj)->read(utf_script);
+  if (is_copy == JNI_TRUE)
+    env->ReleaseStringUTFChars(script, utf_script);
+}
 
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_Solver_read___3Ljava_lang_String_2(JNIEnv *env, jobject obj, jobjectArray files)
 {
   std::vector<std::string> c_files;
   for (jsize i = 0; i < env->GetArrayLength(files); ++i)
-    c_files.push_back(env->GetStringUTFChars(reinterpret_cast<jstring>(env->GetObjectArrayElement(files, i)), (jboolean) false));
+  {
+    jboolean is_copy;
+    jstring c_file = reinterpret_cast<jstring>(env->GetObjectArrayElement(files, i));
+    const char *utf_file = env->GetStringUTFChars(c_file, &is_copy);
+    c_files.push_back(utf_file);
+    if (is_copy == JNI_TRUE)
+      env->ReleaseStringUTFChars(c_file, utf_file);
+  }
   get_solver(env, obj)->read(c_files);
 }
 
