@@ -1,0 +1,1 @@
+#cmakedefine INIT_STRING "@INIT_STRING@"

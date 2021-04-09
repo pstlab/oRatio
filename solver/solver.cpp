@@ -1,4 +1,5 @@
 #include "solver.h"
+#include "init.h"
 #if defined(H_MAX) || defined(H_ADD)
 #include "h_1.h"
 #define HEURISTIC *new h_1(*this)
@@ -31,7 +32,7 @@ namespace ratio
 
     SOLVER_EXPORT void solver::init() noexcept
     {
-        read(std::vector<std::string>({"init.rddl"}));
+        read(INIT_STRING);
         new_types({new state_variable(*this),
                    new reusable_resource(*this),
                    new propositional_agent(*this),
