@@ -4,7 +4,7 @@ add_library(smt SHARED ${SMT_SOURCES})
 GENERATE_EXPORT_HEADER(smt)
 target_include_directories(smt PUBLIC ${CMAKE_CURRENT_BINARY_DIR} . lra ov dl json)
 target_link_libraries(smt PUBLIC json)
-install(TARGETS smt LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS smt)
 
 if(PARALLELIZE)
     target_include_directories(smt PUBLIC concurrent)

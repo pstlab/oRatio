@@ -3,7 +3,8 @@ project(oRatio VERSION 2.9.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-include (GenerateExportHeader)
+include(GenerateExportHeader)
+include(GNUInstallDirs)
 
 option(VERBOSE_LOG "Makes log more verbose" OFF)
 option(PARALLELIZE "Performs some activities in parallel" OFF)
@@ -21,7 +22,7 @@ enable_testing()
 add_executable(${PROJECT_NAME} main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE solver core smt smt/lra smt/ov smt/dl)
 target_link_libraries(${PROJECT_NAME} PRIVATE solver)
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS ${PROJECT_NAME})
 
 add_subdirectory(smt)
 add_subdirectory(smt/json)
