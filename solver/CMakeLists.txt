@@ -15,7 +15,7 @@ add_library(solver SHARED ${SOLVER_SOURCES})
 GENERATE_EXPORT_HEADER(solver)
 target_include_directories(solver PUBLIC ${CMAKE_CURRENT_BINARY_DIR} . ${oRatio_SOURCE_DIR}/smt ${oRatio_SOURCE_DIR}/smt/lra ${oRatio_SOURCE_DIR}/smt/ov ${oRatio_SOURCE_DIR}/smt/dl ${oRatio_SOURCE_DIR}/core ${oRatio_SOURCE_DIR}/riddle flaws types heuristics)
 target_link_libraries(solver PUBLIC core)
-install(TARGETS solver)
+install(TARGETS solver LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 message(STATUS "Temporal network type:    ${TEMPORAL_NETWORK_TYPE}")
 if(TEMPORAL_NETWORK_TYPE STREQUAL DL)
