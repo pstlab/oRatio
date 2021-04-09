@@ -3,7 +3,7 @@
 
 namespace smt
 {
-    thread_pool::thread_pool(const unsigned &c_size)
+    CONCURRENT_EXPORT thread_pool::thread_pool(const unsigned &c_size)
     {
         workers.reserve(c_size);
         for (unsigned i = 0; i < c_size; i++)
@@ -32,7 +32,7 @@ namespace smt
             });
         }
     }
-    thread_pool::~thread_pool()
+    CONCURRENT_EXPORT thread_pool::~thread_pool()
     {
         {
             std::lock_guard<std::mutex> lock(queue_mutex);
@@ -43,7 +43,7 @@ namespace smt
             worker.join();
     }
 
-    void thread_pool::enqueue(std::function<void()> f)
+    CONCURRENT_EXPORT void thread_pool::enqueue(std::function<void()> f)
     {
         {
             std::lock_guard<std::mutex> lock(this->queue_mutex);
@@ -52,7 +52,7 @@ namespace smt
         this->condition.notify_one();
     }
 
-    void thread_pool::join()
+    CONCURRENT_EXPORT void thread_pool::join()
     {
         std::unique_lock<std::mutex> lock(this->queue_mutex);
         if (active != 0 || !this->tasks.empty())

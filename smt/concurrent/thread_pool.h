@@ -1,5 +1,6 @@
 #pragma once
 
+#include "concurrent_export.h"
 #include <functional>
 #include <vector>
 #include <thread>
@@ -12,13 +13,13 @@ namespace smt
   class thread_pool
   {
   public:
-    thread_pool(const unsigned &c_size = std::thread::hardware_concurrency());
+    CONCURRENT_EXPORT thread_pool(const unsigned &c_size = std::thread::hardware_concurrency());
     thread_pool(const thread_pool &orig) = delete;
-    virtual ~thread_pool();
+    CONCURRENT_EXPORT virtual ~thread_pool();
 
     inline size_t size() const { return workers.size(); }
-    void enqueue(std::function<void()> f);
-    void join();
+    CONCURRENT_EXPORT void enqueue(std::function<void()> f);
+    CONCURRENT_EXPORT void join();
 
   private:
     std::vector<std::thread> workers;

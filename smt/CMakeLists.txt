@@ -2,7 +2,7 @@ file(GLOB SMT_SOURCES *.cpp lra/*.cpp ov/*.cpp dl/*.cpp)
 
 add_library(smt SHARED ${SMT_SOURCES})
 GENERATE_EXPORT_HEADER(smt)
-target_include_directories(smt PUBLIC . lra ov dl json ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(smt PUBLIC ${CMAKE_CURRENT_BINARY_DIR} . lra ov dl json)
 target_link_libraries(smt PUBLIC json)
 
 if(PARALLELIZE)
