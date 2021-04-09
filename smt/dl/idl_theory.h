@@ -30,13 +30,13 @@ namespace smt
     SMT_EXPORT lit new_geq(const lin &left, const lin &right);
     SMT_EXPORT lit new_gt(const lin &left, const lin &right);
 
-    inline I lb(const var &v) const noexcept { return -_dists[v][0]; }
-    inline I ub(const var &v) const noexcept { return _dists[0][v]; }
+    SMT_EXPORT inline I lb(const var &v) const noexcept { return -_dists[v][0]; }
+    SMT_EXPORT inline I ub(const var &v) const noexcept { return _dists[0][v]; }
     SMT_EXPORT inline std::pair<I, I> bounds(const var &v) const noexcept { return std::make_pair(-_dists[v][0], _dists[0][v]); }
-    inline std::pair<I, I> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
+    SMT_EXPORT inline std::pair<I, I> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
 
     SMT_EXPORT std::pair<I, I> bounds(const lin &l) const;
-    std::pair<I, I> distance(const lin &from, const lin &to) const;
+    SMT_EXPORT std::pair<I, I> distance(const lin &from, const lin &to) const;
 
     SMT_EXPORT bool equates(const lin &l0, const lin &l1) const;
 

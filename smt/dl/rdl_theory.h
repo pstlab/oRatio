@@ -30,13 +30,13 @@ namespace smt
     SMT_EXPORT lit new_geq(const lin &left, const lin &right);
     SMT_EXPORT lit new_gt(const lin &left, const lin &right);
 
-    inline inf_rational lb(const var &v) const noexcept { return -_dists[v][0]; }
-    inline inf_rational ub(const var &v) const noexcept { return _dists[0][v]; }
+    SMT_EXPORT inline inf_rational lb(const var &v) const noexcept { return -_dists[v][0]; }
+    SMT_EXPORT inline inf_rational ub(const var &v) const noexcept { return _dists[0][v]; }
     SMT_EXPORT inline std::pair<inf_rational, inf_rational> bounds(const var &v) const noexcept { return std::make_pair(-_dists[v][0], _dists[0][v]); }
-    inline std::pair<inf_rational, inf_rational> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
+    SMT_EXPORT inline std::pair<inf_rational, inf_rational> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
 
     SMT_EXPORT std::pair<inf_rational, inf_rational> bounds(const lin &l) const;
-    std::pair<inf_rational, inf_rational> distance(const lin &from, const lin &to) const;
+    SMT_EXPORT std::pair<inf_rational, inf_rational> distance(const lin &from, const lin &to) const;
 
     SMT_EXPORT bool equates(const lin &l0, const lin &l1) const;
 

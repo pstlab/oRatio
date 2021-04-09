@@ -302,7 +302,7 @@ namespace smt
         return std::make_pair(c_lb, c_ub);
     }
 
-    std::pair<inf_rational, inf_rational> rdl_theory::distance(const lin &from, const lin &to) const
+    SMT_EXPORT std::pair<inf_rational, inf_rational> rdl_theory::distance(const lin &from, const lin &to) const
     {
         lin expr = from - to;
         switch (expr.vars.size())

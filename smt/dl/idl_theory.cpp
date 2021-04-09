@@ -321,7 +321,7 @@ namespace smt
         return std::make_pair(c_lb, c_ub);
     }
 
-    std::pair<I, I> idl_theory::distance(const lin &from, const lin &to) const
+    SMT_EXPORT std::pair<I, I> idl_theory::distance(const lin &from, const lin &to) const
     {
         lin expr = from - to;
         switch (expr.vars.size())
