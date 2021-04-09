@@ -21,7 +21,7 @@ enable_testing()
 add_executable(${PROJECT_NAME} main.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE solver core smt smt/lra smt/ov smt/dl)
 target_link_libraries(${PROJECT_NAME} PRIVATE solver)
-install(TARGETS ${PROJECT_NAME})
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_subdirectory(smt)
 add_subdirectory(smt/json)
