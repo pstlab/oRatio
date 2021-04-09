@@ -3,6 +3,7 @@ project(oRatio VERSION 2.9.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+include (GenerateExportHeader)
 
 option(VERBOSE_LOG "Makes log more verbose" OFF)
 option(PARALLELIZE "Performs some activities in parallel" OFF)

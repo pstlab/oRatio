@@ -6,10 +6,10 @@
 
 namespace smt
 {
-    lra_theory::lra_theory(sat_core &sat) : theory(sat) {}
-    lra_theory::~lra_theory() {}
+    SMT_EXPORT lra_theory::lra_theory(sat_core &sat) : theory(sat) {}
+    SMT_EXPORT lra_theory::~lra_theory() {}
 
-    var lra_theory::new_var() noexcept
+    SMT_EXPORT var lra_theory::new_var() noexcept
     {
         // we create a new arithmetic variable..
         const var id = vals.size();
@@ -25,7 +25,7 @@ namespace smt
         return id;
     }
 
-    var lra_theory::new_var(const lin &l) noexcept
+    SMT_EXPORT var lra_theory::new_var(const lin &l) noexcept
     { // we create, if needed, a new arithmetic variable which is equal to the given linear expression..
         const std::string s_expr = to_string(l);
         if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
@@ -43,7 +43,7 @@ namespace smt
         }
     }
 
-    lit lra_theory::new_lt(const lin &left, const lin &right) noexcept
+    SMT_EXPORT lit lra_theory::new_lt(const lin &left, const lin &right) noexcept
     {
         lin expr = left - right;
         std::vector<var> vars;
@@ -86,7 +86,7 @@ namespace smt
         }
     }
 
-    lit lra_theory::new_leq(const lin &left, const lin &right) noexcept
+    SMT_EXPORT lit lra_theory::new_leq(const lin &left, const lin &right) noexcept
     {
         lin expr = left - right;
         std::vector<var> vars;
@@ -129,7 +129,7 @@ namespace smt
         }
     }
 
-    lit lra_theory::new_geq(const lin &left, const lin &right) noexcept
+    SMT_EXPORT lit lra_theory::new_geq(const lin &left, const lin &right) noexcept
     {
         lin expr = left - right;
         std::vector<var> vars;
@@ -172,7 +172,7 @@ namespace smt
         }
     }
 
-    lit lra_theory::new_gt(const lin &left, const lin &right) noexcept
+    SMT_EXPORT lit lra_theory::new_gt(const lin &left, const lin &right) noexcept
     {
         lin expr = left - right;
         std::vector<var> vars;
@@ -215,7 +215,7 @@ namespace smt
         }
     }
 
-    bool lra_theory::equates(const lin &l0, const lin &l1) const noexcept
+    SMT_EXPORT bool lra_theory::equates(const lin &l0, const lin &l1) const noexcept
     {
         const auto l0_bounds = bounds(l0);
         const auto l1_bounds = bounds(l1);

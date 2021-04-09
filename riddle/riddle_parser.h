@@ -18,9 +18,9 @@ namespace riddle
     class bool_literal_expression : public expression
     {
     public:
-      bool_literal_expression(const bool_token &l) : literal(l) {}
+      RIDDLE_EXPORT bool_literal_expression(const bool_token &l) : literal(l) {}
       bool_literal_expression(const bool_literal_expression &orig) = delete;
-      virtual ~bool_literal_expression() {}
+      RIDDLE_EXPORT virtual ~bool_literal_expression() {}
 
     protected:
       const bool_token literal;
@@ -29,9 +29,9 @@ namespace riddle
     class int_literal_expression : public expression
     {
     public:
-      int_literal_expression(const int_token &l) : literal(l) {}
+      RIDDLE_EXPORT int_literal_expression(const int_token &l) : literal(l) {}
       int_literal_expression(const int_literal_expression &orig) = delete;
-      virtual ~int_literal_expression() {}
+      RIDDLE_EXPORT virtual ~int_literal_expression() {}
 
     protected:
       const int_token literal;
@@ -40,9 +40,9 @@ namespace riddle
     class real_literal_expression : public expression
     {
     public:
-      real_literal_expression(const real_token &l) : literal(l) {}
+      RIDDLE_EXPORT real_literal_expression(const real_token &l) : literal(l) {}
       real_literal_expression(const real_literal_expression &orig) = delete;
-      virtual ~real_literal_expression() {}
+      RIDDLE_EXPORT virtual ~real_literal_expression() {}
 
     protected:
       const real_token literal;
@@ -51,9 +51,9 @@ namespace riddle
     class string_literal_expression : public expression
     {
     public:
-      string_literal_expression(const string_token &l) : literal(l) {}
+      RIDDLE_EXPORT string_literal_expression(const string_token &l) : literal(l) {}
       string_literal_expression(const string_literal_expression &orig) = delete;
-      virtual ~string_literal_expression() {}
+      RIDDLE_EXPORT virtual ~string_literal_expression() {}
 
     protected:
       const string_token literal;
@@ -155,9 +155,9 @@ namespace riddle
     class lt_expression : public expression
     {
     public:
-      lt_expression(const expression *const l, const expression *const r) : left(l), right(r) {}
+      RIDDLE_EXPORT lt_expression(const expression *const l, const expression *const r) : left(l), right(r) {}
       lt_expression(const lt_expression &orig) = delete;
-      virtual ~lt_expression()
+      RIDDLE_EXPORT virtual ~lt_expression()
       {
         delete left;
         delete right;
@@ -171,9 +171,9 @@ namespace riddle
     class leq_expression : public expression
     {
     public:
-      leq_expression(const expression *const l, const expression *const r) : left(l), right(r) {}
+      RIDDLE_EXPORT leq_expression(const expression *const l, const expression *const r) : left(l), right(r) {}
       leq_expression(const leq_expression &orig) = delete;
-      virtual ~leq_expression()
+      RIDDLE_EXPORT virtual ~leq_expression()
       {
         delete left;
         delete right;
@@ -187,9 +187,9 @@ namespace riddle
     class geq_expression : public expression
     {
     public:
-      geq_expression(const expression *const l, const expression *const r) : left(l), right(r) {}
+      RIDDLE_EXPORT geq_expression(const expression *const l, const expression *const r) : left(l), right(r) {}
       geq_expression(const geq_expression &orig) = delete;
-      virtual ~geq_expression()
+      RIDDLE_EXPORT virtual ~geq_expression()
       {
         delete left;
         delete right;
@@ -203,9 +203,9 @@ namespace riddle
     class gt_expression : public expression
     {
     public:
-      gt_expression(const expression *const l, const expression *const r) : left(l), right(r) {}
+      RIDDLE_EXPORT gt_expression(const expression *const l, const expression *const r) : left(l), right(r) {}
       gt_expression(const gt_expression &orig) = delete;
-      virtual ~gt_expression()
+      RIDDLE_EXPORT virtual ~gt_expression()
       {
         delete left;
         delete right;
@@ -236,9 +236,9 @@ namespace riddle
     class id_expression : public expression
     {
     public:
-      id_expression(const std::vector<id_token> &is) : ids(is) {}
+      RIDDLE_EXPORT id_expression(const std::vector<id_token> &is) : ids(is) {}
       id_expression(const id_expression &orig) = delete;
-      virtual ~id_expression() {}
+      RIDDLE_EXPORT virtual ~id_expression() {}
 
     protected:
       const std::vector<id_token> ids;
@@ -402,9 +402,9 @@ namespace riddle
     class expression_statement : public statement
     {
     public:
-      expression_statement(const expression *const e) : xpr(e) {}
+      RIDDLE_EXPORT expression_statement(const expression *const e) : xpr(e) {}
       expression_statement(const expression_statement &orig) = delete;
-      virtual ~expression_statement() { delete xpr; }
+      RIDDLE_EXPORT virtual ~expression_statement() { delete xpr; }
 
     protected:
       const expression *const xpr;
@@ -651,11 +651,11 @@ namespace riddle
   class parser
   {
   public:
-    parser(std::istream &is);
+    RIDDLE_EXPORT parser(std::istream &is);
     parser(const parser &orig) = delete;
-    virtual ~parser();
+    RIDDLE_EXPORT virtual ~parser();
 
-    ast::compilation_unit *parse();
+    RIDDLE_EXPORT ast::compilation_unit *parse();
 
   private:
     token *next();

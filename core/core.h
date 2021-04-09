@@ -78,9 +78,9 @@ namespace ratio
 #endif
 
   public:
-    core();
+    CORE_EXPORT core();
     core(const core &orig) = delete;
-    ~core();
+    CORE_EXPORT ~core();
 
     inline smt::sat_core &get_sat_core() noexcept { return sat_cr; }     // returns the sat core..
     inline smt::lra_theory &get_lra_theory() noexcept { return lra_th; } // returns the linear-real-arithmetic theory..
@@ -88,25 +88,25 @@ namespace ratio
     inline smt::idl_theory &get_idl_theory() noexcept { return idl_th; } // returns the integer difference logic theory..
     inline smt::rdl_theory &get_rdl_theory() noexcept { return rdl_th; } // returns the real difference logic theory..
 
-    void read(const std::string &script);             // parses the given riddle script..
-    void read(const std::vector<std::string> &files); // parses the given riddle files..
+    CORE_EXPORT void read(const std::string &script);             // parses the given riddle script..
+    CORE_EXPORT void read(const std::vector<std::string> &files); // parses the given riddle files..
 
-    virtual bool_expr new_bool() noexcept;                   // creates a new boolean variable..
-    bool_expr new_bool(const bool &val) noexcept;            // creates a new boolean literal..
-    virtual arith_expr new_int() noexcept;                   // creates a new integer variable..
-    arith_expr new_int(const smt::I &val) noexcept;          // creates a new integer literal..
-    arith_expr new_real() noexcept;                          // creates a new real variable..
-    arith_expr new_real(const smt::rational &val) noexcept;  // creates a new real literal..
-    arith_expr new_tp() noexcept;                            // creates a new time-point variable..
-    arith_expr new_tp(const smt::rational &val) noexcept;    // creates a new time-point literal..
-    string_expr new_string() noexcept;                       // creates a new string variable..
-    string_expr new_string(const std::string &val) noexcept; // creates a new string literal..
-    virtual expr new_enum(const type &tp, const std::vector<item *> &allowed_vals);
+    CORE_EXPORT virtual bool_expr new_bool() noexcept;                   // creates a new boolean variable..
+    CORE_EXPORT bool_expr new_bool(const bool &val) noexcept;            // creates a new boolean literal..
+    CORE_EXPORT virtual arith_expr new_int() noexcept;                   // creates a new integer variable..
+    CORE_EXPORT arith_expr new_int(const smt::I &val) noexcept;          // creates a new integer literal..
+    CORE_EXPORT arith_expr new_real() noexcept;                          // creates a new real variable..
+    CORE_EXPORT arith_expr new_real(const smt::rational &val) noexcept;  // creates a new real literal..
+    CORE_EXPORT arith_expr new_tp() noexcept;                            // creates a new time-point variable..
+    CORE_EXPORT arith_expr new_tp(const smt::rational &val) noexcept;    // creates a new time-point literal..
+    CORE_EXPORT string_expr new_string() noexcept;                       // creates a new string variable..
+    CORE_EXPORT string_expr new_string(const std::string &val) noexcept; // creates a new string literal..
+    CORE_EXPORT virtual expr new_enum(const type &tp, const std::vector<item *> &allowed_vals);
 
     bool_expr negate(bool_expr var) noexcept;
     bool_expr eq(bool_expr left, bool_expr right) noexcept;
     bool_expr conj(const std::vector<bool_expr> &exprs) noexcept;
-    virtual bool_expr disj(const std::vector<bool_expr> &exprs) noexcept;
+    CORE_EXPORT virtual bool_expr disj(const std::vector<bool_expr> &exprs) noexcept;
     bool_expr exct_one(const std::vector<bool_expr> &exprs) noexcept;
 
     arith_expr add(const std::vector<arith_expr> &exprs) noexcept;
@@ -133,13 +133,13 @@ namespace ratio
 
   protected:
     void new_methods(const std::vector<const method *> &ms) noexcept;
-    void new_types(const std::vector<type *> &ts) noexcept;
+    CORE_EXPORT void new_types(const std::vector<type *> &ts) noexcept;
     void new_predicates(const std::vector<predicate *> &ps) noexcept;
 
   public:
-    const field &get_field(const std::string &name) const override; // returns the field having the given name..
+    CORE_EXPORT const field &get_field(const std::string &name) const override; // returns the field having the given name..
 
-    const method &get_method(const std::string &name, const std::vector<const type *> &ts) const override;
+    CORE_EXPORT const method &get_method(const std::string &name, const std::vector<const type *> &ts) const override;
     std::vector<const method *> get_methods() const noexcept override
     {
       std::vector<const method *> c_methods;
@@ -148,18 +148,18 @@ namespace ratio
       return c_methods;
     }
 
-    type &get_type(const std::string &name) const override;
+    CORE_EXPORT type &get_type(const std::string &name) const override;
     std::map<std::string, type *> get_types() const noexcept override { return types; }
 
-    predicate &get_predicate(const std::string &name) const override;
+    CORE_EXPORT predicate &get_predicate(const std::string &name) const override;
     std::map<std::string, predicate *> get_predicates() const noexcept override { return predicates; }
 
-    expr get(const std::string &name) const override;
+    CORE_EXPORT expr get(const std::string &name) const override;
 
-    smt::lbool bool_value(const bool_expr &x) const noexcept;                                         // the current value of the given boolean expression..
-    std::pair<smt::inf_rational, smt::inf_rational> arith_bounds(const arith_expr &x) const noexcept; // the current bounds of the given arith expression..
-    smt::inf_rational arith_value(const arith_expr &x) const noexcept;                                // the current value of the given arith expression..
-    std::unordered_set<const smt::var_value *> enum_value(const var_expr &x) const noexcept;          // the current allowed values of the given enum expression..
+    CORE_EXPORT smt::lbool bool_value(const bool_expr &x) const noexcept;                                // the current value of the given boolean expression..
+    std::pair<smt::inf_rational, smt::inf_rational> arith_bounds(const arith_expr &x) const noexcept;    // the current bounds of the given arith expression..
+    CORE_EXPORT smt::inf_rational arith_value(const arith_expr &x) const noexcept;                       // the current value of the given arith expression..
+    CORE_EXPORT std::unordered_set<const smt::var_value *> enum_value(const var_expr &x) const noexcept; // the current allowed values of the given enum expression..
 
     virtual void solve() = 0;
 
@@ -178,9 +178,9 @@ namespace ratio
     inline void restore_ni() noexcept { ni = tmp_ni; }
 
   public:
-    smt::json to_json() const noexcept;
+    CORE_EXPORT smt::json to_json() const noexcept;
 
-    friend std::ostream &operator<<(std::ostream &os, const core &cr);
+    CORE_EXPORT friend std::ostream &operator<<(std::ostream &os, const core &cr);
 
   private:
     smt::sat_core sat_cr;   // the sat core..
@@ -216,9 +216,9 @@ namespace ratio
     void fire_log(const std::string msg) const noexcept;
     void fire_read(const std::string &script) const noexcept;
     void fire_read(const std::vector<std::string> &files) const noexcept;
-    void fire_state_changed() const noexcept;
-    void fire_started_solving() const noexcept;
-    void fire_solution_found() const noexcept;
+    CORE_EXPORT void fire_state_changed() const noexcept;
+    CORE_EXPORT void fire_started_solving() const noexcept;
+    CORE_EXPORT void fire_solution_found() const noexcept;
     void fire_inconsistent_problem() const noexcept;
 #endif
   };

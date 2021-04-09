@@ -1,5 +1,6 @@
 #pragma once
 
+#include "smt_export.h"
 #include "defs.h"
 #include <limits>
 #include <string>

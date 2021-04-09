@@ -12,15 +12,15 @@ namespace smt
     friend class sat_core;
 
   public:
-    theory(sat_core &sat);
+    SMT_EXPORT theory(sat_core &sat);
     theory(const theory &orig) = delete;
-    virtual ~theory();
+    SMT_EXPORT virtual ~theory();
 
     inline sat_core &get_core() const noexcept { return sat; }
 
   protected:
-    void bind(const var &v) noexcept;
-    void record(const std::vector<lit> &clause) noexcept;
+    SMT_EXPORT void bind(const var &v) noexcept;
+    SMT_EXPORT void record(const std::vector<lit> &clause) noexcept;
 
   private:
     /**

@@ -8,21 +8,21 @@
 
 namespace smt
 {
-    sat_core::sat_core()
+    SMT_EXPORT sat_core::sat_core()
     {
         var c_false = new_var(); // the false constant..
         assert(c_false == FALSE_var);
         assigns[FALSE_var] = False;
         level[FALSE_var] = 0;
     }
-    sat_core::~sat_core()
+    SMT_EXPORT sat_core::~sat_core()
     {
         // we delete all the constraints..
         for (const auto &c : constrs)
             delete c;
     }
 
-    var sat_core::new_var() noexcept
+    SMT_EXPORT var sat_core::new_var() noexcept
     {
         const var id = assigns.size();
         watches.push_back(std::vector<constr *>());
@@ -34,7 +34,7 @@ namespace smt
         return id;
     }
 
-    bool sat_core::new_clause(const std::vector<lit> &lits) noexcept
+    SMT_EXPORT bool sat_core::new_clause(const std::vector<lit> &lits) noexcept
     {
         assert(root_level());
         // we check if the clause is already satisfied and filter out false/duplicate literals..
@@ -122,7 +122,7 @@ namespace smt
         }
     }
 
-    lit sat_core::new_conj(const std::vector<lit> &ls) noexcept
+    SMT_EXPORT lit sat_core::new_conj(const std::vector<lit> &ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
@@ -167,7 +167,7 @@ namespace smt
         }
     }
 
-    lit sat_core::new_disj(const std::vector<lit> &ls) noexcept
+    SMT_EXPORT lit sat_core::new_disj(const std::vector<lit> &ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
@@ -212,7 +212,7 @@ namespace smt
         }
     }
 
-    lit sat_core::new_at_most_one(const std::vector<lit> &ls) noexcept
+    SMT_EXPORT lit sat_core::new_at_most_one(const std::vector<lit> &ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
@@ -283,7 +283,7 @@ namespace smt
         }
     }
 
-    lit sat_core::new_exct_one(const std::vector<lit> &ls) noexcept
+    SMT_EXPORT lit sat_core::new_exct_one(const std::vector<lit> &ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
@@ -330,7 +330,7 @@ namespace smt
         }
     }
 
-    bool sat_core::assume(const lit &p) noexcept
+    SMT_EXPORT bool sat_core::assume(const lit &p) noexcept
     {
         assert(prop_q.empty());
         trail_lim.push_back(trail.size());
@@ -339,7 +339,7 @@ namespace smt
         return enqueue(p) && propagate();
     }
 
-    void sat_core::pop() noexcept
+    SMT_EXPORT void sat_core::pop() noexcept
     {
         while (trail_lim.back() < trail.size())
             pop_one();
@@ -349,7 +349,7 @@ namespace smt
             th->pop();
     }
 
-    bool sat_core::simplify_db() noexcept
+    SMT_EXPORT bool sat_core::simplify_db() noexcept
     {
         assert(root_level());
         if (!propagate())
@@ -364,7 +364,7 @@ namespace smt
         return true;
     }
 
-    bool sat_core::propagate() noexcept
+    SMT_EXPORT bool sat_core::propagate() noexcept
     {
         lit p;
     main_loop:
@@ -462,7 +462,7 @@ namespace smt
         return true;
     }
 
-    bool sat_core::check(const std::vector<lit> &lits) noexcept
+    SMT_EXPORT bool sat_core::check(const std::vector<lit> &lits) noexcept
     {
         const size_t c_rl = decision_level(); // the current root-level..
         size_t c_dl;                          // the current decision-level..

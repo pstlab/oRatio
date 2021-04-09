@@ -16,20 +16,20 @@ namespace ratio
         expression::expression() {}
         expression::~expression() {}
 
-        bool_literal_expression::bool_literal_expression(const riddle::bool_token &l) : riddle::ast::bool_literal_expression(l) {}
-        bool_literal_expression::~bool_literal_expression() {}
+        CORE_EXPORT bool_literal_expression::bool_literal_expression(const riddle::bool_token &l) : riddle::ast::bool_literal_expression(l) {}
+        CORE_EXPORT bool_literal_expression::~bool_literal_expression() {}
         expr bool_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_bool(literal.val); }
 
-        int_literal_expression::int_literal_expression(const riddle::int_token &l) : riddle::ast::int_literal_expression(l) {}
-        int_literal_expression::~int_literal_expression() {}
+        CORE_EXPORT int_literal_expression::int_literal_expression(const riddle::int_token &l) : riddle::ast::int_literal_expression(l) {}
+        CORE_EXPORT int_literal_expression::~int_literal_expression() {}
         expr int_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_int(literal.val); }
 
-        real_literal_expression::real_literal_expression(const riddle::real_token &l) : riddle::ast::real_literal_expression(l) {}
-        real_literal_expression::~real_literal_expression() {}
+        CORE_EXPORT real_literal_expression::real_literal_expression(const riddle::real_token &l) : riddle::ast::real_literal_expression(l) {}
+        CORE_EXPORT real_literal_expression::~real_literal_expression() {}
         expr real_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_real(literal.val); }
 
-        string_literal_expression::string_literal_expression(const riddle::string_token &l) : riddle::ast::string_literal_expression(l) {}
-        string_literal_expression::~string_literal_expression() {}
+        CORE_EXPORT string_literal_expression::string_literal_expression(const riddle::string_token &l) : riddle::ast::string_literal_expression(l) {}
+        CORE_EXPORT string_literal_expression::~string_literal_expression() {}
         expr string_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_string(literal.str); }
 
         cast_expression::cast_expression(const std::vector<riddle::id_token> &tp, const riddle::ast::expression *const e) : riddle::ast::cast_expression(tp, e) {}
@@ -86,8 +86,8 @@ namespace ratio
             return scp.get_core().negate(scp.get_core().eq(l, r));
         }
 
-        lt_expression::lt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::lt_expression(l, r) {}
-        lt_expression::~lt_expression() {}
+        CORE_EXPORT lt_expression::lt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::lt_expression(l, r) {}
+        CORE_EXPORT lt_expression::~lt_expression() {}
         expr lt_expression::evaluate(const scope &scp, context &ctx) const
         {
             arith_expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -95,8 +95,8 @@ namespace ratio
             return scp.get_core().lt(l, r);
         }
 
-        leq_expression::leq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::leq_expression(l, r) {}
-        leq_expression::~leq_expression() {}
+        CORE_EXPORT leq_expression::leq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::leq_expression(l, r) {}
+        CORE_EXPORT leq_expression::~leq_expression() {}
         expr leq_expression::evaluate(const scope &scp, context &ctx) const
         {
             arith_expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -104,8 +104,8 @@ namespace ratio
             return scp.get_core().leq(l, r);
         }
 
-        geq_expression::geq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::geq_expression(l, r) {}
-        geq_expression::~geq_expression() {}
+        CORE_EXPORT geq_expression::geq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::geq_expression(l, r) {}
+        CORE_EXPORT geq_expression::~geq_expression() {}
         expr geq_expression::evaluate(const scope &scp, context &ctx) const
         {
             arith_expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -113,8 +113,8 @@ namespace ratio
             return scp.get_core().geq(l, r);
         }
 
-        gt_expression::gt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::gt_expression(l, r) {}
-        gt_expression::~gt_expression() {}
+        CORE_EXPORT gt_expression::gt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::gt_expression(l, r) {}
+        CORE_EXPORT gt_expression::~gt_expression() {}
         expr gt_expression::evaluate(const scope &scp, context &ctx) const
         {
             arith_expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -152,8 +152,8 @@ namespace ratio
                 return scp.get_core().new_bool(true);
         }
 
-        id_expression::id_expression(const std::vector<riddle::id_token> &is) : riddle::ast::id_expression(is) {}
-        id_expression::~id_expression() {}
+        CORE_EXPORT id_expression::id_expression(const std::vector<riddle::id_token> &is) : riddle::ast::id_expression(is) {}
+        CORE_EXPORT id_expression::~id_expression() {}
         expr id_expression::evaluate(const scope &, context &ctx) const
         {
             env *c_e = &*ctx;
@@ -281,8 +281,8 @@ namespace ratio
             c_e->exprs.emplace(id.id, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx));
         }
 
-        expression_statement::expression_statement(const riddle::ast::expression *const e) : riddle::ast::expression_statement(e) {}
-        expression_statement::~expression_statement() {}
+        CORE_EXPORT expression_statement::expression_statement(const riddle::ast::expression *const e) : riddle::ast::expression_statement(e) {}
+        CORE_EXPORT expression_statement::~expression_statement() {}
         void expression_statement::execute(const scope &scp, context &ctx) const
         {
             bool_expr be = dynamic_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx);

@@ -6,7 +6,7 @@
 
 namespace smt
 {
-    rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<inf_rational>>(size, std::vector<inf_rational>(size, inf_rational(rational::POSITIVE_INFINITY)))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
+    SMT_EXPORT rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<inf_rational>>(size, std::vector<inf_rational>(size, inf_rational(rational::POSITIVE_INFINITY)))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
     {
         for (size_t i = 0; i < size; ++i)
         {
@@ -15,9 +15,9 @@ namespace smt
             _preds[i][i] = -1;
         }
     }
-    rdl_theory::~rdl_theory() {}
+    SMT_EXPORT rdl_theory::~rdl_theory() {}
 
-    var rdl_theory::new_var() noexcept
+    SMT_EXPORT var rdl_theory::new_var() noexcept
     {
         var tp = n_vars++;
         if (_dists.size() == tp)
@@ -25,7 +25,7 @@ namespace smt
         return tp;
     }
 
-    lit rdl_theory::new_distance(const var &from, const var &to, const inf_rational &dist) noexcept
+    SMT_EXPORT lit rdl_theory::new_distance(const var &from, const var &to, const inf_rational &dist) noexcept
     {
         if (_dists[to][from] < -dist)
             return FALSE_lit; // the constraint is inconsistent..
@@ -43,7 +43,7 @@ namespace smt
         }
     }
 
-    lit rdl_theory::new_lt(const lin &left, const lin &right)
+    SMT_EXPORT lit rdl_theory::new_lt(const lin &left, const lin &right)
     {
         lin expr = left - right;
         switch (expr.vars.size())
@@ -89,7 +89,7 @@ namespace smt
         }
     }
 
-    lit rdl_theory::new_leq(const lin &left, const lin &right)
+    SMT_EXPORT lit rdl_theory::new_leq(const lin &left, const lin &right)
     {
         lin expr = left - right;
         switch (expr.vars.size())
@@ -135,7 +135,7 @@ namespace smt
         }
     }
 
-    lit rdl_theory::new_eq(const lin &left, const lin &right)
+    SMT_EXPORT lit rdl_theory::new_eq(const lin &left, const lin &right)
     {
         lin expr = left - right;
         switch (expr.vars.size())
@@ -171,7 +171,7 @@ namespace smt
         }
     }
 
-    lit rdl_theory::new_geq(const lin &left, const lin &right)
+    SMT_EXPORT lit rdl_theory::new_geq(const lin &left, const lin &right)
     {
         lin expr = left - right;
         switch (expr.vars.size())
@@ -219,7 +219,7 @@ namespace smt
         }
     }
 
-    lit rdl_theory::new_gt(const lin &left, const lin &right)
+    SMT_EXPORT lit rdl_theory::new_gt(const lin &left, const lin &right)
     {
         lin expr = left - right;
         switch (expr.vars.size())
@@ -265,7 +265,7 @@ namespace smt
         }
     }
 
-    std::pair<inf_rational, inf_rational> rdl_theory::bounds(const lin &l) const
+    SMT_EXPORT std::pair<inf_rational, inf_rational> rdl_theory::bounds(const lin &l) const
     {
         inf_rational c_lb;
         inf_rational c_ub;
@@ -330,7 +330,7 @@ namespace smt
         }
     }
 
-    bool rdl_theory::equates(const lin &l0, const lin &l1) const
+    SMT_EXPORT bool rdl_theory::equates(const lin &l0, const lin &l1) const
     {
         if (l0.vars.empty() && l1.vars.empty())
             return l0.known_term == l1.known_term;

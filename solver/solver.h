@@ -1,5 +1,6 @@
 #pragma once
 
+#include "solver_export.h"
 #include "core.h"
 
 #define AT "at"
@@ -44,19 +45,19 @@ namespace ratio
 #endif
 
   public:
-    solver();
+    SOLVER_EXPORT solver();
     solver(const solver &orig) = delete;
-    ~solver();
+    SOLVER_EXPORT ~solver();
 
     /**
      * Initializes the solver.
      */
-    void init() noexcept;
+    SOLVER_EXPORT void init() noexcept;
 
     /**
      * Solves the given problem.
      */
-    void solve() override;
+    SOLVER_EXPORT void solve() override;
     void take_decision(const smt::lit &ch);
 
     bool_expr new_bool() noexcept override;

@@ -7,7 +7,7 @@ namespace ratio
     conjunction::conjunction(core &cr, scope &scp, const smt::rational &cst, const std::vector<const riddle::ast::statement *> &stmnts) : scope(cr, scp), cost(cst), statements(stmnts) {}
     conjunction::~conjunction() {}
 
-    void conjunction::apply(context &ctx) const
+    CORE_EXPORT void conjunction::apply(context &ctx) const
     {
         context c_ctx(new env(get_core(), context(ctx)));
         for (const auto &s : statements)

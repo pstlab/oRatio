@@ -3,9 +3,9 @@
 
 namespace smt
 {
-    theory::theory(sat_core &sat) : sat(sat) { sat.add_theory(*this); }
-    theory::~theory() {}
+    SMT_EXPORT theory::theory(sat_core &sat) : sat(sat) { sat.add_theory(*this); }
+    SMT_EXPORT theory::~theory() {}
 
-    void theory::bind(const var &v) noexcept { sat.bind(v, *this); }
-    void theory::record(const std::vector<lit> &cls) noexcept { sat.record(cls); }
+    SMT_EXPORT void theory::bind(const var &v) noexcept { sat.bind(v, *this); }
+    SMT_EXPORT void theory::record(const std::vector<lit> &cls) noexcept { sat.record(cls); }
 } // namespace smt

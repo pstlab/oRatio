@@ -7,13 +7,12 @@
 
 namespace ratio
 {
-    constructor::constructor(core &cr, scope &scp, const std::vector<const field *> &args, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) : scope(cr, scp), args(args), init_list(il), statements(stmnts)
+    CORE_EXPORT constructor::constructor(core &cr, scope &scp, const std::vector<const field *> &args, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) : scope(cr, scp), args(args), init_list(il), statements(stmnts)
     {
         new_fields({new field(static_cast<type &>(scp), THIS_KEYWORD, nullptr, true)});
         new_fields(args);
     }
-
-    constructor::~constructor() {}
+    CORE_EXPORT constructor::~constructor() {}
 
     expr constructor::new_instance(context &ctx, const std::vector<expr> &exprs) const noexcept
     {

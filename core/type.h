@@ -31,9 +31,9 @@ namespace ratio
     friend class ast::class_declaration;
 
   public:
-    type(core &cr, scope &scp, const std::string &name, bool primitive = false);
+    CORE_EXPORT type(core &cr, scope &scp, const std::string &name, bool primitive = false);
     type(const type &orig) = delete;
-    virtual ~type();
+    CORE_EXPORT virtual ~type();
 
     inline std::string get_name() const noexcept { return name; } // returns the name of this type..
     std::string get_full_name() const noexcept
@@ -50,28 +50,28 @@ namespace ratio
     inline bool is_primitive() const noexcept { return primitive; }            // returns whether this type is primitive..
     std::vector<type *> get_supertypes() const noexcept { return supertypes; } // returns the base types of this type..
 
-    virtual bool is_assignable_from(const type &t) const noexcept; // checks whether this type is assignable from the 't' type..
+    CORE_EXPORT virtual bool is_assignable_from(const type &t) const noexcept; // checks whether this type is assignable from the 't' type..
 
-    virtual expr new_instance(context &ctx); // creates a new instance of this type within the given context..
-    virtual expr new_existential();          // creates a new existential of this type (i.e. an object variable whose allowed values are all the current instances of this type)..
+    CORE_EXPORT virtual expr new_instance(context &ctx); // creates a new instance of this type within the given context..
+    CORE_EXPORT virtual expr new_existential();          // creates a new existential of this type (i.e. an object variable whose allowed values are all the current instances of this type)..
 
     std::vector<expr> get_instances() const noexcept { return instances; } // returns the instances of this type..
 
   protected:
-    static void new_supertypes(type &t, const std::vector<type *> &sts) noexcept;
-    void new_supertypes(const std::vector<type *> &sts) noexcept;
-    void new_constructors(const std::vector<const constructor *> &cs) noexcept;
+    CORE_EXPORT static void new_supertypes(type &t, const std::vector<type *> &sts) noexcept;
+    CORE_EXPORT void new_supertypes(const std::vector<type *> &sts) noexcept;
+    CORE_EXPORT void new_constructors(const std::vector<const constructor *> &cs) noexcept;
     void new_methods(const std::vector<const method *> &ms) noexcept;
     void new_types(const std::vector<type *> &ts) noexcept;
-    void new_predicates(const std::vector<predicate *> &ps, bool notify = true) noexcept;
+    CORE_EXPORT void new_predicates(const std::vector<predicate *> &ps, bool notify = true) noexcept;
 
   public:
     const constructor &get_constructor(const std::vector<const type *> &ts) const;
     std::vector<const constructor *> get_constructors() const noexcept { return constructors; }
 
-    const field &get_field(const std::string &name) const override; // returns the field having the given name..
+    CORE_EXPORT const field &get_field(const std::string &name) const override; // returns the field having the given name..
 
-    const method &get_method(const std::string &m_name, const std::vector<const type *> &ts) const override;
+    CORE_EXPORT const method &get_method(const std::string &m_name, const std::vector<const type *> &ts) const override;
     std::vector<const method *> get_methods() const noexcept override
     {
       std::vector<const method *> c_methods;
@@ -80,10 +80,10 @@ namespace ratio
       return c_methods;
     }
 
-    type &get_type(const std::string &t_name) const override;
+    CORE_EXPORT type &get_type(const std::string &t_name) const override;
     std::map<std::string, type *> get_types() const noexcept override { return types; }
 
-    predicate &get_predicate(const std::string &p_name) const override;
+    CORE_EXPORT predicate &get_predicate(const std::string &p_name) const override;
     std::map<std::string, predicate *> get_predicates() const noexcept override { return predicates; }
 
   private:

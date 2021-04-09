@@ -23,20 +23,20 @@ namespace smt
     friend class row;
 
   public:
-    lra_theory(sat_core &sat);
+    SMT_EXPORT lra_theory(sat_core &sat);
     lra_theory(const lra_theory &orig) = delete;
-    virtual ~lra_theory();
+    SMT_EXPORT virtual ~lra_theory();
 
-    var new_var() noexcept;             // creates and returns a new numeric variable..
-    var new_var(const lin &l) noexcept; // creates and returns a new numeric variable and makes it equal to the given linear expression..
+    SMT_EXPORT var new_var() noexcept;             // creates and returns a new numeric variable..
+    SMT_EXPORT var new_var(const lin &l) noexcept; // creates and returns a new numeric variable and makes it equal to the given linear expression..
 
     inline bool is_basic(const var &v) const noexcept { return tableau.count(v); }
 
-    lit new_lt(const lin &left, const lin &right) noexcept;
-    lit new_leq(const lin &left, const lin &right) noexcept;
-    lit new_eq(const lin &left, const lin &right) noexcept { return sat.new_conj({new_geq(left, right), new_leq(left, right)}); }
-    lit new_geq(const lin &left, const lin &right) noexcept;
-    lit new_gt(const lin &left, const lin &right) noexcept;
+    SMT_EXPORT lit new_lt(const lin &left, const lin &right) noexcept;
+    SMT_EXPORT lit new_leq(const lin &left, const lin &right) noexcept;
+    SMT_EXPORT lit new_eq(const lin &left, const lin &right) noexcept { return sat.new_conj({new_geq(left, right), new_leq(left, right)}); }
+    SMT_EXPORT lit new_geq(const lin &left, const lin &right) noexcept;
+    SMT_EXPORT lit new_gt(const lin &left, const lin &right) noexcept;
 
     inline inf_rational lb(const var &v) const noexcept { return c_bounds[lb_index(v)].value; } // the current lower bound of variable 'v'..
     inline inf_rational ub(const var &v) const noexcept { return c_bounds[ub_index(v)].value; } // the current upper bound of variable 'v'..
@@ -75,7 +75,7 @@ namespace smt
       return v;
     }
 
-    bool equates(const lin &l0, const lin &l1) const noexcept;
+    SMT_EXPORT bool equates(const lin &l0, const lin &l1) const noexcept;
 
   private:
     bool propagate(const lit &p) noexcept override;

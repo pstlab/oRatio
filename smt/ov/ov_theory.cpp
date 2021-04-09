@@ -5,10 +5,10 @@
 
 namespace smt
 {
-    ov_theory::ov_theory(sat_core &sat) : theory(sat) {}
-    ov_theory::~ov_theory() {}
+    SMT_EXPORT ov_theory::ov_theory(sat_core &sat) : theory(sat) {}
+    SMT_EXPORT ov_theory::~ov_theory() {}
 
-    var ov_theory::new_var(const std::vector<var_value *> &items, const bool enforce_exct_one) noexcept
+    SMT_EXPORT var ov_theory::new_var(const std::vector<var_value *> &items, const bool enforce_exct_one) noexcept
     {
         assert(!items.empty());
         const var id = assigns.size();
@@ -38,7 +38,7 @@ namespace smt
         return id;
     }
 
-    var ov_theory::new_var(const std::vector<lit> &lits, const std::vector<var_value *> &vals) noexcept
+    SMT_EXPORT var ov_theory::new_var(const std::vector<lit> &lits, const std::vector<var_value *> &vals) noexcept
     {
         assert(!lits.empty());
         assert(lits.size() == vals.size());
@@ -53,7 +53,7 @@ namespace smt
         return id;
     }
 
-    lit ov_theory::allows(const var &v, const var_value &val) const noexcept
+    SMT_EXPORT lit ov_theory::allows(const var &v, const var_value &val) const noexcept
     {
         if (const auto at_right = assigns[v].find(&val); at_right != assigns[v].end())
             return at_right->second;
@@ -61,7 +61,7 @@ namespace smt
             return FALSE_lit;
     }
 
-    lit ov_theory::new_eq(const var &left, const var &right) noexcept
+    SMT_EXPORT lit ov_theory::new_eq(const var &left, const var &right) noexcept
     {
         if (left == right)
             return TRUE_lit;
@@ -115,7 +115,7 @@ namespace smt
         }
     }
 
-    std::unordered_set<const var_value *> ov_theory::value(var v) const noexcept
+    SMT_EXPORT std::unordered_set<const var_value *> ov_theory::value(var v) const noexcept
     {
         std::unordered_set<const var_value *> vals;
         for (const auto &val : assigns[v])

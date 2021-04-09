@@ -2,7 +2,7 @@
 
 namespace riddle
 {
-    lexer::lexer(std::istream &is)
+    RIDDLE_EXPORT lexer::lexer(std::istream &is)
     {
         char buffer[1024];
         while (is.read(buffer, sizeof(buffer)))
@@ -10,9 +10,9 @@ namespace riddle
         sb.append(buffer, is.gcount());
         ch = next_char();
     }
-    lexer::~lexer() {}
+    RIDDLE_EXPORT lexer::~lexer() {}
 
-    token *lexer::next()
+    RIDDLE_EXPORT token *lexer::next()
     {
         switch (ch)
         {

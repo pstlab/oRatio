@@ -36,9 +36,9 @@ namespace ratio
     friend class ast::return_statement;
 
   public:
-    env(core &cr, const context ctx);
+    CORE_EXPORT env(core &cr, const context ctx);
     env(const env &orig) = delete;
-    ~env();
+    CORE_EXPORT ~env();
 
     inline core &get_core() const { return cr; } // returns the core in which this environment is created..
 

@@ -4,30 +4,30 @@
 
 namespace smt
 {
-    const rational rational::ZERO(0);
-    const rational rational::ONE(1);
-    const rational rational::NEGATIVE_INFINITY(-1, 0);
-    const rational rational::POSITIVE_INFINITY(1, 0);
+    SMT_EXPORT const rational rational::ZERO(0);
+    SMT_EXPORT const rational rational::ONE(1);
+    SMT_EXPORT const rational rational::NEGATIVE_INFINITY(-1, 0);
+    SMT_EXPORT const rational rational::POSITIVE_INFINITY(1, 0);
 
-    rational::rational() : num(0), den(1) {}
-    rational::rational(I n) : num(n), den(1) {}
-    rational::rational(I n, I d) : num(n), den(d) { normalize(); }
+    SMT_EXPORT rational::rational() : num(0), den(1) {}
+    SMT_EXPORT rational::rational(I n) : num(n), den(1) {}
+    SMT_EXPORT rational::rational(I n, I d) : num(n), den(d) { normalize(); }
 
-    bool rational::operator!=(const rational &rhs) const noexcept { return num != rhs.num || den != rhs.den; }
-    bool rational::operator<(const rational &rhs) const noexcept { return (den == rhs.den) ? num < rhs.num : num * rhs.den < den * rhs.num; }
-    bool rational::operator<=(const rational &rhs) const noexcept { return num * rhs.den <= den * rhs.num; }
-    bool rational::operator==(const rational &rhs) const noexcept { return num == rhs.num && den == rhs.den; }
-    bool rational::operator>=(const rational &rhs) const noexcept { return num * rhs.den >= den * rhs.num; }
-    bool rational::operator>(const rational &rhs) const noexcept { return (den == rhs.den) ? num > rhs.num : num * rhs.den > den * rhs.num; }
+    SMT_EXPORT bool rational::operator!=(const rational &rhs) const noexcept { return num != rhs.num || den != rhs.den; }
+    SMT_EXPORT bool rational::operator<(const rational &rhs) const noexcept { return (den == rhs.den) ? num < rhs.num : num * rhs.den < den * rhs.num; }
+    SMT_EXPORT bool rational::operator<=(const rational &rhs) const noexcept { return num * rhs.den <= den * rhs.num; }
+    SMT_EXPORT bool rational::operator==(const rational &rhs) const noexcept { return num == rhs.num && den == rhs.den; }
+    SMT_EXPORT bool rational::operator>=(const rational &rhs) const noexcept { return num * rhs.den >= den * rhs.num; }
+    SMT_EXPORT bool rational::operator>(const rational &rhs) const noexcept { return (den == rhs.den) ? num > rhs.num : num * rhs.den > den * rhs.num; }
 
-    bool rational::operator!=(const I &rhs) const noexcept { return num != rhs || den != 1; }
-    bool rational::operator<(const I &rhs) const noexcept { return num < den * rhs; }
-    bool rational::operator<=(const I &rhs) const noexcept { return num <= den * rhs; }
-    bool rational::operator==(const I &rhs) const noexcept { return num == rhs && den == 1; }
-    bool rational::operator>=(const I &rhs) const noexcept { return num >= den * rhs; }
-    bool rational::operator>(const I &rhs) const noexcept { return num > den * rhs; }
+    SMT_EXPORT bool rational::operator!=(const I &rhs) const noexcept { return num != rhs || den != 1; }
+    SMT_EXPORT bool rational::operator<(const I &rhs) const noexcept { return num < den * rhs; }
+    SMT_EXPORT bool rational::operator<=(const I &rhs) const noexcept { return num <= den * rhs; }
+    SMT_EXPORT bool rational::operator==(const I &rhs) const noexcept { return num == rhs && den == 1; }
+    SMT_EXPORT bool rational::operator>=(const I &rhs) const noexcept { return num >= den * rhs; }
+    SMT_EXPORT bool rational::operator>(const I &rhs) const noexcept { return num > den * rhs; }
 
-    rational rational::operator+(const rational &rhs) const noexcept
+    SMT_EXPORT rational rational::operator+(const rational &rhs) const noexcept
     {
         assert(den != 0 || rhs.den != 0 || num == rhs.num); // inf + -inf or -inf + inf..
 
@@ -47,9 +47,9 @@ namespace smt
         return res;
     }
 
-    rational rational::operator-(const rational &rhs) const noexcept { return operator+(-rhs); }
+    SMT_EXPORT rational rational::operator-(const rational &rhs) const noexcept { return operator+(-rhs); }
 
-    rational rational::operator*(const rational &rhs) const noexcept
+    SMT_EXPORT rational rational::operator*(const rational &rhs) const noexcept
     {
         assert(num != 0 || rhs.den != 0); // 0*inf..
         assert(den != 0 || rhs.num != 0); // inf*0..
@@ -69,7 +69,7 @@ namespace smt
         return rational(c.num * d.num, c.den * d.den);
     }
 
-    rational rational::operator/(const rational &rhs) const noexcept
+    SMT_EXPORT rational rational::operator/(const rational &rhs) const noexcept
     {
         rational rec;
         if (rhs.num >= 0)
@@ -85,7 +85,7 @@ namespace smt
         return operator*(rec);
     }
 
-    rational rational::operator+(const I &rhs) const noexcept
+    SMT_EXPORT rational rational::operator+(const I &rhs) const noexcept
     {
         // special cases..
         if (num == 0)
@@ -101,9 +101,9 @@ namespace smt
         return res;
     }
 
-    rational rational::operator-(const I &rhs) const noexcept { return operator+(-rhs); }
+    SMT_EXPORT rational rational::operator-(const I &rhs) const noexcept { return operator+(-rhs); }
 
-    rational rational::operator*(const I &rhs) const noexcept
+    SMT_EXPORT rational rational::operator*(const I &rhs) const noexcept
     {
         assert(den != 0 || rhs != 0); // inf*0..
 
@@ -120,7 +120,7 @@ namespace smt
         return rational(num * rhs, den);
     }
 
-    rational rational::operator/(const I &rhs) const noexcept
+    SMT_EXPORT rational rational::operator/(const I &rhs) const noexcept
     {
         rational rec;
         rec.num = 1;
@@ -138,7 +138,7 @@ namespace smt
         return operator*(rec);
     }
 
-    rational &rational::operator+=(const rational &rhs) noexcept
+    SMT_EXPORT rational &rational::operator+=(const rational &rhs) noexcept
     {
         assert(den != 0 || rhs.den != 0 || num == rhs.num); // inf + -inf or -inf + inf..
 
@@ -167,9 +167,9 @@ namespace smt
         return *this;
     }
 
-    rational &rational::operator-=(const rational &rhs) noexcept { return operator+=(-rhs); }
+    SMT_EXPORT rational &rational::operator-=(const rational &rhs) noexcept { return operator+=(-rhs); }
 
-    rational &rational::operator*=(const rational &rhs) noexcept
+    SMT_EXPORT rational &rational::operator*=(const rational &rhs) noexcept
     {
         assert(num != 0 || rhs.den != 0); // 0*inf..
         assert(den != 0 || rhs.num != 0); // inf*0..
@@ -204,7 +204,7 @@ namespace smt
         return *this;
     }
 
-    rational &rational::operator/=(const rational &rhs) noexcept
+    SMT_EXPORT rational &rational::operator/=(const rational &rhs) noexcept
     {
         rational rec;
         rec.num = rhs.den;
@@ -222,7 +222,7 @@ namespace smt
         return operator*=(rec);
     }
 
-    rational &rational::operator+=(const I &rhs) noexcept
+    SMT_EXPORT rational &rational::operator+=(const I &rhs) noexcept
     {
         // special cases..
         if (num == 0)
@@ -242,9 +242,9 @@ namespace smt
         return *this;
     }
 
-    rational &rational::operator-=(const I &rhs) noexcept { return operator+=(-rhs); }
+    SMT_EXPORT rational &rational::operator-=(const I &rhs) noexcept { return operator+=(-rhs); }
 
-    rational &rational::operator*=(const I &rhs) noexcept
+    SMT_EXPORT rational &rational::operator*=(const I &rhs) noexcept
     {
         assert(den != 0 || rhs != 0); // inf*0..
 
@@ -269,7 +269,7 @@ namespace smt
         return *this;
     }
 
-    rational &rational::operator/=(const I &rhs) noexcept
+    SMT_EXPORT rational &rational::operator/=(const I &rhs) noexcept
     {
         rational rec;
         rec.num = 1;
@@ -287,12 +287,12 @@ namespace smt
         return operator*=(rec);
     }
 
-    rational operator+(const I &lhs, const rational &rhs) noexcept { return rational(lhs) + rhs; }
-    rational operator-(const I &lhs, const rational &rhs) noexcept { return rational(lhs) - rhs; }
-    rational operator*(const I &lhs, const rational &rhs) noexcept { return rational(lhs) * rhs; }
-    rational operator/(const I &lhs, const rational &rhs) noexcept { return rational(lhs) / rhs; }
+    SMT_EXPORT rational operator+(const I &lhs, const rational &rhs) noexcept { return rational(lhs) + rhs; }
+    SMT_EXPORT rational operator-(const I &lhs, const rational &rhs) noexcept { return rational(lhs) - rhs; }
+    SMT_EXPORT rational operator*(const I &lhs, const rational &rhs) noexcept { return rational(lhs) * rhs; }
+    SMT_EXPORT rational operator/(const I &lhs, const rational &rhs) noexcept { return rational(lhs) / rhs; }
 
-    rational rational::operator-() const noexcept
+    SMT_EXPORT rational rational::operator-() const noexcept
     {
         rational res(*this);
         res.num = -res.num;

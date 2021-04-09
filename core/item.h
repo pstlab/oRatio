@@ -35,9 +35,9 @@ namespace ratio
   class bool_item : public item
   {
   public:
-    bool_item(core &cr, const smt::lit &l);
+    CORE_EXPORT bool_item(core &cr, const smt::lit &l);
     bool_item(const bool_item &that) = delete;
-    virtual ~bool_item();
+    CORE_EXPORT virtual ~bool_item();
 
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
@@ -52,9 +52,9 @@ namespace ratio
   class arith_item : public item
   {
   public:
-    arith_item(core &cr, const type &t, const smt::lin &l);
+    CORE_EXPORT arith_item(core &cr, const type &t, const smt::lin &l);
     arith_item(const arith_item &that) = delete;
-    virtual ~arith_item();
+    CORE_EXPORT virtual ~arith_item();
 
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
@@ -69,9 +69,9 @@ namespace ratio
   class var_item : public item
   {
   public:
-    var_item(core &cr, const type &t, smt::var ev);
+    CORE_EXPORT var_item(core &cr, const type &t, smt::var ev);
     var_item(const var_item &that) = delete;
-    virtual ~var_item();
+    CORE_EXPORT virtual ~var_item();
 
     expr get(const std::string &name) const override;
 
@@ -88,9 +88,9 @@ namespace ratio
   class string_item : public item
   {
   public:
-    string_item(core &cr, const std::string &l);
+    CORE_EXPORT string_item(core &cr, const std::string &l);
     string_item(const string_item &that) = delete;
-    virtual ~string_item();
+    CORE_EXPORT virtual ~string_item();
 
     inline std::string get_value() const { return l; }
 

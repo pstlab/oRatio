@@ -19,9 +19,9 @@ namespace ratio
     friend class type;
 
   public:
-    constructor(core &cr, scope &scp, const std::vector<const field *> &args, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts);
+    CORE_EXPORT constructor(core &cr, scope &scp, const std::vector<const field *> &args, const std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts);
     constructor(const constructor &orig) = delete;
-    virtual ~constructor();
+    CORE_EXPORT virtual ~constructor();
 
     inline const std::vector<const field *> get_args() const noexcept { return args; } // returns the list of arguments of this constructor..
 

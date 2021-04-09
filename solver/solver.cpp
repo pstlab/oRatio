@@ -26,10 +26,10 @@ using namespace smt;
 
 namespace ratio
 {
-    solver::solver() : core(), theory(get_sat_core()), heur(HEURISTIC) {}
-    solver::~solver() { delete &heur; }
+    SOLVER_EXPORT solver::solver() : core(), theory(get_sat_core()), heur(HEURISTIC) {}
+    SOLVER_EXPORT solver::~solver() { delete &heur; }
 
-    void solver::init() noexcept
+    SOLVER_EXPORT void solver::init() noexcept
     {
         read(std::vector<std::string>({"init.rddl"}));
         new_types({new state_variable(*this),
@@ -40,7 +40,7 @@ namespace ratio
         FIRE_STATE_CHANGED();
     }
 
-    void solver::solve()
+    SOLVER_EXPORT void solver::solve()
     {
         FIRE_STARTED_SOLVING();
 

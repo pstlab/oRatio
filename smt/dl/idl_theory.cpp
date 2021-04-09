@@ -6,7 +6,7 @@
 
 namespace smt
 {
-    idl_theory::idl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<I>>(size, std::vector<I>(size, inf()))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
+    SMT_EXPORT idl_theory::idl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<I>>(size, std::vector<I>(size, inf()))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
     {
         for (size_t i = 0; i < size; ++i)
         {
@@ -15,9 +15,9 @@ namespace smt
             _preds[i][i] = -1;
         }
     }
-    idl_theory::~idl_theory() {}
+    SMT_EXPORT idl_theory::~idl_theory() {}
 
-    var idl_theory::new_var() noexcept
+    SMT_EXPORT var idl_theory::new_var() noexcept
     {
         var tp = n_vars++;
         if (_dists.size() == tp)
@@ -25,7 +25,7 @@ namespace smt
         return tp;
     }
 
-    lit idl_theory::new_distance(const var &from, const var &to, const I &dist) noexcept
+    SMT_EXPORT lit idl_theory::new_distance(const var &from, const var &to, const I &dist) noexcept
     {
         if (_dists[to][from] < -dist)
             return FALSE_lit; // the constraint is inconsistent..
@@ -43,7 +43,7 @@ namespace smt
         }
     }
 
-    lit idl_theory::new_lt(const lin &left, const lin &right)
+    SMT_EXPORT lit idl_theory::new_lt(const lin &left, const lin &right)
     {
         lin expr = left - right;
         switch (expr.vars.size())
@@ -93,7 +93,7 @@ namespace smt
         }
     }
 
-    lit idl_theory::new_leq(const lin &left, const lin &right)
+    SMT_EXPORT lit idl_theory::new_leq(const lin &left, const lin &right)
     {
         lin expr = left - right;
         switch (expr.vars.size())
@@ -143,7 +143,7 @@ namespace smt
         }
     }
 
-    lit idl_theory::new_eq(const lin &left, const lin &right)
+    SMT_EXPORT lit idl_theory::new_eq(const lin &left, const lin &right)
     {
         lin expr = left - right;
         switch (expr.vars.size())
@@ -181,7 +181,7 @@ namespace smt
         }
     }
 
-    lit idl_theory::new_geq(const lin &left, const lin &right)
+    SMT_EXPORT lit idl_theory::new_geq(const lin &left, const lin &right)
     {
         lin expr = left - right;
         switch (expr.vars.size())
@@ -281,7 +281,7 @@ namespace smt
         }
     }
 
-    std::pair<I, I> idl_theory::bounds(const lin &l) const
+    SMT_EXPORT std::pair<I, I> idl_theory::bounds(const lin &l) const
     {
         I c_lb(0);
         I c_ub(0);
@@ -351,7 +351,7 @@ namespace smt
         }
     }
 
-    bool idl_theory::equates(const lin &l0, const lin &l1) const
+    SMT_EXPORT bool idl_theory::equates(const lin &l0, const lin &l1) const
     {
         if (l0.vars.empty() && l1.vars.empty())
             return l0.known_term == l1.known_term;

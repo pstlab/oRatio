@@ -1,5 +1,6 @@
 #pragma once
 
+#include "riddle_export.h"
 #include "rational.h"
 #include <string>
 #include <istream>
@@ -132,11 +133,11 @@ namespace riddle
   class lexer
   {
   public:
-    lexer(std::istream &is);
+    RIDDLE_EXPORT lexer(std::istream &is);
     lexer(const lexer &orig) = delete;
-    virtual ~lexer();
+    RIDDLE_EXPORT virtual ~lexer();
 
-    token *next();
+    RIDDLE_EXPORT token *next();
 
   private:
     static bool is_id_part(const char &ch) noexcept { return ch == '_' || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9'); }

@@ -17,8 +17,8 @@ using namespace smt;
 
 namespace ratio
 {
-    core::core() : scope(*this, *this), env(*this, context(this)), sat_cr(), lra_th(sat_cr), ov_th(sat_cr), idl_th(sat_cr), rdl_th(sat_cr) { new_types({new bool_type(*this), new int_type(*this), new real_type(*this), new tp_type(*this), new string_type(*this)}); }
-    core::~core()
+    CORE_EXPORT core::core() : scope(*this, *this), env(*this, context(this)), sat_cr(), lra_th(sat_cr), ov_th(sat_cr), idl_th(sat_cr), rdl_th(sat_cr) { new_types({new bool_type(*this), new int_type(*this), new real_type(*this), new tp_type(*this), new string_type(*this)}); }
+    CORE_EXPORT core::~core()
     {
         // we delete the predicates..
         for (const auto &p : predicates)
@@ -38,7 +38,7 @@ namespace ratio
             delete cu;
     }
 
-    void core::read(const std::string &script)
+    CORE_EXPORT void core::read(const std::string &script)
     {
         std::stringstream ss(script);
         riddle_parser prs(ss);
@@ -57,7 +57,7 @@ namespace ratio
         FIRE_STATE_CHANGED();
     }
 
-    void core::read(const std::vector<std::string> &files)
+    CORE_EXPORT void core::read(const std::vector<std::string> &files)
     {
         std::vector<ast::compilation_unit *> c_cus;
         for (const auto &f : files)
@@ -87,20 +87,20 @@ namespace ratio
         FIRE_STATE_CHANGED();
     }
 
-    bool_expr core::new_bool() noexcept { return new bool_item(*this, lit(sat_cr.new_var())); }
-    bool_expr core::new_bool(const bool &val) noexcept { return new bool_item(*this, val ? TRUE_lit : FALSE_lit); }
+    CORE_EXPORT bool_expr core::new_bool() noexcept { return new bool_item(*this, lit(sat_cr.new_var())); }
+    CORE_EXPORT bool_expr core::new_bool(const bool &val) noexcept { return new bool_item(*this, val ? TRUE_lit : FALSE_lit); }
 
-    arith_expr core::new_int() noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(lra_th.new_var(), rational::ONE)); }
-    arith_expr core::new_int(const I &val) noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(rational(val))); }
+    CORE_EXPORT arith_expr core::new_int() noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(lra_th.new_var(), rational::ONE)); }
+    CORE_EXPORT arith_expr core::new_int(const I &val) noexcept { return new arith_item(*this, *types.at(INT_KEYWORD), lin(rational(val))); }
 
-    arith_expr core::new_real() noexcept { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(lra_th.new_var(), rational::ONE)); }
-    arith_expr core::new_real(const rational &val) noexcept { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(val)); }
+    CORE_EXPORT arith_expr core::new_real() noexcept { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(lra_th.new_var(), rational::ONE)); }
+    CORE_EXPORT arith_expr core::new_real(const rational &val) noexcept { return new arith_item(*this, *types.at(REAL_KEYWORD), lin(val)); }
 
-    arith_expr core::new_tp() noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(rdl_th.new_var(), rational::ONE)); }
-    arith_expr core::new_tp(const rational &val) noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(val)); }
+    CORE_EXPORT arith_expr core::new_tp() noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(rdl_th.new_var(), rational::ONE)); }
+    CORE_EXPORT arith_expr core::new_tp(const rational &val) noexcept { return new arith_item(*this, *types.at(TP_KEYWORD), lin(val)); }
 
-    string_expr core::new_string() noexcept { return new string_item(*this, ""); }
-    string_expr core::new_string(const std::string &val) noexcept { return new string_item(*this, val); }
+    CORE_EXPORT string_expr core::new_string() noexcept { return new string_item(*this, ""); }
+    CORE_EXPORT string_expr core::new_string(const std::string &val) noexcept { return new string_item(*this, val); }
 
     const type &core::get_type(const std::vector<arith_expr> &exprs) const
     {
@@ -114,7 +114,7 @@ namespace ratio
             return *types.at(REAL_KEYWORD);
     }
 
-    expr core::new_enum(const type &tp, const std::vector<item *> &allowed_vals)
+    CORE_EXPORT expr core::new_enum(const type &tp, const std::vector<item *> &allowed_vals)
     {
         assert(allowed_vals.size() > 1);
         assert(tp.get_name().compare(BOOL_KEYWORD) != 0);
@@ -253,7 +253,7 @@ namespace ratio
         return new bool_item(*this, sat_cr.new_conj(lits));
     }
 
-    bool_expr core::disj(const std::vector<bool_expr> &exprs) noexcept
+    CORE_EXPORT bool_expr core::disj(const std::vector<bool_expr> &exprs) noexcept
     {
         std::vector<lit> lits;
         for (const auto &bex : exprs)
@@ -379,7 +379,7 @@ namespace ratio
             methods[m->get_name()].push_back(m);
     }
 
-    void core::new_types(const std::vector<type *> &ts) noexcept
+    CORE_EXPORT void core::new_types(const std::vector<type *> &ts) noexcept
     {
         for (const auto &t : ts)
             types.emplace(t->get_name(), t);
@@ -391,7 +391,7 @@ namespace ratio
             predicates.emplace(p->get_name(), p);
     }
 
-    const field &core::get_field(const std::string &name) const
+    CORE_EXPORT const field &core::get_field(const std::string &name) const
     {
         if (const auto at_f = fields.find(name); at_f != fields.end())
             return *at_f->second;
@@ -400,7 +400,7 @@ namespace ratio
         throw std::out_of_range(name);
     }
 
-    const method &core::get_method(const std::string &name, const std::vector<const type *> &ts) const
+    CORE_EXPORT const method &core::get_method(const std::string &name, const std::vector<const type *> &ts) const
     {
         if (const auto at_m = methods.find(name); at_m != methods.end())
         {
@@ -424,7 +424,7 @@ namespace ratio
         throw std::out_of_range(name);
     }
 
-    type &core::get_type(const std::string &name) const
+    CORE_EXPORT type &core::get_type(const std::string &name) const
     {
         if (const auto at_tp = types.find(name); at_tp != types.end())
             return *at_tp->second;
@@ -433,7 +433,7 @@ namespace ratio
         throw std::out_of_range(name);
     }
 
-    predicate &core::get_predicate(const std::string &name) const
+    CORE_EXPORT predicate &core::get_predicate(const std::string &name) const
     {
         if (const auto at_p = predicates.find(name); at_p != predicates.end())
             return *at_p->second;
@@ -442,7 +442,7 @@ namespace ratio
         throw std::out_of_range(name);
     }
 
-    expr core::get(const std::string &name) const
+    CORE_EXPORT expr core::get(const std::string &name) const
     {
         if (const auto at_xpr = exprs.find(name); at_xpr != exprs.end())
             return at_xpr->second;
@@ -450,7 +450,7 @@ namespace ratio
         throw std::out_of_range(name);
     }
 
-    lbool core::bool_value(const bool_expr &x) const noexcept { return sat_cr.value(x->l); }
+    CORE_EXPORT lbool core::bool_value(const bool_expr &x) const noexcept { return sat_cr.value(x->l); }
     std::pair<inf_rational, inf_rational> core::arith_bounds(const arith_expr &x) const noexcept
     {
         if (x->get_type().get_name().compare(TP_KEYWORD) == 0)
@@ -458,16 +458,16 @@ namespace ratio
         else
             return lra_th.bounds(x->l);
     }
-    inf_rational core::arith_value(const arith_expr &x) const noexcept
+    CORE_EXPORT inf_rational core::arith_value(const arith_expr &x) const noexcept
     {
         if (x->get_type().get_name().compare(TP_KEYWORD) == 0)
             return rdl_th.bounds(x->l).first;
         else
             return lra_th.value(x->l);
     }
-    std::unordered_set<const var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th.value(x->ev); }
+    CORE_EXPORT std::unordered_set<const var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th.value(x->ev); }
 
-    json core::to_json() const noexcept
+    CORE_EXPORT json core::to_json() const noexcept
     {
         std::set<item *> all_items;
         std::set<atom *> all_atoms;
@@ -513,7 +513,7 @@ namespace ratio
         return j_core;
     }
 
-    std::ostream &operator<<(std::ostream &os, const core &cr)
+    CORE_EXPORT std::ostream &operator<<(std::ostream &os, const core &cr)
     {
         cr.to_json().to_json(os);
         return os;
@@ -560,17 +560,17 @@ namespace ratio
         for (const auto &l : listeners)
             l->read(files);
     }
-    void core::fire_state_changed() const noexcept
+    CORE_EXPORT void core::fire_state_changed() const noexcept
     {
         for (const auto &l : listeners)
             l->state_changed();
     }
-    void core::fire_started_solving() const noexcept
+    CORE_EXPORT void core::fire_started_solving() const noexcept
     {
         for (const auto &l : listeners)
             l->started_solving();
     }
-    void core::fire_solution_found() const noexcept
+    CORE_EXPORT void core::fire_solution_found() const noexcept
     {
         for (const auto &l : listeners)
             l->solution_found();

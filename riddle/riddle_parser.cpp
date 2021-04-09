@@ -5,8 +5,8 @@ namespace riddle
 {
     using namespace ast;
 
-    parser::parser(std::istream &is) : lex(is) {}
-    parser::~parser() {}
+    RIDDLE_EXPORT parser::parser(std::istream &is) : lex(is) {}
+    RIDDLE_EXPORT parser::~parser() {}
 
     token *parser::next()
     {
@@ -35,7 +35,7 @@ namespace riddle
         tk = tks[pos - 1];
     }
 
-    compilation_unit *parser::parse()
+    RIDDLE_EXPORT compilation_unit *parser::parse()
     {
         tk = next();
 

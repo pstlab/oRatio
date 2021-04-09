@@ -6,15 +6,15 @@
 
 namespace ratio
 {
-    predicate::predicate(core &cr, scope &scp, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts) : type(cr, scp, name), args(args), statements(stmnts)
+    CORE_EXPORT predicate::predicate(core &cr, scope &scp, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts) : type(cr, scp, name), args(args), statements(stmnts)
     {
         if (type *t = dynamic_cast<type *>(&scp))
             new_fields({new field(*t, TAU, nullptr)});
         new_fields(args);
     }
-    predicate::~predicate() {}
+    CORE_EXPORT predicate::~predicate() {}
 
-    expr predicate::new_instance(context &ctx) noexcept
+    CORE_EXPORT expr predicate::new_instance(context &ctx) noexcept
     {
         atom *a = new atom(get_core(), context(ctx), *this);
         // we add the new atom to the instances of this predicate and to the instances of all the super-predicates..
@@ -31,7 +31,7 @@ namespace ratio
         return expr(a);
     }
 
-    void predicate::apply_rule(atom &a) const
+    CORE_EXPORT void predicate::apply_rule(atom &a) const
     {
         for (const auto &sp : supertypes)
             static_cast<predicate *>(sp)->apply_rule(a);

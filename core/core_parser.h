@@ -1,5 +1,6 @@
 #pragma once
 
+#include "core_export.h"
 #include "riddle_parser.h"
 
 namespace ratio
@@ -23,9 +24,9 @@ namespace ratio
     class bool_literal_expression : public riddle::ast::bool_literal_expression, public expression
     {
     public:
-      bool_literal_expression(const riddle::bool_token &l);
+      CORE_EXPORT bool_literal_expression(const riddle::bool_token &l);
       bool_literal_expression(const bool_literal_expression &orig) = delete;
-      virtual ~bool_literal_expression();
+      CORE_EXPORT virtual ~bool_literal_expression();
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -33,9 +34,9 @@ namespace ratio
     class int_literal_expression : public riddle::ast::int_literal_expression, public expression
     {
     public:
-      int_literal_expression(const riddle::int_token &l);
+      CORE_EXPORT int_literal_expression(const riddle::int_token &l);
       int_literal_expression(const int_literal_expression &orig) = delete;
-      virtual ~int_literal_expression();
+      CORE_EXPORT virtual ~int_literal_expression();
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -43,9 +44,9 @@ namespace ratio
     class real_literal_expression : public riddle::ast::real_literal_expression, public expression
     {
     public:
-      real_literal_expression(const riddle::real_token &l);
+      CORE_EXPORT real_literal_expression(const riddle::real_token &l);
       real_literal_expression(const real_literal_expression &orig) = delete;
-      virtual ~real_literal_expression();
+      CORE_EXPORT virtual ~real_literal_expression();
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -53,9 +54,9 @@ namespace ratio
     class string_literal_expression : public riddle::ast::string_literal_expression, public expression
     {
     public:
-      string_literal_expression(const riddle::string_token &l);
+      CORE_EXPORT string_literal_expression(const riddle::string_token &l);
       string_literal_expression(const string_literal_expression &orig) = delete;
-      virtual ~string_literal_expression();
+      CORE_EXPORT virtual ~string_literal_expression();
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -133,9 +134,9 @@ namespace ratio
     class lt_expression : public riddle::ast::lt_expression, public expression
     {
     public:
-      lt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
+      CORE_EXPORT lt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       lt_expression(const lt_expression &orig) = delete;
-      virtual ~lt_expression();
+      CORE_EXPORT virtual ~lt_expression();
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -143,9 +144,9 @@ namespace ratio
     class leq_expression : public riddle::ast::leq_expression, public expression
     {
     public:
-      leq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
+      CORE_EXPORT leq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       leq_expression(const leq_expression &orig) = delete;
-      virtual ~leq_expression();
+      CORE_EXPORT virtual ~leq_expression();
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -153,9 +154,9 @@ namespace ratio
     class geq_expression : public riddle::ast::geq_expression, public expression
     {
     public:
-      geq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
+      CORE_EXPORT geq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       geq_expression(const geq_expression &orig) = delete;
-      virtual ~geq_expression();
+      CORE_EXPORT virtual ~geq_expression();
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -163,9 +164,9 @@ namespace ratio
     class gt_expression : public riddle::ast::gt_expression, public expression
     {
     public:
-      gt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
+      CORE_EXPORT gt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       gt_expression(const gt_expression &orig) = delete;
-      virtual ~gt_expression();
+      CORE_EXPORT virtual ~gt_expression();
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -183,9 +184,9 @@ namespace ratio
     class id_expression : public riddle::ast::id_expression, public expression
     {
     public:
-      id_expression(const std::vector<riddle::id_token> &is);
+      CORE_EXPORT id_expression(const std::vector<riddle::id_token> &is);
       id_expression(const id_expression &orig) = delete;
-      virtual ~id_expression();
+      CORE_EXPORT virtual ~id_expression();
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -303,9 +304,9 @@ namespace ratio
     class expression_statement : public riddle::ast::expression_statement, public statement
     {
     public:
-      expression_statement(const riddle::ast::expression *const e);
+      CORE_EXPORT expression_statement(const riddle::ast::expression *const e);
       expression_statement(const expression_statement &orig) = delete;
-      virtual ~expression_statement();
+      CORE_EXPORT virtual ~expression_statement();
 
       void execute(const scope &scp, context &ctx) const override;
     };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "smt_export.h"
 #include "defs.h"
 #include <string>
 
@@ -8,66 +9,66 @@ namespace smt
   class rational
   {
   public:
-    static const rational ZERO;
-    static const rational ONE;
-    static const rational POSITIVE_INFINITY;
-    static const rational NEGATIVE_INFINITY;
+    SMT_EXPORT static const rational ZERO;
+    SMT_EXPORT static const rational ONE;
+    SMT_EXPORT static const rational POSITIVE_INFINITY;
+    SMT_EXPORT static const rational NEGATIVE_INFINITY;
 
-    explicit rational();
-    explicit rational(I n);
-    explicit rational(I n, I d);
+    SMT_EXPORT explicit rational();
+    SMT_EXPORT explicit rational(I n);
+    SMT_EXPORT explicit rational(I n, I d);
 
-    operator double() const noexcept { return static_cast<double>(num) / den; }
-    inline I numerator() const noexcept { return num; }
-    inline I denominator() const noexcept { return den; }
+    SMT_EXPORT operator double() const noexcept { return static_cast<double>(num) / den; }
+    SMT_EXPORT inline I numerator() const noexcept { return num; }
+    SMT_EXPORT inline I denominator() const noexcept { return den; }
 
-    inline friend bool is_integer(const rational &rhs) noexcept { return rhs.den == 1; }
-    inline friend bool is_positive(const rational &rhs) noexcept { return rhs.num > 0; }
-    inline friend bool is_negative(const rational &rhs) noexcept { return rhs.num < 0; }
-    inline friend bool is_infinite(const rational &rhs) noexcept { return rhs.den == 0; }
-    inline friend bool is_positive_infinite(const rational &rhs) noexcept { return is_positive(rhs) && is_infinite(rhs); }
-    inline friend bool is_negative_infinite(const rational &rhs) noexcept { return is_negative(rhs) && is_infinite(rhs); }
+    SMT_EXPORT inline friend bool is_integer(const rational &rhs) noexcept { return rhs.den == 1; }
+    SMT_EXPORT inline friend bool is_positive(const rational &rhs) noexcept { return rhs.num > 0; }
+    SMT_EXPORT inline friend bool is_negative(const rational &rhs) noexcept { return rhs.num < 0; }
+    SMT_EXPORT inline friend bool is_infinite(const rational &rhs) noexcept { return rhs.den == 0; }
+    SMT_EXPORT inline friend bool is_positive_infinite(const rational &rhs) noexcept { return is_positive(rhs) && is_infinite(rhs); }
+    SMT_EXPORT inline friend bool is_negative_infinite(const rational &rhs) noexcept { return is_negative(rhs) && is_infinite(rhs); }
 
-    bool operator!=(const rational &rhs) const noexcept;
-    bool operator<(const rational &rhs) const noexcept;
-    bool operator<=(const rational &rhs) const noexcept;
-    bool operator==(const rational &rhs) const noexcept;
-    bool operator>=(const rational &rhs) const noexcept;
-    bool operator>(const rational &rhs) const noexcept;
+    SMT_EXPORT bool operator!=(const rational &rhs) const noexcept;
+    SMT_EXPORT bool operator<(const rational &rhs) const noexcept;
+    SMT_EXPORT bool operator<=(const rational &rhs) const noexcept;
+    SMT_EXPORT bool operator==(const rational &rhs) const noexcept;
+    SMT_EXPORT bool operator>=(const rational &rhs) const noexcept;
+    SMT_EXPORT bool operator>(const rational &rhs) const noexcept;
 
-    bool operator!=(const I &rhs) const noexcept;
-    bool operator<(const I &rhs) const noexcept;
-    bool operator<=(const I &rhs) const noexcept;
-    bool operator==(const I &rhs) const noexcept;
-    bool operator>=(const I &rhs) const noexcept;
-    bool operator>(const I &rhs) const noexcept;
+    SMT_EXPORT bool operator!=(const I &rhs) const noexcept;
+    SMT_EXPORT bool operator<(const I &rhs) const noexcept;
+    SMT_EXPORT bool operator<=(const I &rhs) const noexcept;
+    SMT_EXPORT bool operator==(const I &rhs) const noexcept;
+    SMT_EXPORT bool operator>=(const I &rhs) const noexcept;
+    SMT_EXPORT bool operator>(const I &rhs) const noexcept;
 
-    rational operator+(const rational &rhs) const noexcept;
-    rational operator-(const rational &rhs) const noexcept;
-    rational operator*(const rational &rhs) const noexcept;
-    rational operator/(const rational &rhs) const noexcept;
+    SMT_EXPORT rational operator+(const rational &rhs) const noexcept;
+    SMT_EXPORT rational operator-(const rational &rhs) const noexcept;
+    SMT_EXPORT rational operator*(const rational &rhs) const noexcept;
+    SMT_EXPORT rational operator/(const rational &rhs) const noexcept;
 
-    rational operator+(const I &rhs) const noexcept;
-    rational operator-(const I &rhs) const noexcept;
-    rational operator*(const I &rhs) const noexcept;
-    rational operator/(const I &rhs) const noexcept;
+    SMT_EXPORT rational operator+(const I &rhs) const noexcept;
+    SMT_EXPORT rational operator-(const I &rhs) const noexcept;
+    SMT_EXPORT rational operator*(const I &rhs) const noexcept;
+    SMT_EXPORT rational operator/(const I &rhs) const noexcept;
 
-    rational &operator+=(const rational &rhs) noexcept;
-    rational &operator-=(const rational &rhs) noexcept;
-    rational &operator*=(const rational &rhs) noexcept;
-    rational &operator/=(const rational &rhs) noexcept;
+    SMT_EXPORT rational &operator+=(const rational &rhs) noexcept;
+    SMT_EXPORT rational &operator-=(const rational &rhs) noexcept;
+    SMT_EXPORT rational &operator*=(const rational &rhs) noexcept;
+    SMT_EXPORT rational &operator/=(const rational &rhs) noexcept;
 
-    rational &operator+=(const I &rhs) noexcept;
-    rational &operator-=(const I &rhs) noexcept;
-    rational &operator*=(const I &rhs) noexcept;
-    rational &operator/=(const I &rhs) noexcept;
+    SMT_EXPORT rational &operator+=(const I &rhs) noexcept;
+    SMT_EXPORT rational &operator-=(const I &rhs) noexcept;
+    SMT_EXPORT rational &operator*=(const I &rhs) noexcept;
+    SMT_EXPORT rational &operator/=(const I &rhs) noexcept;
 
-    friend rational operator+(const I &lhs, const rational &rhs) noexcept;
-    friend rational operator-(const I &lhs, const rational &rhs) noexcept;
-    friend rational operator*(const I &lhs, const rational &rhs) noexcept;
-    friend rational operator/(const I &lhs, const rational &rhs) noexcept;
+    SMT_EXPORT friend rational operator+(const I &lhs, const rational &rhs) noexcept;
+    SMT_EXPORT friend rational operator-(const I &lhs, const rational &rhs) noexcept;
+    SMT_EXPORT friend rational operator*(const I &lhs, const rational &rhs) noexcept;
+    SMT_EXPORT friend rational operator/(const I &lhs, const rational &rhs) noexcept;
 
-    rational operator-() const noexcept;
+    SMT_EXPORT rational operator-() const noexcept;
 
   private:
     void normalize() noexcept;

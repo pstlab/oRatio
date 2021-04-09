@@ -12,7 +12,8 @@ option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
 file(GLOB SOLVER_SOURCES *.cpp flaws/*.cpp types/*.cpp heuristics/*.cpp)
 
 add_library(solver SHARED ${SOLVER_SOURCES})
-target_include_directories(solver PUBLIC . ${oRatio_SOURCE_DIR}/smt ${oRatio_SOURCE_DIR}/smt/lra ${oRatio_SOURCE_DIR}/smt/ov ${oRatio_SOURCE_DIR}/smt/dl ${oRatio_SOURCE_DIR}/core ${oRatio_SOURCE_DIR}/riddle flaws types heuristics)
+GENERATE_EXPORT_HEADER(solver)
+target_include_directories(solver PUBLIC . ${oRatio_SOURCE_DIR}/smt ${oRatio_SOURCE_DIR}/smt/lra ${oRatio_SOURCE_DIR}/smt/ov ${oRatio_SOURCE_DIR}/smt/dl ${oRatio_SOURCE_DIR}/core ${oRatio_SOURCE_DIR}/riddle flaws types heuristics ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(solver PUBLIC core)
 
 message(STATUS "Temporal network type:    ${TEMPORAL_NETWORK_TYPE}")

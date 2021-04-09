@@ -15,15 +15,15 @@ namespace ratio
   class predicate : public type
   {
   public:
-    predicate(core &cr, scope &scp, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
+    CORE_EXPORT predicate(core &cr, scope &scp, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
     predicate(const predicate &orig) = delete;
-    virtual ~predicate();
+    CORE_EXPORT virtual ~predicate();
 
     inline const std::vector<const field *> get_args() const noexcept { return args; }
 
-    expr new_instance(context &ctx) noexcept override; // creates a new atom having this predicate within the given context..
+    CORE_EXPORT expr new_instance(context &ctx) noexcept override; // creates a new atom having this predicate within the given context..
 
-    void apply_rule(atom &a) const; // applies the rule associated to this predicate to the given atom..
+    CORE_EXPORT void apply_rule(atom &a) const; // applies the rule associated to this predicate to the given atom..
 
   private:
     const std::vector<const field *> args;                        // the arguments of the predicate..

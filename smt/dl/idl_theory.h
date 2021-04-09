@@ -15,30 +15,30 @@ namespace smt
     friend class idl_value_listener;
 
   public:
-    idl_theory(sat_core &sat, const size_t &size = 16);
+    SMT_EXPORT idl_theory(sat_core &sat, const size_t &size = 16);
     idl_theory(const idl_theory &orig) = delete;
-    virtual ~idl_theory();
+    SMT_EXPORT virtual ~idl_theory();
 
-    var new_var() noexcept; // creates and returns a new distance logic variable..
+    SMT_EXPORT var new_var() noexcept; // creates and returns a new distance logic variable..
 
-    lit new_distance(const var &from, const var &to, const I &dist) noexcept; // creates and returns a new propositional literal for controlling the constraint 'to - from <= dist'..
-    lit new_distance(const var &from, const var &to, const I &min, const I &max) noexcept { return sat.new_conj({new_distance(to, from, -min), new_distance(from, to, max)}); }
+    SMT_EXPORT lit new_distance(const var &from, const var &to, const I &dist) noexcept; // creates and returns a new propositional literal for controlling the constraint 'to - from <= dist'..
+    SMT_EXPORT lit new_distance(const var &from, const var &to, const I &min, const I &max) noexcept { return sat.new_conj({new_distance(to, from, -min), new_distance(from, to, max)}); }
 
-    lit new_lt(const lin &left, const lin &right);
-    lit new_leq(const lin &left, const lin &right);
-    lit new_eq(const lin &left, const lin &right);
-    lit new_geq(const lin &left, const lin &right);
-    lit new_gt(const lin &left, const lin &right);
+    SMT_EXPORT lit new_lt(const lin &left, const lin &right);
+    SMT_EXPORT lit new_leq(const lin &left, const lin &right);
+    SMT_EXPORT lit new_eq(const lin &left, const lin &right);
+    SMT_EXPORT lit new_geq(const lin &left, const lin &right);
+    SMT_EXPORT lit new_gt(const lin &left, const lin &right);
 
     inline I lb(const var &v) const noexcept { return -_dists[v][0]; }
     inline I ub(const var &v) const noexcept { return _dists[0][v]; }
-    inline std::pair<I, I> bounds(const var &v) const noexcept { return std::make_pair(-_dists[v][0], _dists[0][v]); }
+    SMT_EXPORT inline std::pair<I, I> bounds(const var &v) const noexcept { return std::make_pair(-_dists[v][0], _dists[0][v]); }
     inline std::pair<I, I> distance(const var &from, const var &to) const noexcept { return std::make_pair(-_dists[to][from], _dists[from][to]); }
 
-    std::pair<I, I> bounds(const lin &l) const;
+    SMT_EXPORT std::pair<I, I> bounds(const lin &l) const;
     std::pair<I, I> distance(const lin &from, const lin &to) const;
 
-    bool equates(const lin &l0, const lin &l1) const;
+    SMT_EXPORT bool equates(const lin &l0, const lin &l1) const;
 
     size_t size() const noexcept { return n_vars; }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "smt_export.h"
 #include "lit.h"
 #ifdef PARALLELIZE
 #include "thread_pool.h"
@@ -23,9 +24,9 @@ namespace smt
     friend class sat_value_listener;
 
   public:
-    sat_core();
+    SMT_EXPORT sat_core();
     sat_core(const sat_core &orig) = delete;
-    ~sat_core();
+    SMT_EXPORT ~sat_core();
 
 #ifdef PARALLELIZE
     thread_pool &get_thread_pool()
@@ -34,20 +35,20 @@ namespace smt
     }
 #endif
 
-    var new_var() noexcept;                                 // creates a new propositional variable..
-    bool new_clause(const std::vector<lit> &lits) noexcept; // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
+    SMT_EXPORT var new_var() noexcept;                                 // creates a new propositional variable..
+    SMT_EXPORT bool new_clause(const std::vector<lit> &lits) noexcept; // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
 
-    lit new_eq(const lit &left, const lit &right) noexcept;   // creates a new reified equality..
-    lit new_conj(const std::vector<lit> &ls) noexcept;        // creates a new reified conjunction..
-    lit new_disj(const std::vector<lit> &ls) noexcept;        // creates a new reified disjunction..
-    lit new_at_most_one(const std::vector<lit> &ls) noexcept; // creates a new reified at-most-one..
-    lit new_exct_one(const std::vector<lit> &ls) noexcept;    // creates a new reified exct-one..
+    SMT_EXPORT lit new_eq(const lit &left, const lit &right) noexcept;   // creates a new reified equality..
+    SMT_EXPORT lit new_conj(const std::vector<lit> &ls) noexcept;        // creates a new reified conjunction..
+    SMT_EXPORT lit new_disj(const std::vector<lit> &ls) noexcept;        // creates a new reified disjunction..
+    SMT_EXPORT lit new_at_most_one(const std::vector<lit> &ls) noexcept; // creates a new reified at-most-one..
+    SMT_EXPORT lit new_exct_one(const std::vector<lit> &ls) noexcept;    // creates a new reified exct-one..
 
-    bool assume(const lit &p) noexcept;
-    void pop() noexcept;
-    bool simplify_db() noexcept;
-    bool propagate() noexcept;
-    bool check(const std::vector<lit> &lits) noexcept;
+    SMT_EXPORT bool assume(const lit &p) noexcept;
+    SMT_EXPORT void pop() noexcept;
+    SMT_EXPORT bool simplify_db() noexcept;
+    SMT_EXPORT bool propagate() noexcept;
+    SMT_EXPORT bool check(const std::vector<lit> &lits) noexcept;
 
     inline lbool value(const var &x) const noexcept { return assigns.at(x); } // returns the value of variable 'x'..
     inline lbool value(const lit &p) const noexcept

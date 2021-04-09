@@ -12,8 +12,8 @@
 
 namespace ratio
 {
-    type::type(core &cr, scope &scp, const std::string &name, bool primitive) : scope(cr, scp), name(name), primitive(primitive) {}
-    type::~type()
+    CORE_EXPORT type::type(core &cr, scope &scp, const std::string &name, bool primitive) : scope(cr, scp), name(name), primitive(primitive) {}
+    CORE_EXPORT type::~type()
     {
         // we delete the predicates..
         for (const auto &p : predicates)
@@ -33,7 +33,7 @@ namespace ratio
             delete c;
     }
 
-    bool type::is_assignable_from(const type &t) const noexcept
+    CORE_EXPORT bool type::is_assignable_from(const type &t) const noexcept
     {
         std::queue<const type *> q;
         q.push(&t);
@@ -51,7 +51,7 @@ namespace ratio
         return false;
     }
 
-    expr type::new_instance(context &ctx)
+    CORE_EXPORT expr type::new_instance(context &ctx)
     {
         expr i = new item(cr, context(ctx), *this);
         std::queue<type *> q;
@@ -67,7 +67,7 @@ namespace ratio
         return i;
     }
 
-    expr type::new_existential()
+    CORE_EXPORT expr type::new_existential()
     {
         assert(!instances.empty());
         if (instances.size() == 1)
@@ -82,18 +82,18 @@ namespace ratio
         }
     }
 
-    void type::new_supertypes(type &t, const std::vector<type *> &sts) noexcept
+    CORE_EXPORT void type::new_supertypes(type &t, const std::vector<type *> &sts) noexcept
     {
         for (const auto &st : sts)
             t.supertypes.push_back(st);
     }
-    void type::new_supertypes(const std::vector<type *> &sts) noexcept
+    CORE_EXPORT void type::new_supertypes(const std::vector<type *> &sts) noexcept
     {
         for (const auto &st : sts)
             supertypes.push_back(st);
     }
 
-    void type::new_constructors(const std::vector<const constructor *> &cs) noexcept
+    CORE_EXPORT void type::new_constructors(const std::vector<const constructor *> &cs) noexcept
     {
         for (const auto &c : cs)
             constructors.push_back(c);
@@ -111,7 +111,7 @@ namespace ratio
             types.emplace(t->name, t);
     }
 
-    void type::new_predicates(const std::vector<predicate *> &ps, bool notify) noexcept
+    CORE_EXPORT void type::new_predicates(const std::vector<predicate *> &ps, bool notify) noexcept
     {
         for (const auto &p : ps)
         {
@@ -154,7 +154,7 @@ namespace ratio
         throw std::out_of_range(name);
     }
 
-    const field &type::get_field(const std::string &f_name) const
+    CORE_EXPORT const field &type::get_field(const std::string &f_name) const
     {
         if (const auto at_f = fields.find(f_name); at_f != fields.end())
             return *at_f->second;
@@ -181,7 +181,7 @@ namespace ratio
         throw std::out_of_range(f_name);
     }
 
-    const method &type::get_method(const std::string &m_name, const std::vector<const type *> &ts) const
+    CORE_EXPORT const method &type::get_method(const std::string &m_name, const std::vector<const type *> &ts) const
     {
         const auto at_m = methods.find(m_name);
         if (at_m != methods.end())
@@ -226,7 +226,7 @@ namespace ratio
         throw std::out_of_range(m_name);
     }
 
-    type &type::get_type(const std::string &t_name) const
+    CORE_EXPORT type &type::get_type(const std::string &t_name) const
     {
         if (const auto at_tp = types.find(t_name); at_tp != types.end())
             return *at_tp->second;
@@ -255,7 +255,7 @@ namespace ratio
         throw std::out_of_range(t_name);
     }
 
-    predicate &type::get_predicate(const std::string &p_name) const
+    CORE_EXPORT predicate &type::get_predicate(const std::string &p_name) const
     {
         if (const auto at_p = predicates.find(p_name); at_p != predicates.end())
             return *at_p->second;

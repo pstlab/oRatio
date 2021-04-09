@@ -1,5 +1,7 @@
 #pragma once
 
+#include "core_export.h"
+
 namespace ratio
 {
   class env;
@@ -25,16 +27,16 @@ namespace ratio
   class context
   {
   public:
-    explicit context(env *const ptr);
-    explicit context(const context &orig);
-    virtual ~context();
+    CORE_EXPORT explicit context(env *const ptr);
+    CORE_EXPORT explicit context(const context &orig);
+    CORE_EXPORT virtual ~context();
 
     inline env &operator*() const { return *ptr; }
     inline env *operator->() const { return ptr; }
 
     operator expr() const;
-    operator bool_expr() const;
-    operator arith_expr() const;
+    CORE_EXPORT operator bool_expr() const;
+    CORE_EXPORT operator arith_expr() const;
     operator var_expr() const;
     operator string_expr() const;
 
@@ -52,51 +54,51 @@ namespace ratio
     expr(const expr &orig) : context(orig.ptr) {}
     virtual ~expr() {}
 
-    item &operator*() const;
+    CORE_EXPORT item &operator*() const;
     item *operator->() const;
   };
 
   class bool_expr : public expr
   {
   public:
-    bool_expr(bool_item *const ptr);
-    bool_expr(const bool_expr &orig);
-    virtual ~bool_expr() {}
+    CORE_EXPORT bool_expr(bool_item *const ptr);
+    CORE_EXPORT bool_expr(const bool_expr &orig);
+    CORE_EXPORT virtual ~bool_expr() {}
 
-    bool_item &operator*() const;
-    bool_item *operator->() const;
+    CORE_EXPORT bool_item &operator*() const;
+    CORE_EXPORT bool_item *operator->() const;
   };
 
   class arith_expr : public expr
   {
   public:
-    arith_expr(arith_item *const ptr);
-    arith_expr(const arith_expr &orig);
-    virtual ~arith_expr() {}
+    CORE_EXPORT arith_expr(arith_item *const ptr);
+    CORE_EXPORT arith_expr(const arith_expr &orig);
+    CORE_EXPORT virtual ~arith_expr() {}
 
-    arith_item &operator*() const;
-    arith_item *operator->() const;
+    CORE_EXPORT arith_item &operator*() const;
+    CORE_EXPORT arith_item *operator->() const;
   };
 
   class var_expr : public expr
   {
   public:
-    var_expr(var_item *const ptr);
-    var_expr(const var_expr &orig);
-    virtual ~var_expr() {}
+    CORE_EXPORT var_expr(var_item *const ptr);
+    CORE_EXPORT var_expr(const var_expr &orig);
+    CORE_EXPORT virtual ~var_expr() {}
 
-    var_item &operator*() const;
-    var_item *operator->() const;
+    CORE_EXPORT var_item &operator*() const;
+    CORE_EXPORT var_item *operator->() const;
   };
 
   class string_expr : public expr
   {
   public:
-    string_expr(string_item *const ptr);
-    string_expr(const string_expr &orig);
-    virtual ~string_expr() {}
+    CORE_EXPORT string_expr(string_item *const ptr);
+    CORE_EXPORT string_expr(const string_expr &orig);
+    CORE_EXPORT virtual ~string_expr() {}
 
-    string_item &operator*() const;
-    string_item *operator->() const;
+    CORE_EXPORT string_item &operator*() const;
+    CORE_EXPORT string_item *operator->() const;
   };
 } // namespace ratio
