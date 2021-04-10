@@ -103,28 +103,28 @@ namespace ratio
     CORE_EXPORT string_expr new_string(const std::string &val) noexcept; // creates a new string literal..
     CORE_EXPORT virtual expr new_enum(const type &tp, const std::vector<item *> &allowed_vals);
 
-    bool_expr negate(bool_expr var) noexcept;
-    bool_expr eq(bool_expr left, bool_expr right) noexcept;
-    bool_expr conj(const std::vector<bool_expr> &exprs) noexcept;
+    CORE_EXPORT bool_expr negate(bool_expr var) noexcept;
+    CORE_EXPORT bool_expr eq(bool_expr left, bool_expr right) noexcept;
+    CORE_EXPORT bool_expr conj(const std::vector<bool_expr> &exprs) noexcept;
     CORE_EXPORT virtual bool_expr disj(const std::vector<bool_expr> &exprs) noexcept;
-    bool_expr exct_one(const std::vector<bool_expr> &exprs) noexcept;
+    CORE_EXPORT bool_expr exct_one(const std::vector<bool_expr> &exprs) noexcept;
 
-    arith_expr add(const std::vector<arith_expr> &exprs) noexcept;
-    arith_expr sub(const std::vector<arith_expr> &exprs) noexcept;
-    arith_expr mult(const std::vector<arith_expr> &exprs) noexcept;
-    arith_expr div(const std::vector<arith_expr> &exprs) noexcept;
-    arith_expr minus(arith_expr ex) noexcept;
+    CORE_EXPORT arith_expr add(const std::vector<arith_expr> &exprs) noexcept;
+    CORE_EXPORT arith_expr sub(const std::vector<arith_expr> &exprs) noexcept;
+    CORE_EXPORT arith_expr mult(const std::vector<arith_expr> &exprs) noexcept;
+    CORE_EXPORT arith_expr div(const std::vector<arith_expr> &exprs) noexcept;
+    CORE_EXPORT arith_expr minus(arith_expr ex) noexcept;
 
-    bool_expr lt(arith_expr left, arith_expr right) noexcept;
-    bool_expr leq(arith_expr left, arith_expr right) noexcept;
-    bool_expr eq(arith_expr left, arith_expr right) noexcept;
-    bool_expr geq(arith_expr left, arith_expr right) noexcept;
-    bool_expr gt(arith_expr left, arith_expr right) noexcept;
+    CORE_EXPORT bool_expr lt(arith_expr left, arith_expr right) noexcept;
+    CORE_EXPORT bool_expr leq(arith_expr left, arith_expr right) noexcept;
+    CORE_EXPORT bool_expr eq(arith_expr left, arith_expr right) noexcept;
+    CORE_EXPORT bool_expr geq(arith_expr left, arith_expr right) noexcept;
+    CORE_EXPORT bool_expr gt(arith_expr left, arith_expr right) noexcept;
 
-    bool_expr eq(expr i0, expr i1) noexcept;
+    CORE_EXPORT bool_expr eq(expr i0, expr i1) noexcept;
 
-    void assert_facts(const std::vector<smt::lit> &facts);
-    void assert_facts(const std::vector<bool_expr> &facts);
+    CORE_EXPORT void assert_facts(const std::vector<smt::lit> &facts);
+    CORE_EXPORT void assert_facts(const std::vector<bool_expr> &facts);
 
   private:
     expr new_enum(const type &tp, const std::vector<smt::lit> &lits, const std::vector<item *> &vals) noexcept;

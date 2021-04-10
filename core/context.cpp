@@ -15,12 +15,12 @@ namespace ratio
     context::operator expr() const { return expr(static_cast<item *>(ptr)); }
     CORE_EXPORT context::operator bool_expr() const { return bool_expr(static_cast<bool_item *>(ptr)); }
     CORE_EXPORT context::operator arith_expr() const { return arith_expr(static_cast<arith_item *>(ptr)); }
-    context::operator string_expr() const { return string_expr(static_cast<string_item *>(ptr)); }
-    context::operator var_expr() const { return var_expr(static_cast<var_item *>(ptr)); }
+    CORE_EXPORT context::operator string_expr() const { return string_expr(static_cast<string_item *>(ptr)); }
+    CORE_EXPORT context::operator var_expr() const { return var_expr(static_cast<var_item *>(ptr)); }
 
     expr::expr(item *const ptr) : context(ptr) {}
     CORE_EXPORT item &expr::operator*() const { return *static_cast<item *>(ptr); }
-    item *expr::operator->() const { return static_cast<item *>(ptr); }
+    CORE_EXPORT item *expr::operator->() const { return static_cast<item *>(ptr); }
 
     CORE_EXPORT bool_expr::bool_expr(bool_item *const ptr) : expr(ptr) {}
     CORE_EXPORT bool_expr::bool_expr(const bool_expr &orig) : expr(static_cast<item *>(orig.ptr)) {}

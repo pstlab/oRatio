@@ -1,4 +1,5 @@
 #include "java_executor_listener.h"
+#include "atom.h"
 
 namespace ratio
 {
@@ -28,7 +29,7 @@ namespace ratio
         jlongArray atms_array = env->NewLongArray(static_cast<jsize>(atoms.size()));
         std::vector<jlong> c_atms;
         for (const auto &atm : atoms)
-            c_atms.push_back(reinterpret_cast<jlong>(atm->get_sigma()));
+            c_atms.push_back(static_cast<jlong>(atm->get_sigma()));
         env->SetLongArrayRegion(atms_array, 0, static_cast<jsize>(c_atms.size()), c_atms.data());
 
         env->CallVoidMethod(exec_obj, starting_mthd_id, atms_array);
@@ -41,7 +42,7 @@ namespace ratio
         jlongArray atms_array = env->NewLongArray(static_cast<jsize>(atoms.size()));
         std::vector<jlong> c_atms;
         for (const auto &atm : atoms)
-            c_atms.push_back(reinterpret_cast<jlong>(atm->get_sigma()));
+            c_atms.push_back(static_cast<jlong>(atm->get_sigma()));
         env->SetLongArrayRegion(atms_array, 0, static_cast<jsize>(c_atms.size()), c_atms.data());
 
         env->CallVoidMethod(exec_obj, ending_mthd_id, atms_array);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "executor_export.h"
 #include "core_listener.h"
 #include "solver_listener.h"
 #include "inf_rational.h"
@@ -20,16 +21,16 @@ namespace ratio
     friend class executor_listener;
 
   public:
-    executor(solver &slv, const smt::rational &units_per_tick = smt::rational::ONE);
+    EXECUTOR_EXPORT executor(solver &slv, const smt::rational &units_per_tick = smt::rational::ONE);
     executor(const executor &orig) = delete;
-    ~executor();
+    EXECUTOR_EXPORT ~executor();
 
     smt::rational get_current_time() const { return current_time; };
 
-    void tick();
-    void dont_start_yet(const std::set<atom *> &atoms);
-    void dont_end_yet(const std::set<atom *> &atoms);
-    void failure(const std::set<atom *> &atoms);
+    EXECUTOR_EXPORT void tick();
+    EXECUTOR_EXPORT void dont_start_yet(const std::set<atom *> &atoms);
+    EXECUTOR_EXPORT void dont_end_yet(const std::set<atom *> &atoms);
+    EXECUTOR_EXPORT void failure(const std::set<atom *> &atoms);
 
   private:
     void solution_found() override;

@@ -14,10 +14,10 @@ using namespace smt;
 
 namespace ratio
 {
-    executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), units_per_tick(units_per_tick) { reset_timelines(); }
-    executor::~executor() {}
+    EXECUTOR_EXPORT executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), units_per_tick(units_per_tick) { reset_timelines(); }
+    EXECUTOR_EXPORT executor::~executor() {}
 
-    void executor::tick()
+    EXECUTOR_EXPORT void executor::tick()
     {
         current_time += units_per_tick;
         LOG("current time: " << current_time);
@@ -130,9 +130,9 @@ namespace ratio
         }
     }
 
-    void executor::dont_start_yet(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
-    void executor::dont_end_yet(const std::set<atom *> &atoms) { not_ending.insert(atoms.begin(), atoms.end()); }
-    void executor::failure(const std::set<atom *> &atoms) {}
+    EXECUTOR_EXPORT void executor::dont_start_yet(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
+    EXECUTOR_EXPORT void executor::dont_end_yet(const std::set<atom *> &atoms) { not_ending.insert(atoms.begin(), atoms.end()); }
+    EXECUTOR_EXPORT void executor::failure(const std::set<atom *> &atoms) {}
 
     void executor::solution_found() { reset_timelines(); }
     void executor::inconsistent_problem()

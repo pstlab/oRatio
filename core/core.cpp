@@ -242,10 +242,10 @@ namespace ratio
             return new var_item(*this, tp, ov_th.new_var(lits, std::vector<var_value *>(vals.begin(), vals.end())));
     }
 
-    bool_expr core::negate(bool_expr var) noexcept { return new bool_item(*this, !var->l); }
-    bool_expr core::eq(bool_expr left, bool_expr right) noexcept { return new bool_item(*this, sat_cr.new_eq(left->l, right->l)); }
+    CORE_EXPORT bool_expr core::negate(bool_expr var) noexcept { return new bool_item(*this, !var->l); }
+    CORE_EXPORT bool_expr core::eq(bool_expr left, bool_expr right) noexcept { return new bool_item(*this, sat_cr.new_eq(left->l, right->l)); }
 
-    bool_expr core::conj(const std::vector<bool_expr> &exprs) noexcept
+    CORE_EXPORT bool_expr core::conj(const std::vector<bool_expr> &exprs) noexcept
     {
         std::vector<lit> lits;
         for (const auto &bex : exprs)
@@ -261,7 +261,7 @@ namespace ratio
         return new bool_item(*this, sat_cr.new_disj(lits));
     }
 
-    bool_expr core::exct_one(const std::vector<bool_expr> &exprs) noexcept
+    CORE_EXPORT bool_expr core::exct_one(const std::vector<bool_expr> &exprs) noexcept
     {
         std::vector<lit> lits;
         for (const auto &bex : exprs)
@@ -269,7 +269,7 @@ namespace ratio
         return new bool_item(*this, sat_cr.new_exct_one(lits));
     }
 
-    arith_expr core::add(const std::vector<arith_expr> &exprs) noexcept
+    CORE_EXPORT arith_expr core::add(const std::vector<arith_expr> &exprs) noexcept
     {
         assert(exprs.size() > 1);
         lin l;
@@ -278,7 +278,7 @@ namespace ratio
         return new arith_item(*this, get_type(exprs), l);
     }
 
-    arith_expr core::sub(const std::vector<arith_expr> &exprs) noexcept
+    CORE_EXPORT arith_expr core::sub(const std::vector<arith_expr> &exprs) noexcept
     {
         assert(exprs.size() > 1);
         lin l;
@@ -290,7 +290,7 @@ namespace ratio
         return new arith_item(*this, get_type(exprs), l);
     }
 
-    arith_expr core::mult(const std::vector<arith_expr> &exprs) noexcept
+    CORE_EXPORT arith_expr core::mult(const std::vector<arith_expr> &exprs) noexcept
     {
         assert(exprs.size() > 1);
         arith_expr ae = *std::find_if(exprs.begin(), exprs.end(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); });
@@ -305,7 +305,7 @@ namespace ratio
         return new arith_item(*this, get_type(exprs), l);
     }
 
-    arith_expr core::div(const std::vector<arith_expr> &exprs) noexcept
+    CORE_EXPORT arith_expr core::div(const std::vector<arith_expr> &exprs) noexcept
     {
         assert(exprs.size() > 1);
         assert(std::all_of(++exprs.begin(), exprs.end(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
@@ -319,37 +319,37 @@ namespace ratio
         return new arith_item(*this, get_type(exprs), exprs.at(0)->l / c);
     }
 
-    arith_expr core::minus(arith_expr ex) noexcept { return new arith_item(*this, ex->get_type(), -ex->l); }
+    CORE_EXPORT arith_expr core::minus(arith_expr ex) noexcept { return new arith_item(*this, ex->get_type(), -ex->l); }
 
-    bool_expr core::lt(arith_expr left, arith_expr right) noexcept
+    CORE_EXPORT bool_expr core::lt(arith_expr left, arith_expr right) noexcept
     {
         if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
             return new bool_item(*this, rdl_th.new_lt(left->l, right->l));
         else
             return new bool_item(*this, lra_th.new_lt(left->l, right->l));
     }
-    bool_expr core::leq(arith_expr left, arith_expr right) noexcept
+    CORE_EXPORT bool_expr core::leq(arith_expr left, arith_expr right) noexcept
     {
         if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
             return new bool_item(*this, rdl_th.new_leq(left->l, right->l));
         else
             return new bool_item(*this, lra_th.new_leq(left->l, right->l));
     }
-    bool_expr core::eq(arith_expr left, arith_expr right) noexcept
+    CORE_EXPORT bool_expr core::eq(arith_expr left, arith_expr right) noexcept
     {
         if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
             return new bool_item(*this, rdl_th.new_eq(left->l, right->l));
         else
             return new bool_item(*this, lra_th.new_eq(left->l, right->l));
     }
-    bool_expr core::geq(arith_expr left, arith_expr right) noexcept
+    CORE_EXPORT bool_expr core::geq(arith_expr left, arith_expr right) noexcept
     {
         if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
             return new bool_item(*this, rdl_th.new_geq(left->l, right->l));
         else
             return new bool_item(*this, lra_th.new_geq(left->l, right->l));
     }
-    bool_expr core::gt(arith_expr left, arith_expr right) noexcept
+    CORE_EXPORT bool_expr core::gt(arith_expr left, arith_expr right) noexcept
     {
         if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
             return new bool_item(*this, rdl_th.new_gt(left->l, right->l));
@@ -357,16 +357,16 @@ namespace ratio
             return new bool_item(*this, lra_th.new_gt(left->l, right->l));
     }
 
-    bool_expr core::eq(expr left, expr right) noexcept { return new bool_item(*this, left->new_eq(*right)); }
+    CORE_EXPORT bool_expr core::eq(expr left, expr right) noexcept { return new bool_item(*this, left->new_eq(*right)); }
 
-    void core::assert_facts(const std::vector<lit> &facts)
+    CORE_EXPORT void core::assert_facts(const std::vector<lit> &facts)
     {
         for (const auto &f : facts)
             if (!sat_cr.new_clause({!ni, f}))
                 throw unsolvable_exception();
     }
 
-    void core::assert_facts(const std::vector<bool_expr> &facts)
+    CORE_EXPORT void core::assert_facts(const std::vector<bool_expr> &facts)
     {
         for (const auto &f : facts)
             if (!sat_cr.new_clause({!ni, f->l}))

@@ -37,8 +37,8 @@ namespace ratio
     operator expr() const;
     CORE_EXPORT operator bool_expr() const;
     CORE_EXPORT operator arith_expr() const;
-    operator var_expr() const;
-    operator string_expr() const;
+    CORE_EXPORT operator var_expr() const;
+    CORE_EXPORT operator string_expr() const;
 
     inline bool operator==(const context &right) const noexcept { return ptr == right.ptr; }
     inline bool operator!=(const context &right) const noexcept { return !(*this == right); }
@@ -55,7 +55,7 @@ namespace ratio
     virtual ~expr() {}
 
     CORE_EXPORT item &operator*() const;
-    item *operator->() const;
+    CORE_EXPORT item *operator->() const;
   };
 
   class bool_expr : public expr

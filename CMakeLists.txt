@@ -16,6 +16,14 @@ option(BUILD_SERVER "Builds the server" OFF)
 
 option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
 
+if(BUILD_SERVER)
+    set(BUILD_JAVA_API ${BUILD_SERVER})
+endif()
+
+if(BUILD_JAVA_API)
+    set(BUILD_EXECUTOR ${BUILD_JAVA_API})
+endif()
+
 include(CTest)
 enable_testing()
 
@@ -57,7 +65,7 @@ if(VERBOSE_LOG)
     target_compile_definitions(core PUBLIC VERBOSE_LOG)
 endif()
 
-if(BUILD_EXECUTOR OR BUILD_JAVA_API OR BUILD_SERVER)
+if(BUILD_EXECUTOR OR BUILD_JAVA_API)
     message(STATUS "Building listeners..")
     target_compile_definitions(core PUBLIC BUILD_LISTENERS)
     target_compile_definitions(solver PUBLIC BUILD_LISTENERS)
