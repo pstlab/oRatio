@@ -416,7 +416,6 @@ namespace smt
         pivot(x_i, x_j);
     }
 
-#ifdef PARALLELIZE
     void lra_theory::pivot(const var x_i, const var x_j) noexcept
     {
         // the exiting row..
@@ -437,6 +436,7 @@ namespace smt
         std::unordered_set<row *> x_j_watches;
         std::swap(x_j_watches, t_watches[x_j]);
         for (const auto &r : x_j_watches)
+#ifdef PARALLELIZE
             sat.get_thread_pool().enqueue([this, x_j, expr, r] {
                 rational cc = r->l.vars[x_j];
                 r->l.vars.erase(x_j);
@@ -462,31 +462,7 @@ namespace smt
             });
         // we wait for all the rows to be updated..
         sat.get_thread_pool().join();
-
-        // we add a new row into the tableau..
-        new_row(x_j, expr);
-    }
 #else
-    void lra_theory::pivot(const var x_i, const var x_j) noexcept
-    {
-        // the exiting row..
-        row *ex_row = tableau[x_i];
-        lin expr = std::move(ex_row->l);
-        tableau.erase(x_i);
-        // we remove the row from the watches..
-        for (const auto &c : expr.vars)
-            t_watches[c.first].erase(ex_row);
-        delete ex_row;
-
-        const rational c = expr.vars[x_j];
-        expr.vars.erase(x_j);
-        expr /= -c;
-        expr.vars.emplace(x_i, rational::ONE / c);
-
-        // these are the rows in which x_j appears..
-        std::unordered_set<row *> x_j_watches;
-        std::swap(x_j_watches, t_watches[x_j]);
-        for (const auto &r : x_j_watches)
         { // 'r' is a row in which 'x_j' appears..
             rational cc = r->l.vars[x_j];
             r->l.vars.erase(x_j);
@@ -508,11 +484,10 @@ namespace smt
                 }
             r->l.known_term += expr.known_term * cc;
         }
-
+#endif
         // we add a new row into the tableau..
         new_row(x_j, expr);
     }
-#endif
 
     void lra_theory::new_row(const var &x, const lin &l) noexcept
     {
