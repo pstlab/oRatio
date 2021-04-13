@@ -51,7 +51,7 @@ if(BUILD_EXECUTOR)
     target_compile_definitions(solver PUBLIC BUILD_EXECUTOR)
 endif()
 
-message(STATUS "Build R.O.S. tools:       ${BUILD_ROS_TOOLS}")
+message(STATUS "Build ROS tools:          ${BUILD_ROS_TOOLS}")
 if(BUILD_ROS_TOOLS)
     add_subdirectory(executor/ros)
 endif()

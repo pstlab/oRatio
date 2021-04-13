@@ -9,6 +9,7 @@ using namespace ratio;
 
 void to_ros_msg(const predicate &pred)
 {
+    std::cout << "creating ROS message for predicate " << pred.get_name() << "..\n";
     std::ofstream msg_file;
     msg_file.open(pred.get_name() + ".msg");
     msg_file << "uint64 id\n\n";
@@ -17,9 +18,9 @@ void to_ros_msg(const predicate &pred)
     q.push(&pred);
     while (!q.empty())
     {
-        const type &c_pred = *q.front();
+        const predicate &c_pred = dynamic_cast<const predicate &>(*q.front());
         q.pop();
-        for (const auto &arg : pred.get_args())
+        for (const auto &arg : c_pred.get_args())
         {
             if (arg->get_type().get_name().compare(BOOL_KEYWORD) == 0)
                 msg_file << "bool " << arg->get_name() << "\n";
@@ -32,7 +33,7 @@ void to_ros_msg(const predicate &pred)
             else
                 msg_file << "string " << arg->get_name() << "\n";
         }
-        for (const auto &t : pred.get_supertypes())
+        for (const auto &t : c_pred.get_supertypes())
             if (all_preds.insert(t).second)
                 q.push(t);
     }
