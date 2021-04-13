@@ -45,7 +45,7 @@ int main(int argc, char const *argv[])
 {
     // the problem files..
     std::vector<std::string> prob_names;
-    for (int i = 1; i < argc - 1; i++)
+    for (int i = 1; i < argc; i++)
         prob_names.push_back(argv[i]);
 
     solver s;
