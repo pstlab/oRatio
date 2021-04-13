@@ -13,7 +13,13 @@ import it.cnr.istc.pst.oratio.GraphListener.State;
 public class Solver implements Scope, Env {
 
     static {
+        System.loadLibrary("smt");
+        System.loadLibrary("riddle");
+        System.loadLibrary("core");
+        System.loadLibrary("solver");
+        System.loadLibrary("executor");
         System.loadLibrary("solver-api");
+        System.loadLibrary("executor-api");
     }
     public static final String BOOL = "bool";
     public static final String INT = "int";
