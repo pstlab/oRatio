@@ -13,6 +13,7 @@ import it.cnr.istc.pst.oratio.GraphListener.State;
 public class Solver implements Scope, Env {
 
     static {
+        System.loadLibrary("json");
         System.loadLibrary("smt");
         System.loadLibrary("riddle");
         System.loadLibrary("core");
