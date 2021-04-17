@@ -95,7 +95,23 @@ public class Item implements Env {
         }
 
         public enum LBool {
-            False, True, Undefined
+            False {
+                @Override
+                public Boolean booleanValue() {
+                    return false;
+                }
+            },
+            True {
+                @Override
+                public Boolean booleanValue() {
+                    return true;
+                }
+            },
+            Undefined;
+
+            public Boolean booleanValue() {
+                return null;
+            }
         }
     }
 
