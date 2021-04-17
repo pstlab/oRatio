@@ -12,9 +12,9 @@ void to_ros_msg(const predicate &pred)
     std::cout << "creating ROS message for predicate " << pred.get_name() << "..\n";
     std::ofstream msg_file;
     msg_file.open(pred.get_name() + "Atom.msg");
-    msg_file << "std_msgs.msg:Uint64 id\n\n";
+    msg_file << "uint64 id\n\n";
     if (&pred.get_scope() != &pred.get_core())
-        msg_file << "std_msgs.msg:String " << TAU << "\n";
+        msg_file << "string " << TAU << "\n";
     std::unordered_set<const type *> all_preds;
     std::queue<const type *> q;
     q.push(&pred);
@@ -25,15 +25,15 @@ void to_ros_msg(const predicate &pred)
         for (const auto &arg : c_pred.get_args())
         {
             if (arg->get_type().get_name().compare(BOOL_KEYWORD) == 0)
-                msg_file << "std_msgs.msg:Bool " << arg->get_name() << "\n";
+                msg_file << "bool " << arg->get_name() << "\n";
             else if (arg->get_type().get_name().compare(INT_KEYWORD) == 0)
-                msg_file << "std_msgs.msg:Int64 " << arg->get_name() << "\n";
+                msg_file << "int64 " << arg->get_name() << "\n";
             else if (arg->get_type().get_name().compare(REAL_KEYWORD) == 0 || arg->get_type().get_name().compare(TP_KEYWORD) == 0)
-                msg_file << "std_msgs.msg:Float64 " << arg->get_name() << "\n";
+                msg_file << "float64 " << arg->get_name() << "\n";
             else if (arg->get_type().get_name().compare(STRING_KEYWORD) == 0)
-                msg_file << "std_msgs.msg:String " << arg->get_name() << "\n";
+                msg_file << "string " << arg->get_name() << "\n";
             else
-                msg_file << "std_msgs.msg:String " << arg->get_name() << "\n";
+                msg_file << "string " << arg->get_name() << "\n";
         }
         for (const auto &t : c_pred.get_supertypes())
             if (all_preds.insert(t).second)
@@ -43,7 +43,7 @@ void to_ros_msg(const predicate &pred)
     msg_file.close();
 
     msg_file.open(pred.get_name() + ".msg");
-    msg_file << pred.get_name() << "[]\n";
+    msg_file << pred.get_name() << "Atom[] atoms\n";
     msg_file.close();
 }
 
