@@ -844,10 +844,8 @@ namespace riddle
                     e = nullptr;
                     if (!match(LBRACE_ID))
                         error("expected '{'..");
-                    do
-                    {
+                    while (!match(RBRACE_ID))
                         stmnts.push_back(_statement());
-                    } while (!match(RBRACE_ID));
                     if (match(LBRACKET_ID))
                     {
                         e = _expression();
