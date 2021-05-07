@@ -136,7 +136,7 @@ export class Graph {
         const simulation = d3.forceSimulation(data.nodes)
             .force('link', d3.forceLink().id(d => d.id).distance(70))
             .force('charge', d3.forceManyBody().strength(-70))
-            .force('center', d3.forceCenter(graph_width / 2, graph_height / 2));
+            .force('center', d3.forceCenter(this.graph_width / 2, this.graph_height / 2));
 
         const l_group = this.graph_g.selectAll('line').data(data.links).join(
             enter => {
