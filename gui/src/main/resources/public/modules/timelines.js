@@ -78,6 +78,10 @@ export class Timelines {
     }
 
     update(data) {
+        this.timelines_x_scale.domain([0, data.horizon]);
+        this.timelines_axis_g.call(this.timelines_x_axis);
+        this.timelines_y_scale.domain(d3.range(data.timelines.length));
+
         this.timelines_g.selectAll('g.timeline').data(data.timelines, d => d.id).join(
             enter => {
                 const tl_g = enter.append('g').attr('class', 'timeline').attr('id', d => 'tl-' + d.id);
@@ -89,10 +93,10 @@ export class Timelines {
                 update.select('rect').transition().duration(200).attr('width', this.timelines_x_scale(data.horizon) + 20);
                 return update;
             });
-        data.timelines.forEach((tl, i) => this.updateTimeline(tl, i));
+        data.timelines.forEach((tl, i) => this.updateTimeline(data, tl, i));
     }
 
-    updateTimeline(tl, i) {
+    updateTimeline(data, tl, i) {
         switch (tl.type) {
             case 'state-variable':
                 d3.select('#tl-' + i).selectAll('g').data(tl.values, d => d.id).join(
@@ -131,11 +135,11 @@ export class Timelines {
                 rr_g.selectAll('line').data([tl.capacity]).join(
                     enter => {
                         const line_g = enter.append('line').attr('stroke-width', 2).attr('stroke-opacity', 0.8).attr('stroke-linecap', 'round').attr('stroke', 'darkslategray');
-                        line_g.attr('x1', this.timelines_x_scale(0)).attr('y1', d => rr_y_scale(d)).attr('x2', this.timelines_x_scale(this.horizon)).attr('y2', d => rr_y_scale(d));
+                        line_g.attr('x1', this.timelines_x_scale(0)).attr('y1', d => rr_y_scale(d)).attr('x2', this.timelines_x_scale(data.horizon)).attr('y2', d => rr_y_scale(d));
                         return line_g;
                     },
                     update => {
-                        update.transition().duration(200).attr('y1', d => rr_y_scale(d)).attr('x2', this.timelines_x_scale(this.horizon)).attr('y2', d => rr_y_scale(d));
+                        update.transition().duration(200).attr('y1', d => rr_y_scale(d)).attr('x2', this.timelines_x_scale(data.horizon)).attr('y2', d => rr_y_scale(d));
                         return update;
                     }
                 );

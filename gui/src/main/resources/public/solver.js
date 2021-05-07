@@ -92,7 +92,7 @@ ws.onmessage = msg => {
             break;
         case 'tick':
             timelines_data.tick(c_msg.current_time.num / c_msg.current_time.den);
-            timelines_chart.update(timelines_data);
+            timelines_chart.updateTime(timelines_data);
             break;
         case 'starting_atoms':
             timelines_data.starting_atoms(c_msg);

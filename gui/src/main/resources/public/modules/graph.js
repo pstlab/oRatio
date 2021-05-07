@@ -110,8 +110,8 @@ export class Graph {
         this.graph_g = svg.append('g');
 
         const graph_box = svg.node().getBoundingClientRect();
-        this.graph_width = graph_box.width;
-        this.graph_height = graph_box.height;
+        const graph_width = graph_box.width;
+        const graph_height = graph_box.height;
 
         const graph_zoom = d3.zoom().on('zoom', event => this.graph_g.attr('transform', event.transform));
         svg.call(graph_zoom);
@@ -129,14 +129,16 @@ export class Graph {
             .attr('stroke', 'dimgray')
             .attr('fill', 'dimgray');
 
+        this.simulation = d3.forceSimulation()
+            .force('link', d3.forceLink().id(d => d.id).distance(70))
+            .force('charge', d3.forceManyBody().strength(-70))
+            .force('center', d3.forceCenter(graph_width / 2, graph_height / 2));
+
         this.tooltip = tooltip;
     }
 
     update(data) {
-        const simulation = d3.forceSimulation(data.nodes)
-            .force('link', d3.forceLink().id(d => d.id).distance(70))
-            .force('charge', d3.forceManyBody().strength(-70))
-            .force('center', d3.forceCenter(this.graph_width / 2, this.graph_height / 2));
+        data.nodes.forEach(n => n.graph = this);
 
         const l_group = this.graph_g.selectAll('line').data(data.links).join(
             enter => {
@@ -166,7 +168,7 @@ export class Graph {
             }
         );
 
-        simulation.nodes(data.nodes).on('tick', () => {
+        this.simulation.nodes(data.nodes).on('tick', () => {
             n_group.attr('transform', d => `translate(${d.x}, ${d.y})`);
             l_group.each(l => {
                 let src = intersection({ x: l.source.x - 15, y: l.source.y - 5 }, { x: l.source.x - 15, y: l.source.y + 5 }, { x: l.source.x, y: l.source.y }, { x: l.target.x, y: l.target.y });
@@ -196,10 +198,10 @@ export class Graph {
                 }
             }).attr('x1', d => d.x1).attr('y1', d => d.y1).attr('x2', d => d.x2).attr('y2', d => d.y2).attr('marker-end', 'url(#triangle)');
         });
-        simulation.force('link').links(data.links);
+        this.simulation.force('link').links(data.links);
 
-        simulation.restart();
-        simulation.alpha(0.3);
+        this.simulation.restart();
+        this.simulation.alpha(0.3);
     }
 }
 
