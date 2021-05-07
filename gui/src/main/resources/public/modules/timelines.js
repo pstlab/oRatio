@@ -1,8 +1,41 @@
+export class TimelinesData {
+
+    constructor() {
+        this.timelines = [];
+    }
+
+    reset(timelines) {
+        if (timelines) {
+            this.timelines.splice(0, this.timelines.length - timelines.length);
+            timelines.forEach((tl, i) => {
+                this.timelines[i] = tl;
+                this.timelines[i].id = i;
+                this.timelines[i].values.forEach((v, j) => v.id = j);
+                if (this.timelines[i].type === 'reusable-resource' && this.timelines[i].values.length) this.timelines[i].values.push({ usage: 0, from: this.timelines[i].values[this.timelines[i].values.length - 1].to, id: this.timelines[i].values.length });
+                if (this.timelines[i].type === 'agent') {
+                    const ends = [0];
+                    this.timelines[i].values.forEach(v => v.y = values_y(v.from, v.from === v.to ? v.from + 0.1 : v.to, ends));
+                }
+            });
+        }
+        if (this.timelines.length)
+            this.horizon = Math.max(d3.max(this.timelines, d => d.horizon), 1);
+    }
+
+    tick(time) {
+        this.current_time = time;
+    }
+
+    starting_atoms(atoms) {
+    }
+
+    ending_atoms(atoms) {
+    }
+}
+
 export class Timelines {
 
     constructor(svg, tooltip) {
-        this.timelines = [];
-
         this.sv_ok_lg = svg.append('defs').append('linearGradient').attr('id', 'sv-ok-lg').attr('x1', '0%').attr('x2', '0%').attr('y1', '0%').attr('y2', '100%');
         this.sv_ok_lg.append('stop').attr('offset', '0%').style('stop-color', 'palegreen').style('stop-opacity', 1);
         this.sv_ok_lg.append('stop').attr('offset', '20%').style('stop-color', 'ivory').style('stop-opacity', 1);
@@ -44,57 +77,19 @@ export class Timelines {
         this.tooltip = tooltip;
     }
 
-    reset(tls) {
-        if (tls.timelines) {
-            this.timelines.splice(0, this.timelines.length - tls.timelines.length);
-            tls.timelines.forEach((tl, i) => {
-                console.log(tl);
-                this.timelines[i] = tl;
-                this.timelines[i].id = i;
-                this.timelines[i].values.forEach((v, j) => v.id = j);
-                if (this.timelines[i].type === 'reusable-resource' && this.timelines[i].values.length) this.timelines[i].values.push({ usage: 0, from: this.timelines[i].values[this.timelines[i].values.length - 1].to, id: this.timelines[i].values.length });
-                if (this.timelines[i].type === 'agent') {
-                    const ends = [0];
-                    this.timelines[i].values.forEach(v => v.y = values_y(v.from, v.from === v.to ? v.from + 0.1 : v.to, ends));
-                }
-            });
-        }
-        if (this.timelines.length) {
-            this.horizon = Math.max(d3.max(this.timelines, d => d.horizon), 1);
-            this.timelines_x_scale.domain([0, this.horizon]);
-            this.timelines_y_scale.domain(d3.range(this.timelines.length));
-            this.update();
-        }
-        this.timelines_axis_g.call(this.timelines_x_axis);
-    }
-
-    tick(time) {
-        this.current_time = time;
-        if (this.timelines.length)
-            this.updateTime();
-    }
-
-    starting_atoms(atoms) {
-        console.log('starting atoms: ' + atoms.atoms);
-    }
-
-    ending_atoms(atoms) {
-        console.log('ending atoms: ' + atoms.atoms);
-    }
-
-    update() {
-        this.timelines_g.selectAll('g.timeline').data(this.timelines, d => d.id).join(
+    update(data) {
+        this.timelines_g.selectAll('g.timeline').data(data.timelines, d => d.id).join(
             enter => {
                 const tl_g = enter.append('g').attr('class', 'timeline').attr('id', d => 'tl-' + d.id);
-                tl_g.append('rect').attr('x', -10).attr('y', d => this.timelines_y_scale(this.timelines.indexOf(d))).attr('width', this.timelines_x_scale(this.horizon) + 20).attr('height', this.timelines_y_scale.bandwidth()).style('fill', 'floralwhite');
-                tl_g.append('text').attr('x', 0).attr('y', d => this.timelines_y_scale(this.timelines.indexOf(d)) + this.timelines_y_scale.bandwidth() * 0.08).text(d => d.name).style('text-anchor', 'start');
+                tl_g.append('rect').attr('x', -10).attr('y', d => this.timelines_y_scale(data.timelines.indexOf(d))).attr('width', this.timelines_x_scale(data.horizon) + 20).attr('height', this.timelines_y_scale.bandwidth()).style('fill', 'floralwhite');
+                tl_g.append('text').attr('x', 0).attr('y', d => this.timelines_y_scale(data.timelines.indexOf(d)) + this.timelines_y_scale.bandwidth() * 0.08).text(d => d.name).style('text-anchor', 'start');
                 return tl_g;
             },
             update => {
-                update.select('rect').transition().duration(200).attr('width', this.timelines_x_scale(this.horizon) + 20);
+                update.select('rect').transition().duration(200).attr('width', this.timelines_x_scale(data.horizon) + 20);
                 return update;
             });
-        this.timelines.forEach((tl, i) => this.updateTimeline(tl, i));
+        data.timelines.forEach((tl, i) => this.updateTimeline(tl, i));
     }
 
     updateTimeline(tl, i) {
@@ -168,17 +163,18 @@ export class Timelines {
         }
     }
 
-    updateTime() {
-        this.timelines_g.selectAll('g.time').data([this.current_time]).join(
-            enter => {
-                const t_g = enter.append('g').attr('class', 'time');
-                t_g.append('line').attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke', 'lavender').attr('stroke-opacity', 0.4).attr('x1', this.timelines_x_scale(this.current_time)).attr('y1', 0).attr('x2', this.timelines_x_scale(this.current_time)).attr('y2', this.timelines_height);
-                return t_g;
-            },
-            update => {
-                update.select('line').transition().duration(200).attr('x1', this.timelines_x_scale(this.current_time)).attr('x2', this.timelines_x_scale(this.current_time));
-                return update;
-            });
+    updateTime(data) {
+        if (data.timelines.length)
+            this.timelines_g.selectAll('g.time').data([data.current_time]).join(
+                enter => {
+                    const t_g = enter.append('g').attr('class', 'time');
+                    t_g.append('line').attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke', 'lavender').attr('stroke-opacity', 0.4).attr('x1', this.timelines_x_scale(data.current_time)).attr('y1', 0).attr('x2', this.timelines_x_scale(data.current_time)).attr('y2', this.timelines_height);
+                    return t_g;
+                },
+                update => {
+                    update.select('line').transition().duration(200).attr('x1', this.timelines_x_scale(data.current_time)).attr('x2', this.timelines_x_scale(data.current_time));
+                    return update;
+                });
     }
 }
 

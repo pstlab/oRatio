@@ -1,16 +1,117 @@
 const color_interpolator = d3.scaleSequential(d3.interpolateRdYlGn).domain([15, 0]);
 
-export class Graph {
+export class GraphData {
 
-    constructor(svg, tooltip) {
+    constructor() {
         this.nodes = [];
         this.node_map = new Map();
         this.links = [];
+    }
 
+    reset(flaws, resolvers) {
+        this.nodes.length = 0;
+        this.links.length = 0;
+        this.node_map.clear();
+
+        flaws.forEach(f => {
+            f.type = 'flaw';
+            f.graph = this;
+            this.nodes.push(f);
+            this.node_map.set(f.id, f);
+            f.causes.forEach(c => this.links.push({ source: f.id, target: c, state: f.state }));
+        });
+        resolvers.forEach(r => {
+            r.type = 'resolver';
+            r.graph = this;
+            this.nodes.push(r);
+            this.node_map.set(r.id, r);
+            this.links.push({ source: r.id, target: r.effect, state: r.state });
+            r.preconditions.filter(pre => !this.links.find(l => l.source === pre && l.target === r.id)).forEach(pre => this.links.push({ source: pre, target: r.id, state: this.node_map.get(pre).state }));
+        });
+
+        this.nodes.filter(n => n.type === 'resolver').forEach(r => this.update_resolver_cost(r));
+    }
+
+    solution_found() {
+        if (this.c_flaw) this.c_flaw.current = false;
+        if (this.c_resolver) { this.c_resolver.current = false; this.c_resolver = undefined; }
+    }
+
+    flaw_created(flaw) {
+        flaw.type = 'flaw';
+        flaw.graph = this;
+        this.nodes.push(flaw);
+        this.node_map.set(flaw.id, flaw);
+        flaw.causes.forEach(c => this.links.push({ source: flaw.id, target: c, state: flaw.state }));
+        flaw.causes.forEach(c => this.update_resolver_cost(this.node_map.get(c)));
+    }
+
+    flaw_state_changed(change) {
+        this.node_map.get(change.id).state = change.state;
+        this.links.filter(l => l.source.id === change.id).forEach(l => l.state = change.state);
+    }
+
+    flaw_cost_changed(change) {
+        const f_node = this.node_map.get(change.id);
+        f_node.cost = change.cost;
+        this.links.filter(l => l.source.id == f_node.id).forEach(out_link => this.update_resolver_cost(out_link.target));
+    }
+
+    flaw_position_changed(change) {
+        this.node_map.get(change.id).position = change.position;
+    }
+
+    current_flaw(current) {
+        if (this.c_flaw) this.c_flaw.current = false;
+        if (this.c_resolver) { this.c_resolver.current = false; this.c_resolver = undefined; }
+        const f_node = this.node_map.get(current.id);
+        f_node.current = true;
+        this.c_flaw = f_node;
+    }
+
+    resolver_created(resolver) {
+        resolver.type = 'resolver';
+        resolver.graph = this;
+        this.nodes.push(resolver);
+        this.node_map.set(resolver.id, resolver);
+        this.links.push({ source: resolver.id, target: resolver.effect, state: resolver.state });
+    }
+
+    resolver_state_changed(change) {
+        this.node_map.get(change.id).state = change.state;
+        this.links.filter(l => l.source.id === change.id || l.target.id === change.id).forEach(l => l.state = change.state);
+    }
+
+    current_resolver(current) {
+        if (this.c_resolver) this.c_resolver.current = false;
+        const r_node = this.node_map.get(current.id);
+        r_node.current = true;
+        this.c_resolver = r_node;
+    }
+
+    causal_link_added(link) {
+        this.links.push({ source: link.flaw, target: link.resolver, state: this.node_map.get(link.flaw).state });
+        this.update_resolver_cost(this.node_map.get(link.resolver));
+    }
+
+    update_resolver_cost(resolver) {
+        let c_cost = Number.NEGATIVE_INFINITY;
+        this.links.filter(l => l.target.id == resolver.id).forEach(in_link => {
+            if (c_cost < in_link.source.cost)
+                c_cost = in_link.source.cost;
+        });
+        resolver.cost = c_cost == Number.NEGATIVE_INFINITY ? resolver.intrinsic_cost : resolver.intrinsic_cost + c_cost;
+    }
+}
+
+export class Graph {
+
+    constructor(svg, tooltip) {
         this.graph_g = svg.append('g');
 
         const graph_box = svg.node().getBoundingClientRect();
-        const graph_width = graph_box.width, graph_height = graph_box.height;
+        this.graph_width = graph_box.width;
+        this.graph_height = graph_box.height;
 
         const graph_zoom = d3.zoom().on('zoom', event => this.graph_g.attr('transform', event.transform));
         svg.call(graph_zoom);
@@ -28,125 +129,16 @@ export class Graph {
             .attr('stroke', 'dimgray')
             .attr('fill', 'dimgray');
 
-        this.simulation = d3.forceSimulation(this.nodes)
+        this.tooltip = tooltip;
+    }
+
+    update(data) {
+        const simulation = d3.forceSimulation(data.nodes)
             .force('link', d3.forceLink().id(d => d.id).distance(70))
             .force('charge', d3.forceManyBody().strength(-70))
             .force('center', d3.forceCenter(graph_width / 2, graph_height / 2));
 
-        this.tooltip = tooltip;
-    }
-
-    reset(graph) {
-        this.nodes.length = 0;
-        this.links.length = 0;
-        this.node_map.clear();
-
-        graph.flaws.forEach(f => {
-            f.type = 'flaw';
-            f.graph = this;
-            this.nodes.push(f);
-            this.node_map.set(f.id, f);
-            f.causes.forEach(c => this.links.push({ source: f.id, target: c, state: f.state }));
-        });
-        graph.resolvers.forEach(r => {
-            r.type = 'resolver';
-            r.graph = this;
-            this.nodes.push(r);
-            this.node_map.set(r.id, r);
-            this.links.push({ source: r.id, target: r.effect, state: r.state });
-            r.preconditions.filter(pre => !this.links.find(l => l.source === pre && l.target === r.id)).forEach(pre => this.links.push({ source: pre, target: r.id, state: this.node_map.get(pre).state }));
-        });
-
-        this.update();
-        this.nodes.filter(n => n.type === 'resolver').forEach(r => this.update_resolver_cost(r));
-        this.update();
-    }
-
-    solution_found() {
-        if (this.c_flaw) this.c_flaw.current = false;
-        if (this.c_resolver) { this.c_resolver.current = false; this.c_resolver = undefined; }
-        this.update();
-    }
-
-    flaw_created(flaw) {
-        flaw.type = 'flaw';
-        flaw.graph = this;
-        this.nodes.push(flaw);
-        this.node_map.set(flaw.id, flaw);
-        flaw.causes.forEach(c => this.links.push({ source: flaw.id, target: c, state: flaw.state }));
-        this.update();
-        flaw.causes.forEach(c => this.update_resolver_cost(this.node_map.get(c)));
-        this.update();
-    }
-
-    flaw_state_changed(change) {
-        this.node_map.get(change.id).state = change.state;
-        this.links.filter(l => l.source.id === change.id).forEach(l => l.state = change.state);
-        this.update();
-    }
-
-    flaw_cost_changed(change) {
-        const f_node = this.node_map.get(change.id);
-        f_node.cost = change.cost;
-        this.links.filter(l => l.source.id == f_node.id).forEach(out_link => this.update_resolver_cost(out_link.target));
-        this.update();
-    }
-
-    flaw_position_changed(change) {
-        this.node_map.get(change.id).position = change.position;
-        this.update();
-    }
-
-    current_flaw(current) {
-        if (this.c_flaw) this.c_flaw.current = false;
-        if (this.c_resolver) { this.c_resolver.current = false; this.c_resolver = undefined; }
-        const f_node = this.node_map.get(current.id);
-        f_node.current = true;
-        this.c_flaw = f_node;
-        this.update();
-    }
-
-    resolver_created(resolver) {
-        resolver.type = 'resolver';
-        resolver.graph = this;
-        this.nodes.push(resolver);
-        this.node_map.set(resolver.id, resolver);
-        this.links.push({ source: resolver.id, target: resolver.effect, state: resolver.state });
-        this.update();
-    }
-
-    resolver_state_changed(change) {
-        this.node_map.get(change.id).state = change.state;
-        this.links.filter(l => l.source.id === change.id || l.target.id === change.id).forEach(l => l.state = change.state);
-        this.update();
-    }
-
-    current_resolver(current) {
-        if (this.c_resolver) this.c_resolver.current = false;
-        const r_node = this.node_map.get(current.id);
-        r_node.current = true;
-        this.c_resolver = r_node;
-        this.update();
-    }
-
-    causal_link_added(link) {
-        this.links.push({ source: link.flaw, target: link.resolver, state: this.node_map.get(link.flaw).state });
-        this.update();
-        this.update_resolver_cost(this.node_map.get(link.resolver));
-        this.update();
-    }
-
-    update_resolver_cost(resolver) {
-        let c_cost = Number.NEGATIVE_INFINITY;
-        this.links.filter(l => l.target.id == resolver.id).forEach(in_link => {
-            if (c_cost < in_link.source.cost)
-                c_cost = in_link.source.cost;
-        });
-        resolver.cost = c_cost == Number.NEGATIVE_INFINITY ? resolver.intrinsic_cost : resolver.intrinsic_cost + c_cost;
-    }
-
-    update() {
-        const l_group = this.graph_g.selectAll('line').data(this.links).join(
+        const l_group = this.graph_g.selectAll('line').data(data.links).join(
             enter => {
                 return enter.append('line').attr('stroke', 'dimgray').style('stroke-dasharray', d => stroke_dasharray(d));
             },
@@ -155,7 +147,7 @@ export class Graph {
                 return update;
             }
         );
-        const n_group = this.graph_g.selectAll('g').data(this.nodes, d => d.id).join(
+        const n_group = this.graph_g.selectAll('g').data(data.nodes, d => d.id).join(
             enter => {
                 const g = enter.append('g').attr('cursor', 'grab');
                 g.append('rect').attr('width', 30).attr('x', -15).attr('height', 10).attr('y', -5).attr('rx', d => radius(d)).attr('ry', d => radius(d)).style('fill', d => node_color(d)).style('fill-opacity', d => node_opacity(d)).style('stroke-dasharray', d => stroke_dasharray(d)).style('opacity', d => node_opacity(d)).transition().duration(500).style('stroke', d => stroke(d)).style('stroke-width', d => stroke_width(d));
@@ -174,7 +166,7 @@ export class Graph {
             }
         );
 
-        this.simulation.nodes(this.nodes).on('tick', () => {
+        simulation.nodes(data.nodes).on('tick', () => {
             n_group.attr('transform', d => `translate(${d.x}, ${d.y})`);
             l_group.each(l => {
                 let src = intersection({ x: l.source.x - 15, y: l.source.y - 5 }, { x: l.source.x - 15, y: l.source.y + 5 }, { x: l.source.x, y: l.source.y }, { x: l.target.x, y: l.target.y });
@@ -204,10 +196,10 @@ export class Graph {
                 }
             }).attr('x1', d => d.x1).attr('y1', d => d.y1).attr('x2', d => d.x2).attr('y2', d => d.y2).attr('marker-end', 'url(#triangle)');
         });
-        this.simulation.force('link').links(this.links);
+        simulation.force('link').links(data.links);
 
-        this.simulation.restart();
-        this.simulation.alpha(0.3);
+        simulation.restart();
+        simulation.alpha(0.3);
     }
 }
 

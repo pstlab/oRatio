@@ -1,11 +1,13 @@
-import { Graph } from "./modules/graph.js";
-import { Timelines } from "./modules/timelines.js";
+import { Graph, GraphData } from "./modules/graph.js";
+import { Timelines, TimelinesData } from "./modules/timelines.js";
 
 document.querySelector('#tick').addEventListener('click', () => ws.send("tick"));
 
 const tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
 
-const timelines = new Timelines(d3.select('#timelines').append('svg'), tooltip);
+const timelines_data = new TimelinesData();
+const timelines_chart = new Timelines(d3.select('#timelines').append('svg'), tooltip);
+const graph_data = new GraphData();
 const graph = new Graph(d3.select('#graph').append('svg'), tooltip);
 
 const ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/solver');
@@ -25,14 +27,16 @@ ws.onmessage = msg => {
                 r.intrinsic_cost = r.cost.num / r.cost.den;
                 r.cost = r.intrinsic_cost;
             });
-            graph.reset(c_msg);
+            graph_data.reset(c_msg.flaws, c_msg.resolvers);
+            graph.update(graph_data);
             break;
         case 'started_solving':
             console.log("solving the problem..");
             break;
         case 'solution_found':
             console.log("hurray!! we have found a solution..");
-            graph.solution_found();
+            graph_data.solution_found();
+            graph.update(graph_data);
             break;
         case 'inconsistent_problem':
             console.log("unsolvable problem..");
@@ -43,47 +47,58 @@ ws.onmessage = msg => {
                 c_msg.cost = (c_msg.cost.num / c_msg.cost.den);
             else
                 c_msg.cost = Number.POSITIVE_INFINITY;
-            graph.flaw_created(c_msg);
+            graph_data.flaw_created(c_msg);
+            graph.update(graph_data);
             break;
         case 'flaw_state_changed':
-            graph.flaw_state_changed(c_msg);
+            graph_data.flaw_state_changed(c_msg);
+            graph.update(graph_data);
             break;
         case 'flaw_cost_changed':
             c_msg.cost = c_msg.cost.num / c_msg.cost.den;
-            graph.flaw_cost_changed(c_msg);
+            graph_data.flaw_cost_changed(c_msg);
+            graph.update(graph_data);
             break;
         case 'flaw_position_changed':
-            graph.flaw_position_changed(c_msg);
+            graph_data.flaw_position_changed(c_msg);
+            graph.update(graph_data);
             break;
         case 'current_flaw':
-            graph.current_flaw(c_msg);
+            graph_data.current_flaw(c_msg);
+            graph.update(graph_data);
             break;
         case 'resolver_created':
             c_msg.label = JSON.parse(c_msg.label);
             c_msg.intrinsic_cost = c_msg.cost.num / c_msg.cost.den;
             c_msg.cost = c_msg.intrinsic_cost;
-            graph.resolver_created(c_msg);
+            graph_data.resolver_created(c_msg);
+            graph.update(graph_data);
             break;
         case 'resolver_state_changed':
-            graph.resolver_state_changed(c_msg);
+            graph_data.resolver_state_changed(c_msg);
+            graph.update(graph_data);
             break;
         case 'current_resolver':
-            graph.current_resolver(c_msg);
+            graph_data.current_resolver(c_msg);
+            graph.update(graph_data);
             break;
         case 'causal_link_added':
-            graph.causal_link_added(c_msg);
+            graph_data.causal_link_added(c_msg);
+            graph.update(graph_data);
             break;
         case 'timelines':
-            timelines.reset(c_msg);
+            timelines_data.reset(c_msg.timelines);
+            timelines_chart.update(timelines_data);
             break;
         case 'tick':
-            timelines.tick(c_msg.current_time.num / c_msg.current_time.den);
+            timelines_data.tick(c_msg.current_time.num / c_msg.current_time.den);
+            timelines_chart.update(timelines_data);
             break;
         case 'starting_atoms':
-            timelines.starting_atoms(c_msg);
+            timelines_data.starting_atoms(c_msg);
             break;
         case 'ending_atoms':
-            timelines.ending_atoms(c_msg);
+            timelines_data.ending_atoms(c_msg);
             break;
         default:
             console.error('cannot handle message type ' + c_msg.message_type);
