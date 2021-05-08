@@ -2,6 +2,7 @@ export class TimelinesData {
 
     constructor() {
         this.timelines = [];
+        this.horizon = 1;
     }
 
     reset(timelines) {
@@ -91,6 +92,7 @@ export class Timelines {
             },
             update => {
                 update.select('rect').transition().duration(200).attr('width', this.timelines_x_scale(data.horizon) + 20);
+                update.select('text').text(d => d.name);
                 return update;
             });
         data.timelines.forEach((tl, i) => this.updateTimeline(data, tl, i));
