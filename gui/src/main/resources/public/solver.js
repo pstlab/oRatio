@@ -1,14 +1,12 @@
-import { Graph, GraphData } from "./modules/graph.js";
-import { Timelines, TimelinesData } from "./modules/timelines.js";
+import { Graph, GraphData } from './modules/graph.js';
+import { Timelines, TimelinesData } from './modules/timelines.js';
 
-document.querySelector('#tick').addEventListener('click', () => ws.send("tick"));
-
-const tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+document.querySelector('#tick').addEventListener('click', () => ws.send('tick'));
 
 const timelines_data = new TimelinesData();
-const timelines_chart = new Timelines(d3.select('#timelines').append('svg'), tooltip);
+const timelines_chart = new Timelines();
 const graph_data = new GraphData();
-const graph = new Graph(d3.select('#graph').append('svg'), tooltip);
+const graph = new Graph();
 
 const ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/solver');
 ws.onmessage = msg => {
@@ -31,15 +29,15 @@ ws.onmessage = msg => {
             graph.update(graph_data);
             break;
         case 'started_solving':
-            console.log("solving the problem..");
+            console.log('solving the problem..');
             break;
         case 'solution_found':
-            console.log("hurray!! we have found a solution..");
+            console.log('hurray!! we have found a solution..');
             graph_data.solution_found();
             graph.update(graph_data);
             break;
         case 'inconsistent_problem':
-            console.log("unsolvable problem..");
+            console.log('unsolvable problem..');
             break;
         case 'flaw_created':
             c_msg.label = JSON.parse(c_msg.label);

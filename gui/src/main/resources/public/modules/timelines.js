@@ -36,7 +36,9 @@ export class TimelinesData {
 
 export class Timelines {
 
-    constructor(svg, tooltip) {
+    constructor(timelines_id = 'timelines', width = window.innerWidth, height = window.innerHeight) {
+        const svg = d3.select('#' + timelines_id).append('svg').attr('viewBox', '0 0 ' + width + ' ' + height);
+
         this.sv_ok_lg = svg.append('defs').append('linearGradient').attr('id', 'sv-ok-lg').attr('x1', '0%').attr('x2', '0%').attr('y1', '0%').attr('y2', '100%');
         this.sv_ok_lg.append('stop').attr('offset', '0%').style('stop-color', 'palegreen').style('stop-opacity', 1);
         this.sv_ok_lg.append('stop').attr('offset', '20%').style('stop-color', 'ivory').style('stop-opacity', 1);
@@ -59,11 +61,9 @@ export class Timelines {
 
         this.timelines_g = svg.append('g');
 
-        const timelines_box = svg.node().getBoundingClientRect();
-        const timelines_width = timelines_box.width;
-        this.timelines_height = timelines_box.height;
+        this.timelines_height = height;
 
-        this.timelines_x_scale = d3.scaleLinear().range([0, timelines_width]);
+        this.timelines_x_scale = d3.scaleLinear().range([0, width]);
         this.timelines_y_scale = d3.scaleBand().rangeRound([0, this.timelines_height]).padding(0.1);
 
         this.timelines_axis_g = svg.append('g');
@@ -75,7 +75,7 @@ export class Timelines {
         });
         svg.call(timelines_zoom);
 
-        this.tooltip = tooltip;
+        this.tooltip = d3.select('.tooltip');
     }
 
     update(data) {

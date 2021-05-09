@@ -106,12 +106,10 @@ export class GraphData {
 
 export class Graph {
 
-    constructor(svg, tooltip) {
-        this.graph_g = svg.append('g');
+    constructor(graph_id = 'graph', width = window.innerWidth, height = window.innerHeight) {
+        const svg = d3.select('#' + graph_id).append('svg').attr('viewBox', '0 0 ' + width + ' ' + height);
 
-        const graph_box = svg.node().getBoundingClientRect();
-        const graph_width = graph_box.width;
-        const graph_height = graph_box.height;
+        this.graph_g = svg.append('g');
 
         const graph_zoom = d3.zoom().on('zoom', event => this.graph_g.attr('transform', event.transform));
         svg.call(graph_zoom);
@@ -132,9 +130,9 @@ export class Graph {
         this.simulation = d3.forceSimulation()
             .force('link', d3.forceLink().id(d => d.id).distance(70))
             .force('charge', d3.forceManyBody().strength(-70))
-            .force('center', d3.forceCenter(graph_width / 2, graph_height / 2));
+            .force('center', d3.forceCenter(width / 2, height / 2));
 
-        this.tooltip = tooltip;
+        this.tooltip = d3.select('.tooltip');
     }
 
     update(data) {
