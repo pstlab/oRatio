@@ -13,7 +13,7 @@ namespace ratio
 
     expr env::get(const std::string &name) const
     {
-        if (const auto at_xpr = exprs.find(name); at_xpr != exprs.end())
+        if (const auto at_xpr = exprs.find(name); at_xpr != exprs.cend())
             return at_xpr->second;
 
         // if not here, check any enclosing environment..

@@ -71,7 +71,7 @@ namespace ratio
     {
         assert(!instances.empty());
         if (instances.size() == 1)
-            return *instances.begin();
+            return *instances.cbegin();
         else
         {
             std::vector<item *> c_items;
@@ -135,7 +135,7 @@ namespace ratio
 
     const constructor &type::get_constructor(const std::vector<const type *> &ts) const
     {
-        assert(std::none_of(ts.begin(), ts.end(), [](const type *t) { return t == nullptr; }));
+        assert(std::none_of(ts.cbegin(), ts.cend(), [](const type *t) { return t == nullptr; }));
         bool found = false;
         for (const auto &cnstr : constructors)
             if (cnstr->args.size() == ts.size())
@@ -156,7 +156,7 @@ namespace ratio
 
     CORE_EXPORT const field &type::get_field(const std::string &f_name) const
     {
-        if (const auto at_f = fields.find(f_name); at_f != fields.end())
+        if (const auto at_f = fields.find(f_name); at_f != fields.cend())
             return *at_f->second;
 
         // if not here, check any enclosing scope
@@ -184,7 +184,7 @@ namespace ratio
     CORE_EXPORT const method &type::get_method(const std::string &m_name, const std::vector<const type *> &ts) const
     {
         const auto at_m = methods.find(m_name);
-        if (at_m != methods.end())
+        if (at_m != methods.cend())
         {
             bool found = false;
             for (const auto &mthd : at_m->second)
@@ -228,7 +228,7 @@ namespace ratio
 
     CORE_EXPORT type &type::get_type(const std::string &t_name) const
     {
-        if (const auto at_tp = types.find(t_name); at_tp != types.end())
+        if (const auto at_tp = types.find(t_name); at_tp != types.cend())
             return *at_tp->second;
 
         // if not here, check any enclosing scope
@@ -257,7 +257,7 @@ namespace ratio
 
     CORE_EXPORT predicate &type::get_predicate(const std::string &p_name) const
     {
-        if (const auto at_p = predicates.find(p_name); at_p != predicates.end())
+        if (const auto at_p = predicates.find(p_name); at_p != predicates.cend())
             return *at_p->second;
 
         // if not here, check any enclosing scope

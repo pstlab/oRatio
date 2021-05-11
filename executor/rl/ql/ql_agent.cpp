@@ -11,7 +11,7 @@ namespace rl
     size_t ql_agent::select_best_action() noexcept
     {
         auto it_a = q_table.find(env.get_state());
-        if (it_a == q_table.end())
+        if (it_a == q_table.cend())
             it_a = q_table.emplace(env.get_state(), std::vector<double>(env.get_action_dim(), 0)).first;
         size_t best_action = 0;
         double q = -std::numeric_limits<double>::infinity();
@@ -29,7 +29,7 @@ namespace rl
     size_t ql_agent::select_softmax_action(const double &t) noexcept
     {
         auto it_a = q_table.find(env.get_state());
-        if (it_a == q_table.end())
+        if (it_a == q_table.cend())
             it_a = q_table.emplace(env.get_state(), std::vector<double>(env.get_action_dim(), 0)).first;
         double den = 0;
         std::vector<double> softmax(env.get_action_dim(), 0);
@@ -41,7 +41,7 @@ namespace rl
         }
         for (size_t i = 0; i < it_a->second.size(); ++i)
             softmax[i] /= den;
-        return std::discrete_distribution<>(softmax.begin(), softmax.end())(gen);
+        return std::discrete_distribution<>(softmax.cbegin(), softmax.cend())(gen);
     }
 
     void ql_agent::train(const size_t &iterations, const double &gamma, const double &alpha, const double &eps_decay) noexcept
@@ -61,9 +61,9 @@ namespace rl
             double q = q_table.at(c_state).at(c_action);
             // this is the max among the qs for the resulting state and the selected action..
             auto it_a = q_table.find(env.get_state());
-            if (it_a == q_table.end())
+            if (it_a == q_table.cend())
                 it_a = q_table.emplace(env.get_state(), std::vector<double>(env.get_action_dim(), 0)).first;
-            double max_q = *std::max_element(it_a->second.begin(), it_a->second.end());
+            double max_q = *std::max_element(it_a->second.cbegin(), it_a->second.cend());
             // this is the expected q..
             double expected_q = result.reward + max_q * gamma;
             // we update the q table..

@@ -104,11 +104,11 @@ namespace ratio
 
     const type &core::get_type(const std::vector<arith_expr> &exprs) const
     {
-        if (std::all_of(exprs.begin(), exprs.end(), [](const arith_expr &aex) { return aex->get_type().get_name().compare(INT_KEYWORD) == 0; }))
+        if (std::all_of(exprs.cbegin(), exprs.cend(), [](const arith_expr &aex) { return aex->get_type().get_name().compare(INT_KEYWORD) == 0; }))
             return *types.at(INT_KEYWORD);
-        else if (std::all_of(exprs.begin(), exprs.end(), [](const arith_expr &aex) { return aex->get_type().get_name().compare(REAL_KEYWORD) == 0; }))
+        else if (std::all_of(exprs.cbegin(), exprs.cend(), [](const arith_expr &aex) { return aex->get_type().get_name().compare(REAL_KEYWORD) == 0; }))
             return *types.at(REAL_KEYWORD);
-        else if (std::all_of(exprs.begin(), exprs.end(), [this](const arith_expr &aex) { return aex->get_type().get_name().compare(TP_KEYWORD) == 0 || aex->l.vars.empty() || lra_th.lb(aex->l) == lra_th.ub(aex->l); }))
+        else if (std::all_of(exprs.cbegin(), exprs.cend(), [this](const arith_expr &aex) { return aex->get_type().get_name().compare(TP_KEYWORD) == 0 || aex->l.vars.empty() || lra_th.lb(aex->l) == lra_th.ub(aex->l); }))
             return *types.at(TP_KEYWORD);
         else
             return *types.at(REAL_KEYWORD);
@@ -121,7 +121,7 @@ namespace ratio
         assert(tp.get_name().compare(INT_KEYWORD) != 0);
         assert(tp.get_name().compare(REAL_KEYWORD) != 0);
         assert(tp.get_name().compare(TP_KEYWORD) != 0);
-        return new var_item(*this, tp, ov_th.new_var(std::vector<var_value *>(allowed_vals.begin(), allowed_vals.end())));
+        return new var_item(*this, tp, ov_th.new_var(std::vector<var_value *>(allowed_vals.cbegin(), allowed_vals.cend())));
     }
 
     expr core::new_enum(const type &tp, const std::vector<lit> &lits, const std::vector<item *> &vals) noexcept
@@ -239,7 +239,7 @@ namespace ratio
             }
         }
         else
-            return new var_item(*this, tp, ov_th.new_var(lits, std::vector<var_value *>(vals.begin(), vals.end())));
+            return new var_item(*this, tp, ov_th.new_var(lits, std::vector<var_value *>(vals.cbegin(), vals.cend())));
     }
 
     CORE_EXPORT bool_expr core::negate(bool_expr var) noexcept { return new bool_item(*this, !var->l); }
@@ -282,7 +282,7 @@ namespace ratio
     {
         assert(exprs.size() > 1);
         lin l;
-        for (std::vector<arith_expr>::const_iterator it = exprs.cbegin(); it != exprs.cend(); ++it)
+        for (auto it = exprs.cbegin(); it != exprs.cend(); ++it)
             if (it == exprs.cbegin())
                 l += (*it)->l;
             else
@@ -293,7 +293,7 @@ namespace ratio
     CORE_EXPORT arith_expr core::mult(const std::vector<arith_expr> &exprs) noexcept
     {
         assert(exprs.size() > 1);
-        arith_expr ae = *std::find_if(exprs.begin(), exprs.end(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); });
+        arith_expr ae = *std::find_if(exprs.cbegin(), exprs.cend(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); });
         lin l = ae->l;
         for (const auto &aex : exprs)
             if (aex != ae)
@@ -308,7 +308,7 @@ namespace ratio
     CORE_EXPORT arith_expr core::div(const std::vector<arith_expr> &exprs) noexcept
     {
         assert(exprs.size() > 1);
-        assert(std::all_of(++exprs.begin(), exprs.end(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
+        assert(std::all_of(++exprs.cbegin(), exprs.cend(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
         assert(lra_th.value(exprs[1]->l).get_infinitesimal() == rational::ZERO);
         rational c = lra_th.value(exprs[1]->l).get_rational();
         for (size_t i = 2; i < exprs.size(); ++i)
@@ -393,7 +393,7 @@ namespace ratio
 
     CORE_EXPORT const field &core::get_field(const std::string &name) const
     {
-        if (const auto at_f = fields.find(name); at_f != fields.end())
+        if (const auto at_f = fields.find(name); at_f != fields.cend())
             return *at_f->second;
 
         // not found
@@ -402,7 +402,7 @@ namespace ratio
 
     CORE_EXPORT const method &core::get_method(const std::string &name, const std::vector<const type *> &ts) const
     {
-        if (const auto at_m = methods.find(name); at_m != methods.end())
+        if (const auto at_m = methods.find(name); at_m != methods.cend())
         {
             bool found = false;
             for (const auto &mthd : at_m->second)
@@ -426,7 +426,7 @@ namespace ratio
 
     CORE_EXPORT type &core::get_type(const std::string &name) const
     {
-        if (const auto at_tp = types.find(name); at_tp != types.end())
+        if (const auto at_tp = types.find(name); at_tp != types.cend())
             return *at_tp->second;
 
         // not found
@@ -435,7 +435,7 @@ namespace ratio
 
     CORE_EXPORT predicate &core::get_predicate(const std::string &name) const
     {
-        if (const auto at_p = predicates.find(name); at_p != predicates.end())
+        if (const auto at_p = predicates.find(name); at_p != predicates.cend())
             return *at_p->second;
 
         // not found
@@ -444,7 +444,7 @@ namespace ratio
 
     CORE_EXPORT expr core::get(const std::string &name) const
     {
-        if (const auto at_xpr = exprs.find(name); at_xpr != exprs.end())
+        if (const auto at_xpr = exprs.find(name); at_xpr != exprs.cend())
             return at_xpr->second;
 
         throw std::out_of_range(name);

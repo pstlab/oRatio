@@ -12,7 +12,7 @@ namespace ratio
   public:
     core_listener(core &cr) : cr(cr) { cr.listeners.push_back(this); }
     core_listener(const core_listener &orig) = delete;
-    virtual ~core_listener() { cr.listeners.erase(std::find(cr.listeners.begin(), cr.listeners.end(), this)); }
+    virtual ~core_listener() { cr.listeners.erase(std::find(cr.listeners.cbegin(), cr.listeners.cend(), this)); }
 
   private:
     virtual void log(const std::string &msg) {}

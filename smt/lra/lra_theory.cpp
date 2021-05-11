@@ -28,7 +28,7 @@ namespace smt
     SMT_EXPORT var lra_theory::new_var(const lin &l) noexcept
     { // we create, if needed, a new arithmetic variable which is equal to the given linear expression..
         const std::string s_expr = to_string(l);
-        if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new slack variable..
@@ -51,7 +51,7 @@ namespace smt
         for (const auto &[v, c] : expr.vars)
             vars.push_back(v);
         for (const auto &v : vars)
-            if (const auto at_v = tableau.find(v); at_v != tableau.end())
+            if (const auto at_v = tableau.find(v); at_v != tableau.cend())
             {
                 rational c = expr.vars[v];
                 expr.vars.erase(v);
@@ -73,7 +73,7 @@ namespace smt
         else if (lb(slack) > c_right)
             return FALSE_lit; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " <= " + to_string(c_right);
-        if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
+        if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.cend()) // this assertion already exists..
             return at_asrt->second;
         else
         { // we need to create a new control variable..
@@ -94,7 +94,7 @@ namespace smt
         for (const auto &[v, c] : expr.vars)
             vars.push_back(v);
         for (const auto &v : vars)
-            if (const auto at_v = tableau.find(v); at_v != tableau.end())
+            if (const auto at_v = tableau.find(v); at_v != tableau.cend())
             {
                 rational c = expr.vars[v];
                 expr.vars.erase(v);
@@ -116,7 +116,7 @@ namespace smt
         else if (lb(slack) > c_right)
             return FALSE_lit; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " <= " + to_string(c_right);
-        if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
+        if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.cend()) // this assertion already exists..
             return at_asrt->second;
         else
         { // we need to create a new control variable..
@@ -137,7 +137,7 @@ namespace smt
         for (const auto &[v, c] : expr.vars)
             vars.push_back(v);
         for (const auto &v : vars)
-            if (const auto at_v = tableau.find(v); at_v != tableau.end())
+            if (const auto at_v = tableau.find(v); at_v != tableau.cend())
             {
                 rational c = expr.vars[v];
                 expr.vars.erase(v);
@@ -159,7 +159,7 @@ namespace smt
         else if (ub(slack) < c_right)
             return FALSE_lit; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " >= " + to_string(c_right);
-        if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
+        if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.cend()) // this assertion already exists..
             return at_asrt->second;
         else
         { // we need to create a new control variable..
@@ -180,7 +180,7 @@ namespace smt
         for (const auto &[v, c] : expr.vars)
             vars.push_back(v);
         for (const auto &v : vars)
-            if (const auto at_v = tableau.find(v); at_v != tableau.end())
+            if (const auto at_v = tableau.find(v); at_v != tableau.cend())
             {
                 rational c = expr.vars[v];
                 expr.vars.erase(v);
@@ -202,7 +202,7 @@ namespace smt
         else if (ub(slack) < c_right)
             return FALSE_lit; // the constraint is unsatisfable..
         const std::string s_assertion = "x" + std::to_string(slack) + " >= " + to_string(c_right);
-        if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.end()) // this assertion already exists..
+        if (const auto at_asrt = s_asrts.find(s_assertion); at_asrt != s_asrts.cend()) // this assertion already exists..
             return at_asrt->second;
         else
         { // we need to create a new control variable..
@@ -246,8 +246,8 @@ namespace smt
         assert(cnfl.empty());
         while (true)
         {
-            const auto &x_i_it = std::find_if(tableau.begin(), tableau.end(), [this](const std::pair<var, row *> &v) { return value(v.first) < lb(v.first) || value(v.first) > ub(v.first); });
-            if (x_i_it == tableau.end())
+            const auto &x_i_it = std::find_if(tableau.cbegin(), tableau.cend(), [this](const std::pair<var, row *> &v) { return value(v.first) < lb(v.first) || value(v.first) > ub(v.first); });
+            if (x_i_it == tableau.cend())
                 return true;
             // the current value of the x_i variable is out of its c_bounds..
             const var x_i = (*x_i_it).first;
@@ -255,8 +255,8 @@ namespace smt
             const row *f_row = (*x_i_it).second;
             if (value(x_i) < lb(x_i))
             {
-                const auto &x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, rational> &v) { return (is_positive(f_row->l.vars.at(v.first)) && value(v.first) < ub(v.first)) || (is_negative(f_row->l.vars.at(v.first)) && value(v.first) > lb(v.first)); });
-                if (x_j_it != f_row->l.vars.end()) // var x_j can be used to increase the value of x_i..
+                const auto &x_j_it = std::find_if(f_row->l.vars.cbegin(), f_row->l.vars.cend(), [f_row, this](const std::pair<var, rational> &v) { return (is_positive(f_row->l.vars.at(v.first)) && value(v.first) < ub(v.first)) || (is_negative(f_row->l.vars.at(v.first)) && value(v.first) > lb(v.first)); });
+                if (x_j_it != f_row->l.vars.cend()) // var x_j can be used to increase the value of x_i..
                     pivot_and_update(x_i, (*x_j_it).first, lb(x_i));
                 else
                 { // we generate an explanation for the conflict..
@@ -271,8 +271,8 @@ namespace smt
             }
             else if (value(x_i) > ub(x_i))
             {
-                const auto &x_j_it = std::find_if(f_row->l.vars.begin(), f_row->l.vars.end(), [f_row, this](const std::pair<var, rational> &v) { return (is_negative(f_row->l.vars.at(v.first)) && value(v.first) < ub(v.first)) || (is_positive(f_row->l.vars.at(v.first)) && value(v.first) > lb(v.first)); });
-                if (x_j_it != f_row->l.vars.end()) // var x_j can be used to decrease the value of x_i..
+                const auto &x_j_it = std::find_if(f_row->l.vars.cbegin(), f_row->l.vars.cend(), [f_row, this](const std::pair<var, rational> &v) { return (is_negative(f_row->l.vars.at(v.first)) && value(v.first) < ub(v.first)) || (is_positive(f_row->l.vars.at(v.first)) && value(v.first) > lb(v.first)); });
+                if (x_j_it != f_row->l.vars.cend()) // var x_j can be used to decrease the value of x_i..
                     pivot_and_update(x_i, (*x_j_it).first, ub(x_i));
                 else
                 { // we generate an explanation for the conflict..
@@ -371,13 +371,13 @@ namespace smt
         for (const auto &c : t_watches[x_i])
         { // x_j = x_j + a_ji(v - x_i)..
             vals[c->x] += c->l.vars.at(x_i) * (v - vals[x_i]);
-            if (const auto at_c_x = listening.find(c->x); at_c_x != listening.end())
+            if (const auto at_c_x = listening.find(c->x); at_c_x != listening.cend())
                 for (const auto &l : at_c_x->second)
                     l->lra_value_change(c->x);
         }
         // x_i = v..
         vals[x_i] = v;
-        if (const auto at_x_i = listening.find(x_i); at_x_i != listening.end())
+        if (const auto at_x_i = listening.find(x_i); at_x_i != listening.cend())
             for (const auto &l : at_x_i->second)
                 l->lra_value_change(x_i);
     }
@@ -393,13 +393,13 @@ namespace smt
 
         // x_i = v
         vals[x_i] = v;
-        if (const auto at_x_i = listening.find(x_i); at_x_i != listening.end())
+        if (const auto at_x_i = listening.find(x_i); at_x_i != listening.cend())
             for (const auto &l : at_x_i->second)
                 l->lra_value_change(x_i);
 
         // x_j += theta
         vals[x_j] += theta;
-        if (const auto at_x_j = listening.find(x_j); at_x_j != listening.end())
+        if (const auto at_x_j = listening.find(x_j); at_x_j != listening.cend())
             for (const auto &l : at_x_j->second)
                 l->lra_value_change(x_j);
 
@@ -408,7 +408,7 @@ namespace smt
             if (c->x != x_i)
             { // x_k += a_kj * theta..
                 vals[c->x] += c->l.vars.at(x_j) * theta;
-                if (const auto at_x_c = listening.find(c->x); at_x_c != listening.end())
+                if (const auto at_x_c = listening.find(c->x); at_x_c != listening.cend())
                     for (const auto &l : at_x_c->second)
                         l->lra_value_change(c->x);
             }
@@ -441,7 +441,7 @@ namespace smt
                 rational cc = r->l.vars[x_j];
                 r->l.vars.erase(x_j);
                 for (const auto &[v, c] : std::map<const var, rational>(expr.vars))
-                    if (const auto trm_it = r->l.vars.find(v); trm_it == r->l.vars.end())
+                    if (const auto trm_it = r->l.vars.find(v); trm_it == r->l.vars.cend())
                     { // we are adding a new term to 'r'..
                         r->l.vars.emplace(v, c * cc);
                         std::lock_guard<std::mutex> lock(t_mtxs[v]);
@@ -467,7 +467,7 @@ namespace smt
             rational cc = r->l.vars[x_j];
             r->l.vars.erase(x_j);
             for (const auto &[v, c] : std::map<const var, rational>(expr.vars))
-                if (const auto trm_it = r->l.vars.find(v); trm_it == r->l.vars.end())
+                if (const auto trm_it = r->l.vars.find(v); trm_it == r->l.vars.cend())
                 { // we are adding a new term to 'r'..
                     r->l.vars.emplace(v, c * cc);
                     t_watches[v].emplace(r);

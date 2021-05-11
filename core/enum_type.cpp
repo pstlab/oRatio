@@ -18,7 +18,7 @@ namespace ratio
         {
             std::vector<item *> es_instances = es->get_all_instances();
             c_instances.reserve(c_instances.size() + es_instances.size());
-            c_instances.insert(c_instances.end(), es_instances.begin(), es_instances.end());
+            c_instances.insert(c_instances.cend(), es_instances.cbegin(), es_instances.cend());
         }
         return c_instances;
     }

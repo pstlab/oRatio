@@ -39,10 +39,10 @@ namespace smt
         assert(root_level());
         // we check if the clause is already satisfied and filter out false/duplicate literals..
         std::vector<lit> c_lits = lits;
-        std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
-        for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
+        for (auto it = c_lits.cbegin(); it != c_lits.cend(); ++it)
             if (value(*it) == True || *it == !p)
                 return true; // the clause is already satisfied or represents a tautology..
             else if (value(*it) != False && *it != p)
@@ -106,11 +106,11 @@ namespace smt
         }
 
         const std::string s_expr = "=" + (left < right ? (to_string(left) + to_string(right)) : (to_string(right) + to_string(left)));
-        if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const lit ctr = lit(new_var());
+            auto ctr = lit(new_var());
             if (!new_clause({!ctr, !left, right}))
                 return FALSE_lit;
             if (!new_clause({!ctr, left, !right}))
@@ -127,11 +127,11 @@ namespace smt
         assert(root_level());
         // we try to avoid creating a new variable..
         std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "&";
-        for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
+        for (auto it = c_lits.cbegin(); it != c_lits.cend(); ++it)
             if (value(*it) == False || *it == !p)
                 return FALSE_lit; // the conjunction cannot be satisfied..
             else if (value(*it) != True && *it != p)
@@ -146,11 +146,11 @@ namespace smt
             return TRUE_lit;
         else if (c_lits.size() == 1)
             return c_lits[0];
-        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const lit ctr = lit(new_var());
+            auto ctr = lit(new_var());
             std::vector<lit> lits;
             lits.reserve(c_lits.size() + 1);
             lits.push_back(ctr);
@@ -172,11 +172,11 @@ namespace smt
         assert(root_level());
         // we try to avoid creating a new variable..
         std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "|";
-        for (std::vector<lit>::const_iterator it = c_lits.begin(); it != c_lits.end(); ++it)
+        for (auto it = c_lits.cbegin(); it != c_lits.cend(); ++it)
             if (value(*it) == True || *it == !p)
                 return TRUE_lit; // the disjunction is already satisfied..
             else if (value(*it) != False && *it != p)
@@ -191,11 +191,11 @@ namespace smt
             return FALSE_lit;
         else if (c_lits.size() == 1)
             return c_lits[0];
-        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const lit ctr = lit(new_var());
+            auto ctr = lit(new_var());
             std::vector<lit> lits;
             lits.reserve(c_lits.size() + 1);
             lits.push_back(!ctr);
@@ -217,13 +217,13 @@ namespace smt
         assert(root_level());
         // we try to avoid creating a new variable..
         std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "amo";
-        for (std::vector<lit>::const_iterator it0 = c_lits.begin(); it0 != c_lits.end(); ++it0)
+        for (auto it0 = c_lits.cbegin(); it0 != c_lits.cend(); ++it0)
             if (value(*it0) == True)
-                for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
+                for (auto it1 = it0 + 1; it1 != c_lits.cend(); ++it1)
                 {
                     if (value(*it1) == True || *it1 == !p)
                         return FALSE_lit; // the at-most-one cannot be satisfied..
@@ -244,13 +244,13 @@ namespace smt
 
         if (c_lits.empty() || c_lits.size() == 1) // an empty or a singleton at-most-one is assumed to be satisfied..
             return TRUE_lit;
-        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
             if (ls.size() < 4)
             { // we use the standard encoding..
-                const lit ctr = lit(new_var());
+                const auto ctr = lit(new_var());
                 for (size_t i = 0; i < ls.size(); ++i)
                     for (size_t j = i + 1; j < ls.size(); ++j)
                         if (!new_clause({!ls[i], !ls[j], !ctr}))
@@ -269,7 +269,7 @@ namespace smt
                 for (size_t j = 0; j < qs; ++j)
                     v.push_back(lit(new_var()));
 
-                const lit ctr = new_conj({new_at_most_one(u), new_at_most_one(v)});
+                const auto ctr = new_conj({new_at_most_one(u), new_at_most_one(v)});
 
                 for (size_t i = 0; i < ps; ++i)
                     for (size_t j = 0; j < qs; ++j)
@@ -288,13 +288,13 @@ namespace smt
         assert(root_level());
         // we try to avoid creating a new variable..
         std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const lit &l0, const lit &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "^";
-        for (std::vector<lit>::const_iterator it0 = c_lits.begin(); it0 != c_lits.end(); ++it0)
+        for (auto it0 = c_lits.cbegin(); it0 != c_lits.cend(); ++it0)
             if (value(*it0) == True)
-                for (std::vector<lit>::const_iterator it1 = it0 + 1; it1 != c_lits.end(); ++it1)
+                for (auto it1 = it0 + 1; it1 != c_lits.cend(); ++it1)
                 {
                     if (value(*it1) == True || *it1 == !p)
                         return FALSE_lit; // the exact-one cannot be satisfied..
@@ -317,11 +317,11 @@ namespace smt
             return FALSE_lit;
         else if (c_lits.size() == 1 && sign(c_lits[0]))
             return c_lits[0];
-        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const lit ctr = new_at_most_one(c_lits);
+            const auto ctr = new_at_most_one(c_lits);
             c_lits.push_back(!ctr);
             if (!new_clause(c_lits))
                 return FALSE_lit;
@@ -397,7 +397,7 @@ namespace smt
                 }
 
             // we then perform theory propagation..
-            if (const auto bnds_it = bounds.find(variable(p)); bnds_it != bounds.end())
+            if (const auto bnds_it = bounds.find(variable(p)); bnds_it != bounds.cend())
             {
                 for (const auto &th : bnds_it->second)
                     if (!th->propagate(p))
@@ -522,16 +522,16 @@ namespace smt
         } while (counter > 0);
         // 'p' is now the first Unique Implication Point (UIP), possibly the asserting literal, that led to the conflict..
         assert(value(p) == Undefined);
-        assert(std::all_of(out_learnt.begin() + 1, out_learnt.end(), [this](const lit &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
+        assert(std::all_of(out_learnt.cbegin() + 1, out_learnt.cend(), [this](auto &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
         out_learnt[0] = !p;
     }
 
     void sat_core::record(const std::vector<lit> &lits) noexcept
     {
         assert(value(lits[0]) == Undefined);
-        assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == True; }) == 0);
-        assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == Undefined; }) == 1);
-        assert(std::count_if(lits.begin(), lits.end(), [this](const lit &p) { return value(p) == False; }) == lits.size() - 1);
+        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p) { return value(p) == True; }) == 0);
+        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p) { return value(p) == Undefined; }) == 1);
+        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p) { return value(p) == False; }) == lits.size() - 1);
         if (lits.size() == 1)
         {
             assert(root_level());
@@ -542,7 +542,7 @@ namespace smt
         {
             std::vector<lit> c_lits = lits;
             // we sort literals according to descending order of variable assignment (except for the first literal which is now unassigned)..
-            std::sort(c_lits.begin() + 1, c_lits.end(), [this](const lit &a, const lit &b) { return level[variable(a)] > level[variable(b)]; });
+            std::sort(c_lits.begin() + 1, c_lits.end(), [this](auto &a, auto &b) { return level[variable(a)] > level[variable(b)]; });
 
             clause *c = new clause(*this, c_lits);
             watches[index(!c_lits[0])].push_back(c);
@@ -566,7 +566,7 @@ namespace smt
             trail.push_back(p);
             prop_q.push(p);
             // we notify the listeners that a listening variable has been assigned..
-            if (const auto at_p = listening.find(variable(p)); at_p != listening.end())
+            if (const auto at_p = listening.find(variable(p)); at_p != listening.cend())
             {
                 for (const auto &l : at_p->second)
                     l->sat_value_change(variable(p));
@@ -584,7 +584,7 @@ namespace smt
         level[v] = 0;
         reason[v] = nullptr;
         trail.pop_back();
-        if (const auto at_v = listening.find(v); at_v != listening.end())
+        if (const auto at_v = listening.find(v); at_v != listening.cend())
             for (const auto &l : at_v->second)
                 l->sat_value_change(v);
     }

@@ -16,7 +16,7 @@ namespace ratio
   public:
     solver_listener(solver &s) : slv(s) { slv.listeners.push_back(this); }
     solver_listener(const solver_listener &orig) = delete;
-    virtual ~solver_listener() { slv.listeners.erase(std::find(slv.listeners.begin(), slv.listeners.end(), this)); }
+    virtual ~solver_listener() { slv.listeners.erase(std::find(slv.listeners.cbegin(), slv.listeners.cend(), this)); }
 
   private:
     void new_flaw(const flaw &f)

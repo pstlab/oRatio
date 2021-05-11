@@ -159,9 +159,9 @@ namespace smt
     void json_core::to_json(std::ostream &os) const noexcept
     {
         os << '{';
-        for (std::map<std::string, json>::const_iterator v_it = vals.begin(); v_it != vals.end(); ++v_it)
+        for (auto v_it = vals.cbegin(); v_it != vals.cend(); ++v_it)
         {
-            if (v_it != vals.begin())
+            if (v_it != vals.cbegin())
                 os << ", ";
             os << '\"' << v_it->first << "\": ";
             v_it->second->to_json(os);
@@ -205,9 +205,9 @@ namespace smt
     void array_val::to_json(std::ostream &os) const noexcept
     {
         os << '[';
-        for (auto v_it = vals.begin(); v_it != vals.end(); ++v_it)
+        for (auto v_it = vals.cbegin(); v_it != vals.cend(); ++v_it)
         {
-            if (v_it != vals.begin())
+            if (v_it != vals.cbegin())
                 os << ", ";
             v_it->to_json(os);
         }

@@ -56,7 +56,7 @@ namespace ratio
             gamma = lit(slv.get_sat_core().new_var());
             LOG("γ is" << to_string(gamma));
             already_closed.clear();
-            if (std::any_of(get_flaws().begin(), get_flaws().end(), [](flaw *f) { return is_positive_infinite(f->get_estimated_cost()); }))
+            if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f) { return is_positive_infinite(f->get_estimated_cost()); }))
                 build(); // we can still build upon the current graph..
             else
                 add_layer(); // we add a layer to the current graph..
@@ -77,7 +77,7 @@ namespace ratio
         assert(slv.get_sat_core().root_level());
         LOG("building the causal graph..");
 
-        while (std::any_of(get_flaws().begin(), get_flaws().end(), [](flaw *f) { return is_positive_infinite(f->get_estimated_cost()); }))
+        while (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f) { return is_positive_infinite(f->get_estimated_cost()); }))
         {
             if (flaw_q.empty())
                 throw unsolvable_exception();
@@ -119,11 +119,11 @@ namespace ratio
     void h_1::add_layer()
     {
         assert(slv.get_sat_core().root_level());
-        assert(std::none_of(get_flaws().begin(), get_flaws().end(), [](flaw *f) { return is_positive_infinite(f->get_estimated_cost()); }));
+        assert(std::none_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f) { return is_positive_infinite(f->get_estimated_cost()); }));
         LOG("adding a layer to the causal graph..");
 
         std::deque<flaw *> f_q(flaw_q);
-        while (std::all_of(f_q.begin(), f_q.end(), [](flaw *f) { return is_infinite(f->get_estimated_cost()); }))
+        while (std::all_of(f_q.cbegin(), f_q.cend(), [](flaw *f) { return is_infinite(f->get_estimated_cost()); }))
         {
             if (flaw_q.empty())
                 throw unsolvable_exception();
@@ -149,12 +149,12 @@ namespace ratio
 #ifdef DEFERRABLE_FLAWS
     bool h_1::is_deferrable(flaw &f)
     {
-        if (f.get_estimated_cost() < rational::POSITIVE_INFINITY || std::any_of(f.get_resolvers().begin(), f.get_resolvers().end(), [this](resolver *r) { return slv.get_sat_core().value(r->get_rho()) == True; }))
+        if (f.get_estimated_cost() < rational::POSITIVE_INFINITY || std::any_of(f.get_resolvers().cbegin(), f.get_resolvers().cend(), [this](resolver *r) { return slv.get_sat_core().value(r->get_rho()) == True; }))
             return true; // we already have a possible solution for this flaw, thus we defer..
         if (slv.get_sat_core().value(f.get_phi()) == True || visited.count(&f))
             return false; // we necessarily have to solve this flaw: it cannot be deferred..
         visited.insert(&f);
-        bool def = std::all_of(f.get_supports().begin(), f.get_supports().end(), [this](resolver *r) { return is_deferrable(r->get_effect()); });
+        bool def = std::all_of(f.get_supports().cbegin(), f.get_supports().cend(), [this](resolver *r) { return is_deferrable(r->get_effect()); });
         visited.erase(&f);
         return def;
     }

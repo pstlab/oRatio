@@ -11,7 +11,7 @@ namespace ratio
   public:
     executor_listener(executor &e) : exec(e) { exec.listeners.push_back(this); }
     executor_listener(const executor_listener &that) = delete;
-    virtual ~executor_listener() { exec.listeners.erase(std::find(exec.listeners.begin(), exec.listeners.end(), this)); }
+    virtual ~executor_listener() { exec.listeners.erase(std::find(exec.listeners.cbegin(), exec.listeners.cend(), this)); }
 
   private:
     virtual void tick(const smt::rational time) { LOG("current time: " << to_string(time)); }

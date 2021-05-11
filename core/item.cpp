@@ -190,18 +190,18 @@ namespace ratio
         else
         {
             const auto &it_it = exprs.find(name);
-            if (it_it == exprs.end())
+            if (it_it == exprs.cend())
             {
                 assert(!get_core().get_ov_theory().value(ev).empty());
                 if (auto vs = get_core().get_ov_theory().value(ev); vs.size() == 1)
-                    return (static_cast<const item *>(*vs.begin()))->get(name);
+                    return (static_cast<const item *>(*vs.cbegin()))->get(name);
                 else
                 {
                     std::unordered_map<item *, std::vector<lit>> val_vars;
                     for (const auto &val : vs)
                         val_vars[&*static_cast<const item *>(val)->get(name)].push_back(get_core().get_ov_theory().allows(ev, *val));
                     if (val_vars.size() == 1)
-                        return val_vars.begin()->first;
+                        return val_vars.cbegin()->first;
 
                     std::vector<lit> c_vars;
                     std::vector<item *> c_vals;

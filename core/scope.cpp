@@ -13,7 +13,7 @@ namespace ratio
 
     CORE_EXPORT const field &scope::get_field(const std::string &name) const
     {
-        if (const auto at_f = fields.find(name); at_f != fields.end())
+        if (const auto at_f = fields.find(name); at_f != fields.cend())
             return *at_f->second;
 
         // if not here, check any enclosing scope

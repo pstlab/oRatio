@@ -380,7 +380,7 @@ namespace ratio
             }
 
             // we assign fields..
-            a->exprs.insert(assgnments.begin(), assgnments.end());
+            a->exprs.insert(assgnments.cbegin(), assgnments.cend());
 
             // we initialize atom's fields..
             std::queue<predicate *> q;

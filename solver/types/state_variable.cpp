@@ -62,16 +62,16 @@ namespace ratio
             std::set<atom *> overlapping_atoms;
             for (const auto &p : pulses)
             {
-                if (const auto at_start_p = starting_atoms.find(p); at_start_p != starting_atoms.end())
-                    overlapping_atoms.insert(at_start_p->second.begin(), at_start_p->second.end());
-                if (const auto at_end_p = ending_atoms.find(p); at_end_p != ending_atoms.end())
+                if (const auto at_start_p = starting_atoms.find(p); at_start_p != starting_atoms.cend())
+                    overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
+                if (const auto at_end_p = ending_atoms.find(p); at_end_p != ending_atoms.cend())
                     for (const auto &a : at_end_p->second)
                         overlapping_atoms.erase(a);
 
                 if (overlapping_atoms.size() > 1) // we have a 'peak'..
-                    for (const auto &as : combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2))
+                    for (const auto &as : combinations(std::vector<atom *>(overlapping_atoms.cbegin(), overlapping_atoms.cend()), 2))
                     { // state-variable MCSs are made of two atoms..
-                        std::set<atom *> mcs(as.begin(), as.end());
+                        std::set<atom *> mcs(as.cbegin(), as.cend());
                         if (!sv_flaws.count(mcs))
                         { // we create a new state-variable flaw..
                             sv_flaw *flw = new sv_flaw(*this, mcs);
@@ -85,8 +85,8 @@ namespace ratio
                         arith_expr a1_start = as[1]->get(START);
                         arith_expr a1_end = as[1]->get(END);
 
-                        if (auto a0_it = leqs.find(as[0]); a0_it != leqs.end())
-                            if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.end())
+                        if (auto a0_it = leqs.find(as[0]); a0_it != leqs.cend())
+                            if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.cend())
                                 if (get_solver().get_sat_core().value(a0_a1_it->second) != False)
                                 {
 #ifdef DL_TN
@@ -99,8 +99,8 @@ namespace ratio
                                     choices.push_back({a0_a1_it->second, commit});
                                 }
 
-                        if (auto a1_it = leqs.find(as[1]); a1_it != leqs.end())
-                            if (auto a1_a0_it = a1_it->second.find(as[0]); a1_a0_it != a1_it->second.end())
+                        if (auto a1_it = leqs.find(as[1]); a1_it != leqs.cend())
+                            if (auto a1_a0_it = a1_it->second.find(as[0]); a1_a0_it != a1_it->second.cend())
                                 if (get_solver().get_sat_core().value(a1_a0_it->second) != False)
                                 {
 #ifdef DL_TN
@@ -291,9 +291,9 @@ namespace ratio
     std::string state_variable::sv_flaw::get_label() const
     {
         std::string lbl = "{\"type\":\"sv-flaw\", \"phi\":\"" + to_string(get_phi()) + "\", \"position\":" + std::to_string(get_position()) + ", \"atoms\":[";
-        for (std::set<atom *>::iterator as_it = overlapping_atoms.begin(); as_it != overlapping_atoms.end(); ++as_it)
+        for (auto as_it = overlapping_atoms.cbegin(); as_it != overlapping_atoms.cend(); ++as_it)
         {
-            if (as_it != overlapping_atoms.begin())
+            if (as_it != overlapping_atoms.cbegin())
                 lbl += ", ";
             lbl += "\"" + std::to_string(reinterpret_cast<uintptr_t>(*as_it)) + "\"";
         }
@@ -303,16 +303,16 @@ namespace ratio
 
     void state_variable::sv_flaw::compute_resolvers()
     {
-        const auto cs = combinations(std::vector<atom *>(overlapping_atoms.begin(), overlapping_atoms.end()), 2);
+        const auto cs = combinations(std::vector<atom *>(overlapping_atoms.cbegin(), overlapping_atoms.cend()), 2);
         for (const auto &as : cs)
         {
-            if (auto a0_it = sv.leqs.find(as[0]); a0_it != sv.leqs.end())
-                if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.end())
+            if (auto a0_it = sv.leqs.find(as[0]); a0_it != sv.leqs.cend())
+                if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.cend())
                     if (get_solver().get_sat_core().value(a0_a1_it->second) != False)
                         add_resolver(*new order_resolver(*this, a0_a1_it->second, *as[0], *as[1]));
 
-            if (auto a1_it = sv.leqs.find(as[1]); a1_it != sv.leqs.end())
-                if (auto a1_a0_it = a1_it->second.find(as[0]); a1_a0_it != a1_it->second.end())
+            if (auto a1_it = sv.leqs.find(as[1]); a1_it != sv.leqs.cend())
+                if (auto a1_a0_it = a1_it->second.find(as[0]); a1_a0_it != a1_it->second.cend())
                     if (get_solver().get_sat_core().value(a1_a0_it->second) != False)
                         add_resolver(*new order_resolver(*this, a1_a0_it->second, *as[1], *as[0]));
 
@@ -324,7 +324,7 @@ namespace ratio
                 add_resolver(*new forbid_resolver(*this, *as[0], *a1_tau));
             else if (!a0_tau_itm && a1_tau_itm)
                 add_resolver(*new forbid_resolver(*this, *as[1], *a0_tau));
-            else if (auto a0_a1_it = sv.plcs.find({as[0], as[1]}); a0_a1_it != sv.plcs.end())
+            else if (auto a0_a1_it = sv.plcs.find({as[0], as[1]}); a0_a1_it != sv.plcs.cend())
                 for (const auto &a0_a1_disp : a0_a1_it->second)
                     if (get_solver().get_sat_core().value(a0_a1_disp.first) != False)
                         add_resolver(*new place_resolver(*this, a0_a1_disp.first, *as[0], *a0_a1_disp.second, *as[1]));

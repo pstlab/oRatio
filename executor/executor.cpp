@@ -29,18 +29,18 @@ namespace ratio
         const auto &int_pred = slv.get_predicate("Interval");
         const auto &imp_pred = slv.get_predicate("Impulse");
 
-        if (*pulses.begin() < static_cast<I>(current_time))
+        if (*pulses.cbegin() < static_cast<I>(current_time))
         { // we have something to do..
-            const auto starting_atms = s_atms.find(*pulses.begin());
-            const auto ending_atms = e_atms.find(*pulses.begin());
-            if (starting_atms != s_atms.end()) // we notify that we are starting some atoms..
+            const auto starting_atms = s_atms.find(*pulses.cbegin());
+            const auto ending_atms = e_atms.find(*pulses.cbegin());
+            if (starting_atms != s_atms.cend()) // we notify that we are starting some atoms..
                 for (const auto &l : listeners)
                     l->starting(starting_atms->second);
-            if (ending_atms != e_atms.end()) // we notify that we are ending some atoms..
+            if (ending_atms != e_atms.cend()) // we notify that we are ending some atoms..
                 for (const auto &l : listeners)
                     l->ending(ending_atms->second);
 
-            if (starting_atms != s_atms.end()) // some atoms are starting..
+            if (starting_atms != s_atms.cend()) // some atoms are starting..
                 for (const auto &atm : starting_atms->second)
                     if (!not_starting.count(atm))
                     { // we freeze the parameters of the starting atoms..
@@ -51,7 +51,7 @@ namespace ratio
                                     if (arith_item *ai = dynamic_cast<arith_item *>(&*xpr))
                                         frozen_nums.emplace(ai, slv.arith_value(xpr));
                                     else if (var_item *vi = dynamic_cast<var_item *>(&*xpr))
-                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).begin()));
+                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).cbegin()));
                         }
                         if (int_pred.is_assignable_from(atm->get_type()))
                         { // we have an impulsive atom..
@@ -60,11 +60,11 @@ namespace ratio
                                     if (arith_item *ai = dynamic_cast<arith_item *>(&*xpr))
                                         frozen_nums.emplace(ai, slv.arith_value(xpr));
                                     else if (var_item *vi = dynamic_cast<var_item *>(&*xpr))
-                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).begin()));
+                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).cbegin()));
                         }
                     }
 
-            if (ending_atms != e_atms.end()) // some atoms are ending..
+            if (ending_atms != e_atms.cend()) // some atoms are ending..
                 for (const auto &atm : ending_atms->second)
                     if (!not_ending.count(atm))
                     { // we freeze the ending parameter of the ending atoms..
@@ -81,11 +81,11 @@ namespace ratio
                     }
 
             // we make some cleanings..
-            if (starting_atms != s_atms.end())
+            if (starting_atms != s_atms.cend())
                 s_atms.erase(starting_atms);
-            if (ending_atms != e_atms.end())
+            if (ending_atms != e_atms.cend())
                 e_atms.erase(ending_atms);
-            pulses.erase(pulses.begin());
+            pulses.erase(pulses.cbegin());
 
             if (!not_starting.empty() || !not_ending.empty())
             { // we have to delay something..
@@ -130,8 +130,8 @@ namespace ratio
         }
     }
 
-    EXECUTOR_EXPORT void executor::dont_start_yet(const std::set<atom *> &atoms) { not_starting.insert(atoms.begin(), atoms.end()); }
-    EXECUTOR_EXPORT void executor::dont_end_yet(const std::set<atom *> &atoms) { not_ending.insert(atoms.begin(), atoms.end()); }
+    EXECUTOR_EXPORT void executor::dont_start_yet(const std::set<atom *> &atoms) { not_starting.insert(atoms.cbegin(), atoms.cend()); }
+    EXECUTOR_EXPORT void executor::dont_end_yet(const std::set<atom *> &atoms) { not_ending.insert(atoms.cbegin(), atoms.cend()); }
     EXECUTOR_EXPORT void executor::failure(const std::set<atom *> &atoms) {}
 
     void executor::solution_found() { reset_timelines(); }

@@ -28,7 +28,7 @@ namespace ratio
                 else if (resolver *ag = dynamic_cast<atom_flaw::activate_goal *>(r))
                     ress.insert(ag);
 
-        return std::vector<resolver *>(ress.begin(), ress.end());
+        return std::vector<resolver *>(ress.cbegin(), ress.cend());
     }
 
     atom_listener::atom_listener(atom &atm) : smt::sat_value_listener(atm.get_core().get_sat_core()), smt::lra_value_listener(atm.get_core().get_lra_theory()), smt::rdl_value_listener(atm.get_core().get_rdl_theory()), smt::ov_value_listener(atm.get_core().get_ov_theory()), atm(atm)

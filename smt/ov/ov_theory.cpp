@@ -14,7 +14,7 @@ namespace smt
         const var id = assigns.size();
         auto c_vals = std::unordered_map<const var_value *, lit>();
         if (items.size() == 1)
-            c_vals.emplace(*items.begin(), TRUE_lit);
+            c_vals.emplace(*items.cbegin(), TRUE_lit);
         else
         {
             for (const auto &i : items)
@@ -55,7 +55,7 @@ namespace smt
 
     SMT_EXPORT lit ov_theory::allows(const var &v, const var_value &val) const noexcept
     {
-        if (const auto at_right = assigns[v].find(&val); at_right != assigns[v].end())
+        if (const auto at_right = assigns[v].find(&val); at_right != assigns[v].cend())
             return at_right->second;
         else
             return FALSE_lit;
@@ -70,7 +70,7 @@ namespace smt
             return new_eq(right, left);
 
         const std::string s_expr = left < right ? ("=e" + std::to_string(left) + "e" + std::to_string(right)) : ("=e" + std::to_string(right) + "e" + std::to_string(left));
-        if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.end()) // the expression already exists..
+        if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         {
@@ -128,7 +128,7 @@ namespace smt
     { // propagation is performed at SAT level, here we just notify possible listeners..
         assert(cnfl.empty());
         for (const auto &v : is_contained_in.at(variable(p)))
-            if (const auto at_v = listening.find(v); at_v != listening.end())
+            if (const auto at_v = listening.find(v); at_v != listening.cend())
                 for (const auto &l : at_v->second)
                     l->ov_value_change(v);
         return true;
@@ -145,7 +145,7 @@ namespace smt
     void ov_theory::pop() noexcept
     {
         for (const auto &v : layers.back().vars)
-            if (const auto at_v = listening.find(v); at_v != listening.end())
+            if (const auto at_v = listening.find(v); at_v != listening.cend())
                 for (const auto &l : at_v->second)
                     l->ov_value_change(v);
         layers.pop_back();

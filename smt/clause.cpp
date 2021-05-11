@@ -54,9 +54,9 @@ namespace smt
     void clause::remove() noexcept
     {
         auto &l0_w = watches(!lits[0]);
-        l0_w.erase(std::find(l0_w.begin(), l0_w.end(), this));
+        l0_w.erase(std::find(l0_w.cbegin(), l0_w.cend(), this));
         auto &l1_w = watches(!lits[1]);
-        l1_w.erase(std::find(l1_w.begin(), l1_w.end(), this));
+        l1_w.erase(std::find(l1_w.cbegin(), l1_w.cend(), this));
         delete this;
     }
 

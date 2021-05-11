@@ -76,7 +76,7 @@ namespace ratio
     {
       std::vector<const method *> c_methods;
       for (const auto &[mthd_name, mthds] : methods)
-        c_methods.insert(c_methods.begin(), mthds.begin(), mthds.end());
+        c_methods.insert(c_methods.cbegin(), mthds.cbegin(), mthds.cend());
       return c_methods;
     }
 

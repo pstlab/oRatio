@@ -51,21 +51,21 @@ namespace smt
         case 0:
             return expr.known_term < rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
-            if (expr.vars.begin()->second < rational::ZERO)
+            if (expr.vars.cbegin()->second < rational::ZERO)
             {
-                expr = expr / expr.vars.begin()->second;
-                return new_distance(expr.vars.begin()->first, 0, inf_rational(expr.known_term, -1));
+                expr = expr / expr.vars.cbegin()->second;
+                return new_distance(expr.vars.cbegin()->first, 0, inf_rational(expr.known_term, -1));
             }
             else
             {
-                expr = expr / expr.vars.begin()->second;
-                return new_distance(0, expr.vars.begin()->first, -inf_rational(expr.known_term, 1));
+                expr = expr / expr.vars.cbegin()->second;
+                return new_distance(0, expr.vars.cbegin()->first, -inf_rational(expr.known_term, 1));
             }
         case 2:
-            if (expr.vars.begin()->second < rational::ZERO)
+            if (expr.vars.cbegin()->second < rational::ZERO)
             {
-                expr = expr / expr.vars.begin()->second;
-                auto it = expr.vars.begin();
+                expr = expr / expr.vars.cbegin()->second;
+                auto it = expr.vars.cbegin();
                 const auto [v0, c0] = *it++;
                 assert(c0 == rational::ONE);
                 const auto [v1, c1] = *it;
@@ -75,8 +75,8 @@ namespace smt
             }
             else
             {
-                expr = expr / expr.vars.begin()->second;
-                auto it = expr.vars.begin();
+                expr = expr / expr.vars.cbegin()->second;
+                auto it = expr.vars.cbegin();
                 const auto [v0, c0] = *it++;
                 assert(c0 == rational::ONE);
                 const auto [v1, c1] = *it;
@@ -97,21 +97,21 @@ namespace smt
         case 0:
             return expr.known_term <= rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
-            if (expr.vars.begin()->second < rational::ZERO)
+            if (expr.vars.cbegin()->second < rational::ZERO)
             {
-                expr = expr / expr.vars.begin()->second;
-                return new_distance(expr.vars.begin()->first, 0, inf_rational(expr.known_term));
+                expr = expr / expr.vars.cbegin()->second;
+                return new_distance(expr.vars.cbegin()->first, 0, inf_rational(expr.known_term));
             }
             else
             {
-                expr = expr / expr.vars.begin()->second;
-                return new_distance(0, expr.vars.begin()->first, -inf_rational(expr.known_term));
+                expr = expr / expr.vars.cbegin()->second;
+                return new_distance(0, expr.vars.cbegin()->first, -inf_rational(expr.known_term));
             }
         case 2:
-            if (expr.vars.begin()->second < rational::ZERO)
+            if (expr.vars.cbegin()->second < rational::ZERO)
             {
-                expr = expr / expr.vars.begin()->second;
-                auto it = expr.vars.begin();
+                expr = expr / expr.vars.cbegin()->second;
+                auto it = expr.vars.cbegin();
                 const auto [v0, c0] = *it++;
                 assert(c0 == rational::ONE);
                 const auto [v1, c1] = *it;
@@ -121,8 +121,8 @@ namespace smt
             }
             else
             {
-                expr = expr / expr.vars.begin()->second;
-                auto it = expr.vars.begin();
+                expr = expr / expr.vars.cbegin()->second;
+                auto it = expr.vars.cbegin();
                 const auto [v0, c0] = *it++;
                 assert(c0 == rational::ONE);
                 const auto [v1, c1] = *it;
@@ -144,17 +144,17 @@ namespace smt
             return expr.known_term == rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
         {
-            expr = expr / expr.vars.begin()->second;
-            const auto dist = distance(expr.vars.begin()->first, 0);
+            expr = expr / expr.vars.cbegin()->second;
+            const auto dist = distance(expr.vars.cbegin()->first, 0);
             if (dist.first <= expr.known_term && dist.second >= expr.known_term)
-                return sat.new_conj({new_distance(expr.vars.begin()->first, 0, inf_rational(expr.known_term)), new_distance(0, expr.vars.begin()->first, -inf_rational(expr.known_term))});
+                return sat.new_conj({new_distance(expr.vars.cbegin()->first, 0, inf_rational(expr.known_term)), new_distance(0, expr.vars.cbegin()->first, -inf_rational(expr.known_term))});
             else
                 return FALSE_lit;
         }
         case 2:
         {
-            expr = expr / expr.vars.begin()->second;
-            auto it = expr.vars.begin();
+            expr = expr / expr.vars.cbegin()->second;
+            auto it = expr.vars.cbegin();
             const auto [v0, c0] = *it++;
             assert(c0 == rational::ONE);
             const auto [v1, c1] = *it;
@@ -179,22 +179,22 @@ namespace smt
         case 0:
             return expr.known_term >= rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
-            if (expr.vars.begin()->second < rational::ZERO)
+            if (expr.vars.cbegin()->second < rational::ZERO)
             {
-                expr = expr / expr.vars.begin()->second;
-                return new_distance(0, expr.vars.begin()->first, -inf_rational(expr.known_term));
+                expr = expr / expr.vars.cbegin()->second;
+                return new_distance(0, expr.vars.cbegin()->first, -inf_rational(expr.known_term));
             }
             else
             {
-                expr = expr / expr.vars.begin()->second;
-                return new_distance(expr.vars.begin()->first, 0, inf_rational(expr.known_term));
+                expr = expr / expr.vars.cbegin()->second;
+                return new_distance(expr.vars.cbegin()->first, 0, inf_rational(expr.known_term));
             }
         case 2:
         {
-            if (expr.vars.begin()->second < rational::ZERO)
+            if (expr.vars.cbegin()->second < rational::ZERO)
             {
-                expr = expr / expr.vars.begin()->second;
-                auto it = expr.vars.begin();
+                expr = expr / expr.vars.cbegin()->second;
+                auto it = expr.vars.cbegin();
                 const auto [v0, c0] = *it++;
                 assert(c0 == rational::ONE);
                 const auto [v1, c1] = *it;
@@ -204,8 +204,8 @@ namespace smt
             }
             else
             {
-                expr = expr / expr.vars.begin()->second;
-                auto it = expr.vars.begin();
+                expr = expr / expr.vars.cbegin()->second;
+                auto it = expr.vars.cbegin();
                 const auto [v0, c0] = *it++;
                 assert(c0 == rational::ONE);
                 const auto [v1, c1] = *it;
@@ -227,21 +227,21 @@ namespace smt
         case 0:
             return expr.known_term > rational::ZERO ? TRUE_lit : FALSE_lit;
         case 1:
-            if (expr.vars.begin()->second < rational::ZERO)
+            if (expr.vars.cbegin()->second < rational::ZERO)
             {
-                expr = expr / expr.vars.begin()->second;
-                return new_distance(0, expr.vars.begin()->first, -inf_rational(expr.known_term, 1));
+                expr = expr / expr.vars.cbegin()->second;
+                return new_distance(0, expr.vars.cbegin()->first, -inf_rational(expr.known_term, 1));
             }
             else
             {
-                expr = expr / expr.vars.begin()->second;
-                return new_distance(expr.vars.begin()->first, 0, inf_rational(expr.known_term, -1));
+                expr = expr / expr.vars.cbegin()->second;
+                return new_distance(expr.vars.cbegin()->first, 0, inf_rational(expr.known_term, -1));
             }
         case 2:
-            if (expr.vars.begin()->second < rational::ZERO)
+            if (expr.vars.cbegin()->second < rational::ZERO)
             {
-                expr = expr / expr.vars.begin()->second;
-                auto it = expr.vars.begin();
+                expr = expr / expr.vars.cbegin()->second;
+                auto it = expr.vars.cbegin();
                 const auto [v0, c0] = *it++;
                 assert(c0 == rational::ONE);
                 const auto [v1, c1] = *it;
@@ -251,8 +251,8 @@ namespace smt
             }
             else
             {
-                expr = expr / expr.vars.begin()->second;
-                auto it = expr.vars.begin();
+                expr = expr / expr.vars.cbegin()->second;
+                auto it = expr.vars.cbegin();
                 const auto [v0, c0] = *it++;
                 assert(c0 == rational::ONE);
                 const auto [v1, c1] = *it;
@@ -278,15 +278,15 @@ namespace smt
             break;
         case 1:
         {
-            std::map<const var, rational>::const_iterator it = l.vars.begin();
+            auto it = l.vars.cbegin();
             c_lb += lb(it->first) * it->second + l.known_term;
             c_ub += ub(it->first) * it->second + l.known_term;
             break;
         }
         case 2:
         {
-            const auto expr = l / l.vars.begin()->second;
-            std::map<const var, rational>::const_iterator it = expr.vars.begin();
+            const auto expr = l / l.vars.cbegin()->second;
+            auto it = expr.vars.cbegin();
             const auto [v0, c0] = *it++;
             assert(c0 == rational::ONE);
             const auto [v1, c1] = *it;
@@ -311,13 +311,13 @@ namespace smt
             return std::make_pair(inf_rational(expr.known_term), inf_rational(expr.known_term));
         case 1:
         {
-            expr = expr / expr.vars.begin()->second;
-            return distance(expr.vars.begin()->first, 0);
+            expr = expr / expr.vars.cbegin()->second;
+            return distance(expr.vars.cbegin()->first, 0);
         }
         case 2:
         {
-            expr = expr / expr.vars.begin()->second;
-            auto it = expr.vars.begin();
+            expr = expr / expr.vars.cbegin()->second;
+            auto it = expr.vars.cbegin();
             const auto [v0, c0] = *it++;
             assert(c0 == rational::ONE);
             const auto [v1, c1] = *it;
@@ -346,7 +346,7 @@ namespace smt
         }
         else if (l0.vars.size() == 1 && l1.vars.size() == 1)
         {
-            const auto [lb, ub] = distance(l0.vars.begin()->first, l1.vars.begin()->first);
+            const auto [lb, ub] = distance(l0.vars.cbegin()->first, l1.vars.cbegin()->first);
             const auto kt = l0.known_term - l1.known_term;
             return lb + kt <= 0 && ub + kt >= 0;
         }
@@ -368,7 +368,7 @@ namespace smt
                     var c_to = dist->from;
                     while (c_to != dist->to)
                     {
-                        if (const auto &c_d = dist_constr.find({_preds[dist->to][c_to], c_to}); c_d != dist_constr.end())
+                        if (const auto &c_d = dist_constr.find({_preds[dist->to][c_to], c_to}); c_d != dist_constr.cend())
                             if (sat.value(c_d->second->b) == True)
                                 cnfl.push_back(!c_d->second->b);
                             else if (sat.value(c_d->second->b) == False)
@@ -382,7 +382,7 @@ namespace smt
                 { // we propagate..
                     const auto from_to = std::make_pair(dist->from, dist->to);
                     if (!layers.empty() && !layers.back().old_constrs.count(from_to))
-                        if (const auto &c_dist = dist_constr.find(from_to); c_dist != dist_constr.end())
+                        if (const auto &c_dist = dist_constr.find(from_to); c_dist != dist_constr.cend())
                             // we store the current constraint for backtracking purposes..
                             layers.back().old_constrs.emplace(c_dist->first, c_dist->second);
                         else
@@ -397,7 +397,7 @@ namespace smt
                     var c_from = dist->to;
                     while (c_from != dist->from)
                     {
-                        if (const auto &c_d = dist_constr.find({_preds[dist->from][c_from], c_from}); c_d != dist_constr.end())
+                        if (const auto &c_d = dist_constr.find({_preds[dist->from][c_from], c_from}); c_d != dist_constr.cend())
                             if (sat.value(c_d->second->b) == True)
                                 cnfl.push_back(!c_d->second->b);
                             else if (sat.value(c_d->second->b) == False)
@@ -411,7 +411,7 @@ namespace smt
                 { // we propagate..
                     const auto to_from = std::make_pair(dist->to, dist->from);
                     if (!layers.empty() && !layers.back().old_constrs.count(to_from))
-                        if (const auto &c_dist = dist_constr.find(to_from); c_dist != dist_constr.end())
+                        if (const auto &c_dist = dist_constr.find(to_from); c_dist != dist_constr.cend())
                             // we store the current constraint for backtracking purposes..
                             layers.back().old_constrs.emplace(c_dist->first, c_dist->second);
                         else
@@ -427,7 +427,7 @@ namespace smt
     bool rdl_theory::check() noexcept
     {
         assert(cnfl.empty());
-        assert(std::all_of(dist_constr.begin(), dist_constr.end(), [this](const auto &dist) {
+        assert(std::all_of(dist_constr.cbegin(), dist_constr.cend(), [this](const auto &dist) {
             switch (sat.value(dist.second->b))
             {
             case True: // the constraint is asserted..
@@ -501,7 +501,7 @@ namespace smt
                 }
 
         for (const auto &c_pairs : c_updates)
-            if (const auto &c_dists = dist_constrs.find(c_pairs); c_dists != dist_constrs.end())
+            if (const auto &c_dists = dist_constrs.find(c_pairs); c_dists != dist_constrs.cend())
                 for (const auto &c_dist : c_dists->second)
                     if (sat.value(c_dist->b) == Undefined)
                         if (_dists[c_dist->to][c_dist->from] < -c_dist->dist)
@@ -511,7 +511,7 @@ namespace smt
                             var c_to = c_dist->from;
                             while (c_to != c_dist->to)
                             {
-                                if (const auto &c_d = dist_constr.find({_preds[c_dist->to][c_to], c_to}); c_d != dist_constr.end())
+                                if (const auto &c_d = dist_constr.find({_preds[c_dist->to][c_to], c_to}); c_d != dist_constr.cend())
                                     if (sat.value(c_d->second->b) == True)
                                         cnfl.push_back(!c_d->second->b);
                                     else if (sat.value(c_d->second->b) == False)
@@ -528,7 +528,7 @@ namespace smt
                             var c_to = c_dist->to;
                             while (c_to != c_dist->from)
                             {
-                                if (const auto &c_d = dist_constr.find({_preds[c_dist->from][c_to], c_to}); c_d != dist_constr.end())
+                                if (const auto &c_d = dist_constr.find({_preds[c_dist->from][c_to], c_to}); c_d != dist_constr.cend())
                                     if (sat.value(c_d->second->b) == True)
                                         cnfl.push_back(!c_d->second->b);
                                     else if (sat.value(c_d->second->b) == False)
@@ -551,13 +551,13 @@ namespace smt
 
         if (from == 0)
         {
-            if (const auto at_c_x = listening.find(to); at_c_x != listening.end())
+            if (const auto at_c_x = listening.find(to); at_c_x != listening.cend())
                 for (const auto &l : at_c_x->second)
                     l->rdl_value_change(to);
         }
         else if (to == 0)
         {
-            if (const auto at_c_x = listening.find(from); at_c_x != listening.end())
+            if (const auto at_c_x = listening.find(from); at_c_x != listening.cend())
                 for (const auto &l : at_c_x->second)
                     l->rdl_value_change(from);
         }

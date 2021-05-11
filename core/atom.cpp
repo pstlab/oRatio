@@ -39,7 +39,7 @@ namespace ratio
             case 0:
                 return TRUE_lit;
             case 1:
-                return *eqs.begin();
+                return *eqs.cbegin();
             default:
                 return get_core().get_sat_core().new_conj(eqs);
             }

@@ -135,7 +135,7 @@ namespace ratio
             q.pop();
 
             const auto &t_it = all_types.find(&t);
-            if (t_it == all_types.end())
+            if (t_it == all_types.cend())
             { // we have a new type..
                 if (!t.is_primitive())
                     new_types.insert(&t);
@@ -178,7 +178,7 @@ namespace ratio
         for (const auto &[pred_name, pred] : cr.get_predicates())
         {
             const auto &p_it = all_types.find(pred);
-            if (p_it == all_types.end())
+            if (p_it == all_types.cend())
             {
                 new_predicates.insert(pred);
                 new_predicate(env, *pred);
@@ -197,7 +197,7 @@ namespace ratio
                 atom &atm = static_cast<atom &>(*a);
                 c_items.insert(&atm);
                 const auto &i_it = all_items.find(&atm);
-                if (i_it == all_items.end())
+                if (i_it == all_items.cend())
                     new_atom(env, atm);
             }
         for (const auto &[tp_name, tp] : cr.get_types())
@@ -210,7 +210,7 @@ namespace ratio
                 item &itm = *i;
                 c_items.insert(&itm);
                 const auto &i_it = all_items.find(&itm);
-                if (i_it == all_items.end())
+                if (i_it == all_items.cend())
                     new_item(env, itm);
             }
             for (const auto &[pred_name, pred] : q.front()->get_predicates())
@@ -219,7 +219,7 @@ namespace ratio
                     atom &atm = static_cast<atom &>(*a);
                     c_items.insert(&atm);
                     const auto &a_it = all_items.find(&atm);
-                    if (a_it == all_items.end())
+                    if (a_it == all_items.cend())
                         new_atom(env, atm);
                 }
             for (const auto &[tp_name, tp] : q.front()->get_types())
@@ -404,7 +404,7 @@ namespace ratio
         if (const bool_item *bi = dynamic_cast<const bool_item *>(&itm))
         { // the expression represents a primitive bool type..
             const auto &c_val = cr.get_sat_core().value(bi->l);
-            if (i_it == all_items.end())
+            if (i_it == all_items.cend())
             { // we create a new boolean..
                 jstring lit_s = env->NewStringUTF(((sign(bi->l) ? "b" : "!b") + std::to_string(variable(bi->l))).c_str());
                 new_obj = env->NewGlobalRef(env->NewObject(bool_item_cls, bool_item_ctr_id, slv_obj, lit_s, c_val));
@@ -427,7 +427,7 @@ namespace ratio
             jlong ub_rat_num = ub.get_rational().numerator(), ub_rat_den = ub.get_rational().denominator(), ub_inf_num = ub.get_infinitesimal().numerator(), ub_inf_den = ub.get_infinitesimal().denominator();
             jlong val_rat_num = val.get_rational().numerator(), val_rat_den = val.get_rational().denominator(), val_inf_num = val.get_infinitesimal().numerator(), val_inf_den = val.get_infinitesimal().denominator();
 
-            if (i_it == all_items.end())
+            if (i_it == all_items.cend())
             { // we create a new arith..
                 jobject c_type = all_types.at(&itm.get_type());
                 jstring lit_s = env->NewStringUTF(to_string(ai->l).c_str());
@@ -458,7 +458,7 @@ namespace ratio
             for (const auto &v : vals)
                 env->SetObjectArrayElement(vals_array, static_cast<jsize>(i++), all_items.at(static_cast<const item *>(v)));
 
-            if (i_it == all_items.end())
+            if (i_it == all_items.cend())
             { // we create a new enum..
                 jobject c_type = all_types.at(&itm.get_type());
                 jstring lit_s = env->NewStringUTF(("e" + std::to_string(ei->ev)).c_str());
@@ -478,7 +478,7 @@ namespace ratio
         else if (const string_item *si = dynamic_cast<const string_item *>(&itm))
         { // the expression represents a primitive string type..
             jstring c_val = env->NewStringUTF(si->get_value().c_str());
-            if (i_it == all_items.end())
+            if (i_it == all_items.cend())
             {
                 new_obj = env->NewGlobalRef(env->NewObject(string_item_cls, string_item_ctr_id, slv_obj, c_val));
                 env->CallVoidMethod(c_obj, mthd_id, i_name, new_obj);

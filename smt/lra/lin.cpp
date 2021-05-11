@@ -14,7 +14,7 @@ namespace smt
         for (const auto &term : right.vars)
         {
             const auto trm_it = res.vars.find(term.first);
-            if (trm_it == res.vars.end())
+            if (trm_it == res.vars.cend())
                 res.vars.insert(term);
             else
             {
@@ -45,7 +45,7 @@ namespace smt
     {
         lin res = *this;
         for (const auto &term : right.vars)
-            if (const auto trm_it = res.vars.find(term.first); trm_it == res.vars.end())
+            if (const auto trm_it = res.vars.find(term.first); trm_it == res.vars.cend())
                 res.vars.emplace(term.first, -term.second);
             else
             {
@@ -101,7 +101,7 @@ namespace smt
     SMT_EXPORT lin lin::operator+=(const lin &right) noexcept
     {
         for (const auto &term : right.vars)
-            if (const auto trm_it = vars.find(term.first); trm_it == vars.end())
+            if (const auto trm_it = vars.find(term.first); trm_it == vars.cend())
                 vars.insert(term);
             else
             {
@@ -122,7 +122,7 @@ namespace smt
     SMT_EXPORT lin lin::operator-=(const lin &right) noexcept
     {
         for (const auto &[v, c] : right.vars)
-            if (const auto trm_it = vars.find(v); trm_it == vars.end())
+            if (const auto trm_it = vars.find(v); trm_it == vars.cend())
                 vars.emplace(v, -c);
             else
             {
@@ -184,7 +184,7 @@ namespace smt
             return to_string(rhs.known_term);
 
         std::string s;
-        for (std::map<const var, rational>::const_iterator it = rhs.vars.cbegin(); it != rhs.vars.cend(); ++it)
+        for (auto it = rhs.vars.cbegin(); it != rhs.vars.cend(); ++it)
             if (it == rhs.vars.cbegin())
             {
                 if (it->second == rational::ONE)
