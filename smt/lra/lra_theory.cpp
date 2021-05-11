@@ -77,7 +77,7 @@ namespace smt
             return at_asrt->second;
         else
         { // we need to create a new control variable..
-            const var ctr = sat.new_var();
+            const auto ctr = sat.new_var();
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
@@ -120,7 +120,7 @@ namespace smt
             return at_asrt->second;
         else
         { // we need to create a new control variable..
-            const var ctr = sat.new_var();
+            const auto ctr = sat.new_var();
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
@@ -163,7 +163,7 @@ namespace smt
             return at_asrt->second;
         else
         { // we need to create a new control variable..
-            const var ctr = sat.new_var();
+            const auto ctr = sat.new_var();
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
@@ -206,7 +206,7 @@ namespace smt
             return at_asrt->second;
         else
         { // we need to create a new control variable..
-            const var ctr = sat.new_var();
+            const auto ctr = sat.new_var();
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);

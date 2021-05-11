@@ -110,7 +110,7 @@ namespace smt
             return at_expr->second;
         else
         { // we need to create a new variable..
-            auto ctr = lit(new_var());
+            const auto ctr = lit(new_var());
             if (!new_clause({!ctr, !left, right}))
                 return FALSE_lit;
             if (!new_clause({!ctr, left, !right}))
@@ -150,7 +150,7 @@ namespace smt
             return at_expr->second;
         else
         { // we need to create a new variable..
-            auto ctr = lit(new_var());
+            const auto ctr = lit(new_var());
             std::vector<lit> lits;
             lits.reserve(c_lits.size() + 1);
             lits.push_back(ctr);
@@ -195,7 +195,7 @@ namespace smt
             return at_expr->second;
         else
         { // we need to create a new variable..
-            auto ctr = lit(new_var());
+            const auto ctr = lit(new_var());
             std::vector<lit> lits;
             lits.reserve(c_lits.size() + 1);
             lits.push_back(!ctr);
