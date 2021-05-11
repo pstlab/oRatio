@@ -46,21 +46,21 @@ namespace ratio
                     { // we freeze the parameters of the starting atoms..
                         if (int_pred.is_assignable_from(atm->get_type()))
                         { // we have an interval atom..
-                            for (const auto &expr : atm->get_exprs())
-                                if (expr.first.compare(END))
-                                    if (arith_item *ai = dynamic_cast<arith_item *>(&*expr.second))
-                                        frozen_nums.emplace(ai, slv.arith_value(expr.second));
-                                    else if (var_item *vi = dynamic_cast<var_item *>(&*expr.second))
-                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(expr.second).begin()));
+                            for (const auto &[xpr_name, xpr] : atm->get_exprs())
+                                if (xpr_name.compare(END))
+                                    if (arith_item *ai = dynamic_cast<arith_item *>(&*xpr))
+                                        frozen_nums.emplace(ai, slv.arith_value(xpr));
+                                    else if (var_item *vi = dynamic_cast<var_item *>(&*xpr))
+                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).begin()));
                         }
                         if (int_pred.is_assignable_from(atm->get_type()))
                         { // we have an impulsive atom..
-                            for (const auto &expr : atm->get_exprs())
-                                if (expr.first.compare(AT))
-                                    if (arith_item *ai = dynamic_cast<arith_item *>(&*expr.second))
-                                        frozen_nums.emplace(ai, slv.arith_value(expr.second));
-                                    else if (var_item *vi = dynamic_cast<var_item *>(&*expr.second))
-                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(expr.second).begin()));
+                            for (const auto &[xpr_name, xpr] : atm->get_exprs())
+                                if (xpr_name.compare(AT))
+                                    if (arith_item *ai = dynamic_cast<arith_item *>(&*xpr))
+                                        frozen_nums.emplace(ai, slv.arith_value(xpr));
+                                    else if (var_item *vi = dynamic_cast<var_item *>(&*xpr))
+                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).begin()));
                         }
                     }
 
@@ -170,18 +170,18 @@ namespace ratio
 
         // we collect all the (active) atoms..
         std::unordered_set<atom *> all_atoms;
-        for (const auto &p : slv.get_predicates())
-            for (const auto &atm : p.second->get_instances())
+        for (const auto &[pred_name, pred] : slv.get_predicates())
+            for (const auto &atm : pred->get_instances())
                 if (slv.get_sat_core().value(static_cast<atom &>(*atm).get_sigma()) == True)
                     all_atoms.insert(static_cast<atom *>(&*atm));
         std::queue<type *> q;
-        for (const auto &t : slv.get_types())
-            if (!t.second->is_primitive())
-                q.push(t.second);
+        for (const auto &[tp_name, tp] : slv.get_types())
+            if (!tp->is_primitive())
+                q.push(tp);
         while (!q.empty())
         {
-            for (const auto &p : q.front()->get_predicates())
-                for (const auto &atm : p.second->get_instances())
+            for (const auto &[pred_name, pred] : q.front()->get_predicates())
+                for (const auto &atm : pred->get_instances())
                     if (slv.get_sat_core().value(static_cast<atom &>(*atm).get_sigma()) == True)
                         all_atoms.insert(static_cast<atom *>(&*atm));
             q.pop();

@@ -48,8 +48,8 @@ namespace smt
         lin expr = left - right;
         std::vector<var> vars;
         vars.reserve(expr.vars.size());
-        for (const auto &term : expr.vars)
-            vars.push_back(term.first);
+        for (const auto &[v, c] : expr.vars)
+            vars.push_back(v);
         for (const auto &v : vars)
             if (const auto at_v = tableau.find(v); at_v != tableau.end())
             {
@@ -91,8 +91,8 @@ namespace smt
         lin expr = left - right;
         std::vector<var> vars;
         vars.reserve(expr.vars.size());
-        for (const auto &term : expr.vars)
-            vars.push_back(term.first);
+        for (const auto &[v, c] : expr.vars)
+            vars.push_back(v);
         for (const auto &v : vars)
             if (const auto at_v = tableau.find(v); at_v != tableau.end())
             {
@@ -134,8 +134,8 @@ namespace smt
         lin expr = left - right;
         std::vector<var> vars;
         vars.reserve(expr.vars.size());
-        for (const auto &term : expr.vars)
-            vars.push_back(term.first);
+        for (const auto &[v, c] : expr.vars)
+            vars.push_back(v);
         for (const auto &v : vars)
             if (const auto at_v = tableau.find(v); at_v != tableau.end())
             {
@@ -177,8 +177,8 @@ namespace smt
         lin expr = left - right;
         std::vector<var> vars;
         vars.reserve(expr.vars.size());
-        for (const auto &term : expr.vars)
-            vars.push_back(term.first);
+        for (const auto &[v, c] : expr.vars)
+            vars.push_back(v);
         for (const auto &v : vars)
             if (const auto at_v = tableau.find(v); at_v != tableau.end())
             {
@@ -260,11 +260,11 @@ namespace smt
                     pivot_and_update(x_i, (*x_j_it).first, lb(x_i));
                 else
                 { // we generate an explanation for the conflict..
-                    for (const auto &term : f_row->l.vars)
-                        if (is_positive(term.second))
-                            cnfl.push_back(!c_bounds[lra_theory::ub_index(term.first)].reason);
-                        else if (is_negative(term.second))
-                            cnfl.push_back(!c_bounds[lra_theory::lb_index(term.first)].reason);
+                    for (const auto &[v, c] : f_row->l.vars)
+                        if (is_positive(c))
+                            cnfl.push_back(!c_bounds[lra_theory::ub_index(v)].reason);
+                        else if (is_negative(c))
+                            cnfl.push_back(!c_bounds[lra_theory::lb_index(v)].reason);
                     cnfl.push_back(!c_bounds[lra_theory::lb_index(x_i)].reason);
                     return false;
                 }
@@ -276,11 +276,11 @@ namespace smt
                     pivot_and_update(x_i, (*x_j_it).first, ub(x_i));
                 else
                 { // we generate an explanation for the conflict..
-                    for (const auto &term : f_row->l.vars)
-                        if (is_positive(term.second))
-                            cnfl.push_back(!c_bounds[lra_theory::lb_index(term.first)].reason);
-                        else if (is_negative(term.second))
-                            cnfl.push_back(!c_bounds[lra_theory::ub_index(term.first)].reason);
+                    for (const auto &[v, c] : f_row->l.vars)
+                        if (is_positive(c))
+                            cnfl.push_back(!c_bounds[lra_theory::lb_index(v)].reason);
+                        else if (is_negative(c))
+                            cnfl.push_back(!c_bounds[lra_theory::ub_index(v)].reason);
                     cnfl.push_back(!c_bounds[lra_theory::ub_index(x_i)].reason);
                     return false;
                 }
@@ -440,22 +440,22 @@ namespace smt
             sat.get_thread_pool().enqueue([this, x_j, expr, r] {
                 rational cc = r->l.vars[x_j];
                 r->l.vars.erase(x_j);
-                for (const auto &term : std::map<const var, rational>(expr.vars))
-                    if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
+                for (const auto &[v, c] : std::map<const var, rational>(expr.vars))
+                    if (const auto trm_it = r->l.vars.find(v); trm_it == r->l.vars.end())
                     { // we are adding a new term to 'r'..
-                        r->l.vars.emplace(term.first, term.second * cc);
-                        std::lock_guard<std::mutex> lock(t_mtxs[term.first]);
-                        t_watches[term.first].emplace(r);
+                        r->l.vars.emplace(v, c * cc);
+                        std::lock_guard<std::mutex> lock(t_mtxs[v]);
+                        t_watches[v].emplace(r);
                     }
                     else
                     { // we are updating an existing term of 'r'..
-                        assert(trm_it->first == term.first);
-                        trm_it->second += term.second * cc;
+                        assert(trm_it->first == v);
+                        trm_it->second += c * cc;
                         if (trm_it->second == rational::ZERO)
                         { // the updated term's coefficient has become equal to zero, hence we can remove the term..
                             r->l.vars.erase(trm_it);
-                            std::lock_guard<std::mutex> lock(t_mtxs[term.first]);
-                            t_watches[term.first].erase(r);
+                            std::lock_guard<std::mutex> lock(t_mtxs[v]);
+                            t_watches[v].erase(r);
                         }
                     }
                 r->l.known_term += expr.known_term * cc;
@@ -466,20 +466,20 @@ namespace smt
         { // 'r' is a row in which 'x_j' appears..
             rational cc = r->l.vars[x_j];
             r->l.vars.erase(x_j);
-            for (const auto &term : std::map<const var, rational>(expr.vars))
-                if (const auto trm_it = r->l.vars.find(term.first); trm_it == r->l.vars.end())
+            for (const auto &[v, c] : std::map<const var, rational>(expr.vars))
+                if (const auto trm_it = r->l.vars.find(v); trm_it == r->l.vars.end())
                 { // we are adding a new term to 'r'..
-                    r->l.vars.emplace(term.first, term.second * cc);
-                    t_watches[term.first].emplace(r);
+                    r->l.vars.emplace(v, c * cc);
+                    t_watches[v].emplace(r);
                 }
                 else
                 { // we are updating an existing term of 'r'..
-                    assert(trm_it->first == term.first);
-                    trm_it->second += term.second * cc;
+                    assert(trm_it->first == v);
+                    trm_it->second += c * cc;
                     if (trm_it->second == rational::ZERO)
                     { // the updated term's coefficient has become equal to zero, hence we can remove the term..
                         r->l.vars.erase(trm_it);
-                        t_watches[term.first].erase(r);
+                        t_watches[v].erase(r);
                     }
                 }
             r->l.known_term += expr.known_term * cc;
@@ -493,8 +493,8 @@ namespace smt
     {
         row *r = new row(*this, x, l);
         tableau.emplace(x, r);
-        for (const auto &term : l.vars)
-            t_watches[term.first].emplace(r);
+        for (const auto &[v, c] : l.vars)
+            t_watches[v].emplace(r);
     }
 
     json lra_theory::to_json() const noexcept

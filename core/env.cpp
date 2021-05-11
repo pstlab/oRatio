@@ -23,12 +23,12 @@ namespace ratio
     json env::to_json() const noexcept
     {
         std::vector<json> j_exprs;
-        for (const auto &c_expr : exprs)
+        for (const auto &[xpr_name, xpr] : exprs)
         {
             json j_env;
-            j_env->set("name", new string_val(c_expr.first));
-            j_env->set("type", new string_val(c_expr.second->get_type().get_full_name()));
-            j_env->set("value", c_expr.second->value_to_json());
+            j_env->set("name", new string_val(xpr_name));
+            j_env->set("type", new string_val(xpr->get_type().get_full_name()));
+            j_env->set("value", xpr->value_to_json());
             j_exprs.push_back(j_env);
         }
         return new array_val(j_exprs);

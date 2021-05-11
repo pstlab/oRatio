@@ -7,8 +7,8 @@ namespace ratio
     scope::~scope()
     {
         // we delete the fields defined within this scope..
-        for (const auto &f : fields)
-            delete f.second;
+        for (const auto &[f_name, f] : fields)
+            delete f;
     }
 
     CORE_EXPORT const field &scope::get_field(const std::string &name) const

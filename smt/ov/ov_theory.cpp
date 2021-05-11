@@ -75,9 +75,9 @@ namespace smt
         else
         {
             std::unordered_set<const var_value *> intersection;
-            for (const auto &v : assigns[left])
-                if (assigns[right].count(v.first))
-                    intersection.insert(v.first);
+            for (const auto &[val, l] : assigns[left])
+                if (assigns[right].count(val))
+                    intersection.insert(val);
 
             if (intersection.empty())
                 return FALSE_lit;
@@ -87,16 +87,16 @@ namespace smt
 
             bool nc;
             // the values outside the intersection are pruned if the equality control variable becomes true..
-            for (const auto &v : assigns[left])
-                if (!intersection.count(v.first))
+            for (const auto &[val, l] : assigns[left])
+                if (!intersection.count(val))
                 {
-                    nc = sat.new_clause({!eq_lit, !v.second});
+                    nc = sat.new_clause({!eq_lit, !l});
                     assert(nc);
                 }
-            for (const auto &v : assigns[right])
-                if (!intersection.count(v.first))
+            for (const auto &[val, l] : assigns[right])
+                if (!intersection.count(val))
                 {
-                    nc = sat.new_clause({!eq_lit, !v.second});
+                    nc = sat.new_clause({!eq_lit, !l});
                     assert(nc);
                 }
             // the values inside the intersection are made pairwise equal if the equality variable becomes true..
@@ -118,9 +118,9 @@ namespace smt
     SMT_EXPORT std::unordered_set<const var_value *> ov_theory::value(var v) const noexcept
     {
         std::unordered_set<const var_value *> vals;
-        for (const auto &val : assigns[v])
-            if (sat.value(val.second) != False)
-                vals.insert(val.first);
+        for (const auto &[val, l] : assigns[v])
+            if (sat.value(l) != False)
+                vals.insert(val);
         return vals;
     }
 

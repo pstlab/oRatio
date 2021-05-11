@@ -48,9 +48,9 @@ namespace ratio
         // some cleanings..
         sts.clear();
         std::queue<type *> q;
-        for (const auto &t : get_types())
-            if (!t.second->is_primitive())
-                q.push(t.second);
+        for (const auto &[tp_name, tp] : get_types())
+            if (!tp->is_primitive())
+                q.push(tp);
         while (!q.empty())
         {
             if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
@@ -148,8 +148,8 @@ namespace ratio
         // we take the decision..
         if (!get_sat_core().assume(ch))
             throw unsolvable_exception();
-        assert(std::all_of(phis.begin(), phis.end(), [this](std::pair<var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(rhos.begin(), rhos.end(), [this](std::pair<var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
+        assert(std::all_of(phis.begin(), phis.end(), [this](auto v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](auto *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(rhos.begin(), rhos.end(), [this](auto v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](auto *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
 
         FIRE_STATE_CHANGED();
 
@@ -349,8 +349,8 @@ namespace ratio
 
         if (!get_sat_core().propagate())
             throw unsolvable_exception();
-        assert(std::all_of(phis.begin(), phis.end(), [this](std::pair<var, std::vector<flaw *>> v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](flaw *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(rhos.begin(), rhos.end(), [this](std::pair<var, std::vector<resolver *>> v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](resolver *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
+        assert(std::all_of(phis.begin(), phis.end(), [this](auto v_fs) { return std::all_of(v_fs.second.begin(), v_fs.second.end(), [this](auto *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(rhos.begin(), rhos.end(), [this](auto v_rs) { return std::all_of(v_rs.second.begin(), v_rs.second.end(), [this](auto *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
 
         FIRE_STATE_CHANGED();
 
@@ -455,11 +455,11 @@ namespace ratio
             flaws.erase(f);
 
         // we restore the flaws' estimated costs..
-        for (const auto &f : trail.back().old_f_costs)
+        for (const auto &[f, cost] : trail.back().old_f_costs)
         {
-            // assert(f.first->est_cost != f.second);
-            f.first->est_cost = f.second;
-            FIRE_FLAW_COST_CHANGED(*f.first);
+            // assert(f.first->est_cost != cost);
+            f->est_cost = cost;
+            FIRE_FLAW_COST_CHANGED(*f);
         }
 
         trail.pop_back();
@@ -506,12 +506,12 @@ namespace ratio
                 for (const auto &inc : incs)
                 {
                     double bst_commit = std::numeric_limits<double>::infinity();
-                    for (const auto &ch : inc)
-                        if (ch.second < bst_commit)
-                            bst_commit = ch.second;
+                    for (const auto &[choice, commit] : inc)
+                        if (commit < bst_commit)
+                            bst_commit = commit;
                     double c_k_inv = 0;
-                    for (const auto &ch : inc)
-                        c_k_inv += 1l / (1l + (ch.second - bst_commit));
+                    for (const auto &[choice, commit] : inc)
+                        c_k_inv += 1l / (1l + (commit - bst_commit));
                     if (c_k_inv < k_inv)
                     {
                         k_inv = c_k_inv;
@@ -520,7 +520,7 @@ namespace ratio
                 }
 
                 // we select the best choice (i.e. the least committing one) from those available for the best flaw..
-                take_decision(std::min_element(bst_inc.begin(), bst_inc.end(), [](std::pair<lit, double> const &ch0, std::pair<lit, double> const &ch1) { return ch0.second < ch1.second; })->first);
+                take_decision(std::min_element(bst_inc.begin(), bst_inc.end(), [](const auto &ch0, const auto &ch1) { return ch0.second < ch1.second; })->first);
 
                 // we re-collect all the inconsistencies from all the smart-types..
                 incs = get_incs();
@@ -536,7 +536,7 @@ namespace ratio
             const auto c_incs = st->get_current_incs();
             incs.insert(incs.end(), c_incs.begin(), c_incs.end());
         }
-        assert(std::all_of(incs.begin(), incs.end(), [](std::vector<std::pair<lit, double>> inc) { return std::all_of(inc.begin(), inc.end(), [](std::pair<lit, double> ch) { return std::isfinite(ch.second); }); }));
+        assert(std::all_of(incs.begin(), incs.end(), [](const auto &inc) { return std::all_of(inc.begin(), inc.end(), [](const auto &ch) { return std::isfinite(ch.second); }); }));
         return incs;
     }
 

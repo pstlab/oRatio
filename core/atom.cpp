@@ -26,9 +26,9 @@ namespace ratio
             q.push(&get_type());
             while (!q.empty())
             {
-                for (const auto &f : q.front()->get_fields())
-                    if (!f.second->is_synthetic())
-                        eqs.push_back(get(f.first)->new_eq(*i.get(f.first)));
+                for (const auto &[f_name, f] : q.front()->get_fields())
+                    if (!f->is_synthetic())
+                        eqs.push_back(get(f_name)->new_eq(*i.get(f_name)));
                 for (const auto &st : q.front()->get_supertypes())
                     q.push(st);
                 q.pop();
@@ -60,9 +60,9 @@ namespace ratio
             q.push(&get_type());
             while (!q.empty())
             {
-                for (const auto &f : q.front()->get_fields())
-                    if (!f.second->is_synthetic())
-                        if (!get(f.first)->equates(*i.get(f.first)))
+                for (const auto &[f_name, f] : q.front()->get_fields())
+                    if (!f->is_synthetic())
+                        if (!get(f_name)->equates(*i.get(f_name)))
                             return false;
                 for (const auto &st : q.front()->get_supertypes())
                     q.push(st);

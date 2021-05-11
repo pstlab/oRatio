@@ -17,8 +17,8 @@ namespace ratio
     propositional_state::~propositional_state()
     {
         // we clear the atom listeners..
-        for (const auto &a : atoms)
-            delete a.second;
+        for (const auto &[atm, lstnr] : atoms)
+            delete lstnr;
     }
 
     std::vector<std::vector<std::pair<lit, double>>> propositional_state::get_current_incs()

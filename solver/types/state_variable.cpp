@@ -14,8 +14,8 @@ namespace ratio
     state_variable::~state_variable()
     {
         // we clear the atom listeners..
-        for (const auto &a : atoms)
-            delete a.second;
+        for (const auto &[atm, lstnrs] : atoms)
+            delete lstnrs;
     }
 
     std::vector<std::vector<std::pair<lit, double>>> state_variable::get_current_incs()
@@ -38,7 +38,7 @@ namespace ratio
             }
 
         // we detect inconsistencies for each of the instances..
-        for (const auto &sv : sv_instances)
+        for (const auto &[sv, atms] : sv_instances)
         {
             // for each pulse, the atoms starting at that pulse..
             std::map<inf_rational, std::set<atom *>> starting_atoms;
@@ -47,7 +47,7 @@ namespace ratio
             // all the pulses of the timeline..
             std::set<inf_rational> pulses;
 
-            for (const auto &atm : sv.second)
+            for (const auto &atm : atms)
             {
                 arith_expr s_expr = atm->get(START);
                 arith_expr e_expr = atm->get(END);

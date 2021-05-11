@@ -75,8 +75,8 @@ namespace ratio
     std::vector<const method *> get_methods() const noexcept override
     {
       std::vector<const method *> c_methods;
-      for (const auto &ms : methods)
-        c_methods.insert(c_methods.begin(), ms.second.begin(), ms.second.end());
+      for (const auto &[mthd_name, mthds] : methods)
+        c_methods.insert(c_methods.begin(), mthds.begin(), mthds.end());
       return c_methods;
     }
 

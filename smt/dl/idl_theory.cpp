@@ -70,23 +70,23 @@ namespace smt
             {
                 expr = expr / expr.vars.begin()->second;
                 auto it = expr.vars.begin();
-                const auto first_term = *it++;
-                assert(first_term.second == rational::ONE);
-                const auto second_term = *it;
-                if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+                const auto [v0, c0] = *it++;
+                assert(c0 == rational::ONE);
+                const auto [v1, c1] = *it;
+                if (c1 != -rational::ONE || !is_integer(expr.known_term))
                     throw std::invalid_argument("not a valid integer difference logic constraint..");
-                return new_distance(first_term.first, second_term.first, expr.known_term.numerator() - 1);
+                return new_distance(v0, v1, expr.known_term.numerator() - 1);
             }
             else
             {
                 expr = expr / expr.vars.begin()->second;
                 auto it = expr.vars.begin();
-                const auto first_term = *it++;
-                assert(first_term.second == rational::ONE);
-                const auto second_term = *it;
-                if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+                const auto [v0, c0] = *it++;
+                assert(c0 == rational::ONE);
+                const auto [v1, c1] = *it;
+                if (c1 != -rational::ONE || !is_integer(expr.known_term))
                     throw std::invalid_argument("not a valid integer difference logic constraint..");
-                return new_distance(second_term.first, first_term.first, -expr.known_term.numerator() - 1);
+                return new_distance(v1, v0, -expr.known_term.numerator() - 1);
             }
         default:
             throw std::invalid_argument("not a valid integer difference logic constraint..");
@@ -120,23 +120,23 @@ namespace smt
             {
                 expr = expr / expr.vars.begin()->second;
                 auto it = expr.vars.begin();
-                const auto first_term = *it++;
-                assert(first_term.second == rational::ONE);
-                const auto second_term = *it;
-                if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+                const auto [v0, c0] = *it++;
+                assert(c0 == rational::ONE);
+                const auto [v1, c1] = *it;
+                if (c1 != -rational::ONE || !is_integer(expr.known_term))
                     throw std::invalid_argument("not a valid integer difference logic constraint..");
-                return new_distance(first_term.first, second_term.first, expr.known_term.numerator());
+                return new_distance(v0, v1, expr.known_term.numerator());
             }
             else
             {
                 expr = expr / expr.vars.begin()->second;
                 auto it = expr.vars.begin();
-                const auto first_term = *it++;
-                assert(first_term.second == rational::ONE);
-                const auto second_term = *it;
-                if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+                const auto [v0, c0] = *it++;
+                assert(v0 == rational::ONE);
+                const auto [v1, c1] = *it;
+                if (c1 != -rational::ONE || !is_integer(expr.known_term))
                     throw std::invalid_argument("not a valid integer difference logic constraint..");
-                return new_distance(second_term.first, first_term.first, -expr.known_term.numerator());
+                return new_distance(v1, v0, -expr.known_term.numerator());
             }
         default:
             throw std::invalid_argument("not a valid integer difference logic constraint..");
@@ -165,14 +165,14 @@ namespace smt
         {
             expr = expr / expr.vars.begin()->second;
             auto it = expr.vars.begin();
-            const auto first_term = *it++;
-            assert(first_term.second == rational::ONE);
-            const auto second_term = *it;
-            if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+            const auto [v0, c0] = *it++;
+            assert(c0 == rational::ONE);
+            const auto [v1, c1] = *it;
+            if (c1 != -rational::ONE || !is_integer(expr.known_term))
                 throw std::invalid_argument("not a valid integer difference logic constraint..");
-            const auto dist = distance(first_term.first, second_term.first);
+            const auto dist = distance(v0, v1);
             if (dist.first <= expr.known_term.numerator() && dist.second >= expr.known_term.numerator())
-                return sat.new_conj({new_distance(first_term.first, second_term.first, expr.known_term.numerator()), new_distance(second_term.first, first_term.first, -expr.known_term.numerator())});
+                return sat.new_conj({new_distance(v0, v1, expr.known_term.numerator()), new_distance(v1, v0, -expr.known_term.numerator())});
             else
                 return FALSE_lit;
         }
@@ -208,23 +208,23 @@ namespace smt
             {
                 expr = expr / expr.vars.begin()->second;
                 auto it = expr.vars.begin();
-                const auto first_term = *it++;
-                assert(first_term.second == rational::ONE);
-                const auto second_term = *it;
-                if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+                const auto [v0, c0] = *it++;
+                assert(c0 == rational::ONE);
+                const auto [v1, c1] = *it;
+                if (c1 != -rational::ONE || !is_integer(expr.known_term))
                     throw std::invalid_argument("not a valid integer difference logic constraint..");
-                return new_distance(second_term.first, first_term.first, -expr.known_term.numerator());
+                return new_distance(v1, v0, -expr.known_term.numerator());
             }
             else
             {
                 expr = expr / expr.vars.begin()->second;
                 auto it = expr.vars.begin();
-                const auto first_term = *it++;
-                assert(first_term.second == rational::ONE);
-                const auto second_term = *it;
-                if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+                const auto [v0, c0] = *it++;
+                assert(c0 == rational::ONE);
+                const auto [v1, c1] = *it;
+                if (c1 != -rational::ONE || !is_integer(expr.known_term))
                     throw std::invalid_argument("not a valid integer difference logic constraint..");
-                return new_distance(first_term.first, second_term.first, expr.known_term.numerator());
+                return new_distance(v0, v1, expr.known_term.numerator());
             }
         default:
             throw std::invalid_argument("not a valid integer difference logic constraint..");
@@ -258,23 +258,23 @@ namespace smt
             {
                 expr = expr / expr.vars.begin()->second;
                 auto it = expr.vars.begin();
-                const auto first_term = *it++;
-                assert(first_term.second == rational::ONE);
-                const auto second_term = *it;
-                if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+                const auto [v0, c0] = *it++;
+                assert(c0 == rational::ONE);
+                const auto [v1, c1] = *it;
+                if (c1 != -rational::ONE || !is_integer(expr.known_term))
                     throw std::invalid_argument("not a valid integer difference logic constraint..");
-                return new_distance(second_term.first, first_term.first, -expr.known_term.numerator() - 1);
+                return new_distance(v1, v0, -expr.known_term.numerator() - 1);
             }
             else
             {
                 expr = expr / expr.vars.begin()->second;
                 auto it = expr.vars.begin();
-                const auto first_term = *it++;
-                assert(first_term.second == rational::ONE);
-                const auto second_term = *it;
-                if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+                const auto [v0, c0] = *it++;
+                assert(c0 == rational::ONE);
+                const auto [v1, c1] = *it;
+                if (c1 != -rational::ONE || !is_integer(expr.known_term))
                     throw std::invalid_argument("not a valid integer difference logic constraint..");
-                return new_distance(first_term.first, second_term.first, expr.known_term.numerator(), -1);
+                return new_distance(v0, v1, expr.known_term.numerator(), -1);
             }
         default:
             throw std::invalid_argument("not a valid integer difference logic constraint..");
@@ -307,11 +307,11 @@ namespace smt
         {
             const auto expr = l / l.vars.begin()->second;
             std::map<const var, rational>::const_iterator it = expr.vars.begin();
-            const auto first_term = *it++;
-            const auto second_term = *it;
-            if (!is_integer(second_term.second) || second_term.second.numerator() != -1 || !is_integer(l.known_term))
+            const auto [v0, c0] = *it++;
+            const auto [v1, c1] = *it;
+            if (!is_integer(c1) || c1.numerator() != -1 || !is_integer(l.known_term))
                 throw std::invalid_argument("not a valid integer difference logic expression..");
-            const auto dist = distance(second_term.first, first_term.first);
+            const auto dist = distance(v1, v0);
             c_lb += dist.first + expr.known_term.numerator();
             c_ub += dist.second + expr.known_term.numerator();
         }
@@ -339,12 +339,12 @@ namespace smt
         {
             expr = expr / expr.vars.begin()->second;
             auto it = expr.vars.begin();
-            const auto first_term = *it++;
-            assert(first_term.second == rational::ONE);
-            const auto second_term = *it;
-            if (second_term.second != -rational::ONE || !is_integer(expr.known_term))
+            const auto [v0, c0] = *it++;
+            assert(c0 == rational::ONE);
+            const auto [v1, c1] = *it;
+            if (c1 != -rational::ONE || !is_integer(expr.known_term))
                 throw std::invalid_argument("not a valid real difference logic constraint..");
-            return distance(first_term.first, second_term.first);
+            return distance(v0, v1);
         }
         default:
             throw std::invalid_argument("not a valid real difference logic constraint..");
@@ -357,19 +357,19 @@ namespace smt
             return l0.known_term == l1.known_term;
         else if (l0.vars.empty() && l1.vars.size() == 1)
         {
-            const auto ae_bounds = bounds(l1);
-            return ae_bounds.first <= l0.known_term && ae_bounds.second >= l0.known_term;
+            const auto [lb, ub] = bounds(l1);
+            return lb <= l0.known_term && ub >= l0.known_term;
         }
         else if (l0.vars.size() == 1 && l1.vars.empty())
         {
-            const auto l0_bounds = bounds(l0);
-            return l0_bounds.first <= l1.known_term && l0_bounds.second >= l1.known_term;
+            const auto [lb, ub] = bounds(l0);
+            return lb <= l1.known_term && ub >= l1.known_term;
         }
         else if (l0.vars.size() == 1 && l1.vars.size() == 1)
         {
-            const auto dist = distance(l0.vars.begin()->first, l1.vars.begin()->first);
+            const auto [lb, ub] = distance(l0.vars.begin()->first, l1.vars.begin()->first);
             const auto kt = l0.known_term - l1.known_term;
-            return dist.first + kt <= rational::ZERO && dist.second + kt >= rational::ZERO;
+            return lb + kt <= rational::ZERO && ub + kt >= rational::ZERO;
         }
         else
             throw std::invalid_argument("not a valid comparison between real difference logic expressions..");
@@ -448,7 +448,7 @@ namespace smt
     bool idl_theory::check() noexcept
     {
         assert(cnfl.empty());
-        assert(std::all_of(dist_constr.begin(), dist_constr.end(), [this](const std::pair<std::pair<var, var>, idl_distance *> &dist) {
+        assert(std::all_of(dist_constr.begin(), dist_constr.end(), [this](const auto &dist) {
             switch (sat.value(dist.second->b))
             {
             case True: // the constraint is asserted..
@@ -466,15 +466,15 @@ namespace smt
 
     void idl_theory::pop() noexcept
     {
-        for (const auto &dist : layers.back().old_dists)
-            _dists[dist.first.first][dist.first.second] = dist.second;
-        for (const auto &pred : layers.back().old_preds)
-            _preds[pred.first.first][pred.first.second] = pred.second;
-        for (const auto &dist : layers.back().old_constrs)
-            if (dist.second) // we replace the current constraint..
-                dist_constr.emplace(dist.first, dist.second);
+        for (const auto &[vars, dist] : layers.back().old_dists)
+            _dists[vars.first][vars.second] = dist;
+        for (const auto &[vars, pred] : layers.back().old_preds)
+            _preds[vars.first][vars.second] = pred;
+        for (const auto &[vars, dist] : layers.back().old_constrs)
+            if (dist) // we replace the current constraint..
+                dist_constr.emplace(vars, dist);
             else // we make some cleanings..
-                dist_constr.erase(dist.first);
+                dist_constr.erase(vars);
         layers.pop_back();
     }
 

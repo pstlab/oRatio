@@ -74,8 +74,8 @@ namespace smt
     SMT_EXPORT lin lin::operator*(const rational &right) const noexcept
     {
         lin res = *this;
-        for (auto &term : res.vars)
-            term.second *= right;
+        for (auto &[v, c] : res.vars)
+            c *= right;
         res.known_term *= right;
         return res;
     }
@@ -83,8 +83,8 @@ namespace smt
     SMT_EXPORT lin operator*(const rational &lhs, const lin &rhs) noexcept
     {
         lin res = rhs;
-        for (auto &term : res.vars)
-            term.second *= lhs;
+        for (auto &[v, c] : res.vars)
+            c *= lhs;
         res.known_term *= lhs;
         return res;
     }
@@ -92,8 +92,8 @@ namespace smt
     SMT_EXPORT lin lin::operator/(const rational &right) const noexcept
     {
         lin res = *this;
-        for (auto &term : res.vars)
-            term.second /= right;
+        for (auto &[v, c] : res.vars)
+            c /= right;
         res.known_term /= right;
         return res;
     }
@@ -121,12 +121,12 @@ namespace smt
 
     SMT_EXPORT lin lin::operator-=(const lin &right) noexcept
     {
-        for (const auto &term : right.vars)
-            if (const auto trm_it = vars.find(term.first); trm_it == vars.end())
-                vars.emplace(term.first, -term.second);
+        for (const auto &[v, c] : right.vars)
+            if (const auto trm_it = vars.find(v); trm_it == vars.end())
+                vars.emplace(v, -c);
             else
             {
-                trm_it->second -= term.second;
+                trm_it->second -= c;
                 if (trm_it->second == rational::ZERO)
                     vars.erase(trm_it);
             }
@@ -149,8 +149,8 @@ namespace smt
             known_term = rational::ZERO;
         }
         else
-            for (auto &term : vars)
-                term.second *= right;
+            for (auto &[v, c] : vars)
+                c *= right;
         return *this;
     }
 
@@ -163,8 +163,8 @@ namespace smt
             known_term = rational::ZERO;
         }
         else
-            for (auto &term : vars)
-                term.second /= right;
+            for (auto &[v, c] : vars)
+                c /= right;
         known_term /= right;
         return *this;
     }
@@ -172,8 +172,8 @@ namespace smt
     SMT_EXPORT lin lin::operator-() const noexcept
     {
         lin res;
-        for (const auto &term : vars)
-            res.vars.at(term.first) = -term.second;
+        for (const auto &[v, c] : vars)
+            res.vars.at(v) = -c;
         res.known_term = -known_term;
         return res;
     }

@@ -117,28 +117,28 @@ namespace smt
         if (is_positive(l.vars.at(v)))
         {
             inf_rational lb(0);
-            for (const auto &term : l.vars)
-                if (is_positive(term.second))
-                    if (is_negative_infinite(th.lb(term.first)))
+            for (const auto &[v, c] : l.vars)
+                if (is_positive(c))
+                    if (is_negative_infinite(th.lb(v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        lb += term.second * th.lb(term.first);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(term.first)].reason);
+                        lb += c * th.lb(v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(v)].reason);
                     }
-                else if (is_negative(term.second))
-                    if (is_positive_infinite(th.ub(term.first)))
+                else if (is_negative(c))
+                    if (is_positive_infinite(th.ub(v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        lb += term.second * th.ub(term.first);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(term.first)].reason);
+                        lb += c * th.ub(v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(v)].reason);
                     }
 
             if (lb > th.lb(x))
@@ -177,28 +177,28 @@ namespace smt
         else
         {
             inf_rational ub(0);
-            for (const auto &term : l.vars)
-                if (is_positive(term.second))
-                    if (is_positive_infinite(th.ub(term.first)))
+            for (const auto &[v, c] : l.vars)
+                if (is_positive(c))
+                    if (is_positive_infinite(th.ub(v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        ub += term.second * th.ub(term.first);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(term.first)].reason);
+                        ub += c * th.ub(v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(v)].reason);
                     }
-                else if (is_negative(term.second))
-                    if (is_negative_infinite(th.lb(term.first)))
+                else if (is_negative(c))
+                    if (is_negative_infinite(th.lb(v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        ub += term.second * th.lb(term.first);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(term.first)].reason);
+                        ub += c * th.lb(v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(v)].reason);
                     }
 
             if (ub < th.ub(x))
@@ -247,28 +247,28 @@ namespace smt
         if (is_positive(l.vars.at(v)))
         {
             inf_rational ub(0);
-            for (const auto &term : l.vars)
-                if (is_positive(term.second))
-                    if (is_positive_infinite(th.ub(term.first)))
+            for (const auto &[v, c] : l.vars)
+                if (is_positive(c))
+                    if (is_positive_infinite(th.ub(v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        ub += term.second * th.ub(term.first);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(term.first)].reason);
+                        ub += c * th.ub(v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(v)].reason);
                     }
-                else if (is_negative(term.second))
-                    if (is_negative_infinite(th.lb(term.first)))
+                else if (is_negative(c))
+                    if (is_negative_infinite(th.lb(v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        ub += term.second * th.lb(term.first);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(term.first)].reason);
+                        ub += c * th.lb(v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(v)].reason);
                     }
 
             if (ub < th.ub(x))
@@ -307,28 +307,28 @@ namespace smt
         else
         {
             inf_rational lb(0);
-            for (const auto &term : l.vars)
-                if (is_positive(term.second))
-                    if (is_negative_infinite(th.lb(term.first)))
+            for (const auto &[v, c] : l.vars)
+                if (is_positive(c))
+                    if (is_negative_infinite(th.lb(v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        lb += term.second * th.lb(term.first);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(term.first)].reason);
+                        lb += c * th.lb(v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(v)].reason);
                     }
-                else if (is_negative(term.second))
-                    if (is_positive_infinite(th.ub(term.first)))
+                else if (is_negative(c))
+                    if (is_positive_infinite(th.ub(v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        lb += term.second * th.ub(term.first);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(term.first)].reason);
+                        lb += c * th.ub(v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(v)].reason);
                     }
 
             if (lb > th.lb(x))

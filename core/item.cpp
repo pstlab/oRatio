@@ -121,8 +121,8 @@ namespace ratio
 
     json arith_item::value_to_json() const noexcept
     {
-        const auto bounds = get_type().get_name().compare(TP_KEYWORD) == 0 ? get_core().get_rdl_theory().bounds(l) : get_core().get_lra_theory().bounds(l);
-        const auto val = get_type().get_name().compare(TP_KEYWORD) == 0 ? bounds.first : get_core().get_lra_theory().value(l);
+        const auto [lb, ub] = get_type().get_name().compare(TP_KEYWORD) == 0 ? get_core().get_rdl_theory().bounds(l) : get_core().get_lra_theory().bounds(l);
+        const auto val = get_type().get_name().compare(TP_KEYWORD) == 0 ? lb : get_core().get_lra_theory().value(l);
 
         json j_val;
         j_val->set("lin", new string_val(to_string(l)));
@@ -136,30 +136,30 @@ namespace ratio
             j_inf->set("den", new long_val(val.get_infinitesimal().denominator()));
             j_num_val->set("inf", j_inf);
         }
-        if (!is_negative_infinite(bounds.first))
+        if (!is_negative_infinite(lb))
         {
             json j_lb_bound;
-            j_lb_bound->set("num", new long_val(bounds.first.get_rational().numerator()));
-            j_lb_bound->set("den", new long_val(bounds.first.get_rational().denominator()));
+            j_lb_bound->set("num", new long_val(lb.get_rational().numerator()));
+            j_lb_bound->set("den", new long_val(lb.get_rational().denominator()));
             if (val.get_infinitesimal() != rational::ZERO)
             {
                 json j_inf;
-                j_inf->set("num", new long_val(bounds.first.get_infinitesimal().numerator()));
-                j_inf->set("den", new long_val(bounds.first.get_infinitesimal().denominator()));
+                j_inf->set("num", new long_val(lb.get_infinitesimal().numerator()));
+                j_inf->set("den", new long_val(lb.get_infinitesimal().denominator()));
                 j_lb_bound->set("inf", j_inf);
             }
             j_num_val->set("lb", j_lb_bound);
         }
-        if (!is_positive_infinite(bounds.second))
+        if (!is_positive_infinite(ub))
         {
             json j_ub_bound;
-            j_ub_bound->set("num", new long_val(bounds.second.get_rational().numerator()));
-            j_ub_bound->set("den", new long_val(bounds.second.get_rational().denominator()));
+            j_ub_bound->set("num", new long_val(ub.get_rational().numerator()));
+            j_ub_bound->set("den", new long_val(ub.get_rational().denominator()));
             if (val.get_infinitesimal() != rational::ZERO)
             {
                 json j_inf;
-                j_inf->set("num", new long_val(bounds.second.get_infinitesimal().numerator()));
-                j_inf->set("den", new long_val(bounds.second.get_infinitesimal().denominator()));
+                j_inf->set("num", new long_val(ub.get_infinitesimal().numerator()));
+                j_inf->set("den", new long_val(ub.get_infinitesimal().denominator()));
                 j_ub_bound->set("inf", j_inf);
             }
             j_num_val->set("lb", j_ub_bound);

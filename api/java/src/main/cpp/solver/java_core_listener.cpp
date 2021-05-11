@@ -127,8 +127,8 @@ namespace ratio
         std::unordered_set<type *> new_types;
         std::unordered_set<predicate *> new_predicates;
         std::queue<type *> q;
-        for (const auto &t : cr.get_types())
-            q.push(t.second);
+        for (const auto &[tp_name, tp] : cr.get_types())
+            q.push(tp);
         while (!q.empty())
         {
             type &t = *q.front();
@@ -142,8 +142,8 @@ namespace ratio
                 new_type(env, t);
             }
 
-            for (const auto &t : t.get_types())
-                q.push(t.second);
+            for (const auto &[tp_name, tp] : t.get_types())
+                q.push(tp);
         }
 
         // we revise the types..
@@ -152,10 +152,10 @@ namespace ratio
             revise_type(env, *t);
 
             // we add the predicates..
-            for (const auto &pred : t->get_predicates())
+            for (const auto &[pred_name, pred] : t->get_predicates())
             {
-                new_predicates.insert(pred.second);
-                new_predicate(env, *pred.second);
+                new_predicates.insert(pred);
+                new_predicate(env, *pred);
             }
         }
 
@@ -175,13 +175,13 @@ namespace ratio
         }
 
         // we add the predicates..
-        for (const auto &pred : cr.get_predicates())
+        for (const auto &[pred_name, pred] : cr.get_predicates())
         {
-            const auto &p_it = all_types.find(pred.second);
+            const auto &p_it = all_types.find(pred);
             if (p_it == all_types.end())
             {
-                new_predicates.insert(pred.second);
-                new_predicate(env, *pred.second);
+                new_predicates.insert(pred);
+                new_predicate(env, *pred);
             }
         }
 
@@ -191,8 +191,8 @@ namespace ratio
 
         // we add items and atoms..
         std::unordered_set<item *> c_items;
-        for (const auto &p : cr.get_predicates())
-            for (const auto &a : p.second->get_instances())
+        for (const auto &[pred_name, pred] : cr.get_predicates())
+            for (const auto &a : pred->get_instances())
             {
                 atom &atm = static_cast<atom &>(*a);
                 c_items.insert(&atm);
@@ -200,9 +200,9 @@ namespace ratio
                 if (i_it == all_items.end())
                     new_atom(env, atm);
             }
-        for (const auto &t : cr.get_types())
-            if (!t.second->is_primitive())
-                q.push(t.second);
+        for (const auto &[tp_name, tp] : cr.get_types())
+            if (!tp->is_primitive())
+                q.push(tp);
         while (!q.empty())
         {
             for (const auto &i : q.front()->get_instances())
@@ -213,8 +213,8 @@ namespace ratio
                 if (i_it == all_items.end())
                     new_item(env, itm);
             }
-            for (const auto &p : q.front()->get_predicates())
-                for (const auto &a : p.second->get_instances())
+            for (const auto &[pred_name, pred] : q.front()->get_predicates())
+                for (const auto &a : pred->get_instances())
                 {
                     atom &atm = static_cast<atom &>(*a);
                     c_items.insert(&atm);
@@ -222,8 +222,8 @@ namespace ratio
                     if (a_it == all_items.end())
                         new_atom(env, atm);
                 }
-            for (const auto &t : q.front()->get_types())
-                q.push(t.second);
+            for (const auto &[tp_name, tp] : q.front()->get_types())
+                q.push(tp);
             q.pop();
         }
 

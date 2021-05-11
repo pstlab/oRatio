@@ -40,7 +40,7 @@ namespace ratio
             }
 
         // we detect inconsistencies for each of the instances..
-        for (const auto &rr : rr_instances)
+        for (const auto &[rr, atms] : rr_instances)
         {
             // for each pulse, the atoms starting at that pulse..
             std::map<inf_rational, std::set<atom *>> starting_atoms;
@@ -49,10 +49,10 @@ namespace ratio
             // all the pulses of the timeline..
             std::set<inf_rational> pulses;
             // the resource capacity..
-            arith_expr capacity = rr.first->get(REUSABLE_RESOURCE_CAPACITY);
+            arith_expr capacity = rr->get(REUSABLE_RESOURCE_CAPACITY);
             inf_rational c_capacity = get_core().arith_value(capacity);
 
-            for (const auto &atm : rr.second)
+            for (const auto &atm : atms)
             {
                 arith_expr s_expr = atm->get(START);
                 arith_expr e_expr = atm->get(END);

@@ -45,34 +45,34 @@ namespace smt
     inline inf_rational lb(const lin &l) const noexcept // returns the current lower bound of linear expression 'l'..
     {
       inf_rational b(l.known_term);
-      for (const auto &term : l.vars)
-        b += (is_positive(term.second) ? lb(term.first) : ub(term.first)) * term.second;
+      for (const auto &[v, c] : l.vars)
+        b += (is_positive(c) ? lb(v) : ub(v)) * c;
       return b;
     }
     inline inf_rational ub(const lin &l) const noexcept // returns the current upper bound of linear expression 'l'..
     {
       inf_rational b(l.known_term);
-      for (const auto &term : l.vars)
-        b += (is_positive(term.second) ? ub(term.first) : lb(term.first)) * term.second;
+      for (const auto &[v, c] : l.vars)
+        b += (is_positive(c) ? ub(v) : lb(v)) * c;
       return b;
     }
     inline std::pair<inf_rational, inf_rational> bounds(const lin &l) const noexcept // returns the current upper bound of linear expression 'l'..
     {
       inf_rational c_lb(l.known_term);
       inf_rational c_ub(l.known_term);
-      for (const auto &term : l.vars)
+      for (const auto &[v, c] : l.vars)
       {
-        c_lb += (is_positive(term.second) ? lb(term.first) : ub(term.first)) * term.second;
-        c_ub += (is_positive(term.second) ? ub(term.first) : lb(term.first)) * term.second;
+        c_lb += (is_positive(c) ? lb(v) : ub(v)) * c;
+        c_ub += (is_positive(c) ? ub(v) : lb(v)) * c;
       }
       return std::make_pair(c_lb, c_ub);
     }
     inline inf_rational value(const lin &l) const // returns the current value of linear expression 'l'..
     {
-      inf_rational v(l.known_term);
-      for (const auto &term : l.vars)
-        v += value(term.first) * term.second;
-      return v;
+      inf_rational val(l.known_term);
+      for (const auto &[v, c] : l.vars)
+        val += value(v) * c;
+      return val;
     }
 
     SMT_EXPORT bool equates(const lin &l0, const lin &l1) const noexcept;

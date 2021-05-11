@@ -21,16 +21,16 @@ namespace ratio
     CORE_EXPORT core::~core()
     {
         // we delete the predicates..
-        for (const auto &p : predicates)
-            delete p.second;
+        for (const auto &[pred_name, pred] : predicates)
+            delete pred;
 
         // we delete the types..
-        for (const auto &t : types)
-            delete t.second;
+        for (const auto &[tp_name, tp] : types)
+            delete tp;
 
         // we delete the methods..
-        for (const auto &ms : methods)
-            for (const auto &m : ms.second)
+        for (const auto &[mthd_name, mthds] : methods)
+            for (const auto &m : mthds)
                 delete m;
 
         // we delete the compilation units..
@@ -143,11 +143,11 @@ namespace ratio
             auto max = inf_rational(rational::NEGATIVE_INFINITY);
             for (const auto &val : vals)
             {
-                const auto bds = lra_th.bounds(dynamic_cast<arith_item *>(val)->l);
-                if (min > bds.first)
-                    min = bds.first;
-                if (max < bds.second)
-                    max = bds.second;
+                const auto [lb, ub] = lra_th.bounds(dynamic_cast<arith_item *>(val)->l);
+                if (min > lb)
+                    min = lb;
+                if (max < ub)
+                    max = ub;
             }
             assert(min.get_infinitesimal() == rational::ZERO);
             assert(max.get_infinitesimal() == rational::ZERO);
@@ -178,11 +178,11 @@ namespace ratio
             auto max = inf_rational(rational::NEGATIVE_INFINITY);
             for (const auto &val : vals)
             {
-                const auto bds = lra_th.bounds(dynamic_cast<arith_item *>(val)->l);
-                if (min > bds.first)
-                    min = bds.first;
-                if (max < bds.second)
-                    max = bds.second;
+                const auto [lb, ub] = lra_th.bounds(dynamic_cast<arith_item *>(val)->l);
+                if (min > lb)
+                    min = lb;
+                if (max < ub)
+                    max = ub;
             }
             assert(min.get_infinitesimal() == rational::ZERO);
             assert(max.get_infinitesimal() == rational::ZERO);
@@ -211,11 +211,11 @@ namespace ratio
             auto max = inf_rational(rational::NEGATIVE_INFINITY);
             for (const auto &val : vals)
             {
-                const auto bds = rdl_th.bounds(dynamic_cast<arith_item *>(val)->l);
-                if (min > bds.first)
-                    min = bds.first;
-                if (max < bds.second)
-                    max = bds.second;
+                const auto [lb, ub] = rdl_th.bounds(dynamic_cast<arith_item *>(val)->l);
+                if (min > lb)
+                    min = lb;
+                if (max < ub)
+                    max = ub;
             }
             assert(min.get_infinitesimal() == rational::ZERO);
             assert(max.get_infinitesimal() == rational::ZERO);
@@ -471,22 +471,22 @@ namespace ratio
     {
         std::set<item *> all_items;
         std::set<atom *> all_atoms;
-        for (const auto &p : predicates)
-            for (const auto &a : p.second->get_instances())
+        for (const auto &[pred_name, pred] : predicates)
+            for (const auto &a : pred->get_instances())
                 all_atoms.insert(static_cast<atom *>(&*a));
         std::queue<type *> q;
-        for (const auto &t : types)
-            if (!t.second->is_primitive())
-                q.push(t.second);
+        for (const auto &[tp_name, tp] : types)
+            if (!tp->is_primitive())
+                q.push(tp);
         while (!q.empty())
         {
             for (const auto &i : q.front()->get_instances())
                 all_items.insert(&*i);
-            for (const auto &p : q.front()->get_predicates())
-                for (const auto &a : p.second->get_instances())
+            for (const auto &[pred_name, pred] : q.front()->get_predicates())
+                for (const auto &a : pred->get_instances())
                     all_atoms.insert(static_cast<atom *>(&*a));
-            for (const auto &t : q.front()->get_types())
-                q.push(t.second);
+            for (const auto &[tp_name, tp] : q.front()->get_types())
+                q.push(tp);
             q.pop();
         }
 

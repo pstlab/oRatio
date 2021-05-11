@@ -37,20 +37,20 @@ namespace ratio
         q.push(&atm.get_type());
         while (!q.empty())
         {
-            for (const auto &f : q.front()->get_fields())
-                if (!f.second->is_synthetic())
+            for (const auto &[f_name, f] : q.front()->get_fields())
+                if (!f->is_synthetic())
                 {
-                    item *i = &*atm.get(f.first);
+                    item *i = &*atm.get(f_name);
                     if (bool_item *be = dynamic_cast<bool_item *>(i))
                         listen_sat(variable(be->l));
                     else if (arith_item *ae = dynamic_cast<arith_item *>(i))
                     {
                         if (ae->get_type().get_name().compare(TP_KEYWORD) == 0)
-                            for (const auto &term : ae->l.vars)
-                                listen_rdl(term.first);
+                            for (const auto &[v, c] : ae->l.vars)
+                                listen_rdl(v);
                         else
-                            for (const auto &term : ae->l.vars)
-                                listen_lra(term.first);
+                            for (const auto &[v, c] : ae->l.vars)
+                                listen_lra(v);
                     }
                     else if (var_item *ee = dynamic_cast<var_item *>(i))
                         listen_set(ee->ev);

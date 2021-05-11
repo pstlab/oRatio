@@ -127,8 +127,8 @@ namespace ratio
         expr function_expression::evaluate(const scope &scp, context &ctx) const
         {
             scope *s = const_cast<scope *>(&scp);
-            for (const auto &id : ids)
-                s = &s->get_type(id.id);
+            for (const auto &id_tk : ids)
+                s = &s->get_type(id_tk.id);
 
             std::vector<expr> exprs;
             std::vector<const type *> par_types;
@@ -157,8 +157,8 @@ namespace ratio
         expr id_expression::evaluate(const scope &, context &ctx) const
         {
             env *c_e = &*ctx;
-            for (const auto &id : ids)
-                c_e = &*c_e->get(id.id);
+            for (const auto &id_tk : ids)
+                c_e = &*c_e->get(id_tk.id);
             return expr(static_cast<item *>(c_e));
         }
 
@@ -294,17 +294,17 @@ namespace ratio
         void disjunction_statement::execute(const scope &scp, context &ctx) const
         {
             std::vector<const conjunction *> cs;
-            for (const auto &c : conjunctions)
+            for (const auto &[stmnts, xpr] : conjunctions)
             {
                 smt::rational cost(1);
-                if (c.second)
+                if (xpr)
                 {
-                    arith_expr a_xpr = dynamic_cast<const ast::expression *const>(c.second)->evaluate(scp, ctx);
+                    arith_expr a_xpr = dynamic_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx);
                     if (!a_xpr->l.vars.empty())
                         throw std::invalid_argument("invalid disjunct cost: expected a constant..");
                     cost = scp.get_core().arith_value(a_xpr).get_rational();
                 }
-                cs.push_back(new conjunction(scp.get_core(), const_cast<scope &>(scp), cost, c.first));
+                cs.push_back(new conjunction(scp.get_core(), const_cast<scope &>(scp), cost, stmnts));
             }
             scp.get_core().new_disjunction(ctx, cs);
         }
@@ -342,12 +342,12 @@ namespace ratio
                     assgnments.emplace(TAU, ctx->get(TAU));
             }
 
-            for (const auto &a : assignments)
+            for (const auto &[id_tkn, xpr] : assignments)
             {
-                expr e = dynamic_cast<const ast::expression *>(a.second)->evaluate(scp, ctx);
-                const type &tt = p->get_field(a.first.id).get_type(); // the target type..
-                if (tt.is_assignable_from(e->get_type()))             // the target type is a superclass of the assignment..
-                    assgnments.emplace(a.first.id, e);
+                expr e = dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx);
+                const type &tt = p->get_field(id_tkn.id).get_type(); // the target type..
+                if (tt.is_assignable_from(e->get_type()))            // the target type is a superclass of the assignment..
+                    assgnments.emplace(id_tkn.id, e);
                 else if (e->get_type().is_assignable_from(tt))        // the target type is a subclass of the assignment..
                     if (var_item *ae = dynamic_cast<var_item *>(&*e)) // some of the allowed values might be inhibited..
                     {
@@ -420,19 +420,19 @@ namespace ratio
             if (!return_type.empty())
             {
                 scope *s = &scp;
-                for (const auto &id : return_type)
-                    s = &s->get_type(id.id);
+                for (const auto &id_tk : return_type)
+                    s = &s->get_type(id_tk.id);
                 rt = static_cast<type *>(s);
             }
 
             std::vector<const field *> args;
-            for (const auto &par : parameters)
+            for (const auto &[id_tkns, id_tkn] : parameters)
             {
                 scope *s = &scp;
-                for (const auto &id : par.first)
-                    s = &s->get_type(id.id);
+                for (const auto &id_tk : id_tkns)
+                    s = &s->get_type(id_tk.id);
                 type *tp = static_cast<type *>(s);
-                args.push_back(new field(*tp, par.second.id));
+                args.push_back(new field(*tp, id_tkn.id));
             }
 
             if (method *m = new method(scp.get_core(), scp, rt, name.id, args, statements); core *c = dynamic_cast<core *>(&scp))
@@ -446,13 +446,13 @@ namespace ratio
         void predicate_declaration::refine(scope &scp) const
         {
             std::vector<const field *> args;
-            for (const auto &par : parameters)
+            for (const auto &[id_tkns, id_tkn] : parameters)
             {
                 scope *s = &scp;
-                for (const auto &id : par.first)
-                    s = &s->get_type(id.id);
+                for (const auto &id_tk : id_tkns)
+                    s = &s->get_type(id_tk.id);
                 type *tp = static_cast<type *>(s);
-                args.push_back(new field(*tp, par.second.id));
+                args.push_back(new field(*tp, id_tkn.id));
             }
 
             predicate *p = new predicate(scp.get_core(), scp, name.id, args, statements);
@@ -461,8 +461,8 @@ namespace ratio
             for (const auto &sp : predicate_list)
             {
                 scope *s = &scp;
-                for (const auto &id : sp)
-                    s = &s->get_predicate(id.id);
+                for (const auto &id_tk : sp)
+                    s = &s->get_predicate(id_tk.id);
                 p->new_supertypes({static_cast<predicate *>(s)});
             }
 
@@ -509,8 +509,8 @@ namespace ratio
                 for (const auto &tr : type_refs)
                 {
                     scope *s = &scp;
-                    for (const auto &id : tr)
-                        s = &s->get_type(id.id);
+                    for (const auto &id_tk : tr)
+                        s = &s->get_type(id_tk.id);
                     et->enums.push_back(static_cast<enum_type *>(s));
                 }
             }
@@ -522,8 +522,8 @@ namespace ratio
         {
             // we add fields to the current scope..
             scope *s = &scp;
-            for (const auto &id : field_type)
-                s = &s->get_type(id.id);
+            for (const auto &id_tk : field_type)
+                s = &s->get_type(id_tk.id);
             type *tp = static_cast<type *>(s);
 
             for (const auto &vd : declarations)
@@ -535,18 +535,18 @@ namespace ratio
         void constructor_declaration::refine(scope &scp) const
         {
             std::vector<const field *> args;
-            for (const auto &par : parameters)
+            for (const auto &[id_tkns, id_tkn] : parameters)
             {
                 scope *s = &scp;
-                for (const auto &id : par.first)
-                    s = &s->get_type(id.id);
+                for (const auto &id_tk : id_tkns)
+                    s = &s->get_type(id_tk.id);
                 type *tp = static_cast<type *>(s);
-                args.push_back(new field(*tp, par.second.id));
+                args.push_back(new field(*tp, id_tkn.id));
             }
 
             std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> il;
-            for (const auto &init_el : init_list)
-                il.push_back({init_el.first.id, init_el.second});
+            for (const auto &[id_tkn, xprs] : init_list)
+                il.push_back({id_tkn.id, xprs});
 
             static_cast<type &>(scp).new_constructors({new constructor(scp.get_core(), scp, args, il, statements)});
         }
@@ -572,8 +572,8 @@ namespace ratio
             for (const auto &bc : base_classes)
             {
                 scope *s = &scp;
-                for (const auto &id : bc)
-                    s = &s->get_type(id.id);
+                for (const auto &id_tk : bc)
+                    s = &s->get_type(id_tk.id);
                 tp.new_supertypes({static_cast<type *>(s)});
             }
 

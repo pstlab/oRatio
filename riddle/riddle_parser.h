@@ -417,11 +417,11 @@ namespace riddle
       disjunction_statement(const disjunction_statement &orig) = delete;
       virtual ~disjunction_statement()
       {
-        for (const auto &c : conjunctions)
+        for (const auto &[stmnts, xpr] : conjunctions)
         {
-          for (const auto &s : c.first)
+          for (const auto &s : stmnts)
             delete s;
-          delete c.second;
+          delete xpr;
         }
       }
 
@@ -451,8 +451,8 @@ namespace riddle
       formula_statement(const formula_statement &orig) = delete;
       virtual ~formula_statement()
       {
-        for (const auto &asgnmnt : assignments)
-          delete asgnmnt.second;
+        for (const auto &[id_tkn, xpr] : assignments)
+          delete xpr;
       }
 
     protected:
@@ -581,9 +581,9 @@ namespace riddle
       constructor_declaration(const constructor_declaration &orig) = delete;
       virtual ~constructor_declaration()
       {
-        for (const auto &i : init_list)
-          for (const auto &e : i.second)
-            delete e;
+        for (const auto &[id_tkn, xprs] : init_list)
+          for (const auto &xpr : xprs)
+            delete xpr;
         for (const auto &s : statements)
           delete s;
       }

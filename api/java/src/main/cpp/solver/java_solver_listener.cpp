@@ -43,9 +43,9 @@ namespace ratio
         jbyte state = static_cast<jbyte>(slv.get_sat_core().value(f.get_phi()));
 
         // the flaw's position..
-        const auto pos = slv.get_idl_theory().bounds(f.get_position());
+        const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
 
-        env->CallVoidMethod(slv_obj, flaw_created_mthd_id, id, causes, label, state, pos.first, pos.second);
+        env->CallVoidMethod(slv_obj, flaw_created_mthd_id, id, causes, label, state, lb, ub);
         env->DeleteLocalRef(label);
         env->DeleteLocalRef(causes);
     }
@@ -76,10 +76,10 @@ namespace ratio
         jlong id = reinterpret_cast<jlong>(&f);
 
         // the flaw's position..
-        const auto pos = slv.get_idl_theory().bounds(f.get_position());
-        jint pos_lb = pos.first, pos_ub = pos.second;
+        const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
+        jint jlb = lb, jub = ub;
 
-        get_env()->CallVoidMethod(slv_obj, flaw_position_changed_mthd_id, id, pos_lb, pos_ub);
+        get_env()->CallVoidMethod(slv_obj, flaw_position_changed_mthd_id, id, jlb, jub);
     }
     void java_solver_listener::current_flaw(const flaw &f)
     {

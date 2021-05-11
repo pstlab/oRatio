@@ -16,16 +16,16 @@ namespace ratio
     CORE_EXPORT type::~type()
     {
         // we delete the predicates..
-        for (const auto &p : predicates)
-            delete p.second;
+        for (const auto &[pred_name, pred] : predicates)
+            delete pred;
 
         // we delete the types..
-        for (const auto &t : types)
-            delete t.second;
+        for (const auto &[tp_name, tp] : types)
+            delete tp;
 
         // we delete the methods..
-        for (const auto &ms : methods)
-            for (const auto &m : ms.second)
+        for (const auto &[mthd_name, mthds] : methods)
+            for (const auto &m : mthds)
                 delete m;
 
         // we delete the constructors..
