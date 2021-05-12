@@ -1,4 +1,6 @@
 #include <jni.h>
+#include <thread>
+#include <condition_variable>
 #include <mutex>
 #include "solver.h"
 
