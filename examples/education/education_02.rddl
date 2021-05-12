@@ -1,0 +1,311 @@
+class User {
+
+  int id;
+  bool c_archeologia;
+  bool c_architettura;
+  bool c_arte;
+  bool c_geografia;
+  bool c_economia;
+  bool c_storia;
+  bool c_scienza;
+  bool c_biologia;
+  bool c_agricoltura;
+  bool c_antropologia;
+  bool c_astronomia;
+  bool c_botanica;
+  bool c_branche_della_fisica;
+  bool c_chiese_ditalia;
+  bool c_chimica;
+  bool c_cinema;
+  bool c_cultura;
+  bool c_elettronica;
+  bool c_farmaci;
+  bool c_geologia;
+  bool c_industria;
+  bool c_informatica;
+  bool c_ingegneria;
+  bool c_letteratura;
+  bool c_medicina;
+  bool c_musica;
+  bool c_natura;
+  bool c_opere_darte;
+  bool c_politica;
+  bool c_psichiatria;
+  bool c_psicologia;
+  bool c_filosofia;
+  bool c_religione;
+  bool c_societa;
+  bool c_sociologia;
+  bool c_software;
+  bool c_statistica;
+  bool c_tecnologia;
+  ReusableResource busy_time = new ReusableResource(1.0);
+
+  User(int id, bool c_archeologia, bool c_architettura, bool c_arte, bool c_geografia, bool c_economia, bool c_storia, bool c_scienza, bool c_biologia, bool c_agricoltura, bool c_antropologia, bool c_astronomia, bool c_botanica, bool c_branche_della_fisica, bool c_chiese_ditalia, bool c_chimica, bool c_cinema, bool c_cultura, bool c_elettronica, bool c_farmaci, bool c_geologia, bool c_industria, bool c_informatica, bool c_ingegneria, bool c_letteratura, bool c_medicina, bool c_musica, bool c_natura, bool c_opere_darte, bool c_politica, bool c_psichiatria, bool c_psicologia, bool c_filosofia, bool c_religione, bool c_societa, bool c_sociologia, bool c_software, bool c_statistica, bool c_tecnologia) : id(id), c_archeologia(c_archeologia), c_architettura(c_architettura), c_arte(c_arte), c_geografia(c_geografia), c_economia(c_economia), c_storia(c_storia), c_scienza(c_scienza), c_biologia(c_biologia), c_agricoltura(c_agricoltura), c_antropologia(c_antropologia), c_astronomia(c_astronomia), c_botanica(c_botanica), c_branche_della_fisica(c_branche_della_fisica), c_chiese_ditalia(c_chiese_ditalia), c_chimica(c_chimica), c_cinema(c_cinema), c_cultura(c_cultura), c_elettronica(c_elettronica), c_farmaci(c_farmaci), c_geologia(c_geologia), c_industria(c_industria), c_informatica(c_informatica), c_ingegneria(c_ingegneria), c_letteratura(c_letteratura), c_medicina(c_medicina), c_musica(c_musica), c_natura(c_natura), c_opere_darte(c_opere_darte), c_politica(c_politica), c_psichiatria(c_psichiatria), c_psicologia(c_psicologia), c_filosofia(c_filosofia), c_religione(c_religione), c_societa(c_societa), c_sociologia(c_sociologia), c_software(c_software), c_statistica(c_statistica), c_tecnologia(c_tecnologia) {}
+}
+
+class Lesson {
+
+  predicate St_3(User u) : Interval {
+    duration >= 6979.0;
+    { u.c_geografia; } or { u.c_societa; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+
+    goal st1079 = new St_1079();
+    st1079.start >= end;
+
+    goal st1080 = new St_1080();
+    st1080.start >= end;
+
+    goal st1078 = new St_1078();
+    st1078.start >= end;
+
+    goal st1075 = new St_1075();
+    st1075.start >= end;
+
+    goal st1104 = new St_1104();
+    st1104.start >= end;
+
+    goal st1077 = new St_1077();
+    st1077.start >= end;
+
+    goal st1076 = new St_1076();
+    st1076.start >= end;
+  }
+
+  predicate St_1078(User u) : Interval {
+    duration >= 1089.0;
+    u.c_geografia;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_1077(User u) : Interval {
+    duration >= 1437.0;
+    { u.c_antropologia; } or { u.c_architettura; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+
+    goal st1318 = new St_1318();
+    st1318.start >= end;
+
+    goal st1320 = new St_1320();
+    st1320.start >= end;
+
+    goal st1319 = new St_1319();
+    st1319.start >= end;
+  }
+
+  predicate St_1076(User u) : Interval {
+    duration >= 1613.0;
+    u.c_geografia;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_1104(User u) : Interval {
+    duration >= 820.0;
+    { u.c_architettura; } or { u.c_geografia; } or { u.c_antropologia; } or { u.c_cultura; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+
+    goal st3602 = new St_3602();
+    st3602.start >= end;
+
+    goal st3597 = new St_3597();
+    st3597.start >= end;
+
+    goal st3599 = new St_3599();
+    st3599.start >= end;
+
+    goal st3601 = new St_3601();
+    st3601.start >= end;
+
+    goal st3598 = new St_3598();
+    st3598.start >= end;
+
+    goal st3600 = new St_3600();
+    st3600.start >= end;
+  }
+
+  predicate St_1318(User u) : Interval {
+    duration >= 385.0;
+    { u.c_architettura; } or { u.c_chimica; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+
+    goal st2632 = new St_2632();
+    st2632.start >= end;
+
+    goal st2633 = new St_2633();
+    st2633.start >= end;
+  }
+
+  predicate St_1319(User u) : Interval {
+    duration >= 243.0;
+    { u.c_geografia; } or { u.c_natura; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_1320(User u) : Interval {
+    duration >= 243.0;
+    { u.c_geografia; } or { u.c_natura; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+
+    goal st5151 = new St_5151();
+    st5151.start >= end;
+
+    goal st5148 = new St_5148();
+    st5148.start >= end;
+
+    goal st5149 = new St_5149();
+    st5149.start >= end;
+
+    goal st5150 = new St_5150();
+    st5150.start >= end;
+  }
+
+  predicate St_1075(User u) : Interval {
+    duration >= 7207.0;
+    { u.c_geografia; } or { u.c_natura; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_1079(User u) : Interval {
+    duration >= 2409.0;
+    u.c_societa;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_1080(User u) : Interval {
+    duration >= 2409.0;
+    u.c_societa;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_2632(User u) : Interval {
+    duration >= 2405.0;
+    { u.c_architettura; } or { u.c_geografia; } or { u.c_societa; } or { u.c_chimica; } or { u.c_economia; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_2633(User u) : Interval {
+    duration >= 7354.0;
+    { u.c_chimica; } or { u.c_societa; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_3602(User u) : Interval {
+    duration >= 204.0;
+    u.c_architettura;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_3601(User u) : Interval {
+    duration >= 1951.0;
+    { u.c_antropologia; } or { u.c_geografia; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_3599(User u) : Interval {
+    duration >= 6932.0;
+    u.c_architettura;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_3597(User u) : Interval {
+    duration >= 4888.0;
+    u.c_antropologia;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_3600(User u) : Interval {
+    duration >= 4888.0;
+    u.c_antropologia;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_3598(User u) : Interval {
+    duration >= 9228.0;
+    u.c_cultura;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_5150(User u) : Interval {
+    duration >= 1141.0;
+    { u.c_scienza; } or { u.c_geografia; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+
+    goal st5627 = new St_5627();
+    st5627.start >= end;
+
+    goal st5626 = new St_5626();
+    st5626.start >= end;
+
+    goal st5628 = new St_5628();
+    st5628.start >= end;
+
+    goal st5629 = new St_5629();
+    st5629.start >= end;
+  }
+
+  predicate St_5151(User u) : Interval {
+    duration >= 1165.0;
+    { u.c_geografia; } or { u.c_chimica; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_5148(User u) : Interval {
+    duration >= 675.0;
+    { u.c_architettura; } or { u.c_geografia; } or { u.c_antropologia; } or { u.c_natura; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_5149(User u) : Interval {
+    duration >= 4991.0;
+    u.c_geografia;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+
+    goal st5624 = new St_5624();
+    st5624.start >= end;
+
+    goal st5625 = new St_5625();
+    st5625.start >= end;
+  }
+
+  predicate St_5628(User u) : Interval {
+    duration >= 392.0;
+    u.c_geografia;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_5629(User u) : Interval {
+    duration >= 451.0;
+    u.c_geografia;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_5627(User u) : Interval {
+    duration >= 380.0;
+    u.c_natura;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_5626(User u) : Interval {
+    duration >= 380.0;
+    u.c_natura;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_5625(User u) : Interval {
+    duration >= 1328.0;
+    u.c_geografia;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_5624(User u) : Interval {
+    duration >= 2574.0;
+    u.c_geografia;
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+}
+
+Lesson l_5955 = new Lesson();
+User u_2630 = new User(2630, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true);
+
+goal st3 = new l_5955.St_3();
