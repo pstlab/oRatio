@@ -7,8 +7,9 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         build_type: [Debug, Release]
         check_incs: [ON, OFF]
         heuristic_type: [h_max, h_add]
