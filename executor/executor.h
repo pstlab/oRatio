@@ -30,17 +30,24 @@ namespace ratio
     EXECUTOR_EXPORT void tick();
     EXECUTOR_EXPORT void dont_start_yet(const std::set<atom *> &atoms);
     EXECUTOR_EXPORT void dont_end_yet(const std::set<atom *> &atoms);
+
+    EXECUTOR_EXPORT void done(const std::set<atom *> &atoms);
     EXECUTOR_EXPORT void failure(const std::set<atom *> &atoms);
 
   private:
+    inline bool is_impulse(const atom &atm) const noexcept;
+    inline bool is_interval(const atom &atm) const noexcept;
+
     void solution_found() override;
     void inconsistent_problem() override;
 
-    void resolver_created(const resolver &r) override;
+    void flaw_created(const flaw &f) override;
 
     void reset_timelines();
 
   private:
+    const predicate &int_pred;
+    const predicate &imp_pred;
     smt::rational current_time;         // the current time in plan units..
     const smt::rational units_per_tick; // the number of plan units for each tick..
     std::vector<smt::lit> pending_facts;

@@ -14,7 +14,7 @@ using namespace smt;
 
 namespace ratio
 {
-    EXECUTOR_EXPORT executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), units_per_tick(units_per_tick) { reset_timelines(); }
+    EXECUTOR_EXPORT executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")), units_per_tick(units_per_tick) { reset_timelines(); }
     EXECUTOR_EXPORT executor::~executor() {}
 
     EXECUTOR_EXPORT void executor::tick()
@@ -25,9 +25,6 @@ namespace ratio
         // we notify that a tick has arised..
         for (const auto &l : listeners)
             l->tick(current_time);
-
-        const auto &int_pred = slv.get_predicate("Interval");
-        const auto &imp_pred = slv.get_predicate("Impulse");
 
         if (*pulses.cbegin() < static_cast<I>(current_time))
         { // we have something to do..
@@ -134,6 +131,9 @@ namespace ratio
     EXECUTOR_EXPORT void executor::dont_end_yet(const std::set<atom *> &atoms) { not_ending.insert(atoms.cbegin(), atoms.cend()); }
     EXECUTOR_EXPORT void executor::failure(const std::set<atom *> &atoms) {}
 
+    bool executor::is_impulse(const atom &atm) const noexcept { return imp_pred.is_assignable_from(atm.get_type()); }
+    bool executor::is_interval(const atom &atm) const noexcept { return int_pred.is_assignable_from(atm.get_type()); }
+
     void executor::solution_found() { reset_timelines(); }
     void executor::inconsistent_problem()
     {
@@ -142,22 +142,22 @@ namespace ratio
         pulses.clear();
     }
 
-    void executor::resolver_created(const resolver &r)
+    void executor::flaw_created(const flaw &f)
     { // we cannot plan in the past..
-        if (const atom_flaw::activate_goal *ag = dynamic_cast<const atom_flaw::activate_goal *>(&r))
-        {
-            const auto &int_pred = slv.get_predicate("Interval");
-            const auto &imp_pred = slv.get_predicate("Impulse");
-            const atom &atm = dynamic_cast<const atom_flaw *>(&ag->get_effect())->get_atom();
-            if (int_pred.is_assignable_from(atm.get_type()))
+        if (const atom_flaw *af = dynamic_cast<const atom_flaw *>(&f))
+        { // we force each atom to start after the current time..
+            const atom &atm = af->get_atom();
+            if (is_interval(atm))
             { // we have an interval atom..
                 arith_expr s_expr = atm.get(START);
-                slv.get_sat_core().new_clause({!ag->get_rho(), slv.geq(s_expr, slv.new_real(current_time))->l});
+                if (!slv.get_sat_core().new_clause({lit(atm.get_sigma(), false), slv.geq(s_expr, slv.new_real(current_time))->l}))
+                    throw execution_exception();
             }
-            else if (imp_pred.is_assignable_from(atm.get_type()))
+            else if (is_impulse(atm))
             { // we have an impulsive atom..
                 arith_expr at_expr = atm.get(AT);
-                slv.get_sat_core().new_clause({!ag->get_rho(), slv.geq(at_expr, slv.new_real(current_time))->l});
+                if (!slv.get_sat_core().new_clause({lit(atm.get_sigma(), false), slv.geq(at_expr, slv.new_real(current_time))->l}))
+                    throw execution_exception();
             }
         }
     }
@@ -190,8 +190,7 @@ namespace ratio
         const auto &int_pred = slv.get_predicate("Interval");
         const auto &imp_pred = slv.get_predicate("Impulse");
         for (const auto &atm : all_atoms)
-        {
-            if (int_pred.is_assignable_from(atm->get_type()))
+            if (is_interval(*atm))
             {
                 arith_expr s_expr = atm->get(START);
                 arith_expr e_expr = atm->get(END);
@@ -204,7 +203,7 @@ namespace ratio
                 pulses.insert(start);
                 pulses.insert(end);
             }
-            else if (imp_pred.is_assignable_from(atm->get_type()))
+            else if (is_impulse(*atm))
             {
                 arith_expr at_expr = atm->get(AT);
                 inf_rational at = slv.arith_value(at_expr);
@@ -214,6 +213,5 @@ namespace ratio
                 e_atms[at].insert(atm);
                 pulses.insert(at);
             }
-        }
     }
 } // namespace ratio

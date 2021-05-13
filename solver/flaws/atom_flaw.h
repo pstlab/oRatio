@@ -7,9 +7,11 @@
 namespace ratio
 {
   class atom;
+  class smart_type;
 
   class atom_flaw : public flaw
   {
+    friend class smart_type;
 
   public:
     atom_flaw(solver &slv, const std::vector<resolver *> &causes, atom &a, const bool is_fact);
@@ -23,7 +25,7 @@ namespace ratio
   private:
     void compute_resolvers() override;
 
-  public:
+  private:
     class activate_fact : public resolver
     {
     public:
