@@ -175,10 +175,11 @@ export class Timelines {
                 enter => {
                     const t_g = enter.append('g').attr('class', 'time');
                     t_g.append('line').attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke', 'lavender').attr('stroke-opacity', 0.4).attr('x1', this.timelines_x_scale(data.current_time)).attr('y1', 0).attr('x2', this.timelines_x_scale(data.current_time)).attr('y2', this.timelines_height);
+                    t_g.append('line').attr('stroke-width', 0.1).attr('stroke-linecap', 'round').attr('stroke', 'black').attr('x1', this.timelines_x_scale(data.current_time)).attr('y1', 0).attr('x2', this.timelines_x_scale(data.current_time)).attr('y2', this.timelines_height);
                     return t_g;
                 },
                 update => {
-                    update.select('line').transition().duration(200).attr('x1', this.timelines_x_scale(data.current_time)).attr('x2', this.timelines_x_scale(data.current_time));
+                    update.selectAll('line').transition().duration(200).attr('x1', this.timelines_x_scale(data.current_time)).attr('x2', this.timelines_x_scale(data.current_time));
                     return update;
                 });
     }
