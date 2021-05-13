@@ -2,9 +2,6 @@ name: CMake
 
 on: [push, pull_request]
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -12,12 +9,20 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Debug, Release]
+        check_incs: [ON, OFF]
+        neuristic_type: [h_max, h_add]
+
+    env:
+      BUILD_TYPE: ${{ matrix.build_type }}
+      CHECK_INCONSISTENCIES: ${{ matrix.check_incs }}
+      HEURISTIC_TYPE: ${{ matrix.heuristic_type }}
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCHECK_INCONSISTENCIES=${{env.CHECK_INCONSISTENCIES}} -DHEURISTIC_TYPE=${{env.HEURISTIC_TYPE}}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
