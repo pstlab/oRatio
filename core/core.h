@@ -178,7 +178,7 @@ namespace ratio
     inline void restore_ni() noexcept { ni = tmp_ni; }
 
   public:
-    CORE_EXPORT smt::json to_json() const noexcept;
+    CORE_EXPORT smt::json to_json() const noexcept override;
 
     CORE_EXPORT friend std::ostream &operator<<(std::ostream &os, const core &cr);
 

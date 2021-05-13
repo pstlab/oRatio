@@ -18,7 +18,7 @@ namespace ratio
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
 
-    smt::json to_json() const noexcept;
+    smt::json to_json() const noexcept override;
 
   private:
     const smt::var sigma; // this variable represents the state of the atom: if the variable is true, the atom is active; if the variable is false, the atom is unified; if the variable is undefined, the atom is not justified..
