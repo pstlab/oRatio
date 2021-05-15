@@ -240,6 +240,40 @@ void test_strict_inequalities_1()
     assert(y_val == inf_rational(rational::ONE, rational::ONE));
 }
 
+void test_nonroot_constraints()
+{
+    sat_core core;
+    lra_theory lra(core);
+
+    var x = lra.new_var();
+    var y = lra.new_var();
+
+    lit x_leq_y = lra.new_leq(lin(x, rational::ONE), lin(y, rational::ONE));
+    lit y_leq_x = lra.new_leq(lin(y, rational::ONE), lin(x, rational::ONE));
+
+    bool nc = core.new_clause({lra.new_leq(lin(y, rational::ONE), lin(rational::ONE))});
+    assert(nc);
+
+    bool prop = core.propagate();
+    assert(prop);
+
+    nc = core.new_clause({x_leq_y, y_leq_x});
+    assert(nc);
+
+    bool assm = core.assume({x_leq_y});
+    assert(assm);
+
+    assert(core.value(x_leq_y) == True);
+
+    bool x_ge_1 = lra.set_lb(x, inf_rational(rational::ONE), TRUE_lit);
+    assert(x_ge_1);
+
+    bool x_ge_2 = lra.set_lb(x, inf_rational(rational(2)), TRUE_lit);
+    assert(x_ge_2);
+
+    assert(core.value(x_leq_y) == False);
+}
+
 int main(int, char **)
 {
     test_rationals_0();
@@ -252,4 +286,6 @@ int main(int, char **)
 
     test_strict_inequalities_0();
     test_strict_inequalities_1();
+
+    test_nonroot_constraints();
 }

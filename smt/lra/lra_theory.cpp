@@ -222,6 +222,19 @@ namespace smt
         return l0_bounds.second >= l1_bounds.first && l0_bounds.first <= l1_bounds.second; // the two intervals intersect..
     }
 
+    SMT_EXPORT bool lra_theory::set_lb(const var &x_i, const inf_rational &val, const lit &p) noexcept
+    {
+        if (!assert_lower(x_i, val, p))
+            analyze_and_backjump();
+        return sat.propagate();
+    }
+    SMT_EXPORT bool lra_theory::set_ub(const var &x_i, const inf_rational &val, const lit &p) noexcept
+    {
+        if (!assert_upper(x_i, val, p))
+            analyze_and_backjump();
+        return sat.propagate();
+    }
+
     bool lra_theory::propagate(const lit &p) noexcept
     {
         assert(cnfl.empty());

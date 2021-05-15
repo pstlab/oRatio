@@ -77,6 +77,9 @@ namespace smt
 
     SMT_EXPORT bool equates(const lin &l0, const lin &l1) const noexcept;
 
+    SMT_EXPORT bool set_lb(const var &x_i, const inf_rational &val, const lit &p) noexcept;
+    SMT_EXPORT bool set_ub(const var &x_i, const inf_rational &val, const lit &p) noexcept;
+
   private:
     bool propagate(const lit &p) noexcept override;
     bool check() noexcept override;
