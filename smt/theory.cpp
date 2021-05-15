@@ -1,5 +1,6 @@
 #include "theory.h"
 #include "sat_core.h"
+#include "clause.h"
 
 namespace smt
 {
@@ -7,5 +8,23 @@ namespace smt
     SMT_EXPORT theory::~theory() {}
 
     SMT_EXPORT void theory::bind(const var &v) noexcept { sat.bind(v, *this); }
+    SMT_EXPORT void theory::analyze_and_backjump() noexcept
+    {
+        // we create a conflict clause for the analysis..
+        std::vector<lit> c_cnfl;
+        std::swap(c_cnfl, cnfl);
+        clause cnfl_cl(sat, c_cnfl);
+
+        // .. and we analyze the conflict..
+        std::vector<lit> no_good;
+        size_t bt_level;
+        sat.analyze(cnfl_cl, no_good, bt_level);
+
+        // we backjump..
+        while (sat.decision_level() > bt_level)
+            sat.pop();
+        // .. and record the no-good..
+        sat.record(no_good);
+    }
     SMT_EXPORT void theory::record(const std::vector<lit> &cls) noexcept { sat.record(cls); }
 } // namespace smt

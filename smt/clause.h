@@ -5,6 +5,7 @@
 namespace smt
 {
   class sat_core;
+  class theory;
 
   /**
    * This class is used for representing propositional clauses.
@@ -12,6 +13,7 @@ namespace smt
   class clause : public constr
   {
     friend class sat_core;
+    friend class theory;
 
   private:
     clause(sat_core &s, const std::vector<lit> &lits);

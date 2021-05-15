@@ -20,6 +20,7 @@ namespace smt
 
   protected:
     SMT_EXPORT void bind(const var &v) noexcept;
+    SMT_EXPORT void analyze_and_backjump() noexcept;
     SMT_EXPORT void record(const std::vector<lit> &clause) noexcept;
 
   private:

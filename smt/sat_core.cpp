@@ -408,23 +408,7 @@ namespace smt
                         if (root_level())
                             return false;
 
-                        // we create a clause conflict for the analysis..
-                        std::vector<lit> th_cnfl;
-                        std::swap(th_cnfl, th->cnfl);
-                        constr *cnfl = new clause(*this, th_cnfl);
-
-                        // .. and we analyze the conflict..
-                        std::vector<lit> no_good;
-                        size_t bt_level;
-                        analyze(*cnfl, no_good, bt_level);
-                        delete cnfl;
-
-                        // we backjump..
-                        while (decision_level() > bt_level)
-                            pop();
-                        // .. and record the no-good..
-                        record(no_good);
-
+                        th->analyze_and_backjump(); // we analyze the theory's conflict, create a no-good from the analysis and backjump..
                         goto main_loop;
                     }
                 if (root_level()) // since this variable will no more be assigned, we can perform some cleanings..
@@ -439,23 +423,7 @@ namespace smt
                 if (root_level())
                     return false;
 
-                // we create a clause conflict for the analysis..
-                std::vector<lit> th_cnfl;
-                std::swap(th_cnfl, th->cnfl);
-                constr *cnfl = new clause(*this, th_cnfl);
-
-                // .. and we analyze the conflict..
-                std::vector<lit> no_good;
-                size_t bt_level;
-                analyze(*cnfl, no_good, bt_level);
-                delete cnfl;
-
-                // we backjump..
-                while (decision_level() > bt_level)
-                    pop();
-                // .. and record the no-good..
-                record(no_good);
-
+                th->analyze_and_backjump(); // we analyze the theory's conflict, create a no-good from the analysis and backjump..
                 goto main_loop;
             }
 
