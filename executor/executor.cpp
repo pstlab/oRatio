@@ -39,97 +39,105 @@ namespace ratio
 
             if (starting_atms != s_atms.cend()) // some atoms are starting..
                 for (const auto &atm : starting_atms->second)
-                    if (!not_starting.count(atm))
-                    { // we freeze the parameters of the starting atoms..
-                        if (int_pred.is_assignable_from(atm->get_type()))
-                        { // we have an interval atom..
-                            for (const auto &[xpr_name, xpr] : atm->get_exprs())
-                                if (xpr_name.compare(END))
-                                    if (arith_item *ai = dynamic_cast<arith_item *>(&*xpr))
-                                        frozen_nums.emplace(ai, slv.arith_value(xpr));
-                                    else if (var_item *vi = dynamic_cast<var_item *>(&*xpr))
-                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).cbegin()));
-                        }
-                        if (int_pred.is_assignable_from(atm->get_type()))
-                        { // we have an impulsive atom..
-                            for (const auto &[xpr_name, xpr] : atm->get_exprs())
-                                if (xpr_name.compare(AT))
-                                    if (arith_item *ai = dynamic_cast<arith_item *>(&*xpr))
-                                        frozen_nums.emplace(ai, slv.arith_value(xpr));
-                                    else if (var_item *vi = dynamic_cast<var_item *>(&*xpr))
-                                        frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).cbegin()));
-                        }
+                { // we freeze the parameters of the starting atoms..
+                    if (is_interval(*atm))
+                    { // we have an interval atom..
+                        for (const auto &[xpr_name, xpr] : atm->get_exprs())
+                            if (xpr_name.compare(END))
+                                if (arith_item *ai = dynamic_cast<arith_item *>(&*xpr))
+                                    frozen_nums.emplace(ai, slv.arith_value(xpr));
+                                else if (var_item *vi = dynamic_cast<var_item *>(&*xpr))
+                                    frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).cbegin()));
                     }
+                    if (is_impulse(*atm))
+                    { // we have an impulsive atom..
+                        for (const auto &[xpr_name, xpr] : atm->get_exprs())
+                            if (xpr_name.compare(AT))
+                                if (arith_item *ai = dynamic_cast<arith_item *>(&*xpr))
+                                    frozen_nums.emplace(ai, slv.arith_value(xpr));
+                                else if (var_item *vi = dynamic_cast<var_item *>(&*xpr))
+                                    frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).cbegin()));
+                    }
+                    executing.insert(atm);
+                }
 
             if (ending_atms != e_atms.cend()) // some atoms are ending..
                 for (const auto &atm : ending_atms->second)
-                    if (!not_ending.count(atm))
+                    if (executing.count(atm))
+                    { // the ending atoms are still executing, we need to delay them..
+                        while (!slv.root_level())
+                            slv.get_sat_core().pop();
+
+                        std::vector<smt::lit> delays;
+                        if (is_interval(*atm))
+                        { // we have an interval atom..
+                            arith_expr s_expr = atm->get(END);
+                            delays.push_back(slv.geq(s_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
+                        }
+                        if (is_impulse(*atm))
+                        { // we have an impulsive atom..
+                            arith_expr at_expr = atm->get(AT);
+                            delays.push_back(slv.geq(at_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
+                        }
+
+                        // we assert the delays..
+                        slv.assert_facts(delays);
+
+                        // we solve the problem again..
+                        slv.solve();
+
+                        // we reset the timelines..
+                        reset_timelines();
+                    }
+                    else
                     { // we freeze the ending parameter of the ending atoms..
-                        if (int_pred.is_assignable_from(atm->get_type()))
+                        if (is_interval(*atm))
                         { // we have an interval atom..
                             arith_expr e_expr = atm->get(END);
                             frozen_nums.emplace(&*e_expr, slv.arith_value(e_expr));
                         }
-                        else if (imp_pred.is_assignable_from(atm->get_type()))
+                        if (is_impulse(*atm))
                         { // we have an impulsive atom..
                             arith_expr at_expr = atm->get(AT);
                             frozen_nums.emplace(&*at_expr, slv.arith_value(at_expr));
                         }
+
+                        // we make some cleanings..
+                        if (starting_atms != s_atms.cend())
+                            s_atms.erase(starting_atms);
+                        if (ending_atms != e_atms.cend())
+                            e_atms.erase(ending_atms);
+                        pulses.erase(pulses.cbegin());
                     }
-
-            // we make some cleanings..
-            if (starting_atms != s_atms.cend())
-                s_atms.erase(starting_atms);
-            if (ending_atms != e_atms.cend())
-                e_atms.erase(ending_atms);
-            pulses.erase(pulses.cbegin());
-
-            if (!not_starting.empty() || !not_ending.empty())
-            { // we have to delay something..
-                for (const auto &atm : not_starting)
-                    if (int_pred.is_assignable_from(atm->get_type()))
-                    { // we have an interval atom..
-                        arith_expr s_expr = atm->get(START);
-                        pending_facts.push_back(slv.geq(s_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
-                    }
-                    else if (imp_pred.is_assignable_from(atm->get_type()))
-                    { // we have an impulsive atom..
-                        arith_expr at_expr = atm->get(AT);
-                        pending_facts.push_back(slv.geq(at_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
-                    }
-
-                for (const auto &atm : not_ending)
-                    if (int_pred.is_assignable_from(atm->get_type()))
-                    { // we have an interval atom..
-                        arith_expr e_expr = atm->get(END);
-                        pending_facts.push_back(slv.geq(e_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
-                    }
-                    else if (imp_pred.is_assignable_from(atm->get_type()))
-                    { // we have an impulsive atom..
-                        arith_expr at_expr = atm->get(AT);
-                        pending_facts.push_back(slv.geq(at_expr, slv.new_real(rational(static_cast<I>(current_time))))->l);
-                    }
-
-                // we backtrack at root-level..
-                while (!slv.root_level())
-                    slv.get_sat_core().pop();
-
-                // we assert the pending facts..
-                slv.assert_facts(pending_facts);
-                pending_facts.clear();
-
-                // we solve the problem again..
-                slv.solve();
-
-                // we reset the timelines..
-                reset_timelines();
-            }
         }
     }
 
-    EXECUTOR_EXPORT void executor::dont_start_yet(const std::set<atom *> &atoms) { not_starting.insert(atoms.cbegin(), atoms.cend()); }
-    EXECUTOR_EXPORT void executor::dont_end_yet(const std::set<atom *> &atoms) { not_ending.insert(atoms.cbegin(), atoms.cend()); }
-    EXECUTOR_EXPORT void executor::failure(const std::set<atom *> &atoms) {}
+    EXECUTOR_EXPORT void executor::freeze(const std::set<expr> &xprs)
+    {
+        for (const auto &xpr : xprs)
+            if (arith_item *ai = dynamic_cast<arith_item *>(&*xpr))
+                frozen_nums.emplace(ai, slv.arith_value(xpr));
+            else if (var_item *vi = dynamic_cast<var_item *>(&*xpr))
+                frozen_vals.emplace(vi, slv.get_ov_theory().allows(vi->ev, **slv.enum_value(xpr).cbegin()));
+    }
+
+    EXECUTOR_EXPORT void executor::done(const std::set<atom *> &atoms) { executing.erase(atoms.cbegin(), atoms.cend()); }
+    EXECUTOR_EXPORT void executor::failure(const std::set<atom *> &atoms)
+    {
+        // we backtrack at root-level..
+        while (!slv.root_level())
+            slv.get_sat_core().pop();
+
+        // we assert the pending facts..
+        // slv.assert_facts(pending_facts);
+        pending_facts.clear();
+
+        // we solve the problem again..
+        slv.solve();
+
+        // we reset the timelines..
+        reset_timelines();
+    }
 
     bool executor::is_impulse(const atom &atm) const noexcept { return imp_pred.is_assignable_from(atm.get_type()); }
     bool executor::is_interval(const atom &atm) const noexcept { return int_pred.is_assignable_from(atm.get_type()); }

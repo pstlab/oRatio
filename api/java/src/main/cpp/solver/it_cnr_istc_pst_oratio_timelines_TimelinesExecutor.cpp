@@ -29,7 +29,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
 
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_tick(JNIEnv *env, jobject obj) { get_executor(env, obj)->tick(); }
 
-JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1start_1yet(JNIEnv *env, jobject obj, jlongArray atoms)
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_done(JNIEnv *env, jobject obj, jlongArray atoms)
 {
     const jsize atms_size = env->GetArrayLength(atoms);
     std::vector<jlong> input(atms_size);
@@ -39,20 +39,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
     for (jsize i = 0; i < atms_size; i++)
         atms.insert(reinterpret_cast<atom *>(input[i]));
 
-    get_executor(env, obj)->dont_start_yet(atms);
-}
-
-JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1end_1yet(JNIEnv *env, jobject obj, jlongArray atoms)
-{
-    const jsize atms_size = env->GetArrayLength(atoms);
-    std::vector<jlong> input(atms_size);
-    env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
-
-    std::set<atom *> atms;
-    for (jsize i = 0; i < atms_size; i++)
-        atms.insert(reinterpret_cast<atom *>(input[i]));
-
-    get_executor(env, obj)->dont_end_yet(atms);
+    get_executor(env, obj)->done(atms);
 }
 
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_failure(JNIEnv *env, jobject obj, jlongArray atoms)

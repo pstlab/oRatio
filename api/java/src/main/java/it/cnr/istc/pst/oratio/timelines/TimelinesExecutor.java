@@ -27,9 +27,7 @@ public class TimelinesExecutor {
 
     public native void tick();
 
-    public native void dont_start_yet(long[] atoms);
-
-    public native void dont_end_yet(long[] atoms);
+    public native void done(long[] atoms);
 
     public native void failure(long[] atoms);
 

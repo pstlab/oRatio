@@ -28,9 +28,8 @@ namespace ratio
     smt::rational get_current_time() const { return current_time; };
 
     EXECUTOR_EXPORT void tick();
-    EXECUTOR_EXPORT void dont_start_yet(const std::set<atom *> &atoms);
-    EXECUTOR_EXPORT void dont_end_yet(const std::set<atom *> &atoms);
 
+    EXECUTOR_EXPORT void freeze(const std::set<expr> &xprs);
     EXECUTOR_EXPORT void done(const std::set<atom *> &atoms);
     EXECUTOR_EXPORT void failure(const std::set<atom *> &atoms);
 
@@ -50,10 +49,9 @@ namespace ratio
     const predicate &imp_pred;
     smt::rational current_time;         // the current time in plan units..
     const smt::rational units_per_tick; // the number of plan units for each tick..
-    std::vector<smt::lit> pending_facts;
     std::unordered_map<item *, smt::inf_rational> frozen_nums;
     std::unordered_map<item *, smt::lit> frozen_vals;
-    std::set<atom *> not_starting, not_ending;
+    std::set<atom *> executing;                                   // the currently executing atoms..
     std::map<smt::inf_rational, std::set<atom *>> s_atms, e_atms; // for each pulse, the atoms starting/ending at that pulse..
     std::set<smt::inf_rational> pulses;                           // all the pulses of the plan..
     std::vector<executor_listener *> listeners;                   // the executor listeners..
