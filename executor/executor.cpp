@@ -130,7 +130,7 @@ namespace ratio
 
         // we assert the pending facts..
         // slv.assert_facts(pending_facts);
-        pending_facts.clear();
+        // pending_facts.clear();
 
         // we solve the problem again..
         slv.solve();
