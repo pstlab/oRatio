@@ -78,10 +78,11 @@ namespace ratio
             FIRE_CURRENT_FLAW(**f_next);
 
             if (is_infinite((*f_next)->get_estimated_cost()))
-            { // we don't know how to solve this flaw: we search..
-                next();
-                while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return is_infinite(f->get_estimated_cost()); }))
+            { // we don't know how to solve this flaw :(
+                do
+                { // we search..
                     next();
+                } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return is_infinite(f->get_estimated_cost()); }));
                 // we solve all the current inconsistencies..
                 solve_inconsistencies();
                 continue;
@@ -113,10 +114,11 @@ namespace ratio
                 FIRE_CURRENT_FLAW(**f_next);
 
                 if (is_infinite((*f_next)->get_estimated_cost()))
-                { // we don't know how to solve this flaw: we search..
-                    next();
-                    while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return is_infinite(f->get_estimated_cost()); }))
-                        next(); // and we we search..
+                { // we don't know how to solve this flaw :(
+                    do
+                    { // we search..
+                        next();
+                    } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return is_infinite(f->get_estimated_cost()); }));
                     continue;
                 }
 
