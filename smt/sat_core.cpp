@@ -408,7 +408,8 @@ namespace smt
                         if (root_level())
                             return false;
 
-                        th->analyze_and_backjump(); // we analyze the theory's conflict, create a no-good from the analysis and backjump..
+                        // we analyze the theory's conflict, create a no-good from the analysis and backjump..
+                        th->analyze_and_backjump();
                         goto main_loop;
                     }
                 if (root_level()) // since this variable will no more be assigned, we can perform some cleanings..
@@ -423,7 +424,8 @@ namespace smt
                 if (root_level())
                     return false;
 
-                th->analyze_and_backjump(); // we analyze the theory's conflict, create a no-good from the analysis and backjump..
+                // we analyze the theory's conflict, create a no-good from the analysis and backjump..
+                th->analyze_and_backjump();
                 goto main_loop;
             }
 

@@ -58,6 +58,13 @@ namespace ratio
      * Solves the given problem.
      */
     SOLVER_EXPORT void solve() override;
+    /**
+     * Searches for a consistent solution which has no flaws.
+     */
+    SOLVER_EXPORT void search();
+    /**
+     * Takes the given decision and propagates its effects.
+     */
     void take_decision(const smt::lit &ch);
 
     bool_expr new_bool() noexcept override;

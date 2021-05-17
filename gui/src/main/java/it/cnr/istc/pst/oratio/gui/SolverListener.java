@@ -109,6 +109,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
 
     @Override
     public synchronized void solutionFound() {
+        timelines.stateChanged();
         state = SolverState.Solved;
         if (current_flaw != null)
             current_flaw.current = false;
@@ -117,6 +118,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
             current_resolver.current = false;
         current_resolver = null;
         try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.Timelines(getTimelines())));
             App.broadcast(MAPPER.writeValueAsString(new Message.SolutionFound()));
             App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
         } catch (final JsonProcessingException e) {

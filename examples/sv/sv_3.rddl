@@ -1,0 +1,21 @@
+class TestSV : StateVariable {
+
+    predicate At(real x, real y) {
+        duration >= 1.0;
+        goal going_at = new GoingTo(end:start, x:x, y:y);
+    }
+
+    predicate GoingTo(real x, real y) {
+        duration >= 1.0;
+        goal at = new At(end:start);
+    }
+}
+
+TestSV test = new TestSV();
+
+// we create a fact on the 'test' state variable
+fact f0 = new test.At(start:origin, x:0.0, y:0.0);
+f0.duration >= 1.0;
+
+// we create a goal on the 'test' state variable
+goal g0 = new test.At(end:horizon, x:1.0, y:1.0);

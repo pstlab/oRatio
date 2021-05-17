@@ -316,7 +316,7 @@ namespace smt
         }
     }
 
-    std::string to_string(const rational &rhs) noexcept
+    SMT_EXPORT std::string to_string(const rational &rhs) noexcept
     {
         switch (rhs.den)
         {

@@ -73,7 +73,7 @@ namespace smt
   private:
     void normalize() noexcept;
 
-    friend std::string to_string(const rational &rhs) noexcept;
+    friend SMT_EXPORT std::string to_string(const rational &rhs) noexcept;
 
   private:
     I num; // the numerator..

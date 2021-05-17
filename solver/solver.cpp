@@ -63,6 +63,12 @@ namespace ratio
         // we set the gamma variable..
         heur.check();
 
+        // we search for a consistent solution without flaws..
+        search();
+    }
+
+    SOLVER_EXPORT void solver::search()
+    {
 #ifdef CHECK_INCONSISTENCIES
         // we solve all the current inconsistencies..
         solve_inconsistencies();
@@ -139,6 +145,7 @@ namespace ratio
 
         // Hurray!! we have found a solution..
         LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
+        FIRE_STATE_CHANGED();
         FIRE_SOLUTION_FOUND();
     }
 
