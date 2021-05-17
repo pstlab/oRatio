@@ -15,7 +15,7 @@ namespace ratio
 
     JNIEnv *scoped_env::get_env()
     {
-        auto get_env_result = jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_10);
+        auto get_env_result = jvm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_8);
         if (get_env_result == JNI_EDETACHED)
             if (jvm->AttachCurrentThread(reinterpret_cast<void **>(&env), NULL) == JNI_OK)
                 thread_local detach_on_exit tmp(jvm);
