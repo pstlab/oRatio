@@ -46,7 +46,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
     env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
 
     auto &exec = *get_executor(env, obj);
-    std::set<atom *> atms;
+    std::unordered_set<atom *> atms;
     for (jsize i = 0; i < atms_size; i++)
         atms.insert(&exec.get_atom(input[i]));
 
@@ -60,7 +60,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_f
     env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
 
     auto &exec = *get_executor(env, obj);
-    std::set<atom *> atms;
+    std::unordered_set<atom *> atms;
     for (jsize i = 0; i < atms_size; i++)
         atms.insert(&exec.get_atom(input[i]));
 

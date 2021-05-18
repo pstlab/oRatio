@@ -29,8 +29,8 @@ namespace ratio
     EXECUTOR_EXPORT void tick();
 
     EXECUTOR_EXPORT void freeze(const atom &atm, const expr &xpr);
-    EXECUTOR_EXPORT void done(const std::set<atom *> &atoms);
-    EXECUTOR_EXPORT void failure(const std::set<atom *> &atoms);
+    EXECUTOR_EXPORT void done(const std::unordered_set<atom *> &atoms);
+    EXECUTOR_EXPORT void failure(const std::unordered_set<atom *> &atoms);
 
   private:
     bool propagate(const smt::lit &p) noexcept override { return true; }
@@ -59,7 +59,7 @@ namespace ratio
     std::unordered_map<const atom *, std::unordered_map<arith_item *, smt::inf_rational>> ubs;
     std::unordered_map<const var_item *, const smt::var_value *> frozen_vals;
     std::unordered_map<smt::var, atom *> all_atoms;               // all the interesting atoms indexed by their sigma variable..
-    std::set<atom *> executing;                                   // the currently executing atoms..
+    std::unordered_set<atom *> executing;                         // the currently executing atoms..
     std::map<smt::inf_rational, std::set<atom *>> s_atms, e_atms; // for each pulse, the atoms starting/ending at that pulse..
     std::set<smt::inf_rational> pulses;                           // all the pulses of the plan..
     std::vector<executor_listener *> listeners;                   // the executor listeners..

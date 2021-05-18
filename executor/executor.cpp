@@ -99,8 +99,13 @@ namespace ratio
             frozen_vals.emplace(vi, *slv.enum_value(xpr).begin());
     }
 
-    EXECUTOR_EXPORT void executor::done(const std::set<atom *> &atoms) { executing.erase(atoms.cbegin(), atoms.cend()); }
-    EXECUTOR_EXPORT void executor::failure(const std::set<atom *> &atoms)
+    EXECUTOR_EXPORT void executor::done(const std::unordered_set<atom *> &atoms)
+    {
+        for (const auto &atm : atoms)
+            executing.erase(atm);
+    }
+
+    EXECUTOR_EXPORT void executor::failure(const std::unordered_set<atom *> &atoms)
     {
         for (const auto &atm : atoms)
             cnfl.push_back(lit(atm->get_sigma()));
