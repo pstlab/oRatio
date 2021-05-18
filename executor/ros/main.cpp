@@ -79,6 +79,12 @@ int main(int argc, char const *argv[])
                 q.push(t.second);
         }
 
+        std::cout << "creating UInt64Array message..\n";
+        std::ofstream msg_file;
+        msg_file.open("UInt64Array.msg");
+        msg_file << "uint64[] data\n";
+        msg_file.close();
+
         return 0;
     }
     catch (const std::exception &ex)
