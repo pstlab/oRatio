@@ -217,9 +217,9 @@ namespace smt
 
     SMT_EXPORT bool lra_theory::equates(const lin &l0, const lin &l1) const noexcept
     {
-        const auto l0_bounds = bounds(l0);
-        const auto l1_bounds = bounds(l1);
-        return l0_bounds.second >= l1_bounds.first && l0_bounds.first <= l1_bounds.second; // the two intervals intersect..
+        const auto [l0_lb, l0_ub] = bounds(l0);
+        const auto [l1_lb, l1_ub] = bounds(l1);
+        return l0_ub >= l1_lb && l0_lb <= l1_ub; // the two intervals intersect..
     }
 
     SMT_EXPORT bool lra_theory::set_lb(const var &x_i, const inf_rational &val, const lit &p) noexcept
@@ -259,7 +259,7 @@ namespace smt
         assert(cnfl.empty());
         while (true)
         {
-            const auto &x_i_it = std::find_if(tableau.cbegin(), tableau.cend(), [this](const std::pair<var, row *> &v) { return value(v.first) < lb(v.first) || value(v.first) > ub(v.first); });
+            const auto &x_i_it = std::find_if(tableau.cbegin(), tableau.cend(), [this](const auto &v) { return value(v.first) < lb(v.first) || value(v.first) > ub(v.first); });
             if (x_i_it == tableau.cend())
                 return true;
             // the current value of the x_i variable is out of its c_bounds..
@@ -306,8 +306,8 @@ namespace smt
     void lra_theory::pop() noexcept
     {
         // we restore the variables' c_bounds and their reason..
-        for (const auto &b : layers.back())
-            c_bounds[b.first] = b.second;
+        for (const auto &[v, bnds] : layers.back())
+            c_bounds[v] = bnds;
         layers.pop_back();
     }
 
@@ -436,8 +436,8 @@ namespace smt
         lin expr = std::move(ex_row->l);
         tableau.erase(x_i);
         // we remove the row from the watches..
-        for (const auto &c : expr.vars)
-            t_watches[c.first].erase(ex_row);
+        for (const auto &[v, c] : expr.vars)
+            t_watches[v].erase(ex_row);
         delete ex_row;
 
         const rational c = expr.vars[x_j];

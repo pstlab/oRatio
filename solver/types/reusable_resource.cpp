@@ -25,18 +25,18 @@ namespace ratio
         std::vector<std::vector<std::pair<lit, double>>> incs;
         // we partition atoms for each reusable-resource they might insist on..
         std::unordered_map<const item *, std::vector<atom *>> rr_instances;
-        for (const auto &atm : atoms)
-            if (get_core().get_sat_core().value(atm.first->get_sigma()) == True) // we filter out those which are not strictly active..
+        for (const auto &[atm, atm_lstnr] : atoms)
+            if (get_core().get_sat_core().value(atm->get_sigma()) == True) // we filter out those which are not strictly active..
             {
-                expr c_scope = atm.first->get(TAU);
+                expr c_scope = atm->get(TAU);
                 if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
                 {
                     for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
                         if (to_check.count(static_cast<const item *>(val)))
-                            rr_instances[static_cast<const item *>(val)].push_back(atm.first);
+                            rr_instances[static_cast<const item *>(val)].push_back(atm);
                 }
                 else if (to_check.count(static_cast<item *>(&*c_scope)))
-                    rr_instances[static_cast<item *>(&*c_scope)].push_back(atm.first);
+                    rr_instances[static_cast<item *>(&*c_scope)].push_back(atm);
             }
 
         // we detect inconsistencies for each of the instances..
@@ -129,8 +129,8 @@ namespace ratio
                                         if (get_solver().get_sat_core().value(a0_a1_it->second) != False)
                                         {
 #ifdef DL_TN
-                                            const auto dist = get_solver().get_rdl_theory().distance(a0_end->l, a1_start->l);
-                                            const auto commit = is_infinite(dist.first) || is_infinite(dist.second) ? 0.5 : (std::min(static_cast<double>(dist.second.get_rational()), 0.0) - std::min(static_cast<double>(dist.first.get_rational()), 0.0)) / (static_cast<double>(dist.second.get_rational()) - static_cast<double>(dist.first.get_rational()));
+                                            const auto [min, max] = get_solver().get_rdl_theory().distance(a0_end->l, a1_start->l);
+                                            const auto commit = is_infinite(min) || is_infinite(max) ? 0.5 : (std::min(static_cast<double>(max.get_rational()), 0.0) - std::min(static_cast<double>(min.get_rational()), 0.0)) / (static_cast<double>(max.get_rational()) - static_cast<double>(min.get_rational()));
 #elif LA_TN
                                             const auto work = (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a1_start).get_rational()) * (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a1_start).get_rational());
                                             const auto commit = work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator());
@@ -143,8 +143,8 @@ namespace ratio
                                         if (get_solver().get_sat_core().value(a1_a0_it->second) != False)
                                         {
 #ifdef DL_TN
-                                            const auto dist = get_solver().get_rdl_theory().distance(a1_end->l, a0_start->l);
-                                            const auto commit = is_infinite(dist.first) || is_infinite(dist.second) ? 0.5 : (std::min(static_cast<double>(dist.second.get_rational()), 0.0) - std::min(static_cast<double>(dist.first.get_rational()), 0.0)) / (static_cast<double>(dist.second.get_rational()) - static_cast<double>(dist.first.get_rational()));
+                                            const auto [min, max] = get_solver().get_rdl_theory().distance(a1_end->l, a0_start->l);
+                                            const auto commit = is_infinite(min) || is_infinite(max) ? 0.5 : (std::min(static_cast<double>(max.get_rational()), 0.0) - std::min(static_cast<double>(min.get_rational()), 0.0)) / (static_cast<double>(max.get_rational()) - static_cast<double>(min.get_rational()));
 #elif LA_TN
                                             const auto work = (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a0_start).get_rational()) * (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a0_start).get_rational());
                                             const auto commit = work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator());

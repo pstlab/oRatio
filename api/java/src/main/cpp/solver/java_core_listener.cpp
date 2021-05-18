@@ -134,8 +134,7 @@ namespace ratio
             type &t = *q.front();
             q.pop();
 
-            const auto &t_it = all_types.find(&t);
-            if (t_it == all_types.cend())
+            if (const auto &t_it = all_types.find(&t); t_it == all_types.cend())
             { // we have a new type..
                 if (!t.is_primitive())
                     new_types.insert(&t);
@@ -176,14 +175,11 @@ namespace ratio
 
         // we add the predicates..
         for (const auto &[pred_name, pred] : cr.get_predicates())
-        {
-            const auto &p_it = all_types.find(pred);
-            if (p_it == all_types.cend())
+            if (const auto &p_it = all_types.find(pred); p_it == all_types.cend())
             {
                 new_predicates.insert(pred);
                 new_predicate(env, *pred);
             }
-        }
 
         // we revise the predicates..
         for (const auto &pred : new_predicates)
@@ -209,8 +205,7 @@ namespace ratio
             {
                 item &itm = *i;
                 c_items.insert(&itm);
-                const auto &i_it = all_items.find(&itm);
-                if (i_it == all_items.cend())
+                if (const auto &i_it = all_items.find(&itm); i_it == all_items.cend())
                     new_item(env, itm);
             }
             for (const auto &[pred_name, pred] : q.front()->get_predicates())
@@ -218,8 +213,7 @@ namespace ratio
                 {
                     atom &atm = static_cast<atom &>(*a);
                     c_items.insert(&atm);
-                    const auto &a_it = all_items.find(&atm);
-                    if (a_it == all_items.cend())
+                    if (const auto &a_it = all_items.find(&atm); a_it == all_items.cend())
                         new_atom(env, atm);
                 }
             for (const auto &[tp_name, tp] : q.front()->get_types())
@@ -227,7 +221,7 @@ namespace ratio
             q.pop();
         }
 
-        for (const auto &[itm, j_itm] : all_items)
+        for (const auto &[itm, j_itm] : std::unordered_map<const item *, jobject>(all_items))
         {
             for (const auto &[xpr_name, xpr] : itm->get_exprs())
                 set(env, j_itm, i_set_mthd_id, xpr_name, *xpr);
@@ -275,15 +269,15 @@ namespace ratio
     {
         jobject c_type = all_types.at(&t);
         // we add the type fields..
-        for (const auto &f : t.get_fields())
+        for (const auto &[f_name, f] : t.get_fields())
         {
-            jstring f_name = env->NewStringUTF(f.first.c_str());
-            jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f.second->get_type()), f_name);
+            jstring j_name = env->NewStringUTF(f_name.c_str());
+            jobject c_field = env->NewObject(field_cls, field_ctr_id, all_types.at(&f->get_type()), j_name);
 
             env->CallVoidMethod(c_type, t_dfn_field_mthd_id, c_field);
 
             env->DeleteLocalRef(c_field);
-            env->DeleteLocalRef(f_name);
+            env->DeleteLocalRef(j_name);
         }
 
         // we add the supertypes..
