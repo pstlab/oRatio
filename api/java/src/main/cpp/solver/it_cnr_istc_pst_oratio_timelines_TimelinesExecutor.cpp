@@ -27,7 +27,17 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
     env->SetLongField(obj, env->GetFieldID(env->GetObjectClass(obj), "native_handle", "J"), 0);
 }
 
-JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_tick(JNIEnv *env, jobject obj) { get_executor(env, obj)->tick(); }
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_tick(JNIEnv *env, jobject obj)
+{
+    try
+    {
+        get_executor(env, obj)->tick();
+    }
+    catch (const std::exception &e)
+    {
+        env->ThrowNew(env->FindClass("it/cnr/istc/pst/oratio/timelines/ExecutorException"), e.what());
+    }
+}
 
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_done(JNIEnv *env, jobject obj, jlongArray atoms)
 {
@@ -52,5 +62,12 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_f
     for (jsize i = 0; i < atms_size; i++)
         atms.insert(reinterpret_cast<atom *>(input[i]));
 
-    get_executor(env, obj)->failure(atms);
+    try
+    {
+        get_executor(env, obj)->failure(atms);
+    }
+    catch (const std::exception &e)
+    {
+        env->ThrowNew(env->FindClass("it/cnr/istc/pst/oratio/timelines/ExecutorException"), e.what());
+    }
 }

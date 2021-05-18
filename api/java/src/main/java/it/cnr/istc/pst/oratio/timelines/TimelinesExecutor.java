@@ -3,7 +3,6 @@ package it.cnr.istc.pst.oratio.timelines;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import it.cnr.istc.pst.oratio.ExecutorListener;
 import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
 
@@ -25,11 +24,11 @@ public class TimelinesExecutor {
 
     public native void dispose();
 
-    public native void tick();
+    public native void tick() throws ExecutorException;
 
-    public native void done(long[] atoms);
+    public native void done(long[] atoms) throws ExecutorException;
 
-    public native void failure(long[] atoms);
+    public native void failure(long[] atoms) throws ExecutorException;
 
     private void fireTick(final long current_time_num, final long current_time_den) {
         final Rational current_time = new Rational(current_time_num, current_time_den);

@@ -26,12 +26,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import it.cnr.istc.pst.oratio.Bound;
-import it.cnr.istc.pst.oratio.ExecutorListener;
 import it.cnr.istc.pst.oratio.GraphListener;
 import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
 import it.cnr.istc.pst.oratio.StateListener;
 import it.cnr.istc.pst.oratio.gui.App.Message;
+import it.cnr.istc.pst.oratio.timelines.ExecutorListener;
 import it.cnr.istc.pst.oratio.timelines.PropositionalAgent;
 import it.cnr.istc.pst.oratio.timelines.ReusableResource;
 import it.cnr.istc.pst.oratio.timelines.StateVariable;

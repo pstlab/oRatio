@@ -1,4 +1,6 @@
-package it.cnr.istc.pst.oratio;
+package it.cnr.istc.pst.oratio.timelines;
+
+import it.cnr.istc.pst.oratio.Rational;
 
 public interface ExecutorListener {
 

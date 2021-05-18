@@ -177,11 +177,11 @@ public class Solver implements Scope, Env {
         exprs.put(id, itm);
     }
 
-    public native void read(String script);
+    public native void read(String script) throws SolverException;
 
-    public native void read(String[] files);
+    public native void read(String[] files) throws SolverException;
 
-    public native void solve();
+    public native void solve() throws SolverException;
 
     private void fireFlawCreated(final long id, final long[] causes, final String label, final byte state,
             final int position_lb, final int position_ub) {

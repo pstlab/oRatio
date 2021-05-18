@@ -24,9 +24,11 @@ import io.javalin.websocket.WsMessageContext;
 import it.cnr.istc.pst.oratio.Bound;
 import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
+import it.cnr.istc.pst.oratio.SolverException;
 import it.cnr.istc.pst.oratio.gui.SolverListener.Flaw;
 import it.cnr.istc.pst.oratio.gui.SolverListener.Resolver;
 import it.cnr.istc.pst.oratio.gui.SolverListener.SolverState;
+import it.cnr.istc.pst.oratio.timelines.ExecutorException;
 import it.cnr.istc.pst.oratio.timelines.TimelinesExecutor;
 
 public class App {
@@ -46,8 +48,12 @@ public class App {
     public static void main(final String[] args) {
         start_server();
 
-        SOLVER.read(args);
-        SOLVER.solve();
+        try {
+            SOLVER.read(args);
+            SOLVER.solve();
+        } catch (SolverException e) {
+            LOG.error("Cannot solve the problem", e);
+        }
     }
 
     public static void start_server() {
@@ -116,11 +122,15 @@ public class App {
         final String message = ctx.message();
         LOG.info("Received message {}..", message);
         switch (message) {
-        case "tick":
-            TL_EXEC.tick();
-            break;
-        default:
-            break;
+            case "tick":
+                try {
+                    TL_EXEC.tick();
+                } catch (ExecutorException e) {
+                    LOG.error("Cannot execute the solution", e);
+                }
+                break;
+            default:
+                break;
         }
     }
 
