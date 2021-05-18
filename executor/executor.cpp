@@ -153,12 +153,11 @@ namespace ratio
         pulses.clear();
 
         // we collect all the (active) atoms..
-        std::unordered_set<atom *> all_atoms;
         for (const auto &[pred_name, pred] : slv.get_predicates())
             if (pred->is_assignable_from(imp_pred) || pred->is_assignable_from(int_pred))
                 for (const auto &atm : pred->get_instances())
                     if (slv.get_sat_core().value(static_cast<atom &>(*atm).get_sigma()) == True)
-                        all_atoms.insert(static_cast<atom *>(&*atm));
+                        all_atoms.emplace(static_cast<atom *>(&*atm)->get_sigma(), static_cast<atom *>(&*atm));
         std::queue<type *> q;
         for (const auto &[tp_name, tp] : slv.get_types())
             if (!tp->is_primitive())
@@ -169,13 +168,13 @@ namespace ratio
                 if (pred->is_assignable_from(imp_pred) || pred->is_assignable_from(int_pred))
                     for (const auto &atm : pred->get_instances())
                         if (slv.get_sat_core().value(static_cast<atom &>(*atm).get_sigma()) == True)
-                            all_atoms.insert(static_cast<atom *>(&*atm));
+                            all_atoms.emplace(static_cast<atom *>(&*atm)->get_sigma(), static_cast<atom *>(&*atm));
             q.pop();
         }
 
         const auto &int_pred = slv.get_predicate("Interval");
         const auto &imp_pred = slv.get_predicate("Impulse");
-        for (const auto &atm : all_atoms)
+        for (const auto &[sigma, atm] : all_atoms)
             if (is_impulse(*atm))
             {
                 arith_expr at_expr = atm->get(AT);

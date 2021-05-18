@@ -45,11 +45,12 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
     std::vector<jlong> input(atms_size);
     env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
 
+    auto &exec = *get_executor(env, obj);
     std::set<atom *> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms.insert(reinterpret_cast<atom *>(input[i]));
+        atms.insert(&exec.get_atom(input[i]));
 
-    get_executor(env, obj)->done(atms);
+    exec.done(atms);
 }
 
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_failure(JNIEnv *env, jobject obj, jlongArray atoms)
@@ -58,13 +59,14 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_f
     std::vector<jlong> input(atms_size);
     env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
 
+    auto &exec = *get_executor(env, obj);
     std::set<atom *> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms.insert(reinterpret_cast<atom *>(input[i]));
+        atms.insert(&exec.get_atom(input[i]));
 
     try
     {
-        get_executor(env, obj)->failure(atms);
+        exec.failure(atms);
     }
     catch (const std::exception &e)
     {

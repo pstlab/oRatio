@@ -24,6 +24,8 @@ namespace ratio
 
     smt::rational get_current_time() const { return current_time; };
 
+    EXECUTOR_EXPORT atom &get_atom(const smt::var &sigma) const { return *all_atoms.at(sigma); }
+
     EXECUTOR_EXPORT void tick();
 
     EXECUTOR_EXPORT void freeze(const atom &atm, const expr &xpr);
@@ -56,6 +58,7 @@ namespace ratio
     std::unordered_map<const atom *, std::unordered_map<arith_item *, smt::inf_rational>> lbs;
     std::unordered_map<const atom *, std::unordered_map<arith_item *, smt::inf_rational>> ubs;
     std::unordered_map<const var_item *, const smt::var_value *> frozen_vals;
+    std::unordered_map<smt::var, atom *> all_atoms;               // all the interesting atoms indexed by their sigma variable..
     std::set<atom *> executing;                                   // the currently executing atoms..
     std::map<smt::inf_rational, std::set<atom *>> s_atms, e_atms; // for each pulse, the atoms starting/ending at that pulse..
     std::set<smt::inf_rational> pulses;                           // all the pulses of the plan..
