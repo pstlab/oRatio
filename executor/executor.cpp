@@ -25,6 +25,10 @@ namespace ratio
         { // we have something to do..
             if (const auto ending_atms = e_atms.find(*pulses.cbegin()); ending_atms != e_atms.cend())
             { // some atoms are ending..
+                // we notify that we are ending some atoms..
+                for (const auto &l : listeners)
+                    l->ending(ending_atms->second);
+
                 std::set<atom *> e_ex_atms;
                 for (const auto &atm : ending_atms->second)
                     if (executing.count(atm))
@@ -53,25 +57,21 @@ namespace ratio
                     goto manage_tick;
                 }
 
-                // we notify that we are ending some atoms..
-                for (const auto &l : listeners)
-                    l->ending(ending_atms->second);
-
                 // we make some cleanings..
                 e_atms.erase(ending_atms);
             }
 
             if (const auto starting_atms = s_atms.find(*pulses.cbegin()); starting_atms != s_atms.cend())
             { // some atoms are starting..
+                // we notify that we are starting some atoms..
+                for (const auto &l : listeners)
+                    l->starting(starting_atms->second);
                 for (const auto &atm : starting_atms->second)
                 {
                     if (is_interval(*atm)) // we have an interval atom..
                         freeze(*atm, atm->get(START));
                     executing.insert(atm);
                 }
-                // we notify that we are starting some atoms..
-                for (const auto &l : listeners)
-                    l->starting(starting_atms->second);
                 // we make some cleanings..
                 s_atms.erase(starting_atms);
             }
