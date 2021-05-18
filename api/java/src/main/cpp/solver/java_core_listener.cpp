@@ -227,20 +227,19 @@ namespace ratio
             q.pop();
         }
 
-        for (const auto &c_itm : all_items)
+        for (const auto &[itm, j_itm] : all_items)
         {
-            const auto &j_it = all_items.at(&*c_itm.first);
-            for (const auto &xpr : c_itm.first->get_exprs())
-                set(env, j_it, i_set_mthd_id, xpr.first, *xpr.second);
+            for (const auto &[xpr_name, xpr] : itm->get_exprs())
+                set(env, j_itm, i_set_mthd_id, xpr_name, *xpr);
 
-            if (const atom *a = dynamic_cast<const atom *>(&*c_itm.first))
-                env->CallVoidMethod(j_it, atm_set_state_mthd_id, cr.get_sat_core().value(a->get_sigma()));
+            if (const atom *a = dynamic_cast<const atom *>(itm))
+                env->CallVoidMethod(j_itm, atm_set_state_mthd_id, cr.get_sat_core().value(a->get_sigma()));
         }
 
-        for (const auto &xpr : cr.get_exprs())
-            if (jobject obj = set(env, slv_obj, s_set_mthd_id, xpr.first, *xpr.second))
+        for (const auto &[xpr_name, xpr] : cr.get_exprs())
+            if (jobject obj = set(env, slv_obj, s_set_mthd_id, xpr_name, *xpr))
             {
-                jstring c_name = env->NewStringUTF(cr.guess_name(*xpr.second).c_str());
+                jstring c_name = env->NewStringUTF(cr.guess_name(*xpr).c_str());
                 env->CallVoidMethod(obj, i_set_name_mthd_id, c_name);
                 env->DeleteLocalRef(c_name);
             }
