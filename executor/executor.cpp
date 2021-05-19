@@ -21,7 +21,7 @@ namespace ratio
     {
         LOG("current time: " << current_time);
     manage_tick:
-        if (*pulses.cbegin() <= current_time)
+        while (*pulses.cbegin() <= current_time)
         { // we have something to do..
             if (const auto ending_atms = e_atms.find(*pulses.cbegin()); ending_atms != e_atms.cend())
             { // some atoms are ending..
@@ -198,9 +198,12 @@ namespace ratio
                 if (end < current_time)
                     continue; // this atom is already in the past..
                 inf_rational start = slv.arith_value(s_expr);
-                s_atms[start].insert(atm);
+                if (start >= current_time)
+                {
+                    s_atms[start].insert(atm);
+                    pulses.insert(start);
+                }
                 e_atms[end].insert(atm);
-                pulses.insert(start);
                 pulses.insert(end);
             }
     }
