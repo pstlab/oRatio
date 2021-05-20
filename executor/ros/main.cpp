@@ -12,7 +12,9 @@ void to_ros_msg(const predicate &pred)
     std::cout << "creating ROS message for predicate " << pred.get_name() << "..\n";
     std::ofstream msg_file;
     msg_file.open(pred.get_name() + "Atom.msg");
-    msg_file << "uint64 id\n\n";
+    msg_file << "uint64 sigma\n\n";
+    msg_file << "bool starting\n";
+    msg_file << "bool ending\n\n";
     if (&pred.get_scope() != &pred.get_core())
         msg_file << "string " << TAU << "\n";
     std::unordered_set<const type *> all_preds;
