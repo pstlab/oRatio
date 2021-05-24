@@ -52,7 +52,16 @@ namespace ratio
                 { // we have some delays: we remove new possible flaws and (re)build the timelines..
                     if (!slv.get_sat_core().propagate())
                         throw execution_exception();
+
+                    // we solve the problem again..
                     slv.search();
+                    while (should_set)
+                    {
+                        set_values();
+                        slv.search();
+                    }
+
+                    // we (re)build the timelines..
                     build_timelines();
                     goto manage_tick;
                 }
@@ -108,13 +117,17 @@ namespace ratio
     EXECUTOR_EXPORT void executor::failure(const std::unordered_set<atom *> &atoms)
     {
         for (const auto &atm : atoms)
-            cnfl.push_back(lit(atm->get_sigma()));
+            cnfl.push_back(lit(atm->get_sigma(), false));
 
         // we analyze the theory's conflict, create a no-good from the analysis and backjump..
         analyze_and_backjump();
 
         // we solve the problem again..
-        slv.search();
+        while (should_set)
+        {
+            set_values();
+            slv.search();
+        }
 
         // we (re)build the timelines..
         build_timelines();
@@ -210,27 +223,20 @@ namespace ratio
 
     void executor::set_values()
     {
-    main_loop:
-        while (should_set)
-        {
-            should_set = false;
-            for (const auto &[itm, val] : frozen_vals)
-                if (!slv.get_ov_theory().value(itm->ev).count(val))
-                    if (slv.root_level())
-                        throw execution_exception();
-                    else
-                    {
-                        slv.get_sat_core().pop();
-                        goto main_loop;
-                    }
-            for (auto &&[atm, itm_val] : lbs)
-                for (auto &&[a_itm, lb] : itm_val)
-                    if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(a_itm->l), lb, lit(atm->get_sigma())))
-                        throw execution_exception();
-            for (auto &&[atm, itm_val] : ubs)
-                for (auto &&[a_itm, ub] : itm_val)
-                    if (!slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(a_itm->l), ub, lit(atm->get_sigma())))
-                        throw execution_exception();
-        }
+        should_set = false;
+        for (const auto &[itm, val] : frozen_vals)
+            if (!slv.get_ov_theory().value(itm->ev).count(val))
+                if (slv.root_level())
+                    throw execution_exception();
+                else
+                    slv.get_sat_core().pop();
+        for (auto &&[atm, itm_val] : lbs)
+            for (auto &&[a_itm, lb] : itm_val)
+                if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(a_itm->l), lb, lit(atm->get_sigma())))
+                    throw execution_exception();
+        for (auto &&[atm, itm_val] : ubs)
+            for (auto &&[a_itm, ub] : itm_val)
+                if (!slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(a_itm->l), ub, lit(atm->get_sigma())))
+                    throw execution_exception();
     }
 } // namespace ratio
