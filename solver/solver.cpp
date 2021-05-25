@@ -453,7 +453,7 @@ namespace ratio
     void solver::pop()
     {
         LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")"
-                                         << " -[" << to_string(current_decision) << "]");
+                                         << " -[" << to_string(trail.back().decision) << "]");
 
         // we reintroduce the solved flaw..
         for (const auto &f : trail.back().solved_flaws)
