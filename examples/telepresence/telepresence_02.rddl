@@ -44,8 +44,8 @@ class Robot : StateVariable {
         goal rlh = new left_arm.RaiseHand(start:start);
         goal rrh = new right_arm.RaiseHand(start:start);
 
-        goal llh = new left_arm.LowerHand(end:end);
-        goal lrh = new right_arm.LowerHand(end:end);
+        goal llh = new left_arm.LowerHand(start:end);
+        goal lrh = new right_arm.LowerHand(start:end);
     }
 
     predicate CognitiveExercize(int ex_id) {

@@ -61,6 +61,7 @@ add_test(NAME Logistics_1 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/log
 
 add_test(NAME Telepresence_0 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/telepresence/telepresence_00.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME Telepresence_1 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/telepresence/telepresence_01.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+add_test(NAME Telepresence_2 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/telepresence/telepresence_02.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 
 add_test(NAME Education_1 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/education/education_01.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME Education_2 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/education/education_02.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
