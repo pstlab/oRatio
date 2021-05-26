@@ -76,6 +76,12 @@ export class Timelines {
         svg.call(timelines_zoom);
 
         this.tooltip = d3.select('.tooltip');
+
+        this.sv_val_name = sv_value_name;
+        this.sv_val_tooltip = sv_value_tooltip;
+        this.rr_val_tooltip = rr_value_tooltip;
+        this.ag_val_name = ag_value_name;
+        this.ag_val_tooltip = ag_value_tooltip;
     }
 
     update(data) {
@@ -105,13 +111,15 @@ export class Timelines {
                     enter => {
                         const tl_val_g = enter.append('g');
                         tl_val_g.append('rect').attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1).attr('width', d => this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', this.timelines_y_scale.bandwidth() * 0.9).attr('rx', 5).attr('ry', 5).style('fill', d => sv_value_fill(d)).style('stroke', 'lightgray');
-                        tl_val_g.on('mouseover', (event, d) => this.tooltip.html(sv_value_tooltip(d)).transition().duration(200).style('opacity', .9))
+                        tl_val_g.append('text').attr('x', d => this.timelines_x_scale(d.from) + (this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.5).text(d => this.sv_val_name(d)).style('text-anchor', 'middle');
+                        tl_val_g.on('mouseover', (event, d) => this.tooltip.html(this.sv_val_tooltip(d)).transition().duration(200).style('opacity', .9))
                             .on('mousemove', event => this.tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                             .on('mouseout', event => this.tooltip.transition().duration(500).style('opacity', 0));
                         return tl_val_g;
                     },
                     update => {
                         update.select('rect').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1).attr('width', d => this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', this.timelines_y_scale.bandwidth() * 0.9).style('fill', d => sv_value_fill(d));
+                        update.select('text').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.5);
                         return update;
                     }
                 );
@@ -124,7 +132,7 @@ export class Timelines {
                     enter => {
                         const tl_val_g = enter.append('path').attr('fill', 'aliceblue').attr('stroke', 'lightblue')
                             .attr('d', d3.area().curve(d3.curveStepAfter).x(d => this.timelines_x_scale(d.from)).y0(this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth()).y1(d => rr_y_scale(d.usage)));
-                        tl_val_g.on('mouseover', (event, d) => this.tooltip.html(rr_value_tooltip(d)).transition().duration(200).style('opacity', .9))
+                        tl_val_g.on('mouseover', (event, d) => this.tooltip.html(this.rr_val_tooltip(d)).transition().duration(200).style('opacity', .9))
                             .on('mousemove', event => this.tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                             .on('mouseout', event => this.tooltip.transition().duration(500).style('opacity', 0));
                         return tl_val_g;
@@ -153,13 +161,15 @@ export class Timelines {
                     enter => {
                         const tl_val_g = enter.append('g');
                         tl_val_g.append('rect').attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y)).attr('width', d => d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth()).attr('rx', 5).attr('ry', 5).style('fill', 'url(#ag-lg)').style('stroke', 'lightgray');
-                        tl_val_g.on('mouseover', (event, d) => this.tooltip.html(agent_value_tooltip(d)).transition().duration(200).style('opacity', .9))
+                        tl_val_g.append('text').attr('x', d => this.timelines_x_scale(d.from) + (d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y) + agent_y_scale.bandwidth() / 2).text(d => this.ag_val_name(d)).style('text-anchor', 'middle');
+                        tl_val_g.on('mouseover', (event, d) => this.tooltip.html(this.ag_val_tooltip(d)).transition().duration(200).style('opacity', .9))
                             .on('mousemove', event => this.tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                             .on('mouseout', event => this.tooltip.transition().duration(500).style('opacity', 0));
                         return tl_val_g;
                     },
                     update => {
                         update.select('rect').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y)).attr('width', d => d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth() * 0.9);
+                        update.select('text').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y) + agent_y_scale.bandwidth() / 2);
                         return update;
                     }
                 );
@@ -175,13 +185,29 @@ export class Timelines {
                 enter => {
                     const t_g = enter.append('g').attr('class', 'time');
                     t_g.append('line').attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke', 'lavender').attr('stroke-opacity', 0.4).attr('x1', this.timelines_x_scale(data.current_time)).attr('y1', 0).attr('x2', this.timelines_x_scale(data.current_time)).attr('y2', this.timelines_height);
-                    t_g.append('line').attr('stroke-width', 0.1).attr('stroke-linecap', 'round').attr('stroke', 'black').attr('x1', this.timelines_x_scale(data.current_time)).attr('y1', 0).attr('x2', this.timelines_x_scale(data.current_time)).attr('y2', this.timelines_height);
+                    t_g.append('line').attr('stroke-width', 0.2).attr('stroke-linecap', 'round').attr('stroke', 'black').attr('x1', this.timelines_x_scale(data.current_time)).attr('y1', 0).attr('x2', this.timelines_x_scale(data.current_time)).attr('y2', this.timelines_height);
                     return t_g;
                 },
                 update => {
                     update.selectAll('line').transition().duration(200).attr('x1', this.timelines_x_scale(data.current_time)).attr('x2', this.timelines_x_scale(data.current_time));
                     return update;
                 });
+    }
+
+    set_state_variable_value_name(sv_val_name) { this.sv_val_name = sv_val_name; }
+    set_state_variable_value_tooltip(sv_val_tooltip) { this.sv_val_tooltip = sv_val_tooltip; }
+
+    set_reusable_resource_value_tooltip(rr_val_tooltip) { this.rr_val_tooltip = rr_val_tooltip; }
+
+    set_agent_value_name(ag_val_name) { this.ag_val_name = ag_val_name; }
+    set_agent_value_tooltip(ag_val_tooltip) { this.ag_val_tooltip = ag_val_tooltip; }
+}
+
+function sv_value_name(sv_value) {
+    switch (sv_value.value.length) {
+        case 0: return '';
+        case 1: return sv_value.value[0].predicate;
+        default: return Array.from(sv_value.value, atm => atm.predicate).join();
     }
 }
 
@@ -195,9 +221,9 @@ function sv_value_tooltip(sv_value) {
 
 function rr_value_tooltip(rr_value) { return rr_value.usage; }
 
-function agent_value_tooltip(ag_value) {
-    return atom_to_string(ag_value.value);
-}
+function ag_value_name(ag_value) { return ag_value.value.predicate; }
+
+function ag_value_tooltip(ag_value) { return atom_to_string(ag_value.value); }
 
 function sv_value_fill(sv_value) {
     switch (sv_value.value.length) {
