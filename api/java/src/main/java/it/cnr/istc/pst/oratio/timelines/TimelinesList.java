@@ -75,8 +75,9 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
             q.add(t);
             while (!q.isEmpty()) {
                 final Type c_type = q.poll();
-                if (BUILDERS.containsKey(c_type))
-                    return c_type;
+                for (Type type : BUILDERS.keySet())
+                    if (type.isAssignableFrom(c_type))
+                        return type;
                 if (c_type.getPredicates().values().stream().anyMatch(p -> p.getSuperclasses().stream()
                         .anyMatch(sp -> sp.getName().equals("Impulse") || sp.getName().equals("Interval"))))
                     return t.getSolver().getType("PropositionalAgent");

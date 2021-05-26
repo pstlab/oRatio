@@ -1,5 +1,13 @@
 package it.cnr.istc.pst.oratio;
 
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+@JsonSerialize(using = Rational.RationalSerializer.class)
 public class Rational extends Number implements Comparable<Rational> {
 
     private static final long serialVersionUID = 1L;
@@ -481,5 +489,20 @@ public class Rational extends Number implements Comparable<Rational> {
             v = -v;
         }
         return u * (v / gcd(u, v));
+    }
+
+    static class RationalSerializer extends StdSerializer<Rational> {
+
+        private RationalSerializer() {
+            super(Rational.class);
+        }
+
+        @Override
+        public void serialize(Rational value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+            gen.writeStartObject();
+            gen.writeNumberField("num", value.getNumerator());
+            gen.writeNumberField("den", value.getDenominator());
+            gen.writeEndObject();
+        }
     }
 }

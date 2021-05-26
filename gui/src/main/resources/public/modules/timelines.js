@@ -12,8 +12,8 @@ export class TimelinesData {
                 this.timelines[i] = tl;
                 this.timelines[i].id = i;
                 this.timelines[i].values.forEach((v, j) => v.id = j);
-                if (this.timelines[i].type === 'reusable-resource' && this.timelines[i].values.length) this.timelines[i].values.push({ usage: 0, from: this.timelines[i].values[this.timelines[i].values.length - 1].to, id: this.timelines[i].values.length });
-                if (this.timelines[i].type === 'agent') {
+                if (this.timelines[i].type === 'ReusableResource' && this.timelines[i].values.length) this.timelines[i].values.push({ usage: 0, from: this.timelines[i].values[this.timelines[i].values.length - 1].to, id: this.timelines[i].values.length });
+                if (this.timelines[i].type === 'Agent') {
                     const ends = [0];
                     this.timelines[i].values.forEach(v => v.y = values_y(v.from, v.from === v.to ? v.from + 0.1 : v.to, ends));
                 }
@@ -100,7 +100,7 @@ export class Timelines {
 
     updateTimeline(data, tl, i) {
         switch (tl.type) {
-            case 'state-variable':
+            case 'StateVariable':
                 d3.select('#tl-' + i).selectAll('g').data(tl.values, d => d.id).join(
                     enter => {
                         const tl_val_g = enter.append('g');
@@ -116,7 +116,7 @@ export class Timelines {
                     }
                 );
                 break;
-            case 'reusable-resource':
+            case 'ReusableResource':
                 const rr_max_val = (tl.values.length ? Math.max(d3.max(tl.values, d => d.usage), tl.capacity) : tl.capacity);
                 const rr_y_scale = d3.scaleLinear().domain([0, rr_max_val + rr_max_val * 0.1]).range([this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth(), this.timelines_y_scale(i)]);
                 const rr_g = d3.select('#tl-' + i);
@@ -146,14 +146,14 @@ export class Timelines {
                     }
                 );
                 break;
-            case 'agent':
+            case 'Agent':
                 const max_overlap = d3.max(tl.values, d => d.y) + 1;
                 const agent_y_scale = d3.scaleBand().domain(d3.range(max_overlap)).rangeRound([0, this.timelines_y_scale.bandwidth() * 0.9]).padding(0.1);
                 d3.select('#tl-' + i).selectAll('g').data(tl.values, d => d.id).join(
                     enter => {
                         const tl_val_g = enter.append('g');
                         tl_val_g.append('rect').attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y)).attr('width', d => d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth()).attr('rx', 5).attr('ry', 5).style('fill', 'url(#ag-lg)').style('stroke', 'lightgray');
-                        tl_val_g.on('mouseover', (event, d) => this.tooltip.html(sv_value_tooltip(d)).transition().duration(200).style('opacity', .9))
+                        tl_val_g.on('mouseover', (event, d) => this.tooltip.html(agent_value_tooltip(d)).transition().duration(200).style('opacity', .9))
                             .on('mousemove', event => this.tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                             .on('mouseout', event => this.tooltip.transition().duration(500).style('opacity', 0));
                         return tl_val_g;
@@ -185,12 +185,22 @@ export class Timelines {
     }
 }
 
-function sv_value_tooltip(sv_value) { return sv_value.name; }
+function sv_value_tooltip(sv_value) {
+    switch (sv_value.value.length) {
+        case 0: return '';
+        case 1: return atom_to_string(sv_value.value[0]);
+        default: return Array.from(sv_value.value, atm => atom_to_string(atm)).join();
+    }
+}
 
 function rr_value_tooltip(rr_value) { return rr_value.usage; }
 
+function agent_value_tooltip(ag_value) {
+    return atom_to_string(ag_value.value);
+}
+
 function sv_value_fill(sv_value) {
-    switch (sv_value.atoms.length) {
+    switch (sv_value.value.length) {
         case 0: return 'url(#sv-none-lg)';
         case 1: return 'url(#sv-ok-lg)';
         default: return 'url(#sv-inc-lg)';
@@ -205,4 +215,11 @@ function values_y(start, end, ends) {
         }
     ends.push(end);
     return ends.length - 1;
+}
+
+function atom_to_string(atom) {
+    let txt = '\u03C3' + atom.sigma + ' ' + atom.predicate;
+    const xprs = [];
+    Object.keys(atom).filter(n => n != 'sigma' && n != 'predicate').sort().forEach(xpr => xprs.push(xpr + ':' + atom[xpr]));
+    return txt + '(' + xprs.join(', ') + ')';
 }
