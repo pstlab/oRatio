@@ -94,12 +94,12 @@ export class Timelines {
             enter => {
                 const tl_g = enter.append('g').attr('class', 'timeline').attr('id', d => 'tl-' + d.id);
                 tl_g.append('rect').attr('x', -10).attr('y', d => this.timelines_y_scale(data.timelines.indexOf(d))).attr('width', this.timelines_x_scale(data.horizon) + 20).attr('height', this.timelines_y_scale.bandwidth()).style('fill', 'floralwhite');
-                tl_g.append('text').attr('x', 0).attr('y', d => this.timelines_y_scale(data.timelines.indexOf(d)) + this.timelines_y_scale.bandwidth() * 0.08).text(d => tl_name(d)).style('text-anchor', 'start');
+                tl_g.append('text').attr('x', 0).attr('y', d => this.timelines_y_scale(data.timelines.indexOf(d)) + this.timelines_y_scale.bandwidth() * 0.08).text(d => this.tl_name(d)).style('text-anchor', 'start');
                 return tl_g;
             },
             update => {
                 update.select('rect').transition().duration(200).attr('width', this.timelines_x_scale(data.horizon) + 20);
-                update.select('text').text(d => tl_name(d));
+                update.select('text').text(d => this.tl_name(d));
                 return update;
             });
         data.timelines.forEach((tl, i) => this.updateTimeline(data, tl, i));
