@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import it.cnr.istc.pst.oratio.Bound;
 import it.cnr.istc.pst.oratio.Rational;
+import it.cnr.istc.pst.oratio.timelines.Timeline;
 
 public abstract class Message {
 
@@ -179,9 +180,9 @@ public abstract class Message {
 
     public static class Timelines extends Message {
 
-        public final Collection<Timeline> timelines;
+        public final Collection<Timeline<?>> timelines;
 
-        public Timelines(final Collection<Timeline> timelines) {
+        public Timelines(final Collection<Timeline<?>> timelines) {
             super(MessageType.Timelines);
             this.timelines = timelines;
         }

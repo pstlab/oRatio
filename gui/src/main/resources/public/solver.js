@@ -17,19 +17,7 @@ function setup_ws() {
         const c_msg = JSON.parse(msg.data);
         switch (c_msg.type) {
             case 'Graph':
-                c_msg.flaws.forEach(f => {
-                    f.label = JSON.parse(f.label);
-                    if (f.cost)
-                        f.cost = (f.cost.num / f.cost.den);
-                    else
-                        f.cost = Number.POSITIVE_INFINITY;
-                });
-                c_msg.resolvers.forEach(r => {
-                    r.label = JSON.parse(r.label);
-                    r.intrinsic_cost = r.cost.num / r.cost.den;
-                    r.cost = r.intrinsic_cost;
-                });
-                graph_data.reset(c_msg.flaws, c_msg.resolvers);
+                graph_data.reset(c_msg);
                 graph.update(graph_data);
                 break;
             case 'StartedSolving':
@@ -44,11 +32,6 @@ function setup_ws() {
                 console.log('unsolvable problem..');
                 break;
             case 'FlawCreated':
-                c_msg.label = JSON.parse(c_msg.label);
-                if (c_msg.cost)
-                    c_msg.cost = (c_msg.cost.num / c_msg.cost.den);
-                else
-                    c_msg.cost = Number.POSITIVE_INFINITY;
                 graph_data.flaw_created(c_msg);
                 graph.update(graph_data);
                 break;
@@ -57,7 +40,6 @@ function setup_ws() {
                 graph.update(graph_data);
                 break;
             case 'FlawCostChanged':
-                c_msg.cost = c_msg.cost.num / c_msg.cost.den;
                 graph_data.flaw_cost_changed(c_msg);
                 graph.update(graph_data);
                 break;
@@ -70,9 +52,6 @@ function setup_ws() {
                 graph.update(graph_data);
                 break;
             case 'ResolverCreated':
-                c_msg.label = JSON.parse(c_msg.label);
-                c_msg.intrinsic_cost = c_msg.cost.num / c_msg.cost.den;
-                c_msg.cost = c_msg.intrinsic_cost;
                 graph_data.resolver_created(c_msg);
                 graph.update(graph_data);
                 break;
@@ -89,12 +68,11 @@ function setup_ws() {
                 graph.update(graph_data);
                 break;
             case 'Timelines':
-                c_msg.timelines.forEach(tl => tl.values.forEach(v => v.value = JSON.parse(v.value)));
-                timelines_data.reset(c_msg.timelines);
+                timelines_data.reset(c_msg);
                 timelines_chart.update(timelines_data);
                 break;
             case 'Tick':
-                timelines_data.tick(c_msg.current_time.num / c_msg.current_time.den);
+                timelines_data.tick(c_msg);
                 timelines_chart.updateTime(timelines_data);
                 break;
             case 'StartingAtoms':
@@ -104,7 +82,7 @@ function setup_ws() {
                 timelines_data.ending_atoms(c_msg);
                 break;
             default:
-                console.error('cannot handle message type ' + c_msg.message_type);
+                console.error('cannot handle message type ' + c_msg.type);
                 break;
         }
     };

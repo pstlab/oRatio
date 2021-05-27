@@ -2,7 +2,6 @@ package it.cnr.istc.pst.oratio.gui;
 
 import static it.cnr.istc.pst.oratio.gui.App.MAPPER;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,12 +19,7 @@ import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
 import it.cnr.istc.pst.oratio.StateListener;
 import it.cnr.istc.pst.oratio.timelines.ExecutorListener;
-import it.cnr.istc.pst.oratio.timelines.PropositionalAgent;
-import it.cnr.istc.pst.oratio.timelines.ReusableResource;
-import it.cnr.istc.pst.oratio.timelines.StateVariable;
-import it.cnr.istc.pst.oratio.timelines.Timeline;
 import it.cnr.istc.pst.oratio.timelines.TimelinesExecutor;
-import it.cnr.istc.pst.oratio.timelines.TimelinesList;
 import it.cnr.istc.pst.oratio.utils.Flaw;
 import it.cnr.istc.pst.oratio.utils.Message;
 import it.cnr.istc.pst.oratio.utils.Resolver;
@@ -34,7 +28,6 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
 
     private static final Logger LOG = LoggerFactory.getLogger(SolverListener.class);
     private final Solver solver;
-    private final TimelinesList timelines;
     private final TimelinesExecutor executor;
     private Rational current_time = new Rational();
     private final Map<Long, Flaw> flaws = new HashMap<>();
@@ -46,7 +39,6 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     public SolverListener(final Solver solver, final TimelinesExecutor executor) {
         this.solver = solver;
         this.executor = executor;
-        timelines = new TimelinesList(solver);
     }
 
     public Solver getSolver() {
@@ -80,9 +72,8 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
 
     @Override
     public synchronized void stateChanged() {
-        timelines.stateChanged();
         try {
-            App.broadcast(MAPPER.writeValueAsString(new Message.Timelines(getTimelines())));
+            App.broadcast(MAPPER.writeValueAsString(new Message.Timelines(solver.getTimelines())));
         } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }
@@ -100,7 +91,6 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
 
     @Override
     public synchronized void solutionFound() {
-        timelines.stateChanged();
         state = SolverState.Solved;
         if (current_flaw != null)
             current_flaw.current = false;
@@ -109,7 +99,7 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
             current_resolver.current = false;
         current_resolver = null;
         try {
-            App.broadcast(MAPPER.writeValueAsString(new Message.Timelines(getTimelines())));
+            App.broadcast(MAPPER.writeValueAsString(new Message.Timelines(solver.getTimelines())));
             App.broadcast(MAPPER.writeValueAsString(new Message.SolutionFound()));
             App.broadcast(MAPPER.writeValueAsString(new Message.Tick(current_time)));
         } catch (final JsonProcessingException e) {
@@ -302,20 +292,6 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
 
     public Rational getCurrentTime() {
         return current_time;
-    }
-
-    Collection<it.cnr.istc.pst.oratio.utils.Timeline> getTimelines() {
-        final Collection<it.cnr.istc.pst.oratio.utils.Timeline> c_tls = new ArrayList<>();
-        for (final Timeline<?> tl : timelines) {
-            if (tl instanceof StateVariable) {
-                c_tls.add(new it.cnr.istc.pst.oratio.utils.Timeline.SVTimeline((StateVariable) tl));
-            } else if (tl instanceof ReusableResource) {
-                c_tls.add(new it.cnr.istc.pst.oratio.utils.Timeline.RRTimeline((ReusableResource) tl));
-            } else if (tl instanceof PropositionalAgent) {
-                c_tls.add(new it.cnr.istc.pst.oratio.utils.Timeline.Agent((PropositionalAgent) tl));
-            }
-        }
-        return c_tls;
     }
 
     public enum SolverState {

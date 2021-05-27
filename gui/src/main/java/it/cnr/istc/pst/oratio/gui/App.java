@@ -63,7 +63,7 @@ public class App {
         try {
             ctx.send(
                     MAPPER.writeValueAsString(new Message.Graph(SLV_LISTENER.getFlaws(), SLV_LISTENER.getResolvers())));
-            ctx.send(MAPPER.writeValueAsString(new Message.Timelines(SLV_LISTENER.getTimelines())));
+            ctx.send(MAPPER.writeValueAsString(new Message.Timelines(SLV_LISTENER.getSolver().getTimelines())));
             if (SLV_LISTENER.getState() == SolverState.Solved)
                 ctx.send(MAPPER.writeValueAsString(new Message.Tick(SLV_LISTENER.getCurrentTime())));
         } catch (final JsonProcessingException e) {

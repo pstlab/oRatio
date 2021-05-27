@@ -11,7 +11,7 @@ import it.cnr.istc.pst.oratio.Item;
 import it.cnr.istc.pst.oratio.Solver;
 import it.cnr.istc.pst.oratio.Item.ArithItem;
 
-public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
+public class Agent implements Timeline<Agent.Action> {
 
     public static TimelineBuilder BUILDER = new PropositionalAgentBuilder();
 
@@ -19,7 +19,7 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
     private final InfRational origin, horizon;
     private final List<Action> values = new ArrayList<>();
 
-    private PropositionalAgent(final String name, final InfRational origin, final InfRational horizon) {
+    private Agent(final String name, final InfRational origin, final InfRational horizon) {
         this.name = name;
         this.origin = origin;
         this.horizon = horizon;
@@ -93,9 +93,9 @@ public class PropositionalAgent implements Timeline<PropositionalAgent.Action> {
     private static class PropositionalAgentBuilder implements TimelineBuilder {
 
         @Override
-        public PropositionalAgent build(final Item itm, final Collection<Atom> atoms) {
+        public Agent build(final Item itm, final Collection<Atom> atoms) {
             try {
-                final PropositionalAgent pa = new PropositionalAgent(itm.getName(),
+                final Agent pa = new Agent(itm.getName(),
                         ((ArithItem) itm.getSolver().get(Solver.ORIGIN)).getValue(),
                         ((ArithItem) itm.getSolver().get(Solver.HORIZON)).getValue());
 

@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import it.cnr.istc.pst.oratio.GraphListener.State;
+import it.cnr.istc.pst.oratio.timelines.Timeline;
 
 public class Solver implements Scope, Env {
 
@@ -41,11 +42,22 @@ public class Solver implements Scope, Env {
     final Map<String, Type> types = new LinkedHashMap<>();
     final Map<String, Predicate> predicates = new LinkedHashMap<>();
     final Map<String, Item> exprs = new LinkedHashMap<>();
+    private final TimelinesList timelines;
+    private final boolean build_timelines_at_state_change;
+    private final boolean build_timelines_at_solution_found;
     private final Collection<GraphListener> graph_listeners = new ArrayList<>();
     private final Collection<StateListener> state_listeners = new ArrayList<>();
 
     public Solver() {
+        this(false, true);
+    }
+
+    public Solver(final boolean build_timelines_at_state_change, final boolean build_timelines_at_solution_found) {
         native_handle = new_instance();
+        this.build_timelines_at_state_change = build_timelines_at_state_change;
+        this.build_timelines_at_solution_found = build_timelines_at_solution_found;
+        timelines = build_timelines_at_state_change || build_timelines_at_solution_found ? new TimelinesList(this)
+                : null;
     }
 
     private native long new_instance();
@@ -177,6 +189,10 @@ public class Solver implements Scope, Env {
         exprs.put(id, itm);
     }
 
+    public Collection<Timeline<?>> getTimelines() {
+        return Collections.unmodifiableList(timelines);
+    }
+
     public native void read(String script) throws SolverException;
 
     public native void read(String[] files) throws SolverException;
@@ -242,6 +258,8 @@ public class Solver implements Scope, Env {
     }
 
     private void fireStateChanged() {
+        if (build_timelines_at_state_change)
+            timelines.stateChanged();
         state_listeners.stream().forEach(l -> l.stateChanged());
     }
 
@@ -250,6 +268,8 @@ public class Solver implements Scope, Env {
     }
 
     private void fireSolutionFound() {
+        if (build_timelines_at_solution_found)
+            timelines.stateChanged();
         state_listeners.stream().forEach(l -> l.solutionFound());
     }
 

@@ -1,4 +1,4 @@
-package it.cnr.istc.pst.oratio.timelines;
+package it.cnr.istc.pst.oratio;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -9,12 +9,13 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import it.cnr.istc.pst.oratio.Atom;
-import it.cnr.istc.pst.oratio.Item;
-import it.cnr.istc.pst.oratio.Predicate;
-import it.cnr.istc.pst.oratio.Solver;
-import it.cnr.istc.pst.oratio.Type;
 import it.cnr.istc.pst.oratio.Item.EnumItem;
+import it.cnr.istc.pst.oratio.timelines.Agent;
+import it.cnr.istc.pst.oratio.timelines.PropositionalState;
+import it.cnr.istc.pst.oratio.timelines.ReusableResource;
+import it.cnr.istc.pst.oratio.timelines.StateVariable;
+import it.cnr.istc.pst.oratio.timelines.Timeline;
+import it.cnr.istc.pst.oratio.timelines.TimelineBuilder;
 
 public class TimelinesList extends ArrayList<Timeline<?>> {
 
@@ -22,19 +23,23 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
     private static final Map<Type, TimelineBuilder> BUILDERS = new IdentityHashMap<>();
     private final Solver solver;
 
-    public TimelinesList(final Solver solver) {
+    public static TimelineBuilder addBuilder(final Type type, final TimelineBuilder builder) {
+        return BUILDERS.put(type, builder);
+    }
+
+    TimelinesList(final Solver solver) {
         this.solver = solver;
         try {
             BUILDERS.put(solver.getType("StateVariable"), StateVariable.BUILDER);
             BUILDERS.put(solver.getType("ReusableResource"), ReusableResource.BUILDER);
-            BUILDERS.put(solver.getType("PropositionalAgent"), PropositionalAgent.BUILDER);
+            BUILDERS.put(solver.getType("PropositionalAgent"), Agent.BUILDER);
             BUILDERS.put(solver.getType("PropositionalState"), PropositionalState.BUILDER);
         } catch (final ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public void stateChanged() {
+    void stateChanged() {
         clear();
 
         final Map<Item, Collection<Atom>> atoms = new IdentityHashMap<>();
@@ -75,7 +80,7 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
             q.add(t);
             while (!q.isEmpty()) {
                 final Type c_type = q.poll();
-                for (Type type : BUILDERS.keySet())
+                for (final Type type : BUILDERS.keySet())
                     if (type.isAssignableFrom(c_type))
                         return type;
                 if (c_type.getPredicates().values().stream().anyMatch(p -> p.getSuperclasses().stream()

@@ -5,10 +5,10 @@ export class TimelinesData {
         this.horizon = 1;
     }
 
-    reset(timelines) {
-        if (timelines) {
-            this.timelines.splice(0, this.timelines.length - timelines.length);
-            timelines.forEach((tl, i) => {
+    reset(tls) {
+        if (tls.timelines) {
+            this.timelines.splice(0, this.timelines.length - tls.timelines.length);
+            tls.timelines.forEach((tl, i) => {
                 this.timelines[i] = tl;
                 this.timelines[i].id = i;
                 this.timelines[i].values.forEach((v, j) => v.id = j);
@@ -24,7 +24,7 @@ export class TimelinesData {
     }
 
     tick(time) {
-        this.current_time = time;
+        this.current_time = time.current_time.num / time.current_time.den;
     }
 
     starting_atoms(atoms) {
@@ -77,6 +77,7 @@ export class Timelines {
 
         this.tooltip = d3.select('.tooltip');
 
+        this.tl_name = timeline_name;
         this.sv_val_name = sv_value_name;
         this.sv_val_tooltip = sv_value_tooltip;
         this.rr_val_tooltip = rr_value_tooltip;
@@ -93,12 +94,12 @@ export class Timelines {
             enter => {
                 const tl_g = enter.append('g').attr('class', 'timeline').attr('id', d => 'tl-' + d.id);
                 tl_g.append('rect').attr('x', -10).attr('y', d => this.timelines_y_scale(data.timelines.indexOf(d))).attr('width', this.timelines_x_scale(data.horizon) + 20).attr('height', this.timelines_y_scale.bandwidth()).style('fill', 'floralwhite');
-                tl_g.append('text').attr('x', 0).attr('y', d => this.timelines_y_scale(data.timelines.indexOf(d)) + this.timelines_y_scale.bandwidth() * 0.08).text(d => d.name).style('text-anchor', 'start');
+                tl_g.append('text').attr('x', 0).attr('y', d => this.timelines_y_scale(data.timelines.indexOf(d)) + this.timelines_y_scale.bandwidth() * 0.08).text(d => tl_name(d)).style('text-anchor', 'start');
                 return tl_g;
             },
             update => {
                 update.select('rect').transition().duration(200).attr('width', this.timelines_x_scale(data.horizon) + 20);
-                update.select('text').text(d => d.name);
+                update.select('text').text(d => tl_name(d));
                 return update;
             });
         data.timelines.forEach((tl, i) => this.updateTimeline(data, tl, i));
@@ -111,7 +112,7 @@ export class Timelines {
                     enter => {
                         const tl_val_g = enter.append('g');
                         tl_val_g.append('rect').attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1).attr('width', d => this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', this.timelines_y_scale.bandwidth() * 0.9).attr('rx', 5).attr('ry', 5).style('fill', d => sv_value_fill(d)).style('stroke', 'lightgray');
-                        tl_val_g.append('text').attr('x', d => this.timelines_x_scale(d.from) + (this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.5).text(d => this.sv_val_name(d)).style('text-anchor', 'middle');
+                        tl_val_g.append('text').attr('x', d => this.timelines_x_scale(d.from) + (this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.5).text(d => this.sv_val_name(d)).style('text-anchor', 'middle').style("font-size", "1px").each(getFontSize).style("font-size", function (d) { return d.scale + "px"; });
                         tl_val_g.on('mouseover', (event, d) => this.tooltip.html(this.sv_val_tooltip(d)).transition().duration(200).style('opacity', .9))
                             .on('mousemove', event => this.tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                             .on('mouseout', event => this.tooltip.transition().duration(500).style('opacity', 0));
@@ -119,7 +120,7 @@ export class Timelines {
                     },
                     update => {
                         update.select('rect').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1).attr('width', d => this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', this.timelines_y_scale.bandwidth() * 0.9).style('fill', d => sv_value_fill(d));
-                        update.select('text').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.5);
+                        update.select('text').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.5).each(getFontSize).style("font-size", function (d) { return d.scale + "px"; });
                         return update;
                     }
                 );
@@ -161,7 +162,7 @@ export class Timelines {
                     enter => {
                         const tl_val_g = enter.append('g');
                         tl_val_g.append('rect').attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y)).attr('width', d => d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth()).attr('rx', 5).attr('ry', 5).style('fill', 'url(#ag-lg)').style('stroke', 'lightgray');
-                        tl_val_g.append('text').attr('x', d => this.timelines_x_scale(d.from) + (d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y) + agent_y_scale.bandwidth() / 2).text(d => this.ag_val_name(d)).style('text-anchor', 'middle');
+                        tl_val_g.append('text').attr('x', d => this.timelines_x_scale(d.from) + (d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y) + agent_y_scale.bandwidth() / 2).text(d => this.ag_val_name(d)).style('text-anchor', 'middle').style("font-size", "1px").each(getFontSize).style("font-size", function (d) { return d.scale + "px"; });
                         tl_val_g.on('mouseover', (event, d) => this.tooltip.html(this.ag_val_tooltip(d)).transition().duration(200).style('opacity', .9))
                             .on('mousemove', event => this.tooltip.style('left', (event.pageX) + 'px').style('top', (event.pageY - 28) + 'px'))
                             .on('mouseout', event => this.tooltip.transition().duration(500).style('opacity', 0));
@@ -169,7 +170,7 @@ export class Timelines {
                     },
                     update => {
                         update.select('rect').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y)).attr('width', d => d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth() * 0.9);
-                        update.select('text').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y) + agent_y_scale.bandwidth() / 2);
+                        update.select('text').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y) + agent_y_scale.bandwidth() / 2).each(getFontSize).style("font-size", function (d) { return d.scale + "px"; });
                         return update;
                     }
                 );
@@ -194,6 +195,8 @@ export class Timelines {
                 });
     }
 
+    set_timeline_name(tl_name) { this.tl_name = tl_name; }
+
     set_state_variable_value_name(sv_val_name) { this.sv_val_name = sv_val_name; }
     set_state_variable_value_tooltip(sv_val_tooltip) { this.sv_val_tooltip = sv_val_tooltip; }
 
@@ -203,35 +206,37 @@ export class Timelines {
     set_agent_value_tooltip(ag_val_tooltip) { this.ag_val_tooltip = ag_val_tooltip; }
 }
 
-function sv_value_name(sv_value) {
-    switch (sv_value.value.length) {
-        case 0: return '';
-        case 1: return sv_value.value[0].predicate;
-        default: return Array.from(sv_value.value, atm => atm.predicate).join();
-    }
-}
-
-function sv_value_tooltip(sv_value) {
-    switch (sv_value.value.length) {
-        case 0: return '';
-        case 1: return atom_to_string(sv_value.value[0]);
-        default: return Array.from(sv_value.value, atm => atom_to_string(atm)).join();
-    }
-}
-
-function rr_value_tooltip(rr_value) { return rr_value.usage; }
-
-function ag_value_name(ag_value) { return ag_value.value.predicate; }
-
-function ag_value_tooltip(ag_value) { return atom_to_string(ag_value.value); }
+function timeline_name(tl) { return tl.name; }
 
 function sv_value_fill(sv_value) {
-    switch (sv_value.value.length) {
+    switch (sv_value.atoms.length) {
         case 0: return 'url(#sv-none-lg)';
         case 1: return 'url(#sv-ok-lg)';
         default: return 'url(#sv-inc-lg)';
     }
 }
+
+function sv_value_name(sv_value) {
+    switch (sv_value.atoms.length) {
+        case 0: return '';
+        case 1: return sv_value.atoms[0].predicate;
+        default: return Array.from(sv_value.atoms, atm => atm.predicate).join();
+    }
+}
+
+function sv_value_tooltip(sv_value) {
+    switch (sv_value.atoms.length) {
+        case 0: return 'none';
+        case 1: return atom_to_string(sv_value.atoms[0]);
+        default: return Array.from(sv_value.atoms, atm => atom_to_string(atm)).join();
+    }
+}
+
+function rr_value_tooltip(rr_value) { return rr_value.usage; }
+
+function ag_value_name(ag_value) { return ag_value.atom.predicate; }
+
+function ag_value_tooltip(ag_value) { return atom_to_string(ag_value.atom); }
 
 function values_y(start, end, ends) {
     for (let i = 0; i < ends.length; i++)
@@ -248,4 +253,11 @@ function atom_to_string(atom) {
     const xprs = [];
     Object.keys(atom).filter(n => n != 'sigma' && n != 'predicate').sort().forEach(xpr => xprs.push(xpr + ':' + atom[xpr]));
     return txt + '(' + xprs.join(', ') + ')';
+}
+
+function getFontSize(d) {
+    const bbox = this.getBBox();
+    const cbbox = this.parentNode.getBBox();
+    const scale = Math.min(cbbox.width / bbox.width, cbbox.height / bbox.height, 15);
+    d.scale = scale;
 }

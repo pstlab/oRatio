@@ -8,20 +8,28 @@ export class GraphData {
         this.links = [];
     }
 
-    reset(flaws, resolvers) {
+    reset(graph) {
         this.nodes.length = 0;
         this.links.length = 0;
         this.node_map.clear();
 
-        flaws.forEach(f => {
+        graph.flaws.forEach(f => {
             f.type = 'flaw';
+            f.label = JSON.parse(f.label);
+            if (f.cost)
+                f.cost = (f.cost.num / f.cost.den);
+            else
+                f.cost = Number.POSITIVE_INFINITY;
             f.graph = this;
             this.nodes.push(f);
             this.node_map.set(f.id, f);
             f.causes.forEach(c => this.links.push({ source: f.id, target: c, state: f.state }));
         });
-        resolvers.forEach(r => {
+        graph.resolvers.forEach(r => {
             r.type = 'resolver';
+            r.label = JSON.parse(r.label);
+            r.intrinsic_cost = r.cost.num / r.cost.den;
+            r.cost = r.intrinsic_cost;
             r.graph = this;
             this.nodes.push(r);
             this.node_map.set(r.id, r);
@@ -39,6 +47,11 @@ export class GraphData {
 
     flaw_created(flaw) {
         flaw.type = 'flaw';
+        flaw.label = JSON.parse(flaw.label);
+        if (flaw.cost)
+            flaw.cost = (flaw.cost.num / flaw.cost.den);
+        else
+            flaw.cost = Number.POSITIVE_INFINITY;
         flaw.graph = this;
         this.nodes.push(flaw);
         this.node_map.set(flaw.id, flaw);
@@ -52,6 +65,7 @@ export class GraphData {
     }
 
     flaw_cost_changed(change) {
+        change.cost = change.cost.num / change.cost.den;
         const f_node = this.node_map.get(change.id);
         f_node.cost = change.cost;
         this.links.filter(l => l.source.id == f_node.id).forEach(out_link => this.update_resolver_cost(out_link.target));
@@ -71,6 +85,9 @@ export class GraphData {
 
     resolver_created(resolver) {
         resolver.type = 'resolver';
+        resolver.label = JSON.parse(resolver.label);
+        resolver.intrinsic_cost = resolver.cost.num / resolver.cost.den;
+        resolver.cost = resolver.intrinsic_cost;
         resolver.graph = this;
         this.nodes.push(resolver);
         this.node_map.set(resolver.id, resolver);
