@@ -120,7 +120,7 @@ export class Timelines {
                     },
                     update => {
                         update.select('rect').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1).attr('width', d => this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', this.timelines_y_scale.bandwidth() * 0.9).style('fill', d => sv_value_fill(d));
-                        update.select('text').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.5).each(getFontSize).style("font-size", function (d) { return d.scale + "px"; });
+                        update.select('text').text(d => this.sv_val_name(d)).style("font-size", "1px").each(getFontSize).style("font-size", function (d) { return d.scale + "px"; }).transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.5);
                         return update;
                     }
                 );
@@ -170,7 +170,7 @@ export class Timelines {
                     },
                     update => {
                         update.select('rect').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from)).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y)).attr('width', d => d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)).attr('height', agent_y_scale.bandwidth() * 0.9);
-                        update.select('text').transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y) + agent_y_scale.bandwidth() / 2).each(getFontSize).style("font-size", function (d) { return d.scale + "px"; });
+                        update.select('text').text(d => this.ag_val_name(d)).style("font-size", "1px").each(getFontSize).style("font-size", function (d) { return d.scale + "px"; }).transition().duration(200).attr('x', d => this.timelines_x_scale(d.from) + (d.from === d.to ? 1 : this.timelines_x_scale(d.to) - this.timelines_x_scale(d.from)) / 2).attr('y', d => this.timelines_y_scale(i) + this.timelines_y_scale.bandwidth() * 0.1 + agent_y_scale(max_overlap - 1 - d.y) + agent_y_scale.bandwidth() / 2);
                         return update;
                     }
                 );
