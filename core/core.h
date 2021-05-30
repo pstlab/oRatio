@@ -88,8 +88,8 @@ namespace ratio
     inline smt::idl_theory &get_idl_theory() noexcept { return idl_th; } // returns the integer difference logic theory..
     inline smt::rdl_theory &get_rdl_theory() noexcept { return rdl_th; } // returns the real difference logic theory..
 
-    CORE_EXPORT void read(const std::string &script);             // parses the given riddle script..
-    CORE_EXPORT void read(const std::vector<std::string> &files); // parses the given riddle files..
+    CORE_EXPORT virtual void read(const std::string &script);             // parses the given riddle script..
+    CORE_EXPORT virtual void read(const std::vector<std::string> &files); // parses the given riddle files..
 
     CORE_EXPORT virtual bool_expr new_bool() noexcept;                   // creates a new boolean variable..
     CORE_EXPORT bool_expr new_bool(const bool &val) noexcept;            // creates a new boolean literal..

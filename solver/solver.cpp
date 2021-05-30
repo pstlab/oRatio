@@ -30,6 +30,17 @@ namespace ratio
     SOLVER_EXPORT solver::solver() : core(), theory(get_sat_core()), heur(HEURISTIC) {}
     SOLVER_EXPORT solver::~solver() { delete &heur; }
 
+    SOLVER_EXPORT void solver::read(const std::string &script)
+    {
+        core::read(script);
+        reset_smart_types();
+    }
+    SOLVER_EXPORT void solver::read(const std::vector<std::string> &files)
+    {
+        core::read(files);
+        reset_smart_types();
+    }
+
     SOLVER_EXPORT void solver::init() noexcept
     {
         read(INIT_STRING);
@@ -45,41 +56,25 @@ namespace ratio
     {
         FIRE_STARTED_SOLVING();
 
-        // some cleanings..
-        sts.clear();
-        std::queue<type *> q;
-        for (const auto &[tp_name, tp] : get_types())
-            if (!tp->is_primitive())
-                q.push(tp);
-        while (!q.empty())
-        {
-            if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
-                sts.push_back(st);
-            for (const auto &st : q.front()->get_types())
-                q.push(st.second);
-            q.pop();
-        }
-
         // we set the gamma variable..
         heur.check();
 
         // we search for a consistent solution without flaws..
-        search();
-    }
-
-    SOLVER_EXPORT void solver::search()
-    {
 #ifdef CHECK_INCONSISTENCIES
         // we solve all the current inconsistencies..
         solve_inconsistencies();
 
         while (!flaws.empty())
         {
-            assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return sat.value(f->phi) == True; }));                                                                                           // all the current flaws must be active..
-            assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return std::none_of(f->resolvers.cbegin(), f->resolvers.cend(), [this](resolver *r) { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
+            assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                               { return sat.value(f->phi) == True; })); // all the current flaws must be active..
+            assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                               { return std::none_of(f->resolvers.cbegin(), f->resolvers.cend(), [this](resolver *r)
+                                                     { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
 
             // this is the next flaw (i.e. the most expensive one) to be solved..
-            auto f_next = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1) { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+            auto f_next = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1)
+                                           { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
             assert(f_next != flaws.cend());
             FIRE_CURRENT_FLAW(**f_next);
 
@@ -88,7 +83,8 @@ namespace ratio
                 do
                 { // we search..
                     next();
-                } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return is_infinite(f->get_estimated_cost()); }));
+                } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                                     { return is_infinite(f->get_estimated_cost()); }));
                 // we solve all the current inconsistencies..
                 solve_inconsistencies();
                 continue;
@@ -111,11 +107,15 @@ namespace ratio
         {
             while (!flaws.empty())
             {
-                assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return sat.value(f->phi) == True; }));                                                                                           // all the current flaws must be active..
-                assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return std::none_of(f->resolvers.cbegin(), f->resolvers.cend(), [this](resolver *r) { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
+                assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                                   { return sat.value(f->phi) == True; })); // all the current flaws must be active..
+                assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                                   { return std::none_of(f->resolvers.cbegin(), f->resolvers.cend(), [this](resolver *r)
+                                                         { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
 
                 // this is the next flaw (i.e. the most expensive one) to be solved..
-                auto f_next = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1) { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+                auto f_next = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1)
+                                               { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
                 assert(f_next != flaws.cend());
                 FIRE_CURRENT_FLAW(**f_next);
 
@@ -124,7 +124,8 @@ namespace ratio
                     do
                     { // we search..
                         next();
-                    } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return is_infinite(f->get_estimated_cost()); }));
+                    } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                                         { return is_infinite(f->get_estimated_cost()); }));
                     continue;
                 }
 
@@ -157,8 +158,12 @@ namespace ratio
         // we take the decision..
         if (!get_sat_core().assume(ch))
             throw unsolvable_exception();
-        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs) { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(rhos.cbegin(), rhos.cend(), [this](const auto &v_rs) { return std::all_of(v_rs.second.cbegin(), v_rs.second.cend(), [this](const auto r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
+        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
+                           { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto f)
+                                                { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(rhos.cbegin(), rhos.cend(), [this](const auto &v_rs)
+                           { return std::all_of(v_rs.second.cbegin(), v_rs.second.cend(), [this](const auto r)
+                                                { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
 
         FIRE_STATE_CHANGED();
 
@@ -251,7 +256,8 @@ namespace ratio
         switch (sat.value(f.get_phi()))
         {
         case True: // we have a top-level (a landmark) flaw..
-            if (enqueue || std::none_of(f.resolvers.cbegin(), f.resolvers.cend(), [this](const auto &r) { return sat.value(r->rho) == True; }))
+            if (enqueue || std::none_of(f.resolvers.cbegin(), f.resolvers.cend(), [this](const auto &r)
+                                        { return sat.value(r->rho) == True; }))
                 flaws.insert(&f); // the flaw has not yet already been solved (e.g. it has a single resolver)..
             break;
         case Undefined: // we listen for the flaw to become active..
@@ -303,7 +309,8 @@ namespace ratio
         heur.propagate_costs(f);
 
         // we clean up already solved flaws..
-        if (sat.value(f.get_phi()) == True && std::any_of(f.resolvers.cbegin(), f.resolvers.cend(), [this](const auto &r) { return sat.value(r->rho) == True; }))
+        if (sat.value(f.get_phi()) == True && std::any_of(f.resolvers.cbegin(), f.resolvers.cend(), [this](const auto &r)
+                                                          { return sat.value(r->rho) == True; }))
             flaws.erase(&f); // this flaw has already been solved..
     }
 
@@ -358,8 +365,12 @@ namespace ratio
 
         if (!get_sat_core().propagate())
             throw unsolvable_exception();
-        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs) { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto *f) { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(rhos.cbegin(), rhos.cend(), [this](const auto &v_rs) { return std::all_of(v_rs.second.cbegin(), v_rs.second.cend(), [this](const auto *r) { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
+        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
+                           { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto *f)
+                                                { return (sat.value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(rhos.cbegin(), rhos.cend(), [this](const auto &v_rs)
+                           { return std::all_of(v_rs.second.cbegin(), v_rs.second.cend(), [this](const auto *r)
+                                                { return is_positive_infinite(r->get_estimated_cost()) || sat.value(r->rho) != False; }); }));
 
         FIRE_STATE_CHANGED();
 
@@ -383,7 +394,8 @@ namespace ratio
                     assert(!flaws.count(f));
                     if (!root_level())
                         trail.back().new_flaws.insert(f);
-                    if (std::none_of(f->resolvers.cbegin(), f->resolvers.cend(), [this](const auto &r) { return sat.value(r->rho) == True; }))
+                    if (std::none_of(f->resolvers.cbegin(), f->resolvers.cend(), [this](const auto &r)
+                                     { return sat.value(r->rho) == True; }))
                         flaws.insert(f); // this flaw has been activated and not yet accidentally solved..
                     else if (!root_level())
                         trail.back().solved_flaws.insert(f); // this flaw has been accidentally solved..
@@ -434,10 +446,18 @@ namespace ratio
     bool solver::check()
     {
         assert(cnfl.empty());
-        assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f) { return sat.value(f->phi) == True; }));
-        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs) { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f) { return sat.value(f->phi) != True || (flaws.count(f) || std::any_of(trail.cbegin(), trail.cend(), [this, f](const auto &l) { return l.solved_flaws.count(f); })); }); }));
-        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs) { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f) { return sat.value(f->phi) != False || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(rhos.cbegin(), rhos.cend(), [this](const auto &v_rs) { return std::all_of(v_rs.second.cbegin(), v_rs.second.cend(), [this](const auto &r) { return sat.value(r->rho) != False || is_positive_infinite(r->get_estimated_cost()); }); }));
+        assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                           { return sat.value(f->phi) == True; }));
+        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
+                           { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f)
+                                                { return sat.value(f->phi) != True || (flaws.count(f) || std::any_of(trail.cbegin(), trail.cend(), [this, f](const auto &l)
+                                                                                                                     { return l.solved_flaws.count(f); })); }); }));
+        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
+                           { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f)
+                                                { return sat.value(f->phi) != False || is_positive_infinite(f->get_estimated_cost()); }); }));
+        assert(std::all_of(rhos.cbegin(), rhos.cend(), [this](const auto &v_rs)
+                           { return std::all_of(v_rs.second.cbegin(), v_rs.second.cend(), [this](const auto &r)
+                                                { return sat.value(r->rho) != False || is_positive_infinite(r->get_estimated_cost()); }); }));
         return true;
     }
 
@@ -482,14 +502,18 @@ namespace ratio
         auto incs = get_incs();
 
         while (!incs.empty())
-            if (const auto &uns_flw = std::find_if(incs.cbegin(), incs.cend(), [](const auto &v) { return v.empty(); }); uns_flw != incs.cend())
+            if (const auto &uns_flw = std::find_if(incs.cbegin(), incs.cend(), [](const auto &v)
+                                                   { return v.empty(); });
+                uns_flw != incs.cend())
             { // we have an unsolvable flaw..
                 // we backtrack..
                 next();
                 // we re-collect all the inconsistencies from all the smart-types..
                 incs = get_incs();
             }
-            else if (const auto &det_flw = std::find_if(incs.cbegin(), incs.cend(), [](const auto &v) { return v.size() == 1; }); det_flw != incs.cend())
+            else if (const auto &det_flw = std::find_if(incs.cbegin(), incs.cend(), [](const auto &v)
+                                                        { return v.size() == 1; });
+                     det_flw != incs.cend())
             { // we have deterministic flaw..
                 assert(get_sat_core().value(det_flw->at(0).first) != False);
                 if (get_sat_core().value(det_flw->at(0).first) == Undefined)
@@ -529,7 +553,9 @@ namespace ratio
                 }
 
                 // we select the best choice (i.e. the least committing one) from those available for the best flaw..
-                take_decision(std::min_element(bst_inc.cbegin(), bst_inc.cend(), [](const auto &ch0, const auto &ch1) { return ch0.second < ch1.second; })->first);
+                take_decision(std::min_element(bst_inc.cbegin(), bst_inc.cend(), [](const auto &ch0, const auto &ch1)
+                                               { return ch0.second < ch1.second; })
+                                  ->first);
 
                 // we re-collect all the inconsistencies from all the smart-types..
                 incs = get_incs();
@@ -545,8 +571,28 @@ namespace ratio
             const auto c_incs = st->get_current_incs();
             incs.insert(incs.cend(), c_incs.cbegin(), c_incs.cend());
         }
-        assert(std::all_of(incs.cbegin(), incs.cend(), [](const auto &inc) { return std::all_of(inc.cbegin(), inc.cend(), [](const auto &ch) { return std::isfinite(ch.second); }); }));
+        assert(std::all_of(incs.cbegin(), incs.cend(), [](const auto &inc)
+                           { return std::all_of(inc.cbegin(), inc.cend(), [](const auto &ch)
+                                                { return std::isfinite(ch.second); }); }));
         return incs;
+    }
+
+    void solver::reset_smart_types()
+    {
+        // some cleanings..
+        sts.clear();
+        std::queue<type *> q;
+        for (const auto &[tp_name, tp] : get_types())
+            if (!tp->is_primitive())
+                q.push(tp);
+        while (!q.empty())
+        {
+            if (smart_type *st = dynamic_cast<smart_type *>(q.front()))
+                sts.push_back(st);
+            for (const auto &st : q.front()->get_types())
+                q.push(st.second);
+            q.pop();
+        }
     }
 
 #ifdef BUILD_LISTENERS

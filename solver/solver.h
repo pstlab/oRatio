@@ -49,6 +49,9 @@ namespace ratio
     solver(const solver &orig) = delete;
     SOLVER_EXPORT ~solver();
 
+    SOLVER_EXPORT void read(const std::string &script) override;
+    SOLVER_EXPORT void read(const std::vector<std::string> &files) override;
+
     /**
      * Initializes the solver.
      */
@@ -58,10 +61,6 @@ namespace ratio
      * Solves the given problem.
      */
     SOLVER_EXPORT void solve() override;
-    /**
-     * Searches for a consistent solution which has no flaws.
-     */
-    SOLVER_EXPORT void search();
     /**
      * Takes the given decision and propagates its effects.
      */
@@ -111,6 +110,8 @@ namespace ratio
 
     void solve_inconsistencies();                                     // checks whether the types have any inconsistency and, in case, solve them..
     std::vector<std::vector<std::pair<smt::lit, double>>> get_incs(); // collects all the current inconsistencies..
+
+    void reset_smart_types();
 
   private:
     struct layer
