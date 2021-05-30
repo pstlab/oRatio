@@ -9,6 +9,12 @@
 namespace smt
 {
   class json_core;
+  class null_val;
+  class bool_val;
+  class string_val;
+  class long_val;
+  class double_val;
+  class array_val;
 
   class json
   {
@@ -19,6 +25,7 @@ namespace smt
     JSON_EXPORT ~json();
 
     json &operator=(const json &t);
+    inline json_core &operator*() const { return *ptr; }
     inline json_core *operator->() const { return ptr; }
 
     JSON_EXPORT void to_json(std::ostream &os) const noexcept;
@@ -44,6 +51,13 @@ namespace smt
     inline void set(const std::string &id, const json &val) noexcept { vals.emplace(id, val); }
 
     JSON_EXPORT void set_null(const std::string &id);
+
+    operator null_val &() const { return static_cast<null_val &>(*this); }
+    operator bool_val &() const { return static_cast<bool_val &>(*this); }
+    operator string_val &() const { return static_cast<string_val &>(*this); }
+    operator long_val &() const { return static_cast<long_val &>(*this); }
+    operator double_val &() const { return static_cast<double_val &>(*this); }
+    operator array_val &() const { return static_cast<array_val &>(*this); }
 
   private:
     virtual void to_json(std::ostream &os) const noexcept;
@@ -140,6 +154,8 @@ namespace smt
     JSON_EXPORT array_val();
     JSON_EXPORT array_val(const std::vector<json> &vals);
     JSON_EXPORT ~array_val();
+
+    inline size_t size() const noexcept { return vals.size(); }
 
     inline json get(const size_t &i) const noexcept { return vals.at(i); }
     inline void set(const size_t &i, const json val) noexcept { vals[i] = val; }
