@@ -47,17 +47,11 @@ namespace smt
     json_core(const std::map<std::string, json> &vals);
     ~json_core();
 
+    inline bool has(const std::string &id) const noexcept { return vals.count(id); }
     inline json &get(const std::string &id) noexcept { return vals.at(id); }
     inline void set(const std::string &id, const json &val) noexcept { vals.emplace(id, val); }
 
     JSON_EXPORT void set_null(const std::string &id);
-
-    operator null_val &() const { return static_cast<null_val &>(*this); }
-    operator bool_val &() const { return static_cast<bool_val &>(*this); }
-    operator string_val &() const { return static_cast<string_val &>(*this); }
-    operator long_val &() const { return static_cast<long_val &>(*this); }
-    operator double_val &() const { return static_cast<double_val &>(*this); }
-    operator array_val &() const { return static_cast<array_val &>(*this); }
 
   private:
     virtual void to_json(std::ostream &os) const noexcept;
