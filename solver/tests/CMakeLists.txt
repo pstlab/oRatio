@@ -2,10 +2,6 @@ add_executable(solver_tests test_solver.cpp)
 target_include_directories(solver_tests PRIVATE ${oRatio_SOURCE_DIR}/smt ${oRatio_SOURCE_DIR}/smt/lra ${oRatio_SOURCE_DIR}/smt/ov ${oRatio_SOURCE_DIR}/smt/dl ${oRatio_SOURCE_DIR}/core ${oRatio_SOURCE_DIR}/solver)
 target_link_libraries(solver_tests PRIVATE solver)
 
-if(BUILD_LISTENERS AND WIN32)
-    target_link_libraries(solver_tests PRIVATE wsock32 ws2_32 #[[-PROFILE]])
-endif()
-
 add_test(NAME SolverTest00 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/core/example_00.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME SolverTest01 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/core/example_01.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 add_test(NAME SolverTest02 COMMAND solver_tests "${CMAKE_SOURCE_DIR}/examples/core/example_02.rddl" "solution.json" WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

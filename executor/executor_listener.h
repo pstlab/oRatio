@@ -15,8 +15,26 @@ namespace ratio
 
   private:
     virtual void tick(const smt::rational time) { LOG("current time: " << to_string(time)); }
+
+    /**
+     * @brief Notifies the listener that some atoms are going to start.
+     * 
+     * This is the best time to tell the executor to do delay the starting of some atoms.
+     * 
+     * @param atoms the set of atoms which are going to start.
+     */
     virtual void starting(const std::set<atom *> &atoms) {}
+    virtual void start(const std::set<atom *> &atoms) {}
+
+    /**
+     * @brief Notifies the listener that some atoms are going to end.
+     * 
+     * This is the best time to tell the executor to do delay the ending of some atoms.
+     * 
+     * @param atoms the set of atoms which are going to end.
+     */
     virtual void ending(const std::set<atom *> &atoms) {}
+    virtual void end(const std::set<atom *> &atoms) {}
 
   private:
     executor &exec;

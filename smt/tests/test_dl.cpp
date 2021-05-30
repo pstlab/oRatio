@@ -4,7 +4,7 @@
 
 using namespace smt;
 
-void test_integer_distance_logic()
+void test_config()
 {
     sat_core core;
     idl_theory idl(core, 5);
@@ -577,7 +577,7 @@ void test_semantic_branching()
 
 int main(int, char **)
 {
-    test_integer_distance_logic();
+    test_config();
     test_real_distance_logic();
 
     test_constraints_0();
