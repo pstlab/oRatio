@@ -8,7 +8,25 @@ namespace smt
     SMT_EXPORT theory::~theory() {}
 
     SMT_EXPORT void theory::bind(const var &v) noexcept { sat.bind(v, *this); }
-    SMT_EXPORT void theory::analyze_and_backjump() noexcept
+
+    SMT_EXPORT bool theory::backtrack_analyze_and_backjump() noexcept
+    {
+        size_t bt_level = 0;
+        for (const auto &l : cnfl)
+            if (bt_level < sat.level[variable(l)])
+                bt_level = sat.level[variable(l)];
+
+        while (sat.decision_level() > bt_level)
+            sat.pop();
+
+        if (sat.root_level())
+            return false;
+
+        analyze_and_backjump();
+        return true;
+    }
+
+    void theory::analyze_and_backjump() noexcept
     {
         // we create a conflict clause for the analysis..
         std::vector<lit> c_cnfl;

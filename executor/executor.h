@@ -18,7 +18,7 @@ namespace ratio
     friend class executor_listener;
 
   public:
-    EXECUTOR_EXPORT executor(solver &slv, const smt::rational &units_per_tick = smt::rational::ONE);
+    EXECUTOR_EXPORT executor(solver &slv, const std::string &cnfg_str, const smt::rational &units_per_tick = smt::rational::ONE);
     executor(const executor &orig) = delete;
     EXECUTOR_EXPORT ~executor();
 
@@ -28,41 +28,47 @@ namespace ratio
 
     EXECUTOR_EXPORT void tick();
 
-    EXECUTOR_EXPORT void freeze(const atom &atm, const expr &xpr);
-    EXECUTOR_EXPORT void done(const std::unordered_set<atom *> &atoms);
+    EXECUTOR_EXPORT void dont_start_yet(const std::unordered_set<atom *> &atoms) { dont_start.insert(atoms.cbegin(), atoms.cend()); }
+    EXECUTOR_EXPORT void dont_end_yet(const std::unordered_set<atom *> &atoms) { dont_end.insert(atoms.cbegin(), atoms.cend()); }
     EXECUTOR_EXPORT void failure(const std::unordered_set<atom *> &atoms);
 
   private:
     bool propagate(const smt::lit &p) noexcept override { return true; }
     bool check() noexcept override { return true; }
     void push() noexcept override {}
-    void pop() noexcept override { should_set = true; }
+    void pop() noexcept override {}
 
     inline bool is_impulse(const atom &atm) const noexcept;
     inline bool is_interval(const atom &atm) const noexcept;
+    inline bool is_relevant(const predicate &pred) const noexcept { return relevant_predicates.count(&pred); }
 
+    void read(const std::string &script) override { reset_relevant_predicates(); }
+    void read(const std::vector<std::string> &files) override { reset_relevant_predicates(); }
     void solution_found() override;
     void inconsistent_problem() override;
 
     void flaw_created(const flaw &f) override;
 
+    void reset_relevant_predicates();
     void build_timelines();
+    void freeze(atom &atm, arith_expr &xpr);
     void set_values();
 
   private:
+    smt::lit xi; // the current execution literal..
     const predicate &int_pred;
     const predicate &imp_pred;
-    bool should_set = false;
+    std::unordered_set<const predicate *> relevant_predicates;
+    const std::string cnfg_str;
     smt::rational current_time;         // the current time in plan units..
     const smt::rational units_per_tick; // the number of plan units for each tick..
-    std::unordered_map<const atom *, std::unordered_map<arith_item *, smt::inf_rational>> lbs;
-    std::unordered_map<const atom *, std::unordered_map<arith_item *, smt::inf_rational>> ubs;
-    std::unordered_map<const var_item *, const smt::var_value *> frozen_vals;
-    std::unordered_map<smt::var, atom *> all_atoms;               // all the interesting atoms indexed by their sigma variable..
-    std::unordered_set<atom *> executing;                         // the currently executing atoms..
-    std::map<smt::inf_rational, std::set<atom *>> s_atms, e_atms; // for each pulse, the atoms starting/ending at that pulse..
-    std::set<smt::inf_rational> pulses;                           // all the pulses of the plan..
-    std::vector<executor_listener *> listeners;                   // the executor listeners..
+    std::unordered_map<atom *, std::unordered_map<arith_item *, smt::inf_rational>> lbs, ubs;
+    std::unordered_map<smt::var, atom *> all_atoms; // all the interesting atoms indexed by their sigma variable..
+    std::unordered_set<const atom *> dont_start, dont_end;
+    std::unordered_set<atom *> executing;                                   // the currently executing atoms..
+    std::map<smt::inf_rational, std::unordered_set<atom *>> s_atms, e_atms; // for each pulse, the atoms starting/ending at that pulse..
+    std::set<smt::inf_rational> pulses;                                     // all the pulses of the plan..
+    std::vector<executor_listener *> listeners;                             // the executor listeners..
   };
 
   class execution_exception : public std::exception

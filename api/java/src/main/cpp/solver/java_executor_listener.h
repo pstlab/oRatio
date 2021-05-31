@@ -13,13 +13,17 @@ namespace ratio
     ~java_executor_listener();
 
   private:
-    virtual void tick(const smt::rational time) override;
-    virtual void starting(const std::set<atom *> &atoms) override;
-    virtual void ending(const std::set<atom *> &atoms) override;
+    void tick(const smt::rational time) override;
+    void starting(const std::unordered_set<atom *> &atoms) override;
+    void start(const std::unordered_set<atom *> &atoms) override;
+    void ending(const std::unordered_set<atom *> &atoms) override;
+    void end(const std::unordered_set<atom *> &atoms) override;
+
+    void call_method(const jmethodID &mthd_id, const std::unordered_set<atom *> &atoms);
 
   private:
     jobject exec_obj; // the java executor instance..
     jclass exec_cls;  // the java executor class..
-    jmethodID tick_mthd_id, starting_mthd_id, ending_mthd_id;
+    jmethodID tick_mthd_id, starting_mthd_id, start_mthd_id, ending_mthd_id, end_mthd_id;
   };
 } // namespace ratio

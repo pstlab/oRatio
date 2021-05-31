@@ -254,9 +254,27 @@ public class SolverListener implements StateListener, GraphListener, ExecutorLis
     }
 
     @Override
+    public synchronized void startAtoms(final long[] atoms) {
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.StartAtoms(atoms)));
+        } catch (final JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
+    }
+
+    @Override
     public synchronized void endingAtoms(final long[] atoms) {
         try {
             App.broadcast(MAPPER.writeValueAsString(new Message.EndingAtoms(atoms)));
+        } catch (final JsonProcessingException e) {
+            LOG.error("Cannot serialize", e);
+        }
+    }
+
+    @Override
+    public synchronized void endAtoms(final long[] atoms) {
+        try {
+            App.broadcast(MAPPER.writeValueAsString(new Message.EndAtoms(atoms)));
         } catch (final JsonProcessingException e) {
             LOG.error("Cannot serialize", e);
         }

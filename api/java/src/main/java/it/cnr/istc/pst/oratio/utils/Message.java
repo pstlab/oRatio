@@ -208,6 +208,16 @@ public abstract class Message {
         }
     }
 
+    public static class StartAtoms extends Message {
+
+        public final long[] atoms;
+
+        public StartAtoms(final long[] atoms) {
+            super(MessageType.StartAtoms);
+            this.atoms = atoms;
+        }
+    }
+
     public static class EndingAtoms extends Message {
 
         public final long[] atoms;
@@ -218,9 +228,19 @@ public abstract class Message {
         }
     }
 
+    public static class EndAtoms extends Message {
+
+        public final long[] atoms;
+
+        public EndAtoms(final long[] atoms) {
+            super(MessageType.EndAtoms);
+            this.atoms = atoms;
+        }
+    }
+
     public enum MessageType {
         Log, StartedSolving, SolutionFound, InconsistentProblem, Graph, FlawCreated, FlawStateChanged, FlawCostChanged,
         FlawPositionChanged, CurrentFlaw, ResolverCreated, ResolverStateChanged, CurrentResolver, CausalLinkAdded,
-        Timelines, Tick, StartingAtoms, EndingAtoms;
+        Timelines, Tick, StartingAtoms, StartAtoms, EndingAtoms, EndAtoms;
     }
 }

@@ -13,10 +13,10 @@ inline solver *get_solver(JNIEnv *env, jobject obj)
 
 inline executor *get_executor(JNIEnv *env, jobject obj) { return reinterpret_cast<executor *>(env->GetLongField(obj, env->GetFieldID(env->GetObjectClass(obj), "native_handle", "J"))); }
 
-JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_new_1instance(JNIEnv *env, jobject obj, jlong units_per_tick_num, jlong units_per_tick_den)
+JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_new_1instance(JNIEnv *env, jobject obj, jstring conf, jlong units_per_tick_num, jlong units_per_tick_den)
 {
     solver *s = get_solver(env, obj);
-    executor *exec = new executor(*s, rational(static_cast<I>(units_per_tick_num), static_cast<I>(units_per_tick_den)));
+    executor *exec = new executor(*s, env->GetStringUTFChars(conf, false), rational(static_cast<I>(units_per_tick_num), static_cast<I>(units_per_tick_den)));
     java_executor_listener *jel = new java_executor_listener(*exec, env, obj);
     return reinterpret_cast<jlong>(exec);
 }
@@ -39,7 +39,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_t
     }
 }
 
-JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_done(JNIEnv *env, jobject obj, jlongArray atoms)
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1start_1yet(JNIEnv *env, jobject obj, jlongArray atoms)
 {
     const jsize atms_size = env->GetArrayLength(atoms);
     std::vector<jlong> input(atms_size);
@@ -50,7 +50,21 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
     for (jsize i = 0; i < atms_size; i++)
         atms.insert(&exec.get_atom(input[i]));
 
-    exec.done(atms);
+    exec.dont_start_yet(atms);
+}
+
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1end_1yet(JNIEnv *env, jobject obj, jlongArray atoms)
+{
+    const jsize atms_size = env->GetArrayLength(atoms);
+    std::vector<jlong> input(atms_size);
+    env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
+
+    auto &exec = *get_executor(env, obj);
+    std::unordered_set<atom *> atms;
+    for (jsize i = 0; i < atms_size; i++)
+        atms.insert(&exec.get_atom(input[i]));
+
+    exec.dont_start_yet(atms);
 }
 
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_failure(JNIEnv *env, jobject obj, jlongArray atoms)

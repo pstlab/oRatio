@@ -8,5 +8,9 @@ public interface ExecutorListener {
 
     public void startingAtoms(final long[] atoms);
 
+    public void startAtoms(final long[] atoms);
+
     public void endingAtoms(final long[] atoms);
+
+    public void endAtoms(final long[] atoms);
 }

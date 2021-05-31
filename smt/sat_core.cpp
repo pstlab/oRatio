@@ -39,7 +39,8 @@ namespace smt
         assert(root_level());
         // we check if the clause is already satisfied and filter out false/duplicate literals..
         std::vector<lit> c_lits = lits;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+                  { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         for (auto it = c_lits.cbegin(); it != c_lits.cend(); ++it)
@@ -127,7 +128,8 @@ namespace smt
         assert(root_level());
         // we try to avoid creating a new variable..
         std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+                  { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "&";
@@ -172,7 +174,8 @@ namespace smt
         assert(root_level());
         // we try to avoid creating a new variable..
         std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+                  { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "|";
@@ -217,7 +220,8 @@ namespace smt
         assert(root_level());
         // we try to avoid creating a new variable..
         std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+                  { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "amo";
@@ -288,7 +292,8 @@ namespace smt
         assert(root_level());
         // we try to avoid creating a new variable..
         std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1) { return variable(l0) < variable(l1); });
+        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+                  { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "^";
@@ -492,16 +497,20 @@ namespace smt
         } while (counter > 0);
         // 'p' is now the first Unique Implication Point (UIP), possibly the asserting literal, that led to the conflict..
         assert(value(p) == Undefined);
-        assert(std::all_of(out_learnt.cbegin() + 1, out_learnt.cend(), [this](auto &lt) { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
+        assert(std::all_of(out_learnt.cbegin() + 1, out_learnt.cend(), [this](auto &lt)
+                           { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
         out_learnt[0] = !p;
     }
 
     void sat_core::record(const std::vector<lit> &lits) noexcept
     {
         assert(value(lits[0]) == Undefined);
-        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p) { return value(p) == True; }) == 0);
-        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p) { return value(p) == Undefined; }) == 1);
-        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p) { return value(p) == False; }) == lits.size() - 1);
+        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p)
+                             { return value(p) == True; }) == 0);
+        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p)
+                             { return value(p) == Undefined; }) == 1);
+        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p)
+                             { return value(p) == False; }) == lits.size() - 1);
         if (lits.size() == 1)
         {
             assert(root_level());
@@ -512,7 +521,8 @@ namespace smt
         {
             std::vector<lit> c_lits = lits;
             // we sort literals according to descending order of variable assignment (except for the first literal which is now unassigned)..
-            std::sort(c_lits.begin() + 1, c_lits.end(), [this](auto &a, auto &b) { return level[variable(a)] > level[variable(b)]; });
+            std::sort(c_lits.begin() + 1, c_lits.end(), [this](auto &a, auto &b)
+                      { return level[variable(a)] > level[variable(b)]; });
 
             clause *c = new clause(*this, c_lits);
             watches[index(!c_lits[0])].push_back(c);
