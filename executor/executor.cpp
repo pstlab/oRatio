@@ -103,9 +103,6 @@ namespace ratio
                 if (!slv.get_sat_core().propagate())
                     throw execution_exception();
 
-                if (slv.root_level()) // something failed..
-                    set_values();
-
                 // we solve the problem again..
                 slv.solve();
                 goto manage_tick;
@@ -158,11 +155,37 @@ namespace ratio
         if (!backtrack_analyze_and_backjump())
             throw execution_exception();
 
-        if (slv.root_level()) // something failed..
-            set_values();
-
         // we solve the problem again..
         slv.solve();
+    }
+
+    bool executor::propagate(const smt::lit &p) noexcept
+    {
+        if (slv.get_sat_core().value(p) == True)
+        { // an atom has been activated..
+            auto &atm = get_atom(variable(p));
+            if (const auto &lb = lbs.find(&atm); lb != lbs.end())
+                for (const auto &i : lb->second)
+                {
+                    std::vector<lit> c_cnfl = slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(i.first->l), i.second, p);
+                    if (!c_cnfl.empty())
+                    { // setting the lower bound caused a conflict..
+                        std::swap(c_cnfl, cnfl);
+                        return false;
+                    }
+                }
+            if (const auto &ub = ubs.find(&atm); ub != ubs.end())
+                for (const auto &i : ub->second)
+                {
+                    std::vector<lit> c_cnfl = slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(i.first->l), i.second, p);
+                    if (!c_cnfl.empty())
+                    { // setting the upper bound caused a conflict..
+                        std::swap(c_cnfl, cnfl);
+                        return false;
+                    }
+                }
+        }
+        return true;
     }
 
     bool executor::is_impulse(const atom &atm) const noexcept { return imp_pred.is_assignable_from(atm.get_type()); }
@@ -292,19 +315,5 @@ namespace ratio
             if (!backtrack_analyze_and_backjump())
                 throw execution_exception();
         }
-    }
-
-    void executor::set_values()
-    {
-        for (auto &&[atm, itm_val] : lbs)
-            for (auto &&[a_itm, lb] : itm_val)
-                if (!slv.get_sat_core().new_clause({lit(atm->get_sigma(), false), slv.geq(a_itm, slv.new_real(current_time))->l}))
-                    throw execution_exception();
-        lbs.clear();
-        for (auto &&[atm, itm_val] : ubs)
-            for (auto &&[a_itm, ub] : itm_val)
-                if (!slv.get_sat_core().new_clause({lit(atm->get_sigma(), false), slv.leq(a_itm, slv.new_real(current_time))->l}))
-                    throw execution_exception();
-        ubs.clear();
     }
 } // namespace ratio

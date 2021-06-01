@@ -52,7 +52,6 @@ namespace ratio
     void reset_relevant_predicates();
     void build_timelines();
     void freeze(atom &atm, arith_expr &xpr);
-    void set_values();
 
   private:
     const std::string cnfg_str;
@@ -65,8 +64,6 @@ namespace ratio
     std::unordered_map<smt::var, atom *> all_atoms;                         // all the interesting atoms indexed by their sigma variable..
     std::unordered_set<const atom *> dont_start;                            // the starting atoms which are not yet ready to start..
     std::unordered_set<const atom *> dont_end;                              // the ending atoms which are not yet ready to end..
-    std::unordered_set<const atom *> executing;                             // the currently executing atoms..
-    std::unordered_set<const atom *> executed;                              // the already executed atoms..
     std::map<smt::inf_rational, std::unordered_set<atom *>> s_atms, e_atms; // for each pulse, the atoms starting/ending at that pulse..
     std::set<smt::inf_rational> pulses;                                     // all the pulses of the plan..
     std::vector<executor_listener *> listeners;                             // the executor listeners..
