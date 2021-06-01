@@ -1,0 +1,112 @@
+real base_x = 0.0;
+real base_y = 0.0;
+
+real phys_x = -0.85136;
+real phys_y =  7.77870;
+
+real cogn_x = -2.11301;
+real cogn_y = -3.14830;
+
+real rem_x = -0.85136;
+real rem_y = 7.77870;
+
+real physio_x = -2.11301;
+real physio_y = -3.14830;
+
+class Navigator : StateVariable {
+
+    predicate At(real x, real y) {
+        duration >= 5.0;
+        goal going_at = new GoingTo(end:start, x:x, y:y);
+    }
+
+    predicate GoingTo(real x, real y) {
+        duration >= 5.0;
+        goal at = new At(end:start);
+    }
+}
+
+class Robot : StateVariable {
+
+    Navigator nav = new Navigator();
+
+    predicate CheckUserAround() {
+        duration >= 5.0;
+        duration <= 50.0;
+    }
+
+    predicate CognitiveExercize(int ex_id) {
+        duration >= 10.0;
+
+        goal at = new nav.At(x:cogn_x, y:cogn_y);
+        at.start <= start - 10.0;
+        at.end >= end + 5.0;
+
+        goal chck_usr = new CheckUserAround(end:start);
+        chck_usr.start >= at.start;
+    }
+
+    predicate PhysicalExercize(int ex_id) {
+        duration >= 10.0;
+
+        goal at = new nav.At(x:phys_x, y:phys_y);
+        at.start <= start - 10.0;
+        at.end >= end + 5.0;
+
+        goal chck_usr = new CheckUserAround(end:start);
+        chck_usr.start >= at.start;
+    }
+
+    predicate Reminder(int rem_id) {
+        duration >= 10.0;
+        duration <= 20.0;
+
+        goal at = new nav.At(x:rem_x, y:rem_y);
+        at.start <= start - 10.0;
+        at.end >= end + 5.0;
+
+        goal chck_usr = new CheckUserAround(end:start);
+        chck_usr.start >= at.start;
+    }
+
+    predicate PhysiologicalMeasurement(int pm_id) {
+        duration >= 10.0;
+        duration <= 30.0;
+
+        goal at = new nav.At(x:physio_x, y:physio_y);
+        at.start <= start - 10.0;
+        at.end >= end + 5.0;
+
+        goal chck_usr = new CheckUserAround(end:start);
+        chck_usr.start >= at.start;
+    }
+}
+
+class User {
+
+    bool forgetful, hypertensive;
+
+    User(bool forgetful, bool hypertensive) : forgetful(forgetful), hypertensive(hypertensive) {}
+}
+
+predicate KeepHealthy(Robot r, User u) {
+    goal ce = new r.CognitiveExercize(ex_id:1);
+    goal pe = new r.PhysicalExercize(ex_id:2);
+    ce.end <= pe.start - 60.0;
+    {
+        u.forgetful;
+        goal rem = new r.Reminder(rem_id:1);
+    } or { !u.forgetful; }
+    {
+        u.hypertensive;
+        goal pm = new r.PhysiologicalMeasurement(pm_id:1);
+    } or { !u.hypertensive; }
+}
+
+User u0 = new User(true, true);
+Robot r0 = new Robot();
+
+fact at0 = new r0.nav.At(start:origin, x:base_x, y:base_y);
+at0.duration >= 5.0;
+
+goal keep_healthy = new KeepHealthy(r:r0, u:u0);
