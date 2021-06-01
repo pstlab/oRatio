@@ -269,7 +269,12 @@ void test_nonroot_constraints()
     assert(cnfl.empty());
 
     cnfl = lra.set_lb(x, inf_rational(rational(2)), TRUE_lit);
-    assert(cnfl.empty());
+    assert(!cnfl.empty());
+
+    core.pop();
+    core.new_clause(cnfl);
+    prop = core.propagate();
+    assert(prop);
 
     assert(core.value(x_leq_y) == False);
 }
