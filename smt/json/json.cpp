@@ -28,6 +28,9 @@ namespace smt
         { // we have a json object..
             is.get();
             std::map<std::string, json> vals;
+            is >> std::ws;
+            if (is.peek() == '}') // we have an empty object..
+                return json(new json_core(vals));
             do
             {
                 is >> std::ws;

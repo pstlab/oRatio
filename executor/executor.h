@@ -18,7 +18,7 @@ namespace ratio
     friend class executor_listener;
 
   public:
-    EXECUTOR_EXPORT executor(solver &slv, const std::string &cnfg_str, const smt::rational &units_per_tick = smt::rational::ONE);
+    EXECUTOR_EXPORT executor(solver &slv, const std::string &cnfg_str = "{}", const smt::rational &units_per_tick = smt::rational::ONE);
     executor(const executor &orig) = delete;
     EXECUTOR_EXPORT ~executor();
 

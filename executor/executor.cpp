@@ -203,11 +203,11 @@ namespace ratio
     void executor::flaw_created(const flaw &f)
     { // we cannot plan in the past..
         if (const atom_flaw *af = dynamic_cast<const atom_flaw *>(&f))
-        { // we force each atom to start after the current time..
-            const atom &atm = af->get_atom();
+        { // .. hence we force each atom to start after the current time..
+            atom &atm = af->get_atom();
             switch (slv.get_sat_core().value(af->get_atom().get_sigma()))
             {
-            case True:
+            case True: // the atom is already active..
                 if (is_interval(atm))
                 { // we have an interval atom..
                     arith_expr s_expr = atm.get(START);
@@ -220,9 +220,21 @@ namespace ratio
                     if (!slv.get_sat_core().new_clause({slv.geq(at_expr, slv.new_real(current_time))->l}))
                         throw execution_exception();
                 }
+                all_atoms.emplace(atm.get_sigma(), &atm);
                 break;
             case Undefined:
+                if (is_interval(atm))
+                { // we have an interval atom..
+                    arith_expr s_expr = atm.get(START);
+                    lbs[&atm].emplace(&*s_expr, current_time);
+                }
+                else if (is_impulse(atm))
+                { // we have an impulsive atom..
+                    arith_expr at_expr = atm.get(AT);
+                    lbs[&atm].emplace(&*at_expr, current_time);
+                }
                 bind(af->get_atom().get_sigma());
+                all_atoms.emplace(atm.get_sigma(), &atm);
                 break;
             }
         }
@@ -282,7 +294,6 @@ namespace ratio
                         s_atms[at].insert(&c_atm);
                         e_atms[at].insert(&c_atm);
                         pulses.insert(at);
-                        all_atoms.emplace(c_atm.get_sigma(), &c_atm);
                     }
                     else if (is_interval(c_atm))
                     {
@@ -299,7 +310,6 @@ namespace ratio
                         }
                         e_atms[end].insert(&c_atm);
                         pulses.insert(end);
-                        all_atoms.emplace(c_atm.get_sigma(), &c_atm);
                     }
             }
     }

@@ -25,7 +25,7 @@ public class App {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final Solver SOLVER = new Solver();
-    static final TimelinesExecutor TL_EXEC = new TimelinesExecutor(SOLVER, "", new Rational(1));
+    static final TimelinesExecutor TL_EXEC = new TimelinesExecutor(SOLVER, "{}", new Rational(1));
     static final SolverListener SLV_LISTENER = new SolverListener(SOLVER, TL_EXEC);
     static {
         SOLVER.addStateListener(SLV_LISTENER);
