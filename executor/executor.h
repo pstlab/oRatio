@@ -55,17 +55,18 @@ namespace ratio
     void set_values();
 
   private:
-    smt::lit xi; // the current execution literal..
+    const std::string cnfg_str;
     const predicate &int_pred;
     const predicate &imp_pred;
     std::unordered_set<const predicate *> relevant_predicates;
-    const std::string cnfg_str;
     smt::rational current_time;         // the current time in plan units..
     const smt::rational units_per_tick; // the number of plan units for each tick..
-    std::unordered_map<atom *, std::unordered_map<arith_item *, smt::inf_rational>> lbs, ubs;
-    std::unordered_map<smt::var, atom *> all_atoms; // all the interesting atoms indexed by their sigma variable..
-    std::unordered_set<const atom *> dont_start, dont_end;
-    std::unordered_set<atom *> executing;                                   // the currently executing atoms..
+    std::unordered_map<const atom *, std::unordered_map<arith_item *, const smt::inf_rational>> lbs, ubs;
+    std::unordered_map<smt::var, atom *> all_atoms;                         // all the interesting atoms indexed by their sigma variable..
+    std::unordered_set<const atom *> dont_start;                            // the starting atoms which are not yet ready to start..
+    std::unordered_set<const atom *> dont_end;                              // the ending atoms which are not yet ready to end..
+    std::unordered_set<const atom *> executing;                             // the currently executing atoms..
+    std::unordered_set<const atom *> executed;                              // the already executed atoms..
     std::map<smt::inf_rational, std::unordered_set<atom *>> s_atms, e_atms; // for each pulse, the atoms starting/ending at that pulse..
     std::set<smt::inf_rational> pulses;                                     // all the pulses of the plan..
     std::vector<executor_listener *> listeners;                             // the executor listeners..

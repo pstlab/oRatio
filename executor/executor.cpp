@@ -44,7 +44,7 @@ namespace ratio
         throw std::out_of_range(pred);
     }
 
-    EXECUTOR_EXPORT executor::executor(solver &slv, const std::string &cnfg_str, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), xi(lit(slv.get_sat_core().new_var())), cnfg_str(cnfg_str), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")), units_per_tick(units_per_tick) { build_timelines(); }
+    EXECUTOR_EXPORT executor::executor(solver &slv, const std::string &cnfg_str, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), cnfg_str(cnfg_str), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")), units_per_tick(units_per_tick) { build_timelines(); }
     EXECUTOR_EXPORT executor::~executor() {}
 
     EXECUTOR_EXPORT void executor::tick()
@@ -70,8 +70,13 @@ namespace ratio
                         const arith_expr xpr = is_impulse(*atm) ? atm->get(AT) : atm->get(START);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         lbs[atm].emplace(&*xpr, lb);
-                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, xi))
-                            throw execution_exception();
+                        std::vector<lit> c_cnfl = slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma()));
+                        if (!c_cnfl.empty())
+                        { // setting the lower bound caused a conflict..
+                            std::swap(c_cnfl, cnfl);
+                            if (!backtrack_analyze_and_backjump())
+                                throw execution_exception();
+                        }
                         delays = true;
                         dont_start.erase(at_atm);
                     }
@@ -82,8 +87,13 @@ namespace ratio
                         const arith_expr xpr = is_impulse(*atm) ? atm->get(AT) : atm->get(END);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         lbs[atm].emplace(&*xpr, lb);
-                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, xi))
-                            throw execution_exception();
+                        std::vector<lit> c_cnfl = slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma()));
+                        if (!c_cnfl.empty())
+                        { // setting the lower bound caused a conflict..
+                            std::swap(c_cnfl, cnfl);
+                            if (!backtrack_analyze_and_backjump())
+                                throw execution_exception();
+                        }
                         delays = true;
                         dont_end.erase(at_atm);
                     }
@@ -93,11 +103,8 @@ namespace ratio
                 if (!slv.get_sat_core().propagate())
                     throw execution_exception();
 
-                if (slv.root_level())
-                { // something failed..
+                if (slv.root_level()) // something failed..
                     set_values();
-                    xi = lit(slv.get_sat_core().new_var());
-                }
 
                 // we solve the problem again..
                 slv.solve();
@@ -147,15 +154,12 @@ namespace ratio
     {
         for (const auto &atm : atoms)
             cnfl.push_back(lit(atm->get_sigma(), false));
-        // we backtrack to a level which can analyze the conflict..
+        // we backtrack to a level at which we can analyze the conflict..
         if (!backtrack_analyze_and_backjump())
             throw execution_exception();
 
-        if (slv.root_level())
-        { // something failed..
+        if (slv.root_level()) // something failed..
             set_values();
-            xi = lit(slv.get_sat_core().new_var());
-        }
 
         // we solve the problem again..
         slv.solve();
@@ -177,17 +181,25 @@ namespace ratio
         if (const atom_flaw *af = dynamic_cast<const atom_flaw *>(&f))
         { // we force each atom to start after the current time..
             const atom &atm = af->get_atom();
-            if (is_interval(atm))
-            { // we have an interval atom..
-                arith_expr s_expr = atm.get(START);
-                if (!slv.get_sat_core().new_clause({lit(atm.get_sigma(), false), slv.geq(s_expr, slv.new_real(current_time))->l}))
-                    throw execution_exception();
-            }
-            else if (is_impulse(atm))
-            { // we have an impulsive atom..
-                arith_expr at_expr = atm.get(AT);
-                if (!slv.get_sat_core().new_clause({lit(atm.get_sigma(), false), slv.geq(at_expr, slv.new_real(current_time))->l}))
-                    throw execution_exception();
+            switch (slv.get_sat_core().value(af->get_atom().get_sigma()))
+            {
+            case True:
+                if (is_interval(atm))
+                { // we have an interval atom..
+                    arith_expr s_expr = atm.get(START);
+                    if (!slv.get_sat_core().new_clause({slv.geq(s_expr, slv.new_real(current_time))->l}))
+                        throw execution_exception();
+                }
+                else if (is_impulse(atm))
+                { // we have an impulsive atom..
+                    arith_expr at_expr = atm.get(AT);
+                    if (!slv.get_sat_core().new_clause({slv.geq(at_expr, slv.new_real(current_time))->l}))
+                        throw execution_exception();
+                }
+                break;
+            case Undefined:
+                bind(af->get_atom().get_sigma());
+                break;
             }
         }
     }
@@ -273,8 +285,13 @@ namespace ratio
         auto val = slv.arith_value(xpr);
         lbs[&atm].emplace(&*xpr, val);
         ubs[&atm].emplace(&*xpr, val);
-        if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(xpr->l), val, xi))
-            throw execution_exception();
+        std::vector<lit> c_cnfl = slv.get_lra_theory().set(slv.get_lra_theory().new_var(xpr->l), val, lit(atm.get_sigma()));
+        if (!c_cnfl.empty())
+        { // freezing the arithmetic expression caused a conflict..
+            std::swap(c_cnfl, cnfl);
+            if (!backtrack_analyze_and_backjump())
+                throw execution_exception();
+        }
     }
 
     void executor::set_values()
