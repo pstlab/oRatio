@@ -16,7 +16,7 @@ inline executor *get_executor(JNIEnv *env, jobject obj) { return reinterpret_cas
 JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_new_1instance(JNIEnv *env, jobject obj, jstring conf, jlong units_per_tick_num, jlong units_per_tick_den)
 {
     solver *s = get_solver(env, obj);
-    executor *exec = new executor(*s, env->GetStringUTFChars(conf, false), rational(static_cast<I>(units_per_tick_num), static_cast<I>(units_per_tick_den)));
+    executor *exec = new executor(*s, env->GetStringUTFChars(conf, JNI_FALSE), rational(static_cast<I>(units_per_tick_num), static_cast<I>(units_per_tick_den)));
     java_executor_listener *jel = new java_executor_listener(*exec, env, obj);
     return reinterpret_cast<jlong>(exec);
 }

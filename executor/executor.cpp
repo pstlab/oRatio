@@ -243,7 +243,8 @@ namespace ratio
     void executor::reset_relevant_predicates()
     {
         relevant_predicates.clear();
-        const auto cnfg = smt::json::from_json(std::stringstream(cnfg_str));
+        std::stringstream ss(cnfg_str);
+        const auto cnfg = smt::json::from_json(ss);
         if (cnfg->has("relevant-predicates"))
         { // the configuration identifies some relevant predicates..
             const smt::array_val &notify_s = static_cast<smt::array_val &>(*cnfg->get("relevant-predicates"));
