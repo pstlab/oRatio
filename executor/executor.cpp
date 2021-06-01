@@ -5,6 +5,7 @@
 #include "atom.h"
 #include "atom_flaw.h"
 #include <chrono>
+#include <sstream>
 
 #define AT "at"
 #define START "start"

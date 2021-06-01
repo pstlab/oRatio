@@ -33,7 +33,7 @@ namespace ratio
     EXECUTOR_EXPORT void failure(const std::unordered_set<atom *> &atoms);
 
   private:
-    bool propagate(const smt::lit &p) noexcept override { return true; }
+    bool propagate(const smt::lit &p) noexcept override;
     bool check() noexcept override { return true; }
     void push() noexcept override {}
     void pop() noexcept override {}
