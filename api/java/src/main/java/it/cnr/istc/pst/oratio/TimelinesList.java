@@ -32,7 +32,7 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
         try {
             BUILDERS.put(solver.getType("StateVariable"), StateVariable.BUILDER);
             BUILDERS.put(solver.getType("ReusableResource"), ReusableResource.BUILDER);
-            BUILDERS.put(solver.getType("PropositionalAgent"), Agent.BUILDER);
+            BUILDERS.put(solver.getType("Agent"), Agent.BUILDER);
             BUILDERS.put(solver.getType("PropositionalState"), PropositionalState.BUILDER);
         } catch (final ClassNotFoundException e) {
             e.printStackTrace();
@@ -85,7 +85,7 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
                         return type;
                 if (c_type.getPredicates().values().stream().anyMatch(p -> p.getSuperclasses().stream()
                         .anyMatch(sp -> sp.getName().equals("Impulse") || sp.getName().equals("Interval"))))
-                    return t.getSolver().getType("PropositionalAgent");
+                    return t.getSolver().getType("Agent");
                 q.addAll(c_type.getSuperclasses());
             }
         } catch (final ClassNotFoundException e) {

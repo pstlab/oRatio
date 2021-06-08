@@ -10,7 +10,7 @@ using namespace smt;
 
 namespace ratio
 {
-    state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME) { new_constructors({new sv_constructor(*this)}); }
+    state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME), int_pred(slv.get_predicate("Interval")) { new_constructors({new sv_constructor(*this)}); }
     state_variable::~state_variable()
     {
         // we clear the atom listeners..
@@ -147,7 +147,7 @@ namespace ratio
     void state_variable::new_predicate(predicate &pred) noexcept
     {
         // each state-variable predicate is also an interval-predicate..
-        new_supertypes(pred, {&get_core().get_predicate("Interval")});
+        new_supertypes(pred, {const_cast<predicate *>(&int_pred)});
         // each state-variable predicate has a tau parameter indicating on which state-variables the atoms insist on..
         new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
     }
@@ -158,7 +158,7 @@ namespace ratio
         if (f.is_fact)
         { // we apply interval-predicate whenever the fact becomes active..
             set_ni(lit(atm.get_sigma()));
-            get_core().get_predicate("Interval").apply_rule(atm);
+            int_pred.apply_rule(atm);
             restore_ni();
         }
 

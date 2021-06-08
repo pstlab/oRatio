@@ -13,7 +13,7 @@ import it.cnr.istc.pst.oratio.Item.ArithItem;
 
 public class Agent implements Timeline<Agent.Action> {
 
-    public static TimelineBuilder BUILDER = new PropositionalAgentBuilder();
+    public static TimelineBuilder BUILDER = new AgentBuilder();
 
     private final String name;
     private final InfRational origin, horizon;
@@ -90,7 +90,7 @@ public class Agent implements Timeline<Agent.Action> {
         }
     }
 
-    private static class PropositionalAgentBuilder implements TimelineBuilder {
+    private static class AgentBuilder implements TimelineBuilder {
 
         @Override
         public Agent build(final Item itm, final Collection<Atom> atoms) {

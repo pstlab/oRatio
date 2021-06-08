@@ -9,7 +9,7 @@ using namespace smt;
 
 namespace ratio
 {
-    propositional_state::propositional_state(solver &slv) : smart_type(slv, slv, PROPOSITIONAL_STATE_NAME)
+    propositional_state::propositional_state(solver &slv) : smart_type(slv, slv, PROPOSITIONAL_STATE_NAME), int_pred(slv.get_predicate("Interval"))
     {
         new_constructors({new ps_constructor(*this)});
         new_predicates({new ps_predicate(*this)}, false);
@@ -30,7 +30,7 @@ namespace ratio
 
     void propositional_state::new_predicate(predicate &pred) noexcept
     {
-        new_supertypes(pred, {&get_predicate(PROPOSITIONAL_STATE_PREDICATE_NAME)});
+        new_supertypes(pred, {&get_predicate(PROPOSITIONAL_STATE_PREDICATE_NAME), const_cast<predicate *>(&int_pred)});
         new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
     }
 
@@ -52,7 +52,7 @@ namespace ratio
     propositional_state::ps_constructor::ps_constructor(propositional_state &ps) : constructor(ps.get_solver(), ps, {}, {}, {}) {}
     propositional_state::ps_constructor::~ps_constructor() {}
 
-    propositional_state::ps_predicate::ps_predicate(propositional_state &ps) : predicate(ps.get_solver(), ps, PROPOSITIONAL_STATE_PREDICATE_NAME, {new field(ps.get_solver().get_type(BOOL_KEYWORD), PROPOSITIONAL_STATE_POLARITY_NAME)}, {}) { new_supertypes({&ps.get_core().get_predicate("Interval")}); }
+    propositional_state::ps_predicate::ps_predicate(propositional_state &ps) : predicate(ps.get_solver(), ps, PROPOSITIONAL_STATE_PREDICATE_NAME, {new field(ps.get_solver().get_type(BOOL_KEYWORD), PROPOSITIONAL_STATE_POLARITY_NAME)}, {}) {}
     propositional_state::ps_predicate::~ps_predicate() {}
 
     propositional_state::ps_atom_listener::ps_atom_listener(propositional_state &ps, atom &atm) : atom_listener(atm), ps(ps) {}

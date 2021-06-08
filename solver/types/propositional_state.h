@@ -62,6 +62,7 @@ namespace ratio
     };
 
   private:
+    const predicate &int_pred;
     std::set<atom *> to_check;
     std::vector<std::pair<atom *, ps_atom_listener *>> atoms;
   };
