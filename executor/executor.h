@@ -42,8 +42,8 @@ namespace ratio
     inline bool is_interval(const atom &atm) const noexcept;
     inline bool is_relevant(const predicate &pred) const noexcept { return relevant_predicates.count(&pred); }
 
-    void read(const std::string &script) override { reset_relevant_predicates(); }
-    void read(const std::vector<std::string> &files) override { reset_relevant_predicates(); }
+    void read(const std::string &) override { reset_relevant_predicates(); }
+    void read(const std::vector<std::string> &) override { reset_relevant_predicates(); }
     void solution_found() override;
     void inconsistent_problem() override;
 

@@ -18,19 +18,19 @@ namespace ratio
 
         CORE_EXPORT bool_literal_expression::bool_literal_expression(const riddle::bool_token &l) : riddle::ast::bool_literal_expression(l) {}
         CORE_EXPORT bool_literal_expression::~bool_literal_expression() {}
-        expr bool_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_bool(literal.val); }
+        expr bool_literal_expression::evaluate(const scope &scp, context &) const { return scp.get_core().new_bool(literal.val); }
 
         CORE_EXPORT int_literal_expression::int_literal_expression(const riddle::int_token &l) : riddle::ast::int_literal_expression(l) {}
         CORE_EXPORT int_literal_expression::~int_literal_expression() {}
-        expr int_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_int(literal.val); }
+        expr int_literal_expression::evaluate(const scope &scp, context &) const { return scp.get_core().new_int(literal.val); }
 
         CORE_EXPORT real_literal_expression::real_literal_expression(const riddle::real_token &l) : riddle::ast::real_literal_expression(l) {}
         CORE_EXPORT real_literal_expression::~real_literal_expression() {}
-        expr real_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_real(literal.val); }
+        expr real_literal_expression::evaluate(const scope &scp, context &) const { return scp.get_core().new_real(literal.val); }
 
         CORE_EXPORT string_literal_expression::string_literal_expression(const riddle::string_token &l) : riddle::ast::string_literal_expression(l) {}
         CORE_EXPORT string_literal_expression::~string_literal_expression() {}
-        expr string_literal_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().new_string(literal.str); }
+        expr string_literal_expression::evaluate(const scope &scp, context &) const { return scp.get_core().new_string(literal.str); }
 
         cast_expression::cast_expression(const std::vector<riddle::id_token> &tp, const riddle::ast::expression *const e) : riddle::ast::cast_expression(tp, e) {}
         cast_expression::~cast_expression() {}

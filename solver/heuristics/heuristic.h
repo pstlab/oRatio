@@ -13,7 +13,7 @@ namespace ratio
   public:
     heuristic(solver &slv);
     heuristic(const heuristic &that) = delete;
-    ~heuristic();
+    virtual ~heuristic();
 
     inline solver &get_solver() const noexcept { return slv; }
 

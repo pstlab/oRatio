@@ -38,7 +38,7 @@ namespace ratio
   public:
     CORE_EXPORT env(core &cr, const context ctx);
     env(const env &orig) = delete;
-    CORE_EXPORT ~env();
+    CORE_EXPORT virtual ~env();
 
     inline core &get_core() const { return cr; } // returns the core in which this environment is created..
 
@@ -48,12 +48,8 @@ namespace ratio
     virtual smt::json to_json() const noexcept;
 
   private:
-    core &cr; // the core in which this environment is created..
-
-  private:
-    unsigned ref_count; // the number of references for this environment (used for implementing a 'smart pointer' infrastructure)..
-
-  private:
+    core &cr;                          // the core in which this environment is created..
+    unsigned ref_count;                // the number of references for this environment (used for implementing a 'smart pointer' infrastructure)..
     const context ctx;                 // the context in which this environment was created..
     std::map<std::string, expr> exprs; // the expressions defined within this environment..
   };

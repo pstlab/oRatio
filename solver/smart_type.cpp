@@ -11,7 +11,7 @@ namespace ratio
     smart_type::smart_type(solver &slv, scope &scp, const std::string &name) : type(slv, scp, name, false), slv(slv) {}
     smart_type::~smart_type() {}
 
-    void smart_type::new_atom(atom_flaw &af) {}
+    void smart_type::new_atom(atom_flaw &) {}
 
     void smart_type::set_ni(const smt::lit &v) noexcept { get_solver().set_ni(v); }
     void smart_type::restore_ni() noexcept { get_solver().restore_ni(); }

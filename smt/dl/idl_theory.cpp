@@ -314,6 +314,7 @@ namespace smt
             const auto dist = distance(v1, v0);
             c_lb += dist.first + expr.known_term.numerator();
             c_ub += dist.second + expr.known_term.numerator();
+            break;
         }
         default:
             throw std::invalid_argument("not a valid integer difference logic expression..");
@@ -390,10 +391,12 @@ namespace smt
                     while (c_to != dist->to)
                     {
                         if (const auto &c_d = dist_constr.find({_preds[dist->to][c_to], c_to}); c_d != dist_constr.cend())
+                        {
                             if (sat.value(c_d->second->b) == True)
                                 cnfl.push_back(!c_d->second->b);
                             else if (sat.value(c_d->second->b) == False)
                                 cnfl.push_back(c_d->second->b);
+                        }
                         c_to = _preds[dist->to][c_to];
                     }
                     cnfl.push_back(!p);
@@ -403,11 +406,13 @@ namespace smt
                 { // we propagate..
                     const auto from_to = std::make_pair(dist->from, dist->to);
                     if (!layers.empty() && !layers.back().old_constrs.count(from_to))
+                    {
                         if (const auto &c_dist = dist_constr.find(from_to); c_dist != dist_constr.cend())
                             // we store the current constraint for backtracking purposes..
                             layers.back().old_constrs.emplace(c_dist->first, c_dist->second);
                         else
                             layers.back().old_constrs.emplace(from_to, nullptr);
+                    }
                     dist_constr.emplace(from_to, dist);
                     propagate(dist->from, dist->to, dist->dist);
                 }
@@ -419,10 +424,12 @@ namespace smt
                     while (c_from != dist->from)
                     {
                         if (const auto &c_d = dist_constr.find({_preds[dist->from][c_from], c_from}); c_d != dist_constr.cend())
+                        {
                             if (sat.value(c_d->second->b) == True)
                                 cnfl.push_back(!c_d->second->b);
                             else if (sat.value(c_d->second->b) == False)
                                 cnfl.push_back(c_d->second->b);
+                        }
                         c_from = _preds[dist->from][c_from];
                     }
                     cnfl.push_back(!p);
@@ -432,11 +439,13 @@ namespace smt
                 { // we propagate..
                     const auto to_from = std::make_pair(dist->to, dist->from);
                     if (!layers.empty() && !layers.back().old_constrs.count(to_from))
+                    {
                         if (const auto &c_dist = dist_constr.find(to_from); c_dist != dist_constr.cend())
                             // we store the current constraint for backtracking purposes..
                             layers.back().old_constrs.emplace(c_dist->first, c_dist->second);
                         else
                             layers.back().old_constrs.emplace(to_from, nullptr);
+                    }
                     dist_constr.emplace(to_from, dist);
                     propagate(dist->to, dist->from, -dist->dist - 1);
                 }

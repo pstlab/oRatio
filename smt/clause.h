@@ -24,8 +24,8 @@ namespace smt
     inline const std::vector<lit> get_lits() const noexcept { return lits; }
 
   private:
-    const bool propagate(const lit &p) noexcept override;
-    const bool simplify() noexcept override;
+    bool propagate(const lit &p) noexcept override;
+    bool simplify() noexcept override;
     void remove() noexcept override;
     void get_reason(const lit &p, std::vector<lit> &out_reason) const noexcept override;
 

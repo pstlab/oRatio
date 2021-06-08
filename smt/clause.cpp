@@ -8,7 +8,7 @@ namespace smt
     clause::clause(sat_core &s, const std::vector<lit> &lits) : constr(s), lits(lits) {}
     clause::~clause() {}
 
-    const bool clause::propagate(const lit &p) noexcept
+    bool clause::propagate(const lit &p) noexcept
     {
         // make sure false literal is lits[1]..
         if (variable(lits[0]) == variable(p))
@@ -35,7 +35,7 @@ namespace smt
         return enqueue(lits[0]);
     }
 
-    const bool clause::simplify() noexcept
+    bool clause::simplify() noexcept
     {
         size_t j = 0;
         for (size_t i = 0; i < lits.size(); ++i)

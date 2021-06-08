@@ -25,11 +25,11 @@ namespace ratio
       flaw_created(f);
     }
 
-    virtual void flaw_created(const flaw &f) {}
-    virtual void flaw_state_changed(const flaw &f) {}
-    virtual void flaw_cost_changed(const flaw &f) {}
-    virtual void flaw_position_changed(const flaw &f) {}
-    virtual void current_flaw(const flaw &f) {}
+    virtual void flaw_created(const flaw &) {}
+    virtual void flaw_state_changed(const flaw &) {}
+    virtual void flaw_cost_changed(const flaw &) {}
+    virtual void flaw_position_changed(const flaw &) {}
+    virtual void current_flaw(const flaw &) {}
 
     void new_resolver(const resolver &r)
     {
@@ -37,11 +37,11 @@ namespace ratio
       resolver_created(r);
     }
 
-    virtual void resolver_created(const resolver &r) {}
-    virtual void resolver_state_changed(const resolver &r) {}
-    virtual void current_resolver(const resolver &r) {}
+    virtual void resolver_created(const resolver &) {}
+    virtual void resolver_state_changed(const resolver &) {}
+    virtual void current_resolver(const resolver &) {}
 
-    virtual void causal_link_added(const flaw &f, const resolver &r) {}
+    virtual void causal_link_added(const flaw &, const resolver &) {}
 
     class flaw_listener : public smt::sat_value_listener, public smt::idl_value_listener
     {
@@ -55,8 +55,8 @@ namespace ratio
       virtual ~flaw_listener() {}
 
     private:
-      void sat_value_change(const smt::var &v) override { listener.flaw_state_changed(f); }
-      void idl_value_change(const smt::var &v) override { listener.flaw_position_changed(f); }
+      void sat_value_change(const smt::var &) override { listener.flaw_state_changed(f); }
+      void idl_value_change(const smt::var &) override { listener.flaw_position_changed(f); }
 
     protected:
       solver_listener &listener;
@@ -71,7 +71,7 @@ namespace ratio
       virtual ~resolver_listener() {}
 
     private:
-      void sat_value_change(const smt::var &v) override { listener.resolver_state_changed(r); }
+      void sat_value_change(const smt::var &) override { listener.resolver_state_changed(r); }
 
     protected:
       solver_listener &listener;

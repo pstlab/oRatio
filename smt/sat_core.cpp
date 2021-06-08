@@ -84,6 +84,7 @@ namespace smt
             case Undefined:
                 return sign(left) == sign(right) ? right : !right;
             }
+            [[fallthrough]];
         case False:
             switch (value(right))
             {
@@ -94,6 +95,7 @@ namespace smt
             case Undefined:
                 return sign(left) == sign(right) ? !right : right;
             }
+            [[fallthrough]];
         case Undefined:
             switch (value(right))
             {

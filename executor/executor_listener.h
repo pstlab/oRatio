@@ -23,8 +23,8 @@ namespace ratio
      * 
      * @param atoms the set of atoms which are going to start.
      */
-    virtual void starting(const std::unordered_set<atom *> &atoms) {}
-    virtual void start(const std::unordered_set<atom *> &atoms) {}
+    virtual void starting(const std::unordered_set<atom *> &) {}
+    virtual void start(const std::unordered_set<atom *> &) {}
 
     /**
      * @brief Notifies the listener that some atoms are going to end.
@@ -33,8 +33,8 @@ namespace ratio
      * 
      * @param atoms the set of atoms which are going to end.
      */
-    virtual void ending(const std::unordered_set<atom *> &atoms) {}
-    virtual void end(const std::unordered_set<atom *> &atoms) {}
+    virtual void ending(const std::unordered_set<atom *> &) {}
+    virtual void end(const std::unordered_set<atom *> &) {}
 
   private:
     executor &exec;
