@@ -12,7 +12,7 @@ namespace smt
     {
         // make sure false literal is lits[1]..
         if (variable(lits[0]) == variable(p))
-            std::swap(*(lits.begin()), *(lits.begin() + 1));
+            std::swap(*(lits.begin()), *(std::next(lits.begin())));
 
         // if 0th watch is true, the clause is already satisfied..
         if (value(lits[0]) == True)
@@ -25,7 +25,7 @@ namespace smt
         for (size_t i = 1; i < lits.size(); ++i)
             if (value(lits[i]) != False)
             {
-                std::swap(*(lits.begin() + 1), *(lits.begin() + i));
+                std::swap(*(std::next(lits.begin())), *(std::next(lits.begin(), i)));
                 watches(!lits[1]).push_back(this);
                 return true;
             }

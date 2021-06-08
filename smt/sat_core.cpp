@@ -497,7 +497,7 @@ namespace smt
         } while (counter > 0);
         // 'p' is now the first Unique Implication Point (UIP), possibly the asserting literal, that led to the conflict..
         assert(value(p) == Undefined);
-        assert(std::all_of(out_learnt.cbegin() + 1, out_learnt.cend(), [this](auto &lt)
+        assert(std::all_of(std::next(out_learnt.cbegin()), out_learnt.cend(), [this](auto &lt)
                            { return value(lt) == False; })); // all these literals must have been assigned as false for propagating 'p'..
         out_learnt[0] = !p;
     }
@@ -521,7 +521,7 @@ namespace smt
         {
             std::vector<lit> c_lits = lits;
             // we sort literals according to descending order of variable assignment (except for the first literal which is now unassigned)..
-            std::sort(c_lits.begin() + 1, c_lits.end(), [this](auto &a, auto &b)
+            std::sort(std::next(c_lits.begin()), c_lits.end(), [this](auto &a, auto &b)
                       { return level[variable(a)] > level[variable(b)]; });
 
             clause *c = new clause(*this, c_lits);
