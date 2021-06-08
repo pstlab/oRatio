@@ -222,27 +222,6 @@ namespace smt
         return l0_ub >= l1_lb && l0_lb <= l1_ub; // the two intervals intersect..
     }
 
-    SMT_EXPORT std::vector<smt::lit> lra_theory::set_lb(const var &x_i, const inf_rational &val, const lit &p) noexcept
-    {
-        if (!assert_lower(x_i, val, p))
-        {
-            std::vector<lit> c_cnfl;
-            std::swap(c_cnfl, cnfl);
-            return c_cnfl;
-        }
-        return std::vector<smt::lit>();
-    }
-    SMT_EXPORT std::vector<smt::lit> lra_theory::set_ub(const var &x_i, const inf_rational &val, const lit &p) noexcept
-    {
-        if (!assert_upper(x_i, val, p))
-        {
-            std::vector<lit> c_cnfl;
-            std::swap(c_cnfl, cnfl);
-            return c_cnfl;
-        }
-        return std::vector<smt::lit>();
-    }
-
     bool lra_theory::propagate(const lit &p) noexcept
     {
         assert(cnfl.empty());

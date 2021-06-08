@@ -9,6 +9,8 @@ namespace smt
 
     SMT_EXPORT void theory::bind(const var &v) noexcept { sat.bind(v, *this); }
 
+    SMT_EXPORT void theory::swap_conflict(theory &th) noexcept { std::swap(cnfl, th.cnfl); }
+
     SMT_EXPORT bool theory::backtrack_analyze_and_backjump() noexcept
     {
         size_t bt_level = 0;

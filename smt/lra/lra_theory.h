@@ -77,18 +77,9 @@ namespace smt
 
     SMT_EXPORT bool equates(const lin &l0, const lin &l1) const noexcept;
 
-    SMT_EXPORT std::vector<smt::lit> set_lb(const var &x_i, const inf_rational &val, const lit &p) noexcept;
-    SMT_EXPORT std::vector<smt::lit> set_ub(const var &x_i, const inf_rational &val, const lit &p) noexcept;
-    SMT_EXPORT std::vector<smt::lit> set(const var &x_i, const inf_rational &val, const lit &p) noexcept
-    {
-      std::vector<smt::lit> c_cnfl = set_lb(x_i, val, p);
-      if (!c_cnfl.empty())
-        return c_cnfl;
-      c_cnfl = set_ub(x_i, val, p);
-      if (!c_cnfl.empty())
-        return c_cnfl;
-      return std::vector<smt::lit>();
-    }
+    SMT_EXPORT bool set_lb(const var &x_i, const inf_rational &val, const lit &p) noexcept { return assert_lower(x_i, val, p); }
+    SMT_EXPORT bool set_ub(const var &x_i, const inf_rational &val, const lit &p) noexcept { return assert_upper(x_i, val, p); }
+    SMT_EXPORT bool set(const var &x_i, const inf_rational &val, const lit &p) noexcept { return set_lb(x_i, val, p) && set_ub(x_i, val, p); }
 
   private:
     bool propagate(const lit &p) noexcept override;

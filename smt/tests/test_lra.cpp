@@ -265,18 +265,11 @@ void test_nonroot_constraints()
 
     assert(core.value(x_leq_y) == True);
 
-    std::vector<lit> cnfl = lra.set_lb(x, inf_rational(rational::ONE), TRUE_lit);
-    assert(cnfl.empty());
-
-    cnfl = lra.set_lb(x, inf_rational(rational(2)), TRUE_lit);
-    assert(!cnfl.empty());
-
-    core.pop();
-    core.new_clause(cnfl);
-    prop = core.propagate();
+    prop = lra.set_lb(x, inf_rational(rational::ONE), TRUE_lit);
     assert(prop);
 
-    assert(core.value(x_leq_y) == False);
+    prop = lra.set_lb(x, inf_rational(rational(2)), TRUE_lit);
+    assert(!prop);
 }
 
 int main(int, char **)

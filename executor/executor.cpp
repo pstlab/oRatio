@@ -71,10 +71,9 @@ namespace ratio
                         const arith_expr xpr = is_impulse(*atm) ? atm->get(AT) : atm->get(START);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         lbs[atm].emplace(&*xpr, lb);
-                        std::vector<lit> c_cnfl = slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma()));
-                        if (!c_cnfl.empty())
+                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma())))
                         { // setting the lower bound caused a conflict..
-                            std::swap(c_cnfl, cnfl);
+                            swap_conflict(slv.get_lra_theory());
                             if (!backtrack_analyze_and_backjump())
                                 throw execution_exception();
                         }
@@ -88,10 +87,9 @@ namespace ratio
                         const arith_expr xpr = is_impulse(*atm) ? atm->get(AT) : atm->get(END);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         lbs[atm].emplace(&*xpr, lb);
-                        std::vector<lit> c_cnfl = slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma()));
-                        if (!c_cnfl.empty())
+                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma())))
                         { // setting the lower bound caused a conflict..
-                            std::swap(c_cnfl, cnfl);
+                            swap_conflict(slv.get_lra_theory());
                             if (!backtrack_analyze_and_backjump())
                                 throw execution_exception();
                         }
@@ -167,24 +165,18 @@ namespace ratio
             auto &atm = get_atom(variable(p));
             if (const auto &lb = lbs.find(&atm); lb != lbs.end())
                 for (const auto &i : lb->second)
-                {
-                    std::vector<lit> c_cnfl = slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(i.first->l), i.second, p);
-                    if (!c_cnfl.empty())
+                    if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(i.first->l), i.second, p))
                     { // setting the lower bound caused a conflict..
-                        std::swap(c_cnfl, cnfl);
+                        swap_conflict(slv.get_lra_theory());
                         return false;
                     }
-                }
             if (const auto &ub = ubs.find(&atm); ub != ubs.end())
                 for (const auto &i : ub->second)
-                {
-                    std::vector<lit> c_cnfl = slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(i.first->l), i.second, p);
-                    if (!c_cnfl.empty())
+                    if (!slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(i.first->l), i.second, p))
                     { // setting the upper bound caused a conflict..
-                        std::swap(c_cnfl, cnfl);
+                        swap_conflict(slv.get_lra_theory());
                         return false;
                     }
-                }
         }
         return true;
     }
@@ -320,10 +312,9 @@ namespace ratio
         auto val = slv.arith_value(xpr);
         lbs[&atm].emplace(&*xpr, val);
         ubs[&atm].emplace(&*xpr, val);
-        std::vector<lit> c_cnfl = slv.get_lra_theory().set(slv.get_lra_theory().new_var(xpr->l), val, lit(atm.get_sigma()));
-        if (!c_cnfl.empty())
+        if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(xpr->l), val, lit(atm.get_sigma())))
         { // freezing the arithmetic expression caused a conflict..
-            std::swap(c_cnfl, cnfl);
+            swap_conflict(slv.get_lra_theory());
             if (!backtrack_analyze_and_backjump())
                 throw execution_exception();
         }
