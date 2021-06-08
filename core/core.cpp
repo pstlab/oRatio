@@ -102,13 +102,16 @@ namespace ratio
     CORE_EXPORT string_expr core::new_string() noexcept { return new string_item(*this, ""); }
     CORE_EXPORT string_expr core::new_string(const std::string &val) noexcept { return new string_item(*this, val); }
 
-    const type &core::get_type(const std::vector<arith_expr> &exprs) const
+    const type &core::get_type(const std::vector<arith_expr> &xprs) const
     {
-        if (std::all_of(exprs.cbegin(), exprs.cend(), [](const arith_expr &aex) { return aex->get_type().get_name().compare(INT_KEYWORD) == 0; }))
+        if (std::all_of(xprs.cbegin(), xprs.cend(), [](const arith_expr &aex)
+                        { return aex->get_type().get_name().compare(INT_KEYWORD) == 0; }))
             return *types.at(INT_KEYWORD);
-        else if (std::all_of(exprs.cbegin(), exprs.cend(), [](const arith_expr &aex) { return aex->get_type().get_name().compare(REAL_KEYWORD) == 0; }))
+        else if (std::all_of(xprs.cbegin(), xprs.cend(), [](const arith_expr &aex)
+                             { return aex->get_type().get_name().compare(REAL_KEYWORD) == 0; }))
             return *types.at(REAL_KEYWORD);
-        else if (std::all_of(exprs.cbegin(), exprs.cend(), [this](const arith_expr &aex) { return aex->get_type().get_name().compare(TP_KEYWORD) == 0 || aex->l.vars.empty() || lra_th.lb(aex->l) == lra_th.ub(aex->l); }))
+        else if (std::all_of(xprs.cbegin(), xprs.cend(), [this](const arith_expr &aex)
+                             { return aex->get_type().get_name().compare(TP_KEYWORD) == 0 || aex->l.vars.empty() || lra_th.lb(aex->l) == lra_th.ub(aex->l); }))
             return *types.at(TP_KEYWORD);
         else
             return *types.at(REAL_KEYWORD);
@@ -223,19 +226,19 @@ namespace ratio
                 return new_tp(min.get_rational());
             else
             { // we need to create a new time-point variable..
-                arith_expr tp = new_tp();
+                arith_expr tm_pt = new_tp();
                 bool nc;
                 for (size_t i = 0; i < lits.size(); ++i)
                 {
-                    nc = sat_cr.new_clause({!lits[i], rdl_th.new_eq(tp->l, dynamic_cast<arith_item *>(vals[i])->l)});
+                    nc = sat_cr.new_clause({!lits[i], rdl_th.new_eq(tm_pt->l, dynamic_cast<arith_item *>(vals[i])->l)});
                     assert(nc);
                 }
                 // we impose some bounds which might help propagation..
-                nc = sat_cr.new_clause({rdl_th.new_geq(tp->l, lin(min.get_rational()))});
+                nc = sat_cr.new_clause({rdl_th.new_geq(tm_pt->l, lin(min.get_rational()))});
                 assert(nc);
-                nc = sat_cr.new_clause({rdl_th.new_leq(tp->l, lin(max.get_rational()))});
+                nc = sat_cr.new_clause({rdl_th.new_leq(tm_pt->l, lin(max.get_rational()))});
                 assert(nc);
-                return tp;
+                return tm_pt;
             }
         }
         else
@@ -245,78 +248,81 @@ namespace ratio
     CORE_EXPORT bool_expr core::negate(bool_expr var) noexcept { return new bool_item(*this, !var->l); }
     CORE_EXPORT bool_expr core::eq(bool_expr left, bool_expr right) noexcept { return new bool_item(*this, sat_cr.new_eq(left->l, right->l)); }
 
-    CORE_EXPORT bool_expr core::conj(const std::vector<bool_expr> &exprs) noexcept
+    CORE_EXPORT bool_expr core::conj(const std::vector<bool_expr> &xprs) noexcept
     {
         std::vector<lit> lits;
-        for (const auto &bex : exprs)
+        for (const auto &bex : xprs)
             lits.push_back(bex->l);
         return new bool_item(*this, sat_cr.new_conj(lits));
     }
 
-    CORE_EXPORT bool_expr core::disj(const std::vector<bool_expr> &exprs) noexcept
+    CORE_EXPORT bool_expr core::disj(const std::vector<bool_expr> &xprs) noexcept
     {
         std::vector<lit> lits;
-        for (const auto &bex : exprs)
+        for (const auto &bex : xprs)
             lits.push_back(bex->l);
         return new bool_item(*this, sat_cr.new_disj(lits));
     }
 
-    CORE_EXPORT bool_expr core::exct_one(const std::vector<bool_expr> &exprs) noexcept
+    CORE_EXPORT bool_expr core::exct_one(const std::vector<bool_expr> &xprs) noexcept
     {
         std::vector<lit> lits;
-        for (const auto &bex : exprs)
+        for (const auto &bex : xprs)
             lits.push_back(bex->l);
         return new bool_item(*this, sat_cr.new_exct_one(lits));
     }
 
-    CORE_EXPORT arith_expr core::add(const std::vector<arith_expr> &exprs) noexcept
+    CORE_EXPORT arith_expr core::add(const std::vector<arith_expr> &xprs) noexcept
     {
-        assert(exprs.size() > 1);
+        assert(xprs.size() > 1);
         lin l;
-        for (const auto &aex : exprs)
+        for (const auto &aex : xprs)
             l += aex->l;
-        return new arith_item(*this, get_type(exprs), l);
+        return new arith_item(*this, get_type(xprs), l);
     }
 
-    CORE_EXPORT arith_expr core::sub(const std::vector<arith_expr> &exprs) noexcept
+    CORE_EXPORT arith_expr core::sub(const std::vector<arith_expr> &xprs) noexcept
     {
-        assert(exprs.size() > 1);
+        assert(xprs.size() > 1);
         lin l;
-        for (auto it = exprs.cbegin(); it != exprs.cend(); ++it)
-            if (it == exprs.cbegin())
+        for (auto it = xprs.cbegin(); it != xprs.cend(); ++it)
+            if (it == xprs.cbegin())
                 l += (*it)->l;
             else
                 l -= (*it)->l;
-        return new arith_item(*this, get_type(exprs), l);
+        return new arith_item(*this, get_type(xprs), l);
     }
 
-    CORE_EXPORT arith_expr core::mult(const std::vector<arith_expr> &exprs) noexcept
+    CORE_EXPORT arith_expr core::mult(const std::vector<arith_expr> &xprs) noexcept
     {
-        assert(exprs.size() > 1);
-        arith_expr ae = *std::find_if(exprs.cbegin(), exprs.cend(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); });
+        assert(xprs.size() > 1);
+        arith_expr ae = *std::find_if(xprs.cbegin(), xprs.cend(), [this](arith_expr ae)
+                                      { return lra_th.lb(ae->l) == lra_th.ub(ae->l); });
         lin l = ae->l;
-        for (const auto &aex : exprs)
+        for (const auto &aex : xprs)
             if (aex != ae)
             {
                 assert(lra_th.lb(aex->l) == lra_th.ub(aex->l) && "non-linear expression..");
                 assert(lra_th.value(aex->l).get_infinitesimal() == rational::ZERO);
                 l *= lra_th.value(aex->l).get_rational();
             }
-        return new arith_item(*this, get_type(exprs), l);
+        return new arith_item(*this, get_type(xprs), l);
     }
 
-    CORE_EXPORT arith_expr core::div(const std::vector<arith_expr> &exprs) noexcept
+    CORE_EXPORT arith_expr core::div(const std::vector<arith_expr> &xprs) noexcept
     {
-        assert(exprs.size() > 1);
-        assert(std::all_of(++exprs.cbegin(), exprs.cend(), [this](arith_expr ae) { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) && "non-linear expression..");
-        assert(lra_th.value(exprs[1]->l).get_infinitesimal() == rational::ZERO);
-        rational c = lra_th.value(exprs[1]->l).get_rational();
-        for (size_t i = 2; i < exprs.size(); ++i)
+        assert(xprs.size() > 1);
+        assert(std::all_of(++xprs.cbegin(), xprs.cend(), [this](arith_expr ae)
+                           { return lra_th.lb(ae->l) == lra_th.ub(ae->l); }) &&
+               "non-linear expression..");
+        assert(lra_th.value(xprs[1]->l).get_infinitesimal() == rational::ZERO);
+        rational c = lra_th.value(xprs[1]->l).get_rational();
+        for (size_t i = 2; i < xprs.size(); ++i)
         {
-            assert(lra_th.value(exprs[i]->l).get_infinitesimal() == rational::ZERO);
-            c *= lra_th.value(exprs[i]->l).get_rational();
+            assert(lra_th.value(xprs[i]->l).get_infinitesimal() == rational::ZERO);
+            c *= lra_th.value(xprs[i]->l).get_rational();
         }
-        return new arith_item(*this, get_type(exprs), exprs.at(0)->l / c);
+        return new arith_item(*this, get_type(xprs), xprs.at(0)->l / c);
     }
 
     CORE_EXPORT arith_expr core::minus(arith_expr ex) noexcept { return new arith_item(*this, ex->get_type(), -ex->l); }

@@ -73,12 +73,12 @@ namespace ratio
                                                      { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
 
             // this is the next flaw (i.e. the most expensive one) to be solved..
-            auto f_next = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1)
-                                           { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
-            assert(f_next != flaws.cend());
-            FIRE_CURRENT_FLAW(**f_next);
+            auto best_flaw = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1)
+                                              { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+            assert(best_flaw != flaws.cend());
+            FIRE_CURRENT_FLAW(**best_flaw);
 
-            if (is_infinite((*f_next)->get_estimated_cost()))
+            if (is_infinite((*best_flaw)->get_estimated_cost()))
             { // we don't know how to solve this flaw :(
                 do
                 { // we search..
@@ -91,13 +91,13 @@ namespace ratio
             }
 
             // this is the next resolver (i.e. the cheapest one) to be applied..
-            auto *res = (*f_next)->get_best_resolver();
-            FIRE_CURRENT_RESOLVER(*res);
+            auto *best_res = (*best_flaw)->get_best_resolver();
+            FIRE_CURRENT_RESOLVER(*best_res);
 
-            assert(!is_infinite(res->get_estimated_cost()));
+            assert(!is_infinite(best_res->get_estimated_cost()));
 
             // we apply the resolver..
-            take_decision(res->get_rho());
+            take_decision(best_res->get_rho());
 
             // we solve all the current inconsistencies..
             solve_inconsistencies();
@@ -114,12 +114,12 @@ namespace ratio
                                                          { return sat.value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
 
                 // this is the next flaw (i.e. the most expensive one) to be solved..
-                auto f_next = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1)
-                                               { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
-                assert(f_next != flaws.cend());
-                FIRE_CURRENT_FLAW(**f_next);
+                auto best_flaw = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1)
+                                                  { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+                assert(best_flaw != flaws.cend());
+                FIRE_CURRENT_FLAW(**best_flaw);
 
-                if (is_infinite((*f_next)->get_estimated_cost()))
+                if (is_infinite((*best_flaw)->get_estimated_cost()))
                 { // we don't know how to solve this flaw :(
                     do
                     { // we search..
@@ -130,20 +130,19 @@ namespace ratio
                 }
 
                 // this is the next resolver (i.e. the cheapest one) to be applied..
-                auto *res = (*f_next)->get_best_resolver();
-                FIRE_CURRENT_RESOLVER(*res);
+                auto *best_res = (*best_flaw)->get_best_resolver();
+                FIRE_CURRENT_RESOLVER(*best_res);
 
-                assert(!is_infinite(res->get_estimated_cost()));
+                assert(!is_infinite(best_res->get_estimated_cost()));
 
                 // we apply the resolver..
-                take_decision(res->get_rho());
+                take_decision(best_res->get_rho());
             }
 
             // we solve all the current inconsistencies..
             solve_inconsistencies();
         } while (!flaws.empty());
 #endif
-
         // Hurray!! we have found a solution..
         LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
         FIRE_STATE_CHANGED();
@@ -196,15 +195,15 @@ namespace ratio
         return xp;
     }
 
-    bool_expr solver::disj(const std::vector<bool_expr> &exprs) noexcept
+    bool_expr solver::disj(const std::vector<bool_expr> &xprs) noexcept
     {
         // we create a new bool expression..
         std::vector<lit> lits;
-        for (const auto &bex : exprs)
+        for (const auto &bex : xprs)
             lits.push_back(bex->l);
         bool_expr xp = new bool_item(*this, get_sat_core().new_disj(lits));
 
-        if (exprs.size() > 1) // we create a new var flaw..
+        if (xprs.size() > 1) // we create a new var flaw..
             new_flaw(*new disj_flaw(*this, get_cause(), lits));
 
         return xp;
