@@ -78,7 +78,7 @@ namespace smt
     JSON_EXPORT ~bool_val();
 
     inline bool get() const noexcept { return val; }
-    inline void set(const bool &val) noexcept { this->val = val; }
+    inline void set(const bool &v) noexcept { val = v; }
 
     bool operator*() const noexcept { return val; }
 
@@ -96,7 +96,7 @@ namespace smt
     JSON_EXPORT ~string_val();
 
     inline std::string get() const noexcept { return val; }
-    inline void set(const std::string &val) noexcept { this->val = val; }
+    inline void set(const std::string &v) noexcept { val = v; }
 
     std::string operator*() const noexcept { return val; }
 
@@ -114,7 +114,7 @@ namespace smt
     JSON_EXPORT ~long_val();
 
     inline long get() const noexcept { return val; }
-    inline void set(const long &val) noexcept { this->val = val; }
+    inline void set(const long &v) noexcept { val = v; }
 
     long operator*() const noexcept { return val; }
 
@@ -132,7 +132,7 @@ namespace smt
     JSON_EXPORT ~double_val();
 
     inline double get() const noexcept { return val; }
-    inline void set(const double &val) noexcept { this->val = val; }
+    inline void set(const double &v) noexcept { val = v; }
 
     double operator*() const noexcept { return val; }
 

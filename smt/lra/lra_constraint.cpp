@@ -117,28 +117,28 @@ namespace smt
         if (is_positive(l.vars.at(v)))
         {
             inf_rational lb(0);
-            for (const auto &[v, c] : l.vars)
+            for (const auto &[c_v, c] : l.vars)
                 if (is_positive(c))
-                    if (is_negative_infinite(th.lb(v)))
+                    if (is_negative_infinite(th.lb(c_v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        lb += c * th.lb(v);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(v)].reason);
+                        lb += c * th.lb(c_v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(c_v)].reason);
                     }
                 else if (is_negative(c))
-                    if (is_positive_infinite(th.ub(v)))
+                    if (is_positive_infinite(th.ub(c_v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        lb += c * th.ub(v);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(v)].reason);
+                        lb += c * th.ub(c_v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(c_v)].reason);
                     }
 
             if (lb > th.lb(x))
@@ -177,28 +177,28 @@ namespace smt
         else
         {
             inf_rational ub(0);
-            for (const auto &[v, c] : l.vars)
+            for (const auto &[c_v, c] : l.vars)
                 if (is_positive(c))
-                    if (is_positive_infinite(th.ub(v)))
+                    if (is_positive_infinite(th.ub(c_v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        ub += c * th.ub(v);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(v)].reason);
+                        ub += c * th.ub(c_v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(c_v)].reason);
                     }
                 else if (is_negative(c))
-                    if (is_negative_infinite(th.lb(v)))
+                    if (is_negative_infinite(th.lb(c_v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        ub += c * th.lb(v);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(v)].reason);
+                        ub += c * th.lb(c_v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(c_v)].reason);
                     }
 
             if (ub < th.ub(x))
@@ -247,17 +247,17 @@ namespace smt
         if (is_positive(l.vars.at(v)))
         {
             inf_rational ub(0);
-            for (const auto &[v, c] : l.vars)
+            for (const auto &[c_v, c] : l.vars)
                 if (is_positive(c))
-                    if (is_positive_infinite(th.ub(v)))
+                    if (is_positive_infinite(th.ub(c_v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        ub += c * th.ub(v);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(v)].reason);
+                        ub += c * th.ub(c_v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(c_v)].reason);
                     }
                 else if (is_negative(c))
                     if (is_negative_infinite(th.lb(v)))
@@ -267,8 +267,8 @@ namespace smt
                     }
                     else
                     {
-                        ub += c * th.lb(v);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(v)].reason);
+                        ub += c * th.lb(c_v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(c_v)].reason);
                     }
 
             if (ub < th.ub(x))
@@ -307,28 +307,28 @@ namespace smt
         else
         {
             inf_rational lb(0);
-            for (const auto &[v, c] : l.vars)
+            for (const auto &[c_v, c] : l.vars)
                 if (is_positive(c))
-                    if (is_negative_infinite(th.lb(v)))
+                    if (is_negative_infinite(th.lb(c_v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        lb += c * th.lb(v);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(v)].reason);
+                        lb += c * th.lb(c_v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(c_v)].reason);
                     }
                 else if (is_negative(c))
-                    if (is_positive_infinite(th.ub(v)))
+                    if (is_positive_infinite(th.ub(c_v)))
                     { // nothing to propagate..
                         th.cnfl.clear();
                         return true;
                     }
                     else
                     {
-                        lb += c * th.ub(v);
-                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(v)].reason);
+                        lb += c * th.ub(c_v);
+                        th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(c_v)].reason);
                     }
 
             if (lb > th.lb(x))

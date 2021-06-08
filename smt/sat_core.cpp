@@ -25,12 +25,12 @@ namespace smt
     SMT_EXPORT var sat_core::new_var() noexcept
     {
         const var id = assigns.size();
-        watches.push_back(std::vector<constr *>());
-        watches.push_back(std::vector<constr *>());
-        assigns.push_back(Undefined);
+        watches.emplace_back();
+        watches.emplace_back();
+        assigns.emplace_back(Undefined);
         exprs.emplace("b" + std::to_string(id), id);
-        level.push_back(0);
-        reason.push_back(nullptr);
+        level.emplace_back(0);
+        reason.emplace_back(nullptr);
         return id;
     }
 
@@ -223,7 +223,7 @@ namespace smt
         std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
                   { return variable(l0) < variable(l1); });
         lit p;
-        size_t j = 0;
+        size_t lits_size = 0;
         std::string s_expr = "amo";
         for (auto it0 = c_lits.cbegin(); it0 != c_lits.cend(); ++it0)
             if (value(*it0) == True)
@@ -235,16 +235,16 @@ namespace smt
                     { // we need to include this literal in the at-most-one..
                         p = *it1;
                         s_expr += to_string(p);
-                        c_lits[j++] = p;
+                        c_lits[lits_size++] = p;
                     }
                 }
             else if (value(*it0) != False && *it0 != p)
             { // we need to include this literal in the at-most-one..
                 p = *it0;
                 s_expr += to_string(p);
-                c_lits[j++] = p;
+                c_lits[lits_size++] = p;
             }
-        c_lits.resize(j);
+        c_lits.resize(lits_size);
 
         if (c_lits.empty() || c_lits.size() == 1) // an empty or a singleton at-most-one is assumed to be satisfied..
             return TRUE_lit;
@@ -509,8 +509,8 @@ namespace smt
                              { return value(p) == True; }) == 0);
         assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p)
                              { return value(p) == Undefined; }) == 1);
-        assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p)
-                             { return value(p) == False; }) == lits.size() - 1);
+        assert(static_cast<size_t>(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p)
+                                                 { return value(p) == False; })) == lits.size() - 1);
         if (lits.size() == 1)
         {
             assert(root_level());

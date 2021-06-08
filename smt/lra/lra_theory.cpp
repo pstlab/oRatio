@@ -15,7 +15,7 @@ namespace smt
         const var id = vals.size();
         c_bounds.push_back({inf_rational(rational::NEGATIVE_INFINITY), TRUE_lit}); // we set the lower bound at -inf..
         c_bounds.push_back({inf_rational(rational::POSITIVE_INFINITY), TRUE_lit}); // we set the upper bound at +inf..
-        vals.push_back(inf_rational(rational::ZERO));                              // we set the current value at 0..
+        vals.emplace_back(rational::ZERO);                                         // we set the current value at 0..
         exprs.emplace("x" + std::to_string(id), id);
         a_watches.resize(vals.size());
         t_watches.resize(vals.size());
@@ -430,10 +430,10 @@ namespace smt
             t_watches[v].erase(ex_row);
         delete ex_row;
 
-        const rational c = expr.vars[x_j];
+        const rational cf = expr.vars[x_j];
         expr.vars.erase(x_j);
-        expr /= -c;
-        expr.vars.emplace(x_i, rational::ONE / c);
+        expr /= -cf;
+        expr.vars.emplace(x_i, rational::ONE / cf);
 
         // these are the rows in which x_j appears..
         std::unordered_set<row *> x_j_watches;

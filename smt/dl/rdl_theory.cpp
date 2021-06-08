@@ -6,13 +6,13 @@
 
 namespace smt
 {
-    SMT_EXPORT rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<inf_rational>>(size, std::vector<inf_rational>(size, inf_rational(rational::POSITIVE_INFINITY)))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, -1)))
+    SMT_EXPORT rdl_theory::rdl_theory(sat_core &sat, const size_t &size) : theory(sat), _dists(std::vector<std::vector<inf_rational>>(size, std::vector<inf_rational>(size, inf_rational(rational::POSITIVE_INFINITY)))), _preds(std::vector<std::vector<var>>(size, std::vector<var>(size, std::numeric_limits<size_t>::max())))
     {
         for (size_t i = 0; i < size; ++i)
         {
             _dists[i][i] = inf_rational(rational::ZERO);
             std::fill(_preds[i].begin(), _preds[i].end(), i);
-            _preds[i][i] = -1;
+            _preds[i][i] = std::numeric_limits<size_t>::max();
         }
     }
     SMT_EXPORT rdl_theory::~rdl_theory() {}
@@ -427,17 +427,18 @@ namespace smt
     bool rdl_theory::check() noexcept
     {
         assert(cnfl.empty());
-        assert(std::all_of(dist_constr.cbegin(), dist_constr.cend(), [this](const auto &dist) {
-            switch (sat.value(dist.second->b))
-            {
-            case True: // the constraint is asserted..
-                return _dists[dist.second->from][dist.second->to] <= dist.second->dist;
-            case False: // the constraint is negated..
-                return _dists[dist.second->to][dist.second->from] < -dist.second->dist;
-            default: // the constraint is not asserted..
-                return true;
-            }
-        }));
+        assert(std::all_of(dist_constr.cbegin(), dist_constr.cend(), [this](const auto &dist)
+                           {
+                               switch (sat.value(dist.second->b))
+                               {
+                               case True: // the constraint is asserted..
+                                   return _dists[dist.second->from][dist.second->to] <= dist.second->dist;
+                               case False: // the constraint is negated..
+                                   return _dists[dist.second->to][dist.second->from] < -dist.second->dist;
+                               default: // the constraint is not asserted..
+                                   return true;
+                               }
+                           }));
         return true;
     }
 
@@ -506,7 +507,6 @@ namespace smt
                     if (sat.value(c_dist->b) == Undefined)
                         if (_dists[c_dist->to][c_dist->from] < -c_dist->dist)
                         { // the constraint is inconsistent..
-                            std::vector<lit> cnfl;
                             cnfl.push_back(!c_dist->b);
                             var c_to = c_dist->from;
                             while (c_to != c_dist->to)
@@ -520,10 +520,10 @@ namespace smt
                             }
                             // we propagate the reason for assigning false to dist->b..
                             record(cnfl);
+                            cnfl.clear();
                         }
                         else if (_dists[c_dist->from][c_dist->to] <= c_dist->dist)
                         { // the constraint is redundant..
-                            std::vector<lit> cnfl;
                             cnfl.push_back(c_dist->b);
                             var c_to = c_dist->to;
                             while (c_to != c_dist->from)
@@ -537,6 +537,7 @@ namespace smt
                             }
                             // we propagate the reason for assigning true to dist->b..
                             record(cnfl);
+                            cnfl.clear();
                         }
     }
 
@@ -583,11 +584,11 @@ namespace smt
 
         for (size_t i = 0; i < c_size; ++i)
             _preds[i].resize(size, i);
-        _preds.resize(size, std::vector<var>(size, -1));
+        _preds.resize(size, std::vector<var>(size, std::numeric_limits<size_t>::max()));
         for (size_t i = c_size; i < size; ++i)
         {
             std::fill(_preds[i].begin(), _preds[i].end(), i);
-            _preds[i][i] = -1;
+            _preds[i][i] = std::numeric_limits<size_t>::max();
         }
     }
 } // namespace smt
