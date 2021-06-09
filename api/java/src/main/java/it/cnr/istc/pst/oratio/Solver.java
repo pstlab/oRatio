@@ -20,8 +20,8 @@ public class Solver implements Scope, Env {
         System.loadLibrary("core");
         System.loadLibrary("solver");
         System.loadLibrary("executor");
-        System.loadLibrary("solver-api");
-        System.loadLibrary("executor-api");
+        System.loadLibrary("solver-java-api");
+        System.loadLibrary("executor-java-api");
     }
     public static final String BOOL = "bool";
     public static final String INT = "int";

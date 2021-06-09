@@ -18,6 +18,7 @@ option(BUILD_EXECUTOR "Builds the executor" OFF)
 option(BUILD_ROS_TOOLS "Builds the ROS tools" OFF)
 
 option(BUILD_JAVA_API "Builds the Java API" OFF)
+option(BUILD_PYTHON_API "Builds the Python API" OFF)
 option(BUILD_SERVER "Builds the server" OFF)
 
 option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
@@ -26,8 +27,8 @@ if(BUILD_SERVER)
     set(BUILD_JAVA_API ${BUILD_SERVER})
 endif()
 
-if(BUILD_JAVA_API)
-    set(BUILD_EXECUTOR ${BUILD_JAVA_API})
+if(BUILD_JAVA_API OR BUILD_PYTHON_API)
+    set(BUILD_EXECUTOR ${BUILD_JAVA_API} OR ${BUILD_PYTHON_API})
 endif()
 
 include(CTest)
@@ -63,7 +64,12 @@ endif()
 
 message(STATUS "Build Java API:           ${BUILD_JAVA_API}")
 if(BUILD_JAVA_API)
-    add_subdirectory(api/java/src/main/cpp/solver)
+    add_subdirectory(api/java/src/main/cpp)
+endif()
+
+message(STATUS "Build Python API:         ${BUILD_PYTHON_API}")
+if(BUILD_PYTHON_API)
+    add_subdirectory(api/python/cpp)
 endif()
 
 message(STATUS "Build server:             ${BUILD_SERVER}")
