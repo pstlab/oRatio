@@ -8,9 +8,6 @@ import it.cnr.istc.pst.oratio.Solver;
 
 public class TimelinesExecutor {
 
-    static {
-        System.loadLibrary("executor-api");
-    }
     final Solver solver;
     private final long native_handle;
     private final Collection<ExecutorListener> executor_listeners = new ArrayList<>();
