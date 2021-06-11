@@ -40,7 +40,7 @@ public class TimelinesExecutor {
     }
 
     private void fireStartAtoms(final long[] atoms) {
-        executor_listeners.stream().forEach(l -> l.startingAtoms(atoms));
+        executor_listeners.stream().forEach(l -> l.startAtoms(atoms));
     }
 
     private void fireEndingAtoms(final long[] atoms) {
@@ -48,7 +48,7 @@ public class TimelinesExecutor {
     }
 
     private void fireEndAtoms(final long[] atoms) {
-        executor_listeners.stream().forEach(l -> l.endingAtoms(atoms));
+        executor_listeners.stream().forEach(l -> l.endAtoms(atoms));
     }
 
     public void addExecutorListener(final ExecutorListener l) {
