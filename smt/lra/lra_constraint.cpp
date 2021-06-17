@@ -11,38 +11,42 @@ namespace smt
     bool assertion::propagate_lb(const var &x_i) noexcept
     {
         assert(th.cnfl.empty());
-        if (th.lb(x_i) > v)
-            switch (o)
+        switch (o)
+        {
+        case leq:
+            switch (th.sat.value(b))
             {
-            case leq: // the assertion is unsatisfable: [x_i >= lb(x_i)] -> ![x_i <= v]..
-                switch (th.sat.value(b))
-                {
-                case True:                                                             // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+            case True:
+                if (th.lb(x_i) > v)
+                {                                                                      // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
                     th.cnfl.push_back(!b);                                             // either the literal 'b' is false ..
                     th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(x_i)].reason); // or what asserted the lower bound is false..
                     return false;
-                case False: // nothing to propagate..
-                    break;
-                case Undefined: // we propagate information to the sat core..
-                    th.record({!b, !th.c_bounds[lra_theory::lb_index(x_i)].reason});
-                    break;
                 }
                 break;
-            case geq: // the assertion is satisfied; [x_i >= lb(x_i)] -> [x_i >= v]..
-                switch (th.sat.value(b))
-                {
-                case True: // nothing to propagate..
-                    break;
-                case False:                                                            // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+            case Undefined:
+                if (th.lb(x_i) > v) // we propagate information to the sat core: [x_i >= lb(x_i)] -> ![x_i <= v]..
+                    th.record({!b, !th.c_bounds[lra_theory::lb_index(x_i)].reason});
+                break;
+            }
+            break;
+        case geq:
+            switch (th.sat.value(b))
+            {
+            case False:
+                if (th.lb(x_i) >= v)
+                {                                                                      // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
                     th.cnfl.push_back(b);                                              // either the literal 'b' is true ..
                     th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(x_i)].reason); // or what asserted the lower bound is false..
                     return false;
-                case Undefined: // we propagate information to the sat core..
-                    th.record({b, !th.c_bounds[lra_theory::lb_index(x_i)].reason});
-                    break;
                 }
+            case Undefined:
+                if (th.lb(x_i) >= v) // we propagate information to the sat core: [x_i >= lb(x_i)] -> [x_i >= v]..
+                    th.record({b, !th.c_bounds[lra_theory::lb_index(x_i)].reason});
                 break;
             }
+            break;
+        }
 
         return true;
     }
@@ -50,38 +54,41 @@ namespace smt
     bool assertion::propagate_ub(const var &x_i) noexcept
     {
         assert(th.cnfl.empty());
-        if (th.ub(x_i) < v)
-            switch (o)
+        switch (o)
+        {
+        case leq:
+            switch (th.sat.value(b))
             {
-            case leq: // the assertion is satisfied: [x_i <= ub(x_i)] -> [x_i <= v]..
-                switch (th.sat.value(b))
-                {
-                case True: // nothing to propagate..
-                    break;
-                case False:                                                            // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+            case False:
+                if (th.ub(x_i) <= v)
+                {                                                                      // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
                     th.cnfl.push_back(b);                                              // either the literal 'b' is true ..
                     th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(x_i)].reason); // or what asserted the upper bound is false..
                     return false;
-                case Undefined: // we propagate information to the sat core..
-                    th.record({b, !th.c_bounds[lra_theory::ub_index(x_i)].reason});
-                    break;
                 }
+            case Undefined:
+                if (th.ub(x_i) <= v) // we propagate information to the sat core: [x_i <= ub(x_i)] -> [x_i <= v]..
+                    th.record({b, !th.c_bounds[lra_theory::ub_index(x_i)].reason});
                 break;
-            case geq: // the assertion is unsatisfable; [x_i <= ub(x_i)] -> ![x_i >= v]..
-                switch (th.sat.value(b))
-                {
-                case True:                                                             // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+            }
+            break;
+        case geq:
+            switch (th.sat.value(b))
+            {
+            case True:
+                if (th.ub(x_i) < v)
+                {                                                                      // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
                     th.cnfl.push_back(!b);                                             // either the literal 'b' is false ..
                     th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(x_i)].reason); // or what asserted the upper bound is false..
                     return false;
-                case False: // nothing to propagate..
-                    break;
-                case Undefined: // we propagate information to the sat core..
-                    th.record({!b, !th.c_bounds[lra_theory::ub_index(x_i)].reason});
-                    break;
                 }
+            case Undefined: // we propagate information to the sat core: [x_i <= ub(x_i)] -> ![x_i >= v]..
+                if (th.ub(x_i) < v)
+                    th.record({!b, !th.c_bounds[lra_theory::ub_index(x_i)].reason});
                 break;
             }
+            break;
+        }
 
         return true;
     }
@@ -115,7 +122,7 @@ namespace smt
         // we make room for the first literal..
         th.cnfl.push_back(lit());
         if (is_positive(l.vars.at(v)))
-        {
+        { // we compute the lower bound of the linear expression along with its reason..
             inf_rational lb(0);
             for (const auto &[c_v, c] : l.vars)
                 if (is_positive(c))
@@ -141,41 +148,51 @@ namespace smt
                         th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(c_v)].reason);
                     }
 
-            if (lb > th.lb(x))
+            if (lb >= th.lb(x))
                 for (const auto &c : th.a_watches[x])
-                    if (lb > c->v)
-                        switch (c->o)
+                    switch (c->o)
+                    {
+                    case leq: // the assertion is unsatisfable..
+                        switch (th.sat.value(c->b))
                         {
-                        case leq: // the assertion is unsatisfable..
-                            th.cnfl[0] = !c->b;
-                            switch (th.sat.value(c->b))
-                            {
-                            case True: // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                        case True:
+                            if (lb > c->v)
+                            { // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                                th.cnfl[0] = !c->b;
                                 return false;
-                            case False: // nothing to propagate..
-                                break;
-                            case Undefined: // we propagate information to the sat core..
-                                th.record(th.cnfl);
-                                break;
                             }
                             break;
-                        case geq: // the assertion is satisfied..
-                            th.cnfl[0] = c->b;
-                            switch (th.sat.value(c->b))
-                            {
-                            case True: // nothing to propagate..
-                                break;
-                            case False: // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
-                                return false;
-                            case Undefined: // we propagate information to the sat core..
+                        case Undefined:
+                            if (lb > c->v)
+                            { // we propagate information to the sat core..
+                                th.cnfl[0] = !c->b;
                                 th.record(th.cnfl);
-                                break;
                             }
                             break;
                         }
+                        break;
+                    case geq: // the assertion is satisfied..
+                        switch (th.sat.value(c->b))
+                        {
+                        case False:
+                            if (lb >= c->v)
+                            { // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                                th.cnfl[0] = c->b;
+                                return false;
+                            }
+                        case Undefined:
+                            if (lb >= c->v)
+                            { // we propagate information to the sat core..
+                                th.cnfl[0] = c->b;
+                                th.record(th.cnfl);
+                            }
+                            break;
+                        }
+                        break;
+                    }
         }
         else
-        {
+        { // we compute the upper bound of the linear expression along with its reason..
             inf_rational ub(0);
             for (const auto &[c_v, c] : l.vars)
                 if (is_positive(c))
@@ -201,38 +218,47 @@ namespace smt
                         th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(c_v)].reason);
                     }
 
-            if (ub < th.ub(x))
+            if (ub <= th.ub(x))
                 for (const auto &c : th.a_watches[x])
-                    if (ub < c->v)
-                        switch (c->o)
+                    switch (c->o)
+                    {
+                    case leq: // the assertion is satisfied..
+                        switch (th.sat.value(c->b))
                         {
-                        case leq: // the assertion is satisfied..
-                            th.cnfl[0] = c->b;
-                            switch (th.sat.value(c->b))
-                            {
-                            case True: // nothing to propagate..
-                                break;
-                            case False: // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                        case False:
+                            if (ub <= c->v)
+                            { // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                                th.cnfl[0] = c->b;
                                 return false;
-                            case Undefined: // we propagate information to the sat core..
-                                th.record(th.cnfl);
-                                break;
                             }
-                            break;
-                        case geq: // the assertion is unsatisfable..
-                            th.cnfl[0] = !c->b;
-                            switch (th.sat.value(c->b))
-                            {
-                            case True: // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
-                                return false;
-                            case False: // nothing to propagate..
-                                break;
-                            case Undefined: // we propagate information to the sat core..
+                        case Undefined:
+                            if (ub <= c->v)
+                            { // we propagate information to the sat core..
+                                th.cnfl[0] = c->b;
                                 th.record(th.cnfl);
-                                break;
                             }
                             break;
                         }
+                        break;
+                    case geq: // the assertion is unsatisfable..
+                        switch (th.sat.value(c->b))
+                        {
+                        case True:
+                            if (ub < c->v)
+                            { // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                                th.cnfl[0] = !c->b;
+                                return false;
+                            }
+                        case Undefined:
+                            if (ub < c->v)
+                            { // we propagate information to the sat core..
+                                th.cnfl[0] = !c->b;
+                                th.record(th.cnfl);
+                            }
+                            break;
+                        }
+                        break;
+                    }
         }
 
         th.cnfl.clear();
@@ -245,7 +271,7 @@ namespace smt
         // we make room for the first literal..
         th.cnfl.push_back(lit());
         if (is_positive(l.vars.at(v)))
-        {
+        { // we compute the upper bound of the linear expression along with its reason..
             inf_rational ub(0);
             for (const auto &[c_v, c] : l.vars)
                 if (is_positive(c))
@@ -271,41 +297,50 @@ namespace smt
                         th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(c_v)].reason);
                     }
 
-            if (ub < th.ub(x))
+            if (ub <= th.ub(x))
                 for (const auto &c : th.a_watches[x])
-                    if (ub < c->v)
-                        switch (c->o)
+                    switch (c->o)
+                    {
+                    case leq: // the assertion is satisfied..
+                        switch (th.sat.value(c->b))
                         {
-                        case leq: // the assertion is satisfied..
-                            th.cnfl[0] = c->b;
-                            switch (th.sat.value(c->b))
-                            {
-                            case True: // nothing to propagate..
-                                break;
-                            case False: // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                        case False:
+                            if (ub <= c->v)
+                            { // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                                th.cnfl[0] = c->b;
                                 return false;
-                            case Undefined: // we propagate information to the sat core..
-                                th.record(th.cnfl);
-                                break;
                             }
-                            break;
-                        case geq: // the assertion is unsatisfable..
-                            th.cnfl[0] = !c->b;
-                            switch (th.sat.value(c->b))
-                            {
-                            case True: // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
-                                return false;
-                            case False: // nothing to propagate..
-                                break;
-                            case Undefined: // we propagate information to the sat core..
+                        case Undefined:
+                            if (ub <= c->v)
+                            { // we propagate information to the sat core..
+                                th.cnfl[0] = c->b;
                                 th.record(th.cnfl);
-                                break;
                             }
                             break;
                         }
+                        break;
+                    case geq: // the assertion is unsatisfable..
+                        switch (th.sat.value(c->b))
+                        {
+                        case True:
+                            if (ub < c->v)
+                            { // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                                th.cnfl[0] = !c->b;
+                                return false;
+                            }
+                        case Undefined:
+                            if (ub < c->v)
+                            { // we propagate information to the sat core..
+                                th.cnfl[0] = !c->b;
+                                th.record(th.cnfl);
+                            }
+                            break;
+                        }
+                        break;
+                    }
         }
         else
-        {
+        { // we compute the lower bound of the linear expression along with its reason..
             inf_rational lb(0);
             for (const auto &[c_v, c] : l.vars)
                 if (is_positive(c))
@@ -331,38 +366,47 @@ namespace smt
                         th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(c_v)].reason);
                     }
 
-            if (lb > th.lb(x))
+            if (lb >= th.lb(x))
                 for (const auto &c : th.a_watches[x])
-                    if (lb > c->v)
-                        switch (c->o)
+                    switch (c->o)
+                    {
+                    case leq: // the assertion is unsatisfable..
+                        switch (th.sat.value(c->b))
                         {
-                        case leq: // the assertion is unsatisfable..
-                            th.cnfl[0] = !c->b;
-                            switch (th.sat.value(c->b))
-                            {
-                            case True: // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                        case True:
+                            if (lb > c->v)
+                            { // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                                th.cnfl[0] = !c->b;
                                 return false;
-                            case False: // nothing to propagate..
-                                break;
-                            case Undefined: // we propagate information to the sat core..
-                                th.record(th.cnfl);
-                                break;
                             }
-                            break;
-                        case geq: // the assertion is satisfied..
-                            th.cnfl[0] = c->b;
-                            switch (th.sat.value(c->b))
-                            {
-                            case True: // nothing to propagate..
-                                break;
-                            case False: // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
-                                return false;
-                            case Undefined: // we propagate information to the sat core..
+                        case Undefined:
+                            if (lb > c->v)
+                            { // we propagate information to the sat core..
+                                th.cnfl[0] = !c->b;
                                 th.record(th.cnfl);
-                                break;
                             }
                             break;
                         }
+                        break;
+                    case geq: // the assertion is satisfied..
+                        switch (th.sat.value(c->b))
+                        {
+                        case False:
+                            if (lb >= c->v)
+                            { // we have a propositional inconsistency (notice that this can happen in case some propositional literal has been assigned but the theory did not propagate yet)..
+                                th.cnfl[0] = c->b;
+                                return false;
+                            }
+                        case Undefined:
+                            if (lb >= c->v)
+                            { // we propagate information to the sat core..
+                                th.cnfl[0] = c->b;
+                                th.record(th.cnfl);
+                            }
+                            break;
+                        }
+                        break;
+                    }
         }
 
         th.cnfl.clear();
