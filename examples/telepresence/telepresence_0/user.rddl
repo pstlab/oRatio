@@ -1,0 +1,8 @@
+class User {
+
+    bool has_memory_issues, is_forgetful;
+    bool has_physical_issues, is_hypertensive;
+    ReusableResource busy = new ReusableResource(1.0);
+
+    User(bool is_forgetful, bool is_hypertensive) : has_memory_issues(is_forgetful), is_forgetful(is_forgetful), has_physical_issues(is_hypertensive), is_hypertensive(is_hypertensive) {}
+}

@@ -1,0 +1,25 @@
+real base_x = 0.0;
+real base_y = 0.0;
+
+real cogn_x = -2.11301;
+real cogn_y = -3.14830;
+
+real phys_x = -0.85136;
+real phys_y =  7.77870;
+
+real rem_x = -1.85136;
+real rem_y = 6.77870;
+
+origin == 0.0;
+
+User u0 = new User(true, true);
+Robot r0 = new Robot();
+
+fact at0 = new r0.nav.At(start:origin, x:base_x, y:base_y);
+at0.duration >= 5.0;
+
+// goal keep_healthy = new r0.KeepHealthy(u:u0);
+
+goal at1 = new r0.nav.FollowUser(x:cogn_x, y:cogn_y);
+goal at2 = new r0.nav.FollowUser(x:phys_x, y:phys_y);
+goal at3 = new r0.nav.FollowUser(x:rem_x, y:rem_y);
