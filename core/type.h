@@ -72,19 +72,13 @@ namespace ratio
     CORE_EXPORT const field &get_field(const std::string &name) const override; // returns the field having the given name..
 
     CORE_EXPORT const method &get_method(const std::string &m_name, const std::vector<const type *> &ts) const override;
-    std::vector<const method *> get_methods() const noexcept override
-    {
-      std::vector<const method *> c_methods;
-      for (const auto &[mthd_name, mthds] : methods)
-        c_methods.insert(c_methods.cbegin(), mthds.cbegin(), mthds.cend());
-      return c_methods;
-    }
+    const std::map<std::string, std::vector<const method *>> &get_methods() const noexcept override { return methods; }
 
     CORE_EXPORT type &get_type(const std::string &t_name) const override;
-    std::map<std::string, type *> get_types() const noexcept override { return types; }
+    const std::map<std::string, type *> &get_types() const noexcept override { return types; }
 
     CORE_EXPORT predicate &get_predicate(const std::string &p_name) const override;
-    std::map<std::string, predicate *> get_predicates() const noexcept override { return predicates; }
+    const std::map<std::string, predicate *> &get_predicates() const noexcept override { return predicates; }
 
   private:
     virtual void new_predicate(predicate &) noexcept {}

@@ -379,7 +379,7 @@ namespace ratio
                 throw unsolvable_exception();
     }
 
-    void core::new_methods(const std::vector<const method *> &ms) noexcept
+    CORE_EXPORT void core::new_methods(const std::vector<const method *> &ms) noexcept
     {
         for (const auto &m : ms)
             methods[m->get_name()].push_back(m);
@@ -391,7 +391,7 @@ namespace ratio
             types.emplace(t->get_name(), t);
     }
 
-    void core::new_predicates(const std::vector<predicate *> &ps) noexcept
+    CORE_EXPORT void core::new_predicates(const std::vector<predicate *> &ps) noexcept
     {
         for (const auto &p : ps)
             predicates.emplace(p->get_name(), p);

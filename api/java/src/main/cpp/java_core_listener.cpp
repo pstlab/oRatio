@@ -159,17 +159,20 @@ namespace ratio
         }
 
         // we add the methods..
-        for (const auto &mthd : cr.get_methods())
+        for (const auto &[mthd_name, mthds] : cr.get_methods())
         {
-            jstring m_name = env->NewStringUTF(mthd->get_name().c_str());
-            jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
-            jobjectArray fields_array = new_fields_array(env, mthd->get_args());
+            jstring m_name = env->NewStringUTF(mthd_name.c_str());
+            for (const auto &mthd : mthds)
+            {
+                jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
+                jobjectArray fields_array = new_fields_array(env, mthd->get_args());
 
-            jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, slv_obj, m_name, rt, fields_array);
-            env->CallVoidMethod(slv_obj, s_dfn_method_mthd_id, c_method);
+                jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, slv_obj, m_name, rt, fields_array);
+                env->CallVoidMethod(slv_obj, s_dfn_method_mthd_id, c_method);
 
-            env->DeleteLocalRef(c_method);
-            env->DeleteLocalRef(fields_array);
+                env->DeleteLocalRef(c_method);
+                env->DeleteLocalRef(fields_array);
+            }
             env->DeleteLocalRef(m_name);
         }
 
@@ -297,17 +300,20 @@ namespace ratio
         }
 
         // we add the methods..
-        for (const auto &mthd : t.get_methods())
+        for (const auto &[mthd_name, mthds] : cr.get_methods())
         {
-            jstring m_name = env->NewStringUTF(mthd->get_name().c_str());
-            jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
-            jobjectArray fields_array = new_fields_array(env, mthd->get_args());
+            jstring m_name = env->NewStringUTF(mthd_name.c_str());
+            for (const auto &mthd : mthds)
+            {
+                jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
+                jobjectArray fields_array = new_fields_array(env, mthd->get_args());
 
-            jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, c_type, m_name, rt, fields_array);
-            env->CallVoidMethod(c_type, t_dfn_method_mthd_id, c_method);
+                jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, c_type, m_name, rt, fields_array);
+                env->CallVoidMethod(c_type, t_dfn_method_mthd_id, c_method);
 
-            env->DeleteLocalRef(c_method);
-            env->DeleteLocalRef(fields_array);
+                env->DeleteLocalRef(c_method);
+                env->DeleteLocalRef(fields_array);
+            }
             env->DeleteLocalRef(m_name);
         }
     }

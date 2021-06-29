@@ -132,27 +132,21 @@ namespace ratio
     const type &get_type(const std::vector<arith_expr> &exprs) const;
 
   protected:
-    void new_methods(const std::vector<const method *> &ms) noexcept;
+    CORE_EXPORT void new_methods(const std::vector<const method *> &ms) noexcept;
     CORE_EXPORT void new_types(const std::vector<type *> &ts) noexcept;
-    void new_predicates(const std::vector<predicate *> &ps) noexcept;
+    CORE_EXPORT void new_predicates(const std::vector<predicate *> &ps) noexcept;
 
   public:
     CORE_EXPORT const field &get_field(const std::string &name) const override; // returns the field having the given name..
 
     CORE_EXPORT const method &get_method(const std::string &name, const std::vector<const type *> &ts) const override;
-    std::vector<const method *> get_methods() const noexcept override
-    {
-      std::vector<const method *> c_methods;
-      for (const auto &[mthd_name, mthds] : methods)
-        c_methods.insert(c_methods.cbegin(), mthds.cbegin(), mthds.cend());
-      return c_methods;
-    }
+    const std::map<std::string, std::vector<const method *>> &get_methods() const noexcept override { return methods; }
 
     CORE_EXPORT type &get_type(const std::string &name) const override;
-    std::map<std::string, type *> get_types() const noexcept override { return types; }
+    const std::map<std::string, type *> &get_types() const noexcept override { return types; }
 
     CORE_EXPORT predicate &get_predicate(const std::string &name) const override;
-    std::map<std::string, predicate *> get_predicates() const noexcept override { return predicates; }
+    const std::map<std::string, predicate *> &get_predicates() const noexcept override { return predicates; }
 
     CORE_EXPORT expr get(const std::string &name) const override;
 
