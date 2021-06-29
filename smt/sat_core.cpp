@@ -34,36 +34,32 @@ namespace smt
         return id;
     }
 
-    SMT_EXPORT bool sat_core::new_clause(const std::vector<lit> &lits) noexcept
+    SMT_EXPORT bool sat_core::new_clause(std::vector<lit> lits) noexcept
     {
         assert(root_level());
         // we check if the clause is already satisfied and filter out false/duplicate literals..
-        std::vector<lit> c_lits = lits;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+        std::sort(lits.begin(), lits.end(), [](const auto &l0, const auto &l1)
                   { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
-        for (auto it = c_lits.cbegin(); it != c_lits.cend(); ++it)
+        for (auto it = lits.cbegin(); it != lits.cend(); ++it)
             if (value(*it) == True || *it == !p)
                 return true; // the clause is already satisfied or represents a tautology..
             else if (value(*it) != False && *it != p)
             { // we need to include this literal in the clause..
                 p = *it;
-                c_lits[j++] = p;
+                lits[j++] = p;
             }
-        c_lits.resize(j);
+        lits.resize(j);
 
-        switch (c_lits.size())
+        switch (lits.size())
         {
         case 0: // the clause is unsatisfable..
             return false;
         case 1: // the clause is unique under the current assignment..
-            return enqueue(c_lits[0]);
+            return enqueue(lits[0]);
         default: // we need to create a new clause..
-            clause *c = new clause(*this, c_lits);
-            watches[index(!c_lits[0])].push_back(c);
-            watches[index(!c_lits[1])].push_back(c);
-            constrs.push_back(c);
+            constrs.push_back(clause::new_clause(*this, std::move(lits)));
             return true;
         }
     }
@@ -125,111 +121,109 @@ namespace smt
         }
     }
 
-    SMT_EXPORT lit sat_core::new_conj(const std::vector<lit> &ls) noexcept
+    SMT_EXPORT lit sat_core::new_conj(std::vector<lit> ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
-        std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+        std::sort(ls.begin(), ls.end(), [](const auto &l0, const auto &l1)
                   { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "&";
-        for (auto it = c_lits.cbegin(); it != c_lits.cend(); ++it)
+        for (auto it = ls.cbegin(); it != ls.cend(); ++it)
             if (value(*it) == False || *it == !p)
                 return FALSE_lit; // the conjunction cannot be satisfied..
             else if (value(*it) != True && *it != p)
             { // we need to include this literal in the conjunction..
                 p = *it;
                 s_expr += to_string(p);
-                c_lits[j++] = p;
+                ls[j++] = p;
             }
-        c_lits.resize(j);
+        ls.resize(j);
 
-        if (c_lits.empty()) // an empty conjunction is assumed to be satisfied..
+        if (ls.empty()) // an empty conjunction is assumed to be satisfied..
             return TRUE_lit;
-        else if (c_lits.size() == 1)
-            return c_lits[0];
+        else if (ls.size() == 1)
+            return ls[0];
         else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
             const auto ctr = lit(new_var());
             std::vector<lit> lits;
-            lits.reserve(c_lits.size() + 1);
+            lits.reserve(ls.size() + 1);
             lits.push_back(ctr);
-            for (const auto &l : c_lits)
+            for (const auto &l : ls)
             {
                 if (!new_clause({!ctr, l}))
                     return FALSE_lit;
                 lits.push_back(!l);
             }
-            if (!new_clause(lits))
+            if (!new_clause(std::move(lits)))
                 return FALSE_lit;
             exprs.emplace(s_expr, ctr);
             return ctr;
         }
     }
 
-    SMT_EXPORT lit sat_core::new_disj(const std::vector<lit> &ls) noexcept
+    SMT_EXPORT lit sat_core::new_disj(std::vector<lit> ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
-        std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+        std::sort(ls.begin(), ls.end(), [](const auto &l0, const auto &l1)
                   { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "|";
-        for (auto it = c_lits.cbegin(); it != c_lits.cend(); ++it)
+        for (auto it = ls.cbegin(); it != ls.cend(); ++it)
             if (value(*it) == True || *it == !p)
                 return TRUE_lit; // the disjunction is already satisfied..
             else if (value(*it) != False && *it != p)
             { // we need to include this literal in the conjunction..
                 p = *it;
                 s_expr += to_string(p);
-                c_lits[j++] = p;
+                ls[j++] = p;
             }
-        c_lits.resize(j);
+        ls.resize(j);
 
-        if (c_lits.empty()) // an empty disjunction is assumed to be unsatisfable..
+        if (ls.empty()) // an empty disjunction is assumed to be unsatisfable..
             return FALSE_lit;
-        else if (c_lits.size() == 1)
-            return c_lits[0];
+        else if (ls.size() == 1)
+            return ls[0];
         else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
             const auto ctr = lit(new_var());
             std::vector<lit> lits;
-            lits.reserve(c_lits.size() + 1);
+            lits.reserve(ls.size() + 1);
             lits.push_back(!ctr);
-            for (const auto &l : c_lits)
+            for (const auto &l : ls)
             {
                 if (!new_clause({!l, ctr}))
                     return FALSE_lit;
                 lits.push_back(l);
             }
-            if (!new_clause(lits))
+            if (!new_clause(std::move(lits)))
                 return FALSE_lit;
             exprs.emplace(s_expr, ctr);
             return ctr;
         }
     }
 
-    SMT_EXPORT lit sat_core::new_at_most_one(const std::vector<lit> &ls) noexcept
+    SMT_EXPORT lit sat_core::new_at_most_one(std::vector<lit> ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
-        std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+        std::sort(ls.begin(), ls.end(), [](const auto &l0, const auto &l1)
                   { return variable(l0) < variable(l1); });
         lit p;
         size_t lits_size = 0;
         std::string s_expr = "amo";
-        for (auto it0 = c_lits.cbegin(); it0 != c_lits.cend(); ++it0)
+        for (auto it0 = ls.cbegin(); it0 != ls.cend(); ++it0)
             if (value(*it0) == True)
-                for (auto it1 = it0 + 1; it1 != c_lits.cend(); ++it1)
+            {
+                for (auto it1 = it0 + 1; it1 != ls.cend(); ++it1)
                 {
                     if (value(*it1) == True || *it1 == !p)
                         return FALSE_lit; // the at-most-one cannot be satisfied..
@@ -237,18 +231,20 @@ namespace smt
                     { // we need to include this literal in the at-most-one..
                         p = *it1;
                         s_expr += to_string(p);
-                        c_lits[lits_size++] = p;
+                        ls[lits_size++] = p;
                     }
                 }
+                break;
+            }
             else if (value(*it0) != False && *it0 != p)
             { // we need to include this literal in the at-most-one..
                 p = *it0;
                 s_expr += to_string(p);
-                c_lits[lits_size++] = p;
+                ls[lits_size++] = p;
             }
-        c_lits.resize(lits_size);
+        ls.resize(lits_size);
 
-        if (c_lits.empty() || c_lits.size() == 1) // an empty or a singleton at-most-one is assumed to be satisfied..
+        if (ls.empty() || ls.size() == 1) // an empty or a singleton at-most-one is assumed to be satisfied..
             return TRUE_lit;
         else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
@@ -289,19 +285,19 @@ namespace smt
         }
     }
 
-    SMT_EXPORT lit sat_core::new_exct_one(const std::vector<lit> &ls) noexcept
+    SMT_EXPORT lit sat_core::new_exct_one(std::vector<lit> ls) noexcept
     {
         assert(root_level());
         // we try to avoid creating a new variable..
-        std::vector<lit> c_lits = ls;
-        std::sort(c_lits.begin(), c_lits.end(), [](const auto &l0, const auto &l1)
+        std::sort(ls.begin(), ls.end(), [](const auto &l0, const auto &l1)
                   { return variable(l0) < variable(l1); });
         lit p;
         size_t j = 0;
         std::string s_expr = "^";
-        for (auto it0 = c_lits.cbegin(); it0 != c_lits.cend(); ++it0)
+        for (auto it0 = ls.cbegin(); it0 != ls.cend(); ++it0)
             if (value(*it0) == True)
-                for (auto it1 = it0 + 1; it1 != c_lits.cend(); ++it1)
+            {
+                for (auto it1 = it0 + 1; it1 != ls.cend(); ++it1)
                 {
                     if (value(*it1) == True || *it1 == !p)
                         return FALSE_lit; // the exact-one cannot be satisfied..
@@ -309,28 +305,30 @@ namespace smt
                     { // we need to include this literal in the exact-one..
                         p = *it1;
                         s_expr += to_string(p);
-                        c_lits[j++] = p;
+                        ls[j++] = p;
                     }
                 }
+                break;
+            }
             else if (value(*it0) != False && *it0 != p)
             { // we need to include this literal in the exact-one..
                 p = *it0;
                 s_expr += to_string(p);
-                c_lits[j++] = p;
+                ls[j++] = p;
             }
-        c_lits.resize(j);
+        ls.resize(j);
 
-        if (c_lits.empty()) // an empty exact-one is assumed to be unsatisfable..
+        if (ls.empty()) // an empty exact-one is assumed to be unsatisfable..
             return FALSE_lit;
-        else if (c_lits.size() == 1 && sign(c_lits[0]))
-            return c_lits[0];
+        else if (ls.size() == 1 && sign(ls[0]))
+            return ls[0];
         else if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
         else
         { // we need to create a new variable..
-            const auto ctr = new_at_most_one(c_lits);
-            c_lits.push_back(!ctr);
-            if (!new_clause(c_lits))
+            const auto ctr = new_at_most_one(ls);
+            ls.push_back(!ctr);
+            if (!new_clause(std::move(ls)))
                 return FALSE_lit;
             exprs.emplace(s_expr, ctr);
             return ctr;
@@ -504,7 +502,7 @@ namespace smt
         out_learnt[0] = !p;
     }
 
-    void sat_core::record(const std::vector<lit> &lits) noexcept
+    void sat_core::record(std::vector<lit> lits) noexcept
     {
         assert(value(lits[0]) == Undefined);
         assert(std::count_if(lits.cbegin(), lits.cend(), [this](auto &p)
@@ -521,16 +519,13 @@ namespace smt
         }
         else
         {
-            std::vector<lit> c_lits = lits;
             // we sort literals according to descending order of variable assignment (except for the first literal which is now unassigned)..
-            std::sort(std::next(c_lits.begin()), c_lits.end(), [this](auto &a, auto &b)
+            std::sort(std::next(lits.begin()), lits.end(), [this](auto &a, auto &b)
                       { return level[variable(a)] > level[variable(b)]; });
 
-            clause *c = new clause(*this, c_lits);
-            watches[index(!c_lits[0])].push_back(c);
-            watches[index(!c_lits[1])].push_back(c);
-
-            bool e = enqueue(c_lits[0], c);
+            auto l0 = lits[0];
+            clause *c = clause::new_clause(*this, std::move(lits));
+            bool e = enqueue(l0, c);
             assert(e);
             constrs.push_back(c);
         }

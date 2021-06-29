@@ -8,7 +8,7 @@ namespace ratio
   class disj_flaw : public flaw
   {
   public:
-    disj_flaw(solver &slv, const std::vector<resolver *> &causes, const std::vector<smt::lit> &lits);
+    disj_flaw(solver &slv, const std::vector<resolver *> &causes, std::vector<smt::lit> lits);
     disj_flaw(const disj_flaw &orig) = delete;
     virtual ~disj_flaw();
 

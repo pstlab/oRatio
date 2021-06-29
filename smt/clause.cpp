@@ -5,8 +5,17 @@
 
 namespace smt
 {
-    clause::clause(sat_core &s, const std::vector<lit> &lits) : constr(s), lits(lits) {}
+    clause::clause(sat_core &s, std::vector<lit> lits) : constr(s), lits(std::move(lits)) {}
     clause::~clause() {}
+
+    clause *clause::new_clause(sat_core &s, std::vector<lit> lits)
+    {
+        auto l0 = lits[0], l1 = lits[1];
+        clause *c = new clause(s, std::move(lits));
+        c->watches(!l0).push_back(c);
+        c->watches(!l1).push_back(c);
+        return c;
+    }
 
     bool clause::propagate(const lit &p) noexcept
     {

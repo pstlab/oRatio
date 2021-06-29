@@ -204,7 +204,7 @@ namespace ratio
         bool_expr xp = new bool_item(*this, get_sat_core().new_disj(lits));
 
         if (xprs.size() > 1) // we create a new var flaw..
-            new_flaw(*new disj_flaw(*this, get_cause(), lits));
+            new_flaw(*new disj_flaw(*this, get_cause(), std::move(lits)));
 
         return xp;
     }

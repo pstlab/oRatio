@@ -16,9 +16,11 @@ namespace smt
     friend class theory;
 
   private:
-    clause(sat_core &s, const std::vector<lit> &lits);
+    clause(sat_core &s, std::vector<lit> lits);
     clause(const clause &orig) = delete;
     ~clause() override;
+
+    static clause *new_clause(sat_core &s, std::vector<lit> lits);
 
   public:
     inline const std::vector<lit> get_lits() const noexcept { return lits; }

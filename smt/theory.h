@@ -22,7 +22,7 @@ namespace smt
     SMT_EXPORT void bind(const var &v) noexcept;
     SMT_EXPORT void swap_conflict(theory &th) noexcept;
     SMT_EXPORT bool backtrack_analyze_and_backjump() noexcept; // backtracks to the proper level before calling analyze_and_backjump..
-    SMT_EXPORT void record(const std::vector<lit> &clause) noexcept;
+    SMT_EXPORT void record(std::vector<lit> clause) noexcept;
 
   private:
     /**

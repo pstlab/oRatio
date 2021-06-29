@@ -30,7 +30,7 @@ namespace smt
                 lits.reserve(items.size());
                 for (const auto &i : items)
                     lits.push_back(c_vals.find(i)->second);
-                bool exct_one = sat.new_clause({sat.new_exct_one(lits)});
+                bool exct_one = sat.new_clause({sat.new_exct_one(std::move(lits))});
                 assert(exct_one);
             }
         }

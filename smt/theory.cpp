@@ -46,5 +46,5 @@ namespace smt
         // .. and record the no-good..
         sat.record(no_good);
     }
-    SMT_EXPORT void theory::record(const std::vector<lit> &cls) noexcept { sat.record(cls); }
+    SMT_EXPORT void theory::record(std::vector<lit> cls) noexcept { sat.record(std::move(cls)); }
 } // namespace smt

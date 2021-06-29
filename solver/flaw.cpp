@@ -42,7 +42,7 @@ namespace ratio
             assert(dist);
         }
         // we initialize the phi variable as the conjunction of the causes' rho variables..
-        phi = slv.get_sat_core().new_conj(cs);
+        phi = slv.get_sat_core().new_conj(std::move(cs));
     }
 
     void flaw::expand()

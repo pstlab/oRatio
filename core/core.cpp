@@ -253,7 +253,7 @@ namespace ratio
         std::vector<lit> lits;
         for (const auto &bex : xprs)
             lits.push_back(bex->l);
-        return new bool_item(*this, sat_cr.new_conj(lits));
+        return new bool_item(*this, sat_cr.new_conj(std::move(lits)));
     }
 
     CORE_EXPORT bool_expr core::disj(const std::vector<bool_expr> &xprs) noexcept
@@ -261,7 +261,7 @@ namespace ratio
         std::vector<lit> lits;
         for (const auto &bex : xprs)
             lits.push_back(bex->l);
-        return new bool_item(*this, sat_cr.new_disj(lits));
+        return new bool_item(*this, sat_cr.new_disj(std::move(lits)));
     }
 
     CORE_EXPORT bool_expr core::exct_one(const std::vector<bool_expr> &xprs) noexcept
@@ -269,7 +269,7 @@ namespace ratio
         std::vector<lit> lits;
         for (const auto &bex : xprs)
             lits.push_back(bex->l);
-        return new bool_item(*this, sat_cr.new_exct_one(lits));
+        return new bool_item(*this, sat_cr.new_exct_one(std::move(lits)));
     }
 
     CORE_EXPORT arith_expr core::add(const std::vector<arith_expr> &xprs) noexcept

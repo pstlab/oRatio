@@ -35,14 +35,14 @@ namespace smt
     }
 #endif
 
-    SMT_EXPORT var new_var() noexcept;                                 // creates a new propositional variable..
-    SMT_EXPORT bool new_clause(const std::vector<lit> &lits) noexcept; // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
+    SMT_EXPORT var new_var() noexcept;                          // creates a new propositional variable..
+    SMT_EXPORT bool new_clause(std::vector<lit> lits) noexcept; // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
 
-    SMT_EXPORT lit new_eq(const lit &left, const lit &right) noexcept;   // creates a new reified equality..
-    SMT_EXPORT lit new_conj(const std::vector<lit> &ls) noexcept;        // creates a new reified conjunction..
-    SMT_EXPORT lit new_disj(const std::vector<lit> &ls) noexcept;        // creates a new reified disjunction..
-    SMT_EXPORT lit new_at_most_one(const std::vector<lit> &ls) noexcept; // creates a new reified at-most-one..
-    SMT_EXPORT lit new_exct_one(const std::vector<lit> &ls) noexcept;    // creates a new reified exct-one..
+    SMT_EXPORT lit new_eq(const lit &left, const lit &right) noexcept; // creates a new reified equality..
+    SMT_EXPORT lit new_conj(std::vector<lit> ls) noexcept;             // creates a new reified conjunction..
+    SMT_EXPORT lit new_disj(std::vector<lit> ls) noexcept;             // creates a new reified disjunction..
+    SMT_EXPORT lit new_at_most_one(std::vector<lit> ls) noexcept;      // creates a new reified at-most-one..
+    SMT_EXPORT lit new_exct_one(std::vector<lit> ls) noexcept;         // creates a new reified exct-one..
 
     SMT_EXPORT bool assume(const lit &p) noexcept;
     SMT_EXPORT void pop() noexcept;
@@ -68,7 +68,7 @@ namespace smt
 
   private:
     void analyze(constr &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel) noexcept;
-    void record(const std::vector<lit> &lits) noexcept;
+    void record(std::vector<lit> lits) noexcept;
 
     bool enqueue(const lit &p, constr *const c = nullptr) noexcept;
     void pop_one() noexcept;

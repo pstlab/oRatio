@@ -41,7 +41,7 @@ namespace ratio
             case 1:
                 return *eqs.cbegin();
             default:
-                return get_core().get_sat_core().new_conj(eqs);
+                return get_core().get_sat_core().new_conj(std::move(eqs));
             }
         }
     }
