@@ -13,7 +13,7 @@ file(GLOB SOLVER_SOURCES *.cpp flaws/*.cpp types/*.cpp heuristics/*.cpp)
 
 add_library(solver SHARED ${SOLVER_SOURCES})
 GENERATE_EXPORT_HEADER(solver)
-target_include_directories(solver PUBLIC ${CMAKE_CURRENT_BINARY_DIR} . ${oRatio_SOURCE_DIR}/smt ${oRatio_SOURCE_DIR}/smt/lra ${oRatio_SOURCE_DIR}/smt/ov ${oRatio_SOURCE_DIR}/smt/dl ${oRatio_SOURCE_DIR}/core ${oRatio_SOURCE_DIR}/riddle flaws types heuristics)
+target_include_directories(solver PUBLIC ${CMAKE_CURRENT_BINARY_DIR} . flaws types heuristics)
 target_link_libraries(solver PUBLIC core)
 install(TARGETS solver LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
@@ -51,9 +51,3 @@ endif()
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
-
-# if(MSVC)
-#     target_compile_options(solver PRIVATE /W4)
-# else()
-#     target_compile_options(solver PRIVATE -Wall -Wextra -pedantic)
-# endif()

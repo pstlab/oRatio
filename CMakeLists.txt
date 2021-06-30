@@ -99,6 +99,12 @@ if(OPTIMIZE_FOR_NATIVE_ARCH)
     endif()
 endif()
 
+if(MSVC)
+    target_compile_options(smt PRIVATE /W4)
+else()
+    target_compile_options(smt PRIVATE -Wall -Wextra -pedantic)
+endif()
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

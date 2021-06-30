@@ -1,8 +1,8 @@
-file(GLOB SMT_SOURCES *.cpp lra/*.cpp ov/*.cpp dl/*.cpp)
+file(GLOB SMT_SOURCES *.cpp arith/*.cpp arith/lra/*.cpp arith/dl/*.cpp ov/*.cpp)
 
 add_library(smt SHARED ${SMT_SOURCES})
 GENERATE_EXPORT_HEADER(smt)
-target_include_directories(smt PUBLIC ${CMAKE_CURRENT_BINARY_DIR} . lra ov dl json)
+target_include_directories(smt PUBLIC ${CMAKE_CURRENT_BINARY_DIR} . arith arith/lra arith/dl ov)
 target_link_libraries(smt PUBLIC json)
 install(TARGETS smt LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
@@ -14,9 +14,3 @@ endif()
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
-
-# if(MSVC)
-#     target_compile_options(smt PRIVATE /W4)
-# else()
-#     target_compile_options(smt PRIVATE -Wall -Wextra -pedantic)
-# endif()
