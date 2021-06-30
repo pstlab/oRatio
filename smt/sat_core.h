@@ -88,7 +88,7 @@ namespace smt
 
     std::queue<lit> prop_q;                     // propagation queue..
     std::vector<lit> trail;                     // the list of assignment in chronological order..
-    std::vector<size_t> trail_lim;              // separator indices for different decision levels in 'trail'..
+    std::vector<lit> trail_lim;                 // decisions for different decision levels in 'trail'..
     std::vector<constr *> reason;               // for each variable, the constraint that implied its value..
     std::vector<size_t> level;                  // for each variable, the decision level it was assigned..
     std::unordered_map<std::string, lit> exprs; // the already existing expressions (string to literal)..

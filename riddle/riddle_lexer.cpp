@@ -539,7 +539,7 @@ namespace riddle
         }
     }
 
-    int lexer::next_char() noexcept
+    char lexer::next_char() noexcept
     {
         if (pos == sb.length())
             return -1;

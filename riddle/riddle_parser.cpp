@@ -108,7 +108,7 @@ namespace riddle
 
     typedef_declaration *parser::_typedef_declaration()
     {
-        id_token *pt;
+        id_token *pt = nullptr;
         expression *e;
 
         if (!match(TYPEDEF_ID))
@@ -145,9 +145,7 @@ namespace riddle
         if (!match(SEMICOLON_ID))
             error("expected ';'..");
 
-        id_token prmtv_tp = *pt;
-        delete pt;
-        return new_typedef_declaration(n, prmtv_tp, e);
+        return new_typedef_declaration(n, *pt, e);
     }
 
     enum_declaration *parser::_enum_declaration()
@@ -403,12 +401,12 @@ namespace riddle
         {
             if (!match(ID_ID))
                 error("expected identifier..");
-            id_token n = *static_cast<id_token *>(tks[pos - 2]);
+            id_token c_n = *static_cast<id_token *>(tks[pos - 2]);
 
             if (match(EQ_ID))
-                ds.push_back(new_variable_declaration(n, _expression()));
+                ds.push_back(new_variable_declaration(c_n, _expression()));
             else
-                ds.push_back(new_variable_declaration(n));
+                ds.push_back(new_variable_declaration(c_n));
         }
 
         if (!match(SEMICOLON_ID))

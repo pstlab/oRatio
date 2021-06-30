@@ -338,7 +338,7 @@ namespace smt
     SMT_EXPORT bool sat_core::assume(const lit &p) noexcept
     {
         assert(prop_q.empty());
-        trail_lim.push_back(trail.size());
+        trail_lim.push_back(p);
         for (const auto &th : theories)
             th->push();
         return enqueue(p) && propagate();
@@ -346,7 +346,7 @@ namespace smt
 
     SMT_EXPORT void sat_core::pop() noexcept
     {
-        while (trail_lim.back() < trail.size())
+        while (level[variable(trail_lim.back())] < trail.size())
             pop_one();
         trail_lim.pop_back();
 

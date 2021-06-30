@@ -193,12 +193,12 @@ namespace riddle
     token *finish_id(std::string &str) noexcept;
 
     void error(const std::string &err);
-    int next_char() noexcept;
+    char next_char() noexcept;
 
   private:
     std::string sb;
     size_t pos = 0;
-    int ch;
+    char ch;
     size_t start_line = 0;
     size_t start_pos = 0;
     size_t end_line = 0;
