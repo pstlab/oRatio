@@ -345,24 +345,7 @@ namespace ratio
     void solver::next()
     {
         LOG("next..");
-
-        if (root_level())
-            throw unsolvable_exception();
-
-        std::vector<lit> no_good;
-        no_good.reserve(trail.size());
-        for (const auto &l : trail)
-            no_good.push_back(!l.decision);
-        get_sat_core().pop();
-
-        assert(!no_good.empty());
-        assert(get_sat_core().value(no_good.back()) == Undefined);
-
-        // we reverse the no-good and store it..
-        std::reverse(no_good.begin(), no_good.end());
-        record(no_good);
-
-        if (!get_sat_core().propagate())
+        if (!get_sat_core().next())
             throw unsolvable_exception();
         assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto *f)

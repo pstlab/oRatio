@@ -439,7 +439,28 @@ namespace smt
         return true;
     }
 
-    SMT_EXPORT bool sat_core::check(const std::vector<lit> &lits) noexcept
+    SMT_EXPORT bool sat_core::next() noexcept
+    {
+        if (root_level())
+            return false;
+
+        std::vector<lit> no_good;
+        no_good.reserve(trail.size());
+        for (const auto &l : decisions)
+            no_good.push_back(!l);
+        pop();
+
+        assert(!no_good.empty());
+        assert(value(no_good.back()) == Undefined);
+
+        // we reverse the no-good and store it..
+        std::reverse(no_good.begin(), no_good.end());
+        record(no_good);
+
+        return propagate();
+    }
+
+    SMT_EXPORT bool sat_core::check(std::vector<lit> lits) noexcept
     {
         const size_t c_rl = decision_level(); // the current root-level..
         size_t c_dl;                          // the current decision-level..

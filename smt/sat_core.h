@@ -48,7 +48,8 @@ namespace smt
     SMT_EXPORT void pop() noexcept;
     SMT_EXPORT bool simplify_db() noexcept;
     SMT_EXPORT bool propagate() noexcept;
-    SMT_EXPORT bool check(const std::vector<lit> &lits) noexcept;
+    SMT_EXPORT bool next() noexcept;
+    SMT_EXPORT bool check(std::vector<lit> lits) noexcept;
 
     inline lbool value(const var &x) const noexcept { return assigns.at(x); } // returns the value of variable 'x'..
     inline lbool value(const lit &p) const noexcept
