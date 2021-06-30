@@ -3,6 +3,9 @@
 
 namespace smt
 {
+    constr::constr(sat_core &s) : s(s), id(s.constrs.size()) {}
+    constr::~constr() {}
+
     std::vector<constr *> &constr::watches(const lit &p) noexcept { return s.watches[index(p)]; }
     bool constr::enqueue(const lit &p) noexcept { return s.enqueue(p, this); }
 

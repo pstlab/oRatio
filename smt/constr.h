@@ -16,9 +16,9 @@ namespace smt
     friend class sat_core;
 
   protected:
-    constr(sat_core &s) : s(s) {}
+    constr(sat_core &s);
     constr(const constr &orig) = delete;
-    virtual ~constr() {}
+    virtual ~constr();
 
   private:
     virtual bool propagate(const lit &p) = 0;
@@ -37,5 +37,6 @@ namespace smt
 
   private:
     sat_core &s;
+    size_t id;
   };
 } // namespace smt
