@@ -31,14 +31,13 @@ namespace smt
     void theory::analyze_and_backjump() noexcept
     {
         // we create a conflict clause for the analysis..
-        std::vector<lit> c_cnfl;
-        std::swap(c_cnfl, cnfl);
-        clause cnfl_cl(sat, c_cnfl);
+        clause cnfl_cl(sat, std::move(cnfl));
 
         // .. and we analyze the conflict..
         std::vector<lit> no_good;
         size_t bt_level;
         sat.analyze(cnfl_cl, no_good, bt_level);
+        cnfl.clear();
 
         // we backjump..
         while (sat.decision_level() > bt_level)
