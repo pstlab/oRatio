@@ -7,13 +7,6 @@
 #include "ov_theory.h"
 #include "idl_theory.h"
 #include "rdl_theory.h"
-#ifdef VERBOSE_LOG
-#include <iostream>
-
-#define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << '\n'
-#else
-#define LOG(msg)
-#endif
 
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
 #define RECOMPUTE_NAMES() recompute_names()

@@ -10,6 +10,13 @@
 #include <string>
 #include <unordered_map>
 #include <set>
+#ifdef VERBOSE_LOG
+#include <iostream>
+
+#define LOG(msg) std::cout << __FILE__ << "(" << __LINE__ << "): " << msg << '\n'
+#else
+#define LOG(msg)
+#endif
 
 namespace smt
 {
@@ -63,9 +70,10 @@ namespace smt
       default:
         return Undefined;
       }
-    }                                                                          // returns the value of literal 'p'..
-    inline size_t decision_level() const noexcept { return trail_lim.size(); } // returns the current decision level..
-    inline bool root_level() const noexcept { return trail_lim.empty(); }      // checks whether the current decision level is root level..
+    }                                                                                       // returns the value of literal 'p'..
+    inline size_t decision_level() const noexcept { return trail_lim.size(); }              // returns the current decision level..
+    inline bool root_level() const noexcept { return trail_lim.empty(); }                   // checks whether the current decision level is root level..
+    SMT_EXPORT const std::vector<lit> &get_decisions() const noexcept { return decisions; } // returns the decisions taken so far in chronological order..
 
   private:
     void analyze(constr &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel) noexcept;
