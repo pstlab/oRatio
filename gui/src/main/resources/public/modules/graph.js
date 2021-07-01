@@ -55,7 +55,7 @@ export class GraphData {
         flaw.graph = this;
         this.nodes.push(flaw);
         this.node_map.set(flaw.id, flaw);
-        flaw.causes.forEach(c => this.links.push({ source: flaw.id, target: c, state: flaw.state }));
+        flaw.causes.forEach(c => this.links.push({ source: this.node_map.get(flaw.id), target: this.node_map.get(c), state: flaw.state }));
         flaw.causes.forEach(c => this.update_resolver_cost(this.node_map.get(c)));
     }
 
@@ -91,7 +91,7 @@ export class GraphData {
         resolver.graph = this;
         this.nodes.push(resolver);
         this.node_map.set(resolver.id, resolver);
-        this.links.push({ source: resolver.id, target: resolver.effect, state: resolver.state });
+        this.links.push({ source: this.node_map.get(resolver.id), target: this.node_map.get(resolver.effect), state: resolver.state });
     }
 
     resolver_state_changed(change) {
@@ -107,7 +107,7 @@ export class GraphData {
     }
 
     causal_link_added(link) {
-        this.links.push({ source: link.flaw, target: link.resolver, state: this.node_map.get(link.flaw).state });
+        this.links.push({ source: link.flaw, target: link.resolver, state: this.node_map.get(link.resolver).state });
         this.update_resolver_cost(this.node_map.get(link.resolver));
     }
 
