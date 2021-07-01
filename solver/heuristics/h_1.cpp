@@ -46,31 +46,35 @@ namespace ratio
 
     void h_1::check()
     {
-        assert(slv.root_level());
-        if (slv.get_sat_core().value(gamma) != False) // a unit clause, not gamma, has been deduced or, simply, gamma has never been set..
-            build();                                  // the search procedure may have excluded those parts of the graph that could lead to a solution..
-        else
-        { // the graph has been invalidated..
-            LOG("search has exhausted the graph..");
-            // we create a new graph var..
-            gamma = lit(slv.get_sat_core().new_var());
-            LOG("γ is" << to_string(gamma));
-            already_closed.clear();
-            if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
-                            { return is_positive_infinite(f->get_estimated_cost()); }))
-                build(); // we can still build upon the current graph..
+        do
+        {
+            assert(slv.root_level());
+            if (slv.get_sat_core().value(gamma) != False) // a unit clause, not gamma, has been deduced or, simply, gamma has never been set..
+                build();                                  // the search procedure may have excluded those parts of the graph that could lead to a solution..
             else
-                add_layer(); // we add a layer to the current graph..
-        }
+            { // the graph has been invalidated..
+                LOG("search has exhausted the graph..");
+                // we create a new graph var..
+                gamma = lit(slv.get_sat_core().new_var());
+                LOG("γ is" << to_string(gamma));
+                already_closed.clear();
+                if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
+                                { return is_positive_infinite(f->get_estimated_cost()); }))
+                    build(); // we can still build upon the current graph..
+                else
+                    add_layer(); // we add a layer to the current graph..
+            }
 
-        LOG("pruning the graph..");
-        // these flaws have not been expanded, hence, cannot have a solution..
-        for (const auto &f : flaw_q)
-            if (already_closed.insert(variable(f->get_phi())).second)
-                if (!slv.get_sat_core().new_clause({!gamma, !f->get_phi()}))
-                    throw unsolvable_exception();
+            LOG("pruning the graph..");
+            // these flaws have not been expanded, hence, cannot have a solution..
+            for (const auto &f : flaw_q)
+                if (already_closed.insert(variable(f->get_phi())).second)
+                    if (!slv.get_sat_core().new_clause({!gamma, !f->get_phi()}))
+                        throw unsolvable_exception();
 
-        slv.take_decision(gamma);
+            if (!slv.get_sat_core().assume(gamma))
+                throw unsolvable_exception();
+        } while (slv.get_sat_core().value(gamma) != True);
     }
 
     void h_1::build()

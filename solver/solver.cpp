@@ -152,7 +152,6 @@ namespace ratio
     void solver::take_decision(const lit &ch)
     {
         assert(get_sat_core().value(ch) == Undefined);
-        current_decision = ch;
 
         // we take the decision..
         if (!get_sat_core().assume(ch))
@@ -445,17 +444,15 @@ namespace ratio
 
     void solver::push()
     {
-        LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")"
-                                         << " +[" << to_string(current_decision) << "]");
+        LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
 
         // we push the given decision into the trail..
-        trail.push_back(layer(current_decision));
+        trail.emplace_back();
     }
 
     void solver::pop()
     {
-        LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")"
-                                         << " -[" << to_string(trail.back().decision) << "]");
+        LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
 
         // we reintroduce the solved flaw..
         for (const auto &f : trail.back().solved_flaws)
@@ -496,16 +493,15 @@ namespace ratio
             else if (const auto &det_flw = std::find_if(incs.cbegin(), incs.cend(), [](const auto &v)
                                                         { return v.size() == 1; });
                      det_flw != incs.cend())
-            { // we have deterministic flaw..
-                assert(get_sat_core().value(det_flw->at(0).first) != False);
-                if (get_sat_core().value(det_flw->at(0).first) == Undefined)
-                {
-                    // we learn something from it..
+            { // we have deterministic flaw: i.e., a flaw with a single resolver..
+                assert(get_sat_core().value(det_flw->front().first) != False);
+                if (get_sat_core().value(det_flw->front().first) == Undefined)
+                { // we can learn something from it..
                     std::vector<lit> learnt;
                     learnt.reserve(trail.size() + 1);
-                    learnt.push_back(det_flw->at(0).first);
-                    for (const auto &l : trail)
-                        learnt.push_back(!l.decision);
+                    learnt.push_back(det_flw->front().first);
+                    for (const auto &l : get_sat_core().get_decisions())
+                        learnt.push_back(!l);
                     record(learnt);
                     if (!get_sat_core().propagate())
                         throw unsolvable_exception();

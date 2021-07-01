@@ -17,7 +17,6 @@ class Navigator : StateVariable {
 
     predicate FindUser(real x, real y) {
         duration >= 5.0;
-        duration <= 50.0;
         goal at = new At(end:start, x:x, y:y);
     }
 

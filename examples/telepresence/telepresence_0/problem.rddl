@@ -18,8 +18,4 @@ Robot r0 = new Robot();
 fact at0 = new r0.nav.At(start:origin, x:base_x, y:base_y);
 at0.duration >= 5.0;
 
-// goal keep_healthy = new r0.KeepHealthy(u:u0);
-
-goal at1 = new r0.nav.FollowUser(x:cogn_x, y:cogn_y);
-goal at2 = new r0.nav.FollowUser(x:phys_x, y:phys_y);
-goal at3 = new r0.nav.FollowUser(x:rem_x, y:rem_y);
+goal keep_healthy = new r0.KeepHealthy(u:u0);

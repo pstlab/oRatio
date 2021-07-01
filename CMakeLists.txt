@@ -79,6 +79,7 @@ endif()
 
 message(STATUS "Verbose log:              ${VERBOSE_LOG}")
 if(VERBOSE_LOG)
+    target_compile_definitions(smt PUBLIC VERBOSE_LOG)
     target_compile_definitions(core PUBLIC VERBOSE_LOG)
 endif()
 

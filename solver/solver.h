@@ -116,9 +116,6 @@ namespace ratio
   private:
     struct layer
     {
-      layer(const smt::lit &dec) : decision(dec) {}
-
-      const smt::lit decision;                               // the decision which introduced the new layer..
       std::unordered_map<flaw *, smt::rational> old_f_costs; // the old estimated flaws' costs..
       std::unordered_set<flaw *> new_flaws;                  // the just activated flaws..
       std::unordered_set<flaw *> solved_flaws;               // the just solved flaws..
@@ -131,7 +128,6 @@ namespace ratio
     std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
     std::unordered_map<const atom *, atom_flaw *> reason;       // the reason for having introduced an atom..
     std::unordered_set<flaw *> flaws;                           // the currently active flaws..
-    smt::lit current_decision;                                  // the decision which has just been taken..
     std::vector<layer> trail;                                   // the list of taken decisions, with the associated changes made, in chronological order..
 
 #ifdef BUILD_LISTENERS
