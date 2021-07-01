@@ -13,15 +13,14 @@ namespace smt
   class lit
   {
   public:
-    explicit lit(var v = -1, bool sign = true) : x((v << 1) + sign) {}
-    virtual ~lit() {}
+    explicit constexpr lit(var v = -1, bool sign = true) : x((v << 1) + sign) {}
 
     inline friend var variable(const lit &p) noexcept { return p.x >> 1; }
     inline friend bool sign(const lit &p) noexcept { return p.x & 1; }
     inline friend size_t index(const lit &p) noexcept { return p.x; }
     inline friend bool is_undefined(const lit &p) noexcept { return p.x == std::numeric_limits<size_t>::max(); }
 
-    inline lit operator!() const
+    inline constexpr lit operator!() const
     {
       lit p;
       p.x = x ^ 1;
@@ -37,6 +36,6 @@ namespace smt
     size_t x;
   };
 
-  const lit FALSE_lit = lit(FALSE_var);
-  const lit TRUE_lit = !FALSE_lit;
+  constexpr lit FALSE_lit(FALSE_var);
+  constexpr lit TRUE_lit = !FALSE_lit;
 } // namespace smt
