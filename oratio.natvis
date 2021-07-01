@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="smt::lit">
+    <DisplayString Condition="x%2==0">{{ ¬β{x/2} }}</DisplayString>
+    <DisplayString Condition="x%2==1">{{ β{x/2} }}</DisplayString>
+  </Type>
   <Type Name="ratio::flaw">
     <DisplayString>{{ ϕ{phi} }}</DisplayString>
     <Expand>
