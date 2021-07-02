@@ -15,7 +15,7 @@ namespace ratio
   class conjunction : public scope
   {
   public:
-    conjunction(core &cr, scope &scp, const smt::rational &cst, const std::vector<const riddle::ast::statement *> &stmnts);
+    conjunction(core &cr, scope &scp, const smt::rational &cst, std::vector<const riddle::ast::statement *> stmnts);
     conjunction(const conjunction &that) = delete;
     virtual ~conjunction();
 
