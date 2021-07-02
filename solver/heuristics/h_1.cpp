@@ -72,6 +72,7 @@ namespace ratio
                     if (!slv.get_sat_core().new_clause({!gamma, !f->get_phi()}))
                         throw unsolvable_exception();
 
+            LOG("enforcing γ..");
             if (!slv.get_sat_core().assume(gamma))
                 throw unsolvable_exception();
         } while (slv.get_sat_core().value(gamma) != True);

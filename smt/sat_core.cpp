@@ -447,7 +447,7 @@ namespace smt
             return false;
 
         std::vector<lit> no_good;
-        no_good.reserve(trail.size());
+        no_good.reserve(decisions.size());
         for (const auto &l : decisions)
             no_good.push_back(!l);
         pop();
@@ -457,7 +457,7 @@ namespace smt
 
         // we reverse the no-good and store it..
         std::reverse(no_good.begin(), no_good.end());
-        record(no_good);
+        record(std::move(no_good));
 
         return propagate();
     }

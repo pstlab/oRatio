@@ -12,7 +12,7 @@ real rem_y = 6.77870;
 
 origin == 0.0;
 
-User u0 = new User(true, true);
+User u0 = new User(true, false);
 Robot r0 = new Robot();
 
 fact at0 = new r0.nav.At(start:origin, x:base_x, y:base_y);
