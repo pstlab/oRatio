@@ -304,7 +304,7 @@ namespace ratio
                         throw std::invalid_argument("invalid disjunct cost: expected a constant..");
                     cost = scp.get_core().arith_value(a_xpr).get_rational();
                 }
-                cs.push_back(new conjunction(scp.get_core(), const_cast<scope &>(scp), cost, stmnts));
+                cs.push_back(new conjunction(scp.get_core(), const_cast<scope &>(scp), cost, std::move(stmnts)));
             }
             scp.get_core().new_disjunction(ctx, cs);
         }
@@ -548,7 +548,7 @@ namespace ratio
             for (const auto &[id_tkn, xprs] : init_list)
                 il.push_back({id_tkn.id, xprs});
 
-            static_cast<type &>(scp).new_constructors({new constructor(scp.get_core(), scp, args, il, statements)});
+            static_cast<type &>(scp).new_constructors({new constructor(scp.get_core(), scp, std::move(args), std::move(il), std::move(statements))});
         }
 
         class_declaration::class_declaration(const riddle::id_token &n, const std::vector<std::vector<riddle::id_token>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts) : riddle::ast::class_declaration(n, bcs, fs, cs, ms, ps, ts) {}
