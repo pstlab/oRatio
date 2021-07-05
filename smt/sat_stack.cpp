@@ -12,7 +12,10 @@ namespace smt
     {
         stack.push(stack.top());
         for (auto &th : stack.top().theories)
+        {
             th->sat = &stack.top();
+            th->push();
+        }
         for (auto &l : stack.top().listeners)
             l->sat = &stack.top();
     }
@@ -23,7 +26,10 @@ namespace smt
         std::vector<lit> trail = stack.top().trail;
         stack.pop();
         for (auto &th : stack.top().theories)
+        {
             th->sat = &stack.top();
+            th->pop();
+        }
         for (auto &l : stack.top().listeners)
             l->sat = &stack.top();
 
