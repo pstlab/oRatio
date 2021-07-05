@@ -20,12 +20,14 @@
 
 namespace smt
 {
+  class sat_stack;
   class constr;
   class theory;
   class sat_value_listener;
 
   class sat_core
   {
+    friend class sat_stack;
     friend class constr;
     friend class theory;
     friend class sat_value_listener;
@@ -85,7 +87,6 @@ namespace smt
 
     inline void bind(const var &v, theory &th) noexcept { bounds[v].insert(&th); }
     inline void listen(const var &v, sat_value_listener &l) noexcept { listening[v].insert(&l); }
-    void reassign_sat() noexcept;
 
   private:
 #ifdef PARALLELIZE

@@ -8,6 +8,7 @@ namespace smt
   class sat_value_listener
   {
     friend class sat_core;
+    friend class sat_stack;
 
   public:
     sat_value_listener(sat_core &s) : sat(&s) { sat->listeners.push_back(this); }

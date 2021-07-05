@@ -6,10 +6,12 @@
 namespace smt
 {
   class sat_core;
+  class sat_stack;
 
   class theory
   {
     friend class sat_core;
+    friend class sat_stack;
 
   public:
     SMT_EXPORT theory(sat_core &sat);

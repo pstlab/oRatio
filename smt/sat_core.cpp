@@ -31,7 +31,6 @@ namespace smt
                 reason.push_back(nullptr);
 
         simplify_db();
-        reassign_sat();
     }
     SMT_EXPORT sat_core::~sat_core()
     {
@@ -607,13 +606,5 @@ namespace smt
         if (const auto at_v = listening.find(v); at_v != listening.cend())
             for (const auto &l : at_v->second)
                 l->sat_value_change(v);
-    }
-
-    void sat_core::reassign_sat() noexcept
-    {
-        for (auto &th : theories)
-            th->sat = this;
-        for (auto &l : listeners)
-            l->sat = this;
     }
 } // namespace smt
