@@ -16,7 +16,7 @@ namespace smt
     theory(const theory &orig) = delete;
     SMT_EXPORT virtual ~theory();
 
-    inline sat_core &get_core() const noexcept { return sat; }
+    inline sat_core &get_sat() const noexcept { return *sat; }
 
   protected:
     SMT_EXPORT void bind(const var &v) noexcept;
@@ -55,7 +55,7 @@ namespace smt
     virtual void pop() = 0;
 
   protected:
-    sat_core &sat;
+    sat_core *sat;
     std::vector<lit> cnfl;
   };
 } // namespace smt

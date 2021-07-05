@@ -22,7 +22,7 @@ namespace smt
     SMT_EXPORT var new_var() noexcept; // creates and returns a new distance logic variable..
 
     SMT_EXPORT lit new_distance(const var &from, const var &to, const inf_rational &dist) noexcept; // creates and returns a new propositional variable for controlling the constraint 'to - from <= dist'..
-    SMT_EXPORT lit new_distance(const var &from, const var &to, const inf_rational &min, const inf_rational &max) noexcept { return sat.new_conj({new_distance(to, from, -min), new_distance(from, to, max)}); }
+    SMT_EXPORT lit new_distance(const var &from, const var &to, const inf_rational &min, const inf_rational &max) noexcept { return sat->new_conj({new_distance(to, from, -min), new_distance(from, to, max)}); }
 
     SMT_EXPORT lit new_lt(const lin &left, const lin &right);
     SMT_EXPORT lit new_leq(const lin &left, const lin &right);

@@ -14,7 +14,7 @@ namespace smt
         switch (o)
         {
         case leq:
-            switch (th.sat.value(b))
+            switch (th.sat->value(b))
             {
             case True:
                 if (th.lb(x_i) > v)
@@ -31,7 +31,7 @@ namespace smt
             }
             break;
         case geq:
-            switch (th.sat.value(b))
+            switch (th.sat->value(b))
             {
             case False:
                 if (th.lb(x_i) >= v)
@@ -57,7 +57,7 @@ namespace smt
         switch (o)
         {
         case leq:
-            switch (th.sat.value(b))
+            switch (th.sat->value(b))
             {
             case False:
                 if (th.ub(x_i) <= v)
@@ -73,7 +73,7 @@ namespace smt
             }
             break;
         case geq:
-            switch (th.sat.value(b))
+            switch (th.sat->value(b))
             {
             case True:
                 if (th.ub(x_i) < v)
@@ -97,7 +97,7 @@ namespace smt
     {
         json j_asrt;
         j_asrt->set("lit", new string_val(to_string(b)));
-        switch (th.get_core().value(b))
+        switch (th.sat->value(b))
         {
         case True:
             j_asrt->set("val", new string_val("T"));
@@ -153,7 +153,7 @@ namespace smt
                     switch (c->o)
                     {
                     case leq: // the assertion is unsatisfable..
-                        switch (th.sat.value(c->b))
+                        switch (th.sat->value(c->b))
                         {
                         case True:
                             if (lb > c->v)
@@ -172,7 +172,7 @@ namespace smt
                         }
                         break;
                     case geq: // the assertion is satisfied..
-                        switch (th.sat.value(c->b))
+                        switch (th.sat->value(c->b))
                         {
                         case False:
                             if (lb >= c->v)
@@ -223,7 +223,7 @@ namespace smt
                     switch (c->o)
                     {
                     case leq: // the assertion is satisfied..
-                        switch (th.sat.value(c->b))
+                        switch (th.sat->value(c->b))
                         {
                         case False:
                             if (ub <= c->v)
@@ -241,7 +241,7 @@ namespace smt
                         }
                         break;
                     case geq: // the assertion is unsatisfable..
-                        switch (th.sat.value(c->b))
+                        switch (th.sat->value(c->b))
                         {
                         case True:
                             if (ub < c->v)
@@ -302,7 +302,7 @@ namespace smt
                     switch (c->o)
                     {
                     case leq: // the assertion is satisfied..
-                        switch (th.sat.value(c->b))
+                        switch (th.sat->value(c->b))
                         {
                         case False:
                             if (ub <= c->v)
@@ -320,7 +320,7 @@ namespace smt
                         }
                         break;
                     case geq: // the assertion is unsatisfable..
-                        switch (th.sat.value(c->b))
+                        switch (th.sat->value(c->b))
                         {
                         case True:
                             if (ub < c->v)
@@ -371,7 +371,7 @@ namespace smt
                     switch (c->o)
                     {
                     case leq: // the assertion is unsatisfable..
-                        switch (th.sat.value(c->b))
+                        switch (th.sat->value(c->b))
                         {
                         case True:
                             if (lb > c->v)
@@ -389,7 +389,7 @@ namespace smt
                         }
                         break;
                     case geq: // the assertion is satisfied..
-                        switch (th.sat.value(c->b))
+                        switch (th.sat->value(c->b))
                         {
                         case False:
                             if (lb >= c->v)

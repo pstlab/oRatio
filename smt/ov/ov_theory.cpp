@@ -19,7 +19,7 @@ namespace smt
         {
             for (const auto &i : items)
             {
-                const var bv = sat.new_var();
+                const var bv = sat->new_var();
                 c_vals.emplace(i, lit(bv));
                 bind(bv);
                 is_contained_in[bv].insert(id);
@@ -30,7 +30,7 @@ namespace smt
                 lits.reserve(items.size());
                 for (const auto &i : items)
                     lits.push_back(c_vals.find(i)->second);
-                bool exct_one = sat.new_clause({sat.new_exct_one(std::move(lits))});
+                bool exct_one = sat->new_clause({sat->new_exct_one(std::move(lits))});
                 assert(exct_one);
             }
         }
@@ -83,30 +83,30 @@ namespace smt
                 return FALSE_lit;
 
             // we need to create a new variable..
-            const lit eq_lit = lit(sat.new_var()); // the equality literal..
+            const lit eq_lit = lit(sat->new_var()); // the equality literal..
 
             bool nc;
             // the values outside the intersection are pruned if the equality control variable becomes true..
             for (const auto &[val, l] : assigns[left])
                 if (!intersection.count(val))
                 {
-                    nc = sat.new_clause({!eq_lit, !l});
+                    nc = sat->new_clause({!eq_lit, !l});
                     assert(nc);
                 }
             for (const auto &[val, l] : assigns[right])
                 if (!intersection.count(val))
                 {
-                    nc = sat.new_clause({!eq_lit, !l});
+                    nc = sat->new_clause({!eq_lit, !l});
                     assert(nc);
                 }
             // the values inside the intersection are made pairwise equal if the equality variable becomes true..
             for (const auto &v : intersection)
             {
-                nc = sat.new_clause({!eq_lit, !assigns[left].at(v), assigns[right].at(v)});
+                nc = sat->new_clause({!eq_lit, !assigns[left].at(v), assigns[right].at(v)});
                 assert(nc);
-                nc = sat.new_clause({!eq_lit, assigns[left].at(v), !assigns[right].at(v)});
+                nc = sat->new_clause({!eq_lit, assigns[left].at(v), !assigns[right].at(v)});
                 assert(nc);
-                nc = sat.new_clause({eq_lit, !assigns[left].at(v), !assigns[right].at(v)});
+                nc = sat->new_clause({eq_lit, !assigns[left].at(v), !assigns[right].at(v)});
                 assert(nc);
             }
 
@@ -119,7 +119,7 @@ namespace smt
     {
         std::unordered_set<const var_value *> vals;
         for (const auto &[val, l] : assigns[v])
-            if (sat.value(l) != False)
+            if (sat->value(l) != False)
                 vals.insert(val);
         return vals;
     }

@@ -32,7 +32,7 @@ namespace smt
             return at_expr->second;
         else
         { // we need to create a new slack variable..
-            assert(sat.root_level());
+            assert(sat->root_level());
             const var slack = new_var();
             exprs.emplace(s_expr, slack);
             c_bounds[lb_index(slack)] = {lb(l), TRUE_lit}; // we set the lower bound at the lower bound of the given linear expression..
@@ -77,7 +77,7 @@ namespace smt
             return at_asrt->second;
         else
         { // we need to create a new control variable..
-            const auto ctr = sat.new_var();
+            const auto ctr = sat->new_var();
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
@@ -120,7 +120,7 @@ namespace smt
             return at_asrt->second;
         else
         { // we need to create a new control variable..
-            const auto ctr = sat.new_var();
+            const auto ctr = sat->new_var();
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
@@ -163,7 +163,7 @@ namespace smt
             return at_asrt->second;
         else
         { // we need to create a new control variable..
-            const auto ctr = sat.new_var();
+            const auto ctr = sat->new_var();
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
@@ -206,7 +206,7 @@ namespace smt
             return at_asrt->second;
         else
         { // we need to create a new control variable..
-            const auto ctr = sat.new_var();
+            const auto ctr = sat->new_var();
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
@@ -226,7 +226,7 @@ namespace smt
     {
         assert(cnfl.empty());
         for (const auto &a : v_asrts[variable(p)])
-            switch (sat.value(a->b))
+            switch (sat->value(a->b))
             {
             case True: // the assertion is direct..
                 if (!((a->o == op::leq) ? assert_upper(a->x, a->v, p) : assert_lower(a->x, a->v, p)))
@@ -440,7 +440,7 @@ namespace smt
         std::swap(x_j_watches, t_watches[x_j]);
         for (const auto &r : x_j_watches)
 #ifdef PARALLELIZE
-            sat.get_thread_pool().enqueue([this, x_j, expr, r]
+            sat->get_thread_pool().enqueue([this, x_j, expr, r]
                                           {
                                               rational cc = r->l.vars[x_j];
                                               r->l.vars.erase(x_j);
@@ -465,7 +465,7 @@ namespace smt
                                               r->l.known_term += expr.known_term * cc;
                                           });
         // we wait for all the rows to be updated..
-        sat.get_thread_pool().join();
+        sat->get_thread_pool().join();
 #else
         { // 'r' is a row in which 'x_j' appears..
             rational cc = r->l.vars[x_j];

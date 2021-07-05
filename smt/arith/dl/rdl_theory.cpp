@@ -33,7 +33,7 @@ namespace smt
             return TRUE_lit; // the constraint is redundant..
         else
         { // we need to create a new propositional variable..
-            const auto ctr = sat.new_var();
+            const auto ctr = sat->new_var();
             const lit ctr_lit(ctr);
             bind(ctr);
             const auto dst_cnst = new rdl_distance(ctr_lit, from, to, dist);
@@ -147,7 +147,7 @@ namespace smt
             expr = expr / expr.vars.cbegin()->second;
             const auto dist = distance(expr.vars.cbegin()->first, 0);
             if (dist.first <= expr.known_term && dist.second >= expr.known_term)
-                return sat.new_conj({new_distance(expr.vars.cbegin()->first, 0, inf_rational(expr.known_term)), new_distance(0, expr.vars.cbegin()->first, -inf_rational(expr.known_term))});
+                return sat->new_conj({new_distance(expr.vars.cbegin()->first, 0, inf_rational(expr.known_term)), new_distance(0, expr.vars.cbegin()->first, -inf_rational(expr.known_term))});
             else
                 return FALSE_lit;
         }
@@ -162,7 +162,7 @@ namespace smt
                 throw std::invalid_argument("not a valid real difference logic constraint..");
             const auto dist = distance(v0, v1);
             if (dist.first <= expr.known_term && dist.second >= expr.known_term)
-                return sat.new_conj({new_distance(v0, v1, inf_rational(expr.known_term)), new_distance(v1, v0, -inf_rational(expr.known_term))});
+                return sat->new_conj({new_distance(v0, v1, inf_rational(expr.known_term)), new_distance(v1, v0, -inf_rational(expr.known_term))});
             else
                 return FALSE_lit;
         }
@@ -361,7 +361,7 @@ namespace smt
         assert(var_dists.count(variable(p)));
 
         for (const auto &dist : var_dists.at(variable(p)))
-            switch (sat.value(dist->b))
+            switch (sat->value(dist->b))
             {
             case True: // the assertion is direct..
                 if (_dists[dist->to][dist->from] < -dist->dist)
@@ -371,9 +371,9 @@ namespace smt
                     {
                         if (const auto &c_d = dist_constr.find({_preds[dist->to][c_to], c_to}); c_d != dist_constr.cend())
                         {
-                            if (sat.value(c_d->second->b) == True)
+                            if (sat->value(c_d->second->b) == True)
                                 cnfl.push_back(!c_d->second->b);
-                            else if (sat.value(c_d->second->b) == False)
+                            else if (sat->value(c_d->second->b) == False)
                                 cnfl.push_back(c_d->second->b);
                         }
                         c_to = _preds[dist->to][c_to];
@@ -404,9 +404,9 @@ namespace smt
                     {
                         if (const auto &c_d = dist_constr.find({_preds[dist->from][c_from], c_from}); c_d != dist_constr.cend())
                         {
-                            if (sat.value(c_d->second->b) == True)
+                            if (sat->value(c_d->second->b) == True)
                                 cnfl.push_back(!c_d->second->b);
-                            else if (sat.value(c_d->second->b) == False)
+                            else if (sat->value(c_d->second->b) == False)
                                 cnfl.push_back(c_d->second->b);
                         }
                         c_from = _preds[dist->from][c_from];
@@ -436,7 +436,7 @@ namespace smt
         assert(cnfl.empty());
         assert(std::all_of(dist_constr.cbegin(), dist_constr.cend(), [this](const auto &dist)
                            {
-                               switch (sat.value(dist.second->b))
+                               switch (sat->value(dist.second->b))
                                {
                                case True: // the constraint is asserted..
                                    return _dists[dist.second->from][dist.second->to] <= dist.second->dist;
@@ -511,7 +511,7 @@ namespace smt
         for (const auto &c_pairs : c_updates)
             if (const auto &c_dists = dist_constrs.find(c_pairs); c_dists != dist_constrs.cend())
                 for (const auto &c_dist : c_dists->second)
-                    if (sat.value(c_dist->b) == Undefined)
+                    if (sat->value(c_dist->b) == Undefined)
                         if (_dists[c_dist->to][c_dist->from] < -c_dist->dist)
                         { // the constraint is inconsistent..
                             cnfl.push_back(!c_dist->b);
@@ -519,9 +519,9 @@ namespace smt
                             while (c_to != c_dist->to)
                             {
                                 if (const auto &c_d = dist_constr.find({_preds[c_dist->to][c_to], c_to}); c_d != dist_constr.cend())
-                                    if (sat.value(c_d->second->b) == True)
+                                    if (sat->value(c_d->second->b) == True)
                                         cnfl.push_back(!c_d->second->b);
-                                    else if (sat.value(c_d->second->b) == False)
+                                    else if (sat->value(c_d->second->b) == False)
                                         cnfl.push_back(c_d->second->b);
                                 c_to = _preds[c_dist->to][c_to];
                             }
@@ -536,9 +536,9 @@ namespace smt
                             while (c_to != c_dist->from)
                             {
                                 if (const auto &c_d = dist_constr.find({_preds[c_dist->from][c_to], c_to}); c_d != dist_constr.cend())
-                                    if (sat.value(c_d->second->b) == True)
+                                    if (sat->value(c_d->second->b) == True)
                                         cnfl.push_back(!c_d->second->b);
-                                    else if (sat.value(c_d->second->b) == False)
+                                    else if (sat->value(c_d->second->b) == False)
                                         cnfl.push_back(c_d->second->b);
                                 c_to = _preds[c_dist->from][c_to];
                             }

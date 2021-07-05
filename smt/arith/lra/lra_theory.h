@@ -34,7 +34,7 @@ namespace smt
 
     SMT_EXPORT lit new_lt(const lin &left, const lin &right) noexcept;
     SMT_EXPORT lit new_leq(const lin &left, const lin &right) noexcept;
-    SMT_EXPORT lit new_eq(const lin &left, const lin &right) noexcept { return sat.new_conj({new_geq(left, right), new_leq(left, right)}); }
+    SMT_EXPORT lit new_eq(const lin &left, const lin &right) noexcept { return sat->new_conj({new_geq(left, right), new_leq(left, right)}); }
     SMT_EXPORT lit new_geq(const lin &left, const lin &right) noexcept;
     SMT_EXPORT lit new_gt(const lin &left, const lin &right) noexcept;
 
