@@ -4,8 +4,8 @@
 
 namespace smt
 {
-    SMT_EXPORT theory::theory(sat_core &s) : sat(&s) { sat->add_theory(*this); }
-    SMT_EXPORT theory::~theory() {}
+    SMT_EXPORT theory::theory(sat_core &s) : sat(&s) { sat->theories.push_back(this); }
+    SMT_EXPORT theory::~theory() { sat->theories.erase(std::find(sat->theories.cbegin(), sat->theories.cend(), this)); }
 
     SMT_EXPORT void theory::bind(const var &v) noexcept { sat->bind(v, *this); }
 

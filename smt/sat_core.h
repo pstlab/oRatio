@@ -82,7 +82,6 @@ namespace smt
     bool enqueue(const lit &p, constr *const c = nullptr) noexcept;
     void pop_one() noexcept;
 
-    inline void add_theory(theory &th) noexcept { theories.push_back(&th); }
     inline void bind(const var &v, theory &th) noexcept { bounds[v].insert(&th); }
     inline void listen(const var &v, sat_value_listener &l) noexcept { listening[v].insert(&l); }
 
@@ -105,6 +104,7 @@ namespace smt
 
     std::vector<theory *> theories; // all the theories..
     std::unordered_map<size_t, std::set<theory *>> bounds;
+    std::vector<sat_value_listener *> listeners; // all the listeners..
     std::unordered_map<size_t, std::set<sat_value_listener *>> listening;
   };
 
