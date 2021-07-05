@@ -21,6 +21,7 @@ namespace smt
     virtual ~constr();
 
   private:
+    virtual constr *copy(sat_core &s) = 0;
     virtual bool propagate(const lit &p) = 0;
     virtual bool simplify() = 0;
     virtual void remove() = 0;
@@ -36,7 +37,7 @@ namespace smt
     lbool value(const lit &p) const noexcept;
 
   private:
-    sat_core &s;
+    sat_core &sat;
     size_t id;
   };
 } // namespace smt

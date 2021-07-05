@@ -26,6 +26,7 @@ namespace smt
     inline const std::vector<lit> get_lits() const noexcept { return lits; }
 
   private:
+    constr *copy(sat_core &s) noexcept override { return new_clause(s, lits); }
     bool propagate(const lit &p) noexcept override;
     bool simplify() noexcept override;
     void remove() noexcept override;
