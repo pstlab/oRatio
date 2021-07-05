@@ -15,6 +15,24 @@ namespace smt
         assigns[FALSE_var] = False;
         level[FALSE_var] = 0;
     }
+    SMT_EXPORT sat_core::sat_core(const sat_core &orig) : assigns(orig.assigns), level(orig.level.size()), exprs(orig.exprs), theories(orig.theories), bounds(orig.bounds), listeners(orig.listeners), listening(orig.listening)
+    {
+        assert(orig.prop_q.empty());
+        constrs.reserve(orig.constrs.size());
+        watches.resize(orig.watches.size());
+        for (auto &c : orig.constrs)
+            constrs.push_back(c->copy(*this));
+
+        reason.reserve(orig.reason.size());
+        for (auto &c : orig.reason)
+            if (c)
+                reason.push_back(constrs.at(c->id));
+            else
+                reason.push_back(nullptr);
+
+        simplify_db();
+        reassign_sat();
+    }
     SMT_EXPORT sat_core::~sat_core()
     {
         // we delete all the constraints..
@@ -589,5 +607,13 @@ namespace smt
         if (const auto at_v = listening.find(v); at_v != listening.cend())
             for (const auto &l : at_v->second)
                 l->sat_value_change(v);
+    }
+
+    void sat_core::reassign_sat() noexcept
+    {
+        for (auto &th : theories)
+            th->sat = this;
+        for (auto &l : listeners)
+            l->sat = this;
     }
 } // namespace smt

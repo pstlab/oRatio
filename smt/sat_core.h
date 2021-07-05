@@ -32,7 +32,8 @@ namespace smt
 
   public:
     SMT_EXPORT sat_core();
-    sat_core(const sat_core &orig) = delete;
+    SMT_EXPORT sat_core(const sat_core &orig);
+    SMT_EXPORT sat_core(sat_core &&orig) = default;
     SMT_EXPORT ~sat_core();
 
 #ifdef PARALLELIZE
@@ -84,6 +85,7 @@ namespace smt
 
     inline void bind(const var &v, theory &th) noexcept { bounds[v].insert(&th); }
     inline void listen(const var &v, sat_value_listener &l) noexcept { listening[v].insert(&l); }
+    void reassign_sat() noexcept;
 
   private:
 #ifdef PARALLELIZE
