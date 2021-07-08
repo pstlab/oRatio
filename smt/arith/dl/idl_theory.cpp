@@ -15,6 +15,16 @@ namespace smt
             _preds[i][i] = std::numeric_limits<size_t>::max();
         }
     }
+    SMT_EXPORT idl_theory::idl_theory(sat_core &sat, const idl_theory &orig) : theory(sat), n_vars(orig.n_vars), _dists(orig._dists), _preds(orig._preds), layers(orig.layers), listening(orig.listening)
+    {
+        for (const auto &[v, d] : orig.var_dists)
+            var_dists.emplace(v, new idl_distance(d->b, d->from, d->to, d->dist));
+        for (const auto &[fr_to, d] : orig.dist_constr)
+            dist_constr.emplace(fr_to, var_dists.at(variable(d->b)));
+        for (const auto &[fr_to, ds] : orig.dist_constrs)
+            for (const auto &d : ds)
+                dist_constrs[fr_to].push_back(var_dists.at(variable(d->b)));
+    }
     SMT_EXPORT idl_theory::~idl_theory() {}
 
     SMT_EXPORT var idl_theory::new_var() noexcept
@@ -37,7 +47,7 @@ namespace smt
             const lit ctr_lit(ctr);
             bind(ctr);
             const auto dst_cnst = new idl_distance(ctr_lit, from, to, dist);
-            var_dists[ctr].push_back(dst_cnst);
+            var_dists.emplace(ctr, dst_cnst);
             dist_constrs[{from, to}].push_back(dst_cnst);
             return ctr_lit;
         }
@@ -381,76 +391,76 @@ namespace smt
         assert(cnfl.empty());
         assert(var_dists.count(variable(p)));
 
-        for (const auto &dist : var_dists.at(variable(p)))
-            switch (sat->value(dist->b))
-            {
-            case True: // the assertion is direct..
-                if (_dists[dist->to][dist->from] < -dist->dist)
-                { // we build the cause for the conflict..
-                    var c_to = dist->from;
-                    while (c_to != dist->to)
+        const auto &dist = var_dists.at(variable(p));
+        switch (sat->value(dist->b))
+        {
+        case True: // the assertion is direct..
+            if (_dists[dist->to][dist->from] < -dist->dist)
+            { // we build the cause for the conflict..
+                var c_to = dist->from;
+                while (c_to != dist->to)
+                {
+                    if (const auto &c_d = dist_constr.find({_preds[dist->to][c_to], c_to}); c_d != dist_constr.cend())
                     {
-                        if (const auto &c_d = dist_constr.find({_preds[dist->to][c_to], c_to}); c_d != dist_constr.cend())
-                        {
-                            if (sat->value(c_d->second->b) == True)
-                                cnfl.push_back(!c_d->second->b);
-                            else if (sat->value(c_d->second->b) == False)
-                                cnfl.push_back(c_d->second->b);
-                        }
-                        c_to = _preds[dist->to][c_to];
+                        if (sat->value(c_d->second->b) == True)
+                            cnfl.push_back(!c_d->second->b);
+                        else if (sat->value(c_d->second->b) == False)
+                            cnfl.push_back(c_d->second->b);
                     }
-                    cnfl.push_back(!p);
-                    return false;
+                    c_to = _preds[dist->to][c_to];
                 }
-                else if (_dists[dist->from][dist->to] > dist->dist)
-                { // we propagate..
-                    const auto from_to = std::make_pair(dist->from, dist->to);
-                    if (!layers.empty() && !layers.back().old_constrs.count(from_to))
-                    {
-                        if (const auto &c_dist = dist_constr.find(from_to); c_dist != dist_constr.cend())
-                            // we store the current constraint for backtracking purposes..
-                            layers.back().old_constrs.emplace(c_dist->first, c_dist->second);
-                        else
-                            layers.back().old_constrs.emplace(from_to, nullptr);
-                    }
-                    dist_constr.emplace(from_to, dist);
-                    propagate(dist->from, dist->to, dist->dist);
-                }
-                break;
-            case False: // the assertion is negated (semantic branching)..
-                if (_dists[dist->from][dist->to] <= dist->dist)
-                { // we build the cause for the conflict..
-                    var c_from = dist->to;
-                    while (c_from != dist->from)
-                    {
-                        if (const auto &c_d = dist_constr.find({_preds[dist->from][c_from], c_from}); c_d != dist_constr.cend())
-                        {
-                            if (sat->value(c_d->second->b) == True)
-                                cnfl.push_back(!c_d->second->b);
-                            else if (sat->value(c_d->second->b) == False)
-                                cnfl.push_back(c_d->second->b);
-                        }
-                        c_from = _preds[dist->from][c_from];
-                    }
-                    cnfl.push_back(!p);
-                    return false;
-                }
-                else if (_dists[dist->to][dist->from] >= -dist->dist)
-                { // we propagate..
-                    const auto to_from = std::make_pair(dist->to, dist->from);
-                    if (!layers.empty() && !layers.back().old_constrs.count(to_from))
-                    {
-                        if (const auto &c_dist = dist_constr.find(to_from); c_dist != dist_constr.cend())
-                            // we store the current constraint for backtracking purposes..
-                            layers.back().old_constrs.emplace(c_dist->first, c_dist->second);
-                        else
-                            layers.back().old_constrs.emplace(to_from, nullptr);
-                    }
-                    dist_constr.emplace(to_from, dist);
-                    propagate(dist->to, dist->from, -dist->dist - 1);
-                }
-                break;
+                cnfl.push_back(!p);
+                return false;
             }
+            else if (_dists[dist->from][dist->to] > dist->dist)
+            { // we propagate..
+                const auto from_to = std::make_pair(dist->from, dist->to);
+                if (!layers.empty() && !layers.back().old_constrs.count(from_to))
+                {
+                    if (const auto &c_dist = dist_constr.find(from_to); c_dist != dist_constr.cend())
+                        // we store the current constraint for backtracking purposes..
+                        layers.back().old_constrs.emplace(c_dist->first, c_dist->second);
+                    else
+                        layers.back().old_constrs.emplace(from_to, nullptr);
+                }
+                dist_constr.emplace(from_to, dist);
+                propagate(dist->from, dist->to, dist->dist);
+            }
+            break;
+        case False: // the assertion is negated (semantic branching)..
+            if (_dists[dist->from][dist->to] <= dist->dist)
+            { // we build the cause for the conflict..
+                var c_from = dist->to;
+                while (c_from != dist->from)
+                {
+                    if (const auto &c_d = dist_constr.find({_preds[dist->from][c_from], c_from}); c_d != dist_constr.cend())
+                    {
+                        if (sat->value(c_d->second->b) == True)
+                            cnfl.push_back(!c_d->second->b);
+                        else if (sat->value(c_d->second->b) == False)
+                            cnfl.push_back(c_d->second->b);
+                    }
+                    c_from = _preds[dist->from][c_from];
+                }
+                cnfl.push_back(!p);
+                return false;
+            }
+            else if (_dists[dist->to][dist->from] >= -dist->dist)
+            { // we propagate..
+                const auto to_from = std::make_pair(dist->to, dist->from);
+                if (!layers.empty() && !layers.back().old_constrs.count(to_from))
+                {
+                    if (const auto &c_dist = dist_constr.find(to_from); c_dist != dist_constr.cend())
+                        // we store the current constraint for backtracking purposes..
+                        layers.back().old_constrs.emplace(c_dist->first, c_dist->second);
+                    else
+                        layers.back().old_constrs.emplace(to_from, nullptr);
+                }
+                dist_constr.emplace(to_from, dist);
+                propagate(dist->to, dist->from, -dist->dist - 1);
+            }
+            break;
+        }
         return true;
     }
 

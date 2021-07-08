@@ -16,6 +16,7 @@ namespace smt
 
   public:
     SMT_EXPORT rdl_theory(sat_core &sat, const size_t &size = 16);
+    SMT_EXPORT rdl_theory(sat_core &sat, const rdl_theory &orig);
     rdl_theory(const rdl_theory &orig) = delete;
     SMT_EXPORT virtual ~rdl_theory();
 
@@ -84,7 +85,7 @@ namespace smt
     std::vector<std::vector<inf_rational>> _dists;                           // the distance matrix..
     std::vector<std::vector<var>> _preds;                                    // the predecessor matrix..
     std::map<std::pair<var, var>, rdl_distance *> dist_constr;               // the currently enforced constraints..
-    std::unordered_map<var, std::vector<rdl_distance *>> var_dists;          // the constraints controlled by a propositional variable (for propagation purposes)..
+    std::unordered_map<var, rdl_distance *> var_dists;                       // the constraints controlled by a propositional variable (for propagation purposes)..
     std::map<std::pair<var, var>, std::vector<rdl_distance *>> dist_constrs; // the constraints between two temporal points (for propagation purposes)..
     std::vector<layer> layers;                                               // we store the updates..
     std::unordered_map<var, std::set<rdl_value_listener *>> listening;

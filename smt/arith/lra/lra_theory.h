@@ -24,6 +24,7 @@ namespace smt
 
   public:
     SMT_EXPORT lra_theory(sat_core &sat);
+    SMT_EXPORT lra_theory(sat_core &sat, const lra_theory &orig);
     lra_theory(const lra_theory &orig) = delete;
     SMT_EXPORT virtual ~lra_theory();
 
@@ -111,15 +112,15 @@ namespace smt
       lit reason;         // the reason for the value..
     };
 
-    std::vector<bound> c_bounds;                               // the current bounds..
-    std::vector<inf_rational> vals;                            // the current values..
-    std::map<const var, row *> tableau;                        // the sparse matrix..
-    std::unordered_map<std::string, var> exprs;                // the expressions (string to numeric variable) for which already exist slack variables..
-    std::unordered_map<std::string, lit> s_asrts;              // the assertions (string to literal) used for reducing the number of boolean variables..
-    std::unordered_map<var, std::vector<assertion *>> v_asrts; // the assertions (literal to assertions) used for enforcing (negating) assertions..
-    std::vector<std::vector<assertion *>> a_watches;           // for each variable 'v', a list of assertions watching 'v'..
-    std::vector<std::unordered_set<row *>> t_watches;          // for each variable 'v', a list of tableau rows watching 'v'..
-    std::vector<std::unordered_map<size_t, bound>> layers;     // we store the updated bounds..
+    std::vector<bound> c_bounds;                           // the current bounds..
+    std::vector<inf_rational> vals;                        // the current values..
+    std::map<const var, row *> tableau;                    // the sparse matrix..
+    std::unordered_map<std::string, var> exprs;            // the expressions (string to numeric variable) for which already exist slack variables..
+    std::unordered_map<std::string, lit> s_asrts;          // the assertions (string to literal) used for reducing the number of boolean variables..
+    std::unordered_map<var, assertion *> v_asrts;          // the assertions (literal to assertions) used for enforcing (negating) assertions..
+    std::vector<std::vector<assertion *>> a_watches;       // for each variable 'v', a list of assertions watching 'v'..
+    std::vector<std::unordered_set<row *>> t_watches;      // for each variable 'v', a list of tableau rows watching 'v'..
+    std::vector<std::unordered_map<size_t, bound>> layers; // we store the updated bounds..
     std::unordered_map<var, std::set<lra_value_listener *>> listening;
 
 #ifdef PARALLELIZE

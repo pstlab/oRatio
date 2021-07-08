@@ -7,6 +7,16 @@
 namespace smt
 {
     SMT_EXPORT lra_theory::lra_theory(sat_core &sat) : theory(sat) {}
+    SMT_EXPORT lra_theory::lra_theory(sat_core &sat, const lra_theory &orig) : theory(sat), c_bounds(orig.c_bounds), vals(orig.vals), exprs(orig.exprs), s_asrts(orig.s_asrts), layers(orig.layers), listening(orig.listening)
+    {
+        t_watches.resize(orig.t_watches.size());
+        for (const auto &[v, r] : orig.tableau)
+            tableau.emplace(v, new row(*this, v, r->l));
+
+        a_watches.resize(orig.a_watches.size());
+        for (const auto &[ctr_v, a] : orig.v_asrts)
+            v_asrts.emplace(ctr_v, new assertion(*this, a->o, a->b, a->x, a->v));
+    }
     SMT_EXPORT lra_theory::~lra_theory() {}
 
     SMT_EXPORT var lra_theory::new_var() noexcept
@@ -81,7 +91,7 @@ namespace smt
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
-            v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr_lit, slack, c_right));
+            v_asrts.emplace(ctr, new assertion(*this, op::leq, ctr_lit, slack, c_right));
             return ctr_lit;
         }
     }
@@ -124,7 +134,7 @@ namespace smt
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
-            v_asrts[ctr].push_back(new assertion(*this, op::leq, ctr_lit, slack, c_right));
+            v_asrts.emplace(ctr, new assertion(*this, op::leq, ctr_lit, slack, c_right));
             return ctr_lit;
         }
     }
@@ -167,7 +177,7 @@ namespace smt
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
-            v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr_lit, slack, c_right));
+            v_asrts.emplace(ctr, new assertion(*this, op::geq, ctr_lit, slack, c_right));
             return ctr_lit;
         }
     }
@@ -210,7 +220,7 @@ namespace smt
             const lit ctr_lit(ctr);
             bind(ctr);
             s_asrts.emplace(s_assertion, ctr_lit);
-            v_asrts[ctr].push_back(new assertion(*this, op::geq, ctr_lit, slack, c_right));
+            v_asrts.emplace(ctr, new assertion(*this, op::geq, ctr_lit, slack, c_right));
             return ctr_lit;
         }
     }
@@ -225,18 +235,18 @@ namespace smt
     bool lra_theory::propagate(const lit &p) noexcept
     {
         assert(cnfl.empty());
-        for (const auto &a : v_asrts[variable(p)])
-            switch (sat->value(a->b))
-            {
-            case True: // the assertion is direct..
-                if (!((a->o == op::leq) ? assert_upper(a->x, a->v, p) : assert_lower(a->x, a->v, p)))
-                    return false;
-                break;
-            case False: // the assertion is negated..
-                if (!((a->o == op::leq) ? assert_lower(a->x, a->v + inf_rational(rational::ZERO, rational::ONE), p) : assert_upper(a->x, a->v - inf_rational(rational::ZERO, rational::ONE), p)))
-                    return false;
-                break;
-            }
+        const auto &a = v_asrts[variable(p)];
+        switch (sat->value(a->b))
+        {
+        case True: // the assertion is direct..
+            if (!((a->o == op::leq) ? assert_upper(a->x, a->v, p) : assert_lower(a->x, a->v, p)))
+                return false;
+            break;
+        case False: // the assertion is negated..
+            if (!((a->o == op::leq) ? assert_lower(a->x, a->v + inf_rational(rational::ZERO, rational::ONE), p) : assert_upper(a->x, a->v - inf_rational(rational::ZERO, rational::ONE), p)))
+                return false;
+            break;
+        }
 
         return true;
     }
@@ -441,29 +451,29 @@ namespace smt
         for (const auto &r : x_j_watches)
 #ifdef PARALLELIZE
             sat->get_thread_pool().enqueue([this, x_j, expr, r]
-                                          {
-                                              rational cc = r->l.vars[x_j];
-                                              r->l.vars.erase(x_j);
-                                              for (const auto &[v, c] : std::map<const var, rational>(expr.vars))
-                                                  if (const auto trm_it = r->l.vars.find(v); trm_it == r->l.vars.cend())
-                                                  { // we are adding a new term to 'r'..
-                                                      r->l.vars.emplace(v, c * cc);
-                                                      std::lock_guard<std::mutex> lock(t_mtxs[v]);
-                                                      t_watches[v].emplace(r);
-                                                  }
-                                                  else
-                                                  { // we are updating an existing term of 'r'..
-                                                      assert(trm_it->first == v);
-                                                      trm_it->second += c * cc;
-                                                      if (trm_it->second == rational::ZERO)
-                                                      { // the updated term's coefficient has become equal to zero, hence we can remove the term..
-                                                          r->l.vars.erase(trm_it);
-                                                          std::lock_guard<std::mutex> lock(t_mtxs[v]);
-                                                          t_watches[v].erase(r);
-                                                      }
-                                                  }
-                                              r->l.known_term += expr.known_term * cc;
-                                          });
+                                           {
+                                               rational cc = r->l.vars[x_j];
+                                               r->l.vars.erase(x_j);
+                                               for (const auto &[v, c] : std::map<const var, rational>(expr.vars))
+                                                   if (const auto trm_it = r->l.vars.find(v); trm_it == r->l.vars.cend())
+                                                   { // we are adding a new term to 'r'..
+                                                       r->l.vars.emplace(v, c * cc);
+                                                       std::lock_guard<std::mutex> lock(t_mtxs[v]);
+                                                       t_watches[v].emplace(r);
+                                                   }
+                                                   else
+                                                   { // we are updating an existing term of 'r'..
+                                                       assert(trm_it->first == v);
+                                                       trm_it->second += c * cc;
+                                                       if (trm_it->second == rational::ZERO)
+                                                       { // the updated term's coefficient has become equal to zero, hence we can remove the term..
+                                                           r->l.vars.erase(trm_it);
+                                                           std::lock_guard<std::mutex> lock(t_mtxs[v]);
+                                                           t_watches[v].erase(r);
+                                                       }
+                                                   }
+                                               r->l.known_term += expr.known_term * cc;
+                                           });
         // we wait for all the rows to be updated..
         sat->get_thread_pool().join();
 #else
@@ -526,8 +536,7 @@ namespace smt
         {
             std::vector<json> c_j_asrts;
             c_j_asrts.reserve(v_asrts.size());
-            for (const auto &c_asrt : c_asrts.second)
-                c_j_asrts.push_back(c_asrt->to_json());
+            c_j_asrts.push_back(c_asrts.second->to_json());
             j_asrts.push_back(new array_val(c_j_asrts));
         }
         j_th->set("asrts", new array_val(j_asrts));
