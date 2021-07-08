@@ -33,6 +33,7 @@ namespace riddle
                 case '\r':
                 case '\n':
                     error("newline in string literal..");
+                    return nullptr;
                 default:
                     str += ch;
                 }
@@ -139,6 +140,7 @@ namespace riddle
                         break;
                     case '.':
                         error("invalid numeric literal..");
+                        return nullptr;
                     default:
                         return mk_rational_token("", dec);
                     }
@@ -220,6 +222,7 @@ namespace riddle
                             break;
                         case '.':
                             error("invalid numeric literal..");
+                            return nullptr;
                         default:
                             return mk_rational_token(intgr, dcml);
                         }
@@ -561,6 +564,7 @@ namespace riddle
                 end_pos = 0;
                 break;
             }
+            [[fallthrough]];
         case '\n':
             end_line++;
             end_pos = 0;

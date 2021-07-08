@@ -812,6 +812,7 @@ namespace riddle
             }
             default:
                 error("expected either '=' or an identifier..");
+                return nullptr;
             }
         }
         case LBRACE_ID: // either a block or a disjunction..

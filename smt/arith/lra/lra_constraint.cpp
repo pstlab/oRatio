@@ -40,6 +40,7 @@ namespace smt
                     th.cnfl.push_back(!th.c_bounds[lra_theory::lb_index(x_i)].reason); // or what asserted the lower bound is false..
                     return false;
                 }
+                break;
             case Undefined:
                 if (th.lb(x_i) >= v) // we propagate information to the sat core: [x_i >= lb(x_i)] -> [x_i >= v]..
                     th.record({b, !th.c_bounds[lra_theory::lb_index(x_i)].reason});
@@ -66,6 +67,7 @@ namespace smt
                     th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(x_i)].reason); // or what asserted the upper bound is false..
                     return false;
                 }
+                break;
             case Undefined:
                 if (th.ub(x_i) <= v) // we propagate information to the sat core: [x_i <= ub(x_i)] -> [x_i <= v]..
                     th.record({b, !th.c_bounds[lra_theory::ub_index(x_i)].reason});
@@ -82,6 +84,7 @@ namespace smt
                     th.cnfl.push_back(!th.c_bounds[lra_theory::ub_index(x_i)].reason); // or what asserted the upper bound is false..
                     return false;
                 }
+                break;
             case Undefined: // we propagate information to the sat core: [x_i <= ub(x_i)] -> ![x_i >= v]..
                 if (th.ub(x_i) < v)
                     th.record({!b, !th.c_bounds[lra_theory::ub_index(x_i)].reason});
@@ -180,6 +183,7 @@ namespace smt
                                 th.cnfl[0] = c->b;
                                 return false;
                             }
+                            break;
                         case Undefined:
                             if (lb >= c->v)
                             { // we propagate information to the sat core..
@@ -231,6 +235,7 @@ namespace smt
                                 th.cnfl[0] = c->b;
                                 return false;
                             }
+                            break;
                         case Undefined:
                             if (ub <= c->v)
                             { // we propagate information to the sat core..
@@ -249,6 +254,7 @@ namespace smt
                                 th.cnfl[0] = !c->b;
                                 return false;
                             }
+                            break;
                         case Undefined:
                             if (ub < c->v)
                             { // we propagate information to the sat core..
@@ -310,6 +316,7 @@ namespace smt
                                 th.cnfl[0] = c->b;
                                 return false;
                             }
+                            break;
                         case Undefined:
                             if (ub <= c->v)
                             { // we propagate information to the sat core..
@@ -328,6 +335,7 @@ namespace smt
                                 th.cnfl[0] = !c->b;
                                 return false;
                             }
+                            break;
                         case Undefined:
                             if (ub < c->v)
                             { // we propagate information to the sat core..
@@ -379,6 +387,7 @@ namespace smt
                                 th.cnfl[0] = !c->b;
                                 return false;
                             }
+                            break;
                         case Undefined:
                             if (lb > c->v)
                             { // we propagate information to the sat core..
@@ -397,6 +406,7 @@ namespace smt
                                 th.cnfl[0] = c->b;
                                 return false;
                             }
+                            break;
                         case Undefined:
                             if (lb >= c->v)
                             { // we propagate information to the sat core..
