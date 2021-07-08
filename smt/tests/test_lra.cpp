@@ -1,5 +1,6 @@
 #include "sat_core.h"
 #include "lra_theory.h"
+#include "sat_stack.h"
 #include <cassert>
 
 using namespace smt;
@@ -272,6 +273,64 @@ void test_nonroot_constraints()
     assert(!prop);
 }
 
+void test_sat_stack_0()
+{
+    sat_stack stack;
+    lra_theory lra(stack.top());
+
+    var x = lra.new_var();
+    var y = lra.new_var();
+
+    // x >= y
+    bool nc = stack.top().new_clause({lra.new_geq(lin(x, rational::ONE), lin(y, rational::ONE))});
+    assert(nc);
+
+    bool prop = stack.top().propagate();
+    assert(prop);
+
+    inf_rational x_val = lra.value(x);
+    assert(x_val == rational::ZERO);
+
+    inf_rational y_val = lra.value(y);
+    assert(y_val == rational::ZERO);
+
+    // linear constraints have to be created before pushing..
+    // y >= 1
+    auto y_geq_1 = lra.new_geq(lin(y, rational::ONE), lin(rational::ONE));
+    // x <= 0
+    auto x_leq_0 = lra.new_leq(lin(x, rational::ONE), lin(rational::ZERO));
+
+    // we push the sat stack..
+    stack.push();
+
+    nc = stack.top().new_clause({y_geq_1});
+    assert(nc);
+
+    prop = stack.top().propagate();
+    assert(prop);
+
+    x_val = lra.value(x);
+    assert(x_val == rational::ONE);
+
+    y_val = lra.value(y);
+    assert(y_val == rational::ONE);
+
+    // we pop the sat stack..
+    stack.pop();
+
+    nc = stack.top().new_clause({x_leq_0});
+    assert(nc);
+
+    prop = stack.top().propagate();
+    assert(prop);
+
+    x_val = lra.value(x);
+    assert(x_val == rational::ZERO);
+
+    y_val = lra.value(y);
+    assert(y_val == rational::ZERO);
+}
+
 int main(int, char **)
 {
     test_rationals_0();
@@ -286,4 +345,6 @@ int main(int, char **)
     test_strict_inequalities_1();
 
     test_nonroot_constraints();
+
+    test_sat_stack_0();
 }

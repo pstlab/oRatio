@@ -38,7 +38,7 @@ class Robot : Agent {
         chck_usr.end >= end + 5.0;
 
         fact use = new u.busy.Use(start:start - 5.0, end:end + 5.0, duration:duration + 10.0, amount:1.0);
-/*
+
         {
             goal cw = new CountWords(difficulty:"easy");
             cw.start >= start;
@@ -47,7 +47,7 @@ class Robot : Agent {
             goal cw = new CountWords(difficulty:"hard");
             cw.start >= start;
             cw.end <= end;
-        }*/
+        }
     }
 
     predicate CountWords(string difficulty) : Interval {
@@ -62,7 +62,7 @@ class Robot : Agent {
         chck_usr.end >= end + 5.0;
 
         fact use = new u.busy.Use(start:start - 5.0, end:end + 5.0, duration:duration + 10.0, amount:1.0);
-/*
+
         {
             goal cp1 = new ChestPress(session:1, num_reps:10.0);
             cp1.start >= start;
@@ -93,7 +93,7 @@ class Robot : Agent {
 
             fsr1.end + 60.0 <= fsr2.start;
             fsr2.end + 60.0 <= fsr3.start;
-        }*/
+        }
     }
 
     predicate ChestPress(int session, real num_reps) : Interval {
