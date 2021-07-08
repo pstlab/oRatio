@@ -2,6 +2,7 @@
 #pragma once
 
 #include "sat_core.h"
+#include <algorithm>
 
 namespace smt
 {
