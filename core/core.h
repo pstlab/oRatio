@@ -2,7 +2,7 @@
 
 #include "scope.h"
 #include "env.h"
-#include "sat_core.h"
+#include "sat_stack.h"
 #include "lra_theory.h"
 #include "ov_theory.h"
 #include "idl_theory.h"
@@ -75,11 +75,11 @@ namespace ratio
     core(const core &orig) = delete;
     CORE_EXPORT ~core();
 
-    inline smt::sat_core &get_sat_core() noexcept { return sat_cr; }     // returns the sat core..
-    inline smt::lra_theory &get_lra_theory() noexcept { return lra_th; } // returns the linear-real-arithmetic theory..
-    inline smt::ov_theory &get_ov_theory() noexcept { return ov_th; }    // returns the object-variable theory..
-    inline smt::idl_theory &get_idl_theory() noexcept { return idl_th; } // returns the integer difference logic theory..
-    inline smt::rdl_theory &get_rdl_theory() noexcept { return rdl_th; } // returns the real difference logic theory..
+    inline smt::sat_core &get_sat_core() noexcept { return stack.top(); } // returns the sat core..
+    inline smt::lra_theory &get_lra_theory() noexcept { return *lra_th; } // returns the linear-real-arithmetic theory..
+    inline smt::ov_theory &get_ov_theory() noexcept { return *ov_th; }    // returns the object-variable theory..
+    inline smt::idl_theory &get_idl_theory() noexcept { return *idl_th; } // returns the integer difference logic theory..
+    inline smt::rdl_theory &get_rdl_theory() noexcept { return *rdl_th; } // returns the real difference logic theory..
 
     CORE_EXPORT virtual void read(const std::string &script);             // parses the given riddle script..
     CORE_EXPORT virtual void read(const std::vector<std::string> &files); // parses the given riddle files..
@@ -170,11 +170,11 @@ namespace ratio
     CORE_EXPORT friend std::ostream &operator<<(std::ostream &os, const core &cr);
 
   private:
-    smt::sat_core sat_cr;   // the sat core..
-    smt::lra_theory lra_th; // the linear-real-arithmetic theory..
-    smt::ov_theory ov_th;   // the object-variable theory..
-    smt::idl_theory idl_th; // the integer difference logic theory..
-    smt::rdl_theory rdl_th; // the real difference logic theory..
+    smt::sat_stack stack;    // the sat stack..
+    smt::lra_theory *lra_th; // the linear-real-arithmetic theory..
+    smt::ov_theory *ov_th;   // the object-variable theory..
+    smt::idl_theory *idl_th; // the integer difference logic theory..
+    smt::rdl_theory *rdl_th; // the real difference logic theory..
 
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
   public:
