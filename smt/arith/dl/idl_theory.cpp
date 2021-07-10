@@ -25,7 +25,11 @@ namespace smt
             for (const auto &d : ds)
                 dist_constrs[fr_to].push_back(var_dists.at(variable(d->b)));
     }
-    SMT_EXPORT idl_theory::~idl_theory() {}
+    SMT_EXPORT idl_theory::~idl_theory()
+    {
+        for (const auto &[v, d] : var_dists)
+            delete d;
+    }
 
     SMT_EXPORT var idl_theory::new_var() noexcept
     {

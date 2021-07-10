@@ -25,7 +25,11 @@ namespace smt
             for (const auto &d : ds)
                 dist_constrs[fr_to].push_back(var_dists.at(variable(d->b)));
     }
-    SMT_EXPORT rdl_theory::~rdl_theory() {}
+    SMT_EXPORT rdl_theory::~rdl_theory()
+    {
+        for (const auto &[v, d] : var_dists)
+            delete d;
+    }
 
     SMT_EXPORT var rdl_theory::new_var() noexcept
     {

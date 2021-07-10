@@ -17,7 +17,13 @@ namespace smt
         for (const auto &[ctr_v, a] : orig.v_asrts)
             v_asrts.emplace(ctr_v, new assertion(*this, a->o, a->b, a->x, a->v));
     }
-    SMT_EXPORT lra_theory::~lra_theory() {}
+    SMT_EXPORT lra_theory::~lra_theory()
+    {
+        for (const auto &[v, r] : tableau)
+            delete r;
+        for (const auto &[ctr_v, a] : v_asrts)
+            delete a;
+    }
 
     SMT_EXPORT var lra_theory::new_var() noexcept
     {
