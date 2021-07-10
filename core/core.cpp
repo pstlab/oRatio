@@ -36,6 +36,12 @@ namespace ratio
         // we delete the compilation units..
         for (const auto &cu : cus)
             delete cu;
+
+        // we delete the theories..
+        delete lra_th;
+        delete ov_th;
+        delete idl_th;
+        delete rdl_th;
     }
 
     CORE_EXPORT void core::read(const std::string &script)
