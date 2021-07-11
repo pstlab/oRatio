@@ -31,6 +31,9 @@ namespace ratio
     inline std::vector<flaw *> flush_pending_flaws() { return slv.flush_pending_flaws(); }
     inline std::vector<std::vector<std::pair<smt::lit, double>>> get_incs() { return slv.get_incs(); }
 
+    void push_network() { slv.push_network(); }
+    void pop_network() { slv.pop_network(); }
+
   protected:
     solver &slv; // the solver this heuristic belongs to..
   };

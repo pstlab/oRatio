@@ -164,6 +164,9 @@ namespace ratio
 
     inline void restore_ni() noexcept { ni = tmp_ni; }
 
+    void push_network() { stack.push(); }
+    void pop_network() { stack.pop(); }
+
   public:
     CORE_EXPORT smt::json to_json() const noexcept override;
 
