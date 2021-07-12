@@ -6,14 +6,14 @@ namespace ratio
 {
   class flaw;
 
-  class heuristic
+  class graph
   {
     friend class solver;
 
   public:
-    heuristic(solver &slv);
-    heuristic(const heuristic &that) = delete;
-    virtual ~heuristic();
+    graph(solver &slv);
+    graph(const graph &that) = delete;
+    virtual ~graph();
 
     inline solver &get_solver() const noexcept { return slv; }
 

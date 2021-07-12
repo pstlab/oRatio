@@ -25,7 +25,7 @@
 
 namespace ratio
 {
-  class heuristic;
+  class graph;
   class flaw;
   class resolver;
   class smart_type;
@@ -36,7 +36,7 @@ namespace ratio
 
   class solver : public core, private smt::theory
   {
-    friend class heuristic;
+    friend class graph;
     friend class flaw;
     friend class smart_type;
     friend class atom_flaw;
@@ -120,7 +120,7 @@ namespace ratio
       std::unordered_set<flaw *> new_flaws;                  // the just activated flaws..
       std::unordered_set<flaw *> solved_flaws;               // the just solved flaws..
     };
-    heuristic &heur;                                            // the used heuristic..
+    graph &heur;                                                // the used graph..
     std::vector<smart_type *> sts;                              // the smart-types..
     resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
     std::vector<flaw *> pending_flaws;                          // pending flaws, waiting root-level for being initialized..

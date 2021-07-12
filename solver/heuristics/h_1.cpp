@@ -8,7 +8,7 @@ using namespace smt;
 
 namespace ratio
 {
-    h_1::h_1(solver &slv) : heuristic(slv), gamma(slv.get_sat_core().new_var()) { LOG("γ is " << to_string(gamma)); }
+    h_1::h_1(solver &slv) : graph(slv), gamma(slv.get_sat_core().new_var()) { LOG("γ is " << to_string(gamma)); }
     h_1::~h_1() {}
 
     void h_1::enqueue(flaw &f) { flaw_q.push_back(&f); }

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "heuristic.h"
+#include "graph.h"
 
 namespace ratio
 {
-  class h_1 : public heuristic
+  class h_1 : public graph
   {
   public:
     h_1(solver &slv);
