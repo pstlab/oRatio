@@ -36,6 +36,8 @@ namespace smt
     lbool value(const var &x) const noexcept;
     lbool value(const lit &p) const noexcept;
 
+    void remove_constr_from_reason(const var &x) noexcept;
+
   private:
     sat_core &sat;
     size_t id;

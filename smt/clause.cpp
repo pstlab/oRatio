@@ -66,6 +66,8 @@ namespace smt
         l0_w.erase(std::find(l0_w.cbegin(), l0_w.cend(), this));
         auto &l1_w = watches(!lits[1]);
         l1_w.erase(std::find(l1_w.cbegin(), l1_w.cend(), this));
+        for (const auto &l : lits)
+            remove_constr_from_reason(variable(l));
         delete this;
     }
 
