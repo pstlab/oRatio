@@ -85,12 +85,13 @@ namespace ratio
         slv.get_sat_core().simplify_db();
     }
 
-    void h_1::prune()
+    bool h_1::prune()
     {
         LOG("pruning the graph..");
         for (const auto &f : flaw_q)
             if (!slv.get_sat_core().new_clause({!f->get_phi()}))
-                throw unsolvable_exception();
+                return false;
+        return slv.get_sat_core().propagate();
     }
 
     void h_1::add_layer()

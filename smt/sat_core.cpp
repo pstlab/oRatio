@@ -432,7 +432,10 @@ namespace smt
                             prop_q.pop();
 
                         if (root_level())
+                        {
+                            th->cnfl.clear();
                             return false;
+                        }
 
                         // we analyze the theory's conflict, create a no-good from the analysis and backjump..
                         th->analyze_and_backjump();
@@ -448,7 +451,10 @@ namespace smt
             if (!th->check())
             {
                 if (root_level())
+                {
+                    th->cnfl.clear();
                     return false;
+                }
 
                 // we analyze the theory's conflict, create a no-good from the analysis and backjump..
                 th->analyze_and_backjump();
