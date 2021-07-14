@@ -62,7 +62,7 @@ namespace ratio
         push_network();
         // we prune the causal graph..
         while (!gr.prune())
-        { // we add a new layer..
+        { // we add a new layer to the causal graph..
             pop_network();
             gr.add_layer();
             push_network();
@@ -173,7 +173,7 @@ namespace ratio
             push_network();
             // we prune the causal graph..
             while (!gr.prune())
-            { // we add a new layer..
+            { // we add a new layer to the causal graph..
                 pop_network();
                 gr.add_layer();
                 push_network();
@@ -373,7 +373,7 @@ namespace ratio
             push_network();
             // we prune the causal graph..
             while (!gr.prune())
-            { // we add a new layer..
+            { // we add a new layer to the causal graph..
                 pop_network();
                 gr.add_layer();
                 push_network();
@@ -527,7 +527,12 @@ namespace ratio
                         learnt.push_back(!l);
                     record(learnt);
                     if (!get_sat_core().propagate())
-                        throw unsolvable_exception();
+                        do
+                        { // we add a new layer to the causal graph..
+                            pop_network();
+                            gr.add_layer();
+                            push_network();
+                        } while (!gr.prune());
                 }
 
                 // we re-collect all the inconsistencies from all the smart-types..
