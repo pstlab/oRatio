@@ -20,7 +20,9 @@ namespace ratio
   private:
     virtual void enqueue(flaw &f) = 0;
     virtual void propagate_costs(flaw &f) = 0;
-    virtual void check() = 0; // checks the state of the heuristic..
+    virtual void build() = 0;     // builds the graph..
+    virtual void prune() = 0;     // prunes the current graph..
+    virtual void add_layer() = 0; // adds a layer to the graph..
 
   protected:
     inline void new_flaw(flaw &f, const bool &enqueue = true) { slv.new_flaw(f, enqueue); }
@@ -30,9 +32,6 @@ namespace ratio
     inline std::unordered_set<flaw *> &get_flaws() { return slv.flaws; }
     inline std::vector<flaw *> flush_pending_flaws() { return slv.flush_pending_flaws(); }
     inline std::vector<std::vector<std::pair<smt::lit, double>>> get_incs() { return slv.get_incs(); }
-
-    void push_network() { slv.push_network(); }
-    void pop_network() { slv.pop_network(); }
 
   protected:
     solver &slv; // the solver this heuristic belongs to..

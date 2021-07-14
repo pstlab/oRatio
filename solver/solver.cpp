@@ -27,8 +27,8 @@ using namespace smt;
 
 namespace ratio
 {
-    SOLVER_EXPORT solver::solver() : core(), theory(get_sat_core()), heur(HEURISTIC) {}
-    SOLVER_EXPORT solver::~solver() { delete &heur; }
+    SOLVER_EXPORT solver::solver() : core(), theory(get_sat_core()), gr(HEURISTIC) {}
+    SOLVER_EXPORT solver::~solver() { delete &gr; }
 
     SOLVER_EXPORT void solver::read(const std::string &script)
     {
@@ -56,8 +56,10 @@ namespace ratio
     {
         FIRE_STARTED_SOLVING();
 
-        // we set the gamma variable..
-        heur.check();
+        // we build the cuasal graph..
+        gr.build();
+        // .. and we push the constraint network..
+        push_network();
 
         // we search for a consistent solution without flaws..
 #ifdef CHECK_INCONSISTENCIES
@@ -81,7 +83,7 @@ namespace ratio
             if (is_infinite((*best_flaw)->get_estimated_cost()))
             { // we don't know how to solve this flaw :(
                 do
-                { // we search..
+                { // we have to search..
                     next();
                 } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
                                      { return is_infinite(f->get_estimated_cost()); }));
@@ -122,7 +124,7 @@ namespace ratio
                 if (is_infinite((*best_flaw)->get_estimated_cost()))
                 { // we don't know how to solve this flaw :(
                     do
-                    { // we search..
+                    { // we have to search..
                         next();
                     } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
                                          { return is_infinite(f->get_estimated_cost()); }));
@@ -155,7 +157,11 @@ namespace ratio
 
         // we take the decision..
         if (!get_sat_core().assume(ch))
-            throw unsolvable_exception();
+        { // we have exhausted the search..
+            pop_network();
+            gr.add_layer();
+            push_network();
+        }
         assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto f)
                                                 { return (sat->value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
@@ -164,10 +170,6 @@ namespace ratio
                                                 { return is_positive_infinite(r->get_estimated_cost()) || sat->value(r->rho) != False; }); }));
 
         FIRE_STATE_CHANGED();
-
-        // we check if we need to expand the graph..
-        if (root_level())
-            heur.check();
     }
 
     bool_expr solver::new_bool() noexcept
@@ -247,7 +249,7 @@ namespace ratio
         FIRE_NEW_FLAW(f);
 
         if (enqueue) // we enqueue the flaw..
-            heur.enqueue(f);
+            gr.enqueue(f);
         else // we directly expand the flaw..
             expand_flaw(f);
 
@@ -304,11 +306,11 @@ namespace ratio
             throw unsolvable_exception();
 
         // we propagate the costs starting from the currently expanded flaw..
-        heur.propagate_costs(f);
+        gr.propagate_costs(f);
 
         // we clean up already solved flaws..
         if (sat->value(f.get_phi()) == True && std::any_of(f.resolvers.cbegin(), f.resolvers.cend(), [this](const auto &r)
-                                                          { return sat->value(r->rho) == True; }))
+                                                           { return sat->value(r->rho) == True; }))
             flaws.erase(&f); // this flaw has already been solved..
     }
 
@@ -345,7 +347,11 @@ namespace ratio
     {
         LOG("next..");
         if (!get_sat_core().next())
-            throw unsolvable_exception();
+        { // we have exhausted the search..
+            pop_network();
+            gr.add_layer();
+            push_network();
+        }
         assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto *f)
                                                 { return (sat->value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
@@ -354,10 +360,6 @@ namespace ratio
                                                 { return is_positive_infinite(r->get_estimated_cost()) || sat->value(r->rho) != False; }); }));
 
         FIRE_STATE_CHANGED();
-
-        // we check if we need to expand the graph..
-        if (root_level()) // since we are at root-level, we can reason about flaws..
-            heur.check();
     }
 
     bool solver::propagate(const lit &p)
@@ -389,7 +391,7 @@ namespace ratio
                 { // 'f' will never appear in any incoming partial solutions..
                     //  FIRE_FLAW_STATE_CHANGED(*f);
                     assert(!flaws.count(f));
-                    heur.propagate_costs(*f);
+                    gr.propagate_costs(*f);
                 }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
                     phis.erase(at_phis_p);
@@ -400,22 +402,16 @@ namespace ratio
             switch (sat->value(at_rhos_p->first))
             {
             case True:
-                for (const auto &r : at_rhos_p->second)
-                {                                                 // 'r' is an activated resolver..
-                                                                  //  FIRE_RESOLVER_STATE_CHANGED(*r);
+                for (const auto &r : at_rhos_p->second)           // 'r' is an activated resolver..
                     if (flaws.erase(&r->effect) && !root_level()) // this resolver has been activated, hence its effect flaw has been resolved (notice that we remove its effect only in case it was already active)..
                         trail.back().solved_flaws.insert(&r->effect);
-                }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
                     rhos.erase(at_rhos_p);
                 break;
             case False:
-                for (const auto &r : at_rhos_p->second)
-                {                                          // 'r' is a forbidden resolver..
-                                                           //  FIRE_RESOLVER_STATE_CHANGED(*r);
+                for (const auto &r : at_rhos_p->second)     // 'r' is a forbidden resolver..
                     if (sat->value(r->effect.phi) != False) // we update the cost of the resolver's effect..
-                        heur.propagate_costs(r->effect);
-                }
+                        gr.propagate_costs(r->effect);
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
                     rhos.erase(at_rhos_p);
                 break;
@@ -432,7 +428,7 @@ namespace ratio
         assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f)
                                                 { return sat->value(f->phi) != True || (flaws.count(f) || std::any_of(trail.cbegin(), trail.cend(), [this, f](const auto &l)
-                                                                                                                     { return l.solved_flaws.count(f); })); }); }));
+                                                                                                                      { return l.solved_flaws.count(f); })); }); }));
         assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f)
                                                 { return sat->value(f->phi) != False || is_positive_infinite(f->get_estimated_cost()); }); }));

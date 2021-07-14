@@ -8,7 +8,7 @@ using namespace smt;
 
 namespace ratio
 {
-    h_1::h_1(solver &slv) : graph(slv), gamma(slv.get_sat_core().new_var()) { LOG("γ is " << to_string(gamma)); }
+    h_1::h_1(solver &slv) : graph(slv) {}
     h_1::~h_1() {}
 
     void h_1::enqueue(flaw &f) { flaw_q.push_back(&f); }
@@ -44,44 +44,10 @@ namespace ratio
         visited.erase(&f);
     }
 
-    void h_1::check()
-    {
-        do
-        {
-            assert(slv.root_level());
-            if (slv.get_sat_core().value(gamma) != False) // a unit clause, not gamma, has been deduced or, simply, gamma has never been set..
-                build();                                  // the search procedure may have excluded those parts of the graph that could lead to a solution..
-            else
-            { // the graph has been invalidated..
-                LOG("search has exhausted the graph..");
-                // we create a new graph var..
-                gamma = lit(slv.get_sat_core().new_var());
-                LOG("γ is" << to_string(gamma));
-                already_closed.clear();
-                if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
-                                { return is_positive_infinite(f->get_estimated_cost()); }))
-                    build(); // we can still build upon the current graph..
-                else
-                    add_layer(); // we add a layer to the current graph..
-            }
-
-            LOG("pruning the graph..");
-            // these flaws have not been expanded, hence, cannot have a solution..
-            for (const auto &f : flaw_q)
-                if (already_closed.insert(variable(f->get_phi())).second)
-                    if (!slv.get_sat_core().new_clause({!gamma, !f->get_phi()}))
-                        throw unsolvable_exception();
-
-            LOG("enforcing γ..");
-            if (!slv.get_sat_core().assume(gamma))
-                throw unsolvable_exception();
-        } while (slv.get_sat_core().value(gamma) != True);
-    }
-
     void h_1::build()
     {
-        assert(slv.get_sat_core().root_level());
         LOG("building the causal graph..");
+        assert(slv.get_sat_core().root_level());
 
         while (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
                            { return is_positive_infinite(f->get_estimated_cost()); }))
@@ -117,6 +83,14 @@ namespace ratio
 
         // we perform some cleanings..
         slv.get_sat_core().simplify_db();
+    }
+
+    void h_1::prune()
+    {
+        LOG("pruning the graph..");
+        for (const auto &f : flaw_q)
+            if (!slv.get_sat_core().new_clause({!f->get_phi()}))
+                throw unsolvable_exception();
     }
 
     void h_1::add_layer()
