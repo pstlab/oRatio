@@ -74,7 +74,7 @@ namespace smt
     SMT_EXPORT lin lin::operator*(const rational &right) const noexcept
     {
         lin res = *this;
-        for (auto &[v, c] : res.vars)
+        for ([[maybe_unused]] auto &[v, c] : res.vars)
             c *= right;
         res.known_term *= right;
         return res;
@@ -83,7 +83,7 @@ namespace smt
     SMT_EXPORT lin operator*(const rational &lhs, const lin &rhs) noexcept
     {
         lin res = rhs;
-        for (auto &[v, c] : res.vars)
+        for ([[maybe_unused]] auto &[v, c] : res.vars)
             c *= lhs;
         res.known_term *= lhs;
         return res;
@@ -92,7 +92,7 @@ namespace smt
     SMT_EXPORT lin lin::operator/(const rational &right) const noexcept
     {
         lin res = *this;
-        for (auto &[v, c] : res.vars)
+        for ([[maybe_unused]] auto &[v, c] : res.vars)
             c /= right;
         res.known_term /= right;
         return res;
@@ -149,7 +149,7 @@ namespace smt
             known_term = rational::ZERO;
         }
         else
-            for (auto &[v, c] : vars)
+            for ([[maybe_unused]] auto &[v, c] : vars)
                 c *= right;
         return *this;
     }
@@ -163,7 +163,7 @@ namespace smt
             known_term = rational::ZERO;
         }
         else
-            for (auto &[v, c] : vars)
+            for ([[maybe_unused]] auto &[v, c] : vars)
                 c /= right;
         known_term /= right;
         return *this;

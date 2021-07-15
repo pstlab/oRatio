@@ -63,17 +63,17 @@ namespace ratio
 
         // we instantiate the uninstantiated fields..
         for (const auto &[f_name, f] : get_scope().get_fields())
-            if (!f->is_synthetic() && !itm.exprs.count((f->get_name())))
+            if (!f->is_synthetic() && !itm.exprs.count(f_name))
             { // the field is uninstantiated..
                 if (f->get_expression())
-                    itm.exprs.emplace(f->get_name(), dynamic_cast<const ast::expression *>(f->get_expression())->evaluate(*this, ctx));
+                    itm.exprs.emplace(f_name, dynamic_cast<const ast::expression *>(f->get_expression())->evaluate(*this, ctx));
                 else
                 {
                     type &tp = const_cast<type &>(f->get_type());
                     if (tp.is_primitive())
-                        itm.exprs.emplace(f->get_name(), tp.new_instance(ctx));
+                        itm.exprs.emplace(f_name, tp.new_instance(ctx));
                     else
-                        itm.exprs.emplace(f->get_name(), tp.new_existential());
+                        itm.exprs.emplace(f_name, tp.new_existential());
                 }
             }
 

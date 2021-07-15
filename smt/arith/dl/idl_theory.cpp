@@ -27,7 +27,7 @@ namespace smt
     }
     SMT_EXPORT idl_theory::~idl_theory()
     {
-        for (const auto &[v, d] : var_dists)
+        for ([[maybe_unused]] const auto &[v, d] : var_dists)
             delete d;
     }
 
@@ -145,7 +145,7 @@ namespace smt
             {
                 expr = expr / expr.vars.cbegin()->second;
                 auto it = expr.vars.cbegin();
-                const auto [v0, c0] = *it++;
+                [[maybe_unused]] const auto [v0, c0] = *it++;
                 assert(v0 == rational::ONE);
                 const auto [v1, c1] = *it;
                 if (c1 != -rational::ONE || !is_integer(expr.known_term))
@@ -321,7 +321,7 @@ namespace smt
         {
             const auto expr = l / l.vars.cbegin()->second;
             auto it = expr.vars.cbegin();
-            const auto [v0, c0] = *it++;
+            [[maybe_unused]] const auto [v0, c0] = *it++;
             const auto [v1, c1] = *it;
             if (!is_integer(c1) || c1.numerator() != -1 || !is_integer(l.known_term))
                 throw std::invalid_argument("not a valid integer difference logic expression..");

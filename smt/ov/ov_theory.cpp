@@ -75,7 +75,7 @@ namespace smt
         else
         {
             std::unordered_set<const var_value *> intersection;
-            for (const auto &[val, l] : assigns[left])
+            for ([[maybe_unused]] const auto &[val, l] : assigns[left])
                 if (assigns[right].count(val))
                     intersection.insert(val);
 

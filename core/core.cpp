@@ -21,15 +21,15 @@ namespace ratio
     CORE_EXPORT core::~core()
     {
         // we delete the predicates..
-        for (const auto &[pred_name, pred] : predicates)
+        for ([[maybe_unused]] const auto &[pred_name, pred] : predicates)
             delete pred;
 
         // we delete the types..
-        for (const auto &[tp_name, tp] : types)
+        for ([[maybe_unused]] const auto &[tp_name, tp] : types)
             delete tp;
 
         // we delete the methods..
-        for (const auto &[mthd_name, mthds] : methods)
+        for ([[maybe_unused]] const auto &[mthd_name, mthds] : methods)
             for (const auto &m : mthds)
                 delete m;
 
@@ -483,21 +483,21 @@ namespace ratio
     {
         std::set<item *> all_items;
         std::set<atom *> all_atoms;
-        for (const auto &[pred_name, pred] : predicates)
+        for ([[maybe_unused]] const auto &[pred_name, pred] : predicates)
             for (const auto &a : pred->get_instances())
                 all_atoms.insert(static_cast<atom *>(&*a));
         std::queue<type *> q;
-        for (const auto &[tp_name, tp] : types)
+        for ([[maybe_unused]] const auto &[tp_name, tp] : types)
             if (!tp->is_primitive())
                 q.push(tp);
         while (!q.empty())
         {
             for (const auto &i : q.front()->get_instances())
                 all_items.insert(&*i);
-            for (const auto &[pred_name, pred] : q.front()->get_predicates())
+            for ([[maybe_unused]] const auto &[pred_name, pred] : q.front()->get_predicates())
                 for (const auto &a : pred->get_instances())
                     all_atoms.insert(static_cast<atom *>(&*a));
-            for (const auto &[tp_name, tp] : q.front()->get_types())
+            for ([[maybe_unused]] const auto &[tp_name, tp] : q.front()->get_types())
                 q.push(tp);
             q.pop();
         }

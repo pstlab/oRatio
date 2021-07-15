@@ -27,7 +27,7 @@ namespace smt
     }
     SMT_EXPORT rdl_theory::~rdl_theory()
     {
-        for (const auto &[v, d] : var_dists)
+        for ([[maybe_unused]] const auto &[v, d] : var_dists)
             delete d;
     }
 

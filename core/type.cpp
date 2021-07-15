@@ -16,15 +16,15 @@ namespace ratio
     CORE_EXPORT type::~type()
     {
         // we delete the predicates..
-        for (const auto &[pred_name, pred] : predicates)
+        for ([[maybe_unused]] const auto &[pred_name, pred] : predicates)
             delete pred;
 
         // we delete the types..
-        for (const auto &[tp_name, tp] : types)
+        for ([[maybe_unused]] const auto &[tp_name, tp] : types)
             delete tp;
 
         // we delete the methods..
-        for (const auto &[mthd_name, mthds] : methods)
+        for ([[maybe_unused]] const auto &[mthd_name, mthds] : methods)
             for (const auto &m : mthds)
                 delete m;
 
@@ -135,7 +135,8 @@ namespace ratio
 
     const constructor &type::get_constructor(const std::vector<const type *> &ts) const
     {
-        assert(std::none_of(ts.cbegin(), ts.cend(), [](const type *t) { return t == nullptr; }));
+        assert(std::none_of(ts.cbegin(), ts.cend(), [](const type *t)
+                            { return t == nullptr; }));
         bool found = false;
         for (const auto &cnstr : constructors)
             if (cnstr->args.size() == ts.size())

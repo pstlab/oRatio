@@ -14,7 +14,7 @@ namespace ratio
     state_variable::~state_variable()
     {
         // we clear the atom listeners..
-        for (const auto &[atm, lstnrs] : atoms)
+        for ([[maybe_unused]] const auto &[atm, lstnrs] : atoms)
             delete lstnrs;
     }
 
@@ -23,7 +23,7 @@ namespace ratio
         std::vector<std::vector<std::pair<lit, double>>> incs;
         // we partition atoms for each state-variable they might insist on..
         std::unordered_map<const item *, std::vector<atom *>> sv_instances;
-        for (const auto &[atm, atm_lstnr] : atoms)
+        for ([[maybe_unused]] const auto &[atm, atm_lstnr] : atoms)
             if (get_core().get_sat_core().value(atm->get_sigma()) == True) // we filter out those which are not strictly active..
             {
                 expr c_scope = atm->get(TAU);
@@ -38,7 +38,7 @@ namespace ratio
             }
 
         // we detect inconsistencies for each of the instances..
-        for (const auto &[sv, atms] : sv_instances)
+        for ([[maybe_unused]] const auto &[sv, atms] : sv_instances)
         {
             // for each pulse, the atoms starting at that pulse..
             std::map<inf_rational, std::set<atom *>> starting_atoms;

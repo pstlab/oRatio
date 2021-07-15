@@ -18,14 +18,19 @@ namespace ratio
         new_constructors({new rr_constructor(*this)});                                            // we add a constructor..
         new_predicates({new use_predicate(*this)}, false);                                        // we add the 'Use' predicate, without notifying neither the resource nor its supertypes..
     }
-    reusable_resource::~reusable_resource() {}
+    reusable_resource::~reusable_resource()
+    {
+        // we clear the atom listeners..
+        for ([[maybe_unused]] const auto &[atm, lstnrs] : atoms)
+            delete lstnrs;
+    }
 
     std::vector<std::vector<std::pair<lit, double>>> reusable_resource::get_current_incs()
     {
         std::vector<std::vector<std::pair<lit, double>>> incs;
         // we partition atoms for each reusable-resource they might insist on..
         std::unordered_map<const item *, std::vector<atom *>> rr_instances;
-        for (const auto &[atm, atm_lstnr] : atoms)
+        for ([[maybe_unused]] const auto &[atm, atm_lstnr] : atoms)
             if (get_core().get_sat_core().value(atm->get_sigma()) == True) // we filter out those which are not strictly active..
             {
                 expr c_scope = atm->get(TAU);
@@ -85,11 +90,12 @@ namespace ratio
                     // we extract minimal conflict sets (MCSs)..
                     // we sort the overlapping atoms, according to their resource usage, in descending order..
                     std::vector<atom *> inc_atoms(overlapping_atoms.cbegin(), overlapping_atoms.cend());
-                    std::sort(inc_atoms.begin(), inc_atoms.end(), [this](const auto &atm0, const auto &atm1) {
-                        arith_expr amnt0 = atm0->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
-                        arith_expr amnt1 = atm1->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
-                        return get_core().arith_value(amnt0) > get_core().arith_value(amnt1);
-                    });
+                    std::sort(inc_atoms.begin(), inc_atoms.end(), [this](const auto &atm0, const auto &atm1)
+                              {
+                                  arith_expr amnt0 = atm0->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
+                                  arith_expr amnt1 = atm1->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
+                                  return get_core().arith_value(amnt0) > get_core().arith_value(amnt1);
+                              });
 
                     inf_rational mcs_usage;  // the concurrent resource usage of the mcs..
                     std::list<atom *> c_mcs; // the current mcs..

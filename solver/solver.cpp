@@ -545,11 +545,11 @@ namespace ratio
                 for (const auto &inc : incs)
                 {
                     double bst_commit = std::numeric_limits<double>::infinity();
-                    for (const auto &[choice, commit] : inc)
+                    for ([[maybe_unused]] const auto &[choice, commit] : inc)
                         if (commit < bst_commit)
                             bst_commit = commit;
                     double c_k_inv = 0;
-                    for (const auto &[choice, commit] : inc)
+                    for ([[maybe_unused]] const auto &[choice, commit] : inc)
                         c_k_inv += 1l / (1l + (commit - bst_commit));
                     if (c_k_inv < k_inv)
                     {
@@ -588,7 +588,7 @@ namespace ratio
         // some cleanings..
         sts.clear();
         std::queue<type *> q;
-        for (const auto &[tp_name, tp] : get_types())
+        for ([[maybe_unused]] const auto &[tp_name, tp] : get_types())
             if (!tp->is_primitive())
                 q.push(tp);
         while (!q.empty())

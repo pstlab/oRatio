@@ -7,7 +7,7 @@ namespace ratio
     scope::~scope()
     {
         // we delete the fields defined within this scope..
-        for (const auto &[f_name, f] : fields)
+        for ([[maybe_unused]] const auto &[f_name, f] : fields)
             delete f;
     }
 

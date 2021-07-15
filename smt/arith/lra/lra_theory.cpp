@@ -19,9 +19,9 @@ namespace smt
     }
     SMT_EXPORT lra_theory::~lra_theory()
     {
-        for (const auto &[v, r] : tableau)
+        for ([[maybe_unused]] const auto &[v, r] : tableau)
             delete r;
-        for (const auto &[ctr_v, a] : v_asrts)
+        for ([[maybe_unused]] const auto &[ctr_v, a] : v_asrts)
             delete a;
     }
 
@@ -64,7 +64,7 @@ namespace smt
         lin expr = left - right;
         std::vector<var> vars;
         vars.reserve(expr.vars.size());
-        for (const auto &[v, c] : expr.vars)
+        for ([[maybe_unused]] const auto &[v, c] : expr.vars)
             vars.push_back(v);
         for (const auto &v : vars)
             if (const auto at_v = tableau.find(v); at_v != tableau.cend())
@@ -107,7 +107,7 @@ namespace smt
         lin expr = left - right;
         std::vector<var> vars;
         vars.reserve(expr.vars.size());
-        for (const auto &[v, c] : expr.vars)
+        for ([[maybe_unused]] const auto &[v, c] : expr.vars)
             vars.push_back(v);
         for (const auto &v : vars)
             if (const auto at_v = tableau.find(v); at_v != tableau.cend())
@@ -150,7 +150,7 @@ namespace smt
         lin expr = left - right;
         std::vector<var> vars;
         vars.reserve(expr.vars.size());
-        for (const auto &[v, c] : expr.vars)
+        for ([[maybe_unused]] const auto &[v, c] : expr.vars)
             vars.push_back(v);
         for (const auto &v : vars)
             if (const auto at_v = tableau.find(v); at_v != tableau.cend())
@@ -193,7 +193,7 @@ namespace smt
         lin expr = left - right;
         std::vector<var> vars;
         vars.reserve(expr.vars.size());
-        for (const auto &[v, c] : expr.vars)
+        for ([[maybe_unused]] const auto &[v, c] : expr.vars)
             vars.push_back(v);
         for (const auto &v : vars)
             if (const auto at_v = tableau.find(v); at_v != tableau.cend())
@@ -442,7 +442,7 @@ namespace smt
         lin expr = std::move(ex_row->l);
         tableau.erase(x_i);
         // we remove the row from the watches..
-        for (const auto &[v, c] : expr.vars)
+        for ([[maybe_unused]] const auto &[v, c] : expr.vars)
             t_watches[v].erase(ex_row);
         delete ex_row;
 
@@ -513,7 +513,7 @@ namespace smt
     {
         row *r = new row(*this, x, l);
         tableau.emplace(x, r);
-        for (const auto &[v, c] : l.vars)
+        for ([[maybe_unused]] const auto &[v, c] : l.vars)
             t_watches[v].emplace(r);
     }
 

@@ -17,7 +17,7 @@ namespace ratio
     propositional_state::~propositional_state()
     {
         // we clear the atom listeners..
-        for (const auto &[atm, lstnr] : atoms)
+        for ([[maybe_unused]] const auto &[atm, lstnr] : atoms)
             delete lstnr;
     }
 

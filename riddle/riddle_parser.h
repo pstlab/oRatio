@@ -451,7 +451,7 @@ namespace riddle
       formula_statement(const formula_statement &orig) = delete;
       virtual ~formula_statement()
       {
-        for (const auto &[id_tkn, xpr] : assignments)
+        for ([[maybe_unused]] const auto &[id_tkn, xpr] : assignments)
           delete xpr;
       }
 
@@ -581,7 +581,7 @@ namespace riddle
       constructor_declaration(const constructor_declaration &orig) = delete;
       virtual ~constructor_declaration()
       {
-        for (const auto &[id_tkn, xprs] : init_list)
+        for ([[maybe_unused]] const auto &[id_tkn, xprs] : init_list)
           for (const auto &xpr : xprs)
             delete xpr;
         for (const auto &s : statements)
