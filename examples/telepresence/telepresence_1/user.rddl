@@ -1,0 +1,136 @@
+class Gender {}
+Gender male = new Gender(), female = new Gender();
+
+class Group {}
+Group retain = new Group(), improve = new Group();
+
+real interval = 10.0;
+
+class User {
+
+    Gender gender;
+    Group group;
+    bool is_forgetful;
+    bool is_hypertensive;
+    real one_rm;
+    Communication communication = new Communication(this);
+
+    User(Gender gender, Group group, bool is_forgetful, bool is_hypertensive, real one_rm) : gender(gender), group(group), is_forgetful(is_forgetful), is_hypertensive(is_hypertensive), one_rm(one_rm) {}
+
+    predicate Retain() {
+        // session 1..
+        goal cp0 = new communication.ChestPress(start:10.0, sets:3.0, repetitions:10.0);
+        goal bc0 = new communication.BicepsCurl(start:cp0.end + interval, sets:3.0, repetitions:10.0);
+        goal cs0 = new communication.ChairSquats(start:bc0.end + interval, sets:3.0, repetitions:10.0);
+        goal sle0 = new communication.SeatedLegExtensions(start:cs0.end + interval, sets:3.0, repetitions:10.0);
+        goal ac0 = new communication.AbdominalCrunch(start:sle0.end + interval, sets:3.0, repetitions:15.0);
+        goal be0 = new communication.BackExtensions(start:ac0.end + interval, sets:3.0, repetitions:15.0);
+
+        // session 2..
+        goal op1 = new communication.OverheadPress(start:be0.end + interval * 3.0, sets:3.0, repetitions:10.0);
+        goal pu1 = new communication.PushUps(start:op1.end + interval, sets:3.0, repetitions:10.0);
+        goal shc1 = new communication.StandingHamstringsCurl(start:pu1.end + interval, sets:3.0, repetitions:10.0);
+        goal scr1 = new communication.StandingCalfRaises(start:shc1.end + interval, sets:3.0, repetitions:10.0);
+        goal ac1 = new communication.AbdominalCrunch(start:scr1.end + interval, sets:3.0, repetitions:15.0);
+        goal be1 = new communication.BackExtensions(start:ac1.end + interval, sets:3.0, repetitions:15.0);
+
+        // session 3..
+        goal fsr2 = new communication.FrontShoulderRaise(start:be1.end + interval * 3.0, sets:3.0, repetitions:10.0);
+        goal ste2 = new communication.StandingTricepsExtension(start:fsr2.end + interval, sets:3.0, repetitions:10.0);
+        goal shl2 = new communication.SupineHipLifts(start:ste2.end + interval, sets:3.0, repetitions:15.0);
+        goal shr2 = new communication.SideHipRaise(start:shl2.end + interval, sets:3.0, repetitions:10.0);
+        goal ac2 = new communication.AbdominalCrunch(start:shr2.end + interval, sets:3.0, repetitions:15.0);
+        goal be2 = new communication.BackExtensions(start:ac2.end + interval, sets:3.0, repetitions:15.0);
+    }
+
+    predicate Improve() {
+        // session 1..
+        goal cp0 = new communication.ChestPress(start:10.0, sets:5.0, repetitions:15.0);
+        goal ur0 = new communication.UprightRow(start:cp0.end + interval, sets:5.0, repetitions:15.0);
+        goal ste0 = new communication.StandingTricepsExtension(start:ur0.end + interval, sets:5.0, repetitions:15.0);
+        goal st0 = new communication.ShoulderT(start:ste0.end + interval, sets:5.0, repetitions:15.0);
+        goal cs0 = new communication.ChairSquats(start:st0.end + interval, sets:5.0, repetitions:15.0);
+        goal scr0 = new communication.StandingCalfRaises(start:cs0.end + interval, sets:5.0, repetitions:15.0);
+        goal shl0 = new communication.SupineHipLifts(start:scr0.end + interval, sets:5.0, repetitions:10.0);
+        goal shr0 = new communication.SideHipRaise(start:shl0.end + interval, sets:5.0, repetitions:15.0);
+        goal ac0 = new communication.AbdominalCrunch(start:shr0.end + interval, sets:5.0, repetitions:10.0);
+        goal be0 = new communication.BackExtensions(start:ac0.end + interval, sets:5.0, repetitions:10.0);
+
+        // session 2..
+        goal pu1 = new communication.PushUps(start:be0.end + interval * 3.0, sets:5.0, repetitions:15.0);
+        goal op1 = new communication.OverheadPress(start:pu1.end + interval, sets:5.0, repetitions:15.0);
+        goal bc1 = new communication.BicepsCurl(start:op1.end + interval, sets:5.0, repetitions:15.0);
+        goal fsr1 = new communication.FrontShoulderRaise(start:bc1.end + interval, sets:5.0, repetitions:15.0);
+        goal cs1 = new communication.ChairSquats(start:fsr1.end + interval, sets:5.0, repetitions:15.0);
+        goal sle1 = new communication.SeatedLegExtensions(start:cs1.end + interval, sets:5.0, repetitions:15.0);
+        goal shc1 = new communication.StandingHamstringsCurl(start:sle1.end + interval, sets:5.0, repetitions:10.0);
+        goal scr1 = new communication.StandingCalfRaises(start:shc1.end + interval, sets:5.0, repetitions:15.0);
+        goal ac1 = new communication.AbdominalCrunch(start:scr1.end + interval, sets:5.0, repetitions:10.0);
+        goal be1 = new communication.BackExtensions(start:ac1.end + interval, sets:5.0, repetitions:10.0);
+
+        // session 3..
+        goal cp2 = new communication.ChestPress(start:be1.end + interval * 3.0, sets:5.0, repetitions:15.0);
+        goal op2 = new communication.OverheadPress(start:cp2.end + interval, sets:5.0, repetitions:15.0);
+        goal bc2 = new communication.BicepsCurl(start:op2.end + interval, sets:5.0, repetitions:15.0);
+        goal ste2 = new communication.StandingTricepsExtension(start:bc2.end + interval, sets:5.0, repetitions:15.0);
+        goal shl2 = new communication.SupineHipLifts(start:ste2.end + interval, sets:5.0, repetitions:10.0);
+        goal shr2 = new communication.SideHipRaise(start:shl2.end + interval, sets:5.0, repetitions:15.0);
+        goal shc2 = new communication.StandingHamstringsCurl(start:shr2.end + interval, sets:5.0, repetitions:10.0);
+        goal sle2 = new communication.SeatedLegExtensions(start:shc2.end + interval, sets:5.0, repetitions:15.0);
+        goal ac2 = new communication.AbdominalCrunch(start:sle2.end + interval, sets:5.0, repetitions:10.0);
+        goal be2 = new communication.BackExtensions(start:ac2.end + interval, sets:5.0, repetitions:10.0);
+
+        // session 4..
+        goal cp3 = new communication.ChestPress(start:1000.0, sets:3.0, repetitions:10.0);
+        goal bc3 = new communication.BicepsCurl(start:cp3.end + interval, sets:3.0, repetitions:10.0);
+        goal cs3 = new communication.ChairSquats(start:bc3.end + interval, sets:3.0, repetitions:10.0);
+        goal sle3 = new communication.SeatedLegExtensions(start:cs3.end + interval, sets:3.0, repetitions:10.0);
+        goal ac3 = new communication.AbdominalCrunch(start:sle3.end + interval, sets:3.0, repetitions:15.0);
+        goal be3 = new communication.BackExtensions(start:ac3.end + interval, sets:3.0, repetitions:15.0);
+
+        // session 5..
+        goal op4 = new communication.OverheadPress(start:be3.end + interval * 3.0, sets:3.0, repetitions:10.0);
+        goal pu4 = new communication.PushUps(start:op4.end + interval, sets:3.0, repetitions:10.0);
+        goal shc4 = new communication.StandingHamstringsCurl(start:pu4.end + interval, sets:3.0, repetitions:10.0);
+        goal scr4 = new communication.StandingCalfRaises(start:shc4.end + interval, sets:3.0, repetitions:10.0);
+        goal ac4 = new communication.AbdominalCrunch(start:scr4.end + interval, sets:3.0, repetitions:15.0);
+        goal be4 = new communication.BackExtensions(start:ac4.end + interval, sets:3.0, repetitions:15.0);
+
+        // session 6..
+        goal fsr5 = new communication.FrontShoulderRaise(start:be4.end + interval * 3.0, sets:3.0, repetitions:10.0);
+        goal ste5 = new communication.StandingTricepsExtension(start:fsr5.end + interval, sets:3.0, repetitions:10.0);
+        goal shl5 = new communication.SupineHipLifts(start:ste5.end + interval, sets:3.0, repetitions:15.0);
+        goal shr5 = new communication.SideHipRaise(start:shl5.end + interval, sets:3.0, repetitions:10.0);
+        goal ac5 = new communication.AbdominalCrunch(start:shr5.end + interval, sets:3.0, repetitions:15.0);
+        goal be5 = new communication.BackExtensions(start:ac5.end + interval, sets:3.0, repetitions:15.0);
+    }
+
+    predicate BloodPressureReminders() {
+        goal bpr0 = new communication.Message(intent:"blood_pressure_reminder"); bpr0.start >= 50.0; bpr0.start <= 100.0;
+        goal bpr1 = new communication.Message(intent:"blood_pressure_reminder"); bpr1.start >= 250.0; bpr1.start <= 300.0;
+        goal bpr2 = new communication.Message(intent:"blood_pressure_reminder"); bpr2.start >= 750.0; bpr2.start <= 800.0;
+    }
+
+    predicate BloodPillsReminders() {
+        goal bpr0 = new communication.Message(intent:"blood_pills_reminder"); bpr0.start >= 50.0; bpr0.start <= 100.0;
+        goal bpr1 = new communication.Message(intent:"blood_pills_reminder"); bpr1.start >= 250.0; bpr1.start <= 300.0;
+        goal bpr2 = new communication.Message(intent:"blood_pills_reminder"); bpr2.start >= 750.0; bpr2.start <= 800.0;
+    }
+
+    predicate KeepHealthy() {
+        {
+            group == retain;
+            goal r = new Retain();
+        } or {
+            group == improve;
+            goal i = new Improve();
+        }
+
+        {
+            is_forgetful;
+            is_hypertensive;
+            goal bprr = new BloodPressureReminders();
+            goal bpir = new BloodPillsReminders();
+        } or {}
+    }
+}

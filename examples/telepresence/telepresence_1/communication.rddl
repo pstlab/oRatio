@@ -1,0 +1,355 @@
+class Intensity {}
+Intensity light = new Intensity(), moderate = new Intensity();
+
+class Communication : StateVariable {
+
+    User u;
+
+    Communication(User u) : u(u) {}
+
+    predicate Message(string intent) {
+        duration >= 10;
+    }
+
+    predicate ChestPress(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 2.0;
+            } or {
+                u.gender == female;
+                kgs == 1.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 4.0;
+            } or {
+                u.gender == female;
+                kgs == 2.0;
+            }
+        }
+    }
+
+    predicate UprightRow(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 2.0;
+            } or {
+                u.gender == female;
+                kgs == 1.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 4.0;
+            } or {
+                u.gender == female;
+                kgs == 2.0;
+            }
+        }
+    }
+
+    predicate FrontShoulderRaise(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 2.0;
+            } or {
+                u.gender == female;
+                kgs == 1.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 4.0;
+            } or {
+                u.gender == female;
+                kgs == 2.0;
+            }
+        }
+    }
+
+    predicate BicepsCurl(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 2.0;
+            } or {
+                u.gender == female;
+                kgs == 1.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 4.0;
+            } or {
+                u.gender == female;
+                kgs == 2.0;
+            }
+        }
+    }
+
+    predicate ShoulderT(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 2.0;
+            } or {
+                u.gender == female;
+                kgs == 1.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 4.0;
+            } or {
+                u.gender == female;
+                kgs == 2.0;
+            }
+        }
+    }
+
+    predicate StandingTricepsExtension(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 2.0;
+            } or {
+                u.gender == female;
+                kgs == 1.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 4.0;
+            } or {
+                u.gender == female;
+                kgs == 2.0;
+            }
+        }
+    }
+
+    predicate OverheadPress(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 2.0;
+            } or {
+                u.gender == female;
+                kgs == 1.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 4.0;
+            } or {
+                u.gender == female;
+                kgs == 2.0;
+            }
+        }
+    }
+
+    predicate PushUps(Intensity i, real sets, real repetitions) {
+        duration >= 20;
+    }
+
+    predicate SeatedLegExtensions(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 12.0;
+            } or {
+                u.gender == female;
+                kgs == 6.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 24.0;
+            } or {
+                u.gender == female;
+                kgs == 12.0;
+            }
+        }
+    }
+
+    predicate StandingHamstringsCurl(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 12.0;
+            } or {
+                u.gender == female;
+                kgs == 6.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 24.0;
+            } or {
+                u.gender == female;
+                kgs == 12.0;
+            }
+        }
+    }
+
+    predicate StandingCalfRaises(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 12.0;
+            } or {
+                u.gender == female;
+                kgs == 6.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 24.0;
+            } or {
+                u.gender == female;
+                kgs == 12.0;
+            }
+        }
+    }
+
+    predicate ChairSquats(Intensity i, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                kgs == 12.0;
+            } or {
+                u.gender == female;
+                kgs == 6.0;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            {
+                u.gender == male;
+                kgs == 24.0;
+            } or {
+                u.gender == female;
+                kgs == 12.0;
+            }
+        }
+    }
+
+    predicate SupineHipLifts(real sets, real repetitions) {
+        duration >= 20;
+    }
+
+    predicate SideHipRaise(Intensity i, bool weights, real kgs, real sets, real repetitions) {
+        duration >= 20;
+        {
+            i == light;
+            u.one_rm >= 0.25;
+            u.one_rm < 0.5;
+            {
+                u.gender == male;
+                weights;
+                kgs == 6.0;
+            } or {
+                u.gender == female;
+                weights == false;
+            }
+        } or {
+            i == moderate;
+            u.one_rm >= 0.5;
+            u.one_rm < 0.7;
+            weights;
+            {
+                u.gender == male;
+                kgs == 12.0;
+            } or {
+                u.gender == female;
+                kgs == 6.0;
+            }
+        }
+    }
+
+    predicate AbdominalCrunch(real sets, real repetitions) {
+        duration >= 20;
+    }
+
+    predicate BackExtensions(real sets, real repetitions) {
+        duration >= 20;
+    }
+}
