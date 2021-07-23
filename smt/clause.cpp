@@ -6,7 +6,6 @@
 namespace smt
 {
     clause::clause(sat_core &s, std::vector<lit> lits) : constr(s), lits(std::move(lits)) {}
-    clause::~clause() {}
 
     clause *clause::new_clause(sat_core &s, std::vector<lit> lits)
     {

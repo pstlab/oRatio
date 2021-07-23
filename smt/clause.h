@@ -10,7 +10,7 @@ namespace smt
   /**
    * This class is used for representing propositional clauses.
    */
-  class clause : public constr
+  class clause final : public constr
   {
     friend class sat_core;
     friend class theory;
@@ -18,7 +18,7 @@ namespace smt
   private:
     clause(sat_core &s, std::vector<lit> lits);
     clause(const clause &orig) = delete;
-    ~clause() override;
+    ~clause() override = default;
 
     static clause *new_clause(sat_core &s, std::vector<lit> lits);
 
