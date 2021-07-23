@@ -11,14 +11,14 @@ namespace ratio
 {
   class order_resolver;
 
-  class state_variable : public smart_type
+  class state_variable final : public smart_type
   {
     friend class order_resolver;
 
   public:
     state_variable(solver &slv);
     state_variable(const state_variable &orig) = delete;
-    virtual ~state_variable();
+    ~state_variable();
 
   private:
     std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;
@@ -28,21 +28,19 @@ namespace ratio
     void store_variables(atom &atm0, atom &atm1);
 
     // the state-variable constructor..
-    class sv_constructor : public constructor
+    class sv_constructor final : public constructor
     {
     public:
       sv_constructor(state_variable &sv);
       sv_constructor(sv_constructor &&) = delete;
-      virtual ~sv_constructor();
     };
 
     // the atom listener for the state-variable..
-    class sv_atom_listener : public atom_listener
+    class sv_atom_listener final : public atom_listener
     {
     public:
       sv_atom_listener(state_variable &sv, atom &atm);
       sv_atom_listener(sv_atom_listener &&) = delete;
-      virtual ~sv_atom_listener();
 
     private:
       void something_changed();
@@ -57,14 +55,13 @@ namespace ratio
     };
 
     // the flaw (i.e. two or more temporally overlapping atoms on the same state-variable instance) that can arise from a state-variable..
-    class sv_flaw : public flaw
+    class sv_flaw final : public flaw
     {
       friend class state_variable;
 
     public:
       sv_flaw(state_variable &sv, const std::set<atom *> &atms);
       sv_flaw(sv_flaw &&) = delete;
-      virtual ~sv_flaw();
 
       std::string get_label() const override;
 
@@ -77,12 +74,11 @@ namespace ratio
     };
 
     // a resolver for temporally ordering atoms..
-    class order_resolver : public resolver
+    class order_resolver final : public resolver
     {
     public:
       order_resolver(sv_flaw &flw, const smt::lit &r, const atom &before, const atom &after);
       order_resolver(const order_resolver &that) = delete;
-      virtual ~order_resolver();
 
       std::string get_label() const override;
 
@@ -95,12 +91,11 @@ namespace ratio
     };
 
     // a resolver for placing atoms on a specific state-variable..
-    class place_resolver : public resolver
+    class place_resolver final : public resolver
     {
     public:
       place_resolver(sv_flaw &flw, const smt::lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm);
       place_resolver(const place_resolver &that) = delete;
-      virtual ~place_resolver();
 
       std::string get_label() const override;
 
@@ -114,12 +109,11 @@ namespace ratio
     };
 
     // a resolver for forbidding atoms on a specific state-variable..
-    class forbid_resolver : public resolver
+    class forbid_resolver final : public resolver
     {
     public:
       forbid_resolver(sv_flaw &flw, atom &atm, item &itm);
       forbid_resolver(const forbid_resolver &that) = delete;
-      virtual ~forbid_resolver();
 
       std::string get_label() const override;
 

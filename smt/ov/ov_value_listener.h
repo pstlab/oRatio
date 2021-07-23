@@ -11,7 +11,7 @@ namespace smt
   public:
     ov_value_listener(ov_theory &s) : th(s) {}
     ov_value_listener(const ov_value_listener &that) = delete;
-    virtual ~ov_value_listener() {}
+    virtual ~ov_value_listener() = default;
 
   protected:
     inline void listen_set(var v) noexcept { th.listen(v, this); }

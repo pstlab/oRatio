@@ -11,7 +11,6 @@ using namespace smt;
 namespace ratio
 {
     agent::agent(solver &slv) : smart_type(slv, slv, AGENT_NAME), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")) { new_constructors({new agnt_constructor(*this)}); }
-    agent::~agent() {}
 
     std::vector<std::vector<std::pair<lit, double>>> agent::get_current_incs()
     {

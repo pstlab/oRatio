@@ -12,14 +12,13 @@ namespace smt
 {
   class ov_value_listener;
 
-  class ov_theory : public theory
+  class ov_theory final : public theory
   {
     friend class ov_value_listener;
 
   public:
     SMT_EXPORT ov_theory(sat_core &sat);
     ov_theory(const ov_theory &orig) = delete;
-    SMT_EXPORT virtual ~ov_theory();
 
     SMT_EXPORT var new_var(const std::vector<var_value *> &items, const bool enforce_exct_one = true) noexcept; // creates and returns a new object variable having the given domain..
     SMT_EXPORT var new_var(const std::vector<lit> &lits, const std::vector<var_value *> &vals) noexcept;        // creates and returns a new object variable having the given domain, the presence of the values into the domain is controlled by the 'lits' literals..

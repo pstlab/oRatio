@@ -58,14 +58,13 @@ namespace smt
     inline void listen(const var &v, rdl_value_listener *const l) noexcept { listening[v].insert(l); }
 
   private:
-    class rdl_distance
+    class rdl_distance final
     {
       friend class rdl_theory;
 
     public:
       rdl_distance(const lit &b, const var &from, const var &to, const inf_rational &dist) : b(b), from(from), to(to), dist(dist) {}
       rdl_distance(const rdl_distance &orig) = delete;
-      ~rdl_distance() {}
 
     private:
       const lit b; // the propositional literal associated to the distance constraint..

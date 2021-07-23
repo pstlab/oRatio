@@ -286,25 +286,20 @@ namespace ratio
     }
 
     bool_type::bool_type(core &cr) : type(cr, cr, BOOL_KEYWORD, true) {}
-    bool_type::~bool_type() {}
     expr bool_type::new_instance(context &) noexcept { return get_core().new_bool(); }
 
     int_type::int_type(core &cr) : type(cr, cr, INT_KEYWORD, true) {}
-    int_type::~int_type() {}
     bool int_type::is_assignable_from(const type &t) const noexcept { return &t == this || &t == &get_core().get_type(TP_KEYWORD); }
     expr int_type::new_instance(context &) noexcept { return get_core().new_int(); }
 
     real_type::real_type(core &cr) : type(cr, cr, REAL_KEYWORD, true) {}
-    real_type::~real_type() {}
     bool real_type::is_assignable_from(const type &t) const noexcept { return &t == this || &t == &get_core().get_type(TP_KEYWORD); }
     expr real_type::new_instance(context &) noexcept { return get_core().new_real(); }
 
     tp_type::tp_type(core &cr) : type(cr, cr, TP_KEYWORD, true) {}
-    tp_type::~tp_type() {}
     bool tp_type::is_assignable_from(const type &t) const noexcept { return &t == this || &t == &get_core().get_type(INT_KEYWORD) || &t == &get_core().get_type(REAL_KEYWORD); }
     expr tp_type::new_instance(context &) noexcept { return get_core().new_tp(); }
 
     string_type::string_type(core &cr) : type(cr, cr, STRING_KEYWORD, true) {}
-    string_type::~string_type() {}
     expr string_type::new_instance(context &) noexcept { return get_core().new_string(); }
 } // namespace ratio

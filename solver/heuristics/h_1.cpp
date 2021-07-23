@@ -9,7 +9,6 @@ using namespace smt;
 namespace ratio
 {
     h_1::h_1(solver &slv) : graph(slv) {}
-    h_1::~h_1() {}
 
     void h_1::enqueue(flaw &f) { flaw_q.push_back(&f); }
 

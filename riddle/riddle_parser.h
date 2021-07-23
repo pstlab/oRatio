@@ -10,9 +10,9 @@ namespace riddle
     class expression
     {
     public:
-      expression() {}
+      expression() = default;
       expression(const expression &orig) = delete;
-      virtual ~expression() {}
+      virtual ~expression() = default;
     };
 
     class bool_literal_expression : public expression
@@ -20,7 +20,7 @@ namespace riddle
     public:
       RIDDLE_EXPORT bool_literal_expression(const bool_token &l) : literal(l) {}
       bool_literal_expression(const bool_literal_expression &orig) = delete;
-      RIDDLE_EXPORT virtual ~bool_literal_expression() {}
+      RIDDLE_EXPORT virtual ~bool_literal_expression() = default;
 
     protected:
       const bool_token literal;
@@ -31,7 +31,7 @@ namespace riddle
     public:
       RIDDLE_EXPORT int_literal_expression(const int_token &l) : literal(l) {}
       int_literal_expression(const int_literal_expression &orig) = delete;
-      RIDDLE_EXPORT virtual ~int_literal_expression() {}
+      RIDDLE_EXPORT virtual ~int_literal_expression() = default;
 
     protected:
       const int_token literal;
@@ -42,7 +42,7 @@ namespace riddle
     public:
       RIDDLE_EXPORT real_literal_expression(const real_token &l) : literal(l) {}
       real_literal_expression(const real_literal_expression &orig) = delete;
-      RIDDLE_EXPORT virtual ~real_literal_expression() {}
+      RIDDLE_EXPORT virtual ~real_literal_expression() = default;
 
     protected:
       const real_token literal;
@@ -53,7 +53,7 @@ namespace riddle
     public:
       RIDDLE_EXPORT string_literal_expression(const string_token &l) : literal(l) {}
       string_literal_expression(const string_literal_expression &orig) = delete;
-      RIDDLE_EXPORT virtual ~string_literal_expression() {}
+      RIDDLE_EXPORT virtual ~string_literal_expression() = default;
 
     protected:
       const string_token literal;
@@ -238,7 +238,7 @@ namespace riddle
     public:
       RIDDLE_EXPORT id_expression(const std::vector<id_token> &is) : ids(is) {}
       id_expression(const id_expression &orig) = delete;
-      RIDDLE_EXPORT virtual ~id_expression() {}
+      RIDDLE_EXPORT virtual ~id_expression() = default;
 
     protected:
       const std::vector<id_token> ids;
@@ -368,9 +368,9 @@ namespace riddle
     class statement
     {
     public:
-      statement() {}
+      statement() = default;
       statement(const statement &orig) = delete;
-      virtual ~statement() {}
+      virtual ~statement() = default;
     };
 
     class local_field_statement : public statement
@@ -378,7 +378,7 @@ namespace riddle
     public:
       local_field_statement(const std::vector<id_token> &ft, const std::vector<id_token> &ns, const std::vector<const expression *> &es) : field_type(ft), names(ns), xprs(es) {}
       local_field_statement(const local_field_statement &orig) = delete;
-      virtual ~local_field_statement() {}
+      virtual ~local_field_statement() = default;
 
     protected:
       const std::vector<id_token> field_type;
@@ -536,7 +536,7 @@ namespace riddle
     public:
       enum_declaration(const id_token &n, const std::vector<string_token> &es, const std::vector<std::vector<id_token>> &trs) : name(n), enums(es), type_refs(trs) {}
       enum_declaration(const enum_declaration &orig) = delete;
-      virtual ~enum_declaration() {}
+      virtual ~enum_declaration() = default;
 
     protected:
       const id_token name;

@@ -153,9 +153,7 @@ namespace smt
         }
     }
 
-    json_core::json_core() {}
     json_core::json_core(const std::map<std::string, json> &vals) : vals(vals) {}
-    json_core::~json_core() {}
 
     JSON_EXPORT void json_core::set_null(const std::string &id) { vals.emplace(id, new null_val()); }
 
@@ -172,38 +170,25 @@ namespace smt
         os << '}';
     }
 
-    JSON_EXPORT null_val::null_val() {}
-    JSON_EXPORT null_val::~null_val() {}
-
     void null_val::to_json(std::ostream &os) const noexcept { os << "null"; }
 
-    JSON_EXPORT bool_val::bool_val() {}
     JSON_EXPORT bool_val::bool_val(const bool &val) : val(val) {}
-    JSON_EXPORT bool_val::~bool_val() {}
 
     void bool_val::to_json(std::ostream &os) const noexcept { os << std::boolalpha << val; }
 
-    JSON_EXPORT string_val::string_val() {}
     JSON_EXPORT string_val::string_val(const std::string &val) : val(val) {}
-    JSON_EXPORT string_val::~string_val() {}
 
     void string_val::to_json(std::ostream &os) const noexcept { os << '\"' << val << '\"'; }
 
-    JSON_EXPORT long_val::long_val() {}
     JSON_EXPORT long_val::long_val(const long &val) : val(val) {}
-    JSON_EXPORT long_val::~long_val() {}
 
     void long_val::to_json(std::ostream &os) const noexcept { os << std::to_string(val); }
 
-    JSON_EXPORT double_val::double_val() {}
     JSON_EXPORT double_val::double_val(const double &val) : val(val) {}
-    JSON_EXPORT double_val::~double_val() {}
 
     void double_val::to_json(std::ostream &os) const noexcept { os << std::to_string(val); }
 
-    JSON_EXPORT array_val::array_val() {}
     JSON_EXPORT array_val::array_val(const std::vector<json> &vals) : vals(vals) {}
-    JSON_EXPORT array_val::~array_val() {}
 
     void array_val::to_json(std::ostream &os) const noexcept
     {

@@ -11,11 +11,10 @@ namespace ratio
 {
   class type;
 
-  class field
+  class field final
   {
   public:
     field(const type &tp, const std::string &name, const riddle::ast::expression *const e = nullptr, bool synthetic = false) : tp(tp), name(name), xpr(e), synthetic(synthetic) {}
-    virtual ~field() {}
 
     inline const type &get_type() const { return tp; }                           // returns the type of the field..
     inline const std::string &get_name() const { return name; }                  // returns the name of the field..

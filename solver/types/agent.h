@@ -7,12 +7,11 @@
 
 namespace ratio
 {
-  class agent : public smart_type
+  class agent final : public smart_type
   {
   public:
     agent(solver &slv);
     agent(const agent &orig) = delete;
-    virtual ~agent();
 
   private:
     std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;

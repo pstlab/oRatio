@@ -17,7 +17,7 @@ namespace ratio
   public:
     CORE_EXPORT predicate(core &cr, scope &scp, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
     predicate(const predicate &orig) = delete;
-    CORE_EXPORT virtual ~predicate();
+    CORE_EXPORT virtual ~predicate() = default;
 
     inline const std::vector<const field *> get_args() const noexcept { return args; }
 

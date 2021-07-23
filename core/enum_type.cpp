@@ -4,7 +4,6 @@
 namespace ratio
 {
     enum_type::enum_type(core &cr, scope &scp, std::string name) : type(cr, scp, name) {}
-    enum_type::~enum_type() {}
 
     expr enum_type::new_instance(context &) { return get_core().new_enum(*this, get_all_instances()); }
 

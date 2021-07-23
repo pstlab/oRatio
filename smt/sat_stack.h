@@ -5,12 +5,11 @@
 
 namespace smt
 {
-  class sat_stack
+  class sat_stack final
   {
   public:
     SMT_EXPORT sat_stack();
     sat_stack(const sat_stack &orig) = delete;
-    SMT_EXPORT ~sat_stack();
 
     SMT_EXPORT void push() noexcept;
     SMT_EXPORT void pop() noexcept;

@@ -16,7 +16,6 @@ namespace rl
         for (size_t i = 0; i < policy_pars.size(); i++)
             target_pars.at(i).data().copy_(policy_pars.at(i));
     }
-    dql_agent::~dql_agent() {}
 
     size_t dql_agent::select_best_action() noexcept
     {
@@ -141,7 +140,6 @@ namespace rl
     void dql_agent::load() { torch::load(policy, "actor.pt"); }
 
     dql_agent::reply_buffer::reply_buffer(const size_t &size) : size(size) { storage.reserve(size); }
-    dql_agent::reply_buffer::~reply_buffer() {}
 
     void dql_agent::reply_buffer::add(const torch::Tensor &state, const long &action, const torch::Tensor &next_state, const double &reward, const bool &done)
     {

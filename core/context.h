@@ -52,7 +52,7 @@ namespace ratio
   public:
     expr(item *const ptr);
     expr(const expr &orig) : context(orig.ptr) {}
-    virtual ~expr() {}
+    virtual ~expr() = default;
 
     CORE_EXPORT item &operator*() const;
     CORE_EXPORT item *operator->() const;
@@ -63,7 +63,7 @@ namespace ratio
   public:
     CORE_EXPORT bool_expr(bool_item *const ptr);
     CORE_EXPORT bool_expr(const bool_expr &orig);
-    CORE_EXPORT virtual ~bool_expr() {}
+    CORE_EXPORT virtual ~bool_expr() = default;
 
     CORE_EXPORT bool_item &operator*() const;
     CORE_EXPORT bool_item *operator->() const;
@@ -74,7 +74,7 @@ namespace ratio
   public:
     CORE_EXPORT arith_expr(arith_item *const ptr);
     CORE_EXPORT arith_expr(const arith_expr &orig);
-    CORE_EXPORT virtual ~arith_expr() {}
+    CORE_EXPORT virtual ~arith_expr() = default;
 
     CORE_EXPORT arith_item &operator*() const;
     CORE_EXPORT arith_item *operator->() const;
@@ -85,7 +85,7 @@ namespace ratio
   public:
     CORE_EXPORT var_expr(var_item *const ptr);
     CORE_EXPORT var_expr(const var_expr &orig);
-    CORE_EXPORT virtual ~var_expr() {}
+    CORE_EXPORT virtual ~var_expr() = default;
 
     CORE_EXPORT var_item &operator*() const;
     CORE_EXPORT var_item *operator->() const;
@@ -96,7 +96,7 @@ namespace ratio
   public:
     CORE_EXPORT string_expr(string_item *const ptr);
     CORE_EXPORT string_expr(const string_expr &orig);
-    CORE_EXPORT virtual ~string_expr() {}
+    CORE_EXPORT virtual ~string_expr() = default;
 
     CORE_EXPORT string_item &operator*() const;
     CORE_EXPORT string_item *operator->() const;

@@ -6,7 +6,6 @@
 namespace smt
 {
     SMT_EXPORT ov_theory::ov_theory(sat_core &sat) : theory(sat) {}
-    SMT_EXPORT ov_theory::~ov_theory() {}
 
     SMT_EXPORT var ov_theory::new_var(const std::vector<var_value *> &items, const bool enforce_exct_one) noexcept
     {

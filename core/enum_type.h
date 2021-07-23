@@ -18,7 +18,7 @@ namespace ratio
   public:
     enum_type(core &cr, scope &scp, std::string name);
     enum_type(const enum_type &orig) = delete;
-    virtual ~enum_type();
+    virtual ~enum_type() = default;
 
     expr new_instance(context &ctx) override;
 

@@ -9,7 +9,6 @@
 namespace ratio
 {
     smart_type::smart_type(solver &slv, scope &scp, const std::string &name) : type(slv, scp, name, false), slv(slv) {}
-    smart_type::~smart_type() {}
 
     void smart_type::new_atom(atom_flaw &) {}
 
@@ -61,5 +60,4 @@ namespace ratio
             q.pop();
         }
     }
-    atom_listener::~atom_listener() {}
 } // namespace ratio

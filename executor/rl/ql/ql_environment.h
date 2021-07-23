@@ -6,7 +6,7 @@ namespace rl
   {
   public:
     ql_environment(const size_t &state_dim, const size_t &action_dim, const size_t &init_state = 0) : state_dim(state_dim), action_dim(action_dim), state(init_state) {}
-    virtual ~ql_environment() {}
+    virtual ~ql_environment() = default;
 
     size_t get_state_dim() const noexcept { return state_dim; }
     size_t get_action_dim() const noexcept { return action_dim; }

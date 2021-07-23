@@ -6,7 +6,6 @@
 namespace smt
 {
     SMT_EXPORT sat_stack::sat_stack() { stack.emplace(); }
-    SMT_EXPORT sat_stack::~sat_stack() {}
 
     SMT_EXPORT void sat_stack::push() noexcept
     {

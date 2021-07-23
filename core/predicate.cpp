@@ -12,7 +12,6 @@ namespace ratio
             new_fields({new field(*t, TAU, nullptr)});
         new_fields(args);
     }
-    CORE_EXPORT predicate::~predicate() {}
 
     CORE_EXPORT expr predicate::new_instance(context &ctx) noexcept
     {

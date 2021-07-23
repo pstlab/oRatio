@@ -70,7 +70,7 @@ namespace riddle
   {
   public:
     token(const symbol &sym, const size_t &start_line, const size_t &start_pos, const size_t &end_line, const size_t &end_pos) : sym(sym), start_line(start_line), start_pos(start_pos), end_line(end_line), end_pos(end_pos) {}
-    virtual ~token() {}
+    virtual ~token() = default;
 
   public:
     const symbol sym;
@@ -80,62 +80,56 @@ namespace riddle
     const size_t end_pos;
   };
 
-  class id_token : public token
+  class id_token final : public token
   {
   public:
     id_token(const size_t &start_line, const size_t &start_pos, const size_t &end_line, const size_t &end_pos, const std::string &id) : token(ID_ID, start_line, start_pos, end_line, end_pos), id(id) {}
-    virtual ~id_token() {}
 
   public:
     const std::string id;
   };
 
-  class bool_token : public token
+  class bool_token final : public token
   {
   public:
     bool_token(const size_t &start_line, const size_t &start_pos, const size_t &end_line, const size_t &end_pos, const bool &val) : token(BoolLiteral_ID, start_line, start_pos, end_line, end_pos), val(val) {}
-    virtual ~bool_token() {}
 
   public:
     const bool val;
   };
 
-  class int_token : public token
+  class int_token final : public token
   {
   public:
     int_token(const size_t &start_line, const size_t &start_pos, const size_t &end_line, const size_t &end_pos, const smt::I &val) : token(IntLiteral_ID, start_line, start_pos, end_line, end_pos), val(val) {}
-    virtual ~int_token() {}
 
   public:
     const smt::I val;
   };
 
-  class real_token : public token
+  class real_token final : public token
   {
   public:
     real_token(const size_t &start_line, const size_t &start_pos, const size_t &end_line, const size_t &end_pos, const smt::rational &val) : token(RealLiteral_ID, start_line, start_pos, end_line, end_pos), val(val) {}
-    virtual ~real_token() {}
 
   public:
     const smt::rational val;
   };
 
-  class string_token : public token
+  class string_token final : public token
   {
   public:
     string_token(const size_t &start_line, const size_t &start_pos, const size_t &end_line, const size_t &end_pos, const std::string &str) : token(StringLiteral_ID, start_line, start_pos, end_line, end_pos), str(str) {}
-    virtual ~string_token() {}
 
   public:
     const std::string str;
   };
 
-  class lexer
+  class lexer final
   {
   public:
     RIDDLE_EXPORT lexer(std::istream &is);
     lexer(const lexer &orig) = delete;
-    RIDDLE_EXPORT virtual ~lexer();
 
     RIDDLE_EXPORT token *next();
 

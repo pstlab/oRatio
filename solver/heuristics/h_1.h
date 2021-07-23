@@ -4,12 +4,11 @@
 
 namespace ratio
 {
-  class h_1 : public graph
+  class h_1 final : public graph
   {
   public:
     h_1(solver &slv);
     h_1(const h_1 &that) = delete;
-    ~h_1();
 
   private:
     void enqueue(flaw &f);

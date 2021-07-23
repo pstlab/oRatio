@@ -18,7 +18,7 @@ namespace ratio
     resolver(solver &slv, const smt::rational &cost, flaw &eff);
     resolver(solver &slv, const smt::lit &r, const smt::rational &cost, flaw &eff);
     resolver(const resolver &that) = delete;
-    ~resolver();
+    virtual ~resolver() = default;
 
     inline solver &get_solver() const noexcept { return slv; }
     inline smt::lit get_rho() const noexcept { return rho; }

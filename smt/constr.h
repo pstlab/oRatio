@@ -18,7 +18,7 @@ namespace smt
   protected:
     constr(sat_core &s);
     constr(const constr &orig) = delete;
-    virtual ~constr();
+    virtual ~constr() = default;
 
   private:
     virtual constr *copy(sat_core &s) = 0;

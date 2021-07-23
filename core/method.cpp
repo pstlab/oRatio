@@ -15,7 +15,6 @@ namespace ratio
             new_fields({new field(*return_type, RETURN_KEYWORD, nullptr, true)});
         new_fields(args);
     }
-    method::~method() {}
 
     item *method::invoke(context &ctx, const std::vector<expr> &exprs) const
     {

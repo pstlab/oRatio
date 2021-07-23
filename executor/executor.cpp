@@ -46,7 +46,6 @@ namespace ratio
     }
 
     EXECUTOR_EXPORT executor::executor(solver &slv, const std::string &cnfg_str, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), cnfg_str(cnfg_str), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")), units_per_tick(units_per_tick) { build_timelines(); }
-    EXECUTOR_EXPORT executor::~executor() {}
 
     EXECUTOR_EXPORT void executor::tick()
     {

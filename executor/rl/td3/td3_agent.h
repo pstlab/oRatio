@@ -74,7 +74,6 @@ namespace rl
 
   public:
     td3_agent(td3_environment &env, const size_t &buffer_size = 1e3);
-    ~td3_agent();
 
     reply_buffer &get_buffer() noexcept { return buffer; }
 
@@ -92,7 +91,6 @@ namespace rl
     {
     public:
       transition(const torch::Tensor &state, const torch::Tensor &action, const torch::Tensor &next_state, const double &reward, const bool &done) : state(state), next_state(next_state), action(action), reward(reward), done(done) {}
-      ~transition() {}
 
       torch::Tensor state;
       torch::Tensor action;
@@ -105,7 +103,6 @@ namespace rl
     {
     public:
       transition_batch(std::vector<torch::Tensor> states, std::vector<torch::Tensor> actions, std::vector<torch::Tensor> next_states, std::vector<double> rewards, const std::vector<bool> &dones) : states(states), next_states(next_states), actions(actions), rewards(rewards), dones(dones) {}
-      ~transition_batch() {}
 
       std::vector<torch::Tensor> states;
       std::vector<torch::Tensor> actions;
@@ -118,7 +115,6 @@ namespace rl
     {
     public:
       reply_buffer(const size_t &size = 1e5);
-      ~reply_buffer();
 
       size_t get_size() const noexcept { return size; }
 

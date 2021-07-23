@@ -13,7 +13,7 @@ namespace ratio
   public:
     graph(solver &slv);
     graph(const graph &that) = delete;
-    virtual ~graph();
+    virtual ~graph() = default;
 
     inline solver &get_solver() const noexcept { return slv; }
 

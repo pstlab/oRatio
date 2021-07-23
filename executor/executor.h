@@ -13,14 +13,13 @@ namespace ratio
   class atom;
   class executor_listener;
 
-  class executor : public core_listener, public solver_listener, public smt::theory
+  class executor final : public core_listener, public solver_listener, public smt::theory
   {
     friend class executor_listener;
 
   public:
     EXECUTOR_EXPORT executor(solver &slv, const std::string &cnfg_str = "{}", const smt::rational &units_per_tick = smt::rational::ONE);
     executor(const executor &orig) = delete;
-    EXECUTOR_EXPORT ~executor();
 
     smt::rational get_current_time() const { return current_time; };
 

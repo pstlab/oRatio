@@ -11,7 +11,7 @@ namespace smt
   public:
     rdl_value_listener(rdl_theory &s) : th(s) {}
     rdl_value_listener(const rdl_value_listener &that) = delete;
-    virtual ~rdl_value_listener() {}
+    virtual ~rdl_value_listener() = default;
 
   protected:
     inline void listen_rdl(var v) noexcept { th.listen(v, this); }

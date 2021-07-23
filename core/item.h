@@ -16,7 +16,7 @@ namespace ratio
   public:
     item(core &cr, const context ctx, const type &tp);
     item(const item &orig) = delete;
-    virtual ~item();
+    virtual ~item() = default;
 
     inline const type &get_type() const noexcept { return tp; }
 
@@ -37,7 +37,7 @@ namespace ratio
   public:
     CORE_EXPORT bool_item(core &cr, const smt::lit &l);
     bool_item(const bool_item &that) = delete;
-    CORE_EXPORT virtual ~bool_item();
+    CORE_EXPORT virtual ~bool_item() = default;
 
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
@@ -54,7 +54,7 @@ namespace ratio
   public:
     CORE_EXPORT arith_item(core &cr, const type &t, const smt::lin &l);
     arith_item(const arith_item &that) = delete;
-    CORE_EXPORT virtual ~arith_item();
+    CORE_EXPORT virtual ~arith_item() = default;
 
     smt::lit new_eq(item &i) noexcept override;
     bool equates(const item &i) const noexcept override;
@@ -71,7 +71,7 @@ namespace ratio
   public:
     CORE_EXPORT var_item(core &cr, const type &t, smt::var ev);
     var_item(const var_item &that) = delete;
-    CORE_EXPORT virtual ~var_item();
+    CORE_EXPORT virtual ~var_item() = default;
 
     expr get(const std::string &name) const override;
 
@@ -90,7 +90,7 @@ namespace ratio
   public:
     CORE_EXPORT string_item(core &cr, const std::string &l);
     string_item(const string_item &that) = delete;
-    CORE_EXPORT virtual ~string_item();
+    CORE_EXPORT virtual ~string_item() = default;
 
     inline std::string get_value() const { return l; }
 

@@ -7,11 +7,10 @@ namespace rl
 {
     constexpr double act_rew = -0.01;
 
-    class dql_maze : public dql_environment
+    class dql_maze final : public dql_environment
     {
     public:
         dql_maze(const torch::Tensor &init_state) : dql_environment(2, 4, init_state) {}
-        ~dql_maze() {}
 
         step execute_action(const size_t &action) noexcept override
         {

@@ -10,7 +10,6 @@ namespace riddle
         sb.append(buffer, is.gcount());
         ch = next_char();
     }
-    RIDDLE_EXPORT lexer::~lexer() {}
 
     RIDDLE_EXPORT token *lexer::next()
     {

@@ -8,7 +8,7 @@ namespace rl
   {
   public:
     td3_environment(const size_t &state_dim, const size_t &action_dim, const double &max_action, const torch::Tensor &init_state) : state_dim(state_dim), action_dim(action_dim), max_action(max_action), state(init_state) {}
-    virtual ~td3_environment() {}
+    virtual ~td3_environment() = default;
 
     size_t get_state_dim() const noexcept { return state_dim; }
     size_t get_action_dim() const noexcept { return action_dim; }

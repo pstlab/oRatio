@@ -23,7 +23,6 @@ namespace rl
         for (size_t i = 0; i < critic_model_pars.size(); i++)
             critic_target_pars.at(i).data().copy_(critic_model_pars.at(i));
     }
-    td3_agent::~td3_agent() {}
 
     Tensor td3_agent::select_action() noexcept { return actor_model->forward(env.get_state()).to(device); }
 

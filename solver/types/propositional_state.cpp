@@ -50,12 +50,9 @@ namespace ratio
     }
 
     propositional_state::ps_constructor::ps_constructor(propositional_state &ps) : constructor(ps.get_solver(), ps, {}, {}, {}) {}
-    propositional_state::ps_constructor::~ps_constructor() {}
 
     propositional_state::ps_predicate::ps_predicate(propositional_state &ps) : predicate(ps.get_solver(), ps, PROPOSITIONAL_STATE_PREDICATE_NAME, {new field(ps.get_solver().get_type(BOOL_KEYWORD), PROPOSITIONAL_STATE_POLARITY_NAME)}, {}) {}
-    propositional_state::ps_predicate::~ps_predicate() {}
 
     propositional_state::ps_atom_listener::ps_atom_listener(propositional_state &ps, atom &atm) : atom_listener(atm), ps(ps) {}
-    propositional_state::ps_atom_listener::~ps_atom_listener() {}
     void propositional_state::ps_atom_listener::something_changed() { ps.to_check.insert(&atm); }
 } // namespace ratio

@@ -9,7 +9,6 @@ using namespace smt;
 namespace ratio
 {
     atom_flaw::atom_flaw(solver &slv, const std::vector<resolver *> &causes, atom &atm, const bool is_fact) : flaw(slv, causes, true), atm(atm), is_fact(is_fact) {}
-    atom_flaw::~atom_flaw() {}
 
     std::string atom_flaw::get_label() const noexcept
     {
@@ -66,7 +65,6 @@ namespace ratio
 
     atom_flaw::activate_fact::activate_fact(solver &slv, atom_flaw &f, atom &a) : resolver(slv, rational::ZERO, f), atm(a) {}
     atom_flaw::activate_fact::activate_fact(solver &slv, const lit &r, atom_flaw &f, atom &a) : resolver(slv, r, rational::ZERO, f), atm(a) {}
-    atom_flaw::activate_fact::~activate_fact() {}
 
     std::string atom_flaw::activate_fact::get_label() const noexcept { return "{\"type\":\"activate\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
 
@@ -78,7 +76,6 @@ namespace ratio
 
     atom_flaw::activate_goal::activate_goal(solver &slv, atom_flaw &f, atom &a) : resolver(slv, rational::ONE, f), atm(a) {}
     atom_flaw::activate_goal::activate_goal(solver &slv, const lit &r, atom_flaw &f, atom &a) : resolver(slv, r, rational::ONE, f), atm(a) {}
-    atom_flaw::activate_goal::~activate_goal() {}
 
     std::string atom_flaw::activate_goal::get_label() const noexcept { return "{\"type\":\"activate\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
 
@@ -91,7 +88,6 @@ namespace ratio
     }
 
     atom_flaw::unify_atom::unify_atom(solver &slv, atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(slv, rational::ONE, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}
-    atom_flaw::unify_atom::~unify_atom() {}
 
     std::string atom_flaw::unify_atom::get_label() const noexcept { return "{\"type\":\"unify\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\", \"target\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&trgt)) + "\"}"; }
 

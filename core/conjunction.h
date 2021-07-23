@@ -17,7 +17,7 @@ namespace ratio
   public:
     conjunction(core &cr, scope &scp, const smt::rational &cst, std::vector<const riddle::ast::statement *> stmnts);
     conjunction(const conjunction &that) = delete;
-    virtual ~conjunction();
+    virtual ~conjunction() = default;
 
     inline smt::rational get_cost() const noexcept { return cost; } // returns the cost of applying this conjunction..
 

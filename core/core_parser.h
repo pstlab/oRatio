@@ -14,9 +14,9 @@ namespace ratio
     class expression : public riddle::ast::expression
     {
     public:
-      expression();
+      expression() = default;
       expression(const expression &orig) = delete;
-      virtual ~expression();
+      virtual ~expression() = default;
 
       virtual expr evaluate(const scope &scp, context &ctx) const = 0;
     };
@@ -26,7 +26,7 @@ namespace ratio
     public:
       CORE_EXPORT bool_literal_expression(const riddle::bool_token &l);
       bool_literal_expression(const bool_literal_expression &orig) = delete;
-      CORE_EXPORT virtual ~bool_literal_expression();
+      CORE_EXPORT virtual ~bool_literal_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -36,7 +36,7 @@ namespace ratio
     public:
       CORE_EXPORT int_literal_expression(const riddle::int_token &l);
       int_literal_expression(const int_literal_expression &orig) = delete;
-      CORE_EXPORT virtual ~int_literal_expression();
+      CORE_EXPORT virtual ~int_literal_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -46,7 +46,7 @@ namespace ratio
     public:
       CORE_EXPORT real_literal_expression(const riddle::real_token &l);
       real_literal_expression(const real_literal_expression &orig) = delete;
-      CORE_EXPORT virtual ~real_literal_expression();
+      CORE_EXPORT virtual ~real_literal_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -56,7 +56,7 @@ namespace ratio
     public:
       CORE_EXPORT string_literal_expression(const riddle::string_token &l);
       string_literal_expression(const string_literal_expression &orig) = delete;
-      CORE_EXPORT virtual ~string_literal_expression();
+      CORE_EXPORT virtual ~string_literal_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -66,7 +66,7 @@ namespace ratio
     public:
       cast_expression(const std::vector<riddle::id_token> &tp, const riddle::ast::expression *const e);
       cast_expression(const cast_expression &orig) = delete;
-      virtual ~cast_expression();
+      virtual ~cast_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -76,7 +76,7 @@ namespace ratio
     public:
       plus_expression(const riddle::ast::expression *const e);
       plus_expression(const plus_expression &orig) = delete;
-      virtual ~plus_expression();
+      virtual ~plus_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -86,7 +86,7 @@ namespace ratio
     public:
       minus_expression(const riddle::ast::expression *const e);
       minus_expression(const minus_expression &orig) = delete;
-      virtual ~minus_expression();
+      virtual ~minus_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -96,7 +96,7 @@ namespace ratio
     public:
       not_expression(const riddle::ast::expression *const e);
       not_expression(const not_expression &orig) = delete;
-      virtual ~not_expression();
+      virtual ~not_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -106,7 +106,7 @@ namespace ratio
     public:
       constructor_expression(const std::vector<riddle::id_token> &it, const std::vector<const riddle::ast::expression *> &es);
       constructor_expression(const constructor_expression &orig) = delete;
-      virtual ~constructor_expression();
+      virtual ~constructor_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -116,7 +116,7 @@ namespace ratio
     public:
       eq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       eq_expression(const eq_expression &orig) = delete;
-      virtual ~eq_expression();
+      virtual ~eq_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -126,7 +126,7 @@ namespace ratio
     public:
       neq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       neq_expression(const neq_expression &orig) = delete;
-      virtual ~neq_expression();
+      virtual ~neq_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -136,7 +136,7 @@ namespace ratio
     public:
       CORE_EXPORT lt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       lt_expression(const lt_expression &orig) = delete;
-      CORE_EXPORT virtual ~lt_expression();
+      CORE_EXPORT virtual ~lt_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -146,7 +146,7 @@ namespace ratio
     public:
       CORE_EXPORT leq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       leq_expression(const leq_expression &orig) = delete;
-      CORE_EXPORT virtual ~leq_expression();
+      CORE_EXPORT virtual ~leq_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -156,7 +156,7 @@ namespace ratio
     public:
       CORE_EXPORT geq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       geq_expression(const geq_expression &orig) = delete;
-      CORE_EXPORT virtual ~geq_expression();
+      CORE_EXPORT virtual ~geq_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -166,7 +166,7 @@ namespace ratio
     public:
       CORE_EXPORT gt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       gt_expression(const gt_expression &orig) = delete;
-      CORE_EXPORT virtual ~gt_expression();
+      CORE_EXPORT virtual ~gt_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -176,7 +176,7 @@ namespace ratio
     public:
       function_expression(const std::vector<riddle::id_token> &is, const riddle::id_token &fn, const std::vector<const riddle::ast::expression *> &es);
       function_expression(const function_expression &orig) = delete;
-      virtual ~function_expression();
+      virtual ~function_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -186,7 +186,7 @@ namespace ratio
     public:
       CORE_EXPORT id_expression(const std::vector<riddle::id_token> &is);
       id_expression(const id_expression &orig) = delete;
-      CORE_EXPORT virtual ~id_expression();
+      CORE_EXPORT virtual ~id_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -196,7 +196,7 @@ namespace ratio
     public:
       implication_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r);
       implication_expression(const implication_expression &orig) = delete;
-      virtual ~implication_expression();
+      virtual ~implication_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -206,7 +206,7 @@ namespace ratio
     public:
       disjunction_expression(const std::vector<const riddle::ast::expression *> &es);
       disjunction_expression(const disjunction_expression &orig) = delete;
-      virtual ~disjunction_expression();
+      virtual ~disjunction_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -216,7 +216,7 @@ namespace ratio
     public:
       conjunction_expression(const std::vector<const riddle::ast::expression *> &es);
       conjunction_expression(const conjunction_expression &orig) = delete;
-      virtual ~conjunction_expression();
+      virtual ~conjunction_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -226,7 +226,7 @@ namespace ratio
     public:
       exct_one_expression(const std::vector<const riddle::ast::expression *> &es);
       exct_one_expression(const exct_one_expression &orig) = delete;
-      virtual ~exct_one_expression();
+      virtual ~exct_one_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -236,7 +236,7 @@ namespace ratio
     public:
       addition_expression(const std::vector<const riddle::ast::expression *> &es);
       addition_expression(const addition_expression &orig) = delete;
-      virtual ~addition_expression();
+      virtual ~addition_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -246,7 +246,7 @@ namespace ratio
     public:
       subtraction_expression(const std::vector<const riddle::ast::expression *> &es);
       subtraction_expression(const subtraction_expression &orig) = delete;
-      virtual ~subtraction_expression();
+      virtual ~subtraction_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -256,7 +256,7 @@ namespace ratio
     public:
       multiplication_expression(const std::vector<const riddle::ast::expression *> &es);
       multiplication_expression(const multiplication_expression &orig) = delete;
-      virtual ~multiplication_expression();
+      virtual ~multiplication_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -266,7 +266,7 @@ namespace ratio
     public:
       division_expression(const std::vector<const riddle::ast::expression *> &es);
       division_expression(const division_expression &orig) = delete;
-      virtual ~division_expression();
+      virtual ~division_expression() = default;
 
       expr evaluate(const scope &scp, context &ctx) const override;
     };
@@ -274,9 +274,9 @@ namespace ratio
     class statement : public riddle::ast::statement
     {
     public:
-      statement();
+      statement() = default;
       statement(const statement &orig) = delete;
-      virtual ~statement();
+      virtual ~statement() = default;
 
       virtual void execute(const scope &scp, context &ctx) const = 0;
     };
@@ -286,7 +286,7 @@ namespace ratio
     public:
       local_field_statement(const std::vector<riddle::id_token> &ft, const std::vector<riddle::id_token> &ns, const std::vector<const riddle::ast::expression *> &es);
       local_field_statement(const local_field_statement &orig) = delete;
-      virtual ~local_field_statement();
+      virtual ~local_field_statement() = default;
 
       void execute(const scope &scp, context &ctx) const override;
     };
@@ -296,7 +296,7 @@ namespace ratio
     public:
       assignment_statement(const std::vector<riddle::id_token> &is, const riddle::id_token &i, const riddle::ast::expression *const e);
       assignment_statement(const assignment_statement &orig) = delete;
-      virtual ~assignment_statement();
+      virtual ~assignment_statement() = default;
 
       void execute(const scope &scp, context &ctx) const override;
     };
@@ -306,7 +306,7 @@ namespace ratio
     public:
       CORE_EXPORT expression_statement(const riddle::ast::expression *const e);
       expression_statement(const expression_statement &orig) = delete;
-      CORE_EXPORT virtual ~expression_statement();
+      CORE_EXPORT virtual ~expression_statement() = default;
 
       void execute(const scope &scp, context &ctx) const override;
     };
@@ -316,7 +316,7 @@ namespace ratio
     public:
       disjunction_statement(const std::vector<std::pair<const std::vector<const riddle::ast::statement *>, const riddle::ast::expression *const>> &conjs);
       disjunction_statement(const disjunction_statement &orig) = delete;
-      virtual ~disjunction_statement();
+      virtual ~disjunction_statement() = default;
 
       void execute(const scope &scp, context &ctx) const override;
     };
@@ -326,7 +326,7 @@ namespace ratio
     public:
       conjunction_statement(const std::vector<const riddle::ast::statement *> &stmnts);
       conjunction_statement(const conjunction_statement &orig) = delete;
-      virtual ~conjunction_statement();
+      virtual ~conjunction_statement() = default;
 
       void execute(const scope &scp, context &ctx) const override;
     };
@@ -336,7 +336,7 @@ namespace ratio
     public:
       formula_statement(const bool &isf, const riddle::id_token &fn, const std::vector<riddle::id_token> &scp, const riddle::id_token &pn, const std::vector<std::pair<const riddle::id_token, const riddle::ast::expression *const>> &assns);
       formula_statement(const formula_statement &orig) = delete;
-      virtual ~formula_statement();
+      virtual ~formula_statement() = default;
 
       void execute(const scope &scp, context &ctx) const override;
     };
@@ -346,7 +346,7 @@ namespace ratio
     public:
       return_statement(const riddle::ast::expression *const e);
       return_statement(const return_statement &orig) = delete;
-      virtual ~return_statement();
+      virtual ~return_statement() = default;
 
       void execute(const scope &scp, context &ctx) const override;
     };
@@ -354,9 +354,9 @@ namespace ratio
     class type_declaration : public riddle::ast::type_declaration
     {
     public:
-      type_declaration();
+      type_declaration() = default;
       type_declaration(const type_declaration &orig) = delete;
-      virtual ~type_declaration();
+      virtual ~type_declaration() = default;
 
       virtual void declare(scope &) const {}
       virtual void refine(scope &) const {}
@@ -367,7 +367,7 @@ namespace ratio
     public:
       method_declaration(const std::vector<riddle::id_token> &rt, const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<const riddle::ast::statement *> &stmnts);
       method_declaration(const method_declaration &orig) = delete;
-      virtual ~method_declaration();
+      virtual ~method_declaration() = default;
 
       void refine(scope &scp) const;
     };
@@ -377,7 +377,7 @@ namespace ratio
     public:
       predicate_declaration(const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<std::vector<riddle::id_token>> &pl, const std::vector<const riddle::ast::statement *> &stmnts);
       predicate_declaration(const predicate_declaration &orig) = delete;
-      virtual ~predicate_declaration();
+      virtual ~predicate_declaration() = default;
 
       void refine(scope &scp) const;
     };
@@ -387,7 +387,7 @@ namespace ratio
     public:
       typedef_declaration(const riddle::id_token &n, const riddle::id_token &pt, const riddle::ast::expression *const e);
       typedef_declaration(const typedef_declaration &orig) = delete;
-      virtual ~typedef_declaration();
+      virtual ~typedef_declaration() = default;
 
       void declare(scope &scp) const override;
     };
@@ -397,7 +397,7 @@ namespace ratio
     public:
       enum_declaration(const riddle::id_token &n, const std::vector<riddle::string_token> &es, const std::vector<std::vector<riddle::id_token>> &trs);
       enum_declaration(const enum_declaration &orig) = delete;
-      virtual ~enum_declaration();
+      virtual ~enum_declaration() = default;
 
       void declare(scope &scp) const override;
       void refine(scope &scp) const override;
@@ -418,7 +418,7 @@ namespace ratio
     public:
       field_declaration(const std::vector<riddle::id_token> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds);
       field_declaration(const field_declaration &orig) = delete;
-      virtual ~field_declaration();
+      virtual ~field_declaration() = default;
 
       void refine(scope &scp) const;
     };
@@ -428,7 +428,7 @@ namespace ratio
     public:
       constructor_declaration(const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<std::pair<const riddle::id_token, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts);
       constructor_declaration(const constructor_declaration &orig) = delete;
-      virtual ~constructor_declaration();
+      virtual ~constructor_declaration() = default;
 
       void refine(scope &scp) const;
     };
@@ -438,7 +438,7 @@ namespace ratio
     public:
       class_declaration(const riddle::id_token &n, const std::vector<std::vector<riddle::id_token>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts);
       class_declaration(const class_declaration &orig) = delete;
-      virtual ~class_declaration();
+      virtual ~class_declaration() = default;
 
       void declare(scope &scp) const override;
       void refine(scope &scp) const override;
@@ -449,7 +449,7 @@ namespace ratio
     public:
       compilation_unit(const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts, const std::vector<const riddle::ast::statement *> &stmnts);
       compilation_unit(const compilation_unit &orig) = delete;
-      virtual ~compilation_unit();
+      virtual ~compilation_unit() = default;
 
       void declare(scope &scp) const;
       void refine(scope &scp) const;
@@ -462,7 +462,7 @@ namespace ratio
   public:
     riddle_parser(std::istream &is);
     riddle_parser(const riddle_parser &orig) = delete;
-    virtual ~riddle_parser();
+    virtual ~riddle_parser() = default;
 
   private:
     /**

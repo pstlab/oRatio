@@ -8,7 +8,7 @@ namespace rl
   {
   public:
     dql_environment(const size_t &state_dim, const size_t &action_dim, const torch::Tensor &init_state) : state_dim(state_dim), action_dim(action_dim), state(init_state) {}
-    virtual ~dql_environment() {}
+    virtual ~dql_environment() = default;
 
     size_t get_state_dim() const noexcept { return state_dim; }
     size_t get_action_dim() const noexcept { return action_dim; }

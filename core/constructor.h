@@ -21,7 +21,7 @@ namespace ratio
   public:
     CORE_EXPORT constructor(core &cr, scope &scp, std::vector<const field *> args, std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> il, std::vector<const riddle::ast::statement *> stmnts);
     constructor(const constructor &orig) = delete;
-    CORE_EXPORT virtual ~constructor();
+    CORE_EXPORT virtual ~constructor() = default;
 
     inline const std::vector<const field *> get_args() const noexcept { return args; } // returns the list of arguments of this constructor..
 

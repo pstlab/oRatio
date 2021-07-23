@@ -13,43 +13,31 @@ namespace ratio
 {
     namespace ast
     {
-        expression::expression() {}
-        expression::~expression() {}
-
         CORE_EXPORT bool_literal_expression::bool_literal_expression(const riddle::bool_token &l) : riddle::ast::bool_literal_expression(l) {}
-        CORE_EXPORT bool_literal_expression::~bool_literal_expression() {}
         expr bool_literal_expression::evaluate(const scope &scp, context &) const { return scp.get_core().new_bool(literal.val); }
 
         CORE_EXPORT int_literal_expression::int_literal_expression(const riddle::int_token &l) : riddle::ast::int_literal_expression(l) {}
-        CORE_EXPORT int_literal_expression::~int_literal_expression() {}
         expr int_literal_expression::evaluate(const scope &scp, context &) const { return scp.get_core().new_int(literal.val); }
 
         CORE_EXPORT real_literal_expression::real_literal_expression(const riddle::real_token &l) : riddle::ast::real_literal_expression(l) {}
-        CORE_EXPORT real_literal_expression::~real_literal_expression() {}
         expr real_literal_expression::evaluate(const scope &scp, context &) const { return scp.get_core().new_real(literal.val); }
 
         CORE_EXPORT string_literal_expression::string_literal_expression(const riddle::string_token &l) : riddle::ast::string_literal_expression(l) {}
-        CORE_EXPORT string_literal_expression::~string_literal_expression() {}
         expr string_literal_expression::evaluate(const scope &scp, context &) const { return scp.get_core().new_string(literal.str); }
 
         cast_expression::cast_expression(const std::vector<riddle::id_token> &tp, const riddle::ast::expression *const e) : riddle::ast::cast_expression(tp, e) {}
-        cast_expression::~cast_expression() {}
         expr cast_expression::evaluate(const scope &scp, context &ctx) const { return dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx); }
 
         plus_expression::plus_expression(const riddle::ast::expression *const e) : riddle::ast::plus_expression(e) {}
-        plus_expression::~plus_expression() {}
         expr plus_expression::evaluate(const scope &scp, context &ctx) const { return dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx); }
 
         minus_expression::minus_expression(const riddle::ast::expression *const e) : riddle::ast::minus_expression(e) {}
-        minus_expression::~minus_expression() {}
         expr minus_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().minus(dynamic_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx)); }
 
         not_expression::not_expression(const riddle::ast::expression *const e) : riddle::ast::not_expression(e) {}
-        not_expression::~not_expression() {}
         expr not_expression::evaluate(const scope &scp, context &ctx) const { return scp.get_core().negate(dynamic_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx)); }
 
         constructor_expression::constructor_expression(const std::vector<riddle::id_token> &it, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::constructor_expression(it, es) {}
-        constructor_expression::~constructor_expression() {}
         expr constructor_expression::evaluate(const scope &scp, context &ctx) const
         {
             scope *s = const_cast<scope *>(&scp);
@@ -69,7 +57,6 @@ namespace ratio
         }
 
         eq_expression::eq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::eq_expression(l, r) {}
-        eq_expression::~eq_expression() {}
         expr eq_expression::evaluate(const scope &scp, context &ctx) const
         {
             expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -78,7 +65,6 @@ namespace ratio
         }
 
         neq_expression::neq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::neq_expression(l, r) {}
-        neq_expression::~neq_expression() {}
         expr neq_expression::evaluate(const scope &scp, context &ctx) const
         {
             expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -87,7 +73,6 @@ namespace ratio
         }
 
         CORE_EXPORT lt_expression::lt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::lt_expression(l, r) {}
-        CORE_EXPORT lt_expression::~lt_expression() {}
         expr lt_expression::evaluate(const scope &scp, context &ctx) const
         {
             arith_expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -96,7 +81,6 @@ namespace ratio
         }
 
         CORE_EXPORT leq_expression::leq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::leq_expression(l, r) {}
-        CORE_EXPORT leq_expression::~leq_expression() {}
         expr leq_expression::evaluate(const scope &scp, context &ctx) const
         {
             arith_expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -105,7 +89,6 @@ namespace ratio
         }
 
         CORE_EXPORT geq_expression::geq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::geq_expression(l, r) {}
-        CORE_EXPORT geq_expression::~geq_expression() {}
         expr geq_expression::evaluate(const scope &scp, context &ctx) const
         {
             arith_expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -114,7 +97,6 @@ namespace ratio
         }
 
         CORE_EXPORT gt_expression::gt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::gt_expression(l, r) {}
-        CORE_EXPORT gt_expression::~gt_expression() {}
         expr gt_expression::evaluate(const scope &scp, context &ctx) const
         {
             arith_expr l = dynamic_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
@@ -123,7 +105,6 @@ namespace ratio
         }
 
         function_expression::function_expression(const std::vector<riddle::id_token> &is, const riddle::id_token &fn, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::function_expression(is, fn, es) {}
-        function_expression::~function_expression() {}
         expr function_expression::evaluate(const scope &scp, context &ctx) const
         {
             scope *s = const_cast<scope *>(&scp);
@@ -153,7 +134,6 @@ namespace ratio
         }
 
         CORE_EXPORT id_expression::id_expression(const std::vector<riddle::id_token> &is) : riddle::ast::id_expression(is) {}
-        CORE_EXPORT id_expression::~id_expression() {}
         expr id_expression::evaluate(const scope &, context &ctx) const
         {
             env *c_e = &*ctx;
@@ -163,7 +143,6 @@ namespace ratio
         }
 
         implication_expression::implication_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::implication_expression(l, r) {}
-        implication_expression::~implication_expression() {}
         expr implication_expression::evaluate(const scope &scp, context &ctx) const
         {
             bool_expr l = dynamic_cast<const ast::expression *>(left)->evaluate(scp, ctx);
@@ -172,7 +151,6 @@ namespace ratio
         }
 
         disjunction_expression::disjunction_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::disjunction_expression(es) {}
-        disjunction_expression::~disjunction_expression() {}
         expr disjunction_expression::evaluate(const scope &scp, context &ctx) const
         {
             std::vector<bool_expr> exprs;
@@ -182,7 +160,6 @@ namespace ratio
         }
 
         conjunction_expression::conjunction_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::conjunction_expression(es) {}
-        conjunction_expression::~conjunction_expression() {}
         expr conjunction_expression::evaluate(const scope &scp, context &ctx) const
         {
             std::vector<bool_expr> exprs;
@@ -192,7 +169,6 @@ namespace ratio
         }
 
         exct_one_expression::exct_one_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::exct_one_expression(es) {}
-        exct_one_expression::~exct_one_expression() {}
         expr exct_one_expression::evaluate(const scope &scp, context &ctx) const
         {
             std::vector<bool_expr> exprs;
@@ -202,7 +178,6 @@ namespace ratio
         }
 
         addition_expression::addition_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::addition_expression(es) {}
-        addition_expression::~addition_expression() {}
         expr addition_expression::evaluate(const scope &scp, context &ctx) const
         {
             std::vector<arith_expr> exprs;
@@ -212,7 +187,6 @@ namespace ratio
         }
 
         subtraction_expression::subtraction_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::subtraction_expression(es) {}
-        subtraction_expression::~subtraction_expression() {}
         expr subtraction_expression::evaluate(const scope &scp, context &ctx) const
         {
             std::vector<arith_expr> exprs;
@@ -222,7 +196,6 @@ namespace ratio
         }
 
         multiplication_expression::multiplication_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::multiplication_expression(es) {}
-        multiplication_expression::~multiplication_expression() {}
         expr multiplication_expression::evaluate(const scope &scp, context &ctx) const
         {
             std::vector<arith_expr> exprs;
@@ -232,7 +205,6 @@ namespace ratio
         }
 
         division_expression::division_expression(const std::vector<const riddle::ast::expression *> &es) : riddle::ast::division_expression(es) {}
-        division_expression::~division_expression() {}
         expr division_expression::evaluate(const scope &scp, context &ctx) const
         {
             std::vector<arith_expr> exprs;
@@ -241,11 +213,7 @@ namespace ratio
             return scp.get_core().div(exprs);
         }
 
-        statement::statement() {}
-        statement::~statement() {}
-
         local_field_statement::local_field_statement(const std::vector<riddle::id_token> &ft, const std::vector<riddle::id_token> &ns, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::local_field_statement(ft, ns, es) {}
-        local_field_statement::~local_field_statement() {}
         void local_field_statement::execute(const scope &scp, context &ctx) const
         {
             for (size_t i = 0; i < names.size(); ++i)
@@ -272,7 +240,6 @@ namespace ratio
         }
 
         assignment_statement::assignment_statement(const std::vector<riddle::id_token> &is, const riddle::id_token &i, const riddle::ast::expression *const e) : riddle::ast::assignment_statement(is, i, e) {}
-        assignment_statement::~assignment_statement() {}
         void assignment_statement::execute(const scope &scp, context &ctx) const
         {
             env *c_e = &*ctx;
@@ -282,7 +249,6 @@ namespace ratio
         }
 
         CORE_EXPORT expression_statement::expression_statement(const riddle::ast::expression *const e) : riddle::ast::expression_statement(e) {}
-        CORE_EXPORT expression_statement::~expression_statement() {}
         void expression_statement::execute(const scope &scp, context &ctx) const
         {
             bool_expr be = dynamic_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx);
@@ -290,7 +256,6 @@ namespace ratio
         }
 
         disjunction_statement::disjunction_statement(const std::vector<std::pair<const std::vector<const riddle::ast::statement *>, const riddle::ast::expression *const>> &conjs) : riddle::ast::disjunction_statement(conjs) {}
-        disjunction_statement::~disjunction_statement() {}
         void disjunction_statement::execute(const scope &scp, context &ctx) const
         {
             std::vector<const conjunction *> cs;
@@ -310,7 +275,6 @@ namespace ratio
         }
 
         conjunction_statement::conjunction_statement(const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::conjunction_statement(stmnts) {}
-        conjunction_statement::~conjunction_statement() {}
         void conjunction_statement::execute(const scope &scp, context &ctx) const
         {
             for (const auto &st : statements)
@@ -318,7 +282,6 @@ namespace ratio
         }
 
         formula_statement::formula_statement(const bool &isf, const riddle::id_token &fn, const std::vector<riddle::id_token> &scp, const riddle::id_token &pn, const std::vector<std::pair<const riddle::id_token, const riddle::ast::expression *const>> &assns) : riddle::ast::formula_statement(isf, fn, scp, pn, assns) {}
-        formula_statement::~formula_statement() {}
         void formula_statement::execute(const scope &scp, context &ctx) const
         {
             predicate *p = nullptr;
@@ -406,14 +369,9 @@ namespace ratio
         }
 
         return_statement::return_statement(const riddle::ast::expression *const e) : riddle::ast::return_statement(e) {}
-        return_statement::~return_statement() {}
         void return_statement::execute(const scope &scp, context &ctx) const { ctx->exprs.emplace(RETURN_KEYWORD, dynamic_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)); }
 
-        type_declaration::type_declaration() {}
-        type_declaration::~type_declaration() {}
-
         method_declaration::method_declaration(const std::vector<riddle::id_token> &rt, const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::method_declaration(rt, n, pars, stmnts) {}
-        method_declaration::~method_declaration() {}
         void method_declaration::refine(scope &scp) const
         {
             type *rt = nullptr;
@@ -442,7 +400,6 @@ namespace ratio
         }
 
         predicate_declaration::predicate_declaration(const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<std::vector<riddle::id_token>> &pl, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::predicate_declaration(n, pars, pl, stmnts) {}
-        predicate_declaration::~predicate_declaration() {}
         void predicate_declaration::refine(scope &scp) const
         {
             std::vector<const field *> args;
@@ -473,7 +430,6 @@ namespace ratio
         }
 
         typedef_declaration::typedef_declaration(const riddle::id_token &n, const riddle::id_token &pt, const riddle::ast::expression *const e) : riddle::ast::typedef_declaration(n, pt, e) {}
-        typedef_declaration::~typedef_declaration() {}
         void typedef_declaration::declare(scope &scp) const
         {
             // A new typedef type has been declared..
@@ -486,7 +442,6 @@ namespace ratio
         }
 
         enum_declaration::enum_declaration(const riddle::id_token &n, const std::vector<riddle::string_token> &es, const std::vector<std::vector<riddle::id_token>> &trs) : riddle::ast::enum_declaration(n, es, trs) {}
-        enum_declaration::~enum_declaration() {}
         void enum_declaration::declare(scope &scp) const
         {
             // A new enum type has been declared..
@@ -517,7 +472,6 @@ namespace ratio
         }
 
         field_declaration::field_declaration(const std::vector<riddle::id_token> &tp, const std::vector<const riddle::ast::variable_declaration *> &ds) : riddle::ast::field_declaration(tp, ds) {}
-        field_declaration::~field_declaration() {}
         void field_declaration::refine(scope &scp) const
         {
             // we add fields to the current scope..
@@ -531,7 +485,6 @@ namespace ratio
         }
 
         constructor_declaration::constructor_declaration(const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<std::pair<const riddle::id_token, const std::vector<const riddle::ast::expression *>>> &il, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::constructor_declaration(pars, il, stmnts) {}
-        constructor_declaration::~constructor_declaration() {}
         void constructor_declaration::refine(scope &scp) const
         {
             std::vector<const field *> args;
@@ -552,7 +505,6 @@ namespace ratio
         }
 
         class_declaration::class_declaration(const riddle::id_token &n, const std::vector<std::vector<riddle::id_token>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts) : riddle::ast::class_declaration(n, bcs, fs, cs, ms, ps, ts) {}
-        class_declaration::~class_declaration() {}
         void class_declaration::declare(scope &scp) const
         {
             // A new type has been declared..
@@ -595,7 +547,6 @@ namespace ratio
         }
 
         compilation_unit::compilation_unit(const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::compilation_unit(ms, ps, ts, stmnts) {}
-        compilation_unit::~compilation_unit() {}
         void compilation_unit::declare(scope &scp) const
         {
             for (const auto &t : types)
@@ -625,5 +576,4 @@ namespace ratio
     } // namespace ast
 
     riddle_parser::riddle_parser(std::istream &is) : parser(is) {}
-    riddle_parser::~riddle_parser() {}
 } // namespace ratio

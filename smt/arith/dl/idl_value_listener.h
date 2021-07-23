@@ -11,7 +11,7 @@ namespace smt
   public:
     idl_value_listener(idl_theory &s) : th(s) {}
     idl_value_listener(const idl_value_listener &that) = delete;
-    virtual ~idl_value_listener() {}
+    virtual ~idl_value_listener() = default;
 
   protected:
     inline void listen_idl(var v) { th.listen(v, this); }

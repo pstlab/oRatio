@@ -7,11 +7,10 @@
 namespace ratio
 {
   template <typename function>
-  class timer
+  class timer final
   {
   public:
     timer(const size_t &tick_dur, function f) : tick_duration(tick_dur), fun(f) {}
-    ~timer() {}
 
   public:
     void lock() { mtx.lock(); }
@@ -23,20 +22,21 @@ namespace ratio
       executing = true;
       mtx.unlock();
       tick_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(tick_duration);
-      std::thread t([this]() {
-        while (true)
-        {
-          if (!executing)
-            return;
-          std::this_thread::sleep_until(tick_time);
-          if (!executing)
-            return;
-          tick_time += std::chrono::milliseconds(tick_duration);
-          mtx.lock();
-          fun();
-          mtx.unlock();
-        }
-      });
+      std::thread t([this]()
+                    {
+                      while (true)
+                      {
+                        if (!executing)
+                          return;
+                        std::this_thread::sleep_until(tick_time);
+                        if (!executing)
+                          return;
+                        tick_time += std::chrono::milliseconds(tick_duration);
+                        mtx.lock();
+                        fun();
+                        mtx.unlock();
+                      }
+                    });
       return t;
     }
 

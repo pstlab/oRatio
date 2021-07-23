@@ -43,9 +43,9 @@ namespace smt
     friend class array_val;
 
   public:
-    json_core();
+    json_core() = default;
     json_core(const std::map<std::string, json> &vals);
-    ~json_core();
+    virtual ~json_core() = default;
 
     inline bool has(const std::string &id) const noexcept { return vals.count(id); }
     inline json &get(const std::string &id) noexcept { return vals.at(id); }
@@ -64,8 +64,8 @@ namespace smt
   class null_val : public json_core
   {
   public:
-    JSON_EXPORT null_val();
-    JSON_EXPORT ~null_val();
+    JSON_EXPORT null_val() = default;
+    JSON_EXPORT ~null_val() = default;
 
     void to_json(std::ostream &os) const noexcept override;
   };
@@ -73,9 +73,9 @@ namespace smt
   class bool_val : public json_core
   {
   public:
-    JSON_EXPORT bool_val();
+    JSON_EXPORT bool_val() = default;
     JSON_EXPORT bool_val(const bool &val);
-    JSON_EXPORT ~bool_val();
+    JSON_EXPORT ~bool_val() = default;
 
     inline bool get() const noexcept { return val; }
     inline void set(const bool &v) noexcept { val = v; }
@@ -91,9 +91,9 @@ namespace smt
   class string_val : public json_core
   {
   public:
-    JSON_EXPORT string_val();
+    JSON_EXPORT string_val() = default;
     JSON_EXPORT string_val(const std::string &val);
-    JSON_EXPORT ~string_val();
+    JSON_EXPORT ~string_val() = default;
 
     inline std::string get() const noexcept { return val; }
     inline void set(const std::string &v) noexcept { val = v; }
@@ -109,9 +109,9 @@ namespace smt
   class long_val : public json_core
   {
   public:
-    JSON_EXPORT long_val();
+    JSON_EXPORT long_val() = default;
     JSON_EXPORT long_val(const long &val);
-    JSON_EXPORT ~long_val();
+    JSON_EXPORT ~long_val() = default;
 
     inline long get() const noexcept { return val; }
     inline void set(const long &v) noexcept { val = v; }
@@ -127,9 +127,9 @@ namespace smt
   class double_val : public json_core
   {
   public:
-    JSON_EXPORT double_val();
+    JSON_EXPORT double_val() = default;
     JSON_EXPORT double_val(const double &val);
-    JSON_EXPORT ~double_val();
+    JSON_EXPORT ~double_val() = default;
 
     inline double get() const noexcept { return val; }
     inline void set(const double &v) noexcept { val = v; }
@@ -145,9 +145,9 @@ namespace smt
   class array_val : public json_core
   {
   public:
-    JSON_EXPORT array_val();
+    JSON_EXPORT array_val() = default;
     JSON_EXPORT array_val(const std::vector<json> &vals);
-    JSON_EXPORT ~array_val();
+    JSON_EXPORT ~array_val() = default;
 
     inline size_t size() const noexcept { return vals.size(); }
 

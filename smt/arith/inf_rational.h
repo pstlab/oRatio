@@ -7,7 +7,7 @@ namespace smt
   class inf_rational
   {
   public:
-    explicit inf_rational() {}
+    explicit inf_rational() = default;
     explicit inf_rational(I nun) : rat(nun) {}
     explicit inf_rational(const rational &rat) : rat(rat) {}
     explicit inf_rational(I nun, I den) : rat(nun, den) {}

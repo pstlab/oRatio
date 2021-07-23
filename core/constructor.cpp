@@ -12,7 +12,6 @@ namespace ratio
         new_fields({new field(static_cast<type &>(scp), THIS_KEYWORD, nullptr, true)});
         new_fields(args);
     }
-    CORE_EXPORT constructor::~constructor() {}
 
     expr constructor::new_instance(context &ctx, const std::vector<expr> &exprs) const noexcept
     {

@@ -21,7 +21,7 @@ namespace ratio
   public:
     smart_type(solver &slv, scope &scp, const std::string &name);
     smart_type(const smart_type &that) = delete;
-    virtual ~smart_type();
+    virtual ~smart_type() = default;
 
     inline solver &get_solver() const noexcept { return slv; }
 
@@ -52,7 +52,7 @@ namespace ratio
   public:
     atom_listener(atom &atm);
     atom_listener(const atom_listener &that) = delete;
-    virtual ~atom_listener();
+    virtual ~atom_listener() = default;
 
   protected:
     atom &atm;

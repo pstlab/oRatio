@@ -94,56 +94,51 @@ namespace ratio
     std::vector<expr> instances;                                // a vector containing all the instances defined within this type..
   };
 
-  class bool_type : public type
+  class bool_type final : public type
   {
   public:
     bool_type(core &cr);
     bool_type(const bool_type &that) = delete;
-    virtual ~bool_type();
 
     bool is_assignable_from(const type &t) const noexcept override { return &t == this; }
     expr new_instance(context &ctx) noexcept override;
   };
 
-  class int_type : public type
+  class int_type final : public type
   {
   public:
     int_type(core &cr);
     int_type(const int_type &that) = delete;
-    virtual ~int_type();
 
     bool is_assignable_from(const type &t) const noexcept override;
     expr new_instance(context &ctx) noexcept override;
   };
 
-  class real_type : public type
+  class real_type final : public type
   {
   public:
     real_type(core &cr);
     real_type(const real_type &that) = delete;
-    virtual ~real_type();
 
     bool is_assignable_from(const type &t) const noexcept override;
     expr new_instance(context &ctx) noexcept override;
   };
 
-  class tp_type : public type
+  class tp_type final : public type
   {
   public:
     tp_type(core &cr);
     tp_type(const tp_type &that) = delete;
-    virtual ~tp_type();
 
     bool is_assignable_from(const type &t) const noexcept override;
     expr new_instance(context &ctx) noexcept override;
   };
 
-  class string_type : public type
+  class string_type final : public type
   {
   public:
     string_type(core &cr);
     string_type(const string_type &that) = delete;
-    virtual ~string_type();
 
     bool is_assignable_from(const type &t) const noexcept override { return &t == this; }
     expr new_instance(context &ctx) noexcept override;

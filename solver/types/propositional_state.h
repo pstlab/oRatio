@@ -10,12 +10,12 @@
 
 namespace ratio
 {
-  class propositional_state : public smart_type
+  class propositional_state final : public smart_type
   {
   public:
     propositional_state(solver &slv);
     propositional_state(const propositional_state &orig) = delete;
-    virtual ~propositional_state();
+    ~propositional_state();
 
   private:
     std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;
@@ -24,30 +24,27 @@ namespace ratio
     void new_atom(atom_flaw &f) override;
 
     // the propositional-state constructor..
-    class ps_constructor : public constructor
+    class ps_constructor final : public constructor
     {
     public:
       ps_constructor(propositional_state &ps);
       ps_constructor(ps_constructor &&) = delete;
-      virtual ~ps_constructor();
     };
 
     // the propositional-state predicate..
-    class ps_predicate : public predicate
+    class ps_predicate final : public predicate
     {
     public:
       ps_predicate(propositional_state &rr);
       ps_predicate(ps_predicate &&) = delete;
-      virtual ~ps_predicate();
     };
 
     // the atom listener for propositional-state..
-    class ps_atom_listener : public atom_listener
+    class ps_atom_listener final : public atom_listener
     {
     public:
       ps_atom_listener(propositional_state &ps, atom &a);
       ps_atom_listener(ps_atom_listener &&) = delete;
-      virtual ~ps_atom_listener();
 
     private:
       void something_changed();

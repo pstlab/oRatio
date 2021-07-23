@@ -61,14 +61,13 @@ namespace smt
     inline void listen(const var &v, idl_value_listener *const l) noexcept { listening[v].insert(l); }
 
   private:
-    class idl_distance
+    class idl_distance final
     {
       friend class idl_theory;
 
     public:
       idl_distance(const lit &b, const var &from, const var &to, const I &dist) : b(b), from(from), to(to), dist(dist) {}
       idl_distance(const idl_distance &orig) = delete;
-      ~idl_distance() {}
 
     private:
       const lit b; // the propositional literal associated to the distance constraint..

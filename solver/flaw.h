@@ -17,7 +17,7 @@ namespace ratio
   public:
     flaw(solver &slv, const std::vector<resolver *> &causes, const bool &exclusive = false);
     flaw(const flaw &that) = delete;
-    ~flaw();
+    virtual ~flaw() = default;
 
     inline solver &get_solver() const noexcept { return slv; }
     inline smt::lit get_phi() const noexcept { return phi; }

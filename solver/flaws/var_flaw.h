@@ -12,24 +12,22 @@ namespace ratio
 {
   class var_item;
 
-  class var_flaw : public flaw
+  class var_flaw final : public flaw
   {
   public:
     var_flaw(solver &slv, const std::vector<resolver *> &causes, var_item &v_itm);
     var_flaw(const var_flaw &orig) = delete;
-    virtual ~var_flaw();
 
     std::string get_label() const noexcept override;
 
   private:
     void compute_resolvers() override;
 
-    class choose_value : public resolver
+    class choose_value final : public resolver
     {
     public:
       choose_value(solver &slv, smt::rational cst, var_flaw &enm_flaw, const smt::var_value &val);
       choose_value(const choose_value &that) = delete;
-      virtual ~choose_value();
 
       std::string get_label() const noexcept override;
 

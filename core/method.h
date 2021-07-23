@@ -13,7 +13,7 @@ namespace ratio
   class expr;
   class item;
 
-  class method : public scope
+  class method final : public scope
   {
     friend class core;
     friend class type;
@@ -21,7 +21,6 @@ namespace ratio
   public:
     method(core &cr, scope &scp, const type *const return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
     method(const method &orig) = delete;
-    virtual ~method();
 
     inline const type *get_return_type() const noexcept { return return_type; }        // returns the return type of this method (can be nullptr)..
     inline std::string get_name() const noexcept { return name; }                      // returns the name of this method..

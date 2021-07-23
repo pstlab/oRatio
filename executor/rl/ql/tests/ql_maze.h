@@ -7,11 +7,10 @@ namespace rl
 {
     constexpr double act_rew = -0.01;
 
-    class ql_maze : public ql_environment
+    class ql_maze final : public ql_environment
     {
     public:
         ql_maze(const size_t &init_state) : ql_environment(11, 4, init_state) {}
-        ~ql_maze() {}
 
         step execute_action(const size_t &action) noexcept override
         {

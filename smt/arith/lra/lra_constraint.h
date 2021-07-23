@@ -21,7 +21,7 @@ namespace smt
    * This class is used for representing assertions.
    * An assertion, controlled by the literal 'b', represents the expression 'x' <op> 'v'.
    */
-  class assertion
+  class assertion final
   {
     friend class lra_theory;
     friend class row;
@@ -29,7 +29,6 @@ namespace smt
   public:
     assertion(lra_theory &th, const op o, const lit b, const var x, const inf_rational &v);
     assertion(const assertion &orig) = delete;
-    virtual ~assertion();
 
   private:
     bool propagate_lb(const var &x) noexcept; // propagates the lower bound of variable 'x' on the assertion returning whether propagation is successful..
@@ -49,14 +48,13 @@ namespace smt
    * This class is used for representing rows in the sparse tableau.
    * A row represents an equality constraint between a basic variable and a linear expression of non-basic variables.
    */
-  class row
+  class row final
   {
     friend class lra_theory;
 
   public:
     row(lra_theory &th, const var x, lin l);
     row(const row &orig) = delete;
-    virtual ~row();
 
   private:
     bool propagate_lb(const var &x) noexcept; // propagates the lower bound of variable 'x' on the tableau row returning whether propagation is successful..

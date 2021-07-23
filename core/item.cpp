@@ -10,7 +10,6 @@ using namespace smt;
 namespace ratio
 {
     item::item(core &cr, const context ctx, const type &tp) : env(cr, context(ctx)), tp(tp) {}
-    item::~item() {}
 
     lit item::new_eq(item &i) noexcept
     {
@@ -45,7 +44,6 @@ namespace ratio
     json item::value_to_json() const noexcept { return new string_val(std::to_string(reinterpret_cast<uintptr_t>(this))); }
 
     CORE_EXPORT bool_item::bool_item(core &cr, const lit &l) : item(cr, context(&cr), cr.get_type(BOOL_KEYWORD)), l(l) {}
-    CORE_EXPORT bool_item::~bool_item() {}
 
     lit bool_item::new_eq(item &i) noexcept
     {
@@ -91,7 +89,6 @@ namespace ratio
     }
 
     CORE_EXPORT arith_item::arith_item(core &cr, const type &t, const lin &l) : item(cr, context(&cr), t), l(l) { assert(&t == &cr.get_type(INT_KEYWORD) || &t == &cr.get_type(REAL_KEYWORD) || &t == &cr.get_type(TP_KEYWORD)); }
-    CORE_EXPORT arith_item::~arith_item() {}
 
     lit arith_item::new_eq(item &i) noexcept
     {
@@ -170,7 +167,6 @@ namespace ratio
     }
 
     CORE_EXPORT var_item::var_item(core &cr, const type &t, var ev) : item(cr, context(&cr), t), ev(ev) {}
-    CORE_EXPORT var_item::~var_item() {}
 
     expr var_item::get(const std::string &name) const
     {
@@ -271,7 +267,6 @@ namespace ratio
     }
 
     CORE_EXPORT string_item::string_item(core &cr, const std::string &l) : item(cr, context(&cr), cr.get_type(STRING_KEYWORD)), l(l) {}
-    CORE_EXPORT string_item::~string_item() {}
 
     lit string_item::new_eq(item &i) noexcept
     {
