@@ -18,7 +18,6 @@ namespace smt
   private:
     clause(sat_core &s, std::vector<lit> lits);
     clause(const clause &orig) = delete;
-    ~clause() override = default;
 
     static clause *new_clause(sat_core &s, std::vector<lit> lits);
 
