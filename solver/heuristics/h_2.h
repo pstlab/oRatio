@@ -4,11 +4,11 @@
 
 namespace ratio
 {
-  class h_1 final : public graph
+  class h_2 final : public graph
   {
   public:
-    h_1(solver &slv);
-    h_1(const h_1 &that) = delete;
+    h_2(solver &slv);
+    h_2(const h_2 &that) = delete;
 
     smt::rational get_estimated_cost(const resolver &r) const noexcept override;
 
@@ -16,8 +16,8 @@ namespace ratio
     void enqueue(flaw &f);
     void propagate_costs(flaw &f);
 
-    void build() override;     // builds the h_1 planning graph..
-    bool prune() override;     // prunes the current h_1 planning graph..
+    void build() override;     // builds the h_2 planning graph..
+    bool prune() override;     // prunes the current h_2 planning graph..
     void add_layer() override; // adds a layer to the current planning graph..
 
 #ifdef DEFERRABLE_FLAWS

@@ -17,6 +17,8 @@ namespace ratio
 
     inline solver &get_solver() const noexcept { return slv; }
 
+    virtual smt::rational get_estimated_cost(const resolver &r) const noexcept = 0;
+
   private:
     virtual void enqueue(flaw &f) = 0;
     virtual void propagate_costs(flaw &f) = 0;

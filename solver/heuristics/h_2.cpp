@@ -1,4 +1,4 @@
-#include "h_1.h"
+#include "h_2.h"
 #include "flaw.h"
 #include "resolver.h"
 #include <algorithm>
@@ -8,9 +8,9 @@ using namespace smt;
 
 namespace ratio
 {
-    h_1::h_1(solver &slv) : graph(slv) {}
+    h_2::h_2(solver &slv) : graph(slv) {}
 
-    smt::rational h_1::get_estimated_cost(const resolver &r) const noexcept
+    smt::rational h_2::get_estimated_cost(const resolver &r) const noexcept
     {
         if (slv.get_sat_core().value(r.get_rho()) == False)
             return rational::POSITIVE_INFINITY;
@@ -18,7 +18,7 @@ namespace ratio
             return r.get_intrinsic_cost();
 
         rational est_cost;
-#ifdef H_MAX
+#ifdef H2_MAX
         est_cost = rational::NEGATIVE_INFINITY;
         for (const auto &f : r.get_preconditions())
             if (!f->is_expanded())
@@ -30,7 +30,7 @@ namespace ratio
                     est_cost = c;
             }
 #endif
-#ifdef H_ADD
+#ifdef H2_ADD
         for (const auto &f : r.get_preconditions())
             if (!f->is_expanded())
                 return rational::POSITIVE_INFINITY;
@@ -40,9 +40,9 @@ namespace ratio
         return est_cost + r.get_intrinsic_cost();
     }
 
-    void h_1::enqueue(flaw &f) { flaw_q.push_back(&f); }
+    void h_2::enqueue(flaw &f) { flaw_q.push_back(&f); }
 
-    void h_1::propagate_costs(flaw &f)
+    void h_2::propagate_costs(flaw &f)
     {
         rational c_cost; // the current cost..
         if (slv.get_sat_core().value(f.get_phi()) == False)
@@ -73,7 +73,7 @@ namespace ratio
         visited.erase(&f);
     }
 
-    void h_1::build()
+    void h_2::build()
     {
         LOG("building the causal graph..");
         assert(slv.get_sat_core().root_level());
@@ -114,7 +114,7 @@ namespace ratio
         slv.get_sat_core().simplify_db();
     }
 
-    bool h_1::prune()
+    bool h_2::prune()
     {
         LOG("pruning the graph..");
         for (const auto &f : flaw_q)
@@ -123,7 +123,7 @@ namespace ratio
         return slv.get_sat_core().propagate();
     }
 
-    void h_1::add_layer()
+    void h_2::add_layer()
     {
         assert(slv.get_sat_core().root_level());
         assert(std::none_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
@@ -156,7 +156,7 @@ namespace ratio
     }
 
 #ifdef DEFERRABLE_FLAWS
-    bool h_1::is_deferrable(flaw &f)
+    bool h_2::is_deferrable(flaw &f)
     {
         if (f.get_estimated_cost() < rational::POSITIVE_INFINITY || std::any_of(f.get_resolvers().cbegin(), f.get_resolvers().cend(), [this](resolver *r)
                                                                                 { return slv.get_sat_core().value(r->get_rho()) == True; }))

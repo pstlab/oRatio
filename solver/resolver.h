@@ -2,6 +2,7 @@
 
 #include "lit.h"
 #include "rational.h"
+#include "graph.h"
 #include <vector>
 
 namespace ratio
@@ -23,7 +24,7 @@ namespace ratio
     inline solver &get_solver() const noexcept { return slv; }
     inline smt::lit get_rho() const noexcept { return rho; }
     inline smt::rational get_intrinsic_cost() const noexcept { return intrinsic_cost; }
-    smt::rational get_estimated_cost() const noexcept;
+    smt::rational get_estimated_cost() const noexcept { return slv.get_graph().get_estimated_cost(*this); }
     inline flaw &get_effect() const noexcept { return effect; }
     inline const std::vector<flaw *> &get_preconditions() const noexcept { return preconditions; }
 

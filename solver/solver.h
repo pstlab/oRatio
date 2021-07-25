@@ -46,6 +46,7 @@ namespace ratio
 
   public:
     SOLVER_EXPORT solver();
+    SOLVER_EXPORT solver(graph &gr);
     solver(const solver &orig) = delete;
     SOLVER_EXPORT ~solver();
 
@@ -72,6 +73,8 @@ namespace ratio
 
     inline size_t decision_level() const noexcept { return trail.size(); } // returns the current decision level..
     inline bool root_level() const noexcept { return trail.empty(); }      // checks whether the current decision level is root level..
+
+    const graph &get_graph() const noexcept { return gr; }
 
   private:
     inline atom_flaw &get_reason(const atom &atm) const noexcept { return *reason.at(&atm); } // returns the flaw which has given rise to the atom..
