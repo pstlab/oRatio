@@ -3,6 +3,9 @@
 #if defined(H_MAX) || defined(H_ADD)
 #include "h_1.h"
 #define HEURISTIC *new h_1(*this)
+#elif defined(H2_MAX) || defined(H2_ADD)
+#include "h_2.h"
+#define HEURISTIC *new h_2(*this)
 #endif
 #include "bool_flaw.h"
 #include "disj_flaw.h"
@@ -302,10 +305,10 @@ namespace ratio
         r.preconditions.push_back(&f);
         f.supports.push_back(&r);
         // activating the resolver requires the activation of the flaw..
-        bool new_clause = sat->new_clause({!r.rho, f.get_phi()});
+        [[maybe_unused]] bool new_clause = sat->new_clause({!r.rho, f.get_phi()});
         assert(new_clause);
         // we introduce an ordering constraint..
-        bool new_dist = sat->new_clause({!r.rho, get_idl_theory().new_distance(r.effect.position, f.position, 0)});
+        [[maybe_unused]] bool new_dist = sat->new_clause({!r.rho, get_idl_theory().new_distance(r.effect.position, f.position, 0)});
         assert(new_dist);
     }
 

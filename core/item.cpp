@@ -210,7 +210,7 @@ namespace ratio
                             if (val != val_not)
                                 for (const auto &v : val_not.second)
                                 {
-                                    bool nc = cr.get_sat_core().new_clause({!var, !v});
+                                    [[maybe_unused]] bool nc = cr.get_sat_core().new_clause({!var, !v});
                                     assert(nc);
                                 }
                     }

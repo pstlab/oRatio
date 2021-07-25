@@ -138,7 +138,7 @@ namespace ratio
         if (tp.get_name().compare(BOOL_KEYWORD) == 0)
         {
             bool_expr b = new_bool();
-            bool nc;
+            [[maybe_unused]] bool nc;
             for (size_t i = 0; i < lits.size(); ++i)
             {
                 nc = stack.top().new_clause({!lits[i], stack.top().new_eq(dynamic_cast<bool_item *>(vals[i])->l, b->l)});
@@ -167,7 +167,7 @@ namespace ratio
             else
             { // we need to create a new integer variable..
                 arith_expr ie = new_int();
-                bool nc;
+                [[maybe_unused]] bool nc;
                 for (size_t i = 0; i < lits.size(); ++i)
                 {
                     nc = stack.top().new_clause({!lits[i], lra_th->new_eq(ie->l, dynamic_cast<arith_item *>(vals[i])->l)});
@@ -200,7 +200,7 @@ namespace ratio
             else
             { // we need to create a new real variable..
                 arith_expr re = new_real();
-                bool nc;
+                [[maybe_unused]] bool nc;
                 for (size_t i = 0; i < lits.size(); ++i)
                 {
                     nc = stack.top().new_clause({!lits[i], lra_th->new_eq(re->l, dynamic_cast<arith_item *>(vals[i])->l)});
@@ -233,7 +233,7 @@ namespace ratio
             else
             { // we need to create a new time-point variable..
                 arith_expr tm_pt = new_tp();
-                bool nc;
+                [[maybe_unused]] bool nc;
                 for (size_t i = 0; i < lits.size(); ++i)
                 {
                     nc = stack.top().new_clause({!lits[i], rdl_th->new_eq(tm_pt->l, dynamic_cast<arith_item *>(vals[i])->l)});

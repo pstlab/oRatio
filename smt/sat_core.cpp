@@ -10,7 +10,7 @@ namespace smt
 {
     SMT_EXPORT sat_core::sat_core()
     {
-        var c_false = new_var(); // the false constant..
+        [[maybe_unused]] var c_false = new_var(); // the false constant..
         assert(c_false == FALSE_var);
         assigns[FALSE_var] = False;
         level[FALSE_var] = 0;
@@ -562,7 +562,7 @@ namespace smt
         if (lits.size() == 1)
         {
             assert(root_level());
-            bool e = enqueue(lits[0]);
+            [[maybe_unused]] bool e = enqueue(lits[0]);
             assert(e);
         }
         else
@@ -573,7 +573,7 @@ namespace smt
 
             auto l0 = lits[0];
             clause *c = clause::new_clause(*this, std::move(lits));
-            bool e = enqueue(l0, c);
+            [[maybe_unused]] bool e = enqueue(l0, c);
             assert(e);
             constrs.push_back(c);
         }
