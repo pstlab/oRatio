@@ -110,10 +110,21 @@ namespace ratio
         for (const auto &f : flush_pending_flaws())
             new_flaw(*f, false); // we add the flaws, without enqueuing, to the planning graph..
 
+        // we check the graph..
+        LOG("checking the graph..");
+        checking = true;
+        for (const auto &f : std::unordered_set<flaw *>(get_flaws()))
+            if (!check(*f))
+            {
+                // TODO: add a graph refinement flaw..
+            }
+        checking = false;
+
         // we perform some cleanings..
         slv.get_sat_core().simplify_db();
     }
 
+#ifdef PRUNE_GRAPH
     bool h_2::prune()
     {
         LOG("pruning the graph..");
@@ -122,6 +133,7 @@ namespace ratio
                 return false;
         return slv.get_sat_core().propagate();
     }
+#endif
 
     void h_2::add_layer()
     {
@@ -170,4 +182,9 @@ namespace ratio
         return def;
     }
 #endif
+
+    bool h_2::check(flaw &f)
+    {
+        return f.is_expanded();
+    }
 } // namespace ratio

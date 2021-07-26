@@ -22,8 +22,10 @@ namespace ratio
   private:
     virtual void enqueue(flaw &f) = 0;
     virtual void propagate_costs(flaw &f) = 0;
-    virtual void build() = 0;     // builds the graph..
-    virtual bool prune() = 0;     // prunes the current graph..
+    virtual void build() = 0; // builds the graph..
+#ifdef PRUNE_GRAPH
+    virtual bool prune() = 0; // prunes the current graph..
+#endif
     virtual void add_layer() = 0; // adds a layer to the graph..
 
     virtual void activated_flaw(flaw &f);

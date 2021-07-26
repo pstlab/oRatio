@@ -64,6 +64,7 @@ namespace ratio
         gr.build();
         // we push the constraint network..
         push_network();
+#ifdef PRUNE_GRAPH
         // we prune the causal graph..
         while (!gr.prune())
         { // we add a new layer to the causal graph..
@@ -71,6 +72,7 @@ namespace ratio
             gr.add_layer();
             push_network();
         }
+#endif
 
         // we search for a consistent solution without flaws..
 #ifdef CHECK_INCONSISTENCIES
@@ -169,19 +171,19 @@ namespace ratio
         // we take the decision..
         if (!get_sat_core().assume(ch))
         { // we have exhausted the search..
-            // we pop the constraint network..
-            pop_network();
-            // we add a layer to the causal graph..
-            gr.add_layer();
-            // we push the constraint network..
-            push_network();
-            // we prune the causal graph..
-            while (!gr.prune())
-            { // we add a new layer to the causal graph..
+#ifdef PRUNE_GRAPH
+            do
+            {
+#endif
+                // we pop the constraint network..
                 pop_network();
+                // we add a layer to the causal graph..
                 gr.add_layer();
+                // we push the constraint network..
                 push_network();
-            }
+#ifdef PRUNE_GRAPH
+            } while (!gr.prune());
+#endif
         }
         assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto f)
@@ -366,19 +368,19 @@ namespace ratio
         LOG("next..");
         if (!get_sat_core().next())
         { // we have exhausted the search..
-            // we pop the constraint network..
-            pop_network();
-            // we add a layer to the causal graph..
-            gr.add_layer();
-            // we push the constraint network..
-            push_network();
-            // we prune the causal graph..
-            while (!gr.prune())
-            { // we add a new layer to the causal graph..
+#ifdef PRUNE_GRAPH
+            do
+            {
+#endif
+                // we pop the constraint network..
                 pop_network();
+                // we add a layer to the causal graph..
                 gr.add_layer();
+                // we push the constraint network..
                 push_network();
-            }
+#ifdef PRUNE_GRAPH
+            } while (!gr.prune());
+#endif
         }
         assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto *f)
@@ -529,12 +531,19 @@ namespace ratio
                         learnt.push_back(!l);
                     record(learnt);
                     if (!get_sat_core().propagate())
+#ifdef PRUNE_GRAPH
                         do
-                        { // we add a new layer to the causal graph..
+                        {
+#endif
+                            // we pop the constraint network..
                             pop_network();
+                            // we add a layer to the causal graph..
                             gr.add_layer();
+                            // we push the constraint network..
                             push_network();
+#ifdef PRUNE_GRAPH
                         } while (!gr.prune());
+#endif
                 }
 
                 // we re-collect all the inconsistencies from all the smart-types..

@@ -16,8 +16,10 @@ namespace ratio
     void enqueue(flaw &f);
     void propagate_costs(flaw &f);
 
-    void build() override;     // builds the h_1 planning graph..
-    bool prune() override;     // prunes the current h_1 planning graph..
+    void build() override; // builds the h_1 planning graph..
+#ifdef PRUNE_GRAPH
+    bool prune() override; // prunes the current h_1 planning graph..
+#endif
     void add_layer() override; // adds a layer to the current planning graph..
 
 #ifdef DEFERRABLE_FLAWS
