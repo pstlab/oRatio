@@ -123,15 +123,13 @@ namespace ratio
       std::unordered_set<flaw *> new_flaws;                  // the just activated flaws..
       std::unordered_set<flaw *> solved_flaws;               // the just solved flaws..
     };
-    graph &gr;                                                  // the used graph..
-    std::vector<smart_type *> sts;                              // the smart-types..
-    resolver *res = nullptr;                                    // the current resolver (i.e. the cause for the new flaws)..
-    std::vector<flaw *> pending_flaws;                          // pending flaws, waiting root-level for being initialized..
-    std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
-    std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
-    std::unordered_map<const atom *, atom_flaw *> reason;       // the reason for having introduced an atom..
-    std::unordered_set<flaw *> flaws;                           // the currently active flaws..
-    std::vector<layer> trail;                                   // the list of taken decisions, with the associated changes made, in chronological order..
+    graph &gr;                                            // the used graph..
+    std::vector<smart_type *> sts;                        // the smart-types..
+    resolver *res = nullptr;                              // the current resolver (i.e. the cause for the new flaws)..
+    std::vector<flaw *> pending_flaws;                    // pending flaws, waiting root-level for being initialized..
+    std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
+    std::unordered_set<flaw *> flaws;                     // the currently active flaws..
+    std::vector<layer> trail;                             // the list of taken decisions, with the associated changes made, in chronological order..
 
 #ifdef BUILD_LISTENERS
   private:

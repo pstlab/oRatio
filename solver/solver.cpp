@@ -183,10 +183,10 @@ namespace ratio
                 push_network();
             }
         }
-        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
+        assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto f)
                                                 { return (sat->value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(rhos.cbegin(), rhos.cend(), [this](const auto &v_rs)
+        assert(std::all_of(gr.rhos.cbegin(), gr.rhos.cend(), [this](const auto &v_rs)
                            { return std::all_of(v_rs.second.cbegin(), v_rs.second.cend(), [this](const auto r)
                                                 { return is_positive_infinite(r->get_estimated_cost()) || sat->value(r->rho) != False; }); }));
 
@@ -272,7 +272,7 @@ namespace ratio
         if (enqueue) // we enqueue the flaw..
             gr.enqueue(f);
         else // we directly expand the flaw..
-            expand_flaw(f);
+            gr.expand_flaw(f);
 
         switch (sat->value(f.get_phi()))
         {
@@ -282,7 +282,7 @@ namespace ratio
                 flaws.insert(&f); // the flaw has not yet already been solved (e.g. it has a single resolver)..
             break;
         case Undefined: // we listen for the flaw to become active..
-            phis[variable(f.get_phi())].push_back(&f);
+            gr.phis[variable(f.get_phi())].push_back(&f);
             bind(variable(f.get_phi()));
             break;
         }
@@ -294,7 +294,7 @@ namespace ratio
         if (sat->value(r.rho) == Undefined) // we do not have a top-level (a landmark) resolver, nor an infeasible one..
         {
             // we listen for the resolver to become inactive..
-            rhos[variable(r.rho)].push_back(&r);
+            gr.rhos[variable(r.rho)].push_back(&r);
             bind(variable(r.rho));
         }
     }
@@ -325,9 +325,6 @@ namespace ratio
 
         if (!get_sat_core().propagate())
             throw unsolvable_exception();
-
-        // we propagate the costs starting from the currently expanded flaw..
-        gr.propagate_costs(f);
 
         // we clean up already solved flaws..
         if (sat->value(f.get_phi()) == True && std::any_of(f.resolvers.cbegin(), f.resolvers.cend(), [this](const auto &r)
@@ -383,10 +380,10 @@ namespace ratio
                 push_network();
             }
         }
-        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
+        assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto *f)
                                                 { return (sat->value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(rhos.cbegin(), rhos.cend(), [this](const auto &v_rs)
+        assert(std::all_of(gr.rhos.cbegin(), gr.rhos.cend(), [this](const auto &v_rs)
                            { return std::all_of(v_rs.second.cbegin(), v_rs.second.cend(), [this](const auto *r)
                                                 { return is_positive_infinite(r->get_estimated_cost()) || sat->value(r->rho) != False; }); }));
 
@@ -396,14 +393,14 @@ namespace ratio
     bool solver::propagate(const lit &p)
     {
         assert(cnfl.empty());
-        assert(phis.count(variable(p)) || rhos.count(variable(p)));
+        assert(gr.phis.count(variable(p)) || gr.rhos.count(variable(p)));
 
-        if (const auto at_phis_p = phis.find(variable(p)); at_phis_p != phis.cend())
+        if (const auto at_phis_p = gr.phis.find(variable(p)); at_phis_p != gr.phis.cend())
             switch (sat->value(at_phis_p->first))
             {
-            case True:
+            case True: // some flaws have been activated..
                 for (const auto &f : at_phis_p->second)
-                { // 'f' is an activated flaw..
+                {
                     assert(!flaws.count(f));
                     if (!root_level())
                         trail.back().new_flaws.insert(f);
@@ -412,37 +409,40 @@ namespace ratio
                         flaws.insert(f); // this flaw has been activated and not yet accidentally solved..
                     else if (!root_level())
                         trail.back().solved_flaws.insert(f); // this flaw has been accidentally solved..
+                    gr.activated_flaw(*f);
                 }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
-                    phis.erase(at_phis_p);
+                    gr.phis.erase(at_phis_p);
                 break;
-            case False:
+            case False: // some flaws have been negated..
                 for (const auto &f : at_phis_p->second)
-                { // 'f' will never appear in any incoming partial solutions..
+                {
                     assert(!flaws.count(f));
-                    gr.propagate_costs(*f);
+                    gr.negated_flaw(*f);
                 }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
-                    phis.erase(at_phis_p);
+                    gr.phis.erase(at_phis_p);
                 break;
             }
 
-        if (const auto at_rhos_p = rhos.find(variable(p)); at_rhos_p != rhos.cend())
+        if (const auto at_rhos_p = gr.rhos.find(variable(p)); at_rhos_p != gr.rhos.cend())
             switch (sat->value(at_rhos_p->first))
             {
-            case True:
-                for (const auto &r : at_rhos_p->second)           // 'r' is an activated resolver..
+            case True: // some resolvers have been activated..
+                for (const auto &r : at_rhos_p->second)
+                {
                     if (flaws.erase(&r->effect) && !root_level()) // this resolver has been activated, hence its effect flaw has been resolved (notice that we remove its effect only in case it was already active)..
                         trail.back().solved_flaws.insert(&r->effect);
+                    gr.activated_resolver(*r);
+                }
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
-                    rhos.erase(at_rhos_p);
+                    gr.rhos.erase(at_rhos_p);
                 break;
-            case False:
-                for (const auto &r : at_rhos_p->second)     // 'r' is a forbidden resolver..
-                    if (sat->value(r->effect.phi) != False) // we update the cost of the resolver's effect..
-                        gr.propagate_costs(r->effect);
+            case False: // some resolvers have been negated..
+                for (const auto &r : at_rhos_p->second)
+                    gr.negated_resolver(*r);
                 if (root_level()) // since we are at root-level, we can perform some cleaning..
-                    rhos.erase(at_rhos_p);
+                    gr.rhos.erase(at_rhos_p);
                 break;
             }
 
@@ -454,14 +454,14 @@ namespace ratio
         assert(cnfl.empty());
         assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
                            { return sat->value(f->phi) == True; }));
-        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
+        assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f)
                                                 { return sat->value(f->phi) != True || (flaws.count(f) || std::any_of(trail.cbegin(), trail.cend(), [this, f](const auto &l)
                                                                                                                       { return l.solved_flaws.count(f); })); }); }));
-        assert(std::all_of(phis.cbegin(), phis.cend(), [this](const auto &v_fs)
+        assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f)
                                                 { return sat->value(f->phi) != False || is_positive_infinite(f->get_estimated_cost()); }); }));
-        assert(std::all_of(rhos.cbegin(), rhos.cend(), [this](const auto &v_rs)
+        assert(std::all_of(gr.rhos.cbegin(), gr.rhos.cend(), [this](const auto &v_rs)
                            { return std::all_of(v_rs.second.cbegin(), v_rs.second.cend(), [this](const auto &r)
                                                 { return sat->value(r->rho) != False || is_positive_infinite(r->get_estimated_cost()); }); }));
         return true;

@@ -26,9 +26,21 @@ namespace ratio
     virtual bool prune() = 0;     // prunes the current graph..
     virtual void add_layer() = 0; // adds a layer to the graph..
 
+    virtual void activated_flaw(flaw &f);
+    virtual void negated_flaw(flaw &f);
+    virtual void activated_resolver(resolver &r);
+    virtual void negated_resolver(resolver &r);
+
   protected:
     inline void new_flaw(flaw &f, const bool &enqueue = true) { slv.new_flaw(f, enqueue); }
-    inline void expand_flaw(flaw &f) { slv.expand_flaw(f); }
+    inline void expand_flaw(flaw &f)
+    {
+      // we expand the flaw..
+      slv.expand_flaw(f);
+
+      // we propagate the costs starting from the just expanded flaw..
+      propagate_costs(f);
+    }
     inline void set_cost(flaw &f, const smt::rational &cost) { slv.set_cost(f, cost); }
 
     inline std::unordered_set<flaw *> &get_flaws() { return slv.flaws; }
@@ -37,5 +49,8 @@ namespace ratio
 
   protected:
     solver &slv; // the solver this heuristic belongs to..
+  private:
+    std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
+    std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..
   };
 } // namespace ratio
