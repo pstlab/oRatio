@@ -404,7 +404,6 @@ namespace ratio
             case True:
                 for (const auto &f : at_phis_p->second)
                 { // 'f' is an activated flaw..
-                    //  FIRE_FLAW_STATE_CHANGED(*f);
                     assert(!flaws.count(f));
                     if (!root_level())
                         trail.back().new_flaws.insert(f);
@@ -420,7 +419,6 @@ namespace ratio
             case False:
                 for (const auto &f : at_phis_p->second)
                 { // 'f' will never appear in any incoming partial solutions..
-                    //  FIRE_FLAW_STATE_CHANGED(*f);
                     assert(!flaws.count(f));
                     gr.propagate_costs(*f);
                 }
