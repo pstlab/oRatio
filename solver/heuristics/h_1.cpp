@@ -114,7 +114,7 @@ namespace ratio
         slv.get_sat_core().simplify_db();
     }
 
-#ifdef PRUNE_GRAPH
+#ifdef GRAPH_PRUNING
     bool h_1::prune()
     {
         LOG("pruning the graph..");

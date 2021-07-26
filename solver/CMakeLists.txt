@@ -7,7 +7,7 @@ set(HEURISTIC_TYPE h_max CACHE STRING "Heuristic type")
 set_property(CACHE HEURISTIC_TYPE PROPERTY STRINGS ${HEURISTIC_TYPES})
 
 option(DEFERRABLE_FLAWS "Check for deferrable flaws" ON)
-option(PRUNE_GRAPH "Prunes the causal graph before starting the search" ON)
+option(GRAPH_PRUNING "Prunes the causal graph before starting the search" ON)
 option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
 
 file(GLOB SOLVER_SOURCES *.cpp flaws/*.cpp types/*.cpp heuristics/*.cpp)
@@ -48,9 +48,9 @@ if(DEFERRABLE_FLAWS)
     target_compile_definitions(solver PRIVATE DEFERRABLE_FLAWS)
 endif()
 
-message(STATUS "Prune graph:              ${PRUNE_GRAPH}")
-if(PRUNE_GRAPH)
-    target_compile_definitions(solver PRIVATE PRUNE_GRAPH)
+message(STATUS "Prune graph:              ${GRAPH_PRUNING}")
+if(GRAPH_PRUNING)
+    target_compile_definitions(solver PRIVATE GRAPH_PRUNING)
 endif()
 
 message(STATUS "Check inconsistencies:    ${CHECK_INCONSISTENCIES}")

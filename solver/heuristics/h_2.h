@@ -17,7 +17,7 @@ namespace ratio
     void propagate_costs(flaw &f);
 
     void build() override; // builds the h_2 planning graph..
-#ifdef PRUNE_GRAPH
+#ifdef GRAPH_PRUNING
     bool prune() override; // prunes the current h_2 planning graph..
 #endif
     void add_layer() override; // adds a layer to the current planning graph..

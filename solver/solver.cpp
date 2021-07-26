@@ -64,7 +64,7 @@ namespace ratio
         gr.build();
         // we push the constraint network..
         push_network();
-#ifdef PRUNE_GRAPH
+#ifdef GRAPH_PRUNING
         // we prune the causal graph..
         while (!gr.prune())
         { // we add a new layer to the causal graph..
@@ -171,7 +171,7 @@ namespace ratio
         // we take the decision..
         if (!get_sat_core().assume(ch))
         { // we have exhausted the search..
-#ifdef PRUNE_GRAPH
+#ifdef GRAPH_PRUNING
             do
             {
 #endif
@@ -181,7 +181,7 @@ namespace ratio
                 gr.add_layer();
                 // we push the constraint network..
                 push_network();
-#ifdef PRUNE_GRAPH
+#ifdef GRAPH_PRUNING
             } while (!gr.prune());
 #endif
         }
@@ -368,7 +368,7 @@ namespace ratio
         LOG("next..");
         if (!get_sat_core().next())
         { // we have exhausted the search..
-#ifdef PRUNE_GRAPH
+#ifdef GRAPH_PRUNING
             do
             {
 #endif
@@ -378,7 +378,7 @@ namespace ratio
                 gr.add_layer();
                 // we push the constraint network..
                 push_network();
-#ifdef PRUNE_GRAPH
+#ifdef GRAPH_PRUNING
             } while (!gr.prune());
 #endif
         }
@@ -531,7 +531,7 @@ namespace ratio
                         learnt.push_back(!l);
                     record(learnt);
                     if (!get_sat_core().propagate())
-#ifdef PRUNE_GRAPH
+#ifdef GRAPH_PRUNING
                         do
                         {
 #endif
@@ -541,7 +541,7 @@ namespace ratio
                             gr.add_layer();
                             // we push the constraint network..
                             push_network();
-#ifdef PRUNE_GRAPH
+#ifdef GRAPH_PRUNING
                         } while (!gr.prune());
 #endif
                 }
