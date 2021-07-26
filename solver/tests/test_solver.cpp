@@ -25,21 +25,24 @@ int main(int argc, char *argv[])
 #endif
     std::cout << "..\n";
 
-    solver s;
-
-    s.init();
-    try
+    for (size_t i = 0; i < NUM_TESTS; ++i)
     {
-        std::cout << "parsing input files..\n";
-        s.read(prob_names);
+        solver s;
 
-        std::cout << "solving the problem..\n";
-        s.solve();
-        std::cout << "hurray!! we have found a solution..\n";
-    }
-    catch (const std::exception &ex)
-    {
-        std::cout << ex.what() << '\n';
-        return 1;
+        s.init();
+        try
+        {
+            std::cout << "parsing input files..\n";
+            s.read(prob_names);
+
+            std::cout << "solving the problem..\n";
+            s.solve();
+            std::cout << "hurray!! we have found a solution..\n";
+        }
+        catch (const std::exception &ex)
+        {
+            std::cout << ex.what() << '\n';
+            return 1;
+        }
     }
 }
