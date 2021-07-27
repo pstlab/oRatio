@@ -12,20 +12,18 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         build_type: [Debug, Release]
         check_incs: [ON, OFF]
-        graph_pruning: [ON, OFF]
         heuristic_type: [h_max, h_add, h2_max, h2_add]
 
     env:
       BUILD_TYPE: ${{ matrix.build_type }}
       CHECK_INCONSISTENCIES: ${{ matrix.check_incs }}
-      GRAPH_PRUNING: ${{ matrix.graph_pruning }}
       HEURISTIC_TYPE: ${{ matrix.heuristic_type }}
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Configure CMake
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCHECK_INCONSISTENCIES=${{env.CHECK_INCONSISTENCIES}} -DGRAPH_PRUNING=${{env.GRAPH_PRUNING}} -DHEURISTIC_TYPE=${{env.HEURISTIC_TYPE}}
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCHECK_INCONSISTENCIES=${{env.CHECK_INCONSISTENCIES}} -DHEURISTIC_TYPE=${{env.HEURISTIC_TYPE}}
 
       - name: Build
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
