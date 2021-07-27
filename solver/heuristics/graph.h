@@ -25,6 +25,11 @@ namespace ratio
     virtual void build() = 0; // builds the graph..
 #ifdef GRAPH_PRUNING
     virtual bool prune() = 0; // prunes the current graph..
+#else
+    constexpr bool prune()
+    {
+      return true;
+    }
 #endif
     virtual void add_layer() = 0; // adds a layer to the graph..
 
