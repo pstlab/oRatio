@@ -23,6 +23,21 @@ namespace ratio
 #endif
     void add_layer() override; // adds a layer to the current planning graph..
 
+    void push() noexcept override
+    {
+      if (checking)
+        visited.insert(current_flaw);
+    }
+    void pop() noexcept override
+    {
+      if (checking)
+        visited.erase(current_flaw);
+    }
+    void activated_flaw(flaw &) noexcept override {}
+    void negated_flaw(flaw &) noexcept override {}
+    void activated_resolver(resolver &) noexcept override {}
+    void negated_resolver(resolver &) noexcept override {}
+
     bool check(flaw &f);
 
 #ifdef DEFERRABLE_FLAWS
@@ -42,5 +57,6 @@ namespace ratio
     bool checking = false;
     std::deque<flaw *> flaw_q;          // the flaw queue (for the graph building procedure)..
     std::unordered_set<flaw *> visited; // the visited flaws, for graph cost propagation (and deferrable flaws check)..
+    flaw *current_flaw = nullptr;
   };
 } // namespace ratio

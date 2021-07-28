@@ -78,47 +78,53 @@ namespace ratio
         LOG("building the causal graph..");
         assert(slv.get_sat_core().root_level());
 
-        while (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
-                           { return is_positive_infinite(f->get_estimated_cost()); }))
+        bool ok;
+        do
         {
-            if (flaw_q.empty())
-                throw unsolvable_exception();
-#ifdef DEFERRABLE_FLAWS
-            flaw *c_f = flaw_q.front();
-            flaw_q.pop_front();
-            assert(!c_f->is_expanded());
-            if (slv.get_sat_core().value(c_f->get_phi()) != False)
-                if (is_deferrable(*c_f)) // we have a deferrable flaw: we can postpone its expansion..
-                    flaw_q.push_back(c_f);
-                else
-                    expand_flaw(*c_f); // we expand the flaw..
-#else
-            size_t q_size = flaw_q.size();
-            for (size_t i = 0; i < q_size; ++i)
+            while (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
+                               { return is_positive_infinite(f->get_estimated_cost()); }))
             {
+                if (flaw_q.empty())
+                    throw unsolvable_exception();
+#ifdef DEFERRABLE_FLAWS
                 flaw *c_f = flaw_q.front();
                 flaw_q.pop_front();
                 assert(!c_f->is_expanded());
                 if (slv.get_sat_core().value(c_f->get_phi()) != False)
-                    expand_flaw(*c_f); // we expand the flaw..
-            }
+                    if (is_deferrable(*c_f)) // we have a deferrable flaw: we can postpone its expansion..
+                        flaw_q.push_back(c_f);
+                    else
+                        expand_flaw(*c_f); // we expand the flaw..
+#else
+                size_t q_size = flaw_q.size();
+                for (size_t i = 0; i < q_size; ++i)
+                {
+                    flaw *c_f = flaw_q.front();
+                    flaw_q.pop_front();
+                    assert(!c_f->is_expanded());
+                    if (slv.get_sat_core().value(c_f->get_phi()) != False)
+                        expand_flaw(*c_f); // we expand the flaw..
+                }
 #endif
-        }
-
-        // we extract the inconsistencies (and translate them into flaws)..
-        std::vector<std::vector<std::pair<lit, double>>> incs = get_incs();
-        for (const auto &f : flush_pending_flaws())
-            new_flaw(*f, false); // we add the flaws, without enqueuing, to the planning graph..
-
-        // we check the graph..
-        LOG("checking the graph..");
-        checking = true;
-        for (const auto &f : std::unordered_set<flaw *>(get_flaws()))
-            if (!check(*f))
-            {
-                // TODO: add a graph refinement flaw..
             }
-        checking = false;
+
+            // we extract the inconsistencies (and translate them into flaws)..
+            std::vector<std::vector<std::pair<lit, double>>> incs = get_incs();
+            for (const auto &f : flush_pending_flaws())
+                new_flaw(*f, false); // we add the flaws, without enqueuing, to the planning graph..
+
+            // we check the graph..
+            LOG("checking the graph..");
+            checking = true;
+            std::vector<flaw *> c_flaws(get_flaws().begin(), get_flaws().end());
+            // we sort the current flaws according to their estimated costs..
+            std::sort(c_flaws.begin(), c_flaws.end(), [](flaw *f0, flaw *f1)
+                      { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+
+            ok = std::all_of(c_flaws.cbegin(), c_flaws.cend(), [this](auto &f)
+                             { return check(*f); });
+            checking = false;
+        } while (!ok);
 
         // we perform some cleanings..
         slv.get_sat_core().simplify_db();
@@ -185,22 +191,30 @@ namespace ratio
 
     bool h_2::check(flaw &f)
     {
-        assert(f.is_expanded());
+        if (!f.is_expanded())
+            return false; // this flaw will be expanded at next layer addition..
         assert(slv.get_sat_core().value(f.get_phi()) == True);
         assert(std::all_of(f.get_resolvers().begin(), f.get_resolvers().end(), [this](auto &r)
                            { return slv.get_sat_core().value(r->get_rho()) == False || std::none_of(r->get_preconditions().begin(), r->get_preconditions().end(), [this](auto &cf)
                                                                                                     { return slv.get_sat_core().value(cf->get_phi()) == False; }); }));
 
+        current_flaw = &f;
         FIRE_CURRENT_FLAW(f);
-        if (visited.insert(&f).second)
+        if (!visited.count(&f))
         { // we have not seen this flaw yet..
             if (auto it = std::find_if(f.get_resolvers().begin(), f.get_resolvers().end(), [this](auto &r)
                                        { return slv.get_sat_core().value(r->get_rho()) == True; });
                 it != f.get_resolvers().end())
-                // a resolver is already applied for the given flaw..
-                // we check its active preconditions (notice that preconditions might include consistency-flaws which, depending also from other resolvers, might not be active)..
-                return std::all_of((*it)->get_preconditions().begin(), (*it)->get_preconditions().end(), [this](auto &f)
+            { // a resolver is already applied for the given flaw..
+                // we check its active preconditions..
+                std::vector<flaw *> c_precs((*it)->get_preconditions().begin(), (*it)->get_preconditions().end());
+                // we sort the current flaws according to their estimated costs..
+                std::sort(c_precs.begin(), c_precs.end(), [](flaw *f0, flaw *f1)
+                          { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+                //preconditions might include consistency-flaws which, depending also from other resolvers, might not be active
+                return std::all_of(c_precs.begin(), c_precs.end(), [this](auto &f)
                                    { return slv.get_sat_core().value(f->get_phi()) == Undefined || check(*f); });
+            }
             else
             {
                 assert(std::none_of(f.get_resolvers().begin(), f.get_resolvers().end(), [this](auto &r)
@@ -211,7 +225,7 @@ namespace ratio
                     if (slv.get_sat_core().value(r->get_rho()) == Undefined)
                         c_ress.push_back(r);
 
-                // we sort the applicable flaws' resolvers according to their currently estimated cost..
+                // we sort the applicable flaws' resolvers according to their estimated costs..
                 std::sort(c_ress.begin(), c_ress.end(), [](resolver *r0, resolver *r1)
                           { return r0->get_estimated_cost() < r1->get_estimated_cost(); });
 
@@ -219,8 +233,6 @@ namespace ratio
                 for (const auto &r : c_ress)
                 {
                     FIRE_CURRENT_RESOLVER(*r);
-                    if (slv.get_sat_core().value(r->get_rho()) == True)
-                        break;
                     if (is_infinite(r->get_estimated_cost()))
                         break; // either the resolver cannot be applied or it would not lead to a solution..
 
@@ -238,7 +250,6 @@ namespace ratio
                             if (is_unification(*r) || std::all_of(r->get_preconditions().begin(), r->get_preconditions().end(), [this](auto &f)
                                                                   { return slv.get_sat_core().value(f->get_phi()) == Undefined || check(*f); }))
                             { // either 'r' is a valid unification or all of its preconditions are applicable..
-                                visited.erase(&f);
                                 slv.get_sat_core().pop();
                                 assert(c_lvl == slv.decision_level());
                                 return true;
@@ -246,9 +257,22 @@ namespace ratio
                         slv.get_sat_core().pop();
                         assert(c_lvl == slv.decision_level());
                     }
+
+                    if (auto c_it = std::find_if(f.get_resolvers().begin(), f.get_resolvers().end(), [this](auto &r)
+                                                 { return slv.get_sat_core().value(r->get_rho()) == True; });
+                        c_it != f.get_resolvers().end())
+                    { // a resolver is already applied for the given flaw..
+                        // we check its active preconditions..
+                        std::vector<flaw *> c_precs((*c_it)->get_preconditions().begin(), (*c_it)->get_preconditions().end());
+                        // we sort the current flaws according to their estimated costs..
+                        std::sort(c_precs.begin(), c_precs.end(), [](flaw *f0, flaw *f1)
+                                  { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+                        //preconditions might include consistency-flaws which, depending also from other resolvers, might not be active
+                        return std::all_of(c_precs.begin(), c_precs.end(), [this](auto &f)
+                                           { return slv.get_sat_core().value(f->get_phi()) == Undefined || check(*f); });
+                    }
                 }
             }
-            visited.erase(&f);
         }
         // it is not possible to estimate a solution for the given flaw..
         return false;
