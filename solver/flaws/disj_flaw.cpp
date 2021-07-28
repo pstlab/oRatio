@@ -3,7 +3,7 @@
 
 namespace ratio
 {
-    disj_flaw::disj_flaw(solver &slv, const std::vector<resolver *> &causes, std::vector<smt::lit> lits) : flaw(slv, causes, false), lits(std::move(lits)) {}
+    disj_flaw::disj_flaw(solver &slv, std::vector<resolver *> causes, std::vector<smt::lit> lits) : flaw(slv, std::move(causes), false), lits(std::move(lits)) {}
 
     std::string disj_flaw::get_label() const noexcept { return "{\"type\":\"disj\", \"phi\":\"" + to_string(get_phi()) + "\", \"position\":" + std::to_string(get_position()) + "}"; }
 

@@ -4,7 +4,7 @@
 
 namespace ratio
 {
-    disjunction_flaw::disjunction_flaw(solver &slv, const std::vector<resolver *> &causes, const context &ctx, const std::vector<const conjunction *> &conjs) : flaw(slv, causes, false), ctx(ctx), conjs(conjs) {}
+    disjunction_flaw::disjunction_flaw(solver &slv, std::vector<resolver *> causes, const context &ctx, const std::vector<const conjunction *> &conjs) : flaw(slv, std::move(causes), false), ctx(ctx), conjs(conjs) {}
 
     std::string disjunction_flaw::get_label() const noexcept { return "{\"type\":\"disjunction\", \"phi\":\"" + to_string(get_phi()) + "\", \"position\":" + std::to_string(get_position()) + "}"; }
 

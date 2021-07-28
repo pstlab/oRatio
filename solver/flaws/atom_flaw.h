@@ -14,7 +14,7 @@ namespace ratio
     friend class smart_type;
 
   public:
-    atom_flaw(solver &slv, const std::vector<resolver *> &causes, atom &a, const bool is_fact);
+    atom_flaw(solver &slv, std::vector<resolver *> causes, atom &a, const bool is_fact);
     atom_flaw(const atom_flaw &orig) = delete;
 
     inline atom &get_atom() const noexcept { return atm; }
@@ -73,6 +73,8 @@ namespace ratio
       atom &trgt;                            // the target atom..
       const std::vector<smt::lit> unif_lits; // the unification literals..
     };
+
+    friend inline bool is_unification(const resolver &r) { return dynamic_cast<const unify_atom *>(&r); }
 
   private:
     atom &atm; // the atom which has to be justified..

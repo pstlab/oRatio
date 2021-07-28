@@ -4,7 +4,7 @@
 
 namespace ratio
 {
-    var_flaw::var_flaw(solver &slv, const std::vector<resolver *> &causes, var_item &v_itm) : flaw(slv, causes, true), v_itm(v_itm) {}
+    var_flaw::var_flaw(solver &slv, std::vector<resolver *> causes, var_item &v_itm) : flaw(slv, std::move(causes), true), v_itm(v_itm) {}
 
     std::string var_flaw::get_label() const noexcept { return "{\"type\":\"enum\", \"phi\":\"" + to_string(get_phi()) + "\", \"position\":" + std::to_string(get_position()) + "}"; }
 

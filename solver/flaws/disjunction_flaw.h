@@ -12,7 +12,7 @@ namespace ratio
   class disjunction_flaw final : public flaw
   {
   public:
-    disjunction_flaw(solver &slv, const std::vector<resolver *> &causes, const context &ctx, const std::vector<const conjunction *> &conjs);
+    disjunction_flaw(solver &slv, std::vector<resolver *> causes, const context &ctx, const std::vector<const conjunction *> &conjs);
     disjunction_flaw(const disjunction_flaw &orig) = delete;
 
     std::string get_label() const noexcept override;

@@ -4,7 +4,7 @@
 
 namespace ratio
 {
-    bool_flaw::bool_flaw(solver &slv, const std::vector<resolver *> &causes, bool_item &b_itm) : flaw(slv, causes, true), b_itm(b_itm) {}
+    bool_flaw::bool_flaw(solver &slv, std::vector<resolver *> causes, bool_item &b_itm) : flaw(slv, std::move(causes), true), b_itm(b_itm) {}
 
     std::string bool_flaw::get_label() const noexcept { return "{\"type\":\"bool\", \"phi\":\"" + to_string(get_phi()) + "\", \"position\":" + std::to_string(get_position()) + "}"; }
 

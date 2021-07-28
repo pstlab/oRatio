@@ -459,8 +459,8 @@ namespace ratio
     {
         LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
 
-        // we push the given decision into the trail..
         trail.emplace_back();
+        gr.push();
     }
 
     void solver::pop()
@@ -484,6 +484,7 @@ namespace ratio
         }
 
         trail.pop_back();
+        gr.pop();
 
         LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
     }

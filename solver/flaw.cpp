@@ -7,7 +7,7 @@ using namespace smt;
 
 namespace ratio
 {
-    flaw::flaw(solver &slv, const std::vector<resolver *> &causes, const bool &exclusive) : slv(slv), position(slv.get_idl_theory().new_var()), causes(causes), exclusive(exclusive) {}
+    flaw::flaw(solver &slv, std::vector<resolver *> causes, const bool &exclusive) : slv(slv), position(slv.get_idl_theory().new_var()), causes(std::move(causes)), exclusive(exclusive) {}
 
     resolver *flaw::get_cheapest_resolver() const noexcept
     {

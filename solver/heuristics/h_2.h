@@ -1,6 +1,7 @@
 #pragma once
 
 #include "graph.h"
+#include "flaw.h"
 
 namespace ratio
 {
@@ -27,6 +28,15 @@ namespace ratio
 #ifdef DEFERRABLE_FLAWS
     bool is_deferrable(flaw &f); // checks whether the given flaw is deferrable..
 #endif
+
+    class refinement final : public flaw
+    {
+    public:
+      refinement(solver &slv, std::vector<resolver *> causes, std::vector<resolver *> non_mtx_rs);
+
+    private:
+      std::vector<resolver *> non_mtx_rs;
+    };
 
   private:
     bool checking = false;

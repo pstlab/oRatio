@@ -1,5 +1,5 @@
 #include "h_2.h"
-#include "flaw.h"
+#include "atom_flaw.h"
 #include "resolver.h"
 #include <algorithm>
 #include <cassert>
@@ -185,6 +185,74 @@ namespace ratio
 
     bool h_2::check(flaw &f)
     {
-        return f.is_expanded();
+        assert(f.is_expanded());
+        assert(slv.get_sat_core().value(f.get_phi()) == True);
+        assert(std::all_of(f.get_resolvers().begin(), f.get_resolvers().end(), [this](auto &r)
+                           { return slv.get_sat_core().value(r->get_rho()) == False || std::none_of(r->get_preconditions().begin(), r->get_preconditions().end(), [this](auto &cf)
+                                                                                                    { return slv.get_sat_core().value(cf->get_phi()) == False; }); }));
+
+        FIRE_CURRENT_FLAW(f);
+        if (visited.insert(&f).second)
+        { // we have not seen this flaw yet..
+            if (auto it = std::find_if(f.get_resolvers().begin(), f.get_resolvers().end(), [this](auto &r)
+                                       { return slv.get_sat_core().value(r->get_rho()) == True; });
+                it != f.get_resolvers().end())
+                // a resolver is already applied for the given flaw..
+                // we check its active preconditions (notice that preconditions might include consistency-flaws which, depending also from other resolvers, might not be active)..
+                return std::all_of((*it)->get_preconditions().begin(), (*it)->get_preconditions().end(), [this](auto &f)
+                                   { return slv.get_sat_core().value(f->get_phi()) == Undefined || check(*f); });
+            else
+            {
+                assert(std::none_of(f.get_resolvers().begin(), f.get_resolvers().end(), [this](auto &r)
+                                    { return slv.get_sat_core().value(r->get_rho()) == True; }));
+                std::vector<resolver *> c_ress;
+                c_ress.reserve(f.get_resolvers().size());
+                for (const auto &r : f.get_resolvers())
+                    if (slv.get_sat_core().value(r->get_rho()) == Undefined)
+                        c_ress.push_back(r);
+
+                // we sort the applicable flaws' resolvers according to their currently estimated cost..
+                std::sort(c_ress.begin(), c_ress.end(), [](resolver *r0, resolver *r1)
+                          { return r0->get_estimated_cost() < r1->get_estimated_cost(); });
+
+                size_t c_lvl = slv.decision_level();
+                for (const auto &r : c_ress)
+                {
+                    FIRE_CURRENT_RESOLVER(*r);
+                    if (slv.get_sat_core().value(r->get_rho()) == True)
+                        break;
+                    if (is_infinite(r->get_estimated_cost()))
+                        break; // either the resolver cannot be applied or it would not lead to a solution..
+
+                    if (!slv.get_sat_core().assume(r->get_rho()))
+                        throw unsolvable_exception();
+
+                    // we check whether the resolver has actually been applied..
+                    if (slv.decision_level() > c_lvl)
+                    { // yep, the resolver has been applied..
+                        assert(slv.get_sat_core().value(r->get_rho()) == True);
+
+                        // we check whether an estimated solution for the given problem is still possible with the current assignments..
+                        if (std::none_of(get_flaws().begin(), get_flaws().end(), [](auto &f)
+                                         { return is_positive_infinite(f->get_estimated_cost()); })) // we still have an estimated solution, hence we check for the resolver's active preconditions (again, resolver's preconditions might include consistency-flaws which, depending also from other resolvers, might not be active)..
+                            if (is_unification(*r) || std::all_of(r->get_preconditions().begin(), r->get_preconditions().end(), [this](auto &f)
+                                                                  { return slv.get_sat_core().value(f->get_phi()) == Undefined || check(*f); }))
+                            { // either 'r' is a valid unification or all of its preconditions are applicable..
+                                visited.erase(&f);
+                                slv.get_sat_core().pop();
+                                assert(c_lvl == slv.decision_level());
+                                return true;
+                            }
+                        slv.get_sat_core().pop();
+                        assert(c_lvl == slv.decision_level());
+                    }
+                }
+            }
+            visited.erase(&f);
+        }
+        // it is not possible to estimate a solution for the given flaw..
+        return false;
     }
+
+    h_2::refinement::refinement(solver &slv, std::vector<resolver *> causes, std::vector<resolver *> non_mtx_rs) : flaw(slv, std::move(causes)), non_mtx_rs(std::move(non_mtx_rs)) {}
 } // namespace ratio

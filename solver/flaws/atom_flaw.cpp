@@ -8,7 +8,7 @@ using namespace smt;
 
 namespace ratio
 {
-    atom_flaw::atom_flaw(solver &slv, const std::vector<resolver *> &causes, atom &atm, const bool is_fact) : flaw(slv, causes, true), atm(atm), is_fact(is_fact) {}
+    atom_flaw::atom_flaw(solver &slv, std::vector<resolver *> causes, atom &atm, const bool is_fact) : flaw(slv, std::move(causes), true), atm(atm), is_fact(is_fact) {}
 
     std::string atom_flaw::get_label() const noexcept
     {

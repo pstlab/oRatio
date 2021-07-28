@@ -15,7 +15,7 @@ namespace ratio
   class var_flaw final : public flaw
   {
   public:
-    var_flaw(solver &slv, const std::vector<resolver *> &causes, var_item &v_itm);
+    var_flaw(solver &slv, std::vector<resolver *> causes, var_item &v_itm);
     var_flaw(const var_flaw &orig) = delete;
 
     std::string get_label() const noexcept override;

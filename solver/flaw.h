@@ -15,7 +15,7 @@ namespace ratio
     friend class resolver;
 
   public:
-    flaw(solver &slv, const std::vector<resolver *> &causes, const bool &exclusive = false);
+    flaw(solver &slv, std::vector<resolver *> causes, const bool &exclusive = false);
     flaw(const flaw &that) = delete;
     virtual ~flaw() = default;
 

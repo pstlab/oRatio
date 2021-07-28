@@ -10,7 +10,7 @@ namespace ratio
   class bool_flaw final : public flaw
   {
   public:
-    bool_flaw(solver &slv, const std::vector<resolver *> &causes, bool_item &b_itm);
+    bool_flaw(solver &slv, std::vector<resolver *> causes, bool_item &b_itm);
     bool_flaw(const bool_flaw &orig) = delete;
 
     std::string get_label() const noexcept override;

@@ -2,6 +2,14 @@
 
 #include "solver.h"
 
+#ifdef BUILD_LISTENERS
+#define FIRE_CURRENT_FLAW(f) fire_current_flaw(f)
+#define FIRE_CURRENT_RESOLVER(r) fire_current_resolver(r)
+#else
+#define FIRE_CURRENT_FLAW(f)
+#define FIRE_CURRENT_RESOLVER(r)
+#endif
+
 namespace ratio
 {
   class flaw;
@@ -33,6 +41,8 @@ namespace ratio
 #endif
     virtual void add_layer() = 0; // adds a layer to the graph..
 
+    virtual void push() {}
+    virtual void pop() {}
     virtual void activated_flaw(flaw &f);
     virtual void negated_flaw(flaw &f);
     virtual void activated_resolver(resolver &r);
@@ -53,6 +63,17 @@ namespace ratio
     inline std::unordered_set<flaw *> &get_flaws() { return slv.flaws; }
     inline std::vector<flaw *> flush_pending_flaws() { return slv.flush_pending_flaws(); }
     inline std::vector<std::vector<std::pair<smt::lit, double>>> get_incs() { return slv.get_incs(); }
+
+#ifdef BUILD_LISTENERS
+    inline void fire_current_flaw(const flaw &f) const
+    {
+      slv.fire_current_flaw(f);
+    }
+    inline void fire_current_resolver(const resolver &r) const
+    {
+      slv.fire_current_resolver(r);
+    }
+#endif
 
   protected:
     solver &slv; // the solver this heuristic belongs to..
