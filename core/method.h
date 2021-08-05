@@ -26,7 +26,7 @@ namespace ratio
     inline std::string get_name() const noexcept { return name; }                      // returns the name of this method..
     inline const std::vector<const field *> get_args() const noexcept { return args; } // returns the list of arguments of this method..
 
-    item *invoke(context &ctx, const std::vector<expr> &exprs) const;
+    item *invoke(context &ctx, const std::vector<expr> &exprs);
 
   private:
     const type *const return_type; // the return type of this method (can be nullptr)..

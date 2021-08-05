@@ -30,7 +30,7 @@ namespace ratio
         return expr(a);
     }
 
-    CORE_EXPORT void predicate::apply_rule(atom &a) const
+    CORE_EXPORT void predicate::apply_rule(atom &a)
     {
         for (const auto &sp : supertypes)
             static_cast<predicate *>(sp)->apply_rule(a);

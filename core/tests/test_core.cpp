@@ -10,7 +10,7 @@ class test_solver : public core
 {
     virtual void solve() override {}
     virtual void new_atom(atom &atm, const bool &is_fact) override {}
-    virtual void new_disjunction(context &ctx, const std::vector<const conjunction *> &conjs) override {}
+    virtual void new_disjunction(context &ctx, const std::vector<conjunction *> &conjs) override {}
 };
 
 void test_core_0()

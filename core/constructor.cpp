@@ -13,7 +13,7 @@ namespace ratio
         new_fields(args);
     }
 
-    expr constructor::new_instance(context &ctx, const std::vector<expr> &exprs) const noexcept
+    expr constructor::new_instance(context &ctx, const std::vector<expr> &exprs) noexcept
     {
         assert(args.size() == exprs.size());
 
@@ -25,7 +25,7 @@ namespace ratio
         return i;
     }
 
-    void constructor::invoke(item &itm, const std::vector<expr> &exprs) const
+    void constructor::invoke(item &itm, const std::vector<expr> &exprs)
     {
         context ctx(new env(get_core(), context(&itm)));
         ctx->exprs.emplace(THIS_KEYWORD, expr(&itm));
@@ -34,7 +34,7 @@ namespace ratio
 
         // we initialize the supertypes..
         size_t il_idx = 0;
-        for (const auto &st : static_cast<type &>(get_scope()).get_supertypes())
+        for (auto &st : static_cast<type &>(get_scope()).get_supertypes())
             if (il_idx < init_list.size() && init_list.at(il_idx).first.compare(st->get_name()) == 0) // explicit supertype constructor invocation..
             {
                 std::vector<expr> c_exprs;

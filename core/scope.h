@@ -44,8 +44,8 @@ namespace ratio
     CORE_EXPORT virtual const field &get_field(const std::string &name) const;           // returns the field having the given name, check in the enclosed scope if the field is not found..
     CORE_EXPORT const std::map<std::string, const field *> &get_fields() const noexcept; // returns a map of fields defined within this scope having the fields' names as keys..
 
-    CORE_EXPORT virtual const method &get_method(const std::string &name, const std::vector<const type *> &ts) const; // returns the method having the given name and the given argument types, check in the enclosed scope if the type is not found..
-    CORE_EXPORT virtual const std::map<std::string, std::vector<const method *>> &get_methods() const noexcept;       // returns the vector of methods defined within this scope..
+    CORE_EXPORT virtual method &get_method(const std::string &name, const std::vector<const type *> &ts) const; // returns the method having the given name and the given argument types, check in the enclosed scope if the type is not found..
+    CORE_EXPORT virtual const std::map<std::string, std::vector<method *>> &get_methods() const noexcept;       // returns the vector of methods defined within this scope..
 
     CORE_EXPORT virtual type &get_type(const std::string &name) const;                   // returns the type having the given name, check in the enclosed scope if the type is not found..
     CORE_EXPORT virtual const std::map<std::string, type *> &get_types() const noexcept; // returns a map of types defined within this scope having the types' names as keys..

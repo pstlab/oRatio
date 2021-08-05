@@ -385,7 +385,7 @@ namespace ratio
                 throw unsolvable_exception();
     }
 
-    CORE_EXPORT void core::new_methods(const std::vector<const method *> &ms) noexcept
+    CORE_EXPORT void core::new_methods(const std::vector<method *> &ms) noexcept
     {
         for (const auto &m : ms)
             methods[m->get_name()].push_back(m);
@@ -412,7 +412,7 @@ namespace ratio
         throw std::out_of_range(name);
     }
 
-    CORE_EXPORT const method &core::get_method(const std::string &name, const std::vector<const type *> &ts) const
+    CORE_EXPORT method &core::get_method(const std::string &name, const std::vector<const type *> &ts) const
     {
         if (const auto at_m = methods.find(name); at_m != methods.cend())
         {

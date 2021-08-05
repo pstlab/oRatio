@@ -47,8 +47,8 @@ namespace ratio
     };
 
   private:
-    const predicate &int_pred;
-    const predicate &imp_pred;
+    predicate &int_pred;
+    predicate &imp_pred;
     std::set<atom *> to_check;
     std::vector<std::pair<atom *, agnt_atom_listener *>> atoms;
   };

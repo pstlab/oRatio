@@ -126,7 +126,7 @@ namespace ratio
     };
 
   private:
-    const predicate &int_pred;
+    predicate &int_pred;
     std::set<const item *> to_check;                          // the state-variable instances whose atoms have changed..
     std::vector<std::pair<atom *, sv_atom_listener *>> atoms; // we store, for each atom, its atom listener..
 

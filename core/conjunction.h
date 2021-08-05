@@ -21,7 +21,7 @@ namespace ratio
 
     inline smt::rational get_cost() const noexcept { return cost; } // returns the cost of applying this conjunction..
 
-    CORE_EXPORT void apply(context &ctx) const; // applies this conjunction within the given context..
+    CORE_EXPORT void apply(context &ctx); // applies this conjunction within the given context..
 
   private:
     const smt::rational cost;

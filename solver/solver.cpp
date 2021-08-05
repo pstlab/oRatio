@@ -250,7 +250,7 @@ namespace ratio
         }
     }
 
-    void solver::new_disjunction(context &d_ctx, const std::vector<const conjunction *> &conjs)
+    void solver::new_disjunction(context &d_ctx, const std::vector<conjunction *> &conjs)
     {
         // we create a new disjunction flaw..
         disjunction_flaw *df = new disjunction_flaw(*this, get_cause(), d_ctx, conjs);

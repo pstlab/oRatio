@@ -23,7 +23,7 @@ namespace ratio
 
     CORE_EXPORT expr new_instance(context &ctx) noexcept override; // creates a new atom having this predicate within the given context..
 
-    CORE_EXPORT void apply_rule(atom &a) const; // applies the rule associated to this predicate to the given atom..
+    CORE_EXPORT void apply_rule(atom &a); // applies the rule associated to this predicate to the given atom..
 
   private:
     const std::vector<const field *> args;                        // the arguments of the predicate..

@@ -16,7 +16,7 @@ namespace ratio
         new_fields(args);
     }
 
-    item *method::invoke(context &ctx, const std::vector<expr> &exprs) const
+    item *method::invoke(context &ctx, const std::vector<expr> &exprs)
     {
         assert(args.size() == exprs.size());
         context c_ctx(new env(get_core(), context(ctx)));

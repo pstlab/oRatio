@@ -93,13 +93,13 @@ namespace ratio
             supertypes.push_back(st);
     }
 
-    CORE_EXPORT void type::new_constructors(const std::vector<const constructor *> &cs) noexcept
+    CORE_EXPORT void type::new_constructors(const std::vector<constructor *> &cs) noexcept
     {
         for (const auto &c : cs)
             constructors.push_back(c);
     }
 
-    void type::new_methods(const std::vector<const method *> &ms) noexcept
+    void type::new_methods(const std::vector<method *> &ms) noexcept
     {
         for (const auto &m : ms)
             methods[m->get_name()].push_back(m);
@@ -133,7 +133,7 @@ namespace ratio
         }
     }
 
-    const constructor &type::get_constructor(const std::vector<const type *> &ts) const
+    constructor &type::get_constructor(const std::vector<const type *> &ts) const
     {
         assert(std::none_of(ts.cbegin(), ts.cend(), [](const type *t)
                             { return t == nullptr; }));
@@ -182,7 +182,7 @@ namespace ratio
         throw std::out_of_range(f_name);
     }
 
-    CORE_EXPORT const method &type::get_method(const std::string &m_name, const std::vector<const type *> &ts) const
+    CORE_EXPORT method &type::get_method(const std::string &m_name, const std::vector<const type *> &ts) const
     {
         const auto at_m = methods.find(m_name);
         if (at_m != methods.cend())

@@ -125,15 +125,15 @@ namespace ratio
     type &get_type(const std::vector<arith_expr> &exprs) const;
 
   protected:
-    CORE_EXPORT void new_methods(const std::vector<const method *> &ms) noexcept;
+    CORE_EXPORT void new_methods(const std::vector<method *> &ms) noexcept;
     CORE_EXPORT void new_types(const std::vector<type *> &ts) noexcept;
     CORE_EXPORT void new_predicates(const std::vector<predicate *> &ps) noexcept;
 
   public:
     CORE_EXPORT const field &get_field(const std::string &name) const override; // returns the field having the given name..
 
-    CORE_EXPORT const method &get_method(const std::string &name, const std::vector<const type *> &ts) const override;
-    const std::map<std::string, std::vector<const method *>> &get_methods() const noexcept override { return methods; }
+    CORE_EXPORT method &get_method(const std::string &name, const std::vector<const type *> &ts) const override;
+    const std::map<std::string, std::vector<method *>> &get_methods() const noexcept override { return methods; }
 
     CORE_EXPORT type &get_type(const std::string &name) const override;
     const std::map<std::string, type *> &get_types() const noexcept override { return types; }
@@ -152,7 +152,7 @@ namespace ratio
 
   private:
     virtual void new_atom(atom &atm, const bool &is_fact) = 0;
-    virtual void new_disjunction(context &ctx, const std::vector<const conjunction *> &conjs) = 0;
+    virtual void new_disjunction(context &ctx, const std::vector<conjunction *> &conjs) = 0;
 
   protected:
     inline smt::lit get_ni() noexcept { return ni; }
@@ -191,9 +191,9 @@ namespace ratio
 
     std::vector<riddle::ast::compilation_unit *> cus; // the compilation units..
 
-    std::map<std::string, std::vector<const method *>> methods; // the methods, indexed by their name, defined within this type..
-    std::map<std::string, type *> types;                        // the types, indexed by their name, defined within this core..
-    std::map<std::string, predicate *> predicates;              // the predicates, indexed by their name, defined within this core..
+    std::map<std::string, std::vector<method *>> methods; // the methods, indexed by their name, defined within this type..
+    std::map<std::string, type *> types;                  // the types, indexed by their name, defined within this core..
+    std::map<std::string, predicate *> predicates;        // the predicates, indexed by their name, defined within this core..
 
     smt::lit tmp_ni;             // the temporary controlling literal, used for restoring the controlling literal..
     smt::lit ni = smt::TRUE_lit; // the controlling literal..

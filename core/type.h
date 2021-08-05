@@ -60,19 +60,19 @@ namespace ratio
   protected:
     CORE_EXPORT static void new_supertypes(type &t, const std::vector<type *> &sts) noexcept;
     CORE_EXPORT void new_supertypes(const std::vector<type *> &sts) noexcept;
-    CORE_EXPORT void new_constructors(const std::vector<const constructor *> &cs) noexcept;
-    void new_methods(const std::vector<const method *> &ms) noexcept;
+    CORE_EXPORT void new_constructors(const std::vector<constructor *> &cs) noexcept;
+    void new_methods(const std::vector<method *> &ms) noexcept;
     void new_types(const std::vector<type *> &ts) noexcept;
     CORE_EXPORT void new_predicates(const std::vector<predicate *> &ps, bool notify = true) noexcept;
 
   public:
-    const constructor &get_constructor(const std::vector<const type *> &ts) const;
-    std::vector<const constructor *> get_constructors() const noexcept { return constructors; }
+    constructor &get_constructor(const std::vector<const type *> &ts) const;
+    std::vector<constructor *> get_constructors() const noexcept { return constructors; }
 
     CORE_EXPORT const field &get_field(const std::string &name) const override; // returns the field having the given name..
 
-    CORE_EXPORT const method &get_method(const std::string &m_name, const std::vector<const type *> &ts) const override;
-    const std::map<std::string, std::vector<const method *>> &get_methods() const noexcept override { return methods; }
+    CORE_EXPORT method &get_method(const std::string &m_name, const std::vector<const type *> &ts) const override;
+    const std::map<std::string, std::vector<method *>> &get_methods() const noexcept override { return methods; }
 
     CORE_EXPORT type &get_type(const std::string &t_name) const override;
     const std::map<std::string, type *> &get_types() const noexcept override { return types; }
@@ -84,14 +84,14 @@ namespace ratio
     virtual void new_predicate(predicate &) noexcept {}
 
   private:
-    const std::string name;                                     // the name of this type..
-    const bool primitive;                                       // is this type a primitive type?
-    std::vector<type *> supertypes;                             // the base types (i.e. the types this type inherits from)..
-    std::vector<const constructor *> constructors;              // the constructors defined within this type..
-    std::map<std::string, std::vector<const method *>> methods; // the methods, indexed by their name, defined within this type..
-    std::map<std::string, type *> types;                        // the inner types, indexed by their name, defined within this type..
-    std::map<std::string, predicate *> predicates;              // the inner predicates, indexed by their name, defined within this type..
-    std::vector<expr> instances;                                // a vector containing all the instances defined within this type..
+    const std::string name;                               // the name of this type..
+    const bool primitive;                                 // is this type a primitive type?
+    std::vector<type *> supertypes;                       // the base types (i.e. the types this type inherits from)..
+    std::vector<constructor *> constructors;              // the constructors defined within this type..
+    std::map<std::string, std::vector<method *>> methods; // the methods, indexed by their name, defined within this type..
+    std::map<std::string, type *> types;                  // the inner types, indexed by their name, defined within this type..
+    std::map<std::string, predicate *> predicates;        // the inner predicates, indexed by their name, defined within this type..
+    std::vector<expr> instances;                          // a vector containing all the instances defined within this type..
   };
 
   class bool_type final : public type

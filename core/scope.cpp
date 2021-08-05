@@ -22,8 +22,8 @@ namespace ratio
 
     CORE_EXPORT const std::map<std::string, const field *> &scope::get_fields() const noexcept { return fields; }
 
-    CORE_EXPORT const method &scope::get_method(const std::string &name, const std::vector<const type *> &ts) const { return scp.get_method(name, ts); }
-    CORE_EXPORT const std::map<std::string, std::vector<const method *>> &scope::get_methods() const noexcept { return scp.get_methods(); }
+    CORE_EXPORT method &scope::get_method(const std::string &name, const std::vector<const type *> &ts) const { return scp.get_method(name, ts); }
+    CORE_EXPORT const std::map<std::string, std::vector<method *>> &scope::get_methods() const noexcept { return scp.get_methods(); }
 
     CORE_EXPORT type &scope::get_type(const std::string &name) const { return scp.get_type(name); }
     CORE_EXPORT const std::map<std::string, type *> &scope::get_types() const noexcept { return scp.get_types(); }

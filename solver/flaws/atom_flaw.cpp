@@ -84,7 +84,7 @@ namespace ratio
         if (!get_solver().get_sat_core().new_clause({!get_rho(), lit(atm.get_sigma())}))
             throw unsolvable_exception();
         // we also apply the rule..
-        static_cast<const predicate &>(atm.get_type()).apply_rule(atm);
+        static_cast<predicate &>(atm.get_type()).apply_rule(atm);
     }
 
     atom_flaw::unify_atom::unify_atom(solver &slv, atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(slv, rational::ONE, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}

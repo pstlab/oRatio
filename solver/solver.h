@@ -86,8 +86,8 @@ namespace ratio
         return {};
     }
 
-    void new_atom(atom &atm, const bool &is_fact) override;                                       // notifies the creation of a new atom..
-    void new_disjunction(context &d_ctx, const std::vector<const conjunction *> &conjs) override; // notifies the creation of a new disjunction..
+    void new_atom(atom &atm, const bool &is_fact) override;                                 // notifies the creation of a new atom..
+    void new_disjunction(context &d_ctx, const std::vector<conjunction *> &conjs) override; // notifies the creation of a new disjunction..
 
     void new_flaw(flaw &f, const bool &enqueue = true); // notifies the solver that a new flaw 'f' has been created..
     void new_resolver(resolver &r);                     // notifies the solver that a new resolver 'r' has been created..
