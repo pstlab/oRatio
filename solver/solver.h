@@ -68,7 +68,7 @@ namespace ratio
     void take_decision(const smt::lit &ch);
 
     bool_expr new_bool() noexcept override;
-    expr new_enum(const type &tp, const std::vector<item *> &allowed_vals) override;
+    expr new_enum(type &tp, const std::vector<item *> &allowed_vals) override;
     bool_expr disj(const std::vector<bool_expr> &exprs) noexcept override;
 
     inline size_t decision_level() const noexcept { return trail.size(); } // returns the current decision level..

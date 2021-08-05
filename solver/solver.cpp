@@ -196,7 +196,7 @@ namespace ratio
         return xp;
     }
 
-    expr solver::new_enum(const type &tp, const std::vector<item *> &allowed_vals)
+    expr solver::new_enum(type &tp, const std::vector<item *> &allowed_vals)
     {
         assert(allowed_vals.size() > 1);
         assert(tp.get_name().compare(BOOL_KEYWORD) != 0);

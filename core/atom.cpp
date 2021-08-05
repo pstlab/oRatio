@@ -8,7 +8,7 @@ using namespace smt;
 
 namespace ratio
 {
-    atom::atom(core &cr, const context ctx, const predicate &pred) : item(cr, context(ctx), pred), sigma(cr.get_sat_core().new_var()) {}
+    atom::atom(core &cr, const context ctx, predicate &pred) : item(cr, context(ctx), pred), sigma(cr.get_sat_core().new_var()) {}
 
     lit atom::new_eq(item &i) noexcept
     {
@@ -21,7 +21,7 @@ namespace ratio
         else
         {
             std::vector<lit> eqs;
-            std::queue<const type *> q;
+            std::queue<type *> q;
             q.push(&get_type());
             while (!q.empty())
             {
@@ -55,7 +55,7 @@ namespace ratio
             return ei->equates(*this);
         else
         {
-            std::queue<const type *> q;
+            std::queue<type *> q;
             q.push(&get_type());
             while (!q.empty())
             {

@@ -14,11 +14,11 @@ namespace ratio
     friend class env;
 
   public:
-    item(core &cr, const context ctx, const type &tp);
+    item(core &cr, const context ctx, type &tp);
     item(const item &orig) = delete;
     virtual ~item() = default;
 
-    inline const type &get_type() const noexcept { return tp; }
+    inline type &get_type() const noexcept { return tp; }
 
     virtual smt::lit new_eq(item &i) noexcept;
     virtual bool equates(const item &i) const noexcept;
@@ -29,7 +29,7 @@ namespace ratio
     virtual smt::json value_to_json() const noexcept;
 
   private:
-    const type &tp;
+    type &tp;
   };
 
   class bool_item : public item
@@ -52,7 +52,7 @@ namespace ratio
   class arith_item : public item
   {
   public:
-    CORE_EXPORT arith_item(core &cr, const type &t, const smt::lin &l);
+    CORE_EXPORT arith_item(core &cr, type &t, const smt::lin &l);
     arith_item(const arith_item &that) = delete;
     CORE_EXPORT virtual ~arith_item() = default;
 
@@ -69,7 +69,7 @@ namespace ratio
   class var_item : public item
   {
   public:
-    CORE_EXPORT var_item(core &cr, const type &t, smt::var ev);
+    CORE_EXPORT var_item(core &cr, type &t, smt::var ev);
     var_item(const var_item &that) = delete;
     CORE_EXPORT virtual ~var_item() = default;
 

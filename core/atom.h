@@ -9,7 +9,7 @@ namespace ratio
   class atom : public item
   {
   public:
-    atom(core &cr, const context ctx, const predicate &pred);
+    atom(core &cr, const context ctx, predicate &pred);
     atom(const atom &orig) = delete;
     virtual ~atom() = default;
 

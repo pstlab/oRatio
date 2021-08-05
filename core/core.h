@@ -94,7 +94,7 @@ namespace ratio
     CORE_EXPORT arith_expr new_tp(const smt::rational &val) noexcept;    // creates a new time-point literal..
     CORE_EXPORT string_expr new_string() noexcept;                       // creates a new string variable..
     CORE_EXPORT string_expr new_string(const std::string &val) noexcept; // creates a new string literal..
-    CORE_EXPORT virtual expr new_enum(const type &tp, const std::vector<item *> &allowed_vals);
+    CORE_EXPORT virtual expr new_enum(type &tp, const std::vector<item *> &allowed_vals);
 
     CORE_EXPORT bool_expr negate(bool_expr var) noexcept;
     CORE_EXPORT bool_expr eq(bool_expr left, bool_expr right) noexcept;
@@ -120,9 +120,9 @@ namespace ratio
     CORE_EXPORT void assert_facts(const std::vector<bool_expr> &facts);
 
   private:
-    expr new_enum(const type &tp, const std::vector<smt::lit> &lits, const std::vector<item *> &vals) noexcept;
+    expr new_enum(type &tp, const std::vector<smt::lit> &lits, const std::vector<item *> &vals) noexcept;
 
-    const type &get_type(const std::vector<arith_expr> &exprs) const;
+    type &get_type(const std::vector<arith_expr> &exprs) const;
 
   protected:
     CORE_EXPORT void new_methods(const std::vector<const method *> &ms) noexcept;

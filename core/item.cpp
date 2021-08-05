@@ -9,7 +9,7 @@ using namespace smt;
 
 namespace ratio
 {
-    item::item(core &cr, const context ctx, const type &tp) : env(cr, context(ctx)), tp(tp) {}
+    item::item(core &cr, const context ctx, type &tp) : env(cr, context(ctx)), tp(tp) {}
 
     lit item::new_eq(item &i) noexcept
     {
@@ -88,7 +88,7 @@ namespace ratio
         return j_val;
     }
 
-    CORE_EXPORT arith_item::arith_item(core &cr, const type &t, const lin &l) : item(cr, context(&cr), t), l(l) { assert(&t == &cr.get_type(INT_KEYWORD) || &t == &cr.get_type(REAL_KEYWORD) || &t == &cr.get_type(TP_KEYWORD)); }
+    CORE_EXPORT arith_item::arith_item(core &cr, type &t, const lin &l) : item(cr, context(&cr), t), l(l) { assert(&t == &cr.get_type(INT_KEYWORD) || &t == &cr.get_type(REAL_KEYWORD) || &t == &cr.get_type(TP_KEYWORD)); }
 
     lit arith_item::new_eq(item &i) noexcept
     {
@@ -166,12 +166,12 @@ namespace ratio
         return j_val;
     }
 
-    CORE_EXPORT var_item::var_item(core &cr, const type &t, var ev) : item(cr, context(&cr), t), ev(ev) {}
+    CORE_EXPORT var_item::var_item(core &cr, type &t, var ev) : item(cr, context(&cr), t), ev(ev) {}
 
     expr var_item::get(const std::string &name) const
     {
         std::map<std::string, const field *> accessible_fields;
-        std::queue<const type *> q;
+        std::queue<type *> q;
         q.push(&get_type());
         while (!q.empty())
         {
