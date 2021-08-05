@@ -68,7 +68,7 @@ namespace ratio
                     itm.exprs.emplace(f_name, dynamic_cast<const ast::expression *>(f->get_expression())->evaluate(*this, ctx));
                 else
                 {
-                    type &tp = const_cast<type &>(f->get_type());
+                    type &tp = f->get_type();
                     if (tp.is_primitive())
                         itm.exprs.emplace(f_name, tp.new_instance(ctx));
                     else
