@@ -9,6 +9,8 @@ namespace ratio
   class atom;
   class smart_type;
 
+  bool is_unification(const resolver &r);
+
   class atom_flaw final : public flaw
   {
     friend class smart_type;
