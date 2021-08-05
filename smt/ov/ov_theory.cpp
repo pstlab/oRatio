@@ -11,7 +11,7 @@ namespace smt
     {
         assert(!items.empty());
         const var id = assigns.size();
-        auto c_vals = std::unordered_map<const var_value *, lit>();
+        auto c_vals = std::unordered_map<var_value *, lit>();
         if (items.size() == 1)
             c_vals.emplace(*items.cbegin(), TRUE_lit);
         else
@@ -42,7 +42,7 @@ namespace smt
         assert(!lits.empty());
         assert(lits.size() == vals.size());
         const var id = assigns.size();
-        auto c_vals = std::unordered_map<const var_value *, lit>();
+        auto c_vals = std::unordered_map<var_value *, lit>();
         for (size_t i = 0; i < lits.size(); ++i)
         {
             c_vals.emplace(vals[i], lits[i]);
@@ -52,9 +52,9 @@ namespace smt
         return id;
     }
 
-    SMT_EXPORT lit ov_theory::allows(const var &v, const var_value &val) const noexcept
+    SMT_EXPORT lit ov_theory::allows(const var &v, var_value &val) const noexcept
     {
-        if (const auto at_right = assigns[v].find(&val); at_right != assigns[v].cend())
+        if (auto at_right = assigns[v].find(&val); at_right != assigns[v].cend())
             return at_right->second;
         else
             return FALSE_lit;
@@ -73,7 +73,7 @@ namespace smt
             return at_expr->second;
         else
         {
-            std::unordered_set<const var_value *> intersection;
+            std::unordered_set<var_value *> intersection;
             for ([[maybe_unused]] const auto &[val, l] : assigns[left])
                 if (assigns[right].count(val))
                     intersection.insert(val);
@@ -114,9 +114,9 @@ namespace smt
         }
     }
 
-    SMT_EXPORT std::unordered_set<const var_value *> ov_theory::value(var v) const noexcept
+    SMT_EXPORT std::unordered_set<var_value *> ov_theory::value(var v) const noexcept
     {
-        std::unordered_set<const var_value *> vals;
+        std::unordered_set<var_value *> vals;
         for (const auto &[val, l] : assigns[v])
             if (sat->value(l) != False)
                 vals.insert(val);

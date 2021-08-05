@@ -21,11 +21,11 @@ namespace ratio
             return FALSE_lit;
     }
 
-    bool item::equates(const item &i) const noexcept
+    bool item::equates(item &i) noexcept
     {
         if (this == &i)
             return true;
-        else if (const var_item *ei = dynamic_cast<const var_item *>(&i))
+        else if (var_item *ei = dynamic_cast<var_item *>(&i))
             return ei->equates(*this);
         else
             return false;
@@ -55,7 +55,7 @@ namespace ratio
             return FALSE_lit;
     }
 
-    bool bool_item::equates(const item &i) const noexcept
+    bool bool_item::equates(item &i) noexcept
     {
         if (this == &i)
             return true;
@@ -103,7 +103,7 @@ namespace ratio
             return FALSE_lit;
     }
 
-    bool arith_item::equates(const item &i) const noexcept
+    bool arith_item::equates(item &i) noexcept
     {
         if (this == &i)
             return true;
@@ -168,7 +168,7 @@ namespace ratio
 
     CORE_EXPORT var_item::var_item(core &cr, type &t, var ev) : item(cr, context(&cr), t), ev(ev) {}
 
-    expr var_item::get(const std::string &name) const
+    expr var_item::get(const std::string &name)
     {
         std::map<std::string, const field *> accessible_fields;
         std::queue<type *> q;
@@ -190,12 +190,12 @@ namespace ratio
             {
                 assert(!get_core().get_ov_theory().value(ev).empty());
                 if (auto vs = get_core().get_ov_theory().value(ev); vs.size() == 1)
-                    return (static_cast<const item *>(*vs.cbegin()))->get(name);
+                    return (static_cast<item *>(*vs.cbegin()))->get(name);
                 else
                 {
                     std::unordered_map<item *, std::vector<lit>> val_vars;
                     for (const auto &val : vs)
-                        val_vars[&*static_cast<const item *>(val)->get(name)].push_back(get_core().get_ov_theory().allows(ev, *val));
+                        val_vars[&*static_cast<item *>(val)->get(name)].push_back(get_core().get_ov_theory().allows(ev, *val));
                     if (val_vars.size() == 1)
                         return val_vars.cbegin()->first;
 
@@ -215,7 +215,7 @@ namespace ratio
                                 }
                     }
                     var_expr e = get_core().new_enum(get_type().get_field(name).get_type(), c_vars, c_vals);
-                    const_cast<var_item *>(this)->exprs.insert({name, e});
+                    exprs.insert({name, e});
                     return e;
                 }
             }
@@ -234,14 +234,14 @@ namespace ratio
             return get_core().get_ov_theory().allows(ev, i);
     }
 
-    bool var_item::equates(const item &i) const noexcept
+    bool var_item::equates(item &i) noexcept
     {
         if (this == &i)
             return true;
         else if (const var_item *ei = dynamic_cast<const var_item *>(&i))
         {
-            std::unordered_set<const var_value *> c_vals = get_core().get_ov_theory().value(ev);
-            std::unordered_set<const var_value *> i_vals = get_core().get_ov_theory().value(ei->ev);
+            std::unordered_set<var_value *> c_vals = get_core().get_ov_theory().value(ev);
+            std::unordered_set<var_value *> i_vals = get_core().get_ov_theory().value(ei->ev);
             for (const auto &c_v : c_vals)
                 if (i_vals.count(c_v))
                     return true;
@@ -249,8 +249,8 @@ namespace ratio
         }
         else
         {
-            std::unordered_set<const var_value *> c_vals = get_core().get_ov_theory().value(ev);
-            return c_vals.count(const_cast<var_value *>(dynamic_cast<const var_value *>(&i)));
+            std::unordered_set<var_value *> c_vals = get_core().get_ov_theory().value(ev);
+            return c_vals.count(&i);
         }
     }
 
@@ -259,7 +259,7 @@ namespace ratio
         json j_val;
         j_val->set("var", new string_val("e" + std::to_string(ev)));
         std::vector<json> j_vals;
-        std::unordered_set<const var_value *> vals = get_core().get_ov_theory().value(ev);
+        std::unordered_set<var_value *> vals = get_core().get_ov_theory().value(ev);
         for (const auto &val : vals)
             j_vals.push_back(new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const item *>(val)))));
         j_val->set("vals", new array_val(j_vals));
@@ -278,7 +278,7 @@ namespace ratio
             return FALSE_lit;
     }
 
-    bool string_item::equates(const item &i) const noexcept
+    bool string_item::equates(item &i) noexcept
     {
         if (this == &i)
             return true;

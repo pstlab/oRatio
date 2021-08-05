@@ -45,13 +45,13 @@ namespace ratio
         }
     }
 
-    bool atom::equates(const item &i) const noexcept
+    bool atom::equates(item &i) noexcept
     {
         if (this == &i)
             return true;
         if (get_type().get_name().compare(i.get_type().get_name()) != 0)
             return false;
-        else if (const var_item *ei = dynamic_cast<const var_item *>(&i))
+        else if (var_item *ei = dynamic_cast<var_item *>(&i))
             return ei->equates(*this);
         else
         {

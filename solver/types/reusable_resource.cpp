@@ -29,7 +29,7 @@ namespace ratio
     {
         std::vector<std::vector<std::pair<lit, double>>> incs;
         // we partition atoms for each reusable-resource they might insist on..
-        std::unordered_map<const item *, std::vector<atom *>> rr_instances;
+        std::unordered_map<item *, std::vector<atom *>> rr_instances;
         for ([[maybe_unused]] const auto &[atm, atm_lstnr] : atoms)
             if (get_core().get_sat_core().value(atm->get_sigma()) == True) // we filter out those which are not strictly active..
             {
@@ -38,7 +38,7 @@ namespace ratio
                 {
                     for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
                         if (to_check.count(static_cast<const item *>(val)))
-                            rr_instances[static_cast<const item *>(val)].push_back(atm);
+                            rr_instances[static_cast<item *>(val)].push_back(atm);
                 }
                 else if (to_check.count(static_cast<item *>(&*c_scope)))
                     rr_instances[static_cast<item *>(&*c_scope)].push_back(atm);

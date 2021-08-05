@@ -454,7 +454,7 @@ namespace ratio
         throw std::out_of_range(name);
     }
 
-    CORE_EXPORT expr core::get(const std::string &name) const
+    CORE_EXPORT expr core::get(const std::string &name)
     {
         if (const auto at_xpr = exprs.find(name); at_xpr != exprs.cend())
             return at_xpr->second;
@@ -477,7 +477,7 @@ namespace ratio
         else
             return lra_th->value(x->l);
     }
-    CORE_EXPORT std::unordered_set<const var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th->value(x->ev); }
+    CORE_EXPORT std::unordered_set<var_value *> core::enum_value(const var_expr &x) const noexcept { return ov_th->value(x->ev); }
 
     CORE_EXPORT json core::to_json() const noexcept
     {

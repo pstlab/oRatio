@@ -26,7 +26,7 @@ namespace ratio
     class choose_value final : public resolver
     {
     public:
-      choose_value(solver &slv, smt::rational cst, var_flaw &enm_flaw, const smt::var_value &val);
+      choose_value(solver &slv, smt::rational cst, var_flaw &enm_flaw,  smt::var_value &val);
       choose_value(const choose_value &that) = delete;
 
       std::string get_label() const noexcept override;
@@ -36,7 +36,7 @@ namespace ratio
 
     private:
       smt::var v;                // the object variable whose value has to be decided..
-      const smt::var_value &val; // the decided value..
+       smt::var_value &val; // the decided value..
     };
 
   private:

@@ -30,7 +30,7 @@ namespace ratio
 
     void propositional_state::new_predicate(predicate &pred) noexcept
     {
-        new_supertypes(pred, {&get_predicate(PROPOSITIONAL_STATE_PREDICATE_NAME), const_cast<predicate *>(&int_pred)});
+        new_supertypes(pred, {&get_predicate(PROPOSITIONAL_STATE_PREDICATE_NAME), &int_pred});
         new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
     }
 

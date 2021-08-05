@@ -11,7 +11,7 @@ namespace ratio
     CORE_EXPORT env::env(core &cr, const context ctx) : cr(cr), ref_count(this == &cr ? 2 : 0), ctx(ctx) {}
     CORE_EXPORT env::~env() { assert(!ref_count || (this == &*ctx && ref_count)); }
 
-    expr env::get(const std::string &name) const
+    expr env::get(const std::string &name)
     {
         if (const auto at_xpr = exprs.find(name); at_xpr != exprs.cend())
             return at_xpr->second;

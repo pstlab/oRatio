@@ -147,7 +147,7 @@ namespace ratio
     void state_variable::new_predicate(predicate &pred) noexcept
     {
         // each state-variable predicate is also an interval-predicate..
-        new_supertypes(pred, {const_cast<predicate *>(&int_pred)});
+        new_supertypes(pred, {&int_pred});
         // each state-variable predicate has a tau parameter indicating on which state-variables the atoms insist on..
         new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
     }
@@ -188,10 +188,10 @@ namespace ratio
         arith_expr a1_start = atm1.get(START);
         arith_expr a1_end = atm1.get(END);
 
-        expr a0_tau = atm0.get(TAU);
-        expr a1_tau = atm1.get(TAU);
-        var_item *a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
-        var_item *a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
+        auto a0_tau = atm0.get(TAU);
+        auto a1_tau = atm1.get(TAU);
+        auto a0_tau_itm = dynamic_cast<var_item *>(&*a0_tau);
+        auto a1_tau_itm = dynamic_cast<var_item *>(&*a1_tau);
         if (a0_tau_itm && a1_tau_itm)
         { // we have two non-singleton variables..
             auto a0_vals = get_solver().enum_value(a0_tau_itm);

@@ -40,7 +40,7 @@ namespace ratio
         constructor_expression::constructor_expression(const std::vector<riddle::id_token> &it, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::constructor_expression(it, es) {}
         expr constructor_expression::evaluate(scope &scp, context &ctx) const
         {
-            scope *s = const_cast<scope *>(&scp);
+            scope *s = &scp;
             for (const auto &tp : instance_type)
                 s = &s->get_type(tp.id);
 
@@ -107,7 +107,7 @@ namespace ratio
         function_expression::function_expression(const std::vector<riddle::id_token> &is, const riddle::id_token &fn, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::function_expression(is, fn, es) {}
         expr function_expression::evaluate(scope &scp, context &ctx) const
         {
-            scope *s = const_cast<scope *>(&scp);
+            scope *s = &scp;
             for (const auto &id_tk : ids)
                 s = &s->get_type(id_tk.id);
 
@@ -222,7 +222,7 @@ namespace ratio
                     ctx->exprs.emplace(names[i].id, dynamic_cast<const ast::expression *>(xprs[i])->evaluate(scp, ctx));
                 else
                 {
-                    scope *s = const_cast<scope *>(&scp);
+                    scope *s = &scp;
                     for (const auto &tp : field_type)
                         s = &s->get_type(tp.id);
                     type *t = static_cast<type *>(s);
@@ -269,7 +269,7 @@ namespace ratio
                         throw std::invalid_argument("invalid disjunct cost: expected a constant..");
                     cost = scp.get_core().arith_value(a_xpr).get_rational();
                 }
-                cs.push_back(new conjunction(scp.get_core(), const_cast<scope &>(scp), cost, std::move(stmnts)));
+                cs.push_back(new conjunction(scp.get_core(), scp, cost, std::move(stmnts)));
             }
             scp.get_core().new_disjunction(ctx, cs);
         }
@@ -314,8 +314,8 @@ namespace ratio
                 else if (e->get_type().is_assignable_from(tt))        // the target type is a subclass of the assignment..
                     if (var_item *ae = dynamic_cast<var_item *>(&*e)) // some of the allowed values might be inhibited..
                     {
-                        std::unordered_set<const smt::var_value *> alwd_vals = scp.get_core().get_ov_theory().value(ae->ev); // the allowed values..
-                        std::vector<smt::lit> not_alwd_vals;                                                                 // the not allowed values..
+                        std::unordered_set<smt::var_value *> alwd_vals = scp.get_core().get_ov_theory().value(ae->ev); // the allowed values..
+                        std::vector<smt::lit> not_alwd_vals;                                                           // the not allowed values..
                         for (const auto &ev : alwd_vals)
                             if (!tt.is_assignable_from(static_cast<const item *>(ev)->get_type())) // the target type is not a superclass of the value..
                                 not_alwd_vals.push_back(!scp.get_core().get_ov_theory().allows(ae->ev, *ev));
@@ -353,7 +353,7 @@ namespace ratio
                 for (const auto &arg : q.front()->get_args())
                     if (!a->exprs.count(arg->get_name()))
                     { // the field is uninstantiated..
-                        type &tp = const_cast<type &>(arg->get_type());
+                        type &tp = arg->get_type();
                         if (tp.is_primitive())
                             a->exprs.emplace(arg->get_name(), tp.new_instance(ctx));
                         else

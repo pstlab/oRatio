@@ -16,7 +16,7 @@ namespace ratio
     inline smt::var get_sigma() const noexcept { return sigma; } // returns the variable that represents the state of the atom: if the variable is true, the atom is active; if the variable is false, the atom is unified; if the variable is undefined, the atom is not justified..
 
     smt::lit new_eq(item &i) noexcept override;
-    bool equates(const item &i) const noexcept override;
+    bool equates(item &i) noexcept override;
 
     smt::json to_json() const noexcept override;
 

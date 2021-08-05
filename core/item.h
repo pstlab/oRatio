@@ -21,7 +21,7 @@ namespace ratio
     inline type &get_type() const noexcept { return tp; }
 
     virtual smt::lit new_eq(item &i) noexcept;
-    virtual bool equates(const item &i) const noexcept;
+    virtual bool equates(item &i) noexcept;
 
     virtual smt::json to_json() const noexcept;
 
@@ -40,7 +40,7 @@ namespace ratio
     CORE_EXPORT virtual ~bool_item() = default;
 
     smt::lit new_eq(item &i) noexcept override;
-    bool equates(const item &i) const noexcept override;
+    bool equates(item &i) noexcept override;
 
   private:
     smt::json value_to_json() const noexcept override;
@@ -57,7 +57,7 @@ namespace ratio
     CORE_EXPORT virtual ~arith_item() = default;
 
     smt::lit new_eq(item &i) noexcept override;
-    bool equates(const item &i) const noexcept override;
+    bool equates(item &i) noexcept override;
 
   private:
     smt::json value_to_json() const noexcept override;
@@ -73,10 +73,10 @@ namespace ratio
     var_item(const var_item &that) = delete;
     CORE_EXPORT virtual ~var_item() = default;
 
-    expr get(const std::string &name) const override;
+    expr get(const std::string &name) override;
 
     smt::lit new_eq(item &i) noexcept override;
-    bool equates(const item &i) const noexcept override;
+    bool equates(item &i) noexcept override;
 
   private:
     smt::json value_to_json() const noexcept override;
@@ -95,7 +95,7 @@ namespace ratio
     inline std::string get_value() const { return l; }
 
     smt::lit new_eq(item &i) noexcept override;
-    bool equates(const item &i) const noexcept override;
+    bool equates(item &i) noexcept override;
 
   private:
     smt::json value_to_json() const noexcept override;
