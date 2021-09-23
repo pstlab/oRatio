@@ -12,7 +12,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         build_type: [Debug, Release]
         check_incs: [ON, OFF]
-        heuristic_type: [h_max, h_add, h2_max, h2_add]
+        #heuristic_type: [h_max, h_add, h2_max, h2_add]
+        heuristic_type: [h_max, h_add]
 
     env:
       BUILD_TYPE: ${{ matrix.build_type }}
