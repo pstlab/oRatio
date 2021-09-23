@@ -19,12 +19,12 @@ option(BUILD_ROS_TOOLS "Builds the ROS tools" OFF)
 
 option(BUILD_JAVA_API "Builds the Java API" OFF)
 option(BUILD_PYTHON_API "Builds the Python API" OFF)
-option(BUILD_SERVER "Builds the server" OFF)
+option(BUILD_GUI_SERVER "Builds the server" OFF)
 
 option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
 
-if(BUILD_SERVER)
-    set(BUILD_JAVA_API ${BUILD_SERVER})
+if(BUILD_GUI_SERVER)
+    set(BUILD_JAVA_API ${BUILD_GUI_SERVER})
 endif()
 
 if(BUILD_JAVA_API OR BUILD_PYTHON_API)
@@ -71,8 +71,8 @@ if(BUILD_PYTHON_API)
     add_subdirectory(api/python/cpp)
 endif()
 
-message(STATUS "Build server:             ${BUILD_SERVER}")
-if(BUILD_SERVER)
+message(STATUS "Build server:             ${BUILD_GUI_SERVER}")
+if(BUILD_GUI_SERVER)
     add_subdirectory(gui/src/main/cpp)
 endif()
 
