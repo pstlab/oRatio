@@ -1,13 +1,18 @@
 find_package(Threads REQUIRED)
 
-add_library(executor SHARED executor.cpp)
+file(GLOB EXECUTOR_SOURCES *.cpp)
+file(GLOB EXECUTOR_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/*.h *.h)
+
+add_library(executor SHARED ${EXECUTOR_SOURCES})
 GENERATE_EXPORT_HEADER(executor)
 target_include_directories(executor PUBLIC ${CMAKE_CURRENT_BINARY_DIR} .)
 target_link_libraries(executor PUBLIC solver)
-install(TARGETS executor LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(MSVC)
     target_compile_options(executor PRIVATE /W4)
 else()
     target_compile_options(executor PRIVATE -Wall -Wextra -pedantic)
 endif()
+
+install(TARGETS executor LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES ${EXECUTOR_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/executor)

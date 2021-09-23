@@ -1,10 +1,10 @@
 file(GLOB RIDDLE_SOURCES *.cpp)
+file(GLOB RIDDLE_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/*.h *.h)
 
 add_library(riddle SHARED ${RIDDLE_SOURCES})
 GENERATE_EXPORT_HEADER(riddle)
 target_include_directories(riddle PUBLIC ${CMAKE_CURRENT_BINARY_DIR} .)
 target_link_libraries(riddle PUBLIC smt)
-install(TARGETS riddle LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(BUILD_TESTING)
     add_subdirectory(tests)
@@ -15,3 +15,6 @@ if(MSVC)
 else()
     target_compile_options(riddle PRIVATE -Wall -Wextra -pedantic)
 endif()
+
+install(TARGETS riddle LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES ${RIDDLE_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/riddle)
