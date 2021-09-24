@@ -14,7 +14,7 @@ namespace ratio
     virtual ~executor_listener() { exec.listeners.erase(std::find(exec.listeners.cbegin(), exec.listeners.cend(), this)); }
 
   private:
-    virtual void tick([[maybe_unused]] const smt::rational time) { LOG("current time: " << to_string(time)); }
+    virtual void tick([[maybe_unused]] const smt::rational &time) { LOG("current time: " << to_string(time)); }
 
     /**
      * @brief Notifies the listener that some atoms are going to start.
