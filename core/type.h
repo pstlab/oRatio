@@ -35,7 +35,7 @@ namespace ratio
     type(const type &orig) = delete;
     CORE_EXPORT virtual ~type();
 
-    inline std::string get_name() const noexcept { return name; } // returns the name of this type..
+    inline const std::string get_name() const noexcept { return name; } // returns the name of this type..
     std::string get_full_name() const noexcept
     {
       std::string tp_name = name;
