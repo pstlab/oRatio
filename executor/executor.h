@@ -21,6 +21,7 @@ namespace ratio
     EXECUTOR_EXPORT executor(solver &slv, const std::string &cnfg_str = "{}", const smt::rational &units_per_tick = smt::rational::ONE);
     executor(const executor &orig) = delete;
 
+    solver &get_solver() { return slv; }
     const smt::rational &get_current_time() const { return current_time; };
 
     EXECUTOR_EXPORT atom &get_atom(const smt::var &sigma) const { return *all_atoms.at(sigma); }

@@ -30,7 +30,11 @@ using namespace smt;
 
 namespace ratio
 {
-    SOLVER_EXPORT solver::solver() : solver(HEURISTIC) {}
+    SOLVER_EXPORT solver::solver(const bool &i) : solver(HEURISTIC)
+    {
+        if (i)
+            init();
+    }
     SOLVER_EXPORT solver::solver(graph &gr) : core(), theory(get_sat_core()), gr(gr) {}
     SOLVER_EXPORT solver::~solver() { delete &gr; }
 

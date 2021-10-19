@@ -45,7 +45,7 @@ namespace ratio
 #endif
 
   public:
-    SOLVER_EXPORT solver();
+    SOLVER_EXPORT solver(const bool &i = true);
     SOLVER_EXPORT solver(graph &gr);
     solver(const solver &orig) = delete;
     SOLVER_EXPORT ~solver();
