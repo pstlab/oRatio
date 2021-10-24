@@ -2,6 +2,7 @@
 
 #include "solver_export.h"
 #include "core.h"
+#include "timelines_extractor.h"
 
 #define AT "at"
 #define START "start"
@@ -34,7 +35,11 @@ namespace ratio
   class solver_listener;
 #endif
 
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+  class solver : public core, private smt::theory, public timelines_extractor
+#else
   class solver : public core, private smt::theory
+#endif
   {
     friend class graph;
     friend class flaw;
@@ -115,6 +120,11 @@ namespace ratio
     std::vector<std::vector<std::pair<smt::lit, double>>> get_incs(); // collects all the current inconsistencies..
 
     void reset_smart_types();
+
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+  public:
+    smt::json extract_timelines() const noexcept override;
+#endif
 
   private:
     struct layer

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "smart_type.h"
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+#include "timelines_extractor.h"
+#endif
 #include "constructor.h"
 #include "predicate.h"
 #include "flaw.h"
@@ -13,12 +16,20 @@
 
 namespace ratio
 {
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+  class reusable_resource final : public smart_type, public timelines_extractor
+#else
   class reusable_resource final : public smart_type
+#endif
   {
   public:
     reusable_resource(solver &slv);
     reusable_resource(const reusable_resource &orig) = delete;
     ~reusable_resource();
+
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    smt::json extract_timelines() const noexcept override;
+#endif
 
   private:
     std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;

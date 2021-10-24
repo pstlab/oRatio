@@ -10,7 +10,14 @@ using namespace smt;
 
 namespace ratio
 {
-    state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME), int_pred(slv.get_predicate("Interval")) { new_constructors({new sv_constructor(*this)}); }
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME), timelines_extractor(), int_pred(slv.get_predicate("Interval"))
+#else
+    state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME), int_pred(slv.get_predicate("Interval"))
+#endif
+    {
+        new_constructors({new sv_constructor(*this)});
+    }
     state_variable::~state_variable()
     {
         // we clear the atom listeners..
@@ -345,4 +352,12 @@ namespace ratio
     std::string state_variable::forbid_resolver::get_label() const { return "{\"type\":\"forbid\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
 
     void state_variable::forbid_resolver::apply() { get_solver().get_sat_core().new_clause({!get_rho(), !get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
+
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    smt::json state_variable::extract_timelines() const noexcept
+    {
+        json tls;
+        return tls;
+    }
+#endif
 } // namespace ratio

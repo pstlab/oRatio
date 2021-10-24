@@ -9,7 +9,11 @@ using namespace smt;
 
 namespace ratio
 {
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    propositional_state::propositional_state(solver &slv) : smart_type(slv, slv, PROPOSITIONAL_STATE_NAME), timelines_extractor(), int_pred(slv.get_predicate("Interval"))
+#else
     propositional_state::propositional_state(solver &slv) : smart_type(slv, slv, PROPOSITIONAL_STATE_NAME), int_pred(slv.get_predicate("Interval"))
+#endif
     {
         new_constructors({new ps_constructor(*this)});
         new_predicates({new ps_predicate(*this)}, false);
@@ -55,4 +59,12 @@ namespace ratio
 
     propositional_state::ps_atom_listener::ps_atom_listener(propositional_state &ps, atom &atm) : atom_listener(atm), ps(ps) {}
     void propositional_state::ps_atom_listener::something_changed() { ps.to_check.insert(&atm); }
+
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    smt::json propositional_state::extract_timelines() const noexcept
+    {
+        json tls;
+        return tls;
+    }
+#endif
 } // namespace ratio

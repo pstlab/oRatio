@@ -35,8 +35,19 @@ namespace ratio
         if (i)
             init();
     }
-    SOLVER_EXPORT solver::solver(graph &gr) : core(), theory(get_sat_core()), gr(gr) {}
-    SOLVER_EXPORT solver::~solver() { delete &gr; }
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    SOLVER_EXPORT solver::solver(graph &gr) : core(), theory(get_sat_core()), timelines_extractor(), gr(gr)
+    {
+    }
+#else
+    SOLVER_EXPORT solver::solver(graph &gr) : core(), theory(get_sat_core()), gr(gr)
+    {
+    }
+#endif
+    SOLVER_EXPORT solver::~solver()
+    {
+        delete &gr;
+    }
 
     SOLVER_EXPORT void solver::read(const std::string &script)
     {
@@ -598,6 +609,14 @@ namespace ratio
             q.pop();
         }
     }
+
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    json solver::extract_timelines() const noexcept
+    {
+        json tls;
+        return tls;
+    }
+#endif
 
 #ifdef BUILD_LISTENERS
     void solver::fire_new_flaw(const flaw &f) const

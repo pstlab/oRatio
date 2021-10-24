@@ -1,17 +1,28 @@
 #pragma once
 
 #include "smart_type.h"
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+#include "timelines_extractor.h"
+#endif
 #include "constructor.h"
 
 #define AGENT_NAME "Agent"
 
 namespace ratio
 {
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+  class agent final : public smart_type, public timelines_extractor
+#else
   class agent final : public smart_type
+#endif
   {
   public:
     agent(solver &slv);
     agent(const agent &orig) = delete;
+
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+    smt::json extract_timelines() const noexcept override;
+#endif
 
   private:
     std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;
