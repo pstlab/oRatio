@@ -38,8 +38,6 @@ namespace ratio
     void push() noexcept override {}
     void pop() noexcept override {}
 
-    inline bool is_impulse(const atom &atm) const noexcept;
-    inline bool is_interval(const atom &atm) const noexcept;
     inline bool is_relevant(const predicate &pred) const noexcept { return relevant_predicates.count(&pred); }
 
     void read(const std::string &) override { reset_relevant_predicates(); }
@@ -55,8 +53,6 @@ namespace ratio
 
   private:
     const std::string cnfg_str;
-    const predicate &int_pred;
-    const predicate &imp_pred;
     std::unordered_set<const predicate *> relevant_predicates;
     smt::rational current_time;         // the current time in plan units..
     const smt::rational units_per_tick; // the number of plan units for each tick..

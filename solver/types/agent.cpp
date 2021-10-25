@@ -27,7 +27,9 @@ namespace ratio
     }
 
     void agent::new_predicate(predicate &pred) noexcept
-    { // each agent predicate has a tau parameter indicating on which agents the atoms insist on..
+    {
+        assert(get_solver().is_impulse(pred) || get_solver().is_interval(pred));
+        // each agent predicate has a tau parameter indicating on which agents the atoms insist on..
         new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
     }
 
@@ -86,7 +88,7 @@ namespace ratio
 
             for (const auto &atm : atms)
             {
-                arith_expr s_expr = atm->get(START);
+                arith_expr s_expr = get_solver().is_impulse(*atm) ? atm->get(AT) : atm->get(START);
                 inf_rational start = get_core().arith_value(s_expr);
                 starting_atoms[start].insert(atm);
                 pulses.insert(start);

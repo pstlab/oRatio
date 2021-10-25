@@ -123,7 +123,16 @@ namespace ratio
 
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
   public:
-    smt::json extract_timelines() const noexcept override;
+    SOLVER_EXPORT smt::json extract_timelines() const noexcept override;
+
+    SOLVER_EXPORT bool is_impulse(const type &pred) const noexcept;
+    SOLVER_EXPORT bool is_impulse(const atom &atm) const noexcept;
+    SOLVER_EXPORT bool is_interval(const type &pred) const noexcept;
+    SOLVER_EXPORT bool is_interval(const atom &atm) const noexcept;
+
+  private:
+    const predicate &int_pred;
+    const predicate &imp_pred;
 #endif
 
   private:

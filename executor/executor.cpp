@@ -45,7 +45,7 @@ namespace ratio
         throw std::out_of_range(pred);
     }
 
-    EXECUTOR_EXPORT executor::executor(solver &slv, const std::string &cnfg_str, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), cnfg_str(cnfg_str), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")), units_per_tick(units_per_tick) { build_timelines(); }
+    EXECUTOR_EXPORT executor::executor(solver &slv, const std::string &cnfg_str, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), cnfg_str(cnfg_str), units_per_tick(units_per_tick) { build_timelines(); }
 
     EXECUTOR_EXPORT void executor::tick()
     {
@@ -67,7 +67,7 @@ namespace ratio
                 for (const auto &atm : starting_atms->second)
                     if (const auto at_atm = dont_start.find(atm); at_atm != dont_start.end())
                     { // this starting atom is not ready to be started..
-                        const arith_expr xpr = is_impulse(*atm) ? atm->get(AT) : atm->get(START);
+                        const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(AT) : atm->get(START);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         lbs[atm].emplace(&*xpr, lb);
                         if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma())))
@@ -83,7 +83,7 @@ namespace ratio
                 for (const auto &atm : ending_atms->second)
                     if (const auto at_atm = dont_end.find(atm); at_atm != dont_end.end())
                     { // this ending atom is not ready to be ended..
-                        const arith_expr xpr = is_impulse(*atm) ? atm->get(AT) : atm->get(END);
+                        const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(AT) : atm->get(END);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         lbs[atm].emplace(&*xpr, lb);
                         if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma())))
@@ -120,12 +120,12 @@ namespace ratio
             if (const auto ending_atms = e_atms.find(*pulses.cbegin()); ending_atms != e_atms.cend())
             { // we freeze the at and the end of the ending atoms..
                 for (auto &atm : ending_atms->second)
-                    if (is_impulse(*atm)) // we have an impulsive atom..
+                    if (slv.is_impulse(*atm)) // we have an impulsive atom..
                     {
                         arith_expr at = atm->get(AT);
                         freeze(*atm, at);
                     }
-                    else if (is_interval(*atm)) // we have an interval atom..
+                    else if (slv.is_interval(*atm)) // we have an interval atom..
                     {
                         arith_expr end = atm->get(END);
                         freeze(*atm, end);
@@ -180,9 +180,6 @@ namespace ratio
         return true;
     }
 
-    bool executor::is_impulse(const atom &atm) const noexcept { return imp_pred.is_assignable_from(atm.get_type()); }
-    bool executor::is_interval(const atom &atm) const noexcept { return int_pred.is_assignable_from(atm.get_type()); }
-
     void executor::solution_found() { build_timelines(); }
     void executor::inconsistent_problem()
     {
@@ -199,13 +196,13 @@ namespace ratio
             switch (slv.get_sat_core().value(af->get_atom().get_sigma()))
             {
             case True: // the atom is already active..
-                if (is_interval(atm))
+                if (slv.is_interval(atm))
                 { // we have an interval atom..
                     arith_expr s_expr = atm.get(START);
                     if (!slv.get_sat_core().new_clause({slv.geq(s_expr, slv.new_real(current_time))->l}))
                         throw execution_exception();
                 }
-                else if (is_impulse(atm))
+                else if (slv.is_impulse(atm))
                 { // we have an impulsive atom..
                     arith_expr at_expr = atm.get(AT);
                     if (!slv.get_sat_core().new_clause({slv.geq(at_expr, slv.new_real(current_time))->l}))
@@ -214,12 +211,12 @@ namespace ratio
                 all_atoms.emplace(atm.get_sigma(), &atm);
                 break;
             case Undefined:
-                if (is_interval(atm))
+                if (slv.is_interval(atm))
                 { // we have an interval atom..
                     arith_expr s_expr = atm.get(START);
                     lbs[&atm].emplace(&*s_expr, current_time);
                 }
-                else if (is_impulse(atm))
+                else if (slv.is_impulse(atm))
                 { // we have an impulsive atom..
                     arith_expr at_expr = atm.get(AT);
                     lbs[&atm].emplace(&*at_expr, current_time);
@@ -248,7 +245,7 @@ namespace ratio
         else
         { // all executable predicates are relevant..
             for (const auto &[pred_name, pred] : slv.get_predicates())
-                if (pred->is_assignable_from(imp_pred) || pred->is_assignable_from(int_pred))
+                if (slv.is_impulse(*pred) || slv.is_interval(*pred))
                     relevant_predicates.insert(pred);
             std::queue<type *> q;
             for (const auto &[tp_name, tp] : slv.get_types())
@@ -257,7 +254,7 @@ namespace ratio
             while (!q.empty())
             {
                 for (const auto &[pred_name, pred] : q.front()->get_predicates())
-                    if (pred->is_assignable_from(imp_pred) || pred->is_assignable_from(int_pred))
+                    if (slv.is_impulse(*pred) || slv.is_interval(*pred))
                         relevant_predicates.insert(pred);
                 q.pop();
             }
@@ -277,7 +274,7 @@ namespace ratio
             {
                 auto &c_atm = static_cast<atom &>(*atm);
                 if (slv.get_sat_core().value(c_atm.get_sigma()) == True)
-                    if (is_impulse(c_atm))
+                    if (slv.is_impulse(c_atm))
                     {
                         arith_expr at_expr = atm->get(AT);
                         inf_rational at = slv.arith_value(at_expr);
@@ -287,7 +284,7 @@ namespace ratio
                         e_atms[at].insert(&c_atm);
                         pulses.insert(at);
                     }
-                    else if (is_interval(c_atm))
+                    else if (slv.is_interval(c_atm))
                     {
                         arith_expr s_expr = atm->get(START);
                         arith_expr e_expr = atm->get(END);

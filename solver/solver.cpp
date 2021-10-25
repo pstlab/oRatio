@@ -22,6 +22,9 @@
 #ifdef BUILD_LISTENERS
 #include "solver_listener.h"
 #endif
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+#include "timelines_extractor.h"
+#endif
 #include <algorithm>
 #include <math.h>
 #include <cassert>
@@ -36,7 +39,7 @@ namespace ratio
             init();
     }
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    SOLVER_EXPORT solver::solver(graph &gr) : core(), theory(get_sat_core()), timelines_extractor(), gr(gr)
+    SOLVER_EXPORT solver::solver(graph &gr) : core(), theory(get_sat_core()), timelines_extractor(), int_pred(get_predicate("Interval")), imp_pred(get_predicate("Impulse")), gr(gr)
     {
     }
 #else
@@ -611,11 +614,57 @@ namespace ratio
     }
 
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    json solver::extract_timelines() const noexcept
+    SOLVER_EXPORT json solver::extract_timelines() const noexcept
     {
-        json tls;
-        return tls;
+        std::vector<json> tls;
+
+        // for each pulse, the atoms starting at that pulse..
+        std::map<inf_rational, std::set<atom *>> starting_atoms;
+        // all the pulses of the timeline..
+        std::set<inf_rational> pulses;
+        for ([[maybe_unused]] const auto &[p_name, p] : get_predicates())
+            if (is_impulse(*p) || is_interval(*p))
+                for (const auto &atm : p->get_instances())
+                {
+                    arith_expr s_expr = is_impulse(*p) ? atm->get(AT) : atm->get(START);
+                    inf_rational start = arith_value(s_expr);
+                    starting_atoms[start].insert(dynamic_cast<atom *>(&*atm));
+                    pulses.insert(start);
+                }
+        if (!starting_atoms.empty())
+        {
+            json slv_tl;
+            slv_tl->set("name", new string_val("solver"));
+            std::vector<json> j_atms;
+            for (const auto &p : pulses)
+                for (const auto &atm : starting_atoms.at(p))
+                    j_atms.push_back(atm->to_json());
+            slv_tl->set("values", new array_val(j_atms));
+            tls.push_back(slv_tl);
+        }
+
+        std::queue<type *> q;
+        for ([[maybe_unused]] const auto &[tp_name, tp] : get_types())
+            q.push(tp);
+
+        while (!q.empty())
+        {
+            if (timelines_extractor *te = dynamic_cast<timelines_extractor *>(q.front()))
+            {
+                const smt::array_val &te_tls = static_cast<smt::array_val &>(*te->extract_timelines());
+                for (size_t i = 0; i < te_tls.size(); ++i)
+                    tls.push_back(te_tls.get(i));
+            }
+            q.pop();
+        }
+
+        return new array_val(tls);
     }
+
+    SOLVER_EXPORT bool solver::is_impulse(const type &pred) const noexcept { return imp_pred.is_assignable_from(pred); }
+    SOLVER_EXPORT bool solver::is_impulse(const atom &atm) const noexcept { return is_impulse(atm.get_type()); }
+    SOLVER_EXPORT bool solver::is_interval(const type &pred) const noexcept { return int_pred.is_assignable_from(pred); }
+    SOLVER_EXPORT bool solver::is_interval(const atom &atm) const noexcept { return is_interval(atm.get_type()); }
 #endif
 
 #ifdef BUILD_LISTENERS
