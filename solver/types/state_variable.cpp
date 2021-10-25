@@ -72,8 +72,7 @@ namespace ratio
                 if (const auto at_start_p = starting_atoms.find(p); at_start_p != starting_atoms.cend())
                     overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
                 if (const auto at_end_p = ending_atoms.find(p); at_end_p != ending_atoms.cend())
-                    for (const auto &a : at_end_p->second)
-                        overlapping_atoms.erase(a);
+                    overlapping_atoms.erase(at_end_p->second.cbegin(), at_end_p->second.cend());
 
                 if (overlapping_atoms.size() > 1) // we have a 'peak'..
                     for (const auto &as : combinations(std::vector<atom *>(overlapping_atoms.cbegin(), overlapping_atoms.cend()), 2))
@@ -356,8 +355,102 @@ namespace ratio
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
     smt::json state_variable::extract_timelines() const noexcept
     {
-        json tls;
-        return tls;
+        std::vector<json> tls;
+        // we partition atoms for each state-variable they might insist on..
+        std::unordered_map<const item *, std::vector<atom *>> sv_instances;
+        for ([[maybe_unused]] const auto &[atm, atm_lstnr] : atoms)
+            if (get_core().get_sat_core().value(atm->get_sigma()) == True) // we filter out those which are not strictly active..
+            {
+                expr c_scope = atm->get(TAU);
+                if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
+                {
+                    for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
+                        sv_instances[static_cast<const item *>(val)].push_back(atm);
+                }
+                else
+                    sv_instances[static_cast<item *>(&*c_scope)].push_back(atm);
+            }
+
+        for (const auto &[sv, atms] : sv_instances)
+        {
+            json tl;
+            tl->set("name", new string_val(get_core().guess_name(*sv)));
+
+            // for each pulse, the atoms starting at that pulse..
+            std::map<inf_rational, std::set<atom *>> starting_atoms;
+            // for each pulse, the atoms ending at that pulse..
+            std::map<inf_rational, std::set<atom *>> ending_atoms;
+            // all the pulses of the timeline..
+            std::set<inf_rational> pulses;
+
+            for (const auto &atm : atms)
+            {
+                arith_expr s_expr = atm->get(START);
+                arith_expr e_expr = atm->get(END);
+                inf_rational start = get_core().arith_value(s_expr);
+                inf_rational end = get_core().arith_value(e_expr);
+                starting_atoms[start].insert(atm);
+                ending_atoms[end].insert(atm);
+                pulses.insert(start);
+                pulses.insert(end);
+            }
+            arith_expr origin_expr = get_core().get("origin");
+            arith_expr horizon_expr = get_core().get("horizon");
+            pulses.insert(get_core().arith_value(origin_expr));
+            pulses.insert(get_core().arith_value(horizon_expr));
+
+            std::set<atom *> overlapping_atoms;
+            std::set<inf_rational>::iterator p = pulses.begin();
+            if (const auto at_start_p = starting_atoms.find(*p); at_start_p != starting_atoms.cend())
+                overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
+            if (const auto at_end_p = ending_atoms.find(*p); at_end_p != ending_atoms.cend())
+                overlapping_atoms.erase(at_end_p->second.cbegin(), at_end_p->second.cend());
+
+            std::vector<json> j_vals;
+            for (p = std::next(p); p != pulses.end(); ++p)
+            {
+                json j_val;
+                json j_from;
+                j_from->set("num", new long_val(std::prev(p)->get_rational().numerator()));
+                j_from->set("den", new long_val(std::prev(p)->get_rational().denominator()));
+                if (std::prev(p)->get_infinitesimal() != rational::ZERO)
+                {
+                    json j_inf;
+                    j_inf->set("num", new long_val(std::prev(p)->get_infinitesimal().numerator()));
+                    j_inf->set("den", new long_val(std::prev(p)->get_infinitesimal().denominator()));
+                    j_from->set("inf", j_inf);
+                }
+                j_val->set("from", j_from);
+
+                json j_to;
+                j_to->set("num", new long_val(p->get_rational().numerator()));
+                j_to->set("den", new long_val(p->get_rational().denominator()));
+                if (p->get_infinitesimal() != rational::ZERO)
+                {
+                    json j_inf;
+                    j_inf->set("num", new long_val(p->get_infinitesimal().numerator()));
+                    j_inf->set("den", new long_val(p->get_infinitesimal().denominator()));
+                    j_to->set("inf", j_inf);
+                }
+                j_val->set("to", j_to);
+
+                std::vector<json> j_atms;
+                for (const auto &atm : overlapping_atoms)
+                    j_atms.push_back(atm->to_json());
+                j_val->set("atoms", new array_val(j_atms));
+                j_vals.push_back(j_val);
+
+                if (const auto at_start_p = starting_atoms.find(*p); at_start_p != starting_atoms.cend())
+                    overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
+                if (const auto at_end_p = ending_atoms.find(*p); at_end_p != ending_atoms.cend())
+                    overlapping_atoms.erase(at_end_p->second.cbegin(), at_end_p->second.cend());
+            }
+            tl->set("values", new array_val(j_vals));
+
+            tls.push_back(tl);
+        }
+
+        return new array_val(tls);
     }
 #endif
 } // namespace ratio

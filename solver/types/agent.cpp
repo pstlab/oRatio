@@ -58,8 +58,48 @@ namespace ratio
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
     smt::json agent::extract_timelines() const noexcept
     {
-        json tls;
-        return tls;
+        std::vector<json> tls;
+        // we partition atoms for each state-variable they might insist on..
+        std::unordered_map<const item *, std::vector<atom *>> agnt_instances;
+        for ([[maybe_unused]] const auto &[atm, atm_lstnr] : atoms)
+            if (get_core().get_sat_core().value(atm->get_sigma()) == True) // we filter out those which are not strictly active..
+            {
+                expr c_scope = atm->get(TAU);
+                if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
+                {
+                    for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
+                        agnt_instances[static_cast<const item *>(val)].push_back(atm);
+                }
+                else
+                    agnt_instances[static_cast<item *>(&*c_scope)].push_back(atm);
+            }
+
+        for (const auto &[agnt, atms] : agnt_instances)
+        {
+            json tl;
+            tl->set("name", new string_val(get_core().guess_name(*agnt)));
+
+            // for each pulse, the atoms starting at that pulse..
+            std::map<inf_rational, std::set<atom *>> starting_atoms;
+            // all the pulses of the timeline..
+            std::set<inf_rational> pulses;
+
+            for (const auto &atm : atms)
+            {
+                arith_expr s_expr = atm->get(START);
+                inf_rational start = get_core().arith_value(s_expr);
+                starting_atoms[start].insert(atm);
+                pulses.insert(start);
+            }
+
+            std::vector<json> j_atms;
+            for (const auto &p : pulses)
+                for (const auto &atm : starting_atoms.at(p))
+                    j_atms.push_back(atm->to_json());
+            tl->set("values", new array_val(j_atms));
+            tls.push_back(tl);
+        }
+        return new array_val(tls);
     }
 #endif
 } // namespace ratio
