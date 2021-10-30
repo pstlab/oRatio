@@ -28,7 +28,9 @@ namespace ratio
 
     void agent::new_predicate(predicate &pred) noexcept
     {
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
         assert(get_solver().is_impulse(pred) || get_solver().is_interval(pred));
+#endif
         // each agent predicate has a tau parameter indicating on which agents the atoms insist on..
         new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
     }
