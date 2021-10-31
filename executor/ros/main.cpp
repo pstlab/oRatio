@@ -60,8 +60,6 @@ int main(int argc, char const *argv[])
 
     try
     {
-        s.init();
-
         std::cout << "parsing input files..\n";
         s.read(prob_names);
 
