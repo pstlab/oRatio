@@ -72,7 +72,8 @@ namespace ratio
                 if (const auto at_start_p = starting_atoms.find(p); at_start_p != starting_atoms.cend())
                     overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
                 if (const auto at_end_p = ending_atoms.find(p); at_end_p != ending_atoms.cend())
-                    overlapping_atoms.erase(at_end_p->second.cbegin(), at_end_p->second.cend());
+                    for (const auto &a : at_end_p->second)
+                        overlapping_atoms.erase(a);
 
                 if (overlapping_atoms.size() > 1) // we have a 'peak'..
                     for (const auto &as : combinations(std::vector<atom *>(overlapping_atoms.cbegin(), overlapping_atoms.cend()), 2))
@@ -404,7 +405,8 @@ namespace ratio
             if (const auto at_start_p = starting_atoms.find(*p); at_start_p != starting_atoms.cend())
                 overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
             if (const auto at_end_p = ending_atoms.find(*p); at_end_p != ending_atoms.cend())
-                overlapping_atoms.erase(at_end_p->second.cbegin(), at_end_p->second.cend());
+                for (const auto &a : at_end_p->second)
+                    overlapping_atoms.erase(a);
 
             std::vector<json> j_vals;
             for (p = std::next(p); p != pulses.end(); ++p)
@@ -443,7 +445,8 @@ namespace ratio
                 if (const auto at_start_p = starting_atoms.find(*p); at_start_p != starting_atoms.cend())
                     overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
                 if (const auto at_end_p = ending_atoms.find(*p); at_end_p != ending_atoms.cend())
-                    overlapping_atoms.erase(at_end_p->second.cbegin(), at_end_p->second.cend());
+                    for (const auto &a : at_end_p->second)
+                        overlapping_atoms.erase(a);
             }
             tl->set("values", new array_val(j_vals));
 

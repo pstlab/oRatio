@@ -26,6 +26,7 @@
 
 namespace ratio
 {
+  class solver;
   class graph;
   class flaw;
   class resolver;
@@ -35,12 +36,20 @@ namespace ratio
   class solver_listener;
 #endif
 
+  class solver_initializer
+  {
+  public:
+    solver_initializer(solver &slv, const bool &i = true);
+    ~solver_initializer();
+  };
+
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-  class solver : public core, private smt::theory, public timelines_extractor
+  class solver : public core, private solver_initializer, private smt::theory, public timelines_extractor
 #else
-  class solver : public core, private smt::theory
+  class solver : public core, private solver_initializer, private smt::theory
 #endif
   {
+    friend class solver_initializer;
     friend class graph;
     friend class flaw;
     friend class smart_type;
@@ -51,7 +60,7 @@ namespace ratio
 
   public:
     SOLVER_EXPORT solver(const bool &i = true);
-    SOLVER_EXPORT solver(graph &gr);
+    SOLVER_EXPORT solver(graph &gr, const bool &i = true);
     solver(const solver &orig) = delete;
     SOLVER_EXPORT ~solver();
 

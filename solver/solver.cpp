@@ -33,20 +33,21 @@ using namespace smt;
 
 namespace ratio
 {
-    SOLVER_EXPORT solver::solver(const bool &i) : solver(HEURISTIC)
+    solver_initializer::solver_initializer(solver &slv, const bool &i)
     {
         if (i)
-            init();
+            slv.init();
     }
+    solver_initializer::~solver_initializer() {}
+
+    SOLVER_EXPORT solver::solver(const bool &i) : solver(HEURISTIC, i) {}
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    SOLVER_EXPORT solver::solver(graph &gr) : core(), theory(get_sat_core()), timelines_extractor(), int_pred(get_predicate("Interval")), imp_pred(get_predicate("Impulse")), gr(gr)
-    {
-    }
+    SOLVER_EXPORT solver::solver(graph &gr, const bool &i) : core(), solver_initializer(*this, i), theory(get_sat_core()), timelines_extractor(), int_pred(get_predicate("Interval")), imp_pred(get_predicate("Impulse")), gr(gr)
 #else
-    SOLVER_EXPORT solver::solver(graph &gr) : core(), theory(get_sat_core()), gr(gr)
+    SOLVER_EXPORT solver::solver(graph &gr, const bool &i) : core(), solver_initializer(*this, i), theory(get_sat_core()), gr(gr)
+#endif
     {
     }
-#endif
     SOLVER_EXPORT solver::~solver()
     {
         delete &gr;
