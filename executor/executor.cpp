@@ -15,37 +15,7 @@ using namespace smt;
 
 namespace ratio
 {
-    predicate &get_predicate(const solver &slv, const std::string &pred)
-    {
-        std::vector<std::string> ids;
-        size_t start = 0, end = 0;
-        do
-        {
-            end = pred.find('.', start);
-            if (end == std::string::npos)
-                end = pred.length();
-            std::string token = pred.substr(start, end - start);
-            if (!token.empty())
-                ids.push_back(token);
-            start = end + 1;
-        } while (end < pred.length() && start < pred.length());
-
-        if (ids.size() == 1)
-            return slv.get_predicate(ids[0]);
-        else
-        {
-            type *tp = &slv.get_type(ids[0]);
-            for (size_t i = 1; i < ids.size(); ++i)
-                if (i == ids.size() - 1)
-                    return tp->get_predicate(ids[i]);
-                else
-                    tp = &tp->get_type(ids[i]);
-        }
-        // not found
-        throw std::out_of_range(pred);
-    }
-
-    EXECUTOR_EXPORT executor::executor(solver &slv, const std::string &cnfg_str, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), cnfg_str(cnfg_str), units_per_tick(units_per_tick) { build_timelines(); }
+    EXECUTOR_EXPORT executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), units_per_tick(units_per_tick) { build_timelines(); }
 
     EXECUTOR_EXPORT void executor::tick()
     {
@@ -157,6 +127,36 @@ namespace ratio
         slv.solve();
     }
 
+    EXECUTOR_EXPORT predicate &executor::get_predicate(const solver &slv, const std::string &pred)
+    {
+        std::vector<std::string> ids;
+        size_t start = 0, end = 0;
+        do
+        {
+            end = pred.find('.', start);
+            if (end == std::string::npos)
+                end = pred.length();
+            std::string token = pred.substr(start, end - start);
+            if (!token.empty())
+                ids.push_back(token);
+            start = end + 1;
+        } while (end < pred.length() && start < pred.length());
+
+        if (ids.size() == 1)
+            return slv.get_predicate(ids[0]);
+        else
+        {
+            type *tp = &slv.get_type(ids[0]);
+            for (size_t i = 1; i < ids.size(); ++i)
+                if (i == ids.size() - 1)
+                    return tp->get_predicate(ids[i]);
+                else
+                    tp = &tp->get_type(ids[i]);
+        }
+        // not found
+        throw std::out_of_range(pred);
+    }
+
     bool executor::propagate(const smt::lit &p) noexcept
     {
         if (slv.get_sat_core().value(p) == True)
@@ -228,21 +228,14 @@ namespace ratio
         }
     }
 
-    void executor::reset_relevant_predicates()
+    void executor::build_timelines()
     {
-        relevant_predicates.clear();
-        std::stringstream ss(cnfg_str);
-        const auto cnfg = smt::json::from_json(ss);
-        if (cnfg->has("relevant-predicates"))
-        { // the configuration identifies some relevant predicates..
-            const smt::array_val &notify_s = static_cast<smt::array_val &>(*cnfg->get("relevant-predicates"));
-            for (size_t i = 0; i < notify_s.size(); ++i)
-            {
-                const smt::string_val &pred = static_cast<smt::string_val &>(*notify_s.get(i));
-                relevant_predicates.insert(&get_predicate(slv, pred.get()));
-            }
-        }
-        else
+        LOG("building timelines..");
+        s_atms.clear();
+        e_atms.clear();
+        pulses.clear();
+
+        if (relevant_predicates.empty())
         { // all executable predicates are relevant..
             for (const auto &[pred_name, pred] : slv.get_predicates())
                 if (slv.is_impulse(*pred) || slv.is_interval(*pred))
@@ -259,14 +252,6 @@ namespace ratio
                 q.pop();
             }
         }
-    }
-
-    void executor::build_timelines()
-    {
-        LOG("building timelines..");
-        s_atms.clear();
-        e_atms.clear();
-        pulses.clear();
 
         // we collect all the active relevant atoms..
         for (const auto pred : relevant_predicates)
