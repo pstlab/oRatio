@@ -29,8 +29,15 @@ void test_json_1()
     json j_obj = json::from_json(s);
 }
 
+void test_json_2()
+{
+    std::stringstream s("{\"relevant-predicates\": [\"DialogueStateVariable.Interact\"]}");
+    json j_obj = json::from_json(s);
+}
+
 int main(int, char **)
 {
     test_json_0();
     test_json_1();
+    test_json_2();
 }
