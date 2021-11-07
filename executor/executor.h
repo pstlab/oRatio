@@ -18,7 +18,7 @@ namespace ratio
     friend class executor_listener;
 
   public:
-    EXECUTOR_EXPORT executor(solver &slv, const smt::rational &units_per_tick = smt::rational::ONE);
+    EXECUTOR_EXPORT executor(solver &slv, const std::unordered_set<std::string> &rel_preds = {}, const smt::rational &units_per_tick = smt::rational::ONE);
     executor(const executor &orig) = delete;
 
     solver &get_solver() { return slv; }
@@ -32,10 +32,6 @@ namespace ratio
     EXECUTOR_EXPORT void dont_end_yet(const std::unordered_set<atom *> &atoms) { dont_end.insert(atoms.cbegin(), atoms.cend()); }
     EXECUTOR_EXPORT void failure(const std::unordered_set<atom *> &atoms);
 
-    EXECUTOR_EXPORT void set_relevant_predicates(const std::unordered_set<const predicate *> &rel_preds) { relevant_predicates.insert(rel_preds.cbegin(), rel_preds.cend()); }
-
-    EXECUTOR_EXPORT static predicate &get_predicate(const solver &slv, const std::string &pred);
-
   private:
     bool propagate(const smt::lit &p) noexcept override;
     bool check() noexcept override { return true; }
@@ -44,8 +40,8 @@ namespace ratio
 
     inline bool is_relevant(const predicate &pred) const noexcept { return relevant_predicates.count(&pred); }
 
-    void read(const std::string &) override {}
-    void read(const std::vector<std::string> &) override {}
+    void read(const std::string &) override { reset_relevant_predicates(); }
+    void read(const std::vector<std::string> &) override { reset_relevant_predicates(); }
     void solution_found() override;
     void inconsistent_problem() override;
 
@@ -54,7 +50,11 @@ namespace ratio
     void build_timelines();
     void freeze(atom &atm, arith_expr &xpr);
 
+    void reset_relevant_predicates();
+    predicate &get_predicate(const std::string &pred) const;
+
   private:
+    const std::unordered_set<std::string> rel_preds;
     std::unordered_set<const predicate *> relevant_predicates;
     smt::rational current_time;         // the current time in plan units..
     const smt::rational units_per_tick; // the number of plan units for each tick..

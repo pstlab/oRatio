@@ -15,7 +15,7 @@ using namespace smt;
 
 namespace ratio
 {
-    EXECUTOR_EXPORT executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), units_per_tick(units_per_tick) { build_timelines(); }
+    EXECUTOR_EXPORT executor::executor(solver &slv, const std::unordered_set<std::string> &rel_preds, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), rel_preds(rel_preds), units_per_tick(units_per_tick) { build_timelines(); }
 
     EXECUTOR_EXPORT void executor::tick()
     {
@@ -127,36 +127,6 @@ namespace ratio
         slv.solve();
     }
 
-    EXECUTOR_EXPORT predicate &executor::get_predicate(const solver &slv, const std::string &pred)
-    {
-        std::vector<std::string> ids;
-        size_t start = 0, end = 0;
-        do
-        {
-            end = pred.find('.', start);
-            if (end == std::string::npos)
-                end = pred.length();
-            std::string token = pred.substr(start, end - start);
-            if (!token.empty())
-                ids.push_back(token);
-            start = end + 1;
-        } while (end < pred.length() && start < pred.length());
-
-        if (ids.size() == 1)
-            return slv.get_predicate(ids[0]);
-        else
-        {
-            type *tp = &slv.get_type(ids[0]);
-            for (size_t i = 1; i < ids.size(); ++i)
-                if (i == ids.size() - 1)
-                    return tp->get_predicate(ids[i]);
-                else
-                    tp = &tp->get_type(ids[i]);
-        }
-        // not found
-        throw std::out_of_range(pred);
-    }
-
     bool executor::propagate(const smt::lit &p) noexcept
     {
         if (slv.get_sat_core().value(p) == True)
@@ -235,30 +205,13 @@ namespace ratio
         e_atms.clear();
         pulses.clear();
 
-        if (relevant_predicates.empty())
-        { // all executable predicates are relevant..
-            for (const auto &[pred_name, pred] : slv.get_predicates())
-                if (slv.is_impulse(*pred) || slv.is_interval(*pred))
-                    relevant_predicates.insert(pred);
-            std::queue<type *> q;
-            for (const auto &[tp_name, tp] : slv.get_types())
-                if (!tp->is_primitive())
-                    q.push(tp);
-            while (!q.empty())
-            {
-                for (const auto &[pred_name, pred] : q.front()->get_predicates())
-                    if (slv.is_impulse(*pred) || slv.is_interval(*pred))
-                        relevant_predicates.insert(pred);
-                q.pop();
-            }
-        }
-
         // we collect all the active relevant atoms..
         for (const auto pred : relevant_predicates)
             for (const auto &atm : pred->get_instances())
             {
                 auto &c_atm = static_cast<atom &>(*atm);
                 if (slv.get_sat_core().value(c_atm.get_sigma()) == True)
+                { // the atom is active..
                     if (slv.is_impulse(c_atm))
                     {
                         arith_expr at_expr = atm->get(AT);
@@ -285,6 +238,7 @@ namespace ratio
                         e_atms[end].insert(&c_atm);
                         pulses.insert(end);
                     }
+                }
             }
     }
 
@@ -299,5 +253,60 @@ namespace ratio
             if (!backtrack_analyze_and_backjump())
                 throw execution_exception();
         }
+    }
+
+    void executor::reset_relevant_predicates()
+    {
+        relevant_predicates.clear();
+        if (rel_preds.empty())
+        { // all executable predicates are relevant..
+            for (const auto &[pred_name, pred] : slv.get_predicates())
+                if (slv.is_impulse(*pred) || slv.is_interval(*pred))
+                    relevant_predicates.insert(pred);
+            std::queue<type *> q;
+            for (const auto &[tp_name, tp] : slv.get_types())
+                if (!tp->is_primitive())
+                    q.push(tp);
+            while (!q.empty())
+            {
+                for (const auto &[pred_name, pred] : q.front()->get_predicates())
+                    if (slv.is_impulse(*pred) || slv.is_interval(*pred))
+                        relevant_predicates.insert(pred);
+                q.pop();
+            }
+        }
+        else // the configuration identifies some relevant predicates..
+            for (const auto &p_name : rel_preds)
+                relevant_predicates.insert(&get_predicate(p_name));
+    }
+
+    predicate &executor::get_predicate(const std::string &pred) const
+    {
+        std::vector<std::string> ids;
+        size_t start = 0, end = 0;
+        do
+        {
+            end = pred.find('.', start);
+            if (end == std::string::npos)
+                end = pred.length();
+            std::string token = pred.substr(start, end - start);
+            if (!token.empty())
+                ids.push_back(token);
+            start = end + 1;
+        } while (end < pred.length() && start < pred.length());
+
+        if (ids.size() == 1)
+            return slv.get_predicate(ids[0]);
+        else
+        {
+            type *tp = &slv.get_type(ids[0]);
+            for (size_t i = 1; i < ids.size(); ++i)
+                if (i == ids.size() - 1)
+                    return tp->get_predicate(ids[i]);
+                else
+                    tp = &tp->get_type(ids[i]);
+        }
+        // not found
+        throw std::out_of_range(pred);
     }
 } // namespace ratio
