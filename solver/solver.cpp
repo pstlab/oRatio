@@ -79,16 +79,19 @@ namespace ratio
     {
         FIRE_STARTED_SOLVING();
 
-        // we build the cuasal graph..
-        gr.build();
-        // we push the constraint network..
-        push_network();
-        // we prune the causal graph..
-        while (!gr.prune())
-        { // we add a new layer to the causal graph..
-            pop_network();
-            gr.add_layer();
+        if (std::any_of(flaws.cbegin(), flaws.cend(), [](flaw *f)
+                        { return is_positive_infinite(f->get_estimated_cost()); }))
+        { // we build the cuasal graph..
+            gr.build();
+            // we push the constraint network..
             push_network();
+            // we prune the causal graph..
+            while (!gr.prune())
+            { // we add a new layer to the causal graph..
+                pop_network();
+                gr.add_layer();
+                push_network();
+            }
         }
 
         // we search for a consistent solution without flaws..
