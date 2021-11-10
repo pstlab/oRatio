@@ -23,7 +23,7 @@ namespace smt
     inline friend bool is_positive_infinite(const inf_rational &rhs) noexcept { return is_positive(rhs) && is_infinite(rhs); }
     inline friend bool is_negative_infinite(const inf_rational &rhs) noexcept { return is_negative(rhs) && is_infinite(rhs); }
 
-    inline bool operator!=(const inf_rational &rhs) const noexcept { return rat != rhs.rat && inf != rhs.inf; };
+    inline bool operator!=(const inf_rational &rhs) const noexcept { return rat != rhs.rat || inf != rhs.inf; };
     inline bool operator<(const inf_rational &rhs) const noexcept { return rat < rhs.rat || (rat == rhs.rat && inf < rhs.inf); };
     inline bool operator<=(const inf_rational &rhs) const noexcept { return rat < rhs.rat || (rat == rhs.rat && inf <= rhs.inf); };
     inline bool operator==(const inf_rational &rhs) const noexcept { return rat == rhs.rat && inf == rhs.inf; };

@@ -302,23 +302,37 @@ namespace ratio
     CORE_EXPORT arith_expr core::mult(const std::vector<arith_expr> &xprs) noexcept
     {
         assert(xprs.size() > 1);
-        arith_expr ae = *std::find_if(xprs.cbegin(), xprs.cend(), [this](arith_expr ae)
-                                      { return lra_th->lb(ae->l) == lra_th->ub(ae->l); });
-        lin l = ae->l;
-        for (const auto &aex : xprs)
-            if (aex != ae)
+        if (auto var_it = std::find_if(xprs.cbegin(), xprs.cend(), [this](const auto &ae)
+                                       { return lra_th->lb(ae->l) != lra_th->ub(ae->l); });
+            var_it != xprs.cend())
+        {
+            arith_expr c_xpr = *var_it;
+            lin l = c_xpr->l;
+            for (const auto &xpr : xprs)
+                if (xpr != c_xpr)
+                {
+                    assert(lra_th->lb(xpr->l) == lra_th->ub(xpr->l) && "non-linear expression..");
+                    assert(lra_th->value(xpr->l).get_infinitesimal() == rational::ZERO);
+                    l *= lra_th->value(xpr->l).get_rational();
+                }
+            return new arith_item(*this, get_type(xprs), l);
+        }
+        else
+        {
+            lin l = (*xprs.cbegin())->l;
+            for (auto it = ++xprs.cbegin(); it != xprs.cend(); ++it)
             {
-                assert(lra_th->lb(aex->l) == lra_th->ub(aex->l) && "non-linear expression..");
-                assert(lra_th->value(aex->l).get_infinitesimal() == rational::ZERO);
-                l *= lra_th->value(aex->l).get_rational();
+                assert(lra_th->value((*it)->l).get_infinitesimal() == rational::ZERO);
+                l *= lra_th->value((*it)->l).get_rational();
             }
-        return new arith_item(*this, get_type(xprs), l);
+            return new arith_item(*this, get_type(xprs), l);
+        }
     }
 
     CORE_EXPORT arith_expr core::div(const std::vector<arith_expr> &xprs) noexcept
     {
         assert(xprs.size() > 1);
-        assert(std::all_of(++xprs.cbegin(), xprs.cend(), [this](arith_expr ae)
+        assert(std::all_of(++xprs.cbegin(), xprs.cend(), [this](const auto &ae)
                            { return lra_th->lb(ae->l) == lra_th->ub(ae->l); }) &&
                "non-linear expression..");
         assert(lra_th->value(xprs[1]->l).get_infinitesimal() == rational::ZERO);
