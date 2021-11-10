@@ -19,7 +19,7 @@ namespace ratio
         env->DeleteGlobalRef(exec_cls);
     }
 
-    void java_executor_listener::tick(const smt::rational time)
+    void java_executor_listener::tick(const smt::rational &time)
     {
         jlong time_num = time.numerator(), time_den = time.denominator();
 

@@ -13,7 +13,7 @@ namespace ratio
     ~java_executor_listener();
 
   private:
-    void tick(const smt::rational time) override;
+    void tick(const smt::rational &time) override;
     void starting(const std::unordered_set<atom *> &atoms) override;
     void start(const std::unordered_set<atom *> &atoms) override;
     void ending(const std::unordered_set<atom *> &atoms) override;

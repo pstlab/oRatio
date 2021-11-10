@@ -13,10 +13,24 @@ inline solver *get_solver(JNIEnv *env, jobject obj)
 
 inline executor *get_executor(JNIEnv *env, jobject obj) { return reinterpret_cast<executor *>(env->GetLongField(obj, env->GetFieldID(env->GetObjectClass(obj), "native_handle", "J"))); }
 
-JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_new_1instance(JNIEnv *env, jobject obj, jstring conf, jlong units_per_tick_num, jlong units_per_tick_den)
+JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_new_1instance(JNIEnv *env, jobject obj, jobjectArray rel_preds, jlong units_per_tick_num, jlong units_per_tick_den)
 {
     solver *s = get_solver(env, obj);
-    executor *exec = new executor(*s, env->GetStringUTFChars(conf, JNI_FALSE), rational(static_cast<I>(units_per_tick_num), static_cast<I>(units_per_tick_den)));
+    std::unordered_set<std::string> c_rel_preds;
+
+    int n_rel_preds = env->GetArrayLength(rel_preds);
+
+    for (int i = 0; i < n_rel_preds; i++)
+    {
+        jstring pred = (jstring)(env->GetObjectArrayElement(rel_preds, i));
+        jboolean is_copy;
+        const char *utf_pred = env->GetStringUTFChars(pred, &is_copy);
+        c_rel_preds.insert(utf_pred);
+        if (is_copy == JNI_TRUE)
+            env->ReleaseStringUTFChars(pred, utf_pred);
+    }
+
+    executor *exec = new executor(*s, c_rel_preds, rational(static_cast<I>(units_per_tick_num), static_cast<I>(units_per_tick_den)));
     java_executor_listener *jel = new java_executor_listener(*exec, env, obj);
     return reinterpret_cast<jlong>(exec);
 }
