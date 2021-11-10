@@ -21,7 +21,7 @@ namespace ratio
     {
         LOG("current time: " << current_time);
     manage_tick:
-        while (*pulses.cbegin() <= current_time)
+        while (!pulses.empty() && *pulses.cbegin() <= current_time)
         { // we have something to do..
             if (const auto starting_atms = s_atms.find(*pulses.cbegin()); starting_atms != s_atms.cend())
                 // we notify that some atoms might be starting their execution..
