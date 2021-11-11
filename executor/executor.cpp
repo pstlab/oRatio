@@ -15,7 +15,7 @@ using namespace smt;
 
 namespace ratio
 {
-    EXECUTOR_EXPORT executor::executor(solver &slv, const std::unordered_set<std::string> &rel_preds, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), rel_preds(rel_preds), units_per_tick(units_per_tick) { build_timelines(); }
+    EXECUTOR_EXPORT executor::executor(solver &slv, const std::vector<std::string> &rel_preds, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), rel_preds(rel_preds), units_per_tick(units_per_tick) { build_timelines(); }
 
     EXECUTOR_EXPORT void executor::tick()
     {
