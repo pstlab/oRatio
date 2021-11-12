@@ -12,6 +12,10 @@ public class TimelinesExecutor {
     private final long native_handle;
     private final Collection<ExecutorListener> executor_listeners = new ArrayList<>();
 
+    public TimelinesExecutor(final Solver solver) {
+        this(solver, new String[] {}, new Rational(1));
+    }
+
     public TimelinesExecutor(final Solver solver, final String[] rel_preds, final Rational units_per_tick) {
         this.solver = solver;
         this.native_handle = new_instance(rel_preds, units_per_tick.getNumerator(), units_per_tick.getDenominator());

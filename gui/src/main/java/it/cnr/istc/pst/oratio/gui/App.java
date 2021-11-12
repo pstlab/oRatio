@@ -25,7 +25,7 @@ public class App {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
     static final ObjectMapper MAPPER = new ObjectMapper();
     static final Solver SOLVER = new Solver(true, true);
-    static final TimelinesExecutor TL_EXEC = new TimelinesExecutor(SOLVER, "{}", new Rational(1));
+    static final TimelinesExecutor TL_EXEC = new TimelinesExecutor(SOLVER, new String[] {}, new Rational(1));
     static final SolverListener SLV_LISTENER = new SolverListener(SOLVER, TL_EXEC);
     static {
         SOLVER.addStateListener(SLV_LISTENER);
@@ -80,15 +80,15 @@ public class App {
         final String message = ctx.message();
         LOG.info("Received message {}..", message);
         switch (message) {
-            case "tick":
-                try {
-                    TL_EXEC.tick();
-                } catch (ExecutorException e) {
-                    LOG.error("Cannot execute the solution", e);
-                }
-                break;
-            default:
-                break;
+        case "tick":
+            try {
+                TL_EXEC.tick();
+            } catch (ExecutorException e) {
+                LOG.error("Cannot execute the solution", e);
+            }
+            break;
+        default:
+            break;
         }
     }
 
