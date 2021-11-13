@@ -646,9 +646,10 @@ namespace ratio
         {
             if (timelines_extractor *te = dynamic_cast<timelines_extractor *>(q.front()))
             {
-                const smt::array_val &te_tls = static_cast<smt::array_val &>(*te->extract_timelines());
-                for (size_t i = 0; i < te_tls.size(); ++i)
-                    tls.push_back(te_tls.get(i));
+                const auto c_tls = te->extract_timelines();
+                const smt::array_val &tls_array = static_cast<const smt::array_val &>(*c_tls);
+                for (size_t i = 0; i < tls_array.size(); ++i)
+                    tls.push_back(tls_array.get(i));
             }
             for (const auto &st : q.front()->get_types())
                 q.push(st.second);
