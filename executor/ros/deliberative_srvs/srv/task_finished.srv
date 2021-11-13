@@ -1,0 +1,6 @@
+# notifies the deliberative tier that a task has finished
+uint64 reasoner_id
+uint64 task_id
+bool success
+---
+bool ended
