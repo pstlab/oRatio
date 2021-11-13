@@ -11,7 +11,6 @@ import java.util.Set;
 
 import it.cnr.istc.pst.oratio.Item.EnumItem;
 import it.cnr.istc.pst.oratio.timelines.Agent;
-import it.cnr.istc.pst.oratio.timelines.PropositionalState;
 import it.cnr.istc.pst.oratio.timelines.ReusableResource;
 import it.cnr.istc.pst.oratio.timelines.StateVariable;
 import it.cnr.istc.pst.oratio.timelines.Timeline;
@@ -33,7 +32,6 @@ public class TimelinesList extends ArrayList<Timeline<?>> {
             BUILDERS.put(solver.getType("StateVariable"), StateVariable.BUILDER);
             BUILDERS.put(solver.getType("ReusableResource"), ReusableResource.BUILDER);
             BUILDERS.put(solver.getType("Agent"), Agent.BUILDER);
-            BUILDERS.put(solver.getType("PropositionalState"), PropositionalState.BUILDER);
         } catch (final ClassNotFoundException e) {
             e.printStackTrace();
         }

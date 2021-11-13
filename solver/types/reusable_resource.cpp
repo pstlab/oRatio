@@ -421,6 +421,7 @@ namespace ratio
         for (const auto &[rr, atms] : rr_instances)
         {
             json tl;
+            tl->set("id", new string_val(std::to_string(reinterpret_cast<std::uintptr_t>(rr))));
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
             tl->set("name", new string_val(get_core().guess_name(*rr)));
 #endif

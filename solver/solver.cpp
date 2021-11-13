@@ -18,7 +18,6 @@
 #include "state_variable.h"
 #include "reusable_resource.h"
 #include "agent.h"
-#include "propositional_state.h"
 #ifdef BUILD_LISTENERS
 #include "solver_listener.h"
 #endif
@@ -61,8 +60,7 @@ namespace ratio
         read(INIT_STRING);
         new_types({new state_variable(*this),
                    new reusable_resource(*this),
-                   new agent(*this),
-                   new propositional_state(*this)});
+                   new agent(*this)});
 
         FIRE_STATE_CHANGED();
     }
@@ -630,6 +628,7 @@ namespace ratio
         if (!starting_atoms.empty())
         {
             json slv_tl;
+            slv_tl->set("id", new string_val(std::to_string(reinterpret_cast<std::uintptr_t>(this))));
             slv_tl->set("name", new string_val("solver"));
             std::vector<json> j_atms;
             for (const auto &p : pulses)

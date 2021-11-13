@@ -367,6 +367,7 @@ namespace ratio
         for (const auto &[sv, atms] : sv_instances)
         {
             json tl;
+            tl->set("id", new string_val(std::to_string(reinterpret_cast<std::uintptr_t>(sv))));
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
             tl->set("name", new string_val(get_core().guess_name(*sv)));
 #endif
