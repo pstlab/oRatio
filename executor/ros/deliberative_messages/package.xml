@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>deliberative_msgs</name>
+  <name>deliberative_messages</name>
   <version>1.0.0</version>
   <description>Messages communicated by the deliberative tier</description>
 

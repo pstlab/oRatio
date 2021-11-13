@@ -1,19 +1,14 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(deliberative_srvs)
+project(deliberative_messages)
 
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS std_msgs message_generation)
 
-## Declare ROS services
-add_service_files(
+## Declare ROS messages
+add_message_files(
     FILES
-    can_start.srv
-    start_task.srv
-    end_task.srv
-    task_finished.srv
-    create_reasoner.srv
-    destroy_reasoner.srv
-    new_requirement.srv
+    deliberative_state.msg
+    timelines.msg
 )
 
 ## Generate added messages and services

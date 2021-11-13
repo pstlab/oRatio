@@ -2,9 +2,9 @@
 #include "deliberative_manager.h"
 #include "predicate.h"
 #include "atom.h"
-#include "msgs/deliberative_state.h"
-#include "msgs/can_start.h"
-#include "msgs/start_task.h"
+#include "deliberative_messages/deliberative_state.h"
+#include "deliberative_services/can_start.h"
+#include "deliberative_services/start_task.h"
 #include <ros/ros.h>
 
 using namespace ratio;
@@ -57,7 +57,7 @@ namespace sir
     void deliberative_executor::starting(const std::unordered_set<atom *> &atms)
     { // tell the executor the atoms which are not yet ready to start..
         std::unordered_set<ratio::atom *> dsy;
-        msgs::can_start cs_srv;
+        deliberative_services::can_start cs_srv;
         task t;
         for (const auto &atm : atms)
         {
@@ -74,7 +74,7 @@ namespace sir
     }
     void deliberative_executor::start(const std::unordered_set<atom *> &atms)
     { // these atoms are now started..
-        msgs::start_task st_srv;
+        deliberative_services::start_task st_srv;
         task t;
         for (const auto &atm : atms)
         {

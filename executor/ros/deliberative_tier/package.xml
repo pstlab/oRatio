@@ -13,6 +13,6 @@
   <build_depend>roscpp</build_depend>
   <exec_depend>roscpp</exec_depend>
   <build_depend>roslaunch</build_depend>
-  <depend>deliberative_msgs</depend>
-  <depend>deliberative_srvs</depend>
+  <depend>deliberative_messages</depend>
+  <depend>deliberative_services</depend>
 </package>

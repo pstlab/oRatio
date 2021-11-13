@@ -8,7 +8,7 @@ include(GNUInstallDirs)
 include(GenerateExportHeader)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp deliberative_msgs deliberative_srvs)
+find_package(catkin REQUIRED COMPONENTS roscpp deliberative_messages deliberative_services)
 
 ## Declare a catkin package
 catkin_package()
