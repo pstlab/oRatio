@@ -10,14 +10,7 @@ using namespace smt;
 
 namespace ratio
 {
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    agent::agent(solver &slv) : smart_type(slv, slv, AGENT_NAME), timelines_extractor(), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse"))
-#else
-    agent::agent(solver &slv) : smart_type(slv, slv, AGENT_NAME), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse"))
-#endif
-    {
-        new_constructors({new agnt_constructor(*this)});
-    }
+    agent::agent(solver &slv) : smart_type(slv, slv, AGENT_NAME), timelines_extractor(), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")) { new_constructors({new agnt_constructor(*this)}); }
 
     std::vector<std::vector<std::pair<lit, double>>> agent::get_current_incs()
     {
@@ -59,7 +52,6 @@ namespace ratio
     agent::agnt_atom_listener::~agnt_atom_listener() {}
     void agent::agnt_atom_listener::something_changed() { agnt.to_check.insert(&atm); }
 
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
     smt::json agent::extract_timelines() const noexcept
     {
         std::vector<json> tls;
@@ -81,7 +73,9 @@ namespace ratio
         for (const auto &[agnt, atms] : agnt_instances)
         {
             json tl;
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
             tl->set("name", new string_val(get_core().guess_name(*agnt)));
+#endif
 
             // for each pulse, the atoms starting at that pulse..
             std::map<inf_rational, std::set<atom *>> starting_atoms;
@@ -105,5 +99,4 @@ namespace ratio
         }
         return new array_val(tls);
     }
-#endif
 } // namespace ratio

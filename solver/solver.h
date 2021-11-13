@@ -43,11 +43,7 @@ namespace ratio
     ~solver_initializer();
   };
 
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
   class solver : public core, private solver_initializer, private smt::theory, public timelines_extractor
-#else
-  class solver : public core, private solver_initializer, private smt::theory
-#endif
   {
     friend class solver_initializer;
     friend class graph;
@@ -130,7 +126,6 @@ namespace ratio
 
     void reset_smart_types();
 
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
   public:
     SOLVER_EXPORT smt::json extract_timelines() const noexcept override;
 
@@ -142,7 +137,6 @@ namespace ratio
   private:
     const predicate &int_pred;
     const predicate &imp_pred;
-#endif
 
   private:
     struct layer

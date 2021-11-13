@@ -1,9 +1,7 @@
 #pragma once
 
 #include "smart_type.h"
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
 #include "timelines_extractor.h"
-#endif
 #include "constructor.h"
 #include "flaw.h"
 #include "resolver.h"
@@ -14,11 +12,7 @@ namespace ratio
 {
   class order_resolver;
 
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
   class state_variable final : public smart_type, public timelines_extractor
-#else
-  class state_variable final : public smart_type
-#endif
   {
     friend class order_resolver;
 
@@ -26,10 +20,6 @@ namespace ratio
     state_variable(solver &slv);
     state_variable(const state_variable &orig) = delete;
     ~state_variable();
-
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    smt::json extract_timelines() const noexcept override;
-#endif
 
   private:
     std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;
@@ -135,6 +125,9 @@ namespace ratio
       atom &atm; // applying the resolver will forbid this atom on the 'itm' item..
       item &itm; // applying the resolver will forbid the 'atm' atom on this item..
     };
+
+  public:
+    smt::json extract_timelines() const noexcept override;
 
   private:
     predicate &int_pred;

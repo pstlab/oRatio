@@ -22,9 +22,7 @@
 #ifdef BUILD_LISTENERS
 #include "solver_listener.h"
 #endif
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
 #include "timelines_extractor.h"
-#endif
 #include <algorithm>
 #include <math.h>
 #include <cassert>
@@ -41,13 +39,7 @@ namespace ratio
     solver_initializer::~solver_initializer() {}
 
     SOLVER_EXPORT solver::solver(const bool &i) : solver(HEURISTIC, i) {}
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    SOLVER_EXPORT solver::solver(graph &gr, const bool &i) : core(), solver_initializer(*this, i), theory(get_sat_core()), timelines_extractor(), int_pred(get_predicate("Interval")), imp_pred(get_predicate("Impulse")), gr(gr)
-#else
-    SOLVER_EXPORT solver::solver(graph &gr, const bool &i) : core(), solver_initializer(*this, i), theory(get_sat_core()), gr(gr)
-#endif
-    {
-    }
+    SOLVER_EXPORT solver::solver(graph &gr, const bool &i) : core(), solver_initializer(*this, i), theory(get_sat_core()), timelines_extractor(), int_pred(get_predicate("Interval")), imp_pred(get_predicate("Impulse")), gr(gr) {}
     SOLVER_EXPORT solver::~solver()
     {
         delete &gr;
@@ -617,7 +609,6 @@ namespace ratio
         }
     }
 
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
     SOLVER_EXPORT json solver::extract_timelines() const noexcept
     {
         std::vector<json> tls;
@@ -629,12 +620,13 @@ namespace ratio
         for ([[maybe_unused]] const auto &[p_name, p] : get_predicates())
             if (is_impulse(*p) || is_interval(*p))
                 for (const auto &atm : p->get_instances())
-                {
-                    arith_expr s_expr = is_impulse(*p) ? atm->get(AT) : atm->get(START);
-                    inf_rational start = arith_value(s_expr);
-                    starting_atoms[start].insert(dynamic_cast<atom *>(&*atm));
-                    pulses.insert(start);
-                }
+                    if (&atm->get_type().get_core() != this && bool_value(static_cast<atom &>(*atm).get_sigma()) == True)
+                    {
+                        arith_expr s_expr = is_impulse(*p) ? atm->get(AT) : atm->get(START);
+                        inf_rational start = arith_value(s_expr);
+                        starting_atoms[start].insert(dynamic_cast<atom *>(&*atm));
+                        pulses.insert(start);
+                    }
         if (!starting_atoms.empty())
         {
             json slv_tl;
@@ -659,6 +651,8 @@ namespace ratio
                 for (size_t i = 0; i < te_tls.size(); ++i)
                     tls.push_back(te_tls.get(i));
             }
+            for (const auto &st : q.front()->get_types())
+                q.push(st.second);
             q.pop();
         }
 
@@ -669,7 +663,6 @@ namespace ratio
     SOLVER_EXPORT bool solver::is_impulse(const atom &atm) const noexcept { return is_impulse(atm.get_type()); }
     SOLVER_EXPORT bool solver::is_interval(const type &pred) const noexcept { return int_pred.is_assignable_from(pred); }
     SOLVER_EXPORT bool solver::is_interval(const atom &atm) const noexcept { return is_interval(atm.get_type()); }
-#endif
 
 #ifdef BUILD_LISTENERS
     void solver::fire_new_flaw(const flaw &f) const

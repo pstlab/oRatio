@@ -1,9 +1,7 @@
 #pragma once
 
 #include "smart_type.h"
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
 #include "timelines_extractor.h"
-#endif
 #include "constructor.h"
 #include "predicate.h"
 
@@ -13,20 +11,12 @@
 
 namespace ratio
 {
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
   class propositional_state final : public smart_type, public timelines_extractor
-#else
-  class propositional_state final : public smart_type
-#endif
   {
   public:
     propositional_state(solver &slv);
     propositional_state(const propositional_state &orig) = delete;
     ~propositional_state();
-
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    smt::json extract_timelines() const noexcept override;
-#endif
 
   private:
     std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;
@@ -68,6 +58,9 @@ namespace ratio
     protected:
       propositional_state &ps;
     };
+
+  public:
+    smt::json extract_timelines() const noexcept override;
 
   private:
     predicate &int_pred;

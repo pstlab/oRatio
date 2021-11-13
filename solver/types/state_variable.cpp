@@ -10,14 +10,7 @@ using namespace smt;
 
 namespace ratio
 {
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME), timelines_extractor(), int_pred(slv.get_predicate("Interval"))
-#else
-    state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME), int_pred(slv.get_predicate("Interval"))
-#endif
-    {
-        new_constructors({new sv_constructor(*this)});
-    }
+    state_variable::state_variable(solver &slv) : smart_type(slv, slv, STATE_VARIABLE_NAME), timelines_extractor(), int_pred(slv.get_predicate("Interval")) { new_constructors({new sv_constructor(*this)}); }
     state_variable::~state_variable()
     {
         // we clear the atom listeners..
@@ -353,7 +346,6 @@ namespace ratio
 
     void state_variable::forbid_resolver::apply() { get_solver().get_sat_core().new_clause({!get_rho(), !get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
 
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
     smt::json state_variable::extract_timelines() const noexcept
     {
         std::vector<json> tls;
@@ -375,7 +367,9 @@ namespace ratio
         for (const auto &[sv, atms] : sv_instances)
         {
             json tl;
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
             tl->set("name", new string_val(get_core().guess_name(*sv)));
+#endif
 
             // for each pulse, the atoms starting at that pulse..
             std::map<inf_rational, std::set<atom *>> starting_atoms;
@@ -455,5 +449,4 @@ namespace ratio
 
         return new array_val(tls);
     }
-#endif
 } // namespace ratio

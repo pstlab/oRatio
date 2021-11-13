@@ -1,9 +1,7 @@
 #pragma once
 
 #include "smart_type.h"
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
 #include "timelines_extractor.h"
-#endif
 #include "constructor.h"
 #include "predicate.h"
 #include "flaw.h"
@@ -16,20 +14,12 @@
 
 namespace ratio
 {
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
   class reusable_resource final : public smart_type, public timelines_extractor
-#else
-  class reusable_resource final : public smart_type
-#endif
   {
   public:
     reusable_resource(solver &slv);
     reusable_resource(const reusable_resource &orig) = delete;
     ~reusable_resource();
-
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-    smt::json extract_timelines() const noexcept override;
-#endif
 
   private:
     std::vector<std::vector<std::pair<smt::lit, double>>> get_current_incs() override;
@@ -128,7 +118,7 @@ namespace ratio
     };
 
     // a resolver for forbidding atoms on a specific reusable-resource..
-    class forbid_resolver final: public resolver
+    class forbid_resolver final : public resolver
     {
     public:
       forbid_resolver(rr_flaw &flw, atom &atm, item &itm);
@@ -143,6 +133,9 @@ namespace ratio
       atom &atm; // applying the resolver will forbid this atom on the 'itm' item..
       item &itm; // applying the resolver will forbid the 'atm' atom on this item..
     };
+
+  public:
+    smt::json extract_timelines() const noexcept override;
 
   private:
     std::set<const item *> to_check;                          // the reusable-resource instances whose atoms have changed..

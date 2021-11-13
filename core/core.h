@@ -143,6 +143,7 @@ namespace ratio
 
     CORE_EXPORT expr get(const std::string &name) override;
 
+    CORE_EXPORT smt::lbool bool_value(const smt::var &x) const noexcept { return stack.value(x); }    // the current value of the given propositional variable..
     CORE_EXPORT smt::lbool bool_value(const bool_expr &x) const noexcept;                             // the current value of the given boolean expression..
     std::pair<smt::inf_rational, smt::inf_rational> arith_bounds(const arith_expr &x) const noexcept; // the current bounds of the given arith expression..
     CORE_EXPORT smt::inf_rational arith_value(const arith_expr &x) const noexcept;                    // the current value of the given arith expression..

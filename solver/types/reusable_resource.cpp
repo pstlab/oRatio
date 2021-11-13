@@ -12,11 +12,7 @@ using namespace smt;
 
 namespace ratio
 {
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
     reusable_resource::reusable_resource(solver &slv) : smart_type(slv, slv, REUSABLE_RESOURCE_NAME), timelines_extractor()
-#else
-    reusable_resource::reusable_resource(solver &slv) : smart_type(slv, slv, REUSABLE_RESOURCE_NAME)
-#endif
     {
         new_fields(*this, {new field(slv.get_type(STRING_KEYWORD), REUSABLE_RESOURCE_CAPACITY)}); // we add the 'capacity' field..
         new_constructors({new rr_constructor(*this)});                                            // we add a constructor..
@@ -404,7 +400,6 @@ namespace ratio
 
     void reusable_resource::forbid_resolver::apply() { get_solver().get_sat_core().new_clause({!get_rho(), !get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
 
-#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
     smt::json reusable_resource::extract_timelines() const noexcept
     {
         std::vector<json> tls;
@@ -426,7 +421,9 @@ namespace ratio
         for (const auto &[rr, atms] : rr_instances)
         {
             json tl;
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
             tl->set("name", new string_val(get_core().guess_name(*rr)));
+#endif
 
             // for each pulse, the atoms starting at that pulse..
             std::map<inf_rational, std::set<atom *>> starting_atoms;
@@ -524,5 +521,4 @@ namespace ratio
 
         return new array_val(tls);
     }
-#endif
 } // namespace ratio

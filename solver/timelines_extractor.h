@@ -2,6 +2,7 @@
 
 #include "solver_export.h"
 #include "json.h"
+#include <unordered_set>
 
 namespace ratio
 {
