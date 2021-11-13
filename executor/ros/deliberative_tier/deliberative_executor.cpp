@@ -6,6 +6,7 @@
 #include "deliberative_services/can_start.h"
 #include "deliberative_services/start_task.h"
 #include <ros/ros.h>
+#include <sstream>
 
 using namespace ratio;
 
@@ -35,6 +36,19 @@ namespace sir
     {
         ROS_DEBUG("[%lu] Solution found..", reasoner_id);
         set_state(Executing);
+
+        deliberative_messages::time timelines_msg;
+        timelines_msg.reasoner_id = reasoner_id;
+        const auto tls = slv.extract_timelines();
+        const smt::array_val &tls_array = static_cast<const smt::array_val &>(*tls);
+        for (size_t i = 0; i < tls_array.size(); ++i)
+        {
+            std::stringstream ss;
+            ss << tls_array.get(i);
+            timelines_msg.timelines.push_back(ss.str());
+        }
+
+        d_mngr.timelines.publish(timelines_msg);
     }
     void deliberative_executor::inconsistent_problem()
     {
@@ -45,6 +59,12 @@ namespace sir
     void deliberative_executor::tick(const smt::rational &time)
     {
         ROS_DEBUG("Current time: %s", to_string(time).c_str());
+        deliberative_messages::time time_msg;
+        time_msg.reasoner_id = reasoner_id;
+        time_msg.num = time.numerator();
+        time_msg.den = time.denominator();
+        d_mngr.time.publish(time_msg);
+
         arith_expr horizon = slv.get("horizon");
         if (slv.arith_value(horizon) <= exec.get_current_time() && current_tasks.empty())
         {

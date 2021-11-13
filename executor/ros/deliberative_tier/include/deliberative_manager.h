@@ -37,6 +37,8 @@ namespace sir
     ros::ServiceServer new_requirement_server;
     ros::ServiceServer task_finished_server;
     ros::Publisher notify_state;
+    ros::Publisher notify_timelines;
+    ros::Publisher notify_time;
     ros::ServiceClient can_start;
     ros::ServiceClient start_task;
     std::unordered_map<uint64_t, deliberative_executor *> executors;

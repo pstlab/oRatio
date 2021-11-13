@@ -9,6 +9,7 @@ add_message_files(
     FILES
     deliberative_state.msg
     timelines.msg
+    time.msg
 )
 
 ## Generate added messages and services
