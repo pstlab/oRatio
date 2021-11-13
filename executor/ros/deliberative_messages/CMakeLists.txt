@@ -8,6 +8,15 @@ find_package(catkin REQUIRED COMPONENTS std_msgs message_generation)
 add_message_files(
     FILES
     deliberative_state.msg
+    flaw_created.msg
+    flaw_state_changed.msg
+    flaw_cost_changed.msg
+    flaw_position_changed.msg
+    current_flaw.msg
+    resolver_created.msg
+    resolver_state_changed.msg
+    current_resolver.msg
+    causal_link_added.msg
     timelines.msg
     time.msg
 )
