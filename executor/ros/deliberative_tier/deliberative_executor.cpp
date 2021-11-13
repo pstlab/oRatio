@@ -119,7 +119,7 @@ namespace sir
     void deliberative_executor::set_state(const executor_state &st)
     {
         state = st;
-        msgs::deliberative_state state_msg;
+        deliberative_messages::deliberative_state state_msg;
         state_msg.reasoner_id = reasoner_id;
         state_msg.deliberative_state = st;
         d_mngr.notify_state.publish(state_msg);
