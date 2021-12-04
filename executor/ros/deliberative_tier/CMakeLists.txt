@@ -13,12 +13,12 @@ find_package(catkin REQUIRED COMPONENTS roscpp deliberative_messages deliberativ
 ## Declare a catkin package
 catkin_package()
 
-add_subdirectory(../../../smt)
-add_subdirectory(../../../smt/json)
-add_subdirectory(../../../riddle)
-add_subdirectory(../../../core)
-add_subdirectory(../../../solver)
-add_subdirectory(../../../executor)
+add_subdirectory(../../../smt ${CMAKE_INSTALL_BINDIR}/smt)
+add_subdirectory(../../../smt/json ${CMAKE_INSTALL_BINDIR}/smt/json)
+add_subdirectory(../../../riddle ${CMAKE_INSTALL_BINDIR}/riddle)
+add_subdirectory(../../../core ${CMAKE_INSTALL_BINDIR}/core)
+add_subdirectory(../../../solver ${CMAKE_INSTALL_BINDIR}/solver)
+add_subdirectory(../../../executor ${CMAKE_INSTALL_BINDIR}/executor)
 target_compile_definitions(core PUBLIC BUILD_LISTENERS)
 target_compile_definitions(solver PUBLIC BUILD_LISTENERS BUILD_EXECUTOR)
 

@@ -1,6 +1,8 @@
 #include "deliberative_manager.h"
 #include "deliberative_executor.h"
 #include "deliberative_messages/deliberative_state.h"
+#include "deliberative_messages/time.h"
+#include "deliberative_messages/timelines.h"
 #include "deliberative_services/can_start.h"
 #include "deliberative_services/start_task.h"
 
@@ -12,7 +14,7 @@ namespace sir
                                                                      new_requirement_server(h.advertiseService("new_requirement", &deliberative_manager::new_requirement, this)),
                                                                      task_finished_server(h.advertiseService("task_finished", &deliberative_manager::task_finished, this)),
                                                                      notify_state(handle.advertise<deliberative_messages::deliberative_state>("deliberative_state", 10, true)),
-                                                                     notify_timeline(handle.advertise<deliberative_messages::timelines>("timelines", 10, true)),
+                                                                     notify_timelines(handle.advertise<deliberative_messages::timelines>("timelines", 10, true)),
                                                                      notify_time(handle.advertise<deliberative_messages::time>("time", 10, true)),
                                                                      can_start(h.serviceClient<deliberative_services::can_start>("can_start")),
                                                                      start_task(h.serviceClient<deliberative_services::start_task>("start_task"))

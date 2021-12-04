@@ -3,6 +3,8 @@
 #include "predicate.h"
 #include "atom.h"
 #include "deliberative_messages/deliberative_state.h"
+#include "deliberative_messages/time.h"
+#include "deliberative_messages/timelines.h"
 #include "deliberative_services/can_start.h"
 #include "deliberative_services/start_task.h"
 #include <ros/ros.h>
@@ -37,7 +39,7 @@ namespace sir
         ROS_DEBUG("[%lu] Solution found..", reasoner_id);
         set_state(Executing);
 
-        deliberative_messages::time timelines_msg;
+        deliberative_messages::timelines timelines_msg;
         timelines_msg.reasoner_id = reasoner_id;
         const auto tls = slv.extract_timelines();
         const smt::array_val &tls_array = static_cast<const smt::array_val &>(*tls);
@@ -48,7 +50,7 @@ namespace sir
             timelines_msg.timelines.push_back(ss.str());
         }
 
-        d_mngr.timelines.publish(timelines_msg);
+        d_mngr.notify_timelines.publish(timelines_msg);
     }
     void deliberative_executor::inconsistent_problem()
     {
@@ -63,7 +65,7 @@ namespace sir
         time_msg.reasoner_id = reasoner_id;
         time_msg.num = time.numerator();
         time_msg.den = time.denominator();
-        d_mngr.time.publish(time_msg);
+        d_mngr.notify_time.publish(time_msg);
 
         arith_expr horizon = slv.get("horizon");
         if (slv.arith_value(horizon) <= exec.get_current_time() && current_tasks.empty())

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>deliberative_srvs</name>
+  <name>deliberative_services</name>
   <version>1.0.0</version>
   <description>Services for communicating with the deliberative tier</description>
 
