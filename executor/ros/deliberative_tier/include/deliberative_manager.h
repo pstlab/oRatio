@@ -1,9 +1,9 @@
 #pragma once
 
-#include "deliberative_services/create_reasoner.h"
-#include "deliberative_services/destroy_reasoner.h"
-#include "deliberative_services/task_finished.h"
-#include "deliberative_services/new_requirement.h"
+#include "deliberative_tier/create_reasoner.h"
+#include "deliberative_tier/destroy_reasoner.h"
+#include "deliberative_tier/task_finished.h"
+#include "deliberative_tier/new_requirement.h"
 #include <ros/ros.h>
 #include <unordered_map>
 #include <queue>
@@ -25,10 +25,10 @@ namespace sir
     void tick();
 
   private:
-    bool create_reasoner(deliberative_services::create_reasoner::Request &req, deliberative_services::create_reasoner::Response &res);
-    bool destroy_reasoner(deliberative_services::destroy_reasoner::Request &req, deliberative_services::destroy_reasoner::Response &res);
-    bool new_requirement(deliberative_services::new_requirement::Request &req, deliberative_services::new_requirement::Response &res);
-    bool task_finished(deliberative_services::task_finished::Request &req, deliberative_services::task_finished::Response &res);
+    bool create_reasoner(deliberative_tier::create_reasoner::Request &req, deliberative_tier::create_reasoner::Response &res);
+    bool destroy_reasoner(deliberative_tier::destroy_reasoner::Request &req, deliberative_tier::destroy_reasoner::Response &res);
+    bool new_requirement(deliberative_tier::new_requirement::Request &req, deliberative_tier::new_requirement::Response &res);
+    bool task_finished(deliberative_tier::task_finished::Request &req, deliberative_tier::task_finished::Response &res);
 
   private:
     ros::NodeHandle &handle;

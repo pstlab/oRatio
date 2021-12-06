@@ -2,11 +2,11 @@
 #include "deliberative_manager.h"
 #include "predicate.h"
 #include "atom.h"
-#include "deliberative_messages/deliberative_state.h"
-#include "deliberative_messages/time.h"
-#include "deliberative_messages/timelines.h"
-#include "deliberative_services/can_start.h"
-#include "deliberative_services/start_task.h"
+#include "deliberative_tier/deliberative_state.h"
+#include "deliberative_tier/time.h"
+#include "deliberative_tier/timelines.h"
+#include "deliberative_tier/can_start.h"
+#include "deliberative_tier/start_task.h"
 #include <ros/ros.h>
 #include <sstream>
 
@@ -39,7 +39,7 @@ namespace sir
         ROS_DEBUG("[%lu] Solution found..", reasoner_id);
         set_state(Executing);
 
-        deliberative_messages::timelines timelines_msg;
+        deliberative_tier::timelines timelines_msg;
         timelines_msg.reasoner_id = reasoner_id;
         const auto tls = slv.extract_timelines();
         const smt::array_val &tls_array = static_cast<const smt::array_val &>(*tls);
@@ -61,7 +61,7 @@ namespace sir
     void deliberative_executor::tick(const smt::rational &time)
     {
         ROS_DEBUG("Current time: %s", to_string(time).c_str());
-        deliberative_messages::time time_msg;
+        deliberative_tier::time time_msg;
         time_msg.reasoner_id = reasoner_id;
         time_msg.num = time.numerator();
         time_msg.den = time.denominator();
@@ -79,7 +79,7 @@ namespace sir
     void deliberative_executor::starting(const std::unordered_set<atom *> &atms)
     { // tell the executor the atoms which are not yet ready to start..
         std::unordered_set<ratio::atom *> dsy;
-        deliberative_services::can_start cs_srv;
+        deliberative_tier::can_start cs_srv;
         task t;
         for (const auto &atm : atms)
         {
@@ -96,7 +96,7 @@ namespace sir
     }
     void deliberative_executor::start(const std::unordered_set<atom *> &atms)
     { // these atoms are now started..
-        deliberative_services::start_task st_srv;
+        deliberative_tier::start_task st_srv;
         task t;
         for (const auto &atm : atms)
         {
@@ -141,7 +141,7 @@ namespace sir
     void deliberative_executor::set_state(const executor_state &st)
     {
         state = st;
-        deliberative_messages::deliberative_state state_msg;
+        deliberative_tier::deliberative_state state_msg;
         state_msg.reasoner_id = reasoner_id;
         state_msg.deliberative_state = st;
         d_mngr.notify_state.publish(state_msg);

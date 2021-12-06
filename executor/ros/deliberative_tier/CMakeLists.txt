@@ -8,7 +8,39 @@ include(GNUInstallDirs)
 include(GenerateExportHeader)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp deliberative_messages deliberative_services)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation)
+
+## Declare ROS messages
+add_message_files(
+    FILES
+    deliberative_state.msg
+    flaw_created.msg
+    flaw_state_changed.msg
+    flaw_cost_changed.msg
+    flaw_position_changed.msg
+    current_flaw.msg
+    resolver_created.msg
+    resolver_state_changed.msg
+    current_resolver.msg
+    causal_link_added.msg
+    timelines.msg
+    time.msg
+)
+
+## Declare ROS services
+add_service_files(
+    FILES
+    can_start.srv
+    start_task.srv
+    end_task.srv
+    task_finished.srv
+    create_reasoner.srv
+    destroy_reasoner.srv
+    new_requirement.srv
+)
+
+## Generate added messages and services
+generate_messages(DEPENDENCIES std_msgs)
 
 ## Declare a catkin package
 catkin_package()
