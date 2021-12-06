@@ -5,6 +5,7 @@
 #include "deliberative_tier/timelines.h"
 #include "deliberative_tier/can_start.h"
 #include "deliberative_tier/start_task.h"
+#include "std_msgs/UInt64.h"
 
 namespace sir
 {
@@ -13,6 +14,8 @@ namespace sir
                                                                      destroy_reasoner_server(h.advertiseService("destroy_reasoner", &deliberative_manager::destroy_reasoner, this)),
                                                                      new_requirement_server(h.advertiseService("new_requirement", &deliberative_manager::new_requirement, this)),
                                                                      task_finished_server(h.advertiseService("task_finished", &deliberative_manager::task_finished, this)),
+                                                                     reasoner_created(handle.advertise<std_msgs::UInt64>("reasoner_created", 10, true)),
+                                                                     reasoner_destroyed(handle.advertise<std_msgs::UInt64>("reasoner_destroyed", 10, true)),
                                                                      notify_state(handle.advertise<deliberative_tier::deliberative_state>("deliberative_state", 10, true)),
                                                                      notify_timelines(handle.advertise<deliberative_tier::timelines>("timelines", 10, true)),
                                                                      notify_time(handle.advertise<deliberative_tier::time>("time", 10, true)),
@@ -62,6 +65,10 @@ namespace sir
                 pending_requirements[req.reasoner_id].push(r);
 
             res.created = true;
+
+            std_msgs::UInt64 r_created_msg;
+            r_created_msg.data = req.reasoner_id;
+            reasoner_created.publish(r_created_msg);
         }
         return true;
     }
@@ -78,6 +85,10 @@ namespace sir
         {
             executors.erase(req.reasoner_id);
             res.destroyed = true;
+
+            std_msgs::UInt64 r_destroyed_msg;
+            r_destroyed_msg.data = req.reasoner_id;
+            reasoner_destroyed.publish(r_destroyed_msg);
         }
         return true;
     }

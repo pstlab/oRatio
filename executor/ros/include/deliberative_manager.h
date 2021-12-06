@@ -36,6 +36,8 @@ namespace sir
     ros::ServiceServer destroy_reasoner_server;
     ros::ServiceServer new_requirement_server;
     ros::ServiceServer task_finished_server;
+    ros::Publisher reasoner_created;
+    ros::Publisher reasoner_destroyed;
     ros::Publisher notify_state;
     ros::Publisher notify_timelines;
     ros::Publisher notify_time;
