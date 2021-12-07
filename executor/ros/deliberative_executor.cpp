@@ -10,9 +10,7 @@
 #include <ros/ros.h>
 #include <sstream>
 
-using namespace ratio;
-
-namespace sir
+namespace ratio
 {
     deliberative_executor::deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, const std::vector<std::string> &relevant_predicates) : d_mngr(d_mngr), reasoner_id(id), slv(), exec(slv, relevant_predicates), dcl(*this), del(*this)
     {
@@ -176,4 +174,4 @@ namespace sir
             }
         return {task_id, task_name, par_names, par_values};
     }
-} // namespace sir
+} // namespace ratio

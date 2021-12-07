@@ -2,7 +2,7 @@
 
 #include "executor_listener.h"
 
-namespace sir
+namespace ratio
 {
   class deliberative_manager;
 
@@ -21,6 +21,7 @@ namespace sir
     deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, const std::vector<std::string> &relevant_predicates = {});
     ~deliberative_executor();
 
+    uint64_t get_reasoner_id() { return reasoner_id; }
     ratio::solver &get_solver() { return slv; }
     ratio::executor &get_executor() { return exec; }
 
@@ -95,4 +96,4 @@ namespace sir
     executor_state state = Idle;
     std::unordered_map<smt::var, ratio::atom *> current_tasks;
   };
-} // namespace sir
+} // namespace ratio

@@ -1,5 +1,6 @@
 #include "deliberative_manager.h"
 #include "deliberative_executor.h"
+#include "deliberative_solver_listener.h"
 #include "deliberative_tier/deliberative_state.h"
 #include "deliberative_tier/time.h"
 #include "deliberative_tier/timelines.h"
@@ -7,7 +8,7 @@
 #include "deliberative_tier/start_task.h"
 #include "std_msgs/UInt64.h"
 
-namespace sir
+namespace ratio
 {
     deliberative_manager::deliberative_manager(ros::NodeHandle &h) : handle(h),
                                                                      create_reasoner_server(h.advertiseService("create_reasoner", &deliberative_manager::create_reasoner, this)),
@@ -61,6 +62,8 @@ namespace sir
             relevant_predicates.insert(relevant_predicates.end(), req.notify_start.begin(), req.notify_start.end());
 
             executors[req.reasoner_id] = new deliberative_executor(*this, req.reasoner_id, req.domain_files, relevant_predicates);
+            listeners[req.reasoner_id] = new deliberative_solver_listener(*this, *executors.at(req.reasoner_id));
+
             for (const auto &r : req.requirements)
                 pending_requirements[req.reasoner_id].push(r);
 
@@ -83,6 +86,7 @@ namespace sir
         }
         else
         {
+            listeners.erase(req.reasoner_id);
             executors.erase(req.reasoner_id);
             res.destroyed = true;
 
@@ -124,4 +128,4 @@ namespace sir
         }
         return true;
     }
-} // namespace sir
+} // namespace ratio

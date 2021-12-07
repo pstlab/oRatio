@@ -1,10 +1,9 @@
 #include "deliberative_manager.h"
-#include "solver.h"
-#include "executor.h"
+#include "deliberative_solver_listener.h"
 #include <thread>
 #include <chrono>
 
-using namespace sir;
+using namespace ratio;
 
 // the duration of each tick in milliseconds..
 constexpr size_t tick_duration = 1000;
