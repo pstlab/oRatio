@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation)
 ## Declare ROS messages
 add_message_files(
     FILES
+    rational.msg
     deliberative_state.msg
     flaw_created.msg
     flaw_state_changed.msg

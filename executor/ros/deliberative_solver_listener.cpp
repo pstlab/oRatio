@@ -58,7 +58,7 @@ namespace ratio
         fcc_msg.reasoner_id = d_exec.get_reasoner_id();
         fcc_msg.flaw_id = reinterpret_cast<std::uintptr_t>(&f);
         const auto est_cost = f.get_estimated_cost();
-        fcc_msg.cost_num = est_cost.numerator(), fcc_msg.cost_den = est_cost.denominator();
+        fcc_msg.cost.num = est_cost.numerator(), fcc_msg.cost.den = est_cost.denominator();
         flaw_cost_changed_pub.publish(fcc_msg);
     }
     void deliberative_solver_listener::flaw_position_changed(const flaw &f)
@@ -87,7 +87,7 @@ namespace ratio
         rc_msg.label = r.get_label();
         rc_msg.state = slv.get_sat_core().value(r.get_rho());
         const auto est_cost = r.get_estimated_cost();
-        rc_msg.cost_num = est_cost.numerator(), rc_msg.cost_den = est_cost.denominator();
+        rc_msg.cost.num = est_cost.numerator(), rc_msg.cost.den = est_cost.denominator();
         resolver_created_pub.publish(rc_msg);
     }
     void deliberative_solver_listener::resolver_state_changed(const resolver &r)

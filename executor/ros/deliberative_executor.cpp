@@ -61,8 +61,8 @@ namespace ratio
         ROS_DEBUG("Current time: %s", to_string(time).c_str());
         deliberative_tier::time time_msg;
         time_msg.reasoner_id = reasoner_id;
-        time_msg.num = time.numerator();
-        time_msg.den = time.denominator();
+        time_msg.time.num = time.numerator();
+        time_msg.time.den = time.denominator();
         d_mngr.notify_time.publish(time_msg);
 
         arith_expr horizon = slv.get("horizon");
