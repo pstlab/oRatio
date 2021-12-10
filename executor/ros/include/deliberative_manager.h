@@ -11,7 +11,7 @@
 namespace ratio
 {
   class deliberative_executor;
-  class deliberative_solver_listener;
+  class deliberative_listener;
 
   class deliberative_manager
   {
@@ -46,6 +46,6 @@ namespace ratio
     ros::ServiceClient start_task;
     std::unordered_map<uint64_t, deliberative_executor *> executors;
     std::unordered_map<uint64_t, std::queue<std::string>> pending_requirements;
-    std::unordered_map<uint64_t, deliberative_solver_listener *> listeners;
+    std::unordered_map<uint64_t, deliberative_listener *> listeners;
   };
 } // namespace ratio

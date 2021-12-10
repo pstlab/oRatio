@@ -8,11 +8,11 @@ namespace ratio
   class deliberative_manager;
   class deliberative_executor;
 
-  class deliberative_solver_listener : public solver_listener
+  class deliberative_listener : public solver_listener
   {
   public:
-    deliberative_solver_listener(deliberative_manager &d_mngr, deliberative_executor &d_exec);
-    ~deliberative_solver_listener();
+    deliberative_listener(deliberative_manager &d_mngr, deliberative_executor &d_exec);
+    ~deliberative_listener();
 
   private:
     void flaw_created(const flaw &f) override;

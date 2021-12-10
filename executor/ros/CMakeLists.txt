@@ -13,19 +13,13 @@ find_package(catkin REQUIRED COMPONENTS roscpp std_msgs message_generation)
 ## Declare ROS messages
 add_message_files(
     FILES
-    rational.msg
     deliberative_state.msg
-    flaw_created.msg
-    flaw_state_changed.msg
-    flaw_cost_changed.msg
-    flaw_position_changed.msg
-    current_flaw.msg
-    resolver_created.msg
-    resolver_state_changed.msg
-    current_resolver.msg
-    causal_link_added.msg
+    rational.msg
+    position.msg
+    flaw.msg
+    resolver.msg
+    graph.msg
     timelines.msg
-    time.msg
 )
 
 ## Declare ROS services
@@ -55,7 +49,7 @@ add_subdirectory(../../executor ${CMAKE_INSTALL_BINDIR}/executor)
 target_compile_definitions(core PUBLIC BUILD_LISTENERS)
 target_compile_definitions(solver PUBLIC BUILD_LISTENERS BUILD_EXECUTOR)
 
-add_executable(${PROJECT_NAME} main.cpp deliberative_manager.cpp deliberative_executor.cpp deliberative_solver_listener.cpp)
+add_executable(${PROJECT_NAME} main.cpp deliberative_manager.cpp deliberative_executor.cpp deliberative_listener.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include ${catkin_INCLUDE_DIRS} solver executor)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} json smt core riddle solver executor)
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

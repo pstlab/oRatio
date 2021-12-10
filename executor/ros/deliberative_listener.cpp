@@ -1,4 +1,4 @@
-#include "deliberative_solver_listener.h"
+#include "deliberative_listener.h"
 #include "deliberative_manager.h"
 #include "deliberative_executor.h"
 #include "deliberative_tier/flaw_created.h"
@@ -15,7 +15,7 @@ using namespace ratio;
 
 namespace ratio
 {
-    deliberative_solver_listener::deliberative_solver_listener(deliberative_manager &d_mngr, deliberative_executor &d_exec) : solver_listener(d_exec.get_solver()),
+    deliberative_listener::deliberative_listener(deliberative_manager &d_mngr, deliberative_executor &d_exec) : solver_listener(d_exec.get_solver()),
                                                                                                                               d_mngr(d_mngr),
                                                                                                                               d_exec(d_exec),
                                                                                                                               flaw_created_pub(d_mngr.get_handle().advertise<deliberative_tier::flaw_created>("flaw_created", 10, true)),
@@ -29,9 +29,9 @@ namespace ratio
                                                                                                                               causal_link_added_pub(d_mngr.get_handle().advertise<deliberative_tier::causal_link_added>("causal_link_added", 10, true))
     {
     }
-    deliberative_solver_listener::~deliberative_solver_listener() {}
+    deliberative_listener::~deliberative_listener() {}
 
-    void deliberative_solver_listener::flaw_created(const flaw &f)
+    void deliberative_listener::flaw_created(const flaw &f)
     {
         deliberative_tier::flaw_created fc_msg;
         fc_msg.reasoner_id = d_exec.get_reasoner_id();
@@ -44,7 +44,7 @@ namespace ratio
         fc_msg.lb = lb, fc_msg.ub = ub;
         flaw_created_pub.publish(fc_msg);
     }
-    void deliberative_solver_listener::flaw_state_changed(const flaw &f)
+    void deliberative_listener::flaw_state_changed(const flaw &f)
     {
         deliberative_tier::flaw_state_changed fsc_msg;
         fsc_msg.reasoner_id = d_exec.get_reasoner_id();
@@ -52,7 +52,7 @@ namespace ratio
         fsc_msg.state = slv.get_sat_core().value(f.get_phi());
         flaw_state_changed_pub.publish(fsc_msg);
     }
-    void deliberative_solver_listener::flaw_cost_changed(const flaw &f)
+    void deliberative_listener::flaw_cost_changed(const flaw &f)
     {
         deliberative_tier::flaw_cost_changed fcc_msg;
         fcc_msg.reasoner_id = d_exec.get_reasoner_id();
@@ -61,16 +61,16 @@ namespace ratio
         fcc_msg.cost.num = est_cost.numerator(), fcc_msg.cost.den = est_cost.denominator();
         flaw_cost_changed_pub.publish(fcc_msg);
     }
-    void deliberative_solver_listener::flaw_position_changed(const flaw &f)
+    void deliberative_listener::flaw_position_changed(const flaw &f)
     {
         deliberative_tier::flaw_position_changed fpc_msg;
         fpc_msg.reasoner_id = d_exec.get_reasoner_id();
         fpc_msg.flaw_id = reinterpret_cast<std::uintptr_t>(&f);
         const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
-        fpc_msg.lb = lb, fpc_msg.ub = ub;
+        fpc_msg.pos.lb = lb, fpc_msg.pos.ub = ub;
         flaw_position_changed_pub.publish(fpc_msg);
     }
-    void deliberative_solver_listener::current_flaw(const flaw &f)
+    void deliberative_listener::current_flaw(const flaw &f)
     {
         deliberative_tier::current_flaw cf_msg;
         cf_msg.reasoner_id = d_exec.get_reasoner_id();
@@ -78,7 +78,7 @@ namespace ratio
         current_flaw_pub.publish(cf_msg);
     }
 
-    void deliberative_solver_listener::resolver_created(const resolver &r)
+    void deliberative_listener::resolver_created(const resolver &r)
     {
         deliberative_tier::resolver_created rc_msg;
         rc_msg.reasoner_id = d_exec.get_reasoner_id();
@@ -90,7 +90,7 @@ namespace ratio
         rc_msg.cost.num = est_cost.numerator(), rc_msg.cost.den = est_cost.denominator();
         resolver_created_pub.publish(rc_msg);
     }
-    void deliberative_solver_listener::resolver_state_changed(const resolver &r)
+    void deliberative_listener::resolver_state_changed(const resolver &r)
     {
         deliberative_tier::resolver_state_changed rsc_msg;
         rsc_msg.reasoner_id = d_exec.get_reasoner_id();
@@ -98,7 +98,7 @@ namespace ratio
         rsc_msg.state = slv.get_sat_core().value(r.get_rho());
         resolver_state_changed_pub.publish(rsc_msg);
     }
-    void deliberative_solver_listener::current_resolver(const resolver &r)
+    void deliberative_listener::current_resolver(const resolver &r)
     {
         deliberative_tier::current_resolver cr_msg;
         cr_msg.reasoner_id = d_exec.get_reasoner_id();
@@ -106,7 +106,7 @@ namespace ratio
         current_resolver_pub.publish(cr_msg);
     }
 
-    void deliberative_solver_listener::causal_link_added(const flaw &f, const resolver &r)
+    void deliberative_listener::causal_link_added(const flaw &f, const resolver &r)
     {
         deliberative_tier::causal_link_added cl_msg;
         cl_msg.reasoner_id = d_exec.get_reasoner_id();
