@@ -14,7 +14,11 @@ namespace smt
 
     json &json::operator=(const json &t)
     {
+        if (this == &t)
+            return *this;
+
         t.ptr->ref_count++;
+        ptr = t.ptr;
         return *this;
     }
     JSON_EXPORT void json::to_json(std::ostream &os) const noexcept { ptr->to_json(os); }

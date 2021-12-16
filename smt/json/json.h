@@ -34,7 +34,7 @@ namespace smt
     JSON_EXPORT friend std::ostream &operator<<(std::ostream &os, const json &j);
 
   private:
-    json_core *const ptr;
+    json_core * ptr;
   };
 
   class json_core
@@ -50,6 +50,14 @@ namespace smt
     inline bool has(const std::string &id) const noexcept { return vals.count(id); }
     inline json &get(const std::string &id) noexcept { return vals.at(id); }
     inline void set(const std::string &id, const json &val) noexcept { vals.emplace(id, val); }
+
+    virtual bool is_null() const noexcept { return false; }
+    virtual bool is_bool() const noexcept { return false; }
+    virtual bool is_long() const noexcept { return false; }
+    virtual bool is_double() const noexcept { return false; }
+    virtual bool is_object() const noexcept { return false; }
+    virtual bool is_array() const noexcept { return false; }
+    virtual bool is_string() const noexcept { return false; }
 
     JSON_EXPORT void set_null(const std::string &id);
 
@@ -68,6 +76,8 @@ namespace smt
     JSON_EXPORT ~null_val() = default;
 
     void to_json(std::ostream &os) const noexcept override;
+
+    bool is_null() const noexcept override { return true; }
   };
 
   class bool_val : public json_core
@@ -79,6 +89,8 @@ namespace smt
 
     inline bool get() const noexcept { return val; }
     inline void set(const bool &v) noexcept { val = v; }
+
+    bool is_bool() const noexcept override { return true; }
 
     bool operator*() const noexcept { return val; }
 
@@ -98,6 +110,8 @@ namespace smt
     inline std::string get() const noexcept { return val; }
     inline void set(const std::string &v) noexcept { val = v; }
 
+    bool is_string() const noexcept override { return true; }
+
     std::string operator*() const noexcept { return val; }
 
     void to_json(std::ostream &os) const noexcept override;
@@ -116,6 +130,8 @@ namespace smt
     inline long get() const noexcept { return val; }
     inline void set(const long &v) noexcept { val = v; }
 
+    bool is_long() const noexcept override { return true; }
+
     long operator*() const noexcept { return val; }
 
     void to_json(std::ostream &os) const noexcept override;
@@ -133,6 +149,8 @@ namespace smt
 
     inline double get() const noexcept { return val; }
     inline void set(const double &v) noexcept { val = v; }
+
+    bool is_double() const noexcept override { return true; }
 
     double operator*() const noexcept { return val; }
 
@@ -153,6 +171,8 @@ namespace smt
 
     inline json get(const size_t &i) const noexcept { return vals.at(i); }
     inline void set(const size_t &i, const json val) noexcept { vals[i] = val; }
+
+    bool is_array() const noexcept override { return true; }
 
     void to_json(std::ostream &os) const noexcept override;
 
