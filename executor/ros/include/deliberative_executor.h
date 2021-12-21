@@ -6,17 +6,10 @@ namespace ratio
 {
   class deliberative_manager;
 
-  enum executor_state
-  {
-    Idle,
-    Reasoning,
-    Executing,
-    Finished,
-    Inconsistent
-  };
-
   class deliberative_executor
   {
+    friend class deliberative_manager;
+
   public:
     deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, const std::vector<std::string> &relevant_predicates = {});
     ~deliberative_executor();
@@ -28,19 +21,7 @@ namespace ratio
     void finish_task(const smt::var &id, const bool &success = true);
 
   private:
-    void started_solving();
-    void solution_found();
-    void inconsistent_problem();
-
-    void tick(const smt::rational &time);
-
-    void starting(const std::unordered_set<ratio::atom *> &);
-    void start(const std::unordered_set<ratio::atom *> &);
-
-    void ending(const std::unordered_set<ratio::atom *> &);
-    void end(const std::unordered_set<ratio::atom *> &);
-
-    void set_state(const executor_state &state);
+    void set_state(const unsigned int &state);
 
     struct task
     {
@@ -50,7 +31,7 @@ namespace ratio
       std::vector<std::string> par_values;
     };
 
-    task to_task(const ratio::atom &atm) const;
+    static task to_task(const ratio::atom &atm);
 
     class deliberative_core_listener : public ratio::core_listener
     {
@@ -59,9 +40,9 @@ namespace ratio
       ~deliberative_core_listener() {}
 
     private:
-      void started_solving() override { exec.started_solving(); }
-      void solution_found() override { exec.solution_found(); }
-      void inconsistent_problem() override { exec.inconsistent_problem(); }
+      void started_solving() override;
+      void solution_found() override;
+      void inconsistent_problem() override;
 
     private:
       deliberative_executor &exec;
@@ -74,13 +55,36 @@ namespace ratio
       ~deliberative_executor_listener() {}
 
     private:
-      void tick(const smt::rational &time) override { exec.tick(time); }
+      void tick(const smt::rational &time) override;
 
-      void starting(const std::unordered_set<ratio::atom *> &atms) override { exec.starting(atms); }
-      void start(const std::unordered_set<ratio::atom *> &atms) override { exec.start(atms); }
+      void starting(const std::unordered_set<ratio::atom *> &atms) override;
+      void start(const std::unordered_set<ratio::atom *> &atms) override;
 
-      void ending(const std::unordered_set<ratio::atom *> &atms) override { exec.ending(atms); }
-      void end(const std::unordered_set<ratio::atom *> &atms) override { exec.end(atms); }
+      void ending(const std::unordered_set<ratio::atom *> &atms) override;
+      void end(const std::unordered_set<ratio::atom *> &atms) override;
+
+    private:
+      deliberative_executor &exec;
+    };
+
+    class deliberative_solver_listener : public ratio::solver_listener
+    {
+    public:
+      deliberative_solver_listener(deliberative_executor &de) : exec(de), solver_listener(de.get_solver()) {}
+      ~deliberative_solver_listener() {}
+
+    private:
+      void flaw_created(const flaw &f) override;
+      void flaw_state_changed(const flaw &f) override;
+      void flaw_cost_changed(const flaw &f) override;
+      void flaw_position_changed(const flaw &f) override;
+      void current_flaw(const flaw &f) override;
+
+      void resolver_created(const resolver &r) override;
+      void resolver_state_changed(const resolver &r) override;
+      void current_resolver(const resolver &r) override;
+
+      void causal_link_added(const flaw &f, const resolver &r) override;
 
     private:
       deliberative_executor &exec;
@@ -92,8 +96,13 @@ namespace ratio
     ratio::solver slv;
     ratio::executor exec;
     deliberative_core_listener dcl;
+    deliberative_solver_listener dsl;
     deliberative_executor_listener del;
-    executor_state state = Idle;
+    unsigned int state = -1;
     std::unordered_map<smt::var, ratio::atom *> current_tasks;
+    std::unordered_set<flaw const *> flaws;
+    std::unordered_set<resolver const *> resolvers;
+    flaw const *current_flaw = nullptr;
+    resolver const *current_resolver = nullptr;
   };
 } // namespace ratio

@@ -1,6 +1,5 @@
 #include "deliberative_manager.h"
 #include "deliberative_executor.h"
-#include "deliberative_listener.h"
 #include "deliberative_tier/deliberative_state.h"
 #include "deliberative_tier/time.h"
 #include "deliberative_tier/timelines.h"
@@ -15,11 +14,12 @@ namespace ratio
                                                                      destroy_reasoner_server(h.advertiseService("destroy_reasoner", &deliberative_manager::destroy_reasoner, this)),
                                                                      new_requirement_server(h.advertiseService("new_requirement", &deliberative_manager::new_requirement, this)),
                                                                      task_finished_server(h.advertiseService("task_finished", &deliberative_manager::task_finished, this)),
+                                                                     graph_server(h.advertiseService("get_graph", &deliberative_manager::get_graph, this)),
+                                                                     timelines_server(h.advertiseService("get_timelines", &deliberative_manager::get_timelines, this)),
                                                                      reasoner_created(handle.advertise<std_msgs::UInt64>("reasoner_created", 10, true)),
                                                                      reasoner_destroyed(handle.advertise<std_msgs::UInt64>("reasoner_destroyed", 10, true)),
                                                                      notify_state(handle.advertise<deliberative_tier::deliberative_state>("deliberative_state", 10, true)),
                                                                      notify_timelines(handle.advertise<deliberative_tier::timelines>("timelines", 10, true)),
-                                                                     notify_time(handle.advertise<deliberative_tier::time>("time", 10, true)),
                                                                      can_start(h.serviceClient<deliberative_tier::can_start>("can_start")),
                                                                      start_task(h.serviceClient<deliberative_tier::start_task>("start_task"))
     {
@@ -62,7 +62,6 @@ namespace ratio
             relevant_predicates.insert(relevant_predicates.end(), req.notify_start.begin(), req.notify_start.end());
 
             executors[req.reasoner_id] = new deliberative_executor(*this, req.reasoner_id, req.domain_files, relevant_predicates);
-            listeners[req.reasoner_id] = new deliberative_listener(*this, *executors.at(req.reasoner_id));
 
             for (const auto &r : req.requirements)
                 pending_requirements[req.reasoner_id].push(r);
@@ -86,7 +85,7 @@ namespace ratio
         }
         else
         {
-            listeners.erase(req.reasoner_id);
+            delete executors.at(req.reasoner_id);
             executors.erase(req.reasoner_id);
             res.destroyed = true;
 
@@ -115,7 +114,7 @@ namespace ratio
 
     bool deliberative_manager::task_finished(deliberative_tier::task_finished::Request &req, deliberative_tier::task_finished::Response &res)
     {
-        ROS_DEBUG("Ending task %lu for reasoner %lu..", req.reasoner_id, req.task_id);
+        ROS_DEBUG("Ending task %lu for reasoner %lu..", req.task_id, req.reasoner_id);
         if (executors.find(req.reasoner_id) == executors.end())
         {
             ROS_WARN("Reasoner %lu does not exist..", req.reasoner_id);
@@ -125,6 +124,74 @@ namespace ratio
         {
             executors.at(req.reasoner_id)->finish_task(req.task_id, req.success);
             res.ended = true;
+        }
+        return true;
+    }
+
+    bool deliberative_manager::get_graph(deliberative_tier::get_graph::Request &req, deliberative_tier::get_graph::Response &res)
+    {
+        ROS_DEBUG("Getting causal graph for reasoner %lu..", req.reasoner_id);
+        if (executors.find(req.reasoner_id) == executors.end())
+        {
+            ROS_WARN("Reasoner %lu does not exist..", req.reasoner_id);
+        }
+        else
+        {
+            for (const auto &f : executors.at(req.reasoner_id)->flaws)
+            {
+                deliberative_tier::flaw f_msg;
+                f_msg.id = reinterpret_cast<std::uintptr_t>(&f);
+                for (const auto &r : f->get_causes())
+                    f_msg.causes.push_back(reinterpret_cast<std::uintptr_t>(r));
+                f_msg.label = f->get_label();
+                f_msg.state = f->get_solver().get_sat_core().value(f->get_phi());
+                const auto [lb, ub] = f->get_solver().get_idl_theory().bounds(f->get_position());
+                const auto est_cost = f->get_estimated_cost();
+                f_msg.cost.num = est_cost.numerator(), f_msg.cost.den = est_cost.denominator();
+                f_msg.position.lb = lb, f_msg.position.ub = ub;
+                res.graph.flaws.push_back(f_msg);
+            }
+
+            for (const auto &r : executors.at(req.reasoner_id)->resolvers)
+            {
+                deliberative_tier::resolver r_msg;
+                r_msg.id = reinterpret_cast<std::uintptr_t>(&r);
+                r_msg.effect = reinterpret_cast<std::uintptr_t>(&r->get_effect());
+                r_msg.label = r->get_label();
+                r_msg.state = r->get_solver().get_sat_core().value(r->get_rho());
+                const auto est_cost = r->get_estimated_cost();
+                r_msg.cost.num = est_cost.numerator(), r_msg.cost.den = est_cost.denominator();
+                res.graph.resolvers.push_back(r_msg);
+            }
+
+            if (executors.at(req.reasoner_id)->current_flaw)
+                res.graph.flaw = reinterpret_cast<std::uintptr_t>(executors.at(req.reasoner_id)->current_flaw);
+
+            if (executors.at(req.reasoner_id)->current_resolver)
+                res.graph.resolver = reinterpret_cast<std::uintptr_t>(executors.at(req.reasoner_id)->current_resolver);
+        }
+        return true;
+    }
+    bool deliberative_manager::get_timelines(deliberative_tier::get_timelines::Request &req, deliberative_tier::get_timelines::Response &res)
+    {
+        ROS_DEBUG("Getting timelines for reasoner %lu..", req.reasoner_id);
+        if (executors.find(req.reasoner_id) == executors.end())
+        {
+            ROS_WARN("Reasoner %lu does not exist..", req.reasoner_id);
+        }
+        else
+        {
+            const auto tls = executors.at(req.reasoner_id)->get_solver().extract_timelines();
+            const smt::array_val &tls_array = static_cast<const smt::array_val &>(*tls);
+            for (size_t i = 0; i < tls_array.size(); ++i)
+            {
+                std::stringstream ss;
+                ss << tls_array.get(i);
+                res.timelines.timelines.push_back(ss.str());
+            }
+            const auto c_time = executors.at(req.reasoner_id)->get_executor().get_current_time();
+            res.timelines.time.num = c_time.numerator();
+            res.timelines.time.den = c_time.denominator();
         }
         return true;
     }

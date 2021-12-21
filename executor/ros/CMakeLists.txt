@@ -32,6 +32,8 @@ add_service_files(
     create_reasoner.srv
     destroy_reasoner.srv
     new_requirement.srv
+    get_graph.srv
+    get_timelines.srv
 )
 
 ## Generate added messages and services
@@ -49,7 +51,7 @@ add_subdirectory(../../executor ${CMAKE_INSTALL_BINDIR}/executor)
 target_compile_definitions(core PUBLIC BUILD_LISTENERS)
 target_compile_definitions(solver PUBLIC BUILD_LISTENERS BUILD_EXECUTOR)
 
-add_executable(${PROJECT_NAME} main.cpp deliberative_manager.cpp deliberative_executor.cpp deliberative_listener.cpp)
+add_executable(${PROJECT_NAME} main.cpp deliberative_manager.cpp deliberative_executor.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include ${catkin_INCLUDE_DIRS} solver executor)
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES} json smt core riddle solver executor)
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
