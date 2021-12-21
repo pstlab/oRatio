@@ -425,6 +425,21 @@ namespace ratio
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
             tl->set("name", new string_val(get_core().guess_name(*rr)));
 #endif
+            tl->set("type", new string_val(REUSABLE_RESOURCE_NAME));
+
+            arith_expr capacity = rr->get_exprs().at(REUSABLE_RESOURCE_CAPACITY);
+            inf_rational c_capacity = get_core().arith_value(capacity);
+            json j_capacity;
+            j_capacity->set("num", new long_val(c_capacity.get_rational().numerator()));
+            j_capacity->set("den", new long_val(c_capacity.get_rational().denominator()));
+            if (c_capacity.get_infinitesimal() != rational::ZERO)
+            {
+                json j_inf;
+                j_inf->set("num", new long_val(c_capacity.get_infinitesimal().numerator()));
+                j_inf->set("den", new long_val(c_capacity.get_infinitesimal().denominator()));
+                j_capacity->set("inf", j_inf);
+            }
+            tl->set("capacity", j_capacity);
 
             // for each pulse, the atoms starting at that pulse..
             std::map<inf_rational, std::set<atom *>> starting_atoms;

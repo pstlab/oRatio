@@ -371,6 +371,7 @@ namespace ratio
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
             tl->set("name", new string_val(get_core().guess_name(*sv)));
 #endif
+            tl->set("type", new string_val(STATE_VARIABLE_NAME));
 
             // for each pulse, the atoms starting at that pulse..
             std::map<inf_rational, std::set<atom *>> starting_atoms;
