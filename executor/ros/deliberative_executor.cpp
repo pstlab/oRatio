@@ -86,6 +86,15 @@ namespace ratio
             ss << tls_array.get(i);
             timelines_msg.timelines.push_back(ss.str());
         }
+        arith_expr origin_expr = exec.slv.get("origin");
+        const auto origin = exec.slv.arith_value(origin_expr);
+        timelines_msg.origin.num = origin.get_rational().numerator();
+        timelines_msg.origin.den = origin.get_rational().denominator();
+
+        arith_expr horizon_expr = exec.slv.get("horizon");
+        const auto horizon = exec.slv.arith_value(horizon_expr);
+        timelines_msg.horizon.num = horizon.get_rational().numerator();
+        timelines_msg.horizon.den = horizon.get_rational().denominator();
 
         exec.d_mngr.notify_timelines.publish(timelines_msg);
     }

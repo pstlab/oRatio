@@ -19,6 +19,7 @@ namespace ratio
                                                                      reasoner_created(handle.advertise<std_msgs::UInt64>("reasoner_created", 10, true)),
                                                                      reasoner_destroyed(handle.advertise<std_msgs::UInt64>("reasoner_destroyed", 10, true)),
                                                                      notify_state(handle.advertise<deliberative_tier::deliberative_state>("deliberative_state", 10, true)),
+                                                                     notify_graph(handle.advertise<deliberative_tier::graph>("graph", 10, true)),
                                                                      notify_timelines(handle.advertise<deliberative_tier::timelines>("timelines", 10, true)),
                                                                      can_start(h.serviceClient<deliberative_tier::can_start>("can_start")),
                                                                      start_task(h.serviceClient<deliberative_tier::start_task>("start_task"))
@@ -189,6 +190,16 @@ namespace ratio
                 ss << tls_array.get(i);
                 res.timelines.timelines.push_back(ss.str());
             }
+            arith_expr origin_expr = executors.at(req.reasoner_id)->get_solver().get("origin");
+            const auto origin = executors.at(req.reasoner_id)->get_solver().arith_value(origin_expr);
+            res.timelines.origin.num = origin.get_rational().numerator();
+            res.timelines.origin.den = origin.get_rational().denominator();
+
+            arith_expr horizon_expr = executors.at(req.reasoner_id)->get_solver().get("horizon");
+            const auto horizon = executors.at(req.reasoner_id)->get_solver().arith_value(horizon_expr);
+            res.timelines.horizon.num = horizon.get_rational().numerator();
+            res.timelines.horizon.den = horizon.get_rational().denominator();
+
             const auto c_time = executors.at(req.reasoner_id)->get_executor().get_current_time();
             res.timelines.time.num = c_time.numerator();
             res.timelines.time.den = c_time.denominator();
