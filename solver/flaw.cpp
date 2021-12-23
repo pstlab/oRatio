@@ -27,7 +27,7 @@ namespace ratio
         assert(!expanded);
         assert(slv.root_level());
 
-        bool add_distance = slv.get_sat_core().new_clause({slv.get_idl_theory().new_distance(position, 0, 0)});
+        [[maybe_unused]] bool add_distance = slv.get_sat_core().new_clause({slv.get_idl_theory().new_distance(position, 0, 0)});
         assert(add_distance);
 
         std::vector<lit> cs;
