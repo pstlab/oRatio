@@ -84,7 +84,7 @@ namespace smt
             // we need to create a new variable..
             const lit eq_lit = lit(sat->new_var()); // the equality literal..
 
-            bool nc;
+            [[maybe_unused]] bool nc;
             // the values outside the intersection are pruned if the equality control variable becomes true..
             for (const auto &[val, l] : assigns[left])
                 if (!intersection.count(val))
