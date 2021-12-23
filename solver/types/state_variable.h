@@ -130,7 +130,6 @@ namespace ratio
     smt::json extract_timelines() const noexcept override;
 
   private:
-    predicate &int_pred;
     std::set<const item *> to_check;                          // the state-variable instances whose atoms have changed..
     std::vector<std::pair<atom *, sv_atom_listener *>> atoms; // we store, for each atom, its atom listener..
 

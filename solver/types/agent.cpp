@@ -10,7 +10,7 @@ using namespace smt;
 
 namespace ratio
 {
-    agent::agent(solver &slv) : smart_type(slv, slv, AGENT_NAME), timelines_extractor(), int_pred(slv.get_predicate("Interval")), imp_pred(slv.get_predicate("Impulse")) { new_constructors({new agnt_constructor(*this)}); }
+    agent::agent(solver &slv) : smart_type(slv, slv, AGENT_NAME), timelines_extractor() { new_constructors({new agnt_constructor(*this)}); }
 
     std::vector<std::vector<std::pair<lit, double>>> agent::get_current_incs()
     {
@@ -34,10 +34,10 @@ namespace ratio
         if (f.is_fact)
         {
             set_ni(lit(atm.get_sigma()));
-            if (imp_pred.is_assignable_from(atm.get_type())) // we apply impulse-predicate whenever the fact becomes active..
-                imp_pred.apply_rule(atm);
+            if (get_solver().get_impulse().is_assignable_from(atm.get_type())) // we apply impulse-predicate whenever the fact becomes active..
+                get_solver().get_impulse().apply_rule(atm);
             else // we apply interval-predicate whenever the fact becomes active..
-                int_pred.apply_rule(atm);
+                get_solver().get_interval().apply_rule(atm);
             restore_ni();
         }
 

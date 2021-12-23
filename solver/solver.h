@@ -7,6 +7,8 @@
 #define AT "at"
 #define START "start"
 #define END "end"
+#define IMPULSE "Impulse"
+#define INTERVAL "Interval"
 
 #ifdef BUILD_LISTENERS
 #define FIRE_NEW_FLAW(f) fire_new_flaw(f)
@@ -36,16 +38,8 @@ namespace ratio
   class solver_listener;
 #endif
 
-  class solver_initializer
+  class solver : public core, private smt::theory, public timelines_extractor
   {
-  public:
-    solver_initializer(solver &slv, const bool &i = true);
-    ~solver_initializer();
-  };
-
-  class solver : public core, private solver_initializer, private smt::theory, public timelines_extractor
-  {
-    friend class solver_initializer;
     friend class graph;
     friend class flaw;
     friend class smart_type;
@@ -129,14 +123,16 @@ namespace ratio
   public:
     SOLVER_EXPORT smt::json extract_timelines() const noexcept override;
 
+    SOLVER_EXPORT predicate &get_impulse() const noexcept;
     SOLVER_EXPORT bool is_impulse(const type &pred) const noexcept;
     SOLVER_EXPORT bool is_impulse(const atom &atm) const noexcept;
+    SOLVER_EXPORT predicate &get_interval() const noexcept;
     SOLVER_EXPORT bool is_interval(const type &pred) const noexcept;
     SOLVER_EXPORT bool is_interval(const atom &atm) const noexcept;
 
   private:
-    const predicate &int_pred;
-    const predicate &imp_pred;
+    predicate *imp_pred = nullptr;
+    predicate *int_pred = nullptr;
 
   private:
     struct layer

@@ -30,15 +30,12 @@ using namespace smt;
 
 namespace ratio
 {
-    solver_initializer::solver_initializer(solver &slv, const bool &i)
+    SOLVER_EXPORT solver::solver(const bool &i) : solver(HEURISTIC, i) {}
+    SOLVER_EXPORT solver::solver(graph &gr, const bool &i) : core(), theory(get_sat_core()), timelines_extractor(), gr(gr)
     {
         if (i)
-            slv.init();
+            init();
     }
-    solver_initializer::~solver_initializer() {}
-
-    SOLVER_EXPORT solver::solver(const bool &i) : solver(HEURISTIC, i) {}
-    SOLVER_EXPORT solver::solver(graph &gr, const bool &i) : core(), solver_initializer(*this, i), theory(get_sat_core()), timelines_extractor(), int_pred(get_predicate("Interval")), imp_pred(get_predicate("Impulse")), gr(gr) {}
     SOLVER_EXPORT solver::~solver()
     {
         delete &gr;
@@ -58,6 +55,8 @@ namespace ratio
     SOLVER_EXPORT void solver::init() noexcept
     {
         read(INIT_STRING);
+        imp_pred = &get_predicate(IMPULSE);
+        int_pred = &get_predicate(INTERVAL);
         new_types({new state_variable(*this),
                    new reusable_resource(*this),
                    new agent(*this)});
@@ -659,9 +658,11 @@ namespace ratio
         return new array_val(tls);
     }
 
-    SOLVER_EXPORT bool solver::is_impulse(const type &pred) const noexcept { return imp_pred.is_assignable_from(pred); }
+    SOLVER_EXPORT predicate &solver::get_impulse() const noexcept { return *imp_pred; }
+    SOLVER_EXPORT bool solver::is_impulse(const type &pred) const noexcept { return get_impulse().is_assignable_from(pred); }
     SOLVER_EXPORT bool solver::is_impulse(const atom &atm) const noexcept { return is_impulse(atm.get_type()); }
-    SOLVER_EXPORT bool solver::is_interval(const type &pred) const noexcept { return int_pred.is_assignable_from(pred); }
+    SOLVER_EXPORT predicate &solver::get_interval() const noexcept { return *int_pred; }
+    SOLVER_EXPORT bool solver::is_interval(const type &pred) const noexcept { return get_interval().is_assignable_from(pred); }
     SOLVER_EXPORT bool solver::is_interval(const atom &atm) const noexcept { return is_interval(atm.get_type()); }
 
 #ifdef BUILD_LISTENERS
