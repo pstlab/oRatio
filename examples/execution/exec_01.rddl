@@ -1,0 +1,18 @@
+class Test01 : StateVariable {
+
+    predicate G() {
+        duration >= 5.0;
+        {
+            goal a0 = new A(end:start);
+        } or {
+            goal a1 = new A(end:start);
+        }
+    }
+
+    predicate A() {
+        duration >= 5.0;
+    }
+}
+
+Test01 t_01 = new Test01();
+goal g = new t_01.G();
