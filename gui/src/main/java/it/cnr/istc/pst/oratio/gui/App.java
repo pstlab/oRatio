@@ -47,7 +47,9 @@ public class App {
 
     public static void start_server() {
         final Javalin app = Javalin.create(config -> {
-            config.addStaticFiles("/public");
+            config.addStaticFiles(staticFiles -> {
+                staticFiles.directory = "/public";
+            });
         });
         app.ws("/solver", ws -> {
             ws.onConnect(ctx -> on_connect(ctx));
@@ -80,15 +82,15 @@ public class App {
         final String message = ctx.message();
         LOG.info("Received message {}..", message);
         switch (message) {
-        case "tick":
-            try {
-                TL_EXEC.tick();
-            } catch (ExecutorException e) {
-                LOG.error("Cannot execute the solution", e);
-            }
-            break;
-        default:
-            break;
+            case "tick":
+                try {
+                    TL_EXEC.tick();
+                } catch (ExecutorException e) {
+                    LOG.error("Cannot execute the solution", e);
+                }
+                break;
+            default:
+                break;
         }
     }
 
