@@ -40,7 +40,7 @@ predicate LowerBodyExercise() : Interval {
 predicate PhysicalExercise() : Interval {
     goal ube = new UpperBodyExercise();
     ube.start >= start; ube.end <= end;
-    goal lbe = new UpperBodyExercise();
+    goal lbe = new LowerBodyExercise();
     lbe.start >= start; lbe.end <= end;
 }
 
