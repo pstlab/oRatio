@@ -14,6 +14,7 @@ namespace smt
 
     SMT_EXPORT bool theory::backtrack_analyze_and_backjump() noexcept
     {
+        // we backtrack to a level at which we can analyze the conflict..
         size_t bt_level = 0;
         for (const auto &l : cnfl)
             if (bt_level < sat->level[variable(l)])
@@ -25,6 +26,7 @@ namespace smt
         if (sat->root_level())
             return false;
 
+        // we analyze the conflict and backjump..
         analyze_and_backjump();
         return true;
     }
