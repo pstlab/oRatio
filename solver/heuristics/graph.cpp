@@ -28,7 +28,11 @@ namespace ratio
             init();
             [[fallthrough]];
         case Undefined: // we build/extend the graph..
-            build();
+            if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
+                            { return is_positive_infinite(f->get_estimated_cost()); })) // we build/extend the graph..
+                build();
+            else // we add a layer to the current graph..
+                add_layer();
 #ifdef GRAPH_PRUNING
             prune(); // we prune the graph..
 #endif
