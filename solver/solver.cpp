@@ -168,10 +168,11 @@ namespace ratio
 
         // we take the decision..
         if (!get_sat_core().assume(ch))
-        { // we have exhausted the search..
+            throw unsolvable_exception();
+
+        if (root_level()) // we make sure that gamma is at true..
             gr.check();
-            assert(get_sat_core().value(gr.gamma) == True);
-        }
+        assert(get_sat_core().value(gr.gamma) == True);
 
         assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto f)
@@ -358,10 +359,12 @@ namespace ratio
     {
         LOG("next..");
         if (!get_sat_core().next())
-        { // we have exhausted the search..
+            throw unsolvable_exception();
+
+        if (root_level()) // we make sure that gamma is at true..
             gr.check();
-            assert(get_sat_core().value(gr.gamma) == True);
-        }
+        assert(get_sat_core().value(gr.gamma) == True);
+
         assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto *f)
                                                 { return (sat->value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
@@ -512,10 +515,11 @@ namespace ratio
                         learnt.push_back(!l);
                     record(learnt);
                     if (!get_sat_core().propagate())
-                    { // we have exhausted the search..
+                        throw unsolvable_exception();
+
+                    if (root_level()) // we make sure that gamma is at true..
                         gr.check();
-                        assert(get_sat_core().value(gr.gamma) == True);
-                    }
+                    assert(get_sat_core().value(gr.gamma) == True);
                 }
 
                 // we re-collect all the inconsistencies from all the smart-types..
