@@ -15,7 +15,7 @@ namespace ratio
     void smart_type::set_ni(const smt::lit &v) noexcept { get_solver().set_ni(v); }
     void smart_type::restore_ni() noexcept { get_solver().restore_ni(); }
 
-    void smart_type::store_flaw(flaw &f) noexcept { slv.pending_flaws.push_back(&f); }
+    void smart_type::store_flaw(flaw &f) noexcept { slv.pending_flaws.emplace(&f); }
 
     std::vector<resolver *> smart_type::get_resolvers(solver &slv, const std::set<atom *> &atms) noexcept
     {
