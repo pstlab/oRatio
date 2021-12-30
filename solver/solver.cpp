@@ -54,13 +54,13 @@ namespace ratio
 
     SOLVER_EXPORT void solver::init() noexcept
     {
+        gr.init();
         read(INIT_STRING);
         imp_pred = &get_predicate(IMPULSE);
         int_pred = &get_predicate(INTERVAL);
         new_types({new state_variable(*this),
                    new reusable_resource(*this),
                    new agent(*this)});
-
         FIRE_STATE_CHANGED();
     }
 
@@ -68,20 +68,9 @@ namespace ratio
     {
         FIRE_STARTED_SOLVING();
 
-        if (std::any_of(flaws.cbegin(), flaws.cend(), [](flaw *f)
-                        { return is_positive_infinite(f->get_estimated_cost()); }))
-        { // we build the cuasal graph..
-            gr.build();
-            // we push the constraint network..
-            push_network();
-            // we prune the causal graph..
-            while (!gr.prune())
-            { // we add a new layer to the causal graph..
-                pop_network();
-                gr.add_layer();
-                push_network();
-            }
-        }
+        if (root_level()) // we make sure that gamma is at true..
+            gr.check();
+        assert(get_sat_core().value(gr.gamma) == True);
 
         // we search for a consistent solution without flaws..
 #ifdef CHECK_INCONSISTENCIES
@@ -178,16 +167,12 @@ namespace ratio
         assert(get_sat_core().value(ch) == Undefined);
 
         // we take the decision..
-        if (!get_sat_core().assume(ch)) // we have exhausted the search..
-            do
-            {
-                // we pop the constraint network..
-                pop_network();
-                // we add a layer to the causal graph..
-                gr.add_layer();
-                // we push the constraint network..
-                push_network();
-            } while (!gr.prune());
+        if (!get_sat_core().assume(ch))
+        { // we have exhausted the search..
+            gr.check();
+            assert(get_sat_core().value(gr.gamma) == True);
+        }
+
         assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto f)
                                                 { return (sat->value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
@@ -270,6 +255,9 @@ namespace ratio
 
     void solver::new_flaw(flaw &f, const bool &enqueue)
     {
+        if (std::any_of(f.causes.cbegin(), f.causes.cend(), [this](const auto &r)
+                        { return sat->value(r->rho) == False; })) // there is no reason for introducing this flaw..
+            return;
         // we initialize the flaw..
         f.init(); // flaws' initialization requires being at root-level..
         FIRE_NEW_FLAW(f);
@@ -366,33 +354,14 @@ namespace ratio
         FIRE_FLAW_COST_CHANGED(f);
     }
 
-    std::unordered_set<flaw *> solver::flush_pending_flaws()
-    {
-        // we prune inactivable flaws..
-        for (auto i = pending_flaws.begin(), last = pending_flaws.end(); i != last;)
-            if (sat->value((*i)->get_phi()))
-                i = pending_flaws.erase(i);
-            else
-                ++i;
-
-        std::unordered_set<flaw *> pndng_flaws;
-        std::swap(pndng_flaws, pending_flaws);
-        return pndng_flaws;
-    }
-
     void solver::next()
     {
         LOG("next..");
-        if (!get_sat_core().next()) // we have exhausted the search..
-            do
-            {
-                // we pop the constraint network..
-                pop_network();
-                // we add a layer to the causal graph..
-                gr.add_layer();
-                // we push the constraint network..
-                push_network();
-            } while (!gr.prune());
+        if (!get_sat_core().next())
+        { // we have exhausted the search..
+            gr.check();
+            assert(get_sat_core().value(gr.gamma) == True);
+        }
         assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto *f)
                                                 { return (sat->value(f->phi) != False && f->get_estimated_cost() == (f->get_best_resolver() ? f->get_best_resolver()->get_estimated_cost() : rational::POSITIVE_INFINITY)) || is_positive_infinite(f->get_estimated_cost()); }); }));
@@ -543,15 +512,10 @@ namespace ratio
                         learnt.push_back(!l);
                     record(learnt);
                     if (!get_sat_core().propagate())
-                        do
-                        {
-                            // we pop the constraint network..
-                            pop_network();
-                            // we add a layer to the causal graph..
-                            gr.add_layer();
-                            // we push the constraint network..
-                            push_network();
-                        } while (!gr.prune());
+                    { // we have exhausted the search..
+                        gr.check();
+                        assert(get_sat_core().value(gr.gamma) == True);
+                    }
                 }
 
                 // we re-collect all the inconsistencies from all the smart-types..

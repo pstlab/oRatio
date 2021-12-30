@@ -28,11 +28,14 @@ namespace ratio
     virtual smt::rational get_estimated_cost(const resolver &r) const noexcept = 0;
 
   private:
+    virtual void init() = 0;
+    void check();
+
     virtual void enqueue(flaw &f) = 0;
     virtual void propagate_costs(flaw &f) = 0;
     virtual void build() = 0; // builds the graph..
 #ifdef GRAPH_PRUNING
-    virtual bool prune() = 0; // prunes the current graph..
+    virtual void prune() = 0; // prunes the current graph..
 #else
     constexpr bool prune()
     {
@@ -76,7 +79,8 @@ namespace ratio
 #endif
 
   protected:
-    solver &slv; // the solver this heuristic belongs to..
+    solver &slv;    // the solver this heuristic belongs to..
+    smt::var gamma; // this variable represents the validity of the current graph..
   private:
     std::unordered_map<smt::var, std::vector<flaw *>> phis;     // the phi variables (propositional variable to flaws) of the flaws..
     std::unordered_map<smt::var, std::vector<resolver *>> rhos; // the rho variables (propositional variable to resolver) of the resolvers..

@@ -40,6 +40,14 @@ namespace ratio
         return est_cost + r.get_intrinsic_cost();
     }
 
+    void h_2::init() noexcept
+    { // we create the gamma variable..
+        gamma = slv.get_sat_core().new_var();
+        LOG("graph var is: γ" << std::to_string(gamma));
+        // we clear the already closed flaws so that they can be closed again..
+        already_closed.clear();
+    }
+
     void h_2::enqueue(flaw &f) { flaw_q.push_back(&f); }
 
     void h_2::propagate_costs(flaw &f)
@@ -127,17 +135,20 @@ namespace ratio
         } while (!ok);
 
         // we perform some cleanings..
-        slv.get_sat_core().simplify_db();
+        if (!slv.get_sat_core().simplify_db())
+            throw unsolvable_exception();
     }
 
 #ifdef GRAPH_PRUNING
-    bool h_2::prune()
+    void h_2::prune()
     {
         LOG("pruning the graph..");
         for (const auto &f : flaw_q)
-            if (!slv.get_sat_core().new_clause({!f->get_phi()}))
-                return false;
-        return slv.get_sat_core().propagate();
+            if (already_closed.insert(f).second)
+                if (!slv.get_sat_core().new_clause({lit(gamma, false), !f->get_phi()}))
+                    throw unsolvable_exception();
+        if (!slv.get_sat_core().propagate())
+            throw unsolvable_exception();
     }
 #endif
 

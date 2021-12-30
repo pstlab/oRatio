@@ -101,7 +101,7 @@ namespace ratio
     void apply_resolver(resolver &r);                  // applies the given resolver..
     void set_cost(flaw &f, const smt::rational &cost); // sets the cost of the given flaw..
 
-    std::unordered_set<flaw *> flush_pending_flaws();
+    inline std::unordered_set<flaw *> flush_pending_flaws() { return std::move(pending_flaws); }
 
     void next();
 

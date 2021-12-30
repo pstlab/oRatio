@@ -28,7 +28,7 @@ namespace smt
 
         // we analyze the conflict and backjump..
         analyze_and_backjump();
-        return true;
+        return sat->propagate();
     }
 
     void theory::analyze_and_backjump() noexcept

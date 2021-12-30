@@ -40,6 +40,14 @@ namespace ratio
         return est_cost + r.get_intrinsic_cost();
     }
 
+    void h_1::init() noexcept
+    { // we create the gamma variable..
+        gamma = slv.get_sat_core().new_var();
+        LOG("graph var is: γ" << std::to_string(gamma));
+        // we clear the already closed flaws so that they can be closed again..
+        already_closed.clear();
+    }
+
     void h_1::enqueue(flaw &f) { flaw_q.push_back(&f); }
 
     void h_1::propagate_costs(flaw &f)
@@ -76,7 +84,7 @@ namespace ratio
     void h_1::build()
     {
         LOG("building the causal graph..");
-        assert(slv.get_sat_core().root_level());
+        assert(slv.root_level());
 
         while (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
                            { return is_positive_infinite(f->get_estimated_cost()); }))
@@ -111,17 +119,20 @@ namespace ratio
             new_flaw(*f, false); // we add the flaws, without enqueuing, to the planning graph..
 
         // we perform some cleanings..
-        slv.get_sat_core().simplify_db();
+        if (!slv.get_sat_core().simplify_db())
+            throw unsolvable_exception();
     }
 
 #ifdef GRAPH_PRUNING
-    bool h_1::prune()
+    void h_1::prune()
     {
         LOG("pruning the graph..");
         for (const auto &f : flaw_q)
-            if (!slv.get_sat_core().new_clause({!f->get_phi()}))
-                return false;
-        return slv.get_sat_core().propagate();
+            if (already_closed.insert(f).second)
+                if (!slv.get_sat_core().new_clause({lit(gamma, false), !f->get_phi()}))
+                    throw unsolvable_exception();
+        if (!slv.get_sat_core().propagate())
+            throw unsolvable_exception();
     }
 #endif
 
