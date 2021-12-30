@@ -24,7 +24,7 @@ namespace smt
             sat->pop();
 
         if (sat->root_level())
-            return false;
+            return sat->new_clause(cnfl) && sat->propagate();
 
         // we analyze the conflict and backjump..
         analyze_and_backjump();
