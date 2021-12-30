@@ -366,6 +366,20 @@ namespace ratio
         FIRE_FLAW_COST_CHANGED(f);
     }
 
+    std::unordered_set<flaw *> solver::flush_pending_flaws()
+    {
+        // we prune inactivable flaws..
+        for (auto i = pending_flaws.begin(), last = pending_flaws.end(); i != last;)
+            if (sat->value((*i)->get_phi()))
+                i = pending_flaws.erase(i);
+            else
+                ++i;
+
+        std::unordered_set<flaw *> pndng_flaws;
+        std::swap(pndng_flaws, pending_flaws);
+        return pndng_flaws;
+    }
+
     void solver::next()
     {
         LOG("next..");

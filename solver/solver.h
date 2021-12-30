@@ -101,12 +101,7 @@ namespace ratio
     void apply_resolver(resolver &r);                  // applies the given resolver..
     void set_cost(flaw &f, const smt::rational &cost); // sets the cost of the given flaw..
 
-    inline std::vector<flaw *> flush_pending_flaws()
-    {
-      std::vector<flaw *> pndng_flaws;
-      std::swap(pndng_flaws, pending_flaws);
-      return pndng_flaws;
-    }
+    std::unordered_set<flaw *> flush_pending_flaws();
 
     void next();
 
@@ -144,7 +139,7 @@ namespace ratio
     graph &gr;                                            // the used graph..
     std::vector<smart_type *> sts;                        // the smart-types..
     resolver *res = nullptr;                              // the current resolver (i.e. the cause for the new flaws)..
-    std::vector<flaw *> pending_flaws;                    // pending flaws, waiting root-level for being initialized..
+    std::unordered_set<flaw *> pending_flaws;             // pending flaws, waiting root-level for being initialized..
     std::unordered_map<const atom *, atom_flaw *> reason; // the reason for having introduced an atom..
     std::unordered_set<flaw *> flaws;                     // the currently active flaws..
     std::vector<layer> trail;                             // the list of taken decisions, with the associated changes made, in chronological order..

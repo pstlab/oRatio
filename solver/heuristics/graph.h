@@ -61,7 +61,7 @@ namespace ratio
     inline void set_cost(flaw &f, const smt::rational &cost) { slv.set_cost(f, cost); }
 
     inline std::unordered_set<flaw *> &get_flaws() { return slv.flaws; }
-    inline std::vector<flaw *> flush_pending_flaws() { return slv.flush_pending_flaws(); }
+    inline std::unordered_set<flaw *> flush_pending_flaws() { return slv.flush_pending_flaws(); }
     inline std::vector<std::vector<std::pair<smt::lit, double>>> get_incs() { return slv.get_incs(); }
 
 #ifdef BUILD_LISTENERS
