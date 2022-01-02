@@ -27,12 +27,13 @@ namespace ratio
         case False: // we create a new graph var..
             init();
             [[fallthrough]];
-        case Undefined: // we build/extend the graph..
-            if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
-                            { return is_positive_infinite(f->get_estimated_cost()); })) // we build/extend the graph..
-                build();
-            else // we add a layer to the current graph..
-                add_layer();
+        case Undefined:
+            if (!get_flaws().empty())
+                if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
+                                { return is_positive_infinite(f->get_estimated_cost()); })) // we build/extend the graph..
+                    build();
+                else // we add a layer to the current graph..
+                    add_layer();
 #ifdef GRAPH_PRUNING
             prune(); // we prune the graph..
 #endif
@@ -43,11 +44,12 @@ namespace ratio
                 { // the graph has been invalidated..
                     LOG("search has exhausted the graph..");
                     init(); // we create a new graph var..
-                    if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
-                                    { return is_positive_infinite(f->get_estimated_cost()); })) // we build/extend the graph..
-                        build();
-                    else // we add a layer to the current graph..
-                        add_layer();
+                    if (!get_flaws().empty())
+                        if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
+                                        { return is_positive_infinite(f->get_estimated_cost()); })) // we build/extend the graph..
+                            build();
+                        else // we add a layer to the current graph..
+                            add_layer();
 #ifdef GRAPH_PRUNING
                     prune(); // we prune the graph..
 #endif
