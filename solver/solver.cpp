@@ -68,8 +68,11 @@ namespace ratio
     {
         FIRE_STARTED_SOLVING();
 
-        if (root_level()) // we make sure that gamma is at true..
+        if (root_level())
+        { // we make sure that gamma is at true..
+            gr.build();
             gr.check();
+        }
         assert(get_sat_core().value(gr.gamma) == True);
 
         // we search for a consistent solution without flaws..

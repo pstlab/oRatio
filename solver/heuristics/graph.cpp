@@ -24,37 +24,21 @@ namespace ratio
         assert(slv.root_level());
         switch (slv.get_sat_core().value(gamma))
         {
-        case False: // we create a new graph var..
-            init();
-            [[fallthrough]];
-        case Undefined:
+        case False:
+            init(); // we create a new graph var..
             if (!get_flaws().empty())
                 if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
                                 { return is_positive_infinite(f->get_estimated_cost()); })) // we build/extend the graph..
                     build();
                 else // we add a layer to the current graph..
                     add_layer();
+            [[fallthrough]];
+        case Undefined:
 #ifdef GRAPH_PRUNING
             prune(); // we prune the graph..
 #endif
-            do
-            {
-                slv.take_decision(lit(gamma));
-                if (slv.get_sat_core().value(gamma) == False)
-                { // the graph has been invalidated..
-                    LOG("search has exhausted the graph..");
-                    init(); // we create a new graph var..
-                    if (!get_flaws().empty())
-                        if (std::any_of(get_flaws().cbegin(), get_flaws().cend(), [](flaw *f)
-                                        { return is_positive_infinite(f->get_estimated_cost()); })) // we build/extend the graph..
-                            build();
-                        else // we add a layer to the current graph..
-                            add_layer();
-#ifdef GRAPH_PRUNING
-                    prune(); // we prune the graph..
-#endif
-                }
-            } while (slv.get_sat_core().value(gamma) != True);
+            // we take 'gamma' decision..
+            slv.take_decision(lit(gamma));
         }
     }
 } // namespace ratio
