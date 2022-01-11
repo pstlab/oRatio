@@ -34,14 +34,19 @@ namespace ratio
         {
             ROS_DEBUG("Disposing pending requirements..");
             for (auto &req : pending_requirements)
+            {
+                while (!executors.at(req.first)->get_solver().root_level()) // we go at root level..
+                    executors.at(req.first)->get_solver().get_sat_core().pop();
                 while (!req.second.empty())
-                {
+                { // we read the pending requirement..
                     const std::string c_req = req.second.front();
                     ROS_DEBUG("[%lu] %s", req.first, c_req.c_str());
                     executors.at(req.first)->get_solver().read(c_req);
-                    executors.at(req.first)->get_solver().solve();
                     req.second.pop();
                 }
+                // we solve the problem again..
+                executors.at(req.first)->get_solver().solve();
+            }
             pending_requirements.clear();
         }
         for (auto &exec : executors)
