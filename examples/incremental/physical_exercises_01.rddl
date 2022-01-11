@@ -32,6 +32,10 @@ class PhysicalExerciseStateVariable : StateVariable {
         duration >= 10.0;
     }
 
+    predicate SeatedLegExtensions(Intensity intensity) {
+        duration >= 10.0;
+    }
+
     predicate StandingHamstringsCurl(Intensity intensity) {
         duration >= 10.0;
     }
@@ -88,6 +92,9 @@ predicate UpperBodyExercise() : Interval {
 
 predicate LowerBodyExercise() : Interval {
     {
+        goal sle = new sv.SeatedLegExtensions();
+        sle.start >= start; sle.end <= end;
+    } or {
         goal shc = new sv.StandingHamstringsCurl();
         shc.start >= start; shc.end <= end;
     } or {
