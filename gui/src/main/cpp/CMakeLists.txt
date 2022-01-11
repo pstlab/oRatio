@@ -3,5 +3,5 @@ find_package(JNI REQUIRED)
 add_executable(oRatioServer main.cpp)
 
 target_include_directories(oRatioServer PRIVATE ${JNI_INCLUDE_DIRS} .)
-target_link_libraries(oRatioServer PRIVATE ${JAVA_JVM_LIBRARY} solver) # remember to add jdk\bin\server to the path system variable!!
+target_link_libraries(oRatioServer PRIVATE ${JAVA_JVM_LIBRARY} executor) # remember to add jdk\bin\server to the path system variable!!
 install(TARGETS oRatioServer RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

@@ -2,7 +2,7 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
-#include "solver.h"
+#include "executor.h"
 
 using namespace ratio;
 
@@ -29,7 +29,7 @@ int main(int argc, char const *argv[])
     JavaVMOption *options = new JavaVMOption[2]; // JVM invocation options
     // where to find java .class
     options[0].optionString = (char *)"-Djava.class.path=lib/annotations-13.0.jar;lib/jackson-annotations-2.12.1.jar;lib/jackson-core-2.12.1.jar;lib/jackson-databind-2.12.1.jar;lib/javalin-4.1.1.jar;lib/javax.servlet-api-3.1.0.jar;lib/jetty-client-9.4.44.v20210927.jar;lib/jetty-http-9.4.44.v20210927.jar;lib/jetty-io-9.4.44.v20210927.jar;lib/jetty-security-9.4.44.v20210927.jar;lib/jetty-server-9.4.44.v20210927.jar;lib/jetty-servlet-9.4.44.v20210927.jar;lib/jetty-util-9.4.44.v20210927.jar;lib/jetty-util-ajax-9.4.44.v20210927.jar;lib/jetty-webapp-9.4.44.v20210927.jar;lib/jetty-xml-9.4.44.v20210927.jar;lib/kotlin-stdlib-1.5.31.jar;lib/kotlin-stdlib-common-1.5.31.jar;lib/kotlin-stdlib-jdk7-1.5.31.jar;lib/kotlin-stdlib-jdk8-1.5.31.jar;lib/oratio-1.0.jar;lib/slf4j-api-1.7.31.jar;lib/slf4j-simple-1.7.31.jar;lib/websocket-api-9.4.44.v20210927.jar;lib/websocket-client-9.4.44.v20210927.jar;lib/websocket-common-9.4.44.v20210927.jar;lib/websocket-server-9.4.44.v20210927.jar;lib/websocket-servlet-9.4.44.v20210927.jar;gui-1.0.jar";
-    options[1].optionString = (char *)"-Djava.library.path=../../build/bin";
+    options[1].optionString = (char *)"-Djava.library.path=../../build/bin/Debug";
     vm_args.version = JNI_VERSION_1_8; // minimum Java version
     vm_args.nOptions = 2;              // number of options
     vm_args.options = options;
@@ -47,6 +47,10 @@ int main(int argc, char const *argv[])
         jfieldID slv_field = env->GetStaticFieldID(app_class, "SOLVER", "Lit/cnr/istc/pst/oratio/Solver;");
         jobject j_solver = env->GetStaticObjectField(app_class, slv_field);
         solver *s = reinterpret_cast<solver *>(env->GetLongField(j_solver, env->GetFieldID(env->GetObjectClass(j_solver), "native_handle", "J")));
+
+        jfieldID exec_field = env->GetStaticFieldID(app_class, "TL_EXEC", "Lit/cnr/istc/pst/oratio/timelines/TimelinesExecutor;");
+        jobject j_exec = env->GetStaticObjectField(app_class, exec_field);
+        executor *exec = reinterpret_cast<executor *>(env->GetLongField(j_exec, env->GetFieldID(env->GetObjectClass(j_exec), "native_handle", "J")));
 
         std::cout << "parsing input files..\n";
         s->read(prob_names);
