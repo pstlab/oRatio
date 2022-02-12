@@ -1,4 +1,4 @@
-add_executable(oRatioServer main.cpp)
+add_executable(oRatioServer main.cpp gui_server.cpp)
 
 find_package(Crow)
 

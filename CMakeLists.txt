@@ -22,7 +22,7 @@ option(BUILD_GUI_SERVER "Builds the server" OFF)
 
 option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
 
-if(BUILD_JAVA_API OR BUILD_PYTHON_API)
+if(BUILD_JAVA_API OR BUILD_PYTHON_API OR BUILD_GUI_SERVER)
     set(BUILD_EXECUTOR TRUE)
 endif()
 

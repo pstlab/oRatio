@@ -7,10 +7,6 @@
 #include <chrono>
 #include <sstream>
 
-#define AT "at"
-#define START "start"
-#define END "end"
-
 using namespace smt;
 
 namespace ratio

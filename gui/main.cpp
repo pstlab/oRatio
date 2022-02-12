@@ -1,5 +1,4 @@
-#include "executor.h"
-#include <crow.h>
+#include "gui_server.h"
 
 int main(int argc, char const *argv[])
 {
@@ -17,19 +16,7 @@ int main(int argc, char const *argv[])
     // the solution file..
     std::string sol_name = argv[argc - 1];
 
-    crow::SimpleApp app;
-    CROW_ROUTE(app, "/")
-    ([]()
-     { 
-        crow::mustache::context ctx;
-        return crow::mustache::load("index.html").render(ctx); });
-
-    CROW_ROUTE(app, "/ws")
-        .websocket()
-        .onopen([&](crow::websocket::connection &conn) {})
-        .onclose([&](crow::websocket::connection &conn, const std::string &reason) {})
-        .onmessage([&](crow::websocket::connection &conn, const std::string &data, bool is_binary) {});
-
-    app.port(8080).multithreaded().run();
+    ratio::gui_server srv;
+    srv.start();
     return 0;
 }
