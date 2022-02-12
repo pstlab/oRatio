@@ -3,6 +3,7 @@
 #include "core_listener.h"
 #include "solver_listener.h"
 #include "executor_listener.h"
+#include <crow.h>
 
 namespace ratio
 {
@@ -49,5 +50,6 @@ namespace ratio
   private:
     solver slv;
     executor exec;
+    crow::SimpleApp app;
   };
 } // namespace ratio

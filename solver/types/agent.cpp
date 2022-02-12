@@ -86,7 +86,7 @@ namespace ratio
 
             for (const auto &atm : atms)
             {
-                arith_expr s_expr = get_solver().is_impulse(*atm) ? atm->get(AT) : atm->get(START);
+                arith_expr s_expr = get_solver().is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_START);
                 inf_rational start = get_core().arith_value(s_expr);
                 starting_atoms[start].insert(atm);
                 pulses.insert(start);

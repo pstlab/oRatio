@@ -56,8 +56,8 @@ namespace ratio
     {
         gr.init();
         read(INIT_STRING);
-        imp_pred = &get_predicate(IMPULSE);
-        int_pred = &get_predicate(INTERVAL);
+        imp_pred = &get_predicate(RATIO_IMPULSE);
+        int_pred = &get_predicate(RATIO_INTERVAL);
         new_types({new state_variable(*this),
                    new reusable_resource(*this),
                    new agent(*this)});
@@ -604,7 +604,7 @@ namespace ratio
                 for (const auto &atm : p->get_instances())
                     if (&atm->get_type().get_core() != this && bool_value(static_cast<atom &>(*atm).get_sigma()) == True)
                     {
-                        arith_expr s_expr = is_impulse(*p) ? atm->get(AT) : atm->get(START);
+                        arith_expr s_expr = is_impulse(*p) ? atm->get(RATIO_AT) : atm->get(RATIO_START);
                         inf_rational start = arith_value(s_expr);
                         starting_atoms[start].insert(dynamic_cast<atom *>(&*atm));
                         pulses.insert(start);

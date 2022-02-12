@@ -33,7 +33,7 @@ namespace ratio
                 for (const auto &atm : starting_atms->second)
                     if (const auto at_atm = dont_start.find(atm); at_atm != dont_start.end())
                     { // this starting atom is not ready to be started..
-                        const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(AT) : atm->get(START);
+                        const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_START);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         lbs[atm].emplace(&*xpr, lb);
                         if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma())))
@@ -49,7 +49,7 @@ namespace ratio
                 for (const auto &atm : ending_atms->second)
                     if (const auto at_atm = dont_end.find(atm); at_atm != dont_end.end())
                     { // this ending atom is not ready to be ended..
-                        const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(AT) : atm->get(END);
+                        const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_END);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         lbs[atm].emplace(&*xpr, lb);
                         if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma())))
@@ -76,7 +76,7 @@ namespace ratio
             { // we freeze the start of the starting atoms..
                 for (auto &atm : starting_atms->second)
                 {
-                    arith_expr start = atm->get(START);
+                    arith_expr start = atm->get(RATIO_START);
                     freeze(*atm, start);
                 }
                 // we notify that some atoms are starting their execution..
@@ -88,12 +88,12 @@ namespace ratio
                 for (auto &atm : ending_atms->second)
                     if (slv.is_impulse(*atm)) // we have an impulsive atom..
                     {
-                        arith_expr at = atm->get(AT);
+                        arith_expr at = atm->get(RATIO_AT);
                         freeze(*atm, at);
                     }
                     else if (slv.is_interval(*atm)) // we have an interval atom..
                     {
-                        arith_expr end = atm->get(END);
+                        arith_expr end = atm->get(RATIO_END);
                         freeze(*atm, end);
                     }
                 // we notify that some atoms are ending their execution..
@@ -164,13 +164,13 @@ namespace ratio
             case True: // the atom is already active..
                 if (slv.is_interval(atm))
                 { // we have an interval atom..
-                    arith_expr s_expr = atm.get(START);
+                    arith_expr s_expr = atm.get(RATIO_START);
                     if (!slv.get_sat_core().new_clause({slv.geq(s_expr, slv.new_real(current_time))->l}))
                         throw execution_exception();
                 }
                 else if (slv.is_impulse(atm))
                 { // we have an impulsive atom..
-                    arith_expr at_expr = atm.get(AT);
+                    arith_expr at_expr = atm.get(RATIO_AT);
                     if (!slv.get_sat_core().new_clause({slv.geq(at_expr, slv.new_real(current_time))->l}))
                         throw execution_exception();
                 }
@@ -179,12 +179,12 @@ namespace ratio
             case Undefined:
                 if (slv.is_interval(atm))
                 { // we have an interval atom..
-                    arith_expr s_expr = atm.get(START);
+                    arith_expr s_expr = atm.get(RATIO_START);
                     lbs[&atm].emplace(&*s_expr, current_time);
                 }
                 else if (slv.is_impulse(atm))
                 { // we have an impulsive atom..
-                    arith_expr at_expr = atm.get(AT);
+                    arith_expr at_expr = atm.get(RATIO_AT);
                     lbs[&atm].emplace(&*at_expr, current_time);
                 }
                 bind(af->get_atom().get_sigma());
@@ -210,7 +210,7 @@ namespace ratio
                 { // the atom is active..
                     if (slv.is_impulse(c_atm))
                     {
-                        arith_expr at_expr = atm->get(AT);
+                        arith_expr at_expr = atm->get(RATIO_AT);
                         inf_rational at = slv.arith_value(at_expr);
                         if (at < current_time)
                             continue; // this atom is already in the past..
@@ -220,8 +220,8 @@ namespace ratio
                     }
                     else if (slv.is_interval(c_atm))
                     {
-                        arith_expr s_expr = atm->get(START);
-                        arith_expr e_expr = atm->get(END);
+                        arith_expr s_expr = atm->get(RATIO_START);
+                        arith_expr e_expr = atm->get(RATIO_END);
                         inf_rational end = slv.arith_value(e_expr);
                         if (end < current_time)
                             continue; // this atom is already in the past..

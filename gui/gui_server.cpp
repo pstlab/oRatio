@@ -4,10 +4,22 @@ namespace ratio
 {
     gui_server::gui_server() : slv(), exec(slv), core_listener(slv), solver_listener(slv), executor_listener(exec)
     {
+        CROW_ROUTE(app, "/")
+        ([]()
+         { 
+        crow::mustache::context ctx;
+        ctx["name"] = "oRatio";
+        return crow::mustache::load("index.html").render(ctx); });
+
+        CROW_ROUTE(app, "/ws")
+            .websocket()
+            .onopen([&](crow::websocket::connection &conn) {})
+            .onclose([&](crow::websocket::connection &conn, const std::string &reason) {})
+            .onmessage([&](crow::websocket::connection &conn, const std::string &data, bool is_binary) {});
     }
     gui_server::~gui_server() {}
 
-    void gui_server::start() {}
+    void gui_server::start() { app.port(8080).multithreaded().run(); }
 
     void gui_server::log(const std::string &msg) {}
     void gui_server::read(const std::string &script) {}

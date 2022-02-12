@@ -59,8 +59,8 @@ namespace ratio
 
             for (const auto &atm : atms)
             {
-                arith_expr s_expr = atm->get(START);
-                arith_expr e_expr = atm->get(END);
+                arith_expr s_expr = atm->get(RATIO_START);
+                arith_expr e_expr = atm->get(RATIO_END);
                 inf_rational start = get_core().arith_value(s_expr);
                 inf_rational end = get_core().arith_value(e_expr);
                 starting_atoms[start].insert(atm);
@@ -125,10 +125,10 @@ namespace ratio
                             std::vector<std::pair<lit, double>> choices;
                             for (const auto &as : combinations(std::vector<atom *>(c_mcs.cbegin(), c_mcs.cend()), 2))
                             {
-                                arith_expr a0_start = as[0]->get(START);
-                                arith_expr a0_end = as[0]->get(END);
-                                arith_expr a1_start = as[1]->get(START);
-                                arith_expr a1_end = as[1]->get(END);
+                                arith_expr a0_start = as[0]->get(RATIO_START);
+                                arith_expr a0_end = as[0]->get(RATIO_END);
+                                arith_expr a1_start = as[1]->get(RATIO_START);
+                                arith_expr a1_end = as[1]->get(RATIO_END);
 
                                 if (auto a0_it = leqs.find(as[0]); a0_it != leqs.cend())
                                     if (auto a0_a1_it = a0_it->second.find(as[1]); a0_a1_it != a0_it->second.cend())
@@ -235,10 +235,10 @@ namespace ratio
 
     void reusable_resource::store_variables(atom &atm0, atom &atm1)
     {
-        arith_expr a0_start = atm0.get(START);
-        arith_expr a0_end = atm0.get(END);
-        arith_expr a1_start = atm1.get(START);
-        arith_expr a1_end = atm1.get(END);
+        arith_expr a0_start = atm0.get(RATIO_START);
+        arith_expr a0_end = atm0.get(RATIO_END);
+        arith_expr a1_start = atm1.get(RATIO_START);
+        arith_expr a1_end = atm1.get(RATIO_END);
 
         expr a0_tau = atm0.get(TAU);
         expr a1_tau = atm1.get(TAU);
@@ -319,7 +319,7 @@ namespace ratio
 
     reusable_resource::rr_constructor::rr_constructor(reusable_resource &rr) : constructor(rr.get_core(), rr, {new field(rr.get_core().get_type(REAL_KEYWORD), REUSABLE_RESOURCE_CAPACITY)}, {{REUSABLE_RESOURCE_CAPACITY, {static_cast<const ast::expression *>(new ast::id_expression({riddle::id_token(0, 0, 0, 0, REUSABLE_RESOURCE_CAPACITY)}))}}}, {static_cast<const ast::statement *>(new ast::expression_statement(static_cast<const ast::expression *>(new ast::geq_expression(static_cast<const ast::expression *>(new ast::id_expression({riddle::id_token(0, 0, 0, 0, REUSABLE_RESOURCE_CAPACITY)})), static_cast<const ast::expression *>(new ast::real_literal_expression(riddle::real_token(0, 0, 0, 0, rational::ZERO)))))))}) {}
 
-    reusable_resource::use_predicate::use_predicate(reusable_resource &rr) : predicate(rr.get_core(), rr, REUSABLE_RESOURCE_USE_PREDICATE_NAME, {new field(rr.get_core().get_type(REAL_KEYWORD), REUSABLE_RESOURCE_USE_AMOUNT_NAME)}, {static_cast<const ast::statement *>(new ast::expression_statement(static_cast<const ast::expression *>(new ast::geq_expression(static_cast<const ast::expression *>(new ast::id_expression({riddle::id_token(0, 0, 0, 0, REUSABLE_RESOURCE_USE_AMOUNT_NAME)})), static_cast<const ast::expression *>(new ast::real_literal_expression(riddle::real_token(0, 0, 0, 0, rational::ZERO)))))))}) { new_supertypes({&rr.get_core().get_predicate(INTERVAL)}); }
+    reusable_resource::use_predicate::use_predicate(reusable_resource &rr) : predicate(rr.get_core(), rr, REUSABLE_RESOURCE_USE_PREDICATE_NAME, {new field(rr.get_core().get_type(REAL_KEYWORD), REUSABLE_RESOURCE_USE_AMOUNT_NAME)}, {static_cast<const ast::statement *>(new ast::expression_statement(static_cast<const ast::expression *>(new ast::geq_expression(static_cast<const ast::expression *>(new ast::id_expression({riddle::id_token(0, 0, 0, 0, REUSABLE_RESOURCE_USE_AMOUNT_NAME)})), static_cast<const ast::expression *>(new ast::real_literal_expression(riddle::real_token(0, 0, 0, 0, rational::ZERO)))))))}) { new_supertypes({&rr.get_core().get_predicate(RATIO_INTERVAL)}); }
 
     reusable_resource::rr_atom_listener::rr_atom_listener(reusable_resource &rr, atom &atm) : atom_listener(atm), rr(rr) {}
 
@@ -450,8 +450,8 @@ namespace ratio
 
             for (const auto &atm : atms)
             {
-                arith_expr s_expr = atm->get(START);
-                arith_expr e_expr = atm->get(END);
+                arith_expr s_expr = atm->get(RATIO_START);
+                arith_expr e_expr = atm->get(RATIO_END);
                 inf_rational start = get_core().arith_value(s_expr);
                 inf_rational end = get_core().arith_value(e_expr);
                 starting_atoms[start].insert(atm);

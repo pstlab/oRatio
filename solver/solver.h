@@ -4,11 +4,11 @@
 #include "core.h"
 #include "timelines_extractor.h"
 
-#define AT "at"
-#define START "start"
-#define END "end"
-#define IMPULSE "Impulse"
-#define INTERVAL "Interval"
+#define RATIO_AT "at"
+#define RATIO_START "start"
+#define RATIO_END "end"
+#define RATIO_IMPULSE "Impulse"
+#define RATIO_INTERVAL "Interval"
 
 #ifdef BUILD_LISTENERS
 #define FIRE_NEW_FLAW(f) fire_new_flaw(f)
