@@ -4,6 +4,7 @@
 #include "solver_listener.h"
 #include "executor_listener.h"
 #include <crow.h>
+#include <mutex>
 
 namespace ratio
 {
@@ -13,6 +14,9 @@ namespace ratio
   public:
     gui_server();
     ~gui_server();
+
+    solver &get_solver() { return slv; }
+    executor &get_executor() { return exec; }
 
     void start();
 
@@ -51,5 +55,6 @@ namespace ratio
     solver slv;
     executor exec;
     crow::SimpleApp app;
+    std::mutex mtx;
   };
 } // namespace ratio

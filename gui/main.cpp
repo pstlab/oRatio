@@ -18,5 +18,24 @@ int main(int argc, char const *argv[])
 
     ratio::gui_server srv;
     srv.start();
+
+    try
+    {
+        std::cout << "parsing input files..\n";
+        srv.get_solver().read(prob_names);
+
+        std::cout << "solving the problem..\n";
+        srv.get_solver().solve();
+        std::cout << "hurray!! we have found a solution..\n";
+
+        std::ofstream sol_file;
+        sol_file.open(sol_name);
+        sol_file << srv.get_solver();
+        sol_file.close();
+    }
+    catch (const std::exception &ex)
+    {
+        std::cout << ex.what() << '\n';
+    }
     return 0;
 }
