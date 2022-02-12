@@ -22,10 +22,6 @@ option(BUILD_GUI_SERVER "Builds the server" OFF)
 
 option(OPTIMIZE_FOR_NATIVE_ARCH "Optimize for native arch" OFF)
 
-if(BUILD_GUI_SERVER)
-    set(BUILD_JAVA_API ${BUILD_GUI_SERVER})
-endif()
-
 if(BUILD_JAVA_API OR BUILD_PYTHON_API)
     set(BUILD_EXECUTOR TRUE)
 endif()
@@ -67,7 +63,7 @@ endif()
 
 message(STATUS "Build server:             ${BUILD_GUI_SERVER}")
 if(BUILD_GUI_SERVER)
-    add_subdirectory(gui/src/main/cpp)
+    add_subdirectory(gui)
 endif()
 
 message(STATUS "Verbose log:              ${VERBOSE_LOG}")
