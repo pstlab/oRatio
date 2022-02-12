@@ -15,7 +15,6 @@ option(VERBOSE_LOG "Makes log more verbose" OFF)
 option(PARALLELIZE "Performs some activities in parallel" OFF)
 
 option(BUILD_EXECUTOR "Builds the executor" OFF)
-option(BUILD_ROS_TOOLS "Builds the ROS tools" OFF)
 
 option(BUILD_JAVA_API "Builds the Java API" OFF)
 option(BUILD_PYTHON_API "Builds the Python API" OFF)
@@ -54,11 +53,6 @@ message(STATUS "Build executor:           ${BUILD_EXECUTOR}")
 if(BUILD_EXECUTOR)
     add_subdirectory(executor)
     target_compile_definitions(solver PUBLIC BUILD_EXECUTOR)
-endif()
-
-message(STATUS "Build ROS tools:          ${BUILD_ROS_TOOLS}")
-if(BUILD_ROS_TOOLS)
-    add_subdirectory(executor/ros)
 endif()
 
 message(STATUS "Build Java API:           ${BUILD_JAVA_API}")
