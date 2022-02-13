@@ -2,7 +2,7 @@
 
 namespace ratio
 {
-    gui_server::gui_server() : slv(), exec(slv), core_listener(slv), solver_listener(slv), executor_listener(exec)
+    gui_server::gui_server(executor &exec, const std::string &host, const unsigned short port) : exec(exec), host(host), port(port), core_listener(exec.get_solver()), solver_listener(exec.get_solver()), executor_listener(exec)
     {
         CROW_ROUTE(app, "/")
         ([]()
@@ -22,12 +22,9 @@ namespace ratio
     }
     gui_server::~gui_server() { std::lock_guard<std::mutex> _(mtx); }
 
-    void gui_server::start()
-    {
-        auto _ = std::async(std::launch::async, [&]
-                            { app.port(8080).multithreaded().run(); });
-        app.wait_for_server_start();
-    }
+    void gui_server::start() { app.bindaddr(host).port(port).run(); }
+    void gui_server::wait_for_server_start() { app.wait_for_server_start(); }
+    void gui_server::stop() { app.stop(); }
 
     void gui_server::log(const std::string &msg) { std::lock_guard<std::mutex> _(mtx); }
     void gui_server::read(const std::string &script) { std::lock_guard<std::mutex> _(mtx); }

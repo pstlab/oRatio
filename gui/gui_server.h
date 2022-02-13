@@ -12,13 +12,15 @@ namespace ratio
   class gui_server : public core_listener, public solver_listener, public executor_listener
   {
   public:
-    gui_server();
+    gui_server(executor &exec, const std::string &host = "127.0.0.1", const unsigned short port = 8080);
     ~gui_server();
 
     solver &get_solver() { return slv; }
     executor &get_executor() { return exec; }
 
     void start();
+    void wait_for_server_start();
+    void stop();
 
   private:
     void log(const std::string &msg) override;
@@ -52,8 +54,9 @@ namespace ratio
     void end(const std::unordered_set<atom *> &atoms) override;
 
   private:
-    solver slv;
-    executor exec;
+    executor &exec;
+    const std::string host;
+    const unsigned short port;
     crow::SimpleApp app;
     std::mutex mtx;
   };
