@@ -8,7 +8,7 @@ namespace ratio
         ([]()
          { 
         crow::mustache::context ctx;
-        ctx["name"] = "oRatio";
+        ctx["title"] = "oRatio";
         return crow::mustache::load("index.html").render(ctx); });
 
         CROW_ROUTE(app, "/ws")
