@@ -20,14 +20,16 @@ function setup_ws() {
     solver_ws.onmessage = msg => {
         const c_msg = JSON.parse(msg.data);
         switch (c_msg.type) {
-            case 'StartedSolving':
+            case 'started_solving':
                 console.log('solving the problem..');
                 break;
-            case 'SolutionFound':
+            case 'solution_found':
                 console.log('hurray!! we have found a solution..');
                 break;
-            case 'InconsistentProblem':
+            case 'inconsistent_problem':
                 console.log('the problem has no solution..');
+                break;
+            case 'flaw_created':
                 break;
         }
     };

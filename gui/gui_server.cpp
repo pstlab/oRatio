@@ -1,4 +1,5 @@
 #include "gui_server.h"
+#include "json.h"
 
 namespace ratio
 {
@@ -33,37 +34,274 @@ namespace ratio
     void gui_server::started_solving()
     {
         std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_ss;
+        j_ss->set("type", new smt::string_val("started_solving"));
+
+        std::stringstream ss;
+        j_ss.to_json(ss);
         for (const auto &u : users)
-            u->send_text("{\"type\": \"StartedSolving\"}");
+            u->send_text(ss.str());
     }
     void gui_server::solution_found()
     {
         std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_sf;
+        j_sf->set("type", new smt::string_val("solution_found"));
+
+        std::stringstream ss;
+        j_sf.to_json(ss);
         for (const auto &u : users)
-            u->send_text("{\"type\": \"SolutionFound\"}");
+            u->send_text(ss.str());
     }
     void gui_server::inconsistent_problem()
     {
         std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_ip;
+        j_ip->set("type", new smt::string_val("inconsistent_problem"));
+
+        std::stringstream ss;
+        j_ip.to_json(ss);
         for (const auto &u : users)
-            u->send_text("{\"type\": \"Inconsistent Problem\"}");
+            u->send_text(ss.str());
     }
 
-    void gui_server::flaw_created(const flaw &f) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::flaw_state_changed(const flaw &f) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::flaw_cost_changed(const flaw &f) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::flaw_position_changed(const flaw &f) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::current_flaw(const flaw &f) { std::lock_guard<std::mutex> _(mtx); }
+    void gui_server::flaw_created(const flaw &f)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+        flaws.insert(&f);
 
-    void gui_server::resolver_created(const resolver &r) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::resolver_state_changed(const resolver &r) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::current_resolver(const resolver &r) { std::lock_guard<std::mutex> _(mtx); }
+        smt::json j_fc;
+        j_fc->set("type", new smt::string_val("flaw_created"));
+        j_fc->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
+        std::vector<smt::json> causes;
+        for (const auto &c : f.get_causes())
+            causes.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(c)));
+        j_fc->set("causes", new smt::array_val(causes));
+        std::istringstream istr(f.get_label());
+        j_fc->set("label", smt::json::from_json(istr));
+        j_fc->set("state", new smt::long_val(slv.get_sat_core().value(f.get_phi())));
+        const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
+        std::vector<smt::json> pos;
+        pos.push_back(new smt::long_val(lb));
+        pos.push_back(new smt::long_val(ub));
+        j_fc->set("pos", new smt::array_val(pos));
 
-    void gui_server::causal_link_added(const flaw &f, const resolver &r) { std::lock_guard<std::mutex> _(mtx); }
+        std::stringstream ss;
+        j_fc.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::flaw_state_changed(const flaw &f)
+    {
+        std::lock_guard<std::mutex> _(mtx);
 
-    void gui_server::tick(const smt::rational &time) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::starting(const std::unordered_set<atom *> &atoms) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::start(const std::unordered_set<atom *> &atoms) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::ending(const std::unordered_set<atom *> &atoms) { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::end(const std::unordered_set<atom *> &atoms) { std::lock_guard<std::mutex> _(mtx); }
+        smt::json j_fsc;
+        j_fsc->set("type", new smt::string_val("flaw_state_changed"));
+        j_fsc->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
+        j_fsc->set("state", new smt::long_val(slv.get_sat_core().value(f.get_phi())));
+
+        std::stringstream ss;
+        j_fsc.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::flaw_cost_changed(const flaw &f)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_cc;
+        j_cc->set("type", new smt::string_val("flaw_cost_changed"));
+        j_cc->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
+        const auto est_cost = f.get_estimated_cost();
+        smt::json j_cost;
+        j_cost->set("num", new smt::long_val(est_cost.numerator()));
+        j_cost->set("den", new smt::long_val(est_cost.denominator()));
+        j_cc->set("cost", j_cost);
+
+        std::stringstream ss;
+        j_cc.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::flaw_position_changed(const flaw &f)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_fpc;
+        j_fpc->set("type", new smt::string_val("flaw_position_changed"));
+        j_fpc->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
+        const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
+        std::vector<smt::json> pos;
+        pos.push_back(new smt::long_val(lb));
+        pos.push_back(new smt::long_val(ub));
+        j_fpc->set("pos", new smt::array_val(pos));
+
+        std::stringstream ss;
+        j_fpc.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::current_flaw(const flaw &f)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_cf;
+        j_cf->set("type", new smt::string_val("current_flaw"));
+        j_cf->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
+
+        std::stringstream ss;
+        j_cf.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+
+    void gui_server::resolver_created(const resolver &r)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+        resolvers.insert(&r);
+
+        smt::json j_rc;
+        j_rc->set("type", new smt::string_val("resolver_created"));
+        j_rc->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r)));
+        j_rc->set("effect", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r.get_effect())));
+        std::istringstream istr(r.get_label());
+        j_rc->set("label", smt::json::from_json(istr));
+        const auto intr_cost = r.get_intrinsic_cost();
+        smt::json j_cost;
+        j_cost->set("num", new smt::long_val(intr_cost.numerator()));
+        j_cost->set("den", new smt::long_val(intr_cost.denominator()));
+        j_rc->set("intrinsic-cost", j_cost);
+        j_rc->set("state", new smt::long_val(slv.get_sat_core().value(r.get_rho())));
+
+        std::stringstream ss;
+        j_rc.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::resolver_state_changed(const resolver &r)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_rsc;
+        j_rsc->set("type", new smt::string_val("resolver_state_changed"));
+        j_rsc->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r)));
+        j_rsc->set("state", new smt::long_val(slv.get_sat_core().value(r.get_rho())));
+
+        std::stringstream ss;
+        j_rsc.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::current_resolver(const resolver &r)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_cr;
+        j_cr->set("type", new smt::string_val("current_resolver"));
+        j_cr->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r)));
+
+        std::stringstream ss;
+        j_cr.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+
+    void gui_server::causal_link_added(const flaw &f, const resolver &r)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_cla;
+        j_cla->set("type", new smt::string_val("causal_link_added"));
+        j_cla->set("flaw-id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
+        j_cla->set("resolver-id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r)));
+
+        std::stringstream ss;
+        j_cla.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+
+    void gui_server::tick(const smt::rational &time)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_t;
+        j_t->set("type", new smt::string_val("tick"));
+        smt::json j_time;
+        j_time->set("num", new smt::long_val(time.numerator()));
+        j_time->set("den", new smt::long_val(time.denominator()));
+        j_t->set("time", j_time);
+
+        std::stringstream ss;
+        j_t.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::starting(const std::unordered_set<atom *> &atoms)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_st;
+        j_st->set("type", new smt::string_val("starting"));
+        std::vector<smt::json> causes;
+        for (const auto &a : atoms)
+            causes.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(a)));
+        j_st->set("starting", new smt::array_val(causes));
+
+        std::stringstream ss;
+        j_st.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::start(const std::unordered_set<atom *> &atoms)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_st;
+        j_st->set("type", new smt::string_val("start"));
+        std::vector<smt::json> causes;
+        for (const auto &a : atoms)
+            causes.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(a)));
+        j_st->set("start", new smt::array_val(causes));
+
+        std::stringstream ss;
+        j_st.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::ending(const std::unordered_set<atom *> &atoms)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_st;
+        j_st->set("type", new smt::string_val("ending"));
+        std::vector<smt::json> causes;
+        for (const auto &a : atoms)
+            causes.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(a)));
+        j_st->set("ending", new smt::array_val(causes));
+
+        std::stringstream ss;
+        j_st.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
+    void gui_server::end(const std::unordered_set<atom *> &atoms)
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_st;
+        j_st->set("type", new smt::string_val("end"));
+        std::vector<smt::json> causes;
+        for (const auto &a : atoms)
+            causes.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(a)));
+        j_st->set("end", new smt::array_val(causes));
+
+        std::stringstream ss;
+        j_st.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
 } // namespace ratio

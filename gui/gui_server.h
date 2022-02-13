@@ -55,6 +55,10 @@ namespace ratio
 
   private:
     executor &exec;
+    std::unordered_set<const flaw *> flaws;
+    const flaw *c_flaw = nullptr;
+    std::unordered_set<const resolver *> resolvers;
+    const resolver *c_resolver = nullptr;
     const std::string host;
     const unsigned short port;
     crow::SimpleApp app;
