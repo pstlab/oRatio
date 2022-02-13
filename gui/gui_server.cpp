@@ -6,21 +6,19 @@ namespace ratio
     {
         CROW_ROUTE(app, "/")
         ([]()
-         { 
-        crow::mustache::context ctx;
-        ctx["title"] = "oRatio";
-        return crow::mustache::load("index.html").render(ctx); });
+         {
+            crow::mustache::context ctx;
+            ctx["title"] = "oRatio";
+            return crow::mustache::load("index.html").render(ctx); });
 
-        CROW_ROUTE(app, "/ws")
+        CROW_ROUTE(app, "/solver")
             .websocket()
             .onopen([&](crow::websocket::connection &conn)
-                    { std::lock_guard<std::mutex> _(mtx); })
+                    { std::lock_guard<std::mutex> _(mtx); users.insert(&conn); })
             .onclose([&](crow::websocket::connection &conn, const std::string &reason)
-                     { std::lock_guard<std::mutex> _(mtx); })
-            .onmessage([&](crow::websocket::connection &conn, const std::string &data, bool is_binary)
-                       { std::lock_guard<std::mutex> _(mtx); });
+                     { std::lock_guard<std::mutex> _(mtx); users.erase(&conn); });
     }
-    gui_server::~gui_server() { std::lock_guard<std::mutex> _(mtx); }
+    gui_server::~gui_server() {}
 
     void gui_server::start() { app.bindaddr(host).port(port).run(); }
     void gui_server::wait_for_server_start() { app.wait_for_server_start(); }
@@ -32,9 +30,24 @@ namespace ratio
 
     void gui_server::state_changed() { std::lock_guard<std::mutex> _(mtx); }
 
-    void gui_server::started_solving() { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::solution_found() { std::lock_guard<std::mutex> _(mtx); }
-    void gui_server::inconsistent_problem() { std::lock_guard<std::mutex> _(mtx); }
+    void gui_server::started_solving()
+    {
+        std::lock_guard<std::mutex> _(mtx);
+        for (const auto &u : users)
+            u->send_text("{\"type\": \"StartedSolving\"}");
+    }
+    void gui_server::solution_found()
+    {
+        std::lock_guard<std::mutex> _(mtx);
+        for (const auto &u : users)
+            u->send_text("{\"type\": \"SolutionFound\"}");
+    }
+    void gui_server::inconsistent_problem()
+    {
+        std::lock_guard<std::mutex> _(mtx);
+        for (const auto &u : users)
+            u->send_text("{\"type\": \"Inconsistent Problem\"}");
+    }
 
     void gui_server::flaw_created(const flaw &f) { std::lock_guard<std::mutex> _(mtx); }
     void gui_server::flaw_state_changed(const flaw &f) { std::lock_guard<std::mutex> _(mtx); }

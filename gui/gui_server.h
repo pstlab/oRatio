@@ -58,6 +58,7 @@ namespace ratio
     const std::string host;
     const unsigned short port;
     crow::SimpleApp app;
+    std::unordered_set<crow::websocket::connection *> users;
     std::mutex mtx;
   };
 } // namespace ratio

@@ -41,6 +41,8 @@ int main(int argc, char const *argv[])
                              { srv.start(); });
     srv.wait_for_server_start();
 
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     try
     {
         std::cout << "parsing input files..\n";
