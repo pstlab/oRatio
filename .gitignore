@@ -6,3 +6,4 @@ target
 .settings
 .project
 dependency-reduced-pom.xml
+solution.json

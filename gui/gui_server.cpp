@@ -38,10 +38,10 @@ namespace ratio
                 j_f->set("label", smt::json::from_json(istr));
                 j_f->set("state", new smt::long_val(slv.get_sat_core().value(f->get_phi())));
                 const auto [lb, ub] = slv.get_idl_theory().bounds(f->get_position());
-                std::vector<smt::json> pos;
-                pos.push_back(new smt::long_val(lb));
-                pos.push_back(new smt::long_val(ub));
-                j_f->set("pos", new smt::array_val(pos));
+                smt::json j_pos;
+                j_pos->set("lb", new smt::long_val(lb));
+                j_pos->set("ub", new smt::long_val(ub));
+                j_f->set("pos", j_pos);
                 j_flaws.push_back(j_f);
             }
             j_gr->set("flaws", new smt::array_val(j_flaws));
@@ -141,10 +141,10 @@ namespace ratio
         j_fc->set("label", smt::json::from_json(istr));
         j_fc->set("state", new smt::long_val(slv.get_sat_core().value(f.get_phi())));
         const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
-        std::vector<smt::json> pos;
-        pos.push_back(new smt::long_val(lb));
-        pos.push_back(new smt::long_val(ub));
-        j_fc->set("pos", new smt::array_val(pos));
+        smt::json j_pos;
+        j_pos->set("lb", new smt::long_val(lb));
+        j_pos->set("ub", new smt::long_val(ub));
+        j_fc->set("pos", j_pos);
 
         std::stringstream ss;
         j_fc.to_json(ss);
@@ -230,7 +230,7 @@ namespace ratio
         smt::json j_cost;
         j_cost->set("num", new smt::long_val(intr_cost.numerator()));
         j_cost->set("den", new smt::long_val(intr_cost.denominator()));
-        j_rc->set("intrinsic-cost", j_cost);
+        j_rc->set("intrinsic_cost", j_cost);
         j_rc->set("state", new smt::long_val(slv.get_sat_core().value(r.get_rho())));
 
         std::stringstream ss;
@@ -272,8 +272,8 @@ namespace ratio
 
         smt::json j_cla;
         j_cla->set("type", new smt::string_val("causal_link_added"));
-        j_cla->set("flaw-id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
-        j_cla->set("resolver-id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r)));
+        j_cla->set("flaw_id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
+        j_cla->set("resolver_id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r)));
 
         std::stringstream ss;
         j_cla.to_json(ss);
