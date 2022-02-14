@@ -12,6 +12,63 @@ namespace ratio
             ctx["title"] = "oRatio";
             return crow::mustache::load("index.html").render(ctx); });
 
+        CROW_ROUTE(app, "/timelines")
+        ([&]()
+         {
+            std::lock_guard<std::mutex> _(mtx);
+            std::stringstream ss;
+            slv.extract_timelines().to_json(ss);
+            return ss.str(); });
+
+        CROW_ROUTE(app, "/graph")
+        ([&]()
+         {
+            std::lock_guard<std::mutex> _(mtx);
+            smt::json j_gr;
+            std::vector<smt::json> j_flaws;
+            for (const auto &f : flaws)
+            {
+                smt::json j_f;
+                j_f->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(f)));
+                std::vector<smt::json> causes;
+                for (const auto &c : f->get_causes())
+                    causes.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(c)));
+                j_f->set("causes", new smt::array_val(causes));
+                std::istringstream istr(f->get_label());
+                j_f->set("label", smt::json::from_json(istr));
+                j_f->set("state", new smt::long_val(slv.get_sat_core().value(f->get_phi())));
+                const auto [lb, ub] = slv.get_idl_theory().bounds(f->get_position());
+                std::vector<smt::json> pos;
+                pos.push_back(new smt::long_val(lb));
+                pos.push_back(new smt::long_val(ub));
+                j_f->set("pos", new smt::array_val(pos));
+                j_flaws.push_back(j_f);
+            }
+            j_gr->set("flaws", new smt::array_val(j_flaws));
+            if (c_flaw)
+                j_gr->set("current-flaw", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_flaw)));
+            std::vector<smt::json> j_resolvers;
+            for (const auto &r : resolvers)
+            {
+                smt::json j_r;
+                j_r->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(r)));
+                j_r->set("effect", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r->get_effect())));
+                std::istringstream istr(r->get_label());
+                j_r->set("label", smt::json::from_json(istr));
+                const auto intr_cost = r->get_intrinsic_cost();
+                smt::json j_cost;
+                j_cost->set("num", new smt::long_val(intr_cost.numerator()));
+                j_cost->set("den", new smt::long_val(intr_cost.denominator()));
+                j_r->set("intrinsic-cost", j_cost);
+                j_r->set("state", new smt::long_val(slv.get_sat_core().value(r->get_rho())));
+            }
+            j_gr->set("resolvers", new smt::array_val(j_resolvers));
+            if (c_resolver)
+                j_gr->set("current-resolver", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_resolver)));
+            std::stringstream ss;
+            j_gr.to_json(ss);
+            return ss.str(); });
+
         CROW_ROUTE(app, "/solver")
             .websocket()
             .onopen([&](crow::websocket::connection &conn)
