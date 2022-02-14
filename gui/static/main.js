@@ -29,43 +29,76 @@ function setup_ws() {
             case 'inconsistent_problem':
                 console.log('the problem has no solution..');
                 break;
-            case 'flaw_created':
-                c_msg['cost'] = { num: 1, den: 0 };
+            case 'flaw_created': {
+                c_msg.cost = { num: 1, den: 0 };
                 const flaw = {
-                    id: c_msg['id'],
+                    id: c_msg.id,
                     label: flaw_label(c_msg),
                     title: flaw_tooltip(c_msg),
+                    shapeProperties: { borderDashes: stroke_dasharray(c_msg) },
                     data: c_msg
                 };
                 nodes.add(flaw);
                 const causes = [];
-                for (const c of c_msg['causes'])
+                for (const c of c_msg.causes)
                     causes.push({
-                        from: c_msg['id'],
+                        from: c_msg.id,
                         to: c,
-                        arrows: { to: true }
+                        arrows: { to: true },
+                        dashes: stroke_dasharray(c_msg)
                     });
                 edges.add(causes);
                 break;
-            case 'resolver_created':
+            }
+            case 'flaw_state_changed': {
+                const flaw = nodes.get(c_msg.id);
+                flaw.data.state = c_msg.state;
+                flaw.shapeProperties.borderDashes = stroke_dasharray(c_msg);
+                nodes.update(flaw);
+                break;
+            }
+            case 'resolver_created': {
                 const resolver = {
-                    id: c_msg['id'],
+                    id: c_msg.id,
                     label: resolver_label(c_msg),
                     title: resolver_tooltip(c_msg),
                     shape: 'box',
+                    shapeProperties: { borderDashes: stroke_dasharray(c_msg) },
                     data: c_msg
                 };
                 nodes.add(resolver);
                 const effect = {
-                    from: c_msg['id'],
-                    to: c_msg['effect'],
-                    arrows: { to: true }
+                    from: c_msg.id,
+                    to: c_msg.effect,
+                    arrows: { to: true },
+                    dashes: stroke_dasharray(c_msg)
                 };
                 edges.add(effect);
                 break;
+            }
+            case 'resolver_state_changed': {
+                const resolver = nodes.get(c_msg.id);
+                resolver.data.state = c_msg.state;
+                resolver.shapeProperties.borderDashes = stroke_dasharray(c_msg);
+                nodes.update(resolver);
+                break;
+            }
         }
     };
     solver_ws.onclose = () => setTimeout(setup_ws, 1000);
+}
+
+function stroke_dasharray(n) {
+    switch (n.state) {
+        case 0: // False
+            return [2, 2];
+        case 1: // True
+            return false;
+        case 2: // Undefined
+            return [4, 4];
+        default:
+            break;
+    }
 }
 
 function flaw_label(flaw) {
