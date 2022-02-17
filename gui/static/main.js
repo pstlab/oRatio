@@ -1,6 +1,6 @@
-const sc = chroma.scale(['#90EE90', 'yellow', 'red']);
+const sc = chroma.scale(['#90EE90', 'yellow', '#A91101']);
 let max_cost = 1;
-let color_domain = sc.domain([max_cost, 0]);
+let color_domain = sc.domain([0, max_cost]);
 
 const nodes = new vis.DataSet([]);
 const edges = new vis.DataSet([]);
@@ -49,12 +49,22 @@ function setup_ws() {
                 flaw.shapeProperties = { borderDashes: stroke_dasharray(c_msg) };
                 flaw.color = color(flaw);
                 nodes.add(flaw);
+                const updated_res = [];
                 const causes_edges = [];
                 for (const c of flaw.causes) {
                     c.preconditions.push(flaw);
+                    const c_res_cost = estimate_cost(c);
+                    if (c.cost != c_res_cost) {
+                        c.cost = c_res_cost;
+                        c.title = resolver_tooltip(c);
+                        c.color = color(c);
+                        updated_res.push(c);
+                    }
                     causes_edges.push({ from: c_msg.id, to: c.id, arrows: { to: true }, dashes: stroke_dasharray(nodes.get(c)) });
                 }
                 edges.add(causes_edges);
+                if (updated_res.length > 0)
+                    nodes.update(updated_res);
                 break;
             }
             case 'flaw_state_changed': {
@@ -68,9 +78,10 @@ function setup_ws() {
             case 'flaw_cost_changed': {
                 const flaw = nodes.get(c_msg.id);
                 flaw.cost = c_msg.cost.num / c_msg.cost.den;
-                if (flaw.cost != Number.POSITIVE_INFINITY && max_cost < flaw.data.cost) {
+                flaw.title = flaw_tooltip(flaw);
+                if (flaw.cost != Number.POSITIVE_INFINITY && max_cost < flaw.cost) {
                     max_cost = flaw.cost;
-                    color_domain = sc.domain([max_cost, 0]);
+                    color_domain = sc.domain([0, max_cost]);
                     const all_nodes = nodes.get();
                     all_nodes.forEach(n => n.color = color(n));
                     nodes.update(all_nodes);
@@ -83,8 +94,9 @@ function setup_ws() {
                     const c_res_cost = estimate_cost(c);
                     if (c.cost != c_res_cost) {
                         c.cost = c_res_cost;
+                        c.title = resolver_tooltip(c);
                         c.color = color(c);
-                        updated_res.push(c.id);
+                        updated_res.push(c);
                     }
                 }
                 if (updated_res.length > 0)
@@ -93,7 +105,7 @@ function setup_ws() {
             }
             case 'flaw_position_changed': {
                 const flaw = nodes.get(c_msg.id);
-                flaw.data.pos = c_msg.pos;
+                flaw.pos = c_msg.pos;
                 flaw.title = flaw_tooltip(flaw);
                 nodes.update(flaw);
                 break;
@@ -103,9 +115,9 @@ function setup_ws() {
                 c_msg.cost = c_msg.intrinsic_cost.num / c_msg.intrinsic_cost.den;
                 if (c_msg.cost != Number.POSITIVE_INFINITY && max_cost < c_msg.cost) {
                     max_cost = c_msg.cost;
-                    color_domain = sc.domain([max_cost, 0]);
+                    color_domain = sc.domain([0, max_cost]);
                     const all_nodes = nodes.get();
-                    all_nodes.forEach(n => n.color = color_domain(n.data.cost));
+                    all_nodes.forEach(n => n.color = color_domain(n.cost));
                     nodes.update(all_nodes);
                 }
                 const resolver = {
@@ -163,7 +175,10 @@ function color(n) {
             return chroma('lightgray').hex();
         case 1: // True
         case 2: // Undefined
-            return color_domain(Math.min(max_cost, n.cost)).hex();
+            if (n.cost < Number.POSITIVE_INFINITY)
+                return color_domain(Math.min(max_cost, n.cost)).hex();
+            else
+                return chroma('darkgray').hex();
         default:
             break;
     }
@@ -245,8 +260,8 @@ function resolver_tooltip(resolver) {
     switch (resolver.data.rho) {
         case 'b0':
         case '\u00ACb0':
-            return 'cost: ' + resolver.intrinsic_cost;
+            return 'cost: ' + resolver.cost;
         default:
-            return resolver.data.rho.replace('b', '\u03C1') + ', cost: ' + resolver.intrinsic_cost;
+            return resolver.data.rho.replace('b', '\u03C1') + ', cost: ' + resolver.cost;
     }
 }
