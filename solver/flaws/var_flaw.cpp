@@ -6,7 +6,7 @@ namespace ratio
 {
     var_flaw::var_flaw(solver &slv, std::vector<resolver *> causes, var_item &v_itm) : flaw(slv, std::move(causes), true), v_itm(v_itm) {}
 
-    std::string var_flaw::get_label() const noexcept { return "{\"type\":\"enum\", \"phi\":\"" + to_string(get_phi()) + "\", \"position\":" + std::to_string(get_position()) + "}"; }
+    std::string var_flaw::get_data() const noexcept { return "{\"type\":\"enum\", \"phi\":\"" + to_string(get_phi()) + "\", \"position\":" + std::to_string(get_position()) + "}"; }
 
     void var_flaw::compute_resolvers()
     {
@@ -17,7 +17,7 @@ namespace ratio
 
     var_flaw::choose_value::choose_value(solver &slv, smt::rational cst, var_flaw &enm_flaw, smt::var_value &val) : resolver(slv, slv.get_ov_theory().allows(enm_flaw.v_itm.ev, val), cst, enm_flaw), v(enm_flaw.v_itm.ev), val(val) {}
 
-    std::string var_flaw::choose_value::get_label() const noexcept
+    std::string var_flaw::choose_value::get_data() const noexcept
     {
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
         if (const auto itm = dynamic_cast<const item *>(&val))

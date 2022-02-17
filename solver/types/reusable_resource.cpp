@@ -339,7 +339,7 @@ namespace ratio
 
     reusable_resource::rr_flaw::rr_flaw(reusable_resource &rr, const std::set<atom *> &atms) : flaw(rr.get_solver(), smart_type::get_resolvers(rr.get_solver(), atms), {}), rr(rr), overlapping_atoms(atms) {}
 
-    std::string reusable_resource::rr_flaw::get_label() const
+    std::string reusable_resource::rr_flaw::get_data() const
     {
         std::string lbl = "{\"type\":\"rr-flaw\", \"phi\":\"" + to_string(get_phi()) + "\", \"position\":" + std::to_string(get_position()) + ", \"atoms\":[";
         for (auto as_it = overlapping_atoms.cbegin(); as_it != overlapping_atoms.cend(); ++as_it)
@@ -384,19 +384,19 @@ namespace ratio
 
     reusable_resource::order_resolver::order_resolver(rr_flaw &flw, const lit &r, const atom &before, const atom &after) : resolver(flw.get_solver(), r, rational::ZERO, flw), before(before), after(after) {}
 
-    std::string reusable_resource::order_resolver::get_label() const { return "{\"type\":\"order\", \"rho\":\"" + to_string(get_rho()) + "\", \"before_sigma\":" + std::to_string(before.get_sigma()) + ", \"after_sigma\":" + std::to_string(after.get_sigma()) + ", \"before_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&before)) + "\", \"after_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&after)) + "\"}"; }
+    std::string reusable_resource::order_resolver::get_data() const { return "{\"type\":\"order\", \"rho\":\"" + to_string(get_rho()) + "\", \"before_sigma\":" + std::to_string(before.get_sigma()) + ", \"after_sigma\":" + std::to_string(after.get_sigma()) + ", \"before_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&before)) + "\", \"after_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&after)) + "\"}"; }
 
     void reusable_resource::order_resolver::apply() {}
 
     reusable_resource::place_resolver::place_resolver(rr_flaw &flw, const lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm) : resolver(flw.get_solver(), r, rational::ZERO, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
 
-    std::string reusable_resource::place_resolver::get_label() const { return "{\"type\":\"place\", \"rho\":\"" + to_string(get_rho()) + "\", \"place_sigma\":" + std::to_string(plc_atm.get_sigma()) + ", \"forbid_sigma\":" + std::to_string(frbd_atm.get_sigma()) + ", \"place_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&plc_atm)) + "\", \"forbid_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&frbd_atm)) + "\"}"; }
+    std::string reusable_resource::place_resolver::get_data() const { return "{\"type\":\"place\", \"rho\":\"" + to_string(get_rho()) + "\", \"place_sigma\":" + std::to_string(plc_atm.get_sigma()) + ", \"forbid_sigma\":" + std::to_string(frbd_atm.get_sigma()) + ", \"place_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&plc_atm)) + "\", \"forbid_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&frbd_atm)) + "\"}"; }
 
     void reusable_resource::place_resolver::apply() {}
 
     reusable_resource::forbid_resolver::forbid_resolver(rr_flaw &flw, atom &atm, item &itm) : resolver(flw.get_solver(), rational::ZERO, flw), atm(atm), itm(itm) {}
 
-    std::string reusable_resource::forbid_resolver::get_label() const { return "{\"type\":\"forbid\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
+    std::string reusable_resource::forbid_resolver::get_data() const { return "{\"type\":\"forbid\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
 
     void reusable_resource::forbid_resolver::apply() { get_solver().get_sat_core().new_clause({!get_rho(), !get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
 

@@ -11,7 +11,7 @@ namespace ratio
     disj_flaw(solver &slv, std::vector<resolver *> causes, std::vector<smt::lit> lits);
     disj_flaw(const disj_flaw &orig) = delete;
 
-    std::string get_label() const noexcept override;
+    std::string get_data() const noexcept override;
 
   private:
     void compute_resolvers() override;
@@ -22,7 +22,7 @@ namespace ratio
       choose_lit(solver &slv, smt::rational cst, disj_flaw &disj_flaw, const smt::lit &p);
       choose_lit(const choose_lit &that) = delete;
 
-      std::string get_label() const noexcept override;
+      std::string get_data() const noexcept override;
 
     private:
       void apply() override;

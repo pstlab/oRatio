@@ -13,7 +13,7 @@ namespace ratio
     bool_flaw(solver &slv, std::vector<resolver *> causes, bool_item &b_itm);
     bool_flaw(const bool_flaw &orig) = delete;
 
-    std::string get_label() const noexcept override;
+    std::string get_data() const noexcept override;
 
   private:
     void compute_resolvers() override;
@@ -24,7 +24,7 @@ namespace ratio
       choose_value(solver &slv, smt::rational cst, bool_flaw &bl_flaw, const smt::lit &val);
       choose_value(const choose_value &that) = delete;
 
-      std::string get_label() const noexcept override;
+      std::string get_data() const noexcept override;
 
     private:
       void apply() override;

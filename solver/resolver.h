@@ -28,7 +28,7 @@ namespace ratio
     inline flaw &get_effect() const noexcept { return effect; }
     inline const std::vector<flaw *> &get_preconditions() const noexcept { return preconditions; }
 
-    virtual std::string get_label() const = 0;
+    virtual std::string get_data() const = 0;
 
   private:
     /**

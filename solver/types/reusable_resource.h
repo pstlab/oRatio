@@ -72,7 +72,7 @@ namespace ratio
       rr_flaw(reusable_resource &rr, const std::set<atom *> &atms);
       rr_flaw(rr_flaw &&) = delete;
 
-      std::string get_label() const override;
+      std::string get_data() const override;
 
     private:
       void compute_resolvers() override;
@@ -89,7 +89,7 @@ namespace ratio
       order_resolver(rr_flaw &flw, const smt::lit &r, const atom &before, const atom &after);
       order_resolver(const order_resolver &that) = delete;
 
-      std::string get_label() const override;
+      std::string get_data() const override;
 
     private:
       void apply() override;
@@ -106,7 +106,7 @@ namespace ratio
       place_resolver(rr_flaw &flw, const smt::lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm);
       place_resolver(const place_resolver &that) = delete;
 
-      std::string get_label() const override;
+      std::string get_data() const override;
 
     private:
       void apply() override;
@@ -124,7 +124,7 @@ namespace ratio
       forbid_resolver(rr_flaw &flw, atom &atm, item &itm);
       forbid_resolver(const forbid_resolver &that) = delete;
 
-      std::string get_label() const override;
+      std::string get_data() const override;
 
     private:
       void apply() override;

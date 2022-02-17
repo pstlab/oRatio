@@ -54,6 +54,10 @@ namespace ratio
     void end(const std::unordered_set<atom *> &atoms) override;
 
   private:
+    static smt::json to_json(const flaw &f);
+    static smt::json to_json(const resolver &r);
+
+  private:
     executor &exec;
     std::unordered_set<const flaw *> flaws;
     const flaw *c_flaw = nullptr;

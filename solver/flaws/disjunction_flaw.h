@@ -15,7 +15,7 @@ namespace ratio
     disjunction_flaw(solver &slv, std::vector<resolver *> causes, const context &ctx, const std::vector<conjunction *> &conjs);
     disjunction_flaw(const disjunction_flaw &orig) = delete;
 
-    std::string get_label() const noexcept override;
+    std::string get_data() const noexcept override;
 
   private:
     void compute_resolvers() override;
@@ -26,7 +26,7 @@ namespace ratio
       choose_conjunction(solver &slv, disjunction_flaw &disj_flaw, const context &ctx, conjunction &conj);
       choose_conjunction(const choose_conjunction &that) = delete;
 
-      std::string get_label() const noexcept override;
+      std::string get_data() const noexcept override;
 
     private:
       void apply() override;

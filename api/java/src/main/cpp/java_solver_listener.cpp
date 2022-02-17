@@ -37,7 +37,7 @@ namespace ratio
         env->SetLongArrayRegion(causes, 0, static_cast<jsize>(c_causes.size()), c_causes.data());
 
         // the flaw's label..
-        jstring label = env->NewStringUTF(f.get_label().c_str());
+        jstring label = env->NewStringUTF(f.get_data().c_str());
 
         // the flaw's state..
         jbyte state = static_cast<jbyte>(slv.get_sat_core().value(f.get_phi()));
@@ -99,7 +99,7 @@ namespace ratio
         jlong effect = reinterpret_cast<jlong>(&r.get_effect());
 
         // the resolver's label..
-        jstring label = env->NewStringUTF(r.get_label().c_str());
+        jstring label = env->NewStringUTF(r.get_data().c_str());
 
         // the resolver's intrinsic cost..
         const auto est_cost = r.get_intrinsic_cost();

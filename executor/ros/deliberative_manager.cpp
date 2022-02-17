@@ -148,7 +148,7 @@ namespace ratio
                 f_msg.id = reinterpret_cast<std::uintptr_t>(&f);
                 for (const auto &r : f->get_causes())
                     f_msg.causes.push_back(reinterpret_cast<std::uintptr_t>(r));
-                f_msg.label = f->get_label();
+                f_msg.data = f->get_data();
                 f_msg.state = f->get_solver().get_sat_core().value(f->get_phi());
                 const auto [lb, ub] = f->get_solver().get_idl_theory().bounds(f->get_position());
                 const auto est_cost = f->get_estimated_cost();
@@ -162,7 +162,7 @@ namespace ratio
                 deliberative_tier::resolver r_msg;
                 r_msg.id = reinterpret_cast<std::uintptr_t>(&r);
                 r_msg.effect = reinterpret_cast<std::uintptr_t>(&r->get_effect());
-                r_msg.label = r->get_label();
+                r_msg.data = r->get_data();
                 r_msg.state = r->get_solver().get_sat_core().value(r->get_rho());
                 const auto est_cost = r->get_estimated_cost();
                 r_msg.cost.num = est_cost.numerator(), r_msg.cost.den = est_cost.denominator();

@@ -64,7 +64,7 @@ namespace ratio
       sv_flaw(state_variable &sv, const std::set<atom *> &atms);
       sv_flaw(sv_flaw &&) = delete;
 
-      std::string get_label() const override;
+      std::string get_data() const override;
 
     private:
       void compute_resolvers() override;
@@ -81,7 +81,7 @@ namespace ratio
       order_resolver(sv_flaw &flw, const smt::lit &r, const atom &before, const atom &after);
       order_resolver(const order_resolver &that) = delete;
 
-      std::string get_label() const override;
+      std::string get_data() const override;
 
     private:
       void apply() override;
@@ -98,7 +98,7 @@ namespace ratio
       place_resolver(sv_flaw &flw, const smt::lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm);
       place_resolver(const place_resolver &that) = delete;
 
-      std::string get_label() const override;
+      std::string get_data() const override;
 
     private:
       void apply() override;
@@ -116,7 +116,7 @@ namespace ratio
       forbid_resolver(sv_flaw &flw, atom &atm, item &itm);
       forbid_resolver(const forbid_resolver &that) = delete;
 
-      std::string get_label() const override;
+      std::string get_data() const override;
 
     private:
       void apply() override;

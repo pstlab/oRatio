@@ -21,7 +21,7 @@ namespace ratio
 
     inline atom &get_atom() const noexcept { return atm; }
 
-    std::string get_label() const noexcept override;
+    std::string get_data() const noexcept override;
 
   private:
     void compute_resolvers() override;
@@ -34,7 +34,7 @@ namespace ratio
       activate_fact(solver &slv, const smt::lit &r, atom_flaw &f, atom &a);
       activate_fact(const activate_fact &that) = delete;
 
-      std::string get_label() const noexcept override;
+      std::string get_data() const noexcept override;
 
     private:
       void apply() override;
@@ -50,7 +50,7 @@ namespace ratio
       activate_goal(solver &slv, const smt::lit &r, atom_flaw &f, atom &a);
       activate_goal(const activate_goal &that) = delete;
 
-      std::string get_label() const noexcept override;
+      std::string get_data() const noexcept override;
 
     private:
       void apply() override;
@@ -65,7 +65,7 @@ namespace ratio
       unify_atom(solver &slv, atom_flaw &atm_flaw, atom &atm, atom &trgt, const std::vector<smt::lit> &unif_lits);
       unify_atom(const unify_atom &that) = delete;
 
-      std::string get_label() const noexcept override;
+      std::string get_data() const noexcept override;
 
     private:
       void apply() override;

@@ -27,41 +27,13 @@ namespace ratio
             smt::json j_gr;
             std::vector<smt::json> j_flaws;
             for (const auto &f : flaws)
-            {
-                smt::json j_f;
-                j_f->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(f)));
-                std::vector<smt::json> causes;
-                for (const auto &c : f->get_causes())
-                    causes.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(c)));
-                j_f->set("causes", new smt::array_val(causes));
-                std::istringstream istr(f->get_label());
-                j_f->set("label", smt::json::from_json(istr));
-                j_f->set("state", new smt::long_val(slv.get_sat_core().value(f->get_phi())));
-                const auto [lb, ub] = slv.get_idl_theory().bounds(f->get_position());
-                smt::json j_pos;
-                j_pos->set("lb", new smt::long_val(lb));
-                j_pos->set("ub", new smt::long_val(ub));
-                j_f->set("pos", j_pos);
-                j_flaws.push_back(j_f);
-            }
+                j_flaws.push_back(to_json(*f));
             j_gr->set("flaws", new smt::array_val(j_flaws));
             if (c_flaw)
                 j_gr->set("current-flaw", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_flaw)));
             std::vector<smt::json> j_resolvers;
             for (const auto &r : resolvers)
-            {
-                smt::json j_r;
-                j_r->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(r)));
-                j_r->set("effect", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r->get_effect())));
-                std::istringstream istr(r->get_label());
-                j_r->set("label", smt::json::from_json(istr));
-                const auto intr_cost = r->get_intrinsic_cost();
-                smt::json j_cost;
-                j_cost->set("num", new smt::long_val(intr_cost.numerator()));
-                j_cost->set("den", new smt::long_val(intr_cost.denominator()));
-                j_r->set("intrinsic-cost", j_cost);
-                j_r->set("state", new smt::long_val(slv.get_sat_core().value(r->get_rho())));
-            }
+                j_resolvers.push_back(to_json(*r));
             j_gr->set("resolvers", new smt::array_val(j_resolvers));
             if (c_resolver)
                 j_gr->set("current-resolver", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_resolver)));
@@ -130,21 +102,8 @@ namespace ratio
         std::lock_guard<std::mutex> _(mtx);
         flaws.insert(&f);
 
-        smt::json j_fc;
+        smt::json j_fc = to_json(f);
         j_fc->set("type", new smt::string_val("flaw_created"));
-        j_fc->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
-        std::vector<smt::json> causes;
-        for (const auto &c : f.get_causes())
-            causes.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(c)));
-        j_fc->set("causes", new smt::array_val(causes));
-        std::istringstream istr(f.get_label());
-        j_fc->set("label", smt::json::from_json(istr));
-        j_fc->set("state", new smt::long_val(slv.get_sat_core().value(f.get_phi())));
-        const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
-        smt::json j_pos;
-        j_pos->set("lb", new smt::long_val(lb));
-        j_pos->set("ub", new smt::long_val(ub));
-        j_fc->set("pos", j_pos);
 
         std::stringstream ss;
         j_fc.to_json(ss);
@@ -191,10 +150,10 @@ namespace ratio
         j_fpc->set("type", new smt::string_val("flaw_position_changed"));
         j_fpc->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
         const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
-        std::vector<smt::json> pos;
-        pos.push_back(new smt::long_val(lb));
-        pos.push_back(new smt::long_val(ub));
-        j_fpc->set("pos", new smt::array_val(pos));
+        smt::json j_pos;
+        j_pos->set("lb", new smt::long_val(lb));
+        j_pos->set("ub", new smt::long_val(ub));
+        j_fpc->set("pos", j_pos);
 
         std::stringstream ss;
         j_fpc.to_json(ss);
@@ -220,18 +179,8 @@ namespace ratio
         std::lock_guard<std::mutex> _(mtx);
         resolvers.insert(&r);
 
-        smt::json j_rc;
+        smt::json j_rc = to_json(r);
         j_rc->set("type", new smt::string_val("resolver_created"));
-        j_rc->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r)));
-        j_rc->set("effect", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r.get_effect())));
-        std::istringstream istr(r.get_label());
-        j_rc->set("label", smt::json::from_json(istr));
-        const auto intr_cost = r.get_intrinsic_cost();
-        smt::json j_cost;
-        j_cost->set("num", new smt::long_val(intr_cost.numerator()));
-        j_cost->set("den", new smt::long_val(intr_cost.denominator()));
-        j_rc->set("intrinsic_cost", j_cost);
-        j_rc->set("state", new smt::long_val(slv.get_sat_core().value(r.get_rho())));
 
         std::stringstream ss;
         j_rc.to_json(ss);
@@ -360,5 +309,48 @@ namespace ratio
         j_st.to_json(ss);
         for (const auto &u : users)
             u->send_text(ss.str());
+    }
+
+    smt::json gui_server::to_json(const flaw &f)
+    {
+        smt::json j_f;
+        j_f->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&f)));
+        std::vector<smt::json> causes;
+        for (const auto &c : f.get_causes())
+            causes.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(c)));
+        j_f->set("causes", new smt::array_val(causes));
+        j_f->set("state", new smt::long_val(f.get_solver().get_sat_core().value(f.get_phi())));
+        const auto est_cost = f.get_estimated_cost();
+        smt::json j_cost;
+        j_cost->set("num", new smt::long_val(est_cost.numerator()));
+        j_cost->set("den", new smt::long_val(est_cost.denominator()));
+        j_f->set("cost", j_cost);
+        const auto [lb, ub] = f.get_solver().get_idl_theory().bounds(f.get_position());
+        smt::json j_pos;
+        j_pos->set("lb", new smt::long_val(lb));
+        j_pos->set("ub", new smt::long_val(ub));
+        j_f->set("pos", j_pos);
+        std::istringstream istr(f.get_data());
+        j_f->set("data", smt::json::from_json(istr));
+        return j_f;
+    }
+    smt::json gui_server::to_json(const resolver &r)
+    {
+        smt::json j_r;
+        j_r->set("id", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r)));
+        std::vector<smt::json> preconditions;
+        for (const auto &p : r.get_preconditions())
+            preconditions.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(p)));
+        j_r->set("preconditions", new smt::array_val(preconditions));
+        j_r->set("effect", new smt::long_val(reinterpret_cast<std::uintptr_t>(&r.get_effect())));
+        j_r->set("state", new smt::long_val(r.get_solver().get_sat_core().value(r.get_rho())));
+        const auto intr_cost = r.get_intrinsic_cost();
+        smt::json j_cost;
+        j_cost->set("num", new smt::long_val(intr_cost.numerator()));
+        j_cost->set("den", new smt::long_val(intr_cost.denominator()));
+        j_r->set("intrinsic_cost", j_cost);
+        std::istringstream istr(r.get_data());
+        j_r->set("data", smt::json::from_json(istr));
+        return j_r;
     }
 } // namespace ratio

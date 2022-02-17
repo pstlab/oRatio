@@ -32,7 +32,7 @@ namespace ratio
     resolver *get_cheapest_resolver() const noexcept;
     virtual resolver *get_best_resolver() const noexcept { return get_cheapest_resolver(); }
 
-    virtual std::string get_label() const = 0;
+    virtual std::string get_data() const = 0;
 
   private:
     /**
