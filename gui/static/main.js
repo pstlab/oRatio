@@ -38,7 +38,7 @@ function setup_ws() {
                 const flaw = {
                     type: 'flaw',
                     id: c_msg.id,
-                    causes: c_msg.causes.map(c => nodes.get(c)),
+                    causes: c_msg.causes,
                     state: c_msg.state,
                     cost: c_msg.cost.num / c_msg.cost.den,
                     pos: c_msg.pos,
@@ -49,22 +49,20 @@ function setup_ws() {
                 flaw.shapeProperties = { borderDashes: stroke_dasharray(c_msg) };
                 flaw.color = color(flaw);
                 nodes.add(flaw);
-                const updated_res = [];
+                const causes = nodes.get(flaw.causes);
                 const causes_edges = [];
-                for (const c of flaw.causes) {
-                    c.preconditions.push(flaw);
+                for (const c of causes) {
+                    c.preconditions.push(flaw.id);
                     const c_res_cost = estimate_cost(c);
                     if (c.cost != c_res_cost) {
                         c.cost = c_res_cost;
                         c.title = resolver_tooltip(c);
                         c.color = color(c);
-                        updated_res.push(c);
                     }
                     causes_edges.push({ from: c_msg.id, to: c.id, arrows: { to: true }, dashes: stroke_dasharray(nodes.get(c)) });
                 }
                 edges.add(causes_edges);
-                if (updated_res.length > 0)
-                    nodes.update(updated_res);
+                nodes.update(causes);
                 break;
             }
             case 'flaw_state_changed': {
@@ -90,7 +88,7 @@ function setup_ws() {
                     nodes.update(flaw);
                 }
                 const updated_res = [];
-                for (const c of flaw.causes) {
+                for (const c of flaw.causes.map(r_id => nodes.get(r_id))) {
                     const c_res_cost = estimate_cost(c);
                     if (c.cost != c_res_cost) {
                         c.cost = c_res_cost;
@@ -99,7 +97,7 @@ function setup_ws() {
                         updated_res.push(c);
                     }
                 }
-                if (updated_res.length > 0)
+                if (updated_res)
                     nodes.update(updated_res);
                 break;
             }
@@ -122,8 +120,8 @@ function setup_ws() {
                 const resolver = {
                     type: 'resolver',
                     id: c_msg.id,
-                    preconditions: c_msg.preconditions.map(p => nodes.get(p)),
-                    effect: nodes.get(c_msg.effect),
+                    preconditions: c_msg.preconditions,
+                    effect: c_msg.effect,
                     state: c_msg.state,
                     intrinsic_cost: c_msg.intrinsic_cost.num / c_msg.intrinsic_cost.den,
                     data: c_msg.data
@@ -165,7 +163,7 @@ function setup_ws() {
 }
 
 function estimate_cost(res) {
-    return res.preconditions.reduce((f0, f1) => { return (f0.cost > f1.cost) ? f0.cost : f1.cost }, res.intrinsic_cost);
+    return (res.preconditions ? Math.max.apply(Math, res.preconditions.map(f_id => nodes.get(f_id).cost)) : 0) + res.intrinsic_cost;
 }
 
 function color(n) {
