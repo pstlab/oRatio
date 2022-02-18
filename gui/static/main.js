@@ -111,7 +111,6 @@ function setup_ws() {
                 break;
             }
             case 'resolver_created': {
-                c_msg.preconditions = [];
                 c_msg.cost = c_msg.intrinsic_cost.num / c_msg.intrinsic_cost.den;
                 if (c_msg.cost != Number.POSITIVE_INFINITY && max_cost < c_msg.cost) {
                     max_cost = c_msg.cost;
@@ -123,7 +122,7 @@ function setup_ws() {
                 const resolver = {
                     type: 'resolver',
                     id: c_msg.id,
-                    preconditions: c_msg.preconditions,
+                    preconditions: c_msg.preconditions.map(p => nodes.get(p)),
                     effect: nodes.get(c_msg.effect),
                     state: c_msg.state,
                     intrinsic_cost: c_msg.intrinsic_cost.num / c_msg.intrinsic_cost.den,
