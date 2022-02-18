@@ -2,16 +2,16 @@ const sc = chroma.scale(['#90EE90', 'yellow', '#A91101']);
 let max_cost = 1;
 let color_domain = sc.domain([0, max_cost]);
 
+const timelines = new vis.DataSet([]);
+const timeline_values = new vis.DataSet([]);
+
 const nodes = new vis.DataSet([]);
 const edges = new vis.DataSet([]);
 
-const data = {
-    nodes: nodes,
-    edges: edges
-};
 const options = {};
 
-const network = new vis.Network(document.getElementById('graph'), data, options);
+const timeline = new vis.Timeline(document.getElementById('timelines'), timeline_values, timelines, options);
+const network = new vis.Network(document.getElementById('graph'), { nodes: nodes, edges: edges }, options);
 
 let current_flaw, current_resolver;
 
@@ -28,10 +28,14 @@ function setup_ws() {
                 break;
             case 'solution_found':
                 console.log('hurray!! we have found a solution..');
+                current_flaw = undefined;
+                current_resolver = undefined;
                 network.unselectAll();
                 break;
             case 'inconsistent_problem':
                 console.log('the problem has no solution..');
+                current_flaw = undefined;
+                current_resolver = undefined;
                 network.unselectAll();
                 break;
             case 'flaw_created': {
@@ -108,6 +112,13 @@ function setup_ws() {
                 nodes.update(flaw);
                 break;
             }
+            case 'current_flaw': {
+                current_flaw = c_msg.id;
+                current_resolver = undefined;
+                network.selectNodes([current_flaw]);
+                network.focus(current_flaw, { animation: true });
+                break;
+            }
             case 'resolver_created': {
                 c_msg.cost = c_msg.intrinsic_cost.num / c_msg.intrinsic_cost.den;
                 if (c_msg.cost != Number.POSITIVE_INFINITY && max_cost < c_msg.cost) {
@@ -148,6 +159,12 @@ function setup_ws() {
                     c_edges[i].dashes = stroke_dasharray(resolver);
                 });
                 edges.update(c_edges);
+                break;
+            }
+            case 'current_resolver': {
+                current_resolver = c_msg.id;
+                network.selectNodes([current_flaw, current_resolver]);
+                network.focus(current_resolver, { animation: true });
                 break;
             }
             case 'causal_link_added': {
