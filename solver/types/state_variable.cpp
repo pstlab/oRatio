@@ -346,7 +346,7 @@ namespace ratio
 
     void state_variable::forbid_resolver::apply() { get_solver().get_sat_core().new_clause({!get_rho(), !get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
 
-    smt::json state_variable::extract_timelines() const noexcept
+    json state_variable::extract_timelines() const noexcept
     {
         std::vector<json> tls;
         // we partition atoms for each state-variable they might insist on..
@@ -434,7 +434,7 @@ namespace ratio
 
                 std::vector<json> j_atms;
                 for (const auto &atm : overlapping_atoms)
-                    j_atms.push_back(atm->to_json());
+                    j_atms.push_back(new long_val(reinterpret_cast<std::uintptr_t>(atm)));
                 j_val->set("atoms", new array_val(j_atms));
                 j_vals.push_back(j_val);
 

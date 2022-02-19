@@ -94,8 +94,7 @@ namespace ratio
                               {
                                   arith_expr amnt0 = atm0->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
                                   arith_expr amnt1 = atm1->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
-                                  return get_core().arith_value(amnt0) > get_core().arith_value(amnt1);
-                              });
+                                  return get_core().arith_value(amnt0) > get_core().arith_value(amnt1); });
 
                     inf_rational mcs_usage;  // the concurrent resource usage of the mcs..
                     std::list<atom *> c_mcs; // the current mcs..
@@ -400,7 +399,7 @@ namespace ratio
 
     void reusable_resource::forbid_resolver::apply() { get_solver().get_sat_core().new_clause({!get_rho(), !get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
 
-    smt::json reusable_resource::extract_timelines() const noexcept
+    json reusable_resource::extract_timelines() const noexcept
     {
         std::vector<json> tls;
         // we partition atoms for each reusable-resource they might insist on..
@@ -506,7 +505,7 @@ namespace ratio
                 {
                     arith_expr amount = atm->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
                     c_usage += get_core().arith_value(amount);
-                    j_atms.push_back(atm->to_json());
+                    j_atms.push_back(new long_val(reinterpret_cast<std::uintptr_t>(atm)));
                 }
                 j_val->set("atoms", new array_val(j_atms));
 

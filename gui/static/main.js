@@ -11,9 +11,10 @@ const edges = new vis.DataSet([]);
 const options = {};
 
 const timeline = new vis.Timeline(document.getElementById('timelines'), timeline_values, timelines, options);
+timeline.currentTime.stop();
 const network = new vis.Network(document.getElementById('graph'), { nodes: nodes, edges: edges }, options);
 
-let current_flaw, current_resolver;
+let current_time = 0, current_flaw, current_resolver;
 
 let ws;
 setup_ws();
@@ -23,6 +24,72 @@ function setup_ws() {
     ws.onmessage = msg => {
         const c_msg = JSON.parse(msg.data);
         switch (c_msg.type) {
+            case 'state_changed': {
+                timelines.update(c_msg.timelines.map(tl => { return { id: tl.id, content: tl.name } }));
+                const origin = c_msg.state.exprs.find(xpr => xpr.name == 'origin');
+                const horizon = c_msg.state.exprs.find(xpr => xpr.name == 'horizon');
+                timeline.setWindow(origin.value.val.num / origin.value.val.den, horizon.value.val.num / horizon.value.val.den);
+                timeline.setCurrentTime(current_time);
+                const vals = [];
+                for (const tl of c_msg.timelines)
+                    switch (tl.type) {
+                        case 'StateVariable':
+                            tl.values.forEach((val, id) => {
+                                vals.push({
+                                    id: '' + tl.id + id,
+                                    content: sv_value(val),
+                                    start: val.from.num / val.from.den,
+                                    end: val.to.num / val.to.den,
+                                    group: tl.id
+                                });
+                            });
+                            timeline_values.add({
+                                id: 'a',
+                                content: 'Editable',
+                                start: 0,
+                                end: 10,
+                                type: 'background',
+                                group: tl.id
+                            });
+                            timeline_values.add({
+                                id: 'b',
+                                content: 'Editable',
+                                start: 10,
+                                end: 20,
+                                type: 'background',
+                                group: tl.id
+                            });
+                            timeline.setCustomTime(0, 't');
+                            timeline.setCustomTimeMarker('', 't');
+                            break;
+                        case 'Agent':
+                            tl.values.forEach((val, id) => {
+                                vals.push({
+                                    id: '' + tl.id + id,
+                                    content: 'Editable',
+                                    start: val.from.num / val.from.den,
+                                    end: val.to.num / val.to.den,
+                                    group: tl.id
+                                });
+                            });
+                            break;
+                        case 'ReusableResource':
+                            tl.values.forEach((val, id) => {
+                                vals.push({
+                                    id: '' + tl.id + id,
+                                    content: 'Editable',
+                                    start: val.from.num / val.from.den,
+                                    end: val.to.num / val.to.den,
+                                    group: tl.id
+                                });
+                            });
+                            break;
+                        default:
+                            break;
+                    }
+                timeline_values.update(vals);
+                break;
+            }
             case 'started_solving':
                 console.log('solving the problem..');
                 break;
@@ -174,9 +241,33 @@ function setup_ws() {
                 edges.add({ from: c_msg.flaw_id, to: c_msg.resolver_id, arrows: { to: true }, dashes: stroke_dasharray(resolver) });
                 break;
             }
+            case 'tick':
+                current_time = c_msg.time.num / c_msg.time.den;
+                timeline.setCurrentTime(current_time);
+                break;
         }
     };
     ws.onclose = () => setTimeout(setup_ws, 1000);
+}
+
+function sv_value(val) {
+    switch (val.atoms.length) {
+        case 0: return '';
+        case 1: return ag_value(val.atoms[0]);
+        default: return val.atoms.map(atm => ag_value(atm)).sort().join('; ');
+    }
+}
+
+function ag_value(val) {
+    return '\u03C3' + val.sigma + ' ' + val.predicate + '(' + val.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par_to_string(par)).sort().join(', ') + ')';
+}
+
+function par_to_string(par) {
+    switch (par.type) {
+        case 'bool': return par.name + ': ' + par.value;
+        case 'real': return par.name + ': ' + par.value.num / par.value.den;
+        default: return par.name;
+    }
 }
 
 function estimate_cost(res) {

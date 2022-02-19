@@ -58,7 +58,20 @@ namespace ratio
     void gui_server::read(const std::string &script) { std::lock_guard<std::mutex> _(mtx); }
     void gui_server::read(const std::vector<std::string> &files) { std::lock_guard<std::mutex> _(mtx); }
 
-    void gui_server::state_changed() { std::lock_guard<std::mutex> _(mtx); }
+    void gui_server::state_changed()
+    {
+        std::lock_guard<std::mutex> _(mtx);
+
+        smt::json j_sc;
+        j_sc->set("type", new smt::string_val("state_changed"));
+        j_sc->set("state", slv.to_json());
+        j_sc->set("timelines", slv.extract_timelines());
+
+        std::stringstream ss;
+        j_sc.to_json(ss);
+        for (const auto &u : users)
+            u->send_text(ss.str());
+    }
 
     void gui_server::started_solving()
     {
@@ -78,6 +91,8 @@ namespace ratio
 
         smt::json j_sf;
         j_sf->set("type", new smt::string_val("solution_found"));
+        j_sf->set("state", slv.to_json());
+        j_sf->set("timelines", slv.extract_timelines());
 
         std::stringstream ss;
         j_sf.to_json(ss);

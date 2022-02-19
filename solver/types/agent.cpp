@@ -52,7 +52,7 @@ namespace ratio
     agent::agnt_atom_listener::~agnt_atom_listener() {}
     void agent::agnt_atom_listener::something_changed() { agnt.to_check.insert(&atm); }
 
-    smt::json agent::extract_timelines() const noexcept
+    json agent::extract_timelines() const noexcept
     {
         std::vector<json> tls;
         // we partition atoms for each state-variable they might insist on..
@@ -95,7 +95,7 @@ namespace ratio
             std::vector<json> j_atms;
             for (const auto &p : pulses)
                 for (const auto &atm : starting_atoms.at(p))
-                    j_atms.push_back(atm->to_json());
+                    j_atms.push_back(new long_val(reinterpret_cast<std::uintptr_t>(atm)));
             tl->set("values", new array_val(j_atms));
             tls.push_back(tl);
         }
