@@ -1,3 +1,23 @@
 html, body {
     height: 100%;
 }
+
+.vis-item.vis-background.sv-empty {
+    background-color: rgb(206, 206, 206);
+}
+
+.vis-item.vis-background.sv-consistent {
+    background-color: rgb(136, 235, 127);
+}
+
+.vis-item.vis-background.sv-inconsistent {
+    background-color: rgb(255, 157, 157);
+}
+
+.vis-item.vis-background.rr-consistent {
+    background-color: rgb(136, 235, 127);
+}
+
+.vis-item.vis-background.rr-inconsistent {
+    background-color: rgb(255, 157, 157);
+}
