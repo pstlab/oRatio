@@ -15,38 +15,96 @@ namespace ratio
         CROW_ROUTE(app, "/timelines")
         ([&]()
          {
-            std::lock_guard<std::mutex> _(mtx);
-            std::stringstream ss;
-            slv.extract_timelines().to_json(ss);
-            return ss.str(); });
+            crow::mustache::context ctx;
+            ctx["title"] = "oRatio";
+            return crow::mustache::load("timelines.html").render(ctx); });
 
         CROW_ROUTE(app, "/graph")
         ([&]()
          {
-            std::lock_guard<std::mutex> _(mtx);
-            smt::json j_gr;
-            std::vector<smt::json> j_flaws;
-            for (const auto &f : flaws)
-                j_flaws.push_back(to_json(*f));
-            j_gr->set("flaws", new smt::array_val(j_flaws));
-            if (c_flaw)
-                j_gr->set("current-flaw", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_flaw)));
-            std::vector<smt::json> j_resolvers;
-            for (const auto &r : resolvers)
-                j_resolvers.push_back(to_json(*r));
-            j_gr->set("resolvers", new smt::array_val(j_resolvers));
-            if (c_resolver)
-                j_gr->set("current-resolver", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_resolver)));
-            std::stringstream ss;
-            j_gr.to_json(ss);
-            return ss.str(); });
+            crow::mustache::context ctx;
+            ctx["title"] = "oRatio";
+            return crow::mustache::load("graph.html").render(ctx); });
 
-        CROW_ROUTE(app, "/solver")
+        CROW_ROUTE(app, "/ws-solver")
             .websocket()
             .onopen([&](crow::websocket::connection &conn)
-                    { std::lock_guard<std::mutex> _(mtx); users.insert(&conn); })
+                    { std::lock_guard<std::mutex> _(mtx);
+                users.insert(&conn);
+
+                smt::json j_sc;
+                j_sc->set("type", new smt::string_val("state_changed"));
+                j_sc->set("state", slv.to_json());
+                j_sc->set("timelines", slv.extract_timelines());
+
+                std::stringstream ss;
+                j_sc.to_json(ss);
+                conn.send_text(ss.str());
+                ss.clear();
+
+                smt::json j_gr;
+                j_gr->set("type", new smt::string_val("graph"));
+                std::vector<smt::json> j_flaws;
+                for (const auto &f : flaws)
+                    j_flaws.push_back(to_json(*f));
+                j_gr->set("flaws", new smt::array_val(j_flaws));
+                if (c_flaw)
+                    j_gr->set("current-flaw", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_flaw)));
+                std::vector<smt::json> j_resolvers;
+                for (const auto &r : resolvers)
+                    j_resolvers.push_back(to_json(*r));
+                j_gr->set("resolvers", new smt::array_val(j_resolvers));
+                if (c_resolver)
+                    j_gr->set("current-resolver", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_resolver)));
+
+                j_gr.to_json(ss);
+                conn.send_text(ss.str()); })
             .onclose([&](crow::websocket::connection &conn, const std::string &reason)
                      { std::lock_guard<std::mutex> _(mtx); users.erase(&conn); });
+
+        CROW_ROUTE(app, "/ws-timelines")
+            .websocket()
+            .onopen([&](crow::websocket::connection &conn)
+                    { std::lock_guard<std::mutex> _(mtx);
+                timelines_users.insert(&conn);
+
+                smt::json j_sc;
+                j_sc->set("type", new smt::string_val("state_changed"));
+                j_sc->set("state", slv.to_json());
+                j_sc->set("timelines", slv.extract_timelines());
+
+                std::stringstream ss;
+                j_sc.to_json(ss);
+                conn.send_text(ss.str()); })
+            .onclose([&](crow::websocket::connection &conn, const std::string &reason)
+                     { std::lock_guard<std::mutex> _(mtx); timelines_users.erase(&conn); });
+
+        CROW_ROUTE(app, "/ws-graph")
+            .websocket()
+            .onopen([&](crow::websocket::connection &conn)
+                    { std::lock_guard<std::mutex> _(mtx);
+                graph_users.insert(&conn);
+                
+                smt::json j_gr;
+                j_gr->set("type", new smt::string_val("graph"));
+                std::vector<smt::json> j_flaws;
+                for (const auto &f : flaws)
+                    j_flaws.push_back(to_json(*f));
+                j_gr->set("flaws", new smt::array_val(j_flaws));
+                if (c_flaw)
+                    j_gr->set("current-flaw", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_flaw)));
+                std::vector<smt::json> j_resolvers;
+                for (const auto &r : resolvers)
+                    j_resolvers.push_back(to_json(*r));
+                j_gr->set("resolvers", new smt::array_val(j_resolvers));
+                if (c_resolver)
+                    j_gr->set("current-resolver", new smt::long_val(reinterpret_cast<std::uintptr_t>(c_resolver)));
+
+                std::stringstream ss;
+                j_gr.to_json(ss);
+                conn.send_text(ss.str()); })
+            .onclose([&](crow::websocket::connection &conn, const std::string &reason)
+                     { std::lock_guard<std::mutex> _(mtx); graph_users.erase(&conn); });
     }
     gui_server::~gui_server() {}
 

@@ -2,133 +2,29 @@ const sc = chroma.scale(['#90EE90', 'yellow', '#A91101']);
 let max_cost = 1;
 let color_domain = sc.domain([0, max_cost]);
 
-const items = new Map(), atoms = new Map();
-
-const timelines = new vis.DataSet([]);
-const timeline_values = new vis.DataSet([]);
-
 const nodes = new vis.DataSet([]);
 const edges = new vis.DataSet([]);
 
-const options = {};
+const options = {
+    layout: {
+        hierarchical: {
+            direction: "RL",
+        }
+    }
+};
 
-const timeline = new vis.Timeline(document.getElementById('timelines'), timeline_values, timelines, options);
-timeline.currentTime.stop();
 const network = new vis.Network(document.getElementById('graph'), { nodes: nodes, edges: edges }, options);
 
-let current_time = 0, current_flaw, current_resolver;
-timeline.setCurrentTime(current_time);
+let current_flaw, current_resolver;
 
 let ws;
 setup_ws();
 
 function setup_ws() {
-    ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/ws-solver');
+    ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/ws-graph');
     ws.onmessage = msg => {
         const c_msg = JSON.parse(msg.data);
         switch (c_msg.type) {
-            case 'state_changed': {
-                items.clear(); for (const itm of c_msg.state.items) items.set(parseInt(itm.id), itm);
-                atoms.clear(); for (const atm of c_msg.state.atoms) atoms.set(parseInt(atm.id), atm);
-                timelines.update(c_msg.timelines.map(tl => { return { id: tl.id, content: tl.name } }));
-                const origin_var = c_msg.state.exprs.find(xpr => xpr.name == 'origin');
-                const horizon_var = c_msg.state.exprs.find(xpr => xpr.name == 'horizon');
-                const origin_val = origin_var.value.val.num / origin_var.value.val.den;
-                const horizon_val = horizon_var.value.val.num / horizon_var.value.val.den;
-                timeline.setWindow(origin_val - 10, origin_val == horizon_val ? horizon_val + 100 : horizon_val + 10);
-                const vals = [];
-                for (const tl of c_msg.timelines)
-                    switch (tl.type) {
-                        case 'StateVariable': {
-                            const sv_atms = new Set();
-                            tl.values.forEach((val, id) => {
-                                vals.push({
-                                    id: '' + tl.id + id,
-                                    className: sv_value_class(val),
-                                    start: val.from.num / val.from.den,
-                                    end: val.to.num / val.to.den,
-                                    type: 'background',
-                                    group: tl.id
-                                });
-                                for (const atm_id of val.atoms)
-                                    sv_atms.add(atm_id);
-                            });
-                            for (const atm_id of sv_atms) {
-                                const atm = atoms.get(atm_id);
-                                const start_var = atm.pars.find(xpr => xpr.name == 'start');
-                                const end_var = atm.pars.find(xpr => xpr.name == 'end');
-                                vals.push({
-                                    id: '' + tl.id + atm.id,
-                                    content: atom_content(atm),
-                                    title: atom_title(atm),
-                                    start: start_var.value.val.num / start_var.value.val.den,
-                                    end: end_var.value.val.num / end_var.value.val.den,
-                                    group: tl.id
-                                });
-                            }
-                            break;
-                        }
-                        case 'Agent':
-                            for (const atm_id of tl.values) {
-                                const atm = atoms.get(atm_id);
-                                const start_var = atm.pars.find(xpr => xpr.name == 'start');
-                                if (start_var) {
-                                    const end_var = atm.pars.find(xpr => xpr.name == 'end');
-                                    vals.push({
-                                        id: '' + tl.id + atm.id,
-                                        content: atom_content(atm),
-                                        title: atom_title(atm),
-                                        start: start_var.value.val.num / start_var.value.val.den,
-                                        end: end_var.value.val.num / end_var.value.val.den,
-                                        group: tl.id
-                                    });
-                                } else {
-                                    const at_var = atm.pars.find(xpr => xpr.name == 'at');
-                                    vals.push({
-                                        id: '' + tl.id + atm.id,
-                                        content: atom_content(atm),
-                                        start: at_var.value.val.num / at_var.value.val.den,
-                                        group: tl.id
-                                    });
-                                }
-                            }
-                            break;
-                        case 'ReusableResource':
-                            const sv_atms = new Set();
-                            tl.values.forEach((val, id) => {
-                                vals.push({
-                                    id: '' + tl.id + id,
-                                    content: val.usage.num / val.usage.den,
-                                    className: rr_value_class(tl, val),
-                                    start: val.from.num / val.from.den,
-                                    end: val.to.num / val.to.den,
-                                    type: 'background',
-                                    group: tl.id
-                                });
-                                for (const atm_id of val.atoms)
-                                    sv_atms.add(atm_id);
-                            });
-                            for (const atm_id of sv_atms) {
-                                const atm = atoms.get(atm_id);
-                                const start_var = atm.pars.find(xpr => xpr.name == 'start');
-                                const end_var = atm.pars.find(xpr => xpr.name == 'end');
-                                vals.push({
-                                    id: '' + tl.id + atm.id,
-                                    content: atom_content(atm),
-                                    title: atom_title(atm),
-                                    start: start_var.value.val.num / start_var.value.val.den,
-                                    end: end_var.value.val.num / end_var.value.val.den,
-                                    group: tl.id
-                                });
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                timeline_values.update(vals);
-                timeline.setCurrentTime(current_time);
-                break;
-            }
             case 'started_solving':
                 console.log('solving the problem..');
                 break;
@@ -202,7 +98,7 @@ function setup_ws() {
                 };
                 flaw.label = flaw_label(flaw);
                 flaw.title = flaw_tooltip(flaw);
-                flaw.shapeProperties = { borderDashes: stroke_dasharray(c_msg) };
+                flaw.shapeProperties = { borderDashes: stroke_dasharray(flaw) };
                 flaw.color = color(flaw);
                 nodes.add(flaw);
                 const causes = nodes.get(flaw.causes);
@@ -224,7 +120,7 @@ function setup_ws() {
             case 'flaw_state_changed': {
                 const flaw = nodes.get(c_msg.id);
                 flaw.state = c_msg.state;
-                flaw.shapeProperties.borderDashes = stroke_dasharray(c_msg);
+                flaw.shapeProperties.borderDashes = stroke_dasharray(flaw);
                 flaw.color = color(flaw);
                 nodes.update(flaw);
                 break;
@@ -296,7 +192,7 @@ function setup_ws() {
                 resolver.shapeProperties = { borderDashes: stroke_dasharray(resolver) };
                 resolver.color = color(resolver);
                 nodes.add(resolver);
-                edges.add({ from: c_msg.id, to: c_msg.effect, arrows: { to: true }, dashes: stroke_dasharray(c_msg) });
+                edges.add({ from: c_msg.id, to: c_msg.effect, arrows: { to: true }, dashes: stroke_dasharray(resolver) });
                 break;
             }
             case 'resolver_state_changed': {
@@ -333,28 +229,6 @@ function setup_ws() {
         }
     };
     ws.onclose = () => setTimeout(setup_ws, 1000);
-}
-
-function sv_value_class(val) {
-    switch (val.atoms.length) {
-        case 0: return 'sv-empty';
-        case 1: return 'sv-consistent';
-        default: return 'sv-inconsistent';
-    }
-}
-
-function rr_value_class(rr, val) { return rr.capacity.num / rr.capacity.den < val.usage.num / val.usage.den ? 'rr-inconsistent' : 'rr-consistent' }
-
-function atom_content(atm) { return atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par.name).sort().join(', ') + ')'; }
-
-function atom_title(atm) { return '\u03C3' + atm.sigma + ' ' + atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par_to_string(par)).sort().join(', ') + ')'; }
-
-function par_to_string(par) {
-    switch (par.type) {
-        case 'bool': return par.name + ': ' + par.value;
-        case 'real': return par.name + ': ' + par.value.num / par.value.den;
-        default: return par.name;
-    }
 }
 
 function estimate_cost(res) {
