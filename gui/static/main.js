@@ -10,11 +10,10 @@ const timeline_values = new vis.DataSet([]);
 const nodes = new vis.DataSet([]);
 const edges = new vis.DataSet([]);
 
-const options = {};
-
-const timeline = new vis.Timeline(document.getElementById('timelines'), timeline_values, timelines, options);
+const timeline = new vis.Timeline(document.getElementById('timelines'), timeline_values, timelines, {});
 timeline.currentTime.stop();
-const network = new vis.Network(document.getElementById('graph'), { nodes: nodes, edges: edges }, options);
+const network = new vis.Network(document.getElementById('graph'), { nodes: nodes, edges: edges }, { layout: { hierarchical: { direction: "RL", } } });
+const solving_animation = false;
 
 let current_time = 0, current_flaw, current_resolver;
 timeline.setCurrentTime(current_time);
@@ -23,13 +22,13 @@ let ws;
 setup_ws();
 
 function setup_ws() {
-    ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/ws-solver');
+    ws = new WebSocket('ws://' + location.hostname + ':' + location.port + '/solver');
     ws.onmessage = msg => {
         const c_msg = JSON.parse(msg.data);
         switch (c_msg.type) {
             case 'state_changed': {
-                items.clear(); for (const itm of c_msg.state.items) items.set(parseInt(itm.id), itm);
-                atoms.clear(); for (const atm of c_msg.state.atoms) atoms.set(parseInt(atm.id), atm);
+                items.clear(); if (c_msg.state.items) for (const itm of c_msg.state.items) items.set(parseInt(itm.id), itm);
+                atoms.clear(); if (c_msg.state.atoms) for (const atm of c_msg.state.atoms) atoms.set(parseInt(atm.id), atm);
                 timelines.update(c_msg.timelines.map(tl => { return { id: tl.id, content: tl.name } }));
                 const origin_var = c_msg.state.exprs.find(xpr => xpr.name == 'origin');
                 const horizon_var = c_msg.state.exprs.find(xpr => xpr.name == 'horizon');
@@ -188,6 +187,19 @@ function setup_ws() {
                     for (const f of resolver.preconditions)
                         edges.add({ from: f, to: resolver.id, arrows: { to: true }, dashes: stroke_dasharray(resolver) });
                 }
+
+                if (c_msg.current_flaw) {
+                    current_flaw = c_msg.current_flaw;
+                    if (c_msg.current_resolver) {
+                        current_resolver = c_msg.current_resolver;
+                        network.selectNodes([current_flaw, current_resolver]);
+                        network.focus(current_resolver, { animation: solving_animation });
+                    } else {
+                        current_resolver = undefined;
+                        network.selectNodes([current_flaw]);
+                        network.focus(current_flaw, { animation: solving_animation });
+                    }
+                }
                 break;
             }
             case 'flaw_created': {
@@ -268,7 +280,7 @@ function setup_ws() {
                 current_flaw = c_msg.id;
                 current_resolver = undefined;
                 network.selectNodes([current_flaw]);
-                network.focus(current_flaw, { animation: true });
+                network.focus(current_flaw, { animation: solving_animation });
                 break;
             }
             case 'resolver_created': {
@@ -316,7 +328,7 @@ function setup_ws() {
             case 'current_resolver': {
                 current_resolver = c_msg.id;
                 network.selectNodes([current_flaw, current_resolver]);
-                network.focus(current_resolver, { animation: true });
+                network.focus(current_resolver, { animation: solving_animation });
                 break;
             }
             case 'causal_link_added': {
