@@ -42,7 +42,7 @@ namespace ratio
         std::vector<std::string> par_names;
         std::vector<std::string> par_values;
         for (const auto &xpr : atm.get_exprs())
-            if (xpr.first != START && xpr.first != END && xpr.first != AT && xpr.first != TAU)
+            if (xpr.first != RATIO_START && xpr.first != RATIO_END && xpr.first != RATIO_AT && xpr.first != TAU)
             {
                 par_names.push_back(xpr.first);
                 if (bool_item *bi = dynamic_cast<bool_item *>(&*xpr.second))
