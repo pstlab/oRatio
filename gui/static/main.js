@@ -1,3 +1,5 @@
+document.querySelector('#tick').addEventListener('click', () => ws.send('tick'));
+
 const sc = chroma.scale(['#90EE90', 'yellow', '#A91101']);
 let max_cost = 1;
 let color_domain = sc.domain([0, max_cost]);
@@ -10,13 +12,16 @@ const timeline_values = new vis.DataSet([]);
 const nodes = new vis.DataSet([]);
 const edges = new vis.DataSet([]);
 
-const timeline = new vis.Timeline(document.getElementById('timelines'), timeline_values, timelines, {});
-timeline.currentTime.stop();
+const timeline = new vis.Timeline(document.getElementById('timelines'), timeline_values, timelines, { selectable: false, showCurrentTime: false });
+
 const network = new vis.Network(document.getElementById('graph'), { nodes: nodes, edges: edges }, { layout: { hierarchical: { direction: "RL", } } });
-const solving_animation = false;
+const animation = false;
 
 let current_time = 0, current_flaw, current_resolver;
-timeline.setCurrentTime(current_time);
+timeline.addCustomTime(current_time);
+timeline.customTimes[timeline.customTimes.length - 1].hammer.off("panstart panmove panend");
+
+const executing_tasks = new Set();
 
 let ws;
 setup_ws();
@@ -29,6 +34,7 @@ function setup_ws() {
             case 'state_changed': {
                 items.clear(); if (c_msg.state.items) for (const itm of c_msg.state.items) items.set(parseInt(itm.id), itm);
                 atoms.clear(); if (c_msg.state.atoms) for (const atm of c_msg.state.atoms) atoms.set(parseInt(atm.id), atm);
+                executing_tasks.clear();
                 timelines.update(c_msg.timelines.map(tl => { return { id: tl.id, content: tl.name } }));
                 const origin_var = c_msg.state.exprs.find(xpr => xpr.name == 'origin');
                 const horizon_var = c_msg.state.exprs.find(xpr => xpr.name == 'horizon');
@@ -57,7 +63,7 @@ function setup_ws() {
                                 const start_var = atm.pars.find(xpr => xpr.name == 'start');
                                 const end_var = atm.pars.find(xpr => xpr.name == 'end');
                                 vals.push({
-                                    id: '' + tl.id + atm.id,
+                                    id: atm.id,
                                     content: atom_content(atm),
                                     title: atom_title(atm),
                                     start: start_var.value.val.num / start_var.value.val.den,
@@ -74,7 +80,7 @@ function setup_ws() {
                                 if (start_var) {
                                     const end_var = atm.pars.find(xpr => xpr.name == 'end');
                                     vals.push({
-                                        id: '' + tl.id + atm.id,
+                                        id: atm.id,
                                         content: atom_content(atm),
                                         title: atom_title(atm),
                                         start: start_var.value.val.num / start_var.value.val.den,
@@ -84,7 +90,7 @@ function setup_ws() {
                                 } else {
                                     const at_var = atm.pars.find(xpr => xpr.name == 'at');
                                     vals.push({
-                                        id: '' + tl.id + atm.id,
+                                        id: atm.id,
                                         content: atom_content(atm),
                                         start: at_var.value.val.num / at_var.value.val.den,
                                         group: tl.id
@@ -112,7 +118,7 @@ function setup_ws() {
                                 const start_var = atm.pars.find(xpr => xpr.name == 'start');
                                 const end_var = atm.pars.find(xpr => xpr.name == 'end');
                                 vals.push({
-                                    id: '' + tl.id + atm.id,
+                                    id: atm.id,
                                     content: atom_content(atm),
                                     title: atom_title(atm),
                                     start: start_var.value.val.num / start_var.value.val.den,
@@ -125,7 +131,11 @@ function setup_ws() {
                             break;
                     }
                 timeline_values.update(vals);
-                timeline.setCurrentTime(current_time);
+                for (const t of c_msg.executing)
+                    executing_tasks.add(t);
+                timeline.setSelection(Array.from(executing_tasks), { focus: true, animate: animation });
+                current_time = c_msg.time.num / c_msg.time.den;
+                timeline.setCustomTime(current_time);
                 break;
             }
             case 'started_solving':
@@ -193,11 +203,11 @@ function setup_ws() {
                     if (c_msg.current_resolver) {
                         current_resolver = c_msg.current_resolver;
                         network.selectNodes([current_flaw, current_resolver]);
-                        network.focus(current_resolver, { animation: solving_animation });
+                        network.focus(current_resolver, { animation: animation });
                     } else {
                         current_resolver = undefined;
                         network.selectNodes([current_flaw]);
-                        network.focus(current_flaw, { animation: solving_animation });
+                        network.focus(current_flaw, { animation: animation });
                     }
                 }
                 break;
@@ -280,7 +290,7 @@ function setup_ws() {
                 current_flaw = c_msg.id;
                 current_resolver = undefined;
                 network.selectNodes([current_flaw]);
-                network.focus(current_flaw, { animation: solving_animation });
+                network.focus(current_flaw, { animation: animation });
                 break;
             }
             case 'resolver_created': {
@@ -328,7 +338,7 @@ function setup_ws() {
             case 'current_resolver': {
                 current_resolver = c_msg.id;
                 network.selectNodes([current_flaw, current_resolver]);
-                network.focus(current_resolver, { animation: solving_animation });
+                network.focus(current_resolver, { animation: animation });
                 break;
             }
             case 'causal_link_added': {
@@ -340,7 +350,27 @@ function setup_ws() {
             }
             case 'tick':
                 current_time = c_msg.time.num / c_msg.time.den;
-                timeline.setCurrentTime(current_time);
+                timeline.setCustomTime(current_time);
+                break;
+            case 'starting':
+                console.log('starting');
+                for (const t of c_msg.starting)
+                    console.log(atom_content(atoms.get(t)));
+                break;
+            case 'ending':
+                console.log('ending');
+                for (const t of c_msg.ending)
+                    console.log(atom_content(atoms.get(t)));
+                break;
+            case 'start':
+                for (const t of c_msg.start)
+                    executing_tasks.add(t);
+                timeline.setSelection(Array.from(executing_tasks), { focus: true, animate: animation });
+                break;
+            case 'end':
+                for (const t of c_msg.end)
+                    executing_tasks.delete(t);
+                timeline.setSelection(Array.from(executing_tasks), { focus: true, animate: animation });
                 break;
         }
     };

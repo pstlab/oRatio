@@ -2,6 +2,10 @@ html, body {
     height: 100%;
 }
 
+.vis-custom-time {
+    pointer-events: none;
+}
+
 .vis-item.vis-background.sv-empty {
     background-color: rgb(206, 206, 206);
 }

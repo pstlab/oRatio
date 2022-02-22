@@ -63,6 +63,8 @@ namespace ratio
     const flaw *c_flaw = nullptr;
     std::unordered_set<const resolver *> resolvers;
     const resolver *c_resolver = nullptr;
+    smt::rational current_time;
+    std::unordered_set<atom *> executing;
     const std::string host;
     const unsigned short port;
     crow::SimpleApp app;

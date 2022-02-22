@@ -22,6 +22,14 @@ namespace ratio
                 j_sc->set("type", new smt::string_val("state_changed"));
                 j_sc->set("state", slv.to_json());
                 j_sc->set("timelines", slv.extract_timelines());
+                std::vector<smt::json> j_executing;
+                for (const auto &atm : executing)
+                    j_executing.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(atm)));
+                j_sc->set("executing", new smt::array_val(j_executing));
+                smt::json j_time;
+                j_time->set("num", new smt::long_val(current_time.numerator()));
+                j_time->set("den", new smt::long_val(current_time.denominator()));
+                j_sc->set("time", j_time);
 
                 std::stringstream ss_sc;
                 j_sc.to_json(ss_sc);
@@ -46,7 +54,9 @@ namespace ratio
                 j_gr.to_json(ss_gr);
                 conn.send_text(ss_gr.str()); })
             .onclose([&](crow::websocket::connection &conn, const std::string &reason)
-                     { std::lock_guard<std::mutex> _(mtx); users.erase(&conn); });
+                     { std::lock_guard<std::mutex> _(mtx); users.erase(&conn); })
+            .onmessage([&](crow::websocket::connection &conn, const std::string &data, bool is_binary)
+                       { if(data == "tick") exec.tick(); });
     }
     gui_server::~gui_server() {}
 
@@ -66,6 +76,14 @@ namespace ratio
         j_sc->set("type", new smt::string_val("state_changed"));
         j_sc->set("state", slv.to_json());
         j_sc->set("timelines", slv.extract_timelines());
+        std::vector<smt::json> j_executing;
+        for (const auto &atm : executing)
+            j_executing.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(atm)));
+        j_sc->set("executing", new smt::array_val(j_executing));
+        smt::json j_time;
+        j_time->set("num", new smt::long_val(current_time.numerator()));
+        j_time->set("den", new smt::long_val(current_time.denominator()));
+        j_sc->set("time", j_time);
 
         std::stringstream ss;
         j_sc.to_json(ss);
@@ -95,6 +113,14 @@ namespace ratio
         j_sf->set("type", new smt::string_val("solution_found"));
         j_sf->set("state", slv.to_json());
         j_sf->set("timelines", slv.extract_timelines());
+        std::vector<smt::json> j_executing;
+        for (const auto &atm : executing)
+            j_executing.push_back(new smt::long_val(reinterpret_cast<std::uintptr_t>(atm)));
+        j_sf->set("executing", new smt::array_val(j_executing));
+        smt::json j_time;
+        j_time->set("num", new smt::long_val(current_time.numerator()));
+        j_time->set("den", new smt::long_val(current_time.denominator()));
+        j_sf->set("time", j_time);
 
         std::stringstream ss;
         j_sf.to_json(ss);
@@ -255,6 +281,7 @@ namespace ratio
     void gui_server::tick(const smt::rational &time)
     {
         std::lock_guard<std::mutex> _(mtx);
+        current_time = time;
 
         smt::json j_t;
         j_t->set("type", new smt::string_val("tick"));
@@ -287,6 +314,7 @@ namespace ratio
     void gui_server::start(const std::unordered_set<atom *> &atoms)
     {
         std::lock_guard<std::mutex> _(mtx);
+        executing.insert(atoms.cbegin(), atoms.cend());
 
         smt::json j_st;
         j_st->set("type", new smt::string_val("start"));
@@ -319,6 +347,8 @@ namespace ratio
     void gui_server::end(const std::unordered_set<atom *> &atoms)
     {
         std::lock_guard<std::mutex> _(mtx);
+        for (const auto &a : atoms)
+            executing.erase(a);
 
         smt::json j_st;
         j_st->set("type", new smt::string_val("end"));
