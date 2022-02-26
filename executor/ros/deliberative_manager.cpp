@@ -55,28 +55,21 @@ namespace ratio
 
     bool deliberative_manager::create_reasoner(deliberative_tier::create_reasoner::Request &req, deliberative_tier::create_reasoner::Response &res)
     {
-        ROS_DEBUG("Creating new reasoner %lu..", req.reasoner_id);
-        if (executors.find(req.reasoner_id) != executors.end())
-        {
-            ROS_WARN("Reasoner %lu already exists..", req.reasoner_id);
-            res.created = false;
-        }
-        else
-        {
-            std::vector<std::string> relevant_predicates;
-            relevant_predicates.insert(relevant_predicates.end(), req.notify_start.begin(), req.notify_start.end());
+        res.reasoner_id = executors.size();
+        ROS_DEBUG("Creating new reasoner %lu..", res.reasoner_id);
+        std::vector<std::string> relevant_predicates;
+        relevant_predicates.insert(relevant_predicates.end(), req.notify_start.begin(), req.notify_start.end());
 
-            executors[req.reasoner_id] = new deliberative_executor(*this, req.reasoner_id, req.domain_files, relevant_predicates);
+        executors[res.reasoner_id] = new deliberative_executor(*this, res.reasoner_id, req.domain_files, relevant_predicates);
 
-            for (const auto &r : req.requirements)
-                pending_requirements[req.reasoner_id].push(r);
+        for (const auto &r : req.requirements)
+            pending_requirements[res.reasoner_id].push(r);
 
-            res.created = true;
+        res.created = true;
 
-            std_msgs::UInt64 r_created_msg;
-            r_created_msg.data = req.reasoner_id;
-            reasoner_created.publish(r_created_msg);
-        }
+        std_msgs::UInt64 r_created_msg;
+        r_created_msg.data = res.reasoner_id;
+        reasoner_created.publish(r_created_msg);
         return true;
     }
 
@@ -153,7 +146,7 @@ namespace ratio
                 const auto [lb, ub] = f->get_solver().get_idl_theory().bounds(f->get_position());
                 const auto est_cost = f->get_estimated_cost();
                 f_msg.cost.num = est_cost.numerator(), f_msg.cost.den = est_cost.denominator();
-                f_msg.position.lb = lb, f_msg.position.ub = ub;
+                f_msg.pos.lb = lb, f_msg.pos.ub = ub;
                 res.graph.flaws.push_back(f_msg);
             }
 
@@ -164,16 +157,16 @@ namespace ratio
                 r_msg.effect = reinterpret_cast<std::uintptr_t>(&r->get_effect());
                 r_msg.data = r->get_data();
                 r_msg.state = r->get_solver().get_sat_core().value(r->get_rho());
-                const auto est_cost = r->get_estimated_cost();
-                r_msg.cost.num = est_cost.numerator(), r_msg.cost.den = est_cost.denominator();
+                const auto est_cost = r->get_intrinsic_cost();
+                r_msg.intrinsic_cost.num = est_cost.numerator(), r_msg.intrinsic_cost.den = est_cost.denominator();
                 res.graph.resolvers.push_back(r_msg);
             }
 
             if (executors.at(req.reasoner_id)->current_flaw)
-                res.graph.flaw = reinterpret_cast<std::uintptr_t>(executors.at(req.reasoner_id)->current_flaw);
+                res.graph.flaw_id = reinterpret_cast<std::uintptr_t>(executors.at(req.reasoner_id)->current_flaw);
 
             if (executors.at(req.reasoner_id)->current_resolver)
-                res.graph.resolver = reinterpret_cast<std::uintptr_t>(executors.at(req.reasoner_id)->current_resolver);
+                res.graph.resolver_id = reinterpret_cast<std::uintptr_t>(executors.at(req.reasoner_id)->current_resolver);
         }
         return true;
     }

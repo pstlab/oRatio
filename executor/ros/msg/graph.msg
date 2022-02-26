@@ -1,8 +1,8 @@
 uint64 reasoner_id
 flaw[] flaws
 resolver[] resolvers
-uint64 flaw
-uint64 resolver
+uint64 flaw_id
+uint64 resolver_id
 uint8 graph_changed = 0
 uint8 flaw_created = 1
 uint8 flaw_state_changed = 2

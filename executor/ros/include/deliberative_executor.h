@@ -104,5 +104,7 @@ namespace ratio
     std::unordered_set<resolver const *> resolvers;
     flaw const *current_flaw = nullptr;
     resolver const *current_resolver = nullptr;
+    smt::rational current_time;
+    std::unordered_set<ratio::atom *> executing;
   };
 } // namespace ratio

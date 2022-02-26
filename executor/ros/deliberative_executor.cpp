@@ -77,7 +77,12 @@ namespace ratio
 
         deliberative_tier::timelines timelines_msg;
         timelines_msg.reasoner_id = exec.reasoner_id;
-        timelines_msg.update = deliberative_tier::timelines::timelines_changed;
+        timelines_msg.update = deliberative_tier::timelines::state_changed;
+
+        std::stringstream sss;
+        sss << exec.slv.to_json();
+        timelines_msg.state = sss.str();
+
         const auto tls = exec.slv.extract_timelines();
         const smt::array_val &tls_array = static_cast<const smt::array_val &>(*tls);
         for (size_t i = 0; i < tls_array.size(); ++i)
@@ -86,6 +91,7 @@ namespace ratio
             ss << tls_array.get(i);
             timelines_msg.timelines.push_back(ss.str());
         }
+
         arith_expr origin_expr = exec.slv.get("origin");
         const auto origin = exec.slv.arith_value(origin_expr);
         timelines_msg.origin.num = origin.get_rational().numerator();
@@ -95,6 +101,12 @@ namespace ratio
         const auto horizon = exec.slv.arith_value(horizon_expr);
         timelines_msg.horizon.num = horizon.get_rational().numerator();
         timelines_msg.horizon.den = horizon.get_rational().denominator();
+
+        timelines_msg.time.num = exec.current_time.numerator();
+        timelines_msg.time.den = exec.current_time.denominator();
+
+        for (const auto &atm : exec.executing)
+            timelines_msg.executing.push_back(reinterpret_cast<std::uintptr_t>(atm));
 
         exec.d_mngr.notify_timelines.publish(timelines_msg);
     }
@@ -107,6 +119,8 @@ namespace ratio
     void deliberative_executor::deliberative_executor_listener::tick(const smt::rational &time)
     {
         ROS_DEBUG("Current time: %s", to_string(time).c_str());
+        exec.current_time = time;
+
         deliberative_tier::timelines time_msg;
         time_msg.reasoner_id = exec.reasoner_id;
         time_msg.update = deliberative_tier::timelines::time_changed;
@@ -146,6 +160,7 @@ namespace ratio
         task t;
         for (const auto &atm : atms)
         {
+            exec.executing.insert(atm);
             ROS_DEBUG("[%lu] Starting task %s..", exec.reasoner_id, atm->get_type().get_name().c_str());
             t = to_task(*atm);
             st_srv.request.reasoner_id = exec.reasoner_id;
@@ -172,6 +187,7 @@ namespace ratio
     { // these atoms are now ended..
         for (const auto &atm : atms)
         {
+            exec.executing.erase(atm);
             ROS_DEBUG("[%lu] Ended task %s..", exec.reasoner_id, atm->get_type().get_name().c_str());
         }
     }
@@ -195,7 +211,7 @@ namespace ratio
         fc_msg.data = f.get_data();
         fc_msg.state = slv.get_sat_core().value(f.get_phi());
         const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
-        fc_msg.position.lb = lb, fc_msg.position.ub = ub;
+        fc_msg.pos.lb = lb, fc_msg.pos.ub = ub;
 
         deliberative_tier::graph g_msg;
         g_msg.reasoner_id = exec.get_reasoner_id();
@@ -233,7 +249,7 @@ namespace ratio
         deliberative_tier::flaw fpc_msg;
         fpc_msg.id = reinterpret_cast<std::uintptr_t>(&f);
         const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
-        fpc_msg.position.lb = lb, fpc_msg.position.ub = ub;
+        fpc_msg.pos.lb = lb, fpc_msg.pos.ub = ub;
 
         deliberative_tier::graph g_msg;
         g_msg.reasoner_id = exec.get_reasoner_id();
@@ -247,7 +263,7 @@ namespace ratio
 
         deliberative_tier::graph g_msg;
         g_msg.reasoner_id = exec.get_reasoner_id();
-        g_msg.flaw = reinterpret_cast<std::uintptr_t>(&f);
+        g_msg.flaw_id = reinterpret_cast<std::uintptr_t>(&f);
         g_msg.update = deliberative_tier::graph::current_flaw;
         exec.d_mngr.notify_graph.publish(g_msg);
     }
@@ -261,8 +277,8 @@ namespace ratio
         rc_msg.effect = reinterpret_cast<std::uintptr_t>(&r.get_effect());
         rc_msg.data = r.get_data();
         rc_msg.state = slv.get_sat_core().value(r.get_rho());
-        const auto est_cost = r.get_estimated_cost();
-        rc_msg.cost.num = est_cost.numerator(), rc_msg.cost.den = est_cost.denominator();
+        const auto est_cost = r.get_intrinsic_cost();
+        rc_msg.intrinsic_cost.num = est_cost.numerator(), rc_msg.intrinsic_cost.den = est_cost.denominator();
 
         deliberative_tier::graph g_msg;
         g_msg.reasoner_id = exec.get_reasoner_id();
@@ -288,7 +304,7 @@ namespace ratio
 
         deliberative_tier::graph g_msg;
         g_msg.reasoner_id = exec.get_reasoner_id();
-        g_msg.resolver = reinterpret_cast<std::uintptr_t>(&r);
+        g_msg.resolver_id = reinterpret_cast<std::uintptr_t>(&r);
         g_msg.update = deliberative_tier::graph::current_resolver;
         exec.d_mngr.notify_graph.publish(g_msg);
     }
@@ -297,8 +313,8 @@ namespace ratio
     {
         deliberative_tier::graph g_msg;
         g_msg.reasoner_id = exec.get_reasoner_id();
-        g_msg.flaw = reinterpret_cast<std::uintptr_t>(&f);
-        g_msg.resolver = reinterpret_cast<std::uintptr_t>(&r);
+        g_msg.flaw_id = reinterpret_cast<std::uintptr_t>(&f);
+        g_msg.resolver_id = reinterpret_cast<std::uintptr_t>(&r);
         g_msg.update = deliberative_tier::graph::causal_link_added;
         exec.d_mngr.notify_graph.publish(g_msg);
     }

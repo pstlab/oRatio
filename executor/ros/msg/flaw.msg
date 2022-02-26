@@ -2,6 +2,6 @@ uint64 id
 uint64[] causes
 string data
 uint8 state
-position position
+position pos
 rational cost
 bool current

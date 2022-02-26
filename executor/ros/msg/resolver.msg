@@ -3,5 +3,5 @@ uint64[] preconditions
 uint64 effect
 string data
 uint8 state
-rational cost
+rational intrinsic_cost
 bool current
