@@ -136,12 +136,29 @@ class Reasoner {
         this.timeline.setCustomTime(this.current_time);
     }
 
-    time_changed(message) {
+    solution_found() {
+        this.current_flaw = undefined;
+        this.current_resolver = undefined;
+        this.network.unselectAll();
+    }
+
+    inconsistent_problem() {
+        this.current_flaw = undefined;
+        this.current_resolver = undefined;
+        this.network.unselectAll();
+    }
+
+    tick(message) {
         this.current_time = message.time.num / message.time.den;
         this.timeline.setCustomTime(this.current_time);
     }
 
-    graph_changed(message) {
+    graph(message) {
+        this.nodes.clear();
+        this.edges.clear();
+        this.current_flaw = undefined;
+        this.current_resolver = undefined;
+
         for (const f of message.flaws) {
             const flaw = {
                 type: 'flaw',
@@ -338,5 +355,148 @@ class Reasoner {
 
     estimate_cost(res) {
         return (res.preconditions ? Math.max.apply(Math, res.preconditions.map(f_id => this.nodes.get(f_id).cost)) : 0) + res.intrinsic_cost;
+    }
+
+    starting(message) {
+        console.log('starting');
+        for (const t of message.starting)
+            console.log(atom_content(this.atoms.get(t)));
+    }
+
+    start(message) {
+        for (const t of message.start)
+            this.executing_tasks.add(t);
+        this.timeline.setSelection(Array.from(this.executing_tasks), { focus: true, animate: animation });
+    }
+
+    ending(message) {
+        console.log('ending');
+        for (const t of message.ending)
+            console.log(atom_content(this.atoms.get(t)));
+    }
+
+    end(message) {
+        for (const t of message.end)
+            this.executing_tasks.delete(t);
+        this.timeline.setSelection(Array.from(this.executing_tasks), { focus: true, animate: animation });
+    }
+}
+
+function sv_value_class(val) {
+    switch (val.atoms.length) {
+        case 0: return 'sv-empty';
+        case 1: return 'sv-consistent';
+        default: return 'sv-inconsistent';
+    }
+}
+
+function rr_value_class(rr, val) { return rr.capacity.num / rr.capacity.den < val.usage.num / val.usage.den ? 'rr-inconsistent' : 'rr-consistent' }
+
+function atom_content(atm) { return atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par.name).sort().join(', ') + ')'; }
+
+function atom_title(atm) { return '\u03C3' + atm.sigma + ' ' + atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par_to_string(par)).sort().join(', ') + ')'; }
+
+function par_to_string(par) {
+    switch (par.type) {
+        case 'bool': return par.name + ': ' + par.value;
+        case 'real': return par.name + ': ' + par.value.num / par.value.den;
+        default: return par.name;
+    }
+}
+
+function color(n) {
+    switch (n.state) {
+        case 0: // False
+            return chroma('lightgray').hex();
+        case 1: // True
+        case 2: // Undefined
+            if (n.cost < Number.POSITIVE_INFINITY)
+                return color_domain(Math.min(max_cost, n.cost)).hex();
+            else
+                return chroma('darkgray').hex();
+        default:
+            break;
+    }
+}
+
+function stroke_dasharray(n) {
+    switch (n.state) {
+        case 0: // False
+            return [2, 2];
+        case 1: // True
+            return false;
+        case 2: // Undefined
+            return [4, 4];
+        default:
+            break;
+    }
+}
+
+function flaw_label(flaw) {
+    switch (flaw.data.type) {
+        case 'fact':
+            return 'fact \u03C3' + flaw.data.sigma + ' ' + flaw.data.predicate;
+        case 'goal':
+            return 'goal \u03C3' + flaw.data.sigma + ' ' + flaw.data.predicate;
+        case 'enum':
+            return 'enum';
+        case 'bool':
+            return 'bool';
+        default:
+            switch (flaw.data.phi) {
+                case 'b0':
+                case '\u00ACb0':
+                    return flaw.data.type;
+                default:
+                    return flaw.data.phi.replace('b', '\u03C6') + ' ' + flaw.data.type;
+            }
+    }
+}
+
+function flaw_tooltip(flaw) {
+    switch (flaw.data.phi) {
+        case 'b0':
+        case '\u00ACb0':
+            return 'cost: ' + flaw.cost + ', pos: ' + flaw.pos.lb;
+        default:
+            return flaw.data.phi.replace('b', '\u03C6') + ', cost: ' + flaw.cost + ', pos: ' + flaw.pos.lb;
+    }
+}
+
+function resolver_label(resolver) {
+    if (resolver.data.type)
+        switch (resolver.data.type) {
+            case 'activate':
+                return 'activate';
+            case 'unify':
+                return 'unify';
+            case 'assignment':
+                return resolver.data.val;
+            default:
+                switch (resolver.data.rho) {
+                    case 'b0':
+                    case '\u00ACb0':
+                        return resolver.data.type;
+                    default:
+                        return resolver.data.rho.replace('b', '\u03C1') + ' ' + resolver.data.type;
+                }
+        }
+    switch (resolver.data.rho) {
+        case 'b0':
+            return '\u22A4';
+        case '\u00ACb0':
+            return '\u22A5';
+        default:
+            return resolver.data.rho.replace('b', '\u03C1');
+    }
+}
+
+function resolver_tooltip(resolver) {
+    switch (resolver.data.rho) {
+        case 'b0':
+        case '\u00ACb0':
+            return 'cost: ' + resolver.cost;
+        default:
+            return resolver.data.rho.replace('b', '\u03C1') + ', cost: ' + resolver.cost;
     }
 }
