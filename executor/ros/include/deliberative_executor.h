@@ -100,10 +100,10 @@ namespace ratio
     deliberative_executor_listener del;
     unsigned int state = -1;
     std::unordered_map<smt::var, ratio::atom *> current_tasks;
-    std::unordered_set<flaw const *> flaws;
-    std::unordered_set<resolver const *> resolvers;
-    flaw const *current_flaw = nullptr;
-    resolver const *current_resolver = nullptr;
+    std::unordered_set<const flaw *> flaws;
+    std::unordered_set<const resolver *> resolvers;
+    const flaw *current_flaw = nullptr;
+    const resolver *current_resolver = nullptr;
     smt::rational current_time;
     std::unordered_set<ratio::atom *> executing;
   };
