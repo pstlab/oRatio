@@ -32,8 +32,7 @@ add_service_files(
     create_reasoner.srv
     destroy_reasoner.srv
     new_requirement.srv
-    get_graph.srv
-    get_timelines.srv
+    get_state.srv
 )
 
 ## Generate added messages and services

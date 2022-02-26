@@ -380,6 +380,12 @@ class Reasoner {
             this.executing_tasks.delete(t);
         this.timeline.setSelection(Array.from(this.executing_tasks), { focus: true, animate: animation });
     }
+
+    executing_changed(message) {
+        this.executing_tasks.clear();
+        this.executing_tasks.add(message.executing);
+        this.timeline.setSelection(Array.from(this.executing_tasks), { focus: true, animate: animation });
+    }
 }
 
 function sv_value_class(val) {

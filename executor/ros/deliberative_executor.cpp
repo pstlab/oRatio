@@ -73,7 +73,8 @@ namespace ratio
     void deliberative_executor::deliberative_core_listener::solution_found()
     {
         ROS_DEBUG("[%lu] Solution found..", exec.reasoner_id);
-        exec.set_state(deliberative_tier::deliberative_state::executing);
+        exec.current_flaw = nullptr;
+        exec.current_resolver = nullptr;
 
         deliberative_tier::timelines timelines_msg;
         timelines_msg.reasoner_id = exec.reasoner_id;
@@ -109,10 +110,16 @@ namespace ratio
             timelines_msg.executing.push_back(reinterpret_cast<std::uintptr_t>(atm));
 
         exec.d_mngr.notify_timelines.publish(timelines_msg);
+
+        exec.set_state(deliberative_tier::deliberative_state::executing);
     }
     void deliberative_executor::deliberative_core_listener::inconsistent_problem()
     {
         ROS_DEBUG("[%lu] Inconsistent problem..", exec.reasoner_id);
+
+        exec.current_flaw = nullptr;
+        exec.current_resolver = nullptr;
+
         exec.set_state(deliberative_tier::deliberative_state::inconsistent);
     }
 
