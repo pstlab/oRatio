@@ -13,13 +13,12 @@ namespace ratio
                                                                      destroy_reasoner_server(h.advertiseService("destroy_reasoner", &deliberative_manager::destroy_reasoner, this)),
                                                                      new_requirement_server(h.advertiseService("new_requirement", &deliberative_manager::new_requirement, this)),
                                                                      task_finished_server(h.advertiseService("task_finished", &deliberative_manager::task_finished, this)),
-                                                                     graph_server(h.advertiseService("get_graph", &deliberative_manager::get_graph, this)),
-                                                                     timelines_server(h.advertiseService("get_timelines", &deliberative_manager::get_timelines, this)),
-                                                                     reasoner_created(handle.advertise<std_msgs::UInt64>("reasoner_created", 10, true)),
-                                                                     reasoner_destroyed(handle.advertise<std_msgs::UInt64>("reasoner_destroyed", 10, true)),
+                                                                     state_server(h.advertiseService("get_state", &deliberative_manager::get_state, this)),
+                                                                     reasoner_created(handle.advertise<std_msgs::UInt64>("reasoner_created", 10)),
+                                                                     reasoner_destroyed(handle.advertise<std_msgs::UInt64>("reasoner_destroyed", 10)),
                                                                      notify_state(handle.advertise<deliberative_tier::deliberative_state>("deliberative_state", 10, true)),
-                                                                     notify_graph(handle.advertise<deliberative_tier::graph>("graph", 10, true)),
-                                                                     notify_timelines(handle.advertise<deliberative_tier::timelines>("timelines", 10, true)),
+                                                                     notify_graph(handle.advertise<deliberative_tier::graph>("graph", 10)),
+                                                                     notify_timelines(handle.advertise<deliberative_tier::timelines>("timelines", 10)),
                                                                      can_start(h.serviceClient<deliberative_tier::can_start>("can_start")),
                                                                      start_task(h.serviceClient<deliberative_tier::start_task>("start_task"))
     {
@@ -126,16 +125,13 @@ namespace ratio
         return true;
     }
 
-    bool deliberative_manager::get_graph(deliberative_tier::get_graph::Request &req, deliberative_tier::get_graph::Response &res)
+    bool deliberative_manager::get_state(deliberative_tier::get_state::Request &req, deliberative_tier::get_state::Response &res)
     {
-        ROS_DEBUG("Getting causal graph for reasoner %lu..", req.reasoner_id);
-        if (executors.find(req.reasoner_id) == executors.end())
+        ROS_DEBUG("Getting Deliberative Manager state");
+        for (const auto &exec : executors)
         {
-            ROS_WARN("Reasoner %lu does not exist..", req.reasoner_id);
-        }
-        else
-        {
-            for (const auto &f : executors.at(req.reasoner_id)->flaws)
+            deliberative_tier::graph g_msg;
+            for (const auto &f : exec.second->flaws)
             {
                 deliberative_tier::flaw f_msg;
                 f_msg.id = f->get_id();
@@ -147,10 +143,10 @@ namespace ratio
                 const auto est_cost = f->get_estimated_cost();
                 f_msg.cost.num = est_cost.numerator(), f_msg.cost.den = est_cost.denominator();
                 f_msg.pos.lb = lb, f_msg.pos.ub = ub;
-                res.graph.flaws.push_back(f_msg);
+                g_msg.flaws.push_back(f_msg);
             }
 
-            for (const auto &r : executors.at(req.reasoner_id)->resolvers)
+            for (const auto &r : exec.second->resolvers)
             {
                 deliberative_tier::resolver r_msg;
                 r_msg.id = r->get_id();
@@ -159,7 +155,7 @@ namespace ratio
                 r_msg.state = r->get_solver().get_sat_core().value(r->get_rho());
                 const auto est_cost = r->get_intrinsic_cost();
                 r_msg.intrinsic_cost.num = est_cost.numerator(), r_msg.intrinsic_cost.den = est_cost.denominator();
-                res.graph.resolvers.push_back(r_msg);
+                g_msg.resolvers.push_back(r_msg);
             }
 
             if (executors.at(req.reasoner_id)->current_flaw)
@@ -185,21 +181,26 @@ namespace ratio
             {
                 std::stringstream ss;
                 ss << tls_array.get(i);
-                res.timelines.timelines.push_back(ss.str());
+                tls_msg.timelines.push_back(ss.str());
             }
-            arith_expr origin_expr = executors.at(req.reasoner_id)->get_solver().get("origin");
-            const auto origin = executors.at(req.reasoner_id)->get_solver().arith_value(origin_expr);
-            res.timelines.origin.num = origin.get_rational().numerator();
-            res.timelines.origin.den = origin.get_rational().denominator();
+            arith_expr origin_expr = exec.second->get_solver().get("origin");
+            const auto origin = exec.second->get_solver().arith_value(origin_expr);
+            tls_msg.origin.num = origin.get_rational().numerator();
+            tls_msg.origin.den = origin.get_rational().denominator();
 
-            arith_expr horizon_expr = executors.at(req.reasoner_id)->get_solver().get("horizon");
-            const auto horizon = executors.at(req.reasoner_id)->get_solver().arith_value(horizon_expr);
-            res.timelines.horizon.num = horizon.get_rational().numerator();
-            res.timelines.horizon.den = horizon.get_rational().denominator();
+            arith_expr horizon_expr = exec.second->get_solver().get("horizon");
+            const auto horizon = exec.second->get_solver().arith_value(horizon_expr);
+            tls_msg.horizon.num = horizon.get_rational().numerator();
+            tls_msg.horizon.den = horizon.get_rational().denominator();
 
-            const auto c_time = executors.at(req.reasoner_id)->get_executor().get_current_time();
-            res.timelines.time.num = c_time.numerator();
-            res.timelines.time.den = c_time.denominator();
+            const auto c_time = exec.second->get_executor().get_current_time();
+            tls_msg.time.num = c_time.numerator();
+            tls_msg.time.den = c_time.denominator();
+
+            for (const auto &atm : exec.second->executing)
+                tls_msg.executing.push_back(reinterpret_cast<std::uintptr_t>(atm));
+
+            res.timelines.push_back(tls_msg);
         }
         return true;
     }

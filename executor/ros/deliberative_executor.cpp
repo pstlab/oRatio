@@ -73,7 +73,8 @@ namespace ratio
     void deliberative_executor::deliberative_core_listener::solution_found()
     {
         ROS_DEBUG("[%lu] Solution found..", exec.reasoner_id);
-        exec.set_state(deliberative_tier::deliberative_state::executing);
+        exec.current_flaw = nullptr;
+        exec.current_resolver = nullptr;
 
         deliberative_tier::timelines timelines_msg;
         timelines_msg.reasoner_id = exec.reasoner_id;
@@ -109,10 +110,16 @@ namespace ratio
             timelines_msg.executing.push_back(atm->get_id());
 
         exec.d_mngr.notify_timelines.publish(timelines_msg);
+
+        exec.set_state(deliberative_tier::deliberative_state::executing);
     }
     void deliberative_executor::deliberative_core_listener::inconsistent_problem()
     {
         ROS_DEBUG("[%lu] Inconsistent problem..", exec.reasoner_id);
+
+        exec.current_flaw = nullptr;
+        exec.current_resolver = nullptr;
+
         exec.set_state(deliberative_tier::deliberative_state::inconsistent);
     }
 
@@ -171,6 +178,13 @@ namespace ratio
             if (exec.d_mngr.start_task.call(st_srv) && st_srv.response.started)
                 exec.current_tasks.emplace(atm->get_sigma(), atm);
         }
+
+        deliberative_tier::timelines executing_msg;
+        executing_msg.reasoner_id = exec.reasoner_id;
+        executing_msg.update = deliberative_tier::timelines::executing_changed;
+        for (const auto &atm : exec.executing)
+            executing_msg.executing.push_back(reinterpret_cast<std::uintptr_t>(atm));
+        exec.d_mngr.notify_timelines.publish(executing_msg);
     }
 
     void deliberative_executor::deliberative_executor_listener::ending(const std::unordered_set<atom *> &atms)
@@ -190,6 +204,13 @@ namespace ratio
             exec.executing.erase(atm);
             ROS_DEBUG("[%lu] Ended task %s..", exec.reasoner_id, atm->get_type().get_name().c_str());
         }
+
+        deliberative_tier::timelines executing_msg;
+        executing_msg.reasoner_id = exec.reasoner_id;
+        executing_msg.update = deliberative_tier::timelines::executing_changed;
+        for (const auto &atm : exec.executing)
+            executing_msg.executing.push_back(reinterpret_cast<std::uintptr_t>(atm));
+        exec.d_mngr.notify_timelines.publish(executing_msg);
     }
 
     void deliberative_executor::finish_task(const smt::var &id, const bool &success)
