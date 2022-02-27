@@ -383,7 +383,8 @@ class Reasoner {
 
     executing_changed(message) {
         this.executing_tasks.clear();
-        this.executing_tasks.add(message.executing);
+        for (const t of message.executing)
+            this.executing_tasks.add(t);
         this.timeline.setSelection(Array.from(this.executing_tasks), { focus: true, animate: animation });
     }
 }

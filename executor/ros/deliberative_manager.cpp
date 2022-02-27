@@ -150,6 +150,8 @@ namespace ratio
             {
                 deliberative_tier::resolver r_msg;
                 r_msg.id = r->get_id();
+                for (const auto &p : r->get_preconditions())
+                    r_msg.preconditions.push_back(p->get_id());
                 r_msg.effect = r->get_effect().get_id();
                 r_msg.data = r->get_data();
                 r_msg.state = r->get_solver().get_sat_core().value(r->get_rho());
@@ -158,24 +160,21 @@ namespace ratio
                 g_msg.resolvers.push_back(r_msg);
             }
 
-            if (executors.at(req.reasoner_id)->current_flaw)
-                res.graph.flaw_id = executors.at(req.reasoner_id)->current_flaw->get_id();
+            if (exec.second->current_flaw)
+                g_msg.flaw_id = exec.second->current_flaw->get_id();
 
-            if (executors.at(req.reasoner_id)->current_resolver)
-                res.graph.resolver_id = executors.at(req.reasoner_id)->current_resolver->get_id();
-        }
-        return true;
-    }
-    bool deliberative_manager::get_timelines(deliberative_tier::get_timelines::Request &req, deliberative_tier::get_timelines::Response &res)
-    {
-        ROS_DEBUG("Getting timelines for reasoner %lu..", req.reasoner_id);
-        if (executors.find(req.reasoner_id) == executors.end())
-        {
-            ROS_WARN("Reasoner %lu does not exist..", req.reasoner_id);
-        }
-        else
-        {
-            const auto tls = executors.at(req.reasoner_id)->get_solver().extract_timelines();
+            if (exec.second->current_resolver)
+                g_msg.resolver_id = exec.second->current_resolver->get_id();
+
+            res.graphs.push_back(g_msg);
+
+            deliberative_tier::timelines tls_msg;
+
+            std::stringstream sss;
+            sss << exec.second->get_solver().to_json();
+            tls_msg.state = sss.str();
+
+            const auto tls = exec.second->get_solver().extract_timelines();
             const smt::array_val &tls_array = static_cast<const smt::array_val &>(*tls);
             for (size_t i = 0; i < tls_array.size(); ++i)
             {
