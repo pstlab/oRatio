@@ -131,7 +131,7 @@ class Reasoner {
         this.timeline_values.update(vals);
         for (const t of message.executing)
             this.executing_tasks.add(t);
-        this.timeline.setSelection(Array.from(this.executing_tasks), { focus: true, animate: animation });
+        this.timeline.setSelection(Array.from(this.executing_tasks), { animate: animation });
         this.current_time = message.time.num / message.time.den;
         this.timeline.setCustomTime(this.current_time);
     }
@@ -366,7 +366,7 @@ class Reasoner {
     start(message) {
         for (const t of message.start)
             this.executing_tasks.add(t);
-        this.timeline.setSelection(Array.from(this.executing_tasks), { focus: true, animate: animation });
+        this.timeline.setSelection(Array.from(this.executing_tasks), { animate: animation });
     }
 
     ending(message) {
@@ -378,14 +378,14 @@ class Reasoner {
     end(message) {
         for (const t of message.end)
             this.executing_tasks.delete(t);
-        this.timeline.setSelection(Array.from(this.executing_tasks), { focus: true, animate: animation });
+        this.timeline.setSelection(Array.from(this.executing_tasks), { animate: animation });
     }
 
     executing_changed(message) {
         this.executing_tasks.clear();
         for (const t of message.executing)
             this.executing_tasks.add(t);
-        this.timeline.setSelection(Array.from(this.executing_tasks), { focus: true, animate: animation });
+        this.timeline.setSelection(Array.from(this.executing_tasks), { animate: animation });
     }
 }
 
