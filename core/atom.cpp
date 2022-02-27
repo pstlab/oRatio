@@ -74,7 +74,7 @@ namespace ratio
     json atom::to_json() const noexcept
     {
         json j_atm;
-        j_atm->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(this))));
+        j_atm->set("id", new long_val(get_id()));
         j_atm->set("predicate", new string_val(get_type().get_full_name()));
         j_atm->set("sigma", new string_val(std::to_string(sigma)));
         switch (get_core().get_sat_core().value(sigma))

@@ -21,6 +21,13 @@ namespace ratio
     resolver(const resolver &that) = delete;
     virtual ~resolver() = default;
 
+    /**
+     * @brief Get the id of this resolver.
+     *
+     * @return uintptr_t an id of this resolver.
+     */
+    uintptr_t get_id() const noexcept { return reinterpret_cast<uintptr_t>(this); }
+
     inline solver &get_solver() const noexcept { return slv; }
     inline smt::lit get_rho() const noexcept { return rho; }
     inline smt::rational get_intrinsic_cost() const noexcept { return intrinsic_cost; }
@@ -32,10 +39,10 @@ namespace ratio
 
   private:
     /**
-   * Applies this resolver, introducing subgoals and/or constraints.
-   * 
-   * @pre the solver must be at root-level.
-   */
+     * Applies this resolver, introducing subgoals and/or constraints.
+     *
+     * @pre the solver must be at root-level.
+     */
     virtual void apply() = 0;
 
   private:

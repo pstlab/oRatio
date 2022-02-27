@@ -612,7 +612,7 @@ namespace ratio
         if (!starting_atoms.empty())
         {
             json slv_tl;
-            slv_tl->set("id", new string_val(std::to_string(reinterpret_cast<std::uintptr_t>(this))));
+            slv_tl->set("id", new long_val(reinterpret_cast<uintptr_t>(this)));
             slv_tl->set("name", new string_val("solver"));
             std::vector<json> j_atms;
             for (const auto &p : pulses)

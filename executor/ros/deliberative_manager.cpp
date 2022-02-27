@@ -138,9 +138,9 @@ namespace ratio
             for (const auto &f : executors.at(req.reasoner_id)->flaws)
             {
                 deliberative_tier::flaw f_msg;
-                f_msg.id = reinterpret_cast<std::uintptr_t>(&f);
+                f_msg.id = f->get_id();
                 for (const auto &r : f->get_causes())
-                    f_msg.causes.push_back(reinterpret_cast<std::uintptr_t>(r));
+                    f_msg.causes.push_back(r->get_id());
                 f_msg.data = f->get_data();
                 f_msg.state = f->get_solver().get_sat_core().value(f->get_phi());
                 const auto [lb, ub] = f->get_solver().get_idl_theory().bounds(f->get_position());
@@ -153,8 +153,8 @@ namespace ratio
             for (const auto &r : executors.at(req.reasoner_id)->resolvers)
             {
                 deliberative_tier::resolver r_msg;
-                r_msg.id = reinterpret_cast<std::uintptr_t>(&r);
-                r_msg.effect = reinterpret_cast<std::uintptr_t>(&r->get_effect());
+                r_msg.id = r->get_id();
+                r_msg.effect = r->get_effect().get_id();
                 r_msg.data = r->get_data();
                 r_msg.state = r->get_solver().get_sat_core().value(r->get_rho());
                 const auto est_cost = r->get_intrinsic_cost();
@@ -163,10 +163,10 @@ namespace ratio
             }
 
             if (executors.at(req.reasoner_id)->current_flaw)
-                res.graph.flaw_id = reinterpret_cast<std::uintptr_t>(executors.at(req.reasoner_id)->current_flaw);
+                res.graph.flaw_id = executors.at(req.reasoner_id)->current_flaw->get_id();
 
             if (executors.at(req.reasoner_id)->current_resolver)
-                res.graph.resolver_id = reinterpret_cast<std::uintptr_t>(executors.at(req.reasoner_id)->current_resolver);
+                res.graph.resolver_id = executors.at(req.reasoner_id)->current_resolver->get_id();
         }
         return true;
     }

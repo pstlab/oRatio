@@ -292,7 +292,7 @@ namespace ratio
         {
             if (as_it != overlapping_atoms.cbegin())
                 lbl += ", ";
-            lbl += "\"" + std::to_string(reinterpret_cast<uintptr_t>(*as_it)) + "\"";
+            lbl += "\"" + std::to_string((*as_it)->get_id()) + "\"";
         }
         lbl += "]}";
         return lbl;
@@ -330,19 +330,19 @@ namespace ratio
 
     state_variable::order_resolver::order_resolver(sv_flaw &flw, const lit &r, const atom &before, const atom &after) : resolver(flw.get_solver(), r, rational::ZERO, flw), before(before), after(after) {}
 
-    std::string state_variable::order_resolver::get_data() const { return "{\"type\":\"order\", \"rho\":\"" + to_string(get_rho()) + "\", \"before_sigma\":" + std::to_string(before.get_sigma()) + ", \"after_sigma\":" + std::to_string(after.get_sigma()) + ", \"before_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&before)) + "\", \"after_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&after)) + "\"}"; }
+    std::string state_variable::order_resolver::get_data() const { return "{\"type\":\"order\", \"rho\":\"" + to_string(get_rho()) + "\", \"before_sigma\":" + std::to_string(before.get_sigma()) + ", \"after_sigma\":" + std::to_string(after.get_sigma()) + ", \"before_atom\":\"" + std::to_string(before.get_id()) + "\", \"after_atom\":\"" + std::to_string(after.get_id()) + "\"}"; }
 
     void state_variable::order_resolver::apply() {}
 
     state_variable::place_resolver::place_resolver(sv_flaw &flw, const lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm) : resolver(flw.get_solver(), r, rational::ZERO, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
 
-    std::string state_variable::place_resolver::get_data() const { return "{\"type\":\"place\", \"rho\":\"" + to_string(get_rho()) + "\", \"place_sigma\":" + std::to_string(plc_atm.get_sigma()) + ", \"forbid_sigma\":" + std::to_string(frbd_atm.get_sigma()) + ", \"place_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&plc_atm)) + "\", \"forbid_atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&frbd_atm)) + "\"}"; }
+    std::string state_variable::place_resolver::get_data() const { return "{\"type\":\"place\", \"rho\":\"" + to_string(get_rho()) + "\", \"place_sigma\":" + std::to_string(plc_atm.get_sigma()) + ", \"forbid_sigma\":" + std::to_string(frbd_atm.get_sigma()) + ", \"place_atom\":\"" + std::to_string(plc_atm.get_id()) + "\", \"forbid_atom\":\"" + std::to_string(frbd_atm.get_id()) + "\"}"; }
 
     void state_variable::place_resolver::apply() {}
 
     state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, atom &atm, item &itm) : resolver(flw.get_solver(), rational::ZERO, flw), atm(atm), itm(itm) {}
 
-    std::string state_variable::forbid_resolver::get_data() const { return "{\"type\":\"forbid\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":\"" + std::to_string(reinterpret_cast<uintptr_t>(&atm)) + "\"}"; }
+    std::string state_variable::forbid_resolver::get_data() const { return "{\"type\":\"forbid\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":\"" + std::to_string(atm.get_id()) + "\"}"; }
 
     void state_variable::forbid_resolver::apply() { get_solver().get_sat_core().new_clause({!get_rho(), !get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
 
@@ -367,7 +367,7 @@ namespace ratio
         for (const auto &[sv, atms] : sv_instances)
         {
             json tl;
-            tl->set("id", new string_val(std::to_string(reinterpret_cast<std::uintptr_t>(sv))));
+            tl->set("id", new long_val(sv->get_id()));
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
             tl->set("name", new string_val(get_core().guess_name(*sv)));
 #endif
@@ -434,7 +434,7 @@ namespace ratio
 
                 std::vector<json> j_atms;
                 for (const auto &atm : overlapping_atoms)
-                    j_atms.push_back(new long_val(reinterpret_cast<std::uintptr_t>(atm)));
+                    j_atms.push_back(new long_val(atm->get_id()));
                 j_val->set("atoms", new array_val(j_atms));
                 j_vals.push_back(j_val);
 

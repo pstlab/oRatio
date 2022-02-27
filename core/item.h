@@ -18,6 +18,13 @@ namespace ratio
     item(const item &orig) = delete;
     virtual ~item() = default;
 
+    /**
+     * @brief Get the id of this item.
+     *
+     * @return uintptr_t an id of this item.
+     */
+    CORE_EXPORT uintptr_t get_id() const noexcept { return reinterpret_cast<uintptr_t>(this); }
+
     inline type &get_type() const noexcept { return tp; }
 
     virtual smt::lit new_eq(item &i) noexcept;

@@ -34,14 +34,14 @@ namespace ratio
     json item::to_json() const noexcept
     {
         json j_itm;
-        j_itm->set("id", new string_val(std::to_string(reinterpret_cast<uintptr_t>(this))));
+        j_itm->set("id", new long_val(get_id()));
         j_itm->set("type", new string_val(tp.get_full_name()));
         if (!env::exprs.empty())
             j_itm->set("exprs", env::to_json());
         return j_itm;
     }
 
-    json item::value_to_json() const noexcept { return new string_val(std::to_string(reinterpret_cast<uintptr_t>(this))); }
+    json item::value_to_json() const noexcept { return new long_val(get_id()); }
 
     CORE_EXPORT bool_item::bool_item(core &cr, const lit &l) : item(cr, context(&cr), cr.get_type(BOOL_KEYWORD)), l(l) {}
 
@@ -261,7 +261,7 @@ namespace ratio
         std::vector<json> j_vals;
         std::unordered_set<var_value *> vals = get_core().get_ov_theory().value(ev);
         for (const auto &val : vals)
-            j_vals.push_back(new string_val(std::to_string(reinterpret_cast<uintptr_t>(static_cast<const item *>(val)))));
+            j_vals.push_back(new long_val((static_cast<const item *>(val))->get_id()));
         j_val->set("vals", new array_val(j_vals));
         return j_val;
     }

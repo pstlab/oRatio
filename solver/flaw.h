@@ -19,6 +19,13 @@ namespace ratio
     flaw(const flaw &that) = delete;
     virtual ~flaw() = default;
 
+    /**
+     * @brief Get the id of this flaw.
+     *
+     * @return uintptr_t an id of this flaw.
+     */
+    uintptr_t get_id() const noexcept { return reinterpret_cast<uintptr_t>(this); }
+
     inline solver &get_solver() const noexcept { return slv; }
     inline smt::lit get_phi() const noexcept { return phi; }
     inline smt::var get_position() const noexcept { return position; }
@@ -37,13 +44,13 @@ namespace ratio
   private:
     /**
      * Initializes this flaw.
-     * 
+     *
      * @pre the solver must be at root-level.
      */
     void init() noexcept;
     /**
      * Expands this flaw, invoking the compute_resolvers procedure.
-     * 
+     *
      * @pre the solver must be at root-level.
      */
     void expand();

@@ -73,7 +73,7 @@ namespace ratio
         for (const auto &[agnt, atms] : agnt_instances)
         {
             json tl;
-            tl->set("id", new string_val(std::to_string(reinterpret_cast<std::uintptr_t>(agnt))));
+            tl->set("id", new long_val(agnt->get_id()));
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
             tl->set("name", new string_val(get_core().guess_name(*agnt)));
 #endif
@@ -95,7 +95,7 @@ namespace ratio
             std::vector<json> j_atms;
             for (const auto &p : pulses)
                 for (const auto &atm : starting_atoms.at(p))
-                    j_atms.push_back(new long_val(reinterpret_cast<std::uintptr_t>(atm)));
+                    j_atms.push_back(new long_val(atm->get_id()));
             tl->set("values", new array_val(j_atms));
             tls.push_back(tl);
         }

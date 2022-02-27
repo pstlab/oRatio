@@ -106,7 +106,7 @@ namespace ratio
         timelines_msg.time.den = exec.current_time.denominator();
 
         for (const auto &atm : exec.executing)
-            timelines_msg.executing.push_back(reinterpret_cast<std::uintptr_t>(atm));
+            timelines_msg.executing.push_back(atm->get_id());
 
         exec.d_mngr.notify_timelines.publish(timelines_msg);
     }
@@ -205,9 +205,9 @@ namespace ratio
         exec.flaws.insert(&f);
 
         deliberative_tier::flaw fc_msg;
-        fc_msg.id = reinterpret_cast<std::uintptr_t>(&f);
+        fc_msg.id = f.get_id();
         for (const auto &r : f.get_causes())
-            fc_msg.causes.push_back(reinterpret_cast<std::uintptr_t>(r));
+            fc_msg.causes.push_back(r->get_id());
         fc_msg.data = f.get_data();
         fc_msg.state = slv.get_sat_core().value(f.get_phi());
         const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
@@ -222,7 +222,7 @@ namespace ratio
     void deliberative_executor::deliberative_solver_listener::flaw_state_changed(const flaw &f)
     {
         deliberative_tier::flaw fsc_msg;
-        fsc_msg.id = reinterpret_cast<std::uintptr_t>(&f);
+        fsc_msg.id = f.get_id();
         fsc_msg.state = slv.get_sat_core().value(f.get_phi());
 
         deliberative_tier::graph g_msg;
@@ -234,7 +234,7 @@ namespace ratio
     void deliberative_executor::deliberative_solver_listener::flaw_cost_changed(const flaw &f)
     {
         deliberative_tier::flaw fcc_msg;
-        fcc_msg.id = reinterpret_cast<std::uintptr_t>(&f);
+        fcc_msg.id = f.get_id();
         const auto est_cost = f.get_estimated_cost();
         fcc_msg.cost.num = est_cost.numerator(), fcc_msg.cost.den = est_cost.denominator();
 
@@ -247,7 +247,7 @@ namespace ratio
     void deliberative_executor::deliberative_solver_listener::flaw_position_changed(const flaw &f)
     {
         deliberative_tier::flaw fpc_msg;
-        fpc_msg.id = reinterpret_cast<std::uintptr_t>(&f);
+        fpc_msg.id = f.get_id();
         const auto [lb, ub] = slv.get_idl_theory().bounds(f.get_position());
         fpc_msg.pos.lb = lb, fpc_msg.pos.ub = ub;
 
@@ -263,7 +263,7 @@ namespace ratio
 
         deliberative_tier::graph g_msg;
         g_msg.reasoner_id = exec.get_reasoner_id();
-        g_msg.flaw_id = reinterpret_cast<std::uintptr_t>(&f);
+        g_msg.flaw_id = f.get_id();
         g_msg.update = deliberative_tier::graph::current_flaw;
         exec.d_mngr.notify_graph.publish(g_msg);
     }
@@ -273,8 +273,10 @@ namespace ratio
         exec.resolvers.insert(&r);
 
         deliberative_tier::resolver rc_msg;
-        rc_msg.id = reinterpret_cast<std::uintptr_t>(&r);
-        rc_msg.effect = reinterpret_cast<std::uintptr_t>(&r.get_effect());
+        rc_msg.id = r.get_id();
+        for (const auto &p : r.get_preconditions())
+            rc_msg.preconditions.push_back(p->get_id());
+        rc_msg.effect = r.get_effect().get_id();
         rc_msg.data = r.get_data();
         rc_msg.state = slv.get_sat_core().value(r.get_rho());
         const auto est_cost = r.get_intrinsic_cost();
@@ -289,7 +291,7 @@ namespace ratio
     void deliberative_executor::deliberative_solver_listener::resolver_state_changed(const resolver &r)
     {
         deliberative_tier::resolver rsc_msg;
-        rsc_msg.id = reinterpret_cast<std::uintptr_t>(&r);
+        rsc_msg.id = r.get_id();
         rsc_msg.state = slv.get_sat_core().value(r.get_rho());
 
         deliberative_tier::graph g_msg;
@@ -304,7 +306,7 @@ namespace ratio
 
         deliberative_tier::graph g_msg;
         g_msg.reasoner_id = exec.get_reasoner_id();
-        g_msg.resolver_id = reinterpret_cast<std::uintptr_t>(&r);
+        g_msg.resolver_id = r.get_id();
         g_msg.update = deliberative_tier::graph::current_resolver;
         exec.d_mngr.notify_graph.publish(g_msg);
     }
@@ -313,8 +315,8 @@ namespace ratio
     {
         deliberative_tier::graph g_msg;
         g_msg.reasoner_id = exec.get_reasoner_id();
-        g_msg.flaw_id = reinterpret_cast<std::uintptr_t>(&f);
-        g_msg.resolver_id = reinterpret_cast<std::uintptr_t>(&r);
+        g_msg.flaw_id = f.get_id();
+        g_msg.resolver_id = r.get_id();
         g_msg.update = deliberative_tier::graph::causal_link_added;
         exec.d_mngr.notify_graph.publish(g_msg);
     }
