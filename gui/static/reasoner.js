@@ -13,7 +13,7 @@ class Reasoner {
         this.timelines = new vis.DataSet([]);
         this.timeline_values = new vis.DataSet([]);
 
-        this.timeline = new vis.Timeline(timelines_div, this.timeline_values, this.timelines, { selectable: false, showCurrentTime: false });
+        this.timeline = new vis.Timeline(timelines_div, this.timeline_values, this.timelines, { selectable: false, showCurrentTime: false, margin: { item: { horizontal: 0 } } });
 
         this.current_time = 0;
         this.timeline.addCustomTime(this.current_time);
