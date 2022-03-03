@@ -4,4 +4,4 @@ string[] requirements
 string[] notify_start
 ---
 uint64 reasoner_id
-bool created
+bool consistent

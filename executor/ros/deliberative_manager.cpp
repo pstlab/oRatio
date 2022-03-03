@@ -64,7 +64,7 @@ namespace ratio
         for (const auto &r : req.requirements)
             pending_requirements[res.reasoner_id].push(r);
 
-        res.created = true;
+        res.consistent = true;
 
         std_msgs::UInt64 r_created_msg;
         r_created_msg.data = res.reasoner_id;

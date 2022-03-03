@@ -15,6 +15,7 @@ add_message_files(
     FILES
     deliberative_state.msg
     rational.msg
+    task.msg
     position.msg
     flaw.msg
     resolver.msg
@@ -32,6 +33,8 @@ add_service_files(
     create_reasoner.srv
     destroy_reasoner.srv
     new_requirement.srv
+    start_execution.srv
+    pause_execution.srv
     get_state.srv
 )
 
