@@ -109,7 +109,7 @@ make
 ```
 
 ## ROS
-Integrating oRatio into (ROS)[https://www.ros.org/] is straightforward. Just clone this repository into a (catkin)[http://wiki.ros.org/catkin] workspace and compile the workspace. oRatio, in fact, contains a catkin package which, through the implementation of some ROS services and messages, manages the communication to and from other ROS nodes. It is therefore worth describing what these messages and services are in order to fully exploit the potential of oRatio.
+Integrating oRatio into [ROS](https://www.ros.org/) is straightforward. Just clone this repository into a [catkin](http://wiki.ros.org/catkin) workspace and compile the workspace. oRatio, in fact, contains a catkin package which, through the implementation of some ROS services and messages, manages the communication to and from other ROS nodes. It is therefore worth describing what these messages and services are in order to fully exploit the potential of oRatio.
 
 ### Listening oRatio
 By subscribing to the `deliberative_state` topic it is possible to listen the oRatio's state. The ROS message, in particular, has type `deliberative_tier\deliberative_state` and is structured as follows:
