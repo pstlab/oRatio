@@ -33,8 +33,8 @@ add_service_files(
     create_reasoner.srv
     destroy_reasoner.srv
     new_requirement.srv
-    start_execution.srv
-    pause_execution.srv
+    start_executor.srv
+    pause_executor.srv
     get_state.srv
 )
 
