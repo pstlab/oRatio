@@ -1,6 +1,0 @@
-# asks the reactive tier if a task can be started
-string task_name
-string[] par_names
-string[] par_values
----
-bool can_start

@@ -2,8 +2,7 @@
 #include "deliberative_executor.h"
 #include "deliberative_tier/deliberative_state.h"
 #include "deliberative_tier/timelines.h"
-#include "deliberative_tier/can_start.h"
-#include "deliberative_tier/start_task.h"
+#include "deliberative_tier/task_service.h"
 #include "std_msgs/UInt64.h"
 
 namespace ratio
@@ -19,11 +18,15 @@ namespace ratio
                                                                      notify_state(handle.advertise<deliberative_tier::deliberative_state>("deliberative_state", 10, true)),
                                                                      notify_graph(handle.advertise<deliberative_tier::graph>("graph", 10)),
                                                                      notify_timelines(handle.advertise<deliberative_tier::timelines>("timelines", 10)),
-                                                                     can_start(h.serviceClient<deliberative_tier::can_start>("can_start")),
-                                                                     start_task(h.serviceClient<deliberative_tier::start_task>("start_task"))
+                                                                     can_start(h.serviceClient<deliberative_tier::task_service>("can_start")),
+                                                                     start_task(h.serviceClient<deliberative_tier::task_service>("start_task")),
+                                                                     can_end(h.serviceClient<deliberative_tier::task_service>("can_end")),
+                                                                     end_task(h.serviceClient<deliberative_tier::task_service>("end_task"))
     {
         can_start.waitForExistence();
         start_task.waitForExistence();
+        can_end.waitForExistence();
+        end_task.waitForExistence();
     }
     deliberative_manager::~deliberative_manager() {}
 
@@ -111,15 +114,15 @@ namespace ratio
 
     bool deliberative_manager::task_finished(deliberative_tier::task_finished::Request &req, deliberative_tier::task_finished::Response &res)
     {
-        ROS_DEBUG("Ending task %lu for reasoner %lu..", req.task_id, req.reasoner_id);
-        if (executors.find(req.reasoner_id) == executors.end())
+        ROS_DEBUG("Ending task %lu for reasoner %lu..", req.task.task_id, req.task.reasoner_id);
+        if (executors.find(req.task.reasoner_id) == executors.end())
         {
-            ROS_WARN("Reasoner %lu does not exist..", req.reasoner_id);
+            ROS_WARN("Reasoner %lu does not exist..", req.task.reasoner_id);
             res.ended = false;
         }
         else
         {
-            executors.at(req.reasoner_id)->finish_task(req.task_id, req.success);
+            executors.at(req.task.reasoner_id)->finish_task(req.task.task_id, req.success);
             res.ended = true;
         }
         return true;

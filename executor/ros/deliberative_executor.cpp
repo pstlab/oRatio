@@ -4,8 +4,7 @@
 #include "atom.h"
 #include "deliberative_tier/deliberative_state.h"
 #include "deliberative_tier/timelines.h"
-#include "deliberative_tier/can_start.h"
-#include "deliberative_tier/start_task.h"
+#include "deliberative_tier/task_service.h"
 #include <ros/ros.h>
 #include <sstream>
 
@@ -146,15 +145,15 @@ namespace ratio
     void deliberative_executor::deliberative_executor_listener::starting(const std::unordered_set<atom *> &atms)
     { // tell the executor the atoms which are not yet ready to start..
         std::unordered_set<ratio::atom *> dsy;
-        deliberative_tier::can_start cs_srv;
+        deliberative_tier::task_service cs_srv;
         task t;
         for (const auto &atm : atms)
         {
             t = to_task(*atm);
-            cs_srv.request.task_name = t.task_name;
-            cs_srv.request.par_names = t.par_names;
-            cs_srv.request.par_values = t.par_values;
-            if (exec.d_mngr.can_start.call(cs_srv) && !cs_srv.response.can_start)
+            cs_srv.request.task.task_name = t.task_name;
+            cs_srv.request.task.par_names = t.par_names;
+            cs_srv.request.task.par_values = t.par_values;
+            if (exec.d_mngr.can_start.call(cs_srv) && !cs_srv.response.success)
                 dsy.insert(atm);
         }
 
@@ -163,19 +162,19 @@ namespace ratio
     }
     void deliberative_executor::deliberative_executor_listener::start(const std::unordered_set<atom *> &atms)
     { // these atoms are now started..
-        deliberative_tier::start_task st_srv;
+        deliberative_tier::task_service st_srv;
         task t;
         for (const auto &atm : atms)
         {
             exec.executing.insert(atm);
             ROS_DEBUG("[%lu] Starting task %s..", exec.reasoner_id, atm->get_type().get_name().c_str());
             t = to_task(*atm);
-            st_srv.request.reasoner_id = exec.reasoner_id;
-            st_srv.request.task_id = t.task_id;
-            st_srv.request.task_name = t.task_name;
-            st_srv.request.par_names = t.par_names;
-            st_srv.request.par_values = t.par_values;
-            if (exec.d_mngr.start_task.call(st_srv) && st_srv.response.started)
+            st_srv.request.task.reasoner_id = exec.reasoner_id;
+            st_srv.request.task.task_id = t.task_id;
+            st_srv.request.task.task_name = t.task_name;
+            st_srv.request.task.par_names = t.par_names;
+            st_srv.request.task.par_values = t.par_values;
+            if (exec.d_mngr.start_task.call(st_srv) && st_srv.response.success)
                 exec.current_tasks.emplace(atm->get_sigma(), atm);
         }
 

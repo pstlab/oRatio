@@ -1,0 +1,7 @@
+# modifies the state of the executor associated with the reasoner identified by the given reasoner id
+uint64 reasoner_id
+uint8 pause = 0
+uint8 start = 1
+uint8 desired_state
+---
+uint8 new_state

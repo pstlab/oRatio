@@ -1,5 +1,0 @@
-# ends a task on the reactive tier
-uint64 reasoner_id
-uint64 task_id
----
-bool ended

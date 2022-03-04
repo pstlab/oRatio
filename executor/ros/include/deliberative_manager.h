@@ -49,6 +49,8 @@ namespace ratio
     ros::Publisher notify_timelines;
     ros::ServiceClient can_start;
     ros::ServiceClient start_task;
+    ros::ServiceClient can_end;
+    ros::ServiceClient end_task;
     std::unordered_map<uint64_t, deliberative_executor *> executors;
     std::unordered_map<uint64_t, std::queue<std::string>> pending_requirements;
   };
