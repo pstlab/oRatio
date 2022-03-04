@@ -193,32 +193,28 @@ string[] par_values
 In addition to an identifier of the reasoner which generated it and an identifier of the task itself, each task has a name `task_name`, corresponding to the associated predicate as defined in one of the domain files, a set of parameter names `par_names`, defined in the domain files, and a set of parameter values `par_values`, a value for each parameter, established by the planner.
 
 ### Verification of executability and execution
-During execution, executors need to know if tasks can be executed at a certain time and to communicate the start of execution. For this reason oRatio expects the invoking module to implement some ROS services.
-
-During execution, the executors associated to the reasoners invoke some ROS services that allow the dispatching of the tasks on the invoking layers. In other words, these services constitute the junction point between the reasoning process and the execution process and, therefore, must be implemented according to specific needs.
-
-There are two main services to implement: `can_start`, of type `deliberative_tier/can_start`, which is used to check the current executability of a given task, and `start_task`, of type `deliberative_tier/start_task`, which requires the starting of the execution of a given task. These two services are similar. The `can_start` service, in particular, structured as follows:
+During the execution of the generated plans, the executors need to know if tasks can be started or ended at a certain time and to communicate the start and the end of the task execution. For this reason oRatio expects the invoking module to implement some ROS services. Specifically, the implementation of four ROS services of typr `deliberative_tier/task_service` is required, which are structured as follows:
 
 ```
-string task_name
-string[] par_names
-string[] par_values
+task task
 ---
-bool can_start
+bool success
 ```
 
-Through this service, specifically, reasoners can ask the invoking modules if a particular task, whose name is `task_name`, with the parameters `par_names` assuming the values `par_values`, can be executed at a specific time. The negative response from the invoking module turns into a delay request at the start of the activity.
+The four services are:
+1. `can_start`, which returns a boolean indicating whether, at the moment of the service invocation, the task can start;
+2. `start_task`, which requires the starting of the given task and returns a boolean indicating whether the task has actually started;
+3. `can_end`, which returns a boolean indicating whether, at the moment of the service invocation, the task can end;
+4. `end_task`, which requires the ending of the given task and returns a boolean indicating whether the task has actually  ended;
 
-The `start_task` service, on the contrary, structured as follows:
+### Closing the tasks
+Once the tasks have been started, the reasoners wait to receive a message indicating their termination. Specifically, the termination of a task is done by means of the `task_finished` service of type `deliberative_tier/task_finished`, which is structured as follows:
 
 ```
-uint64 reasoner_id
-uint64 task_id
-string task_name
-string[] par_names
-string[] par_values
+task task
+bool success
 ---
-bool started
+bool ended
 ```
 
-Through this service, specifically, reasoners can ask the invoking modules to start the execution of a particular task, whose name is `task_name`, with the parameters `par_names` assuming the values `par_values`. The id of the reasoner and of the task are used by the invoking module to communicate, at a later time, the result of the execution of the task.
+Note that this service can be invoked by any ROS node, as long as the information identifying the task is available (i.e., the reasoner id and the task id). In addition to the information that identifies the task, the node responsible for managing the task must also communicate the success of the execution. If the task has failed, in particular, it will be the task of the corresponding reasoner to generate an alternative plan, if possible, which allows the achievement of the set objectives.
