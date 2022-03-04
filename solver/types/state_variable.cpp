@@ -411,25 +411,15 @@ namespace ratio
                 json j_from;
                 j_from->set("num", new long_val(std::prev(p)->get_rational().numerator()));
                 j_from->set("den", new long_val(std::prev(p)->get_rational().denominator()));
-                if (std::prev(p)->get_infinitesimal() != rational::ZERO)
-                {
-                    json j_inf;
-                    j_inf->set("num", new long_val(std::prev(p)->get_infinitesimal().numerator()));
-                    j_inf->set("den", new long_val(std::prev(p)->get_infinitesimal().denominator()));
-                    j_from->set("inf", j_inf);
-                }
+                if (std::prev(p)->get_infinitesimal() != 0)
+                    j_from->set("inf", new long_val(std::prev(p)->get_infinitesimal()));
                 j_val->set("from", j_from);
 
                 json j_to;
                 j_to->set("num", new long_val(p->get_rational().numerator()));
                 j_to->set("den", new long_val(p->get_rational().denominator()));
-                if (p->get_infinitesimal() != rational::ZERO)
-                {
-                    json j_inf;
-                    j_inf->set("num", new long_val(p->get_infinitesimal().numerator()));
-                    j_inf->set("den", new long_val(p->get_infinitesimal().denominator()));
-                    j_to->set("inf", j_inf);
-                }
+                if (p->get_infinitesimal() != 0)
+                    j_to->set("inf", new long_val(p->get_infinitesimal()));
                 j_val->set("to", j_to);
 
                 std::vector<json> j_atms;

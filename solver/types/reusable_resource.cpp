@@ -431,13 +431,8 @@ namespace ratio
             json j_capacity;
             j_capacity->set("num", new long_val(c_capacity.get_rational().numerator()));
             j_capacity->set("den", new long_val(c_capacity.get_rational().denominator()));
-            if (c_capacity.get_infinitesimal() != rational::ZERO)
-            {
-                json j_inf;
-                j_inf->set("num", new long_val(c_capacity.get_infinitesimal().numerator()));
-                j_inf->set("den", new long_val(c_capacity.get_infinitesimal().denominator()));
-                j_capacity->set("inf", j_inf);
-            }
+            if (c_capacity.get_infinitesimal() != 0)
+                j_capacity->set("inf", new long_val(c_capacity.get_infinitesimal()));
             tl->set("capacity", j_capacity);
 
             // for each pulse, the atoms starting at that pulse..
@@ -478,25 +473,15 @@ namespace ratio
                 json j_from;
                 j_from->set("num", new long_val(std::prev(p)->get_rational().numerator()));
                 j_from->set("den", new long_val(std::prev(p)->get_rational().denominator()));
-                if (std::prev(p)->get_infinitesimal() != rational::ZERO)
-                {
-                    json j_inf;
-                    j_inf->set("num", new long_val(std::prev(p)->get_infinitesimal().numerator()));
-                    j_inf->set("den", new long_val(std::prev(p)->get_infinitesimal().denominator()));
-                    j_from->set("inf", j_inf);
-                }
+                if (std::prev(p)->get_infinitesimal() != 0)
+                    j_from->set("inf", new long_val(std::prev(p)->get_infinitesimal()));
                 j_val->set("from", j_from);
 
                 json j_to;
                 j_to->set("num", new long_val(p->get_rational().numerator()));
                 j_to->set("den", new long_val(p->get_rational().denominator()));
-                if (p->get_infinitesimal() != rational::ZERO)
-                {
-                    json j_inf;
-                    j_inf->set("num", new long_val(p->get_infinitesimal().numerator()));
-                    j_inf->set("den", new long_val(p->get_infinitesimal().denominator()));
-                    j_to->set("inf", j_inf);
-                }
+                if (p->get_infinitesimal() != 0)
+                    j_to->set("inf", new long_val(p->get_infinitesimal()));
                 j_val->set("to", j_to);
 
                 std::vector<json> j_atms;
@@ -512,13 +497,8 @@ namespace ratio
                 json j_usage;
                 j_usage->set("num", new long_val(c_usage.get_rational().numerator()));
                 j_usage->set("den", new long_val(c_usage.get_rational().denominator()));
-                if (c_usage.get_infinitesimal() != rational::ZERO)
-                {
-                    json j_inf;
-                    j_inf->set("num", new long_val(c_usage.get_infinitesimal().numerator()));
-                    j_inf->set("den", new long_val(c_usage.get_infinitesimal().denominator()));
-                    j_usage->set("inf", j_inf);
-                }
+                if (c_usage.get_infinitesimal() != 0)
+                    j_usage->set("inf", new long_val(c_usage.get_infinitesimal()));
                 j_val->set("usage", j_usage);
 
                 j_vals.push_back(j_val);

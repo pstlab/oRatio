@@ -126,25 +126,15 @@ namespace ratio
         json j_num_val;
         j_num_val->set("num", new long_val(val.get_rational().numerator()));
         j_num_val->set("den", new long_val(val.get_rational().denominator()));
-        if (val.get_infinitesimal() != rational::ZERO)
-        {
-            json j_inf;
-            j_inf->set("num", new long_val(val.get_infinitesimal().numerator()));
-            j_inf->set("den", new long_val(val.get_infinitesimal().denominator()));
-            j_num_val->set("inf", j_inf);
-        }
+        if (val.get_infinitesimal() != 0)
+            j_num_val->set("inf", new long_val(val.get_infinitesimal()));
         if (!is_negative_infinite(lb))
         {
             json j_lb_bound;
             j_lb_bound->set("num", new long_val(lb.get_rational().numerator()));
             j_lb_bound->set("den", new long_val(lb.get_rational().denominator()));
-            if (val.get_infinitesimal() != rational::ZERO)
-            {
-                json j_inf;
-                j_inf->set("num", new long_val(lb.get_infinitesimal().numerator()));
-                j_inf->set("den", new long_val(lb.get_infinitesimal().denominator()));
-                j_lb_bound->set("inf", j_inf);
-            }
+            if (val.get_infinitesimal() != 0)
+                j_lb_bound->set("inf", new long_val(val.get_infinitesimal()));
             j_num_val->set("lb", j_lb_bound);
         }
         if (!is_positive_infinite(ub))
@@ -152,13 +142,8 @@ namespace ratio
             json j_ub_bound;
             j_ub_bound->set("num", new long_val(ub.get_rational().numerator()));
             j_ub_bound->set("den", new long_val(ub.get_rational().denominator()));
-            if (val.get_infinitesimal() != rational::ZERO)
-            {
-                json j_inf;
-                j_inf->set("num", new long_val(ub.get_infinitesimal().numerator()));
-                j_inf->set("den", new long_val(ub.get_infinitesimal().denominator()));
-                j_ub_bound->set("inf", j_inf);
-            }
+            if (val.get_infinitesimal() != 0)
+                j_ub_bound->set("inf", new long_val(val.get_infinitesimal()));
             j_num_val->set("lb", j_ub_bound);
         }
         j_val->set("val", j_num_val);

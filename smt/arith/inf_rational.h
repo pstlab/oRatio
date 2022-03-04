@@ -12,10 +12,9 @@ namespace smt
     explicit inf_rational(const rational &rat) : rat(rat) {}
     explicit inf_rational(I nun, I den) : rat(nun, den) {}
     explicit inf_rational(const rational &rat, I inf) : rat(rat), inf(inf) {}
-    explicit inf_rational(const rational &rat, const rational &inf) : rat(rat), inf(inf) {}
 
     inline rational get_rational() const noexcept { return rat; }
-    inline rational get_infinitesimal() const noexcept { return inf; }
+    inline I get_infinitesimal() const noexcept { return inf; }
 
     inline friend bool is_positive(const inf_rational &rhs) noexcept { return is_positive(rhs.rat) || (rhs.rat.numerator() == 0 && is_positive(rhs.rat)); }
     inline friend bool is_negative(const inf_rational &rhs) noexcept { return is_negative(rhs.rat) || (rhs.rat.numerator() == 0 && is_negative(rhs.rat)); }
@@ -30,19 +29,19 @@ namespace smt
     inline bool operator>=(const inf_rational &rhs) const noexcept { return rat > rhs.rat || (rat == rhs.rat && inf >= rhs.inf); };
     inline bool operator>(const inf_rational &rhs) const noexcept { return rat > rhs.rat || (rat == rhs.rat && inf > rhs.inf); };
 
-    inline bool operator!=(const rational &rhs) const noexcept { return rat != rhs || inf.numerator() != 0; };
-    inline bool operator<(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() < 0); };
-    inline bool operator<=(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() <= 0); };
-    inline bool operator==(const rational &rhs) const noexcept { return rat == rhs && inf.numerator() == 0; };
-    inline bool operator>=(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() >= 0); };
-    inline bool operator>(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() > 0); };
+    inline bool operator!=(const rational &rhs) const noexcept { return rat != rhs || inf != 0; };
+    inline bool operator<(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf < 0); };
+    inline bool operator<=(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf <= 0); };
+    inline bool operator==(const rational &rhs) const noexcept { return rat == rhs && inf == 0; };
+    inline bool operator>=(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf >= 0); };
+    inline bool operator>(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf > 0); };
 
-    inline bool operator!=(const I &rhs) const noexcept { return rat != rhs || inf.numerator() != 0; };
-    inline bool operator<(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() < 0); };
-    inline bool operator<=(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf.numerator() <= 0); };
-    inline bool operator==(const I &rhs) const noexcept { return rat == rhs && inf.numerator() == 0; };
-    inline bool operator>=(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() >= 0); };
-    inline bool operator>(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf.numerator() > 0); };
+    inline bool operator!=(const I &rhs) const noexcept { return rat != rhs || inf != 0; };
+    inline bool operator<(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf < 0); };
+    inline bool operator<=(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf <= 0); };
+    inline bool operator==(const I &rhs) const noexcept { return rat == rhs && inf == 0; };
+    inline bool operator>=(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf >= 0); };
+    inline bool operator>(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf > 0); };
 
     inline inf_rational operator+(const inf_rational &rhs) const noexcept { return inf_rational(rat + rhs.rat, inf + rhs.inf); };
     inline inf_rational operator-(const inf_rational &rhs) const noexcept { return inf_rational(rat - rhs.rat, inf - rhs.inf); };
@@ -145,20 +144,20 @@ namespace smt
           c_str += "-ε";
         else
           c_str += " - ε";
-      else if (is_negative(rhs.inf))
+      else if (rhs.inf < 0)
         if (c_str.empty())
-          c_str += to_string(rhs.inf) + "ε";
+          c_str += std::to_string(rhs.inf) + "ε";
         else
-          c_str += " " + to_string(rhs.inf) + "ε";
+          c_str += " " + std::to_string(rhs.inf) + "ε";
       else if (c_str.empty())
-        c_str += to_string(rhs.inf) + "ε";
+        c_str += std::to_string(rhs.inf) + "ε";
       else
-        c_str += " +" + to_string(rhs.inf) + "ε";
+        c_str += " +" + std::to_string(rhs.inf) + "ε";
       return c_str;
     };
 
   private:
     rational rat; // the rational part..
-    rational inf; // the infinitesimal part..
+    I inf = 0;    // the infinitesimal part..
   };
 } // namespace smt
