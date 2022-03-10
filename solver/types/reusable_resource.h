@@ -36,7 +36,7 @@ namespace ratio
       rr_constructor(rr_constructor &&) = delete;
     };
 
-    // the reusable-resource 'use' predicate..
+    // the reusable-resource 'Use' predicate..
     class use_predicate final : public predicate
     {
     public:

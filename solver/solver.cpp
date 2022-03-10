@@ -17,6 +17,7 @@
 #include "atom.h"
 #include "state_variable.h"
 #include "reusable_resource.h"
+#include "consumable_resource.h"
 #include "agent.h"
 #ifdef BUILD_LISTENERS
 #include "solver_listener.h"
@@ -60,6 +61,7 @@ namespace ratio
         int_pred = &get_predicate(RATIO_INTERVAL);
         new_types({new state_variable(*this),
                    new reusable_resource(*this),
+                   new consumable_resource(*this),
                    new agent(*this)});
         FIRE_STATE_CHANGED();
     }
