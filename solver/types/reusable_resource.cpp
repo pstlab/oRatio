@@ -15,8 +15,8 @@ namespace ratio
     reusable_resource::reusable_resource(solver &slv) : smart_type(slv, slv, REUSABLE_RESOURCE_NAME), timelines_extractor()
     {
         new_fields(*this, {new field(slv.get_type(REAL_KEYWORD), REUSABLE_RESOURCE_CAPACITY)}); // we add the 'capacity' field..
-        new_constructors({new rr_constructor(*this)});                                            // we add a constructor..
-        new_predicates({new use_predicate(*this)}, false);                                        // we add the 'Use' predicate, without notifying neither the resource nor its supertypes..
+        new_constructors({new rr_constructor(*this)});                                          // we add a constructor..
+        new_predicates({new use_predicate(*this)}, false);                                      // we add the 'Use' predicate, without notifying neither the resource nor its supertypes..
     }
     reusable_resource::~reusable_resource()
     {
@@ -428,12 +428,7 @@ namespace ratio
 
             arith_expr capacity = rr->get_exprs().at(REUSABLE_RESOURCE_CAPACITY);
             inf_rational c_capacity = get_core().arith_value(capacity);
-            json j_capacity;
-            j_capacity->set("num", new long_val(c_capacity.get_rational().numerator()));
-            j_capacity->set("den", new long_val(c_capacity.get_rational().denominator()));
-            if (c_capacity.get_infinitesimal() != 0)
-                j_capacity->set("inf", new long_val(c_capacity.get_infinitesimal()));
-            tl->set("capacity", j_capacity);
+            tl->set("capacity", to_json(c_capacity));
 
             // for each pulse, the atoms starting at that pulse..
             std::map<inf_rational, std::set<atom *>> starting_atoms;
@@ -470,19 +465,8 @@ namespace ratio
             for (p = std::next(p); p != pulses.end(); ++p)
             {
                 json j_val;
-                json j_from;
-                j_from->set("num", new long_val(std::prev(p)->get_rational().numerator()));
-                j_from->set("den", new long_val(std::prev(p)->get_rational().denominator()));
-                if (std::prev(p)->get_infinitesimal() != 0)
-                    j_from->set("inf", new long_val(std::prev(p)->get_infinitesimal()));
-                j_val->set("from", j_from);
-
-                json j_to;
-                j_to->set("num", new long_val(p->get_rational().numerator()));
-                j_to->set("den", new long_val(p->get_rational().denominator()));
-                if (p->get_infinitesimal() != 0)
-                    j_to->set("inf", new long_val(p->get_infinitesimal()));
-                j_val->set("to", j_to);
+                j_val->set("from", to_json(*std::prev(p)));
+                j_val->set("to", to_json(*p));
 
                 std::vector<json> j_atms;
                 inf_rational c_usage; // the concurrent resource usage..
@@ -494,12 +478,7 @@ namespace ratio
                 }
                 j_val->set("atoms", new array_val(j_atms));
 
-                json j_usage;
-                j_usage->set("num", new long_val(c_usage.get_rational().numerator()));
-                j_usage->set("den", new long_val(c_usage.get_rational().denominator()));
-                if (c_usage.get_infinitesimal() != 0)
-                    j_usage->set("inf", new long_val(c_usage.get_infinitesimal()));
-                j_val->set("usage", j_usage);
+                j_val->set("usage", to_json(c_usage));
 
                 j_vals.push_back(j_val);
 

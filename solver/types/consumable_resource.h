@@ -73,6 +73,8 @@ namespace ratio
     smt::json extract_timelines() const noexcept override;
 
   private:
+    predicate *p_pred = new produce_predicate(*this);
+    predicate *c_pred = new consume_predicate(*this);
     std::set<const item *> to_check;                          // the consumable-resource instances whose atoms have changed..
     std::vector<std::pair<atom *, cr_atom_listener *>> atoms; // we store, for each atom, its atom listener..
   };

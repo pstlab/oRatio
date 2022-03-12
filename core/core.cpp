@@ -601,4 +601,21 @@ namespace ratio
             l->inconsistent_problem();
     }
 #endif
+
+    CORE_EXPORT smt::json to_json(const rational &rhs) noexcept
+    {
+        json j_val;
+        j_val->set("num", new long_val(rhs.numerator()));
+        j_val->set("den", new long_val(rhs.denominator()));
+        return j_val;
+    }
+    CORE_EXPORT smt::json to_json(const inf_rational &rhs) noexcept
+    {
+        json j_val;
+        j_val->set("num", new long_val(rhs.get_rational().numerator()));
+        j_val->set("den", new long_val(rhs.get_rational().denominator()));
+        if (rhs.get_infinitesimal() != 0)
+            j_val->set("inf", new long_val(rhs.get_infinitesimal()));
+        return j_val;
+    }
 } // namespace ratio

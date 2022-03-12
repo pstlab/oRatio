@@ -408,19 +408,8 @@ namespace ratio
             for (p = std::next(p); p != pulses.end(); ++p)
             {
                 json j_val;
-                json j_from;
-                j_from->set("num", new long_val(std::prev(p)->get_rational().numerator()));
-                j_from->set("den", new long_val(std::prev(p)->get_rational().denominator()));
-                if (std::prev(p)->get_infinitesimal() != 0)
-                    j_from->set("inf", new long_val(std::prev(p)->get_infinitesimal()));
-                j_val->set("from", j_from);
-
-                json j_to;
-                j_to->set("num", new long_val(p->get_rational().numerator()));
-                j_to->set("den", new long_val(p->get_rational().denominator()));
-                if (p->get_infinitesimal() != 0)
-                    j_to->set("inf", new long_val(p->get_infinitesimal()));
-                j_val->set("to", j_to);
+                j_val->set("from", to_json(*std::prev(p)));
+                j_val->set("to", to_json(*p));
 
                 std::vector<json> j_atms;
                 for (const auto &atm : overlapping_atoms)

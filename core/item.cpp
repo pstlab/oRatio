@@ -121,32 +121,12 @@ namespace ratio
         const auto [lb, ub] = get_type().get_name().compare(TP_KEYWORD) == 0 ? get_core().get_rdl_theory().bounds(l) : get_core().get_lra_theory().bounds(l);
         const auto val = get_type().get_name().compare(TP_KEYWORD) == 0 ? lb : get_core().get_lra_theory().value(l);
 
-        json j_val;
+        json j_val = ratio::to_json(val);
         j_val->set("lin", new string_val(to_string(l)));
-        json j_num_val;
-        j_num_val->set("num", new long_val(val.get_rational().numerator()));
-        j_num_val->set("den", new long_val(val.get_rational().denominator()));
-        if (val.get_infinitesimal() != 0)
-            j_num_val->set("inf", new long_val(val.get_infinitesimal()));
         if (!is_negative_infinite(lb))
-        {
-            json j_lb_bound;
-            j_lb_bound->set("num", new long_val(lb.get_rational().numerator()));
-            j_lb_bound->set("den", new long_val(lb.get_rational().denominator()));
-            if (val.get_infinitesimal() != 0)
-                j_lb_bound->set("inf", new long_val(val.get_infinitesimal()));
-            j_num_val->set("lb", j_lb_bound);
-        }
+            j_val->set("lb", ratio::to_json(lb));
         if (!is_positive_infinite(ub))
-        {
-            json j_ub_bound;
-            j_ub_bound->set("num", new long_val(ub.get_rational().numerator()));
-            j_ub_bound->set("den", new long_val(ub.get_rational().denominator()));
-            if (val.get_infinitesimal() != 0)
-                j_ub_bound->set("inf", new long_val(val.get_infinitesimal()));
-            j_num_val->set("lb", j_ub_bound);
-        }
-        j_val->set("val", j_num_val);
+            j_val->set("ub", ratio::to_json(ub));
 
         return j_val;
     }

@@ -16,7 +16,7 @@ namespace ratio
     {
         new_fields(*this, {new field(slv.get_type(REAL_KEYWORD), CONSUMABLE_RESOURCE_INITIAL_AMOUNT), new field(slv.get_type(REAL_KEYWORD), CONSUMABLE_RESOURCE_CAPACITY)}); // we add the 'initial_amount' and the 'capacity' fields..
         new_constructors({new cr_constructor(*this)});                                                                                                                       // we add a constructor..
-        new_predicates({new produce_predicate(*this), new consume_predicate(*this)}, false);                                                                                 // we add the 'Produce' and the 'Consume' predicates, without notifying neither the resource nor its supertypes..
+        new_predicates({p_pred, c_pred}, false);                                                                                                                             // we add the 'Produce' and the 'Consume' predicates, without notifying neither the resource nor its supertypes..
     }
     consumable_resource::~consumable_resource()
     {
@@ -56,6 +56,112 @@ namespace ratio
     json consumable_resource::extract_timelines() const noexcept
     {
         std::vector<json> tls;
+        // we partition atoms for each consumable-resource they might insist on..
+        std::unordered_map<const item *, std::vector<atom *>> cr_instances;
+        for ([[maybe_unused]] const auto &[atm, atm_lstnr] : atoms)
+            if (get_core().get_sat_core().value(atm->get_sigma()) == True) // we filter out those which are not strictly active..
+            {
+                expr c_scope = atm->get(TAU);
+                if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
+                {
+                    for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
+                        cr_instances[static_cast<const item *>(val)].push_back(atm);
+                }
+                else
+                    cr_instances[static_cast<item *>(&*c_scope)].push_back(atm);
+            }
+
+        for (const auto &[cr, atms] : cr_instances)
+        {
+            json tl;
+            tl->set("id", new long_val(cr->get_id()));
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+            tl->set("name", new string_val(get_core().guess_name(*rr)));
+#endif
+            tl->set("type", new string_val(CONSUMABLE_RESOURCE_NAME));
+
+            arith_expr initial_amount = cr->get_exprs().at(CONSUMABLE_RESOURCE_INITIAL_AMOUNT);
+            inf_rational c_initial_amount = get_core().arith_value(initial_amount);
+            tl->set("initial_amount", to_json(c_initial_amount));
+
+            arith_expr capacity = cr->get_exprs().at(CONSUMABLE_RESOURCE_CAPACITY);
+            inf_rational c_capacity = get_core().arith_value(capacity);
+            tl->set("capacity", to_json(c_capacity));
+
+            // for each pulse, the atoms starting at that pulse..
+            std::map<inf_rational, std::set<atom *>> starting_atoms;
+            // for each pulse, the atoms ending at that pulse..
+            std::map<inf_rational, std::set<atom *>> ending_atoms;
+            // all the pulses of the timeline..
+            std::set<inf_rational> pulses;
+
+            for (const auto &atm : atms)
+            {
+                arith_expr s_expr = atm->get(RATIO_START);
+                arith_expr e_expr = atm->get(RATIO_END);
+                inf_rational start = get_core().arith_value(s_expr);
+                inf_rational end = get_core().arith_value(e_expr);
+                starting_atoms[start].insert(atm);
+                ending_atoms[end].insert(atm);
+                pulses.insert(start);
+                pulses.insert(end);
+            }
+            arith_expr origin_expr = get_core().get("origin");
+            arith_expr horizon_expr = get_core().get("horizon");
+            pulses.insert(get_core().arith_value(origin_expr));
+            pulses.insert(get_core().arith_value(horizon_expr));
+
+            std::set<atom *> overlapping_atoms;
+            std::set<inf_rational>::iterator p = pulses.begin();
+            if (const auto at_start_p = starting_atoms.find(*p); at_start_p != starting_atoms.cend())
+                overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
+            if (const auto at_end_p = ending_atoms.find(*p); at_end_p != ending_atoms.cend())
+                for (const auto &a : at_end_p->second)
+                    overlapping_atoms.erase(a);
+
+            std::vector<json> j_vals;
+            inf_rational c_val = c_initial_amount;
+            for (p = std::next(p); p != pulses.end(); ++p)
+            {
+                json j_val;
+                j_val->set("from", to_json(*std::prev(p)));
+                j_val->set("to", to_json(*p));
+
+                std::vector<json> j_atms;
+                inf_rational c_angular_coefficient; // the concurrent resource update..
+                for (const auto &atm : overlapping_atoms)
+                {
+                    arith_expr amount = atm->get(CONSUMABLE_RESOURCE_USE_AMOUNT_NAME);
+                    inf_rational c_coeff;
+                    if (&atm->get_type() == c_pred)
+                        c_coeff = get_core().arith_value(amount);
+                    else
+                        c_coeff = -get_core().arith_value(amount);
+                    arith_expr s_expr = atm->get(RATIO_START);
+                    arith_expr e_expr = atm->get(RATIO_END);
+                    c_coeff /= (get_core().arith_value(e_expr) - get_core().arith_value(s_expr)).get_rational();
+
+                    j_atms.push_back(new long_val(atm->get_id()));
+                }
+                j_val->set("atoms", new array_val(j_atms));
+
+                j_val->set("start", to_json(c_val));
+                c_val += (c_angular_coefficient *= (*p - *std::prev(p)).get_rational());
+                j_val->set("end", to_json(c_val));
+
+                j_vals.push_back(j_val);
+
+                if (const auto at_start_p = starting_atoms.find(*p); at_start_p != starting_atoms.cend())
+                    overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
+                if (const auto at_end_p = ending_atoms.find(*p); at_end_p != ending_atoms.cend())
+                    for (const auto &a : at_end_p->second)
+                        overlapping_atoms.erase(a);
+            }
+            tl->set("values", new array_val(j_vals));
+
+            tls.push_back(tl);
+        }
+
         return new array_val(tls);
     }
 } // namespace ratio

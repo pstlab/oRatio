@@ -211,6 +211,9 @@ namespace ratio
 #endif
   };
 
+  CORE_EXPORT smt::json to_json(const smt::rational &rhs) noexcept;
+  CORE_EXPORT smt::json to_json(const smt::inf_rational &rhs) noexcept;
+
   class inconsistency_exception : public std::exception
   {
     const char *what() const noexcept override { return "an inconsistency has been found.."; }
