@@ -14,7 +14,7 @@ namespace smt
     explicit inf_rational(const rational &rat, I inf) : rat(rat), inf(inf) {}
 
     inline rational get_rational() const noexcept { return rat; }
-    inline I get_infinitesimal() const noexcept { return inf; }
+    inline rational get_infinitesimal() const noexcept { return inf; }
 
     inline friend bool is_positive(const inf_rational &rhs) noexcept { return is_positive(rhs.rat) || (rhs.rat.numerator() == 0 && is_positive(rhs.rat)); }
     inline friend bool is_negative(const inf_rational &rhs) noexcept { return is_negative(rhs.rat) || (rhs.rat.numerator() == 0 && is_negative(rhs.rat)); }
@@ -29,19 +29,19 @@ namespace smt
     inline bool operator>=(const inf_rational &rhs) const noexcept { return rat > rhs.rat || (rat == rhs.rat && inf >= rhs.inf); };
     inline bool operator>(const inf_rational &rhs) const noexcept { return rat > rhs.rat || (rat == rhs.rat && inf > rhs.inf); };
 
-    inline bool operator!=(const rational &rhs) const noexcept { return rat != rhs || inf != 0; };
-    inline bool operator<(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf < 0); };
-    inline bool operator<=(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf <= 0); };
-    inline bool operator==(const rational &rhs) const noexcept { return rat == rhs && inf == 0; };
-    inline bool operator>=(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf >= 0); };
-    inline bool operator>(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf > 0); };
+    inline bool operator!=(const rational &rhs) const noexcept { return rat != rhs || inf != rational::ZERO; };
+    inline bool operator<(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf < rational::ZERO); };
+    inline bool operator<=(const rational &rhs) const noexcept { return rat < rhs || (rat == rhs && inf <= rational::ZERO); };
+    inline bool operator==(const rational &rhs) const noexcept { return rat == rhs && inf == rational::ZERO; };
+    inline bool operator>=(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf >= rational::ZERO); };
+    inline bool operator>(const rational &rhs) const noexcept { return rat > rhs || (rat == rhs && inf > rational::ZERO); };
 
-    inline bool operator!=(const I &rhs) const noexcept { return rat != rhs || inf != 0; };
-    inline bool operator<(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf < 0); };
-    inline bool operator<=(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf <= 0); };
-    inline bool operator==(const I &rhs) const noexcept { return rat == rhs && inf == 0; };
-    inline bool operator>=(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf >= 0); };
-    inline bool operator>(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf > 0); };
+    inline bool operator!=(const I &rhs) const noexcept { return rat != rhs || inf != rational::ZERO; };
+    inline bool operator<(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf < rational::ZERO); };
+    inline bool operator<=(const I &rhs) const noexcept { return rat < rhs || (rat == rhs && inf <= rational::ZERO); };
+    inline bool operator==(const I &rhs) const noexcept { return rat == rhs && inf == rational::ZERO; };
+    inline bool operator>=(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf >= rational::ZERO); };
+    inline bool operator>(const I &rhs) const noexcept { return rat > rhs || (rat == rhs && inf > rational::ZERO); };
 
     inline inf_rational operator+(const inf_rational &rhs) const noexcept { return inf_rational(rat + rhs.rat, inf + rhs.inf); };
     inline inf_rational operator-(const inf_rational &rhs) const noexcept { return inf_rational(rat - rhs.rat, inf - rhs.inf); };
@@ -144,7 +144,7 @@ namespace smt
           c_str += "-ε";
         else
           c_str += " - ε";
-      else if (rhs.inf < 0)
+      else if (rhs.inf < rational::ZERO)
         if (c_str.empty())
           c_str += std::to_string(rhs.inf) + "ε";
         else
@@ -158,6 +158,6 @@ namespace smt
 
   private:
     rational rat; // the rational part..
-    I inf = 0;    // the infinitesimal part..
+    rational inf; // the infinitesimal part..
   };
 } // namespace smt

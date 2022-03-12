@@ -611,11 +611,9 @@ namespace ratio
     }
     CORE_EXPORT smt::json to_json(const inf_rational &rhs) noexcept
     {
-        json j_val;
-        j_val->set("num", new long_val(rhs.get_rational().numerator()));
-        j_val->set("den", new long_val(rhs.get_rational().denominator()));
-        if (rhs.get_infinitesimal() != 0)
-            j_val->set("inf", new long_val(rhs.get_infinitesimal()));
+        json j_val = to_json(rhs.get_rational());
+        if (rhs.get_infinitesimal() != rational::ZERO)
+            j_val->set("inf", to_json(rhs.get_infinitesimal()));
         return j_val;
     }
 } // namespace ratio
