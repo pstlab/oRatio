@@ -36,8 +36,8 @@ class Reasoner {
         this.timelines.update(message.timelines.map(tl => { return { id: tl.id, content: tl.name } }));
         const origin_var = message.state.exprs.find(xpr => xpr.name == 'origin');
         const horizon_var = message.state.exprs.find(xpr => xpr.name == 'horizon');
-        const origin_val = origin_var.value.val.num / origin_var.value.val.den;
-        const horizon_val = horizon_var.value.val.num / horizon_var.value.val.den;
+        const origin_val = origin_var.value.num / origin_var.value.den;
+        const horizon_val = horizon_var.value.num / horizon_var.value.den;
         this.timeline.setWindow(origin_val - 10, origin_val == horizon_val ? horizon_val + 100 : horizon_val + 10);
         const vals = [];
         for (const tl of message.timelines)
@@ -64,8 +64,8 @@ class Reasoner {
                             id: atm.id,
                             content: atom_content(atm),
                             title: atom_title(atm),
-                            start: start_var.value.val.num / start_var.value.val.den,
-                            end: end_var.value.val.num / end_var.value.val.den,
+                            start: start_var.value.num / start_var.value.den,
+                            end: end_var.value.num / end_var.value.den,
                             group: tl.id
                         });
                     }
@@ -81,8 +81,8 @@ class Reasoner {
                                 id: atm.id,
                                 content: atom_content(atm),
                                 title: atom_title(atm),
-                                start: start_var.value.val.num / start_var.value.val.den,
-                                end: end_var.value.val.num / end_var.value.val.den,
+                                start: start_var.value.num / start_var.value.den,
+                                end: end_var.value.num / end_var.value.den,
                                 group: tl.id
                             });
                         } else {
@@ -90,7 +90,7 @@ class Reasoner {
                             vals.push({
                                 id: atm.id,
                                 content: atom_content(atm),
-                                start: at_var.value.val.num / at_var.value.val.den,
+                                start: at_var.value.num / at_var.value.den,
                                 group: tl.id
                             });
                         }
@@ -119,8 +119,8 @@ class Reasoner {
                             id: atm.id,
                             content: atom_content(atm),
                             title: atom_title(atm),
-                            start: start_var.value.val.num / start_var.value.val.den,
-                            end: end_var.value.val.num / end_var.value.val.den,
+                            start: start_var.value.num / start_var.value.den,
+                            end: end_var.value.num / end_var.value.den,
                             group: tl.id
                         });
                     }
