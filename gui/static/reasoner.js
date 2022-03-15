@@ -401,12 +401,19 @@ function rr_value_class(rr, val) { return rr.capacity.num / rr.capacity.den < va
 
 function atom_content(atm) { return atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par.name).sort().join(', ') + ')'; }
 
-function atom_title(atm) { return '\u03C3' + atm.sigma + ' ' + atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par_to_string(par)).sort().join(', ') + ')'; }
+function atom_title(atm) { return '\u03C3' + atm.sigma + ' ' + atm.predicate + '(' + atm.pars.filter(par => par.name != 'tau').map(par => par_to_string(par)).sort().join(', ') + ')'; }
 
 function par_to_string(par) {
     switch (par.type) {
         case 'bool': return par.name + ': ' + par.value;
-        case 'real': return par.name + ': ' + par.value.num / par.value.den;
+        case 'real':
+            const lb = par.value.lb ? par.value.lb.num / par.value.lb.den : Number.NEGATIVE_INFINITY;
+            const ub = par.value.ub ? par.value.ub.num / par.value.ub.den : Number.POSITIVE_INFINITY;
+            if (lb == ub)
+                return par.name + ': ' + par.value.num / par.value.den;
+            else
+                return par.name + ': ' + par.value.num / par.value.den + ' [' + lb + ', ' + ub + ']';
+        case 'string': return par.name + ': ' + par.value;
         default: return par.name;
     }
 }
