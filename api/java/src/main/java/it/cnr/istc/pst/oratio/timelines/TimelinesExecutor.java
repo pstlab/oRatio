@@ -13,15 +13,15 @@ public class TimelinesExecutor {
     private final Collection<ExecutorListener> executor_listeners = new ArrayList<>();
 
     public TimelinesExecutor(final Solver solver) {
-        this(solver, new String[] {}, new Rational(1));
+        this(solver, new Rational(1));
     }
 
-    public TimelinesExecutor(final Solver solver, final String[] rel_preds, final Rational units_per_tick) {
+    public TimelinesExecutor(final Solver solver, final Rational units_per_tick) {
         this.solver = solver;
-        this.native_handle = new_instance(rel_preds, units_per_tick.getNumerator(), units_per_tick.getDenominator());
+        this.native_handle = new_instance(units_per_tick.getNumerator(), units_per_tick.getDenominator());
     }
 
-    private native long new_instance(String[] rel_preds, long units_per_tick_num, long units_per_tick_den);
+    private native long new_instance(long units_per_tick_num, long units_per_tick_den);
 
     public native void dispose();
 

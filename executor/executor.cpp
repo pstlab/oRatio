@@ -11,7 +11,7 @@ using namespace smt;
 
 namespace ratio
 {
-    EXECUTOR_EXPORT executor::executor(solver &slv, const std::vector<std::string> &rel_preds, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), rel_preds(rel_preds), units_per_tick(units_per_tick) { build_timelines(); }
+    EXECUTOR_EXPORT executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), units_per_tick(units_per_tick) { build_timelines(); }
 
     EXECUTOR_EXPORT void executor::tick()
     {
@@ -254,26 +254,20 @@ namespace ratio
     void executor::reset_relevant_predicates()
     {
         relevant_predicates.clear();
-        if (rel_preds.empty())
-        { // all executable predicates are relevant..
-            for (const auto &[pred_name, pred] : slv.get_predicates())
+        for (const auto &[pred_name, pred] : slv.get_predicates())
+            if (slv.is_impulse(*pred) || slv.is_interval(*pred))
+                relevant_predicates.insert(pred);
+        std::queue<type *> q;
+        for (const auto &[tp_name, tp] : slv.get_types())
+            if (!tp->is_primitive())
+                q.push(tp);
+        while (!q.empty())
+        {
+            for (const auto &[pred_name, pred] : q.front()->get_predicates())
                 if (slv.is_impulse(*pred) || slv.is_interval(*pred))
                     relevant_predicates.insert(pred);
-            std::queue<type *> q;
-            for (const auto &[tp_name, tp] : slv.get_types())
-                if (!tp->is_primitive())
-                    q.push(tp);
-            while (!q.empty())
-            {
-                for (const auto &[pred_name, pred] : q.front()->get_predicates())
-                    if (slv.is_impulse(*pred) || slv.is_interval(*pred))
-                        relevant_predicates.insert(pred);
-                q.pop();
-            }
+            q.pop();
         }
-        else // the configuration identifies some relevant predicates..
-            for (const auto &p_name : rel_preds)
-                relevant_predicates.insert(&get_predicate(p_name));
     }
 
     predicate &executor::get_predicate(const std::string &pred) const

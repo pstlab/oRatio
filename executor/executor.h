@@ -18,7 +18,7 @@ namespace ratio
     friend class executor_listener;
 
   public:
-    EXECUTOR_EXPORT executor(solver &slv, const std::vector<std::string> &rel_preds = {}, const smt::rational &units_per_tick = smt::rational::ONE);
+    EXECUTOR_EXPORT executor(solver &slv, const smt::rational &units_per_tick = smt::rational::ONE);
     executor(const executor &orig) = delete;
 
     solver &get_solver() { return slv; }
@@ -54,7 +54,6 @@ namespace ratio
     predicate &get_predicate(const std::string &pred) const;
 
   private:
-    const std::vector<std::string> rel_preds;
     std::unordered_set<const predicate *> relevant_predicates;
     smt::rational current_time;         // the current time in plan units..
     const smt::rational units_per_tick; // the number of plan units for each tick..

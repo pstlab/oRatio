@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (Ljava/lang/String;JJ)J
  */
 JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_new_1instance
-  (JNIEnv *, jobject, jobjectArray, jlong, jlong);
+  (JNIEnv *, jobject, jlong, jlong);
 
 /*
  * Class:     it_cnr_istc_pst_oratio_timelines_TimelinesExecutor
