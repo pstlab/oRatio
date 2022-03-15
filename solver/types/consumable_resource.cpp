@@ -76,7 +76,7 @@ namespace ratio
             json tl;
             tl->set("id", new long_val(cr->get_id()));
 #if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
-            tl->set("name", new string_val(get_core().guess_name(*rr)));
+            tl->set("name", new string_val(get_core().guess_name(*cr)));
 #endif
             tl->set("type", new string_val(CONSUMABLE_RESOURCE_NAME));
 
