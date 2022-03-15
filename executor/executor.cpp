@@ -269,34 +269,4 @@ namespace ratio
             q.pop();
         }
     }
-
-    predicate &executor::get_predicate(const std::string &pred) const
-    {
-        std::vector<std::string> ids;
-        size_t start = 0, end = 0;
-        do
-        {
-            end = pred.find('.', start);
-            if (end == std::string::npos)
-                end = pred.length();
-            std::string token = pred.substr(start, end - start);
-            if (!token.empty())
-                ids.push_back(token);
-            start = end + 1;
-        } while (end < pred.length() && start < pred.length());
-
-        if (ids.size() == 1)
-            return slv.get_predicate(ids[0]);
-        else
-        {
-            type *tp = &slv.get_type(ids[0]);
-            for (size_t i = 1; i < ids.size(); ++i)
-                if (i == ids.size() - 1)
-                    return tp->get_predicate(ids[i]);
-                else
-                    tp = &tp->get_type(ids[i]);
-        }
-        // not found
-        throw std::out_of_range(pred);
-    }
 } // namespace ratio

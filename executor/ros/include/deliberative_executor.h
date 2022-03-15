@@ -11,7 +11,7 @@ namespace ratio
     friend class deliberative_manager;
 
   public:
-    deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, const std::vector<std::string> &relevant_predicates = {});
+    deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, std::vector<std::string> notify_start_ids = {});
     ~deliberative_executor();
 
     uint64_t get_reasoner_id() { return reasoner_id; }
@@ -22,6 +22,7 @@ namespace ratio
 
   private:
     void set_state(const unsigned int &state);
+    predicate &get_predicate(const std::string &pred) const;
 
     struct task
     {
@@ -40,9 +41,14 @@ namespace ratio
       ~deliberative_core_listener() {}
 
     private:
+      void read(const std::string &) override { reset_relevant_predicates(); }
+      void read(const std::vector<std::string> &) override { reset_relevant_predicates(); }
+
       void started_solving() override;
       void solution_found() override;
       void inconsistent_problem() override;
+
+      void reset_relevant_predicates();
 
     private:
       deliberative_executor &exec;
@@ -99,6 +105,8 @@ namespace ratio
     deliberative_solver_listener dsl;
     deliberative_executor_listener del;
     unsigned int state = -1;
+    std::vector<std::string> notify_start_ids;
+    std::unordered_set<const ratio::predicate *> notify_start;
     std::unordered_map<smt::var, ratio::atom *> current_tasks;
     std::unordered_set<const flaw *> flaws;
     std::unordered_set<const resolver *> resolvers;

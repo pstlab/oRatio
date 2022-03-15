@@ -10,7 +10,7 @@
 
 namespace ratio
 {
-    deliberative_executor::deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, const std::vector<std::string> &relevant_predicates) : d_mngr(d_mngr), reasoner_id(id), slv(), exec(slv, relevant_predicates), dcl(*this), dsl(*this), del(*this)
+    deliberative_executor::deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, std::vector<std::string> notify_start_ids) : d_mngr(d_mngr), reasoner_id(id), slv(), exec(slv), dcl(*this), dsl(*this), del(*this), notify_start_ids(std::move(notify_start_ids))
     {
         // we read the domain files..
         ROS_DEBUG("[%lu] Reading domain..", reasoner_id);
@@ -32,6 +32,36 @@ namespace ratio
         state_msg.reasoner_id = reasoner_id;
         state_msg.deliberative_state = st;
         d_mngr.notify_state.publish(state_msg);
+    }
+
+    predicate &deliberative_executor::get_predicate(const std::string &pred) const
+    {
+        std::vector<std::string> ids;
+        size_t start = 0, end = 0;
+        do
+        {
+            end = pred.find('.', start);
+            if (end == std::string::npos)
+                end = pred.length();
+            std::string token = pred.substr(start, end - start);
+            if (!token.empty())
+                ids.push_back(token);
+            start = end + 1;
+        } while (end < pred.length() && start < pred.length());
+
+        if (ids.size() == 1)
+            return slv.get_predicate(ids[0]);
+        else
+        {
+            type *tp = &slv.get_type(ids[0]);
+            for (size_t i = 1; i < ids.size(); ++i)
+                if (i == ids.size() - 1)
+                    return tp->get_predicate(ids[i]);
+                else
+                    tp = &tp->get_type(ids[i]);
+        }
+        // not found
+        throw std::out_of_range(pred);
     }
 
     deliberative_executor::task deliberative_executor::to_task(const ratio::atom &atm)
@@ -122,6 +152,12 @@ namespace ratio
         exec.set_state(deliberative_tier::deliberative_state::inconsistent);
     }
 
+    void deliberative_executor::deliberative_core_listener::reset_relevant_predicates()
+    {
+        for (const auto &pred : exec.notify_start_ids)
+            exec.notify_start.insert(&exec.get_predicate(pred));
+    }
+
     void deliberative_executor::deliberative_executor_listener::tick(const smt::rational &time)
     {
         ROS_DEBUG("Current time: %s", to_string(time).c_str());
@@ -148,14 +184,15 @@ namespace ratio
         deliberative_tier::task_service cs_srv;
         task t;
         for (const auto &atm : atms)
-        {
-            t = to_task(*atm);
-            cs_srv.request.task.task_name = t.task_name;
-            cs_srv.request.task.par_names = t.par_names;
-            cs_srv.request.task.par_values = t.par_values;
-            if (exec.d_mngr.can_start.call(cs_srv) && !cs_srv.response.success)
-                dsy.insert(atm);
-        }
+            if (exec.notify_start.count(static_cast<predicate *>(&atm->get_type())))
+            {
+                t = to_task(*atm);
+                cs_srv.request.task.task_name = t.task_name;
+                cs_srv.request.task.par_names = t.par_names;
+                cs_srv.request.task.par_values = t.par_values;
+                if (exec.d_mngr.can_start.call(cs_srv) && !cs_srv.response.success)
+                    dsy.insert(atm);
+            }
 
         if (!dsy.empty())
             exec.exec.dont_start_yet(atms);
@@ -165,18 +202,19 @@ namespace ratio
         deliberative_tier::task_service st_srv;
         task t;
         for (const auto &atm : atms)
-        {
-            exec.executing.insert(atm);
-            ROS_DEBUG("[%lu] Starting task %s..", exec.reasoner_id, atm->get_type().get_name().c_str());
-            t = to_task(*atm);
-            st_srv.request.task.reasoner_id = exec.reasoner_id;
-            st_srv.request.task.task_id = t.task_id;
-            st_srv.request.task.task_name = t.task_name;
-            st_srv.request.task.par_names = t.par_names;
-            st_srv.request.task.par_values = t.par_values;
-            if (exec.d_mngr.start_task.call(st_srv) && st_srv.response.success)
-                exec.current_tasks.emplace(atm->get_sigma(), atm);
-        }
+            if (exec.notify_start.count(static_cast<predicate *>(&atm->get_type())))
+            {
+                exec.executing.insert(atm);
+                ROS_DEBUG("[%lu] Starting task %s..", exec.reasoner_id, atm->get_type().get_name().c_str());
+                t = to_task(*atm);
+                st_srv.request.task.reasoner_id = exec.reasoner_id;
+                st_srv.request.task.task_id = t.task_id;
+                st_srv.request.task.task_name = t.task_name;
+                st_srv.request.task.par_names = t.par_names;
+                st_srv.request.task.par_values = t.par_values;
+                if (exec.d_mngr.start_task.call(st_srv) && st_srv.response.success)
+                    exec.current_tasks.emplace(atm->get_sigma(), atm);
+            }
 
         deliberative_tier::timelines executing_msg;
         executing_msg.reasoner_id = exec.reasoner_id;

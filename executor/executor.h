@@ -51,7 +51,6 @@ namespace ratio
     void freeze(atom &atm, arith_expr &xpr);
 
     void reset_relevant_predicates();
-    predicate &get_predicate(const std::string &pred) const;
 
   private:
     std::unordered_set<const predicate *> relevant_predicates;
