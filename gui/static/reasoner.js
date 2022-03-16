@@ -97,7 +97,7 @@ class Reasoner {
                     }
                     break;
                 case 'ReusableResource':
-                    const sv_atms = new Set();
+                    const rr_atms = new Set();
                     tl.values.forEach((val, id) => {
                         vals.push({
                             id: '' + tl.id + id,
@@ -109,9 +109,38 @@ class Reasoner {
                             group: tl.id
                         });
                         for (const atm_id of val.atoms)
-                            sv_atms.add(atm_id);
+                            rr_atms.add(atm_id);
                     });
-                    for (const atm_id of sv_atms) {
+                    for (const atm_id of rr_atms) {
+                        const atm = this.atoms.get(atm_id);
+                        const start_var = atm.pars.find(xpr => xpr.name == 'start');
+                        const end_var = atm.pars.find(xpr => xpr.name == 'end');
+                        vals.push({
+                            id: atm.id,
+                            content: atom_content(atm),
+                            title: atom_title(atm),
+                            start: start_var.value.num / start_var.value.den,
+                            end: end_var.value.num / end_var.value.den,
+                            group: tl.id
+                        });
+                    }
+                    break;
+                case 'ConsumableResource':
+                    const cr_atms = new Set();
+                    tl.values.forEach((val, id) => {
+                        vals.push({
+                            id: '' + tl.id + id,
+                            content: val.start.num / val.start.den + ' - ' + val.end.num / val.end.den,
+                            className: cr_value_class(tl, val),
+                            start: val.from.num / val.from.den,
+                            end: val.to.num / val.to.den,
+                            type: 'background',
+                            group: tl.id
+                        });
+                        for (const atm_id of val.atoms)
+                            cr_atms.add(atm_id);
+                    });
+                    for (const atm_id of cr_atms) {
                         const atm = this.atoms.get(atm_id);
                         const start_var = atm.pars.find(xpr => xpr.name == 'start');
                         const end_var = atm.pars.find(xpr => xpr.name == 'end');
@@ -398,6 +427,12 @@ function sv_value_class(val) {
 }
 
 function rr_value_class(rr, val) { return rr.capacity.num / rr.capacity.den < val.usage.num / val.usage.den ? 'rr-inconsistent' : 'rr-consistent' }
+
+function cr_value_class(cr, val) {
+    if (cr.capacity.num / cr.capacity.den < val.start.num / val.start.den || cr.capacity.num / cr.capacity.den < val.end.num / val.end.den) return 'rr-inconsistent';
+    if (0 > val.start.num / val.start.den || 0 > val.end.num / val.end.den) return 'rr-inconsistent';
+    return 'rr-consistent'
+}
 
 function atom_content(atm) { return atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par.name).sort().join(', ') + ')'; }
 

@@ -34,6 +34,7 @@ namespace ratio
     void consumable_resource::new_predicate(predicate &pred) noexcept
     {
         assert(get_solver().is_interval(pred));
+        assert(c_pred->is_assignable_from(pred) || p_pred->is_assignable_from(pred));
         // each consumable-resource predicate has a tau parameter indicating on which resource the atoms insist on..
         new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
     }
@@ -170,13 +171,14 @@ namespace ratio
                 {
                     arith_expr amount = atm->get(CONSUMABLE_RESOURCE_USE_AMOUNT_NAME);
                     inf_rational c_coeff;
-                    if (&atm->get_type() == c_pred)
+                    if (p_pred->is_assignable_from(atm->get_type()))
                         c_coeff = get_core().arith_value(amount);
                     else
                         c_coeff = -get_core().arith_value(amount);
                     arith_expr s_expr = atm->get(RATIO_START);
                     arith_expr e_expr = atm->get(RATIO_END);
                     c_coeff /= (get_core().arith_value(e_expr) - get_core().arith_value(s_expr)).get_rational();
+                    c_angular_coefficient += c_coeff;
 
                     j_atms.push_back(new long_val(atm->get_id()));
                 }
