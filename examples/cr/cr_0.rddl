@@ -1,0 +1,17 @@
+class Battery : ConsumableResource {
+
+    Battery(real initial_amount, real capacity) : ConsumableResource(initial_amount, capacity) {}
+
+    predicate Use() : Consume {
+        duration >= 10.0;
+    }
+
+    predicate Charge() : Produce {
+        duration >= 10.0;
+        amount == duration * 0.2;
+    }
+}
+
+Battery cr = new Battery(2.0, 10.0);
+
+fact u0 = new cr.Use(amount:4.0, duration:10.0);
