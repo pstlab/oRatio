@@ -31,6 +31,43 @@ namespace ratio
         return incs;
     }
 
+    void consumable_resource::new_predicate(predicate &pred) noexcept
+    {
+        assert(get_solver().is_interval(pred));
+        // each consumable-resource predicate has a tau parameter indicating on which resource the atoms insist on..
+        new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
+    }
+    void consumable_resource::new_atom(atom_flaw &f)
+    {
+        atom &atm = f.get_atom();
+        if (f.is_fact)
+        { // we apply interval-predicate whenever the fact becomes active..
+            set_ni(lit(atm.get_sigma()));
+            get_solver().get_interval().apply_rule(atm);
+            restore_ni();
+        }
+
+        // we avoid unification..
+        if (!get_core().get_sat_core().new_clause({!f.get_phi(), lit(atm.get_sigma())}))
+            throw unsolvable_exception();
+
+        // since flaws might require planning, we can't store the variables for on-line flaw resolution..
+
+        // we store, for the atom, its atom listener..
+        atoms.push_back({&atm, new cr_atom_listener(*this, atm)});
+
+        // we filter out those atoms which are not strictly active..
+        if (atm.get_core().get_sat_core().value(atm.get_sigma()) == True)
+        {
+            expr c_scope = atm.get(TAU);
+            if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))                  // the 'tau' parameter is a variable..
+                for (const auto &val : atm.get_core().get_ov_theory().value(enum_scope->ev)) // we check for all its allowed values..
+                    to_check.insert(static_cast<const item *>(val));
+            else // the 'tau' parameter is a constant..
+                to_check.insert(&*c_scope);
+        }
+    }
+
     consumable_resource::cr_constructor::cr_constructor(consumable_resource &cr) : constructor(cr.get_core(), cr, {new field(cr.get_core().get_type(REAL_KEYWORD), CONSUMABLE_RESOURCE_INITIAL_AMOUNT), new field(cr.get_core().get_type(REAL_KEYWORD), CONSUMABLE_RESOURCE_INITIAL_AMOUNT)}, {{CONSUMABLE_RESOURCE_INITIAL_AMOUNT, {static_cast<const ast::expression *>(new ast::id_expression({riddle::id_token(0, 0, 0, 0, CONSUMABLE_RESOURCE_INITIAL_AMOUNT)}))}}, {CONSUMABLE_RESOURCE_CAPACITY, {static_cast<const ast::expression *>(new ast::id_expression({riddle::id_token(0, 0, 0, 0, CONSUMABLE_RESOURCE_CAPACITY)}))}}}, {static_cast<const ast::statement *>(new ast::expression_statement(static_cast<const ast::expression *>(new ast::geq_expression(static_cast<const ast::expression *>(new ast::id_expression({riddle::id_token(0, 0, 0, 0, CONSUMABLE_RESOURCE_INITIAL_AMOUNT)})), static_cast<const ast::expression *>(new ast::real_literal_expression(riddle::real_token(0, 0, 0, 0, rational::ZERO))))))), static_cast<const ast::statement *>(new ast::expression_statement(static_cast<const ast::expression *>(new ast::geq_expression(static_cast<const ast::expression *>(new ast::id_expression({riddle::id_token(0, 0, 0, 0, CONSUMABLE_RESOURCE_CAPACITY)})), static_cast<const ast::expression *>(new ast::real_literal_expression(riddle::real_token(0, 0, 0, 0, rational::ZERO)))))))}) {}
 
     consumable_resource::produce_predicate::produce_predicate(consumable_resource &cr) : predicate(cr.get_core(), cr, CONSUMABLE_RESOURCE_PRODUCE_PREDICATE_NAME, {new field(cr.get_core().get_type(REAL_KEYWORD), CONSUMABLE_RESOURCE_USE_AMOUNT_NAME)}, {static_cast<const ast::statement *>(new ast::expression_statement(static_cast<const ast::expression *>(new ast::geq_expression(static_cast<const ast::expression *>(new ast::id_expression({riddle::id_token(0, 0, 0, 0, CONSUMABLE_RESOURCE_USE_AMOUNT_NAME)})), static_cast<const ast::expression *>(new ast::real_literal_expression(riddle::real_token(0, 0, 0, 0, rational::ZERO)))))))}) { new_supertypes({&cr.get_core().get_predicate(RATIO_INTERVAL)}); }
