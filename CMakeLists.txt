@@ -58,7 +58,7 @@ endif()
 
 message(STATUS "Build Python API:         ${BUILD_PYTHON_API}")
 if(BUILD_PYTHON_API)
-    add_subdirectory(api/python/cpp)
+    add_subdirectory(api/python)
 endif()
 
 message(STATUS "Build server:             ${BUILD_GUI_SERVER}")
