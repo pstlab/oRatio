@@ -16,7 +16,7 @@ namespace ratio
     {
         new_fields(*this, {new field(slv.get_type(REAL_KEYWORD), REUSABLE_RESOURCE_CAPACITY)}); // we add the 'capacity' field..
         new_constructors({new rr_constructor(*this)});                                          // we add a constructor..
-        new_predicates({new use_predicate(*this)}, false);                                      // we add the 'Use' predicate, without notifying neither the resource nor its supertypes..
+        new_predicates({u_pred}, false);                                                        // we add the 'Use' predicate, without notifying neither the resource nor its supertypes..
     }
     reusable_resource::~reusable_resource()
     {
@@ -198,16 +198,23 @@ namespace ratio
         return incs;
     }
 
-    void reusable_resource::new_predicate(predicate &) noexcept { assert(false); }
+    void reusable_resource::new_predicate(predicate &pred) noexcept
+    {
+        assert(get_solver().is_interval(pred));
+        assert(u_pred->is_assignable_from(pred));
+        // each reusable-resource predicate has a tau parameter indicating on which resource the atoms insist on..
+        new_fields(pred, {new field(static_cast<type &>(pred.get_scope()), TAU)});
+    }
 
     void reusable_resource::new_atom(atom_flaw &f)
     {
-        assert(f.is_fact);
         atom &atm = f.get_atom();
-        // we apply interval-predicate whenever the fact becomes active..
-        set_ni(lit(atm.get_sigma()));
-        static_cast<predicate &>(get_predicate(REUSABLE_RESOURCE_USE_PREDICATE_NAME)).apply_rule(atm);
-        restore_ni();
+        if (f.is_fact)
+        { // we apply use-predicate whenever the fact becomes active..
+            set_ni(lit(atm.get_sigma()));
+            u_pred->apply_rule(atm);
+            restore_ni();
+        }
 
         // we avoid unification..
         if (!get_core().get_sat_core().new_clause({!f.get_phi(), lit(atm.get_sigma())}))

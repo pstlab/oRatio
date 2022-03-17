@@ -42,9 +42,12 @@ namespace ratio
     {
         atom &atm = f.get_atom();
         if (f.is_fact)
-        { // we apply interval-predicate whenever the fact becomes active..
+        { // we apply produce-predicate or the consume-predicate whenever the fact becomes active..
             set_ni(lit(atm.get_sigma()));
-            get_solver().get_interval().apply_rule(atm);
+            if (p_pred->is_assignable_from(atm.get_type()))
+                p_pred->apply_rule(atm);
+            else
+                c_pred->apply_rule(atm);
             restore_ni();
         }
 
