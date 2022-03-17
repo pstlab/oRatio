@@ -10,7 +10,7 @@ namespace ratio
   class py_rational
   {
   public:
-    py_rational(smt::rational &val) : val(val) {}
+    py_rational(const smt::rational &val) : val(val) {}
     py_rational(const py::int_ &num) : val(num) {}
     py_rational(const py::int_ &num, const py::int_ &den) : val(num, den) {}
     ~py_rational() {}

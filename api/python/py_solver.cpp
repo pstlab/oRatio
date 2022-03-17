@@ -1,5 +1,7 @@
 #include "py_solver.h"
 #include "py_core_listener.h"
+#include "py_solver_listener.h"
+#include "py_rational.h"
 
 namespace ratio
 {
@@ -80,19 +82,80 @@ namespace ratio
         py_f["pos"] = py_pos;
 
         flaws.emplace(&f, py_f);
+
+        for (const auto &l : solver_listeners)
+            l->flaw_created(py_f);
     }
     void py_solver::flaw_state_changed(const flaw &f)
     {
         py::object &py_f = flaws.find(&f)->second;
         py_f["state"] = slv->get_sat_core().value(f.get_phi());
+
+        for (const auto &l : solver_listeners)
+            l->flaw_state_changed(py_f);
     }
-    void py_solver::flaw_cost_changed(const flaw &f) {}
-    void py_solver::flaw_position_changed(const flaw &f) {}
-    void py_solver::current_flaw(const flaw &f) {}
+    void py_solver::flaw_cost_changed(const flaw &f)
+    {
+        py::object &py_f = flaws.find(&f)->second;
+        py_f["cost"] = py_rational(f.get_estimated_cost());
 
-    void py_solver::resolver_created(const resolver &r) {}
-    void py_solver::resolver_state_changed(const resolver &r) {}
-    void py_solver::current_resolver(const resolver &r) {}
+        for (const auto &l : solver_listeners)
+            l->flaw_cost_changed(py_f);
+    }
+    void py_solver::flaw_position_changed(const flaw &f)
+    {
+        py::object &py_f = flaws.find(&f)->second;
 
-    void py_solver::causal_link_added(const flaw &f, const resolver &r) {}
+        for (const auto &l : solver_listeners)
+            l->flaw_position_changed(py_f);
+    }
+    void py_solver::current_flaw(const flaw &f)
+    {
+        py::object &py_f = flaws.find(&f)->second;
+        const auto [lb, ub] = slv->get_idl_theory().bounds(f.get_position());
+        py_f["pos"]["lb"] = lb;
+        py_f["pos"]["ub"] = ub;
+
+        for (const auto &l : solver_listeners)
+            l->current_flaw(py_f);
+    }
+
+    void py_solver::resolver_created(const resolver &r)
+    {
+        py::object py_r;
+        py_r["id"] = r.get_id();
+        py_r["effect"] = r.get_effect().get_id();
+        py_r["label"] = r.get_data();
+        py_r["cost"] = py_rational(r.get_intrinsic_cost());
+        py_r["state"] = slv->get_sat_core().value(r.get_rho());
+
+        resolvers.emplace(&r, py_r);
+
+        for (const auto &l : solver_listeners)
+            l->resolver_created(py_r);
+    }
+    void py_solver::resolver_state_changed(const resolver &r)
+    {
+        py::object &py_r = resolvers.find(&r)->second;
+        py_r["state"] = slv->get_sat_core().value(r.get_rho());
+
+        for (const auto &l : solver_listeners)
+            l->resolver_state_changed(py_r);
+    }
+    void py_solver::current_resolver(const resolver &r)
+    {
+        py::object &py_r = resolvers.find(&r)->second;
+
+        for (const auto &l : solver_listeners)
+            l->current_resolver(py_r);
+    }
+
+    void py_solver::causal_link_added(const flaw &f, const resolver &r)
+    {
+        py::object &py_f = flaws.find(&f)->second;
+        py::object &py_r = resolvers.find(&r)->second;
+
+        for (const auto &l : solver_listeners)
+            l->causal_link_added(py_f, py_r);
+    }
 } // namespace ratio
