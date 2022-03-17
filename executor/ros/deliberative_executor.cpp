@@ -213,7 +213,7 @@ namespace ratio
                 st_srv.request.task.par_names = t.par_names;
                 st_srv.request.task.par_values = t.par_values;
                 if (exec.d_mngr.start_task.call(st_srv) && st_srv.response.success)
-                    exec.current_tasks.emplace(atm->get_sigma(), atm);
+                    exec.current_tasks.emplace(atm->get_id(), atm);
             }
 
         deliberative_tier::timelines executing_msg;
@@ -228,7 +228,7 @@ namespace ratio
     { // tell the executor the atoms which are not yet ready to finish..
         std::unordered_set<ratio::atom *> dey;
         for (const auto &atm : atms)
-            if (exec.current_tasks.count(atm->get_sigma()))
+            if (exec.current_tasks.count(atm->get_id()))
                 dey.insert(atm);
 
         if (!dey.empty())
