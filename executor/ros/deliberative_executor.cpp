@@ -66,7 +66,7 @@ namespace ratio
 
     deliberative_executor::task deliberative_executor::to_task(const ratio::atom &atm)
     {
-        uint64_t task_id = atm.get_sigma();
+        uint64_t task_id = atm.get_id();
         std::string task_name = atm.get_type().get_name();
         std::vector<std::string> par_names;
         std::vector<std::string> par_values;
