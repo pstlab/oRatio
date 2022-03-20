@@ -10,6 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 include(GenerateExportHeader)
 include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 option(VERBOSE_LOG "Makes log more verbose" OFF)
 option(PARALLELIZE "Performs some activities in parallel" OFF)

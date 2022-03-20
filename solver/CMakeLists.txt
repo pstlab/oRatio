@@ -70,4 +70,6 @@ endif()
 
 install(TARGETS solver EXPORT solverTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${SOLVER_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/solver_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/solver)
-install(EXPORT solverTargets FILE solverConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/solver NAMESPACE oRatio::)
+configure_package_config_file(solverConfig.cmake.in solverConfig.cmake INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/solver PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/solverConfigVersion.cmake VERSION 1.0.0 COMPATIBILITY SameMajorVersion)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/solverConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/solverConfigVersion.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/solver)

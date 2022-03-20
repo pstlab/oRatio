@@ -1,0 +1,7 @@
+set(RIDDLE_VERSION 1.0.0)
+
+@PACKAGE_INIT@
+
+set_and_check(RIDDLE_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@/riddle")
+
+check_required_components(riddle)
