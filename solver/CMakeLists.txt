@@ -11,7 +11,7 @@ option(GRAPH_PRUNING "Prunes the causal graph before starting the search" ON)
 option(CHECK_INCONSISTENCIES "Check inconsistencies at each step" OFF)
 
 file(GLOB SOLVER_SOURCES *.cpp flaws/*.cpp types/*.cpp heuristics/*.cpp)
-file(GLOB SOLVER_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/*.h *.h flaws/*.h types/*.h heuristics/*.h)
+file(GLOB SOLVER_HEADERS *.h flaws/*.h types/*.h heuristics/*.h)
 
 add_library(solver SHARED ${SOLVER_SOURCES})
 GENERATE_EXPORT_HEADER(solver)
@@ -69,4 +69,4 @@ else()
 endif()
 
 install(TARGETS solver LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(FILES ${SOLVER_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/solver)
+install(FILES ${SOLVER_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/solver_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/solver)

@@ -1,5 +1,5 @@
 file(GLOB SMT_SOURCES *.cpp arith/*.cpp arith/lra/*.cpp arith/dl/*.cpp ov/*.cpp)
-file(GLOB SMT_HEADERS ${CMAKE_CURRENT_BINARY_DIR}/*.h *.h arith/*.h arith/lra/*.h arith/dl/*.h ov/*.h)
+file(GLOB SMT_HEADERS *.h arith/*.h arith/lra/*.h arith/dl/*.h ov/*.h)
 
 add_library(smt SHARED ${SMT_SOURCES})
 GENERATE_EXPORT_HEADER(smt)
@@ -22,4 +22,4 @@ else()
 endif()
 
 install(TARGETS smt LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-install(FILES ${SMT_HEADERS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/smt)
+install(FILES ${SMT_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/smt_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/smt)
