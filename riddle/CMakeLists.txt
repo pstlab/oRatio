@@ -3,7 +3,7 @@ file(GLOB RIDDLE_HEADERS *.h)
 
 add_library(riddle SHARED ${RIDDLE_SOURCES})
 GENERATE_EXPORT_HEADER(riddle)
-target_include_directories(riddle PUBLIC ${CMAKE_CURRENT_BINARY_DIR} .)
+target_include_directories(riddle PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:>)
 target_link_libraries(riddle PUBLIC smt)
 
 if(BUILD_TESTING)
@@ -16,5 +16,8 @@ else()
     target_compile_options(riddle PRIVATE -Wall -Wextra -pedantic)
 endif()
 
-install(TARGETS riddle LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS riddle EXPORT riddleTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${RIDDLE_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/riddle_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/riddle)
+install(EXPORT riddleTargets FILE riddleTargets.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/riddle NAMESPACE oRatio::)
+configure_file(riddleConfig.cmake.in riddleConfig.cmake @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/riddleConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/riddle)

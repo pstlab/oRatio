@@ -15,7 +15,7 @@ file(GLOB SOLVER_HEADERS *.h flaws/*.h types/*.h heuristics/*.h)
 
 add_library(solver SHARED ${SOLVER_SOURCES})
 GENERATE_EXPORT_HEADER(solver)
-target_include_directories(solver PUBLIC ${CMAKE_CURRENT_BINARY_DIR} . flaws types heuristics)
+target_include_directories(solver PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/flaws $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/types $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>/heuristics $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:>)
 target_link_libraries(solver PUBLIC core)
 
 message(STATUS "Temporal network type:    ${TEMPORAL_NETWORK_TYPE}")
@@ -68,5 +68,8 @@ else()
     target_compile_options(solver PRIVATE -Wall -Wextra -pedantic)
 endif()
 
-install(TARGETS solver LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(TARGETS solver EXPORT solverTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${SOLVER_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/solver_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/solver)
+install(EXPORT solverTargets FILE solverTargets.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/solver NAMESPACE oRatio::)
+configure_file(solverConfig.cmake.in solverConfig.cmake @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/solverConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/solver)

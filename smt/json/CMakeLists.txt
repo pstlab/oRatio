@@ -3,7 +3,11 @@ file(GLOB JSON_HEADERS *.h)
 
 add_library(json SHARED ${JSON_SOURCES})
 GENERATE_EXPORT_HEADER(json)
-target_include_directories(json PUBLIC ${CMAKE_CURRENT_BINARY_DIR} .)
 
-install(TARGETS json LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+target_include_directories(json PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:>)
+
+install(TARGETS json EXPORT jsonTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${JSON_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/json_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json)
+install(EXPORT jsonTargets FILE jsonTargets.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/json NAMESPACE oRatio::)
+configure_file(jsonConfig.cmake.in jsonConfig.cmake @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsonConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/json)
