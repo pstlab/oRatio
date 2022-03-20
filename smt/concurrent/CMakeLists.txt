@@ -10,6 +10,4 @@ target_link_libraries(concurrent PRIVATE Threads::Threads)
 
 install(TARGETS concurrent EXPORT concurrentTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${CONCURRENT_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/concurrent_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/concurrent)
-install(EXPORT concurrentTargets FILE concurrentTargets.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/concurrent NAMESPACE oRatio::)
-configure_file(concurrentConfig.cmake.in concurrentConfig.cmake @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/concurrentConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/concurrent)
+install(EXPORT concurrentTargets FILE concurrentConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/concurrent NAMESPACE oRatio::)

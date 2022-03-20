@@ -23,6 +23,4 @@ endif()
 
 install(TARGETS smt EXPORT smtTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${SMT_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/smt_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/smt)
-install(EXPORT smtTargets FILE smtTargets.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/smt NAMESPACE oRatio::)
-configure_file(smtConfig.cmake.in smtConfig.cmake @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/smtConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/smt)
+install(EXPORT smtTargets FILE smtConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/smt NAMESPACE oRatio::)

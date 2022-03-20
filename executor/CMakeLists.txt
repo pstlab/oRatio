@@ -16,6 +16,4 @@ endif()
 
 install(TARGETS executor EXPORT executorTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${EXECUTOR_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/executor_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/executor)
-install(EXPORT executorTargets FILE executorTargets.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/executor NAMESPACE oRatio::)
-configure_file(executorConfig.cmake.in executorConfig.cmake @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/executorConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/executor)
+install(EXPORT executorTargets FILE executorConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/executor NAMESPACE oRatio::)

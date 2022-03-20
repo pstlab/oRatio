@@ -18,6 +18,4 @@ endif()
 
 install(TARGETS riddle EXPORT riddleTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${RIDDLE_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/riddle_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/riddle)
-install(EXPORT riddleTargets FILE riddleTargets.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/riddle NAMESPACE oRatio::)
-configure_file(riddleConfig.cmake.in riddleConfig.cmake @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/riddleConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/riddle)
+install(EXPORT riddleTargets FILE riddleConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/riddle NAMESPACE oRatio::)

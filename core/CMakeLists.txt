@@ -18,6 +18,4 @@ endif()
 
 install(TARGETS core EXPORT coreTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${CORE_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/core_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/core)
-install(EXPORT coreTargets FILE coreTargets.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/core NAMESPACE oRatio::)
-configure_file(coreConfig.cmake.in coreConfig.cmake @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/coreConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/core)
+install(EXPORT coreTargets FILE coreConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/core NAMESPACE oRatio::)

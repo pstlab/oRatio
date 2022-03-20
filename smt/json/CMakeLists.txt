@@ -8,6 +8,4 @@ target_include_directories(json PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_
 
 install(TARGETS json EXPORT jsonTargets LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(FILES ${JSON_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/json_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json)
-install(EXPORT jsonTargets FILE jsonTargets.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/json NAMESPACE oRatio::)
-configure_file(jsonConfig.cmake.in jsonConfig.cmake @ONLY)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsonConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/json)
+install(EXPORT jsonTargets FILE jsonConfig.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/json NAMESPACE oRatio::)
