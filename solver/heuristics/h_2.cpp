@@ -84,7 +84,7 @@ namespace ratio
     void h_2::build()
     {
         LOG("building the causal graph..");
-        assert(slv.get_sat_core().root_level());
+        assert(slv.root_level());
 
         bool ok;
         do
