@@ -145,8 +145,8 @@ namespace smt
             {
                 expr = expr / expr.vars.cbegin()->second;
                 auto it = expr.vars.cbegin();
-                [[maybe_unused]] const auto [v0, c0] = *it++;
-                assert(v0 == rational::ONE);
+                const auto [v0, c0] = *it++;
+                assert(c0 == rational::ONE);
                 const auto [v1, c1] = *it;
                 if (c1 != -rational::ONE || !is_integer(expr.known_term))
                     throw std::invalid_argument("not a valid integer difference logic constraint..");
@@ -373,12 +373,12 @@ namespace smt
         else if (l0.vars.empty() && l1.vars.size() == 1)
         {
             const auto [lb, ub] = bounds(l1);
-            return lb <= l0.known_term && ub >= l0.known_term;
+            return rational(lb) <= l0.known_term && rational(ub) >= l0.known_term;
         }
         else if (l0.vars.size() == 1 && l1.vars.empty())
         {
             const auto [lb, ub] = bounds(l0);
-            return lb <= l1.known_term && ub >= l1.known_term;
+            return rational(lb) <= l1.known_term && rational(ub) >= l1.known_term;
         }
         else if (l0.vars.size() == 1 && l1.vars.size() == 1)
         {
@@ -481,8 +481,7 @@ namespace smt
                                    return _dists[dist.second->to][dist.second->from] < -dist.second->dist;
                                default: // the constraint is not asserted..
                                    return true;
-                               }
-                           }));
+                               } }));
         return true;
     }
 

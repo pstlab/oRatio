@@ -18,13 +18,15 @@ namespace smt
     SMT_EXPORT explicit rational(I n);
     SMT_EXPORT explicit rational(I n, I d);
 
-    SMT_EXPORT operator double() const noexcept { return static_cast<double>(num) / den; }
     SMT_EXPORT inline I numerator() const noexcept { return num; }
     SMT_EXPORT inline I denominator() const noexcept { return den; }
 
     SMT_EXPORT inline friend bool is_integer(const rational &rhs) noexcept { return rhs.den == 1; }
+    SMT_EXPORT inline friend bool is_zero(const rational &rhs) noexcept { return rhs.num == 0; }
     SMT_EXPORT inline friend bool is_positive(const rational &rhs) noexcept { return rhs.num > 0; }
+    SMT_EXPORT inline friend bool is_positive_or_zero(const rational &rhs) noexcept { return rhs.num >= 0; }
     SMT_EXPORT inline friend bool is_negative(const rational &rhs) noexcept { return rhs.num < 0; }
+    SMT_EXPORT inline friend bool is_negative_or_zero(const rational &rhs) noexcept { return rhs.num <= 0; }
     SMT_EXPORT inline friend bool is_infinite(const rational &rhs) noexcept { return rhs.den == 0; }
     SMT_EXPORT inline friend bool is_positive_infinite(const rational &rhs) noexcept { return is_positive(rhs) && is_infinite(rhs); }
     SMT_EXPORT inline friend bool is_negative_infinite(const rational &rhs) noexcept { return is_negative(rhs) && is_infinite(rhs); }
