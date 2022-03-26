@@ -42,8 +42,6 @@ namespace ratio
     ros::ServiceServer new_requirement_server;
     ros::ServiceServer task_finished_server;
     ros::ServiceServer state_server;
-    ros::Publisher reasoner_created;
-    ros::Publisher reasoner_destroyed;
     ros::Publisher notify_state;
     ros::Publisher notify_graph;
     ros::Publisher notify_timelines;

@@ -3,7 +3,6 @@
 #include "deliberative_tier/deliberative_state.h"
 #include "deliberative_tier/timelines.h"
 #include "deliberative_tier/task_service.h"
-#include "std_msgs/UInt64.h"
 
 namespace ratio
 {
@@ -13,8 +12,6 @@ namespace ratio
                                                                      new_requirement_server(h.advertiseService("new_requirement", &deliberative_manager::new_requirement, this)),
                                                                      task_finished_server(h.advertiseService("task_finished", &deliberative_manager::task_finished, this)),
                                                                      state_server(h.advertiseService("get_state", &deliberative_manager::get_state, this)),
-                                                                     reasoner_created(handle.advertise<std_msgs::UInt64>("reasoner_created", 10)),
-                                                                     reasoner_destroyed(handle.advertise<std_msgs::UInt64>("reasoner_destroyed", 10)),
                                                                      notify_state(handle.advertise<deliberative_tier::deliberative_state>("deliberative_state", 10, true)),
                                                                      notify_graph(handle.advertise<deliberative_tier::graph>("graph", 10)),
                                                                      notify_timelines(handle.advertise<deliberative_tier::timelines>("timelines", 10)),
@@ -69,9 +66,10 @@ namespace ratio
 
         res.consistent = true;
 
-        std_msgs::UInt64 r_created_msg;
-        r_created_msg.data = res.reasoner_id;
-        reasoner_created.publish(r_created_msg);
+        deliberative_tier::deliberative_state state_msg;
+        state_msg.reasoner_id = res.reasoner_id;
+        state_msg.deliberative_state = state_msg.created;
+        notify_state.publish(state_msg);
         return true;
     }
 
@@ -89,9 +87,10 @@ namespace ratio
             executors.erase(req.reasoner_id);
             res.destroyed = true;
 
-            std_msgs::UInt64 r_destroyed_msg;
-            r_destroyed_msg.data = req.reasoner_id;
-            reasoner_destroyed.publish(r_destroyed_msg);
+            deliberative_tier::deliberative_state state_msg;
+            state_msg.reasoner_id = req.reasoner_id;
+            state_msg.deliberative_state = state_msg.destroyed;
+            notify_state.publish(state_msg);
         }
         return true;
     }
