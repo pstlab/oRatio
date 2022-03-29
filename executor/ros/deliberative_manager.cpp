@@ -184,15 +184,6 @@ namespace ratio
                 ss << tls_array.get(i);
                 tls_msg.timelines.push_back(ss.str());
             }
-            arith_expr origin_expr = exec.second->get_solver().get("origin");
-            const auto origin = exec.second->get_solver().arith_value(origin_expr);
-            tls_msg.origin.num = origin.get_rational().numerator();
-            tls_msg.origin.den = origin.get_rational().denominator();
-
-            arith_expr horizon_expr = exec.second->get_solver().get("horizon");
-            const auto horizon = exec.second->get_solver().arith_value(horizon_expr);
-            tls_msg.horizon.num = horizon.get_rational().numerator();
-            tls_msg.horizon.den = horizon.get_rational().denominator();
 
             const auto c_time = exec.second->get_executor().get_current_time();
             tls_msg.time.num = c_time.numerator();
