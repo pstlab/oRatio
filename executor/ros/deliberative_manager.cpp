@@ -133,6 +133,7 @@ namespace ratio
         for (const auto &exec : executors)
         {
             deliberative_tier::graph g_msg;
+            g_msg.reasoner_id = exec.first;
             for (const auto &f : exec.second->flaws)
             {
                 deliberative_tier::flaw f_msg;
@@ -142,9 +143,9 @@ namespace ratio
                 f_msg.data = f->get_data();
                 f_msg.state = f->get_solver().get_sat_core().value(f->get_phi());
                 const auto [lb, ub] = f->get_solver().get_idl_theory().bounds(f->get_position());
+                f_msg.pos.lb = lb, f_msg.pos.ub = ub;
                 const auto est_cost = f->get_estimated_cost();
                 f_msg.cost.num = est_cost.numerator(), f_msg.cost.den = est_cost.denominator();
-                f_msg.pos.lb = lb, f_msg.pos.ub = ub;
                 g_msg.flaws.push_back(f_msg);
             }
 
@@ -171,6 +172,7 @@ namespace ratio
             res.graphs.push_back(g_msg);
 
             deliberative_tier::timelines tls_msg;
+            tls_msg.reasoner_id = exec.first;
 
             std::stringstream sss;
             sss << exec.second->get_solver().to_json();
