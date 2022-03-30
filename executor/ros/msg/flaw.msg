@@ -4,4 +4,3 @@ string data
 uint8 state
 position pos
 rational cost
-bool current
