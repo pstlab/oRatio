@@ -342,7 +342,7 @@ namespace ratio
 
     state_variable::forbid_resolver::forbid_resolver(sv_flaw &flw, atom &atm, item &itm) : resolver(flw.get_solver(), rational::ZERO, flw), atm(atm), itm(itm) {}
 
-    std::string state_variable::forbid_resolver::get_data() const { return "{\"type\":\"forbid\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":\"" + std::to_string(atm.get_id()) + "\"}"; }
+    std::string state_variable::forbid_resolver::get_data() const { return "{\"type\":\"forbid\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":" + std::to_string(atm.get_id()) + "}"; }
 
     void state_variable::forbid_resolver::apply() { get_solver().get_sat_core().new_clause({!get_rho(), !get_solver().get_ov_theory().allows(static_cast<var_item *>(&*atm.get(TAU))->ev, itm)}); }
 
