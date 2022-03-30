@@ -68,7 +68,7 @@ namespace ratio
 
         deliberative_tier::deliberative_state state_msg;
         state_msg.reasoner_id = res.reasoner_id;
-        state_msg.deliberative_state = state_msg.created;
+        state_msg.deliberative_state = deliberative_tier::deliberative_state::created;
         notify_state.publish(state_msg);
         return true;
     }
@@ -89,7 +89,7 @@ namespace ratio
 
             deliberative_tier::deliberative_state state_msg;
             state_msg.reasoner_id = req.reasoner_id;
-            state_msg.deliberative_state = state_msg.destroyed;
+            state_msg.deliberative_state = deliberative_tier::deliberative_state::destroyed;
             notify_state.publish(state_msg);
         }
         return true;
