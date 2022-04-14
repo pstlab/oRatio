@@ -6,6 +6,7 @@ namespace ratio
 {
     gui_server::gui_server(executor &exec, const std::string &host, const unsigned short port) : exec(exec), host(host), port(port), core_listener(exec.get_solver()), solver_listener(exec.get_solver()), executor_listener(exec)
     {
+        app.loglevel(crow::LogLevel::Warning);
         CROW_ROUTE(app, "/")
         ([]()
          {

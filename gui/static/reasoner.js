@@ -13,7 +13,7 @@ class Reasoner {
         this.timelines = new vis.DataSet([]);
         this.timeline_values = new vis.DataSet([]);
 
-        this.timeline = new vis.Timeline(timelines_div, this.timeline_values, this.timelines, { selectable: false, showCurrentTime: false, margin: { item: { horizontal: 0 } } });
+        this.timeline = new vis.Timeline(timelines_div, this.timeline_values, this.timelines, { selectable: false, showCurrentTime: false, verticalScroll: true, zoomKey: 'ctrlKey', margin: { item: { horizontal: 0 } } });
 
         this.current_time = 0;
         this.timeline.addCustomTime(this.current_time);
@@ -436,7 +436,7 @@ function cr_value_class(cr, val) {
 
 function atom_content(atm) { return atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par.name).sort().join(', ') + ')'; }
 
-function atom_title(atm) { return '\u03C3' + atm.sigma + ' ' + atm.predicate + '(' + atm.pars.filter(par => par.name != 'tau').map(par => par_to_string(par)).sort().join(', ') + ')'; }
+function atom_title(atm) { return '\u03C3' + atm.sigma + ' ' + atm.predicate + '(' + atm.pars.filter(par => par.name != 'tau').map(par => '<br>' + par_to_string(par)).sort().join(',') + '<br>)'; }
 
 function par_to_string(par) {
     switch (par.type) {
