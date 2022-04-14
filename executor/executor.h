@@ -13,6 +13,16 @@ namespace ratio
   class atom;
   class executor_listener;
 
+  struct atom_adaptation
+  {
+    struct arith_bounds
+    {
+      smt::inf_rational lb, ub;
+    };
+    smt::lit sigma_xi;
+    std::unordered_map<arith_item *, arith_bounds> bounds;
+  };
+
   class executor final : public core_listener, public solver_listener, public smt::theory
   {
     friend class executor_listener;
@@ -42,6 +52,7 @@ namespace ratio
 
     void read(const std::string &) override { reset_relevant_predicates(); }
     void read(const std::vector<std::string> &) override { reset_relevant_predicates(); }
+    void started_solving() override;
     void solution_found() override;
     void inconsistent_problem() override;
 
@@ -53,10 +64,11 @@ namespace ratio
     void reset_relevant_predicates();
 
   private:
-    std::unordered_set<const predicate *> relevant_predicates;
-    smt::rational current_time;         // the current time in plan units..
-    const smt::rational units_per_tick; // the number of plan units for each tick..
-    std::unordered_map<const atom *, std::unordered_map<arith_item *, const smt::inf_rational>> lbs, ubs;
+    std::unordered_set<const predicate *> relevant_predicates;              // impulses and intervals..
+    smt::rational current_time;                                             // the current time in plan units..
+    const smt::rational units_per_tick;                                     // the number of plan units for each tick..
+    smt::lit xi;                                                            // the execution variable..
+    std::unordered_map<const atom *, atom_adaptation> adaptations;          // for each atom, the numeric adaptations done during the executions (i.e., freezes and delays)..
     std::unordered_map<smt::var, atom *> all_atoms;                         // all the interesting atoms indexed by their sigma variable..
     std::unordered_set<const atom *> dont_start;                            // the starting atoms which are not yet ready to start..
     std::unordered_set<const atom *> dont_end;                              // the ending atoms which are not yet ready to end..
