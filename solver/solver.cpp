@@ -66,63 +66,24 @@ namespace ratio
         FIRE_STATE_CHANGED();
     }
 
-    SOLVER_EXPORT void solver::solve()
+    SOLVER_EXPORT bool solver::solve()
     {
         FIRE_STARTED_SOLVING();
 
-        if (root_level())
-        { // we make sure that gamma is at true..
-            gr.build();
-            gr.check();
-        }
-        assert(get_sat_core().value(gr.gamma) == True);
-
-        // we search for a consistent solution without flaws..
-#ifdef CHECK_INCONSISTENCIES
-        // we solve all the current inconsistencies..
-        solve_inconsistencies();
-
-        while (!flaws.empty())
+        try
         {
-            assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
-                               { return sat->value(f->phi) == True; })); // all the current flaws must be active..
-            assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
-                               { return std::none_of(f->resolvers.cbegin(), f->resolvers.cend(), [this](resolver *r)
-                                                     { return sat->value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
-
-            // this is the next flaw (i.e. the most expensive one) to be solved..
-            auto best_flaw = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1)
-                                              { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
-            assert(best_flaw != flaws.cend());
-            FIRE_CURRENT_FLAW(**best_flaw);
-
-            if (is_infinite((*best_flaw)->get_estimated_cost()))
-            { // we don't know how to solve this flaw :(
-                do
-                { // we have to search..
-                    next();
-                } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
-                                     { return is_infinite(f->get_estimated_cost()); }));
-                // we solve all the current inconsistencies..
-                solve_inconsistencies();
-                continue;
+            if (root_level())
+            { // we make sure that gamma is at true..
+                gr.build();
+                gr.check();
             }
+            assert(get_sat_core().value(gr.gamma) == True);
 
-            // this is the next resolver (i.e. the cheapest one) to be applied..
-            auto *best_res = (*best_flaw)->get_best_resolver();
-            FIRE_CURRENT_RESOLVER(*best_res);
-
-            assert(!is_infinite(best_res->get_estimated_cost()));
-
-            // we apply the resolver..
-            take_decision(best_res->get_rho());
-
+            // we search for a consistent solution without flaws..
+#ifdef CHECK_INCONSISTENCIES
             // we solve all the current inconsistencies..
             solve_inconsistencies();
-        }
-#else
-        do
-        {
+
             while (!flaws.empty())
             {
                 assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
@@ -144,6 +105,8 @@ namespace ratio
                         next();
                     } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
                                          { return is_infinite(f->get_estimated_cost()); }));
+                    // we solve all the current inconsistencies..
+                    solve_inconsistencies();
                     continue;
                 }
 
@@ -155,16 +118,62 @@ namespace ratio
 
                 // we apply the resolver..
                 take_decision(best_res->get_rho());
-            }
 
-            // we solve all the current inconsistencies..
-            solve_inconsistencies();
-        } while (!flaws.empty());
+                // we solve all the current inconsistencies..
+                solve_inconsistencies();
+            }
+#else
+            do
+            {
+                while (!flaws.empty())
+                {
+                    assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                                       { return sat->value(f->phi) == True; })); // all the current flaws must be active..
+                    assert(std::all_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                                       { return std::none_of(f->resolvers.cbegin(), f->resolvers.cend(), [this](resolver *r)
+                                                             { return sat->value(r->rho) == True; }); })); // none of the current flaws must have already been solved..
+
+                    // this is the next flaw (i.e. the most expensive one) to be solved..
+                    auto best_flaw = std::min_element(flaws.cbegin(), flaws.cend(), [](const auto &f0, const auto &f1)
+                                                      { return f0->get_estimated_cost() > f1->get_estimated_cost(); });
+                    assert(best_flaw != flaws.cend());
+                    FIRE_CURRENT_FLAW(**best_flaw);
+
+                    if (is_infinite((*best_flaw)->get_estimated_cost()))
+                    { // we don't know how to solve this flaw :(
+                        do
+                        { // we have to search..
+                            next();
+                        } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                                             { return is_infinite(f->get_estimated_cost()); }));
+                        continue;
+                    }
+
+                    // this is the next resolver (i.e. the cheapest one) to be applied..
+                    auto *best_res = (*best_flaw)->get_best_resolver();
+                    FIRE_CURRENT_RESOLVER(*best_res);
+
+                    assert(!is_infinite(best_res->get_estimated_cost()));
+
+                    // we apply the resolver..
+                    take_decision(best_res->get_rho());
+                }
+
+                // we solve all the current inconsistencies..
+                solve_inconsistencies();
+            } while (!flaws.empty());
 #endif
-        // Hurray!! we have found a solution..
-        LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
-        FIRE_STATE_CHANGED();
-        FIRE_SOLUTION_FOUND();
+            // Hurray!! we have found a solution..
+            LOG(std::to_string(trail.size()) << " (" << std::to_string(flaws.size()) << ")");
+            FIRE_STATE_CHANGED();
+            FIRE_SOLUTION_FOUND();
+            return true;
+        }
+        catch (const unsolvable_exception &)
+        { // the problem is unsolvable..
+            FIRE_INCONSISTENT_PROBLEM();
+            return false;
+        }
     }
 
     void solver::take_decision(const lit &ch)

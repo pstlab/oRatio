@@ -42,8 +42,13 @@ int main(int argc, char *argv[])
         s.read(prob_names);
 
         std::cout << "solving the problem..\n";
-        s.solve();
-        std::cout << "hurray!! we have found a solution..\n";
+        if (s.solve())
+            std::cout << "hurray!! we have found a solution..\n";
+        else
+        {
+            std::cout << "the problem is unsolvable..\n";
+            return 1;
+        }
 
         std::ofstream sol_file;
         sol_file.open(sol_name);

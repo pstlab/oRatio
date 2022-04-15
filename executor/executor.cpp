@@ -64,11 +64,8 @@ namespace ratio
 
             if (delays)
             { // we have some delays: we propagate and remove new possible flaws..
-                if (!slv.get_sat_core().propagate())
+                if (!slv.get_sat_core().propagate() || !slv.solve())
                     throw execution_exception();
-
-                // we solve the problem again..
-                slv.solve();
                 goto manage_tick;
             }
 
@@ -116,11 +113,8 @@ namespace ratio
         for (const auto &atm : atoms)
             cnfl.push_back(lit(atm->get_sigma(), false));
         // we backtrack to a level at which we can analyze the conflict..
-        if (!backtrack_analyze_and_backjump())
+        if (!backtrack_analyze_and_backjump() || !slv.solve())
             throw execution_exception();
-
-        // we solve the problem again..
-        slv.solve();
     }
 
     bool executor::propagate(const smt::lit &p) noexcept

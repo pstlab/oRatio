@@ -149,7 +149,7 @@ namespace ratio
     CORE_EXPORT smt::inf_rational arith_value(const arith_expr &x) const noexcept;                    // the current value of the given arith expression..
     CORE_EXPORT std::unordered_set<smt::var_value *> enum_value(const var_expr &x) const noexcept;    // the current allowed values of the given enum expression..
 
-    virtual void solve() = 0;
+    virtual bool solve() = 0;
 
   private:
     virtual void new_atom(atom &atm, const bool &is_fact) = 0;

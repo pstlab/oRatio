@@ -63,9 +63,9 @@ namespace ratio
     SOLVER_EXPORT void init() noexcept;
 
     /**
-     * Solves the given problem.
+     * Solves the given problem returning whether a solution has been found.
      */
-    SOLVER_EXPORT void solve() override;
+    SOLVER_EXPORT bool solve() override;
     /**
      * Takes the given decision and propagates its effects.
      */

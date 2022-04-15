@@ -8,7 +8,7 @@ using namespace ratio;
 
 class test_solver : public core
 {
-    virtual void solve() override {}
+    virtual bool solve() override { return true; }
     virtual void new_atom(atom &atm, const bool &is_fact) override {}
     virtual void new_disjunction(context &ctx, const std::vector<conjunction *> &conjs) override {}
 };
