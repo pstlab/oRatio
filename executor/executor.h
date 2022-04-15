@@ -52,7 +52,6 @@ namespace ratio
 
     void read(const std::string &) override { reset_relevant_predicates(); }
     void read(const std::vector<std::string> &) override { reset_relevant_predicates(); }
-    void started_solving() override;
     void solution_found() override;
     void inconsistent_problem() override;
 

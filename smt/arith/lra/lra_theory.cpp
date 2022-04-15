@@ -319,6 +319,7 @@ namespace smt
 
     bool lra_theory::assert_lower(const var &x_i, const inf_rational &val, const lit &p) noexcept
     {
+        assert(sat->value(p) != Undefined);
         assert(cnfl.empty());
         if (val <= lb(x_i))
             return true;
@@ -352,6 +353,7 @@ namespace smt
 
     bool lra_theory::assert_upper(const var &x_i, const inf_rational &val, const lit &p) noexcept
     {
+        assert(sat->value(p) != Undefined);
         assert(cnfl.empty());
         if (val >= ub(x_i))
             return true;
@@ -478,8 +480,7 @@ namespace smt
                                                            t_watches[v].erase(r);
                                                        }
                                                    }
-                                               r->l.known_term += expr.known_term * cc;
-                                           });
+                                               r->l.known_term += expr.known_term * cc; });
         // we wait for all the rows to be updated..
         sat->get_thread_pool().join();
 #else

@@ -36,7 +36,7 @@ namespace ratio
                         const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_START);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         adaptations.at(atm).bounds.at(&*xpr).lb = lb;
-                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma())))
+                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
                         { // setting the lower bound caused a conflict..
                             swap_conflict(slv.get_lra_theory());
                             if (!backtrack_analyze_and_backjump())
@@ -52,7 +52,7 @@ namespace ratio
                         const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_END);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         adaptations.at(atm).bounds.at(&*xpr).lb = lb;
-                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, lit(atm->get_sigma())))
+                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
                         { // setting the lower bound caused a conflict..
                             swap_conflict(slv.get_lra_theory());
                             if (!backtrack_analyze_and_backjump())
@@ -130,7 +130,7 @@ namespace ratio
             auto &atm = get_atom(variable(p));
             if (const auto &adapt_i = adaptations.find(&atm); adapt_i != adaptations.end())
                 for (const auto &bnds : adapt_i->second.bounds)
-                    if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.lb, adapt_i->second.sigma_xi) || !slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.ub, adapt_i->second.sigma_xi))
+                    if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.lb, p) || !slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.ub, p))
                     { // setting the lower bound caused a conflict..
                         swap_conflict(slv.get_lra_theory());
                         return false;
@@ -139,11 +139,16 @@ namespace ratio
         return true;
     }
 
-    void executor::started_solving()
-    {
-    }
     void executor::solution_found()
     {
+        switch (slv.get_sat_core().value(xi))
+        {
+        case False: // the plan can't be executed anymore..
+            throw execution_exception();
+        case Undefined: // we enforce the xi variable..
+            slv.take_decision(xi);
+            break;
+        }
         build_timelines();
     }
     void executor::inconsistent_problem()
@@ -159,7 +164,6 @@ namespace ratio
         { // .. hence we force each atom to start after the current time..
             atom &atm = af->get_atom();
             atom_adaptation adapt = {slv.get_sat_core().new_conj({atm.get_sigma(), xi}), {}};
-            adaptations.emplace(&atm, adapt);
             switch (slv.get_sat_core().value(af->get_atom().get_sigma()))
             {
             case True: // the atom is already active..
@@ -210,6 +214,7 @@ namespace ratio
                 all_atoms.emplace(atm.get_sigma(), &atm);
                 break;
             }
+            adaptations.emplace(&atm, std::move(adapt));
         }
     }
 
