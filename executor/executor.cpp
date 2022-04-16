@@ -6,6 +6,7 @@
 #include "atom_flaw.h"
 #include <chrono>
 #include <sstream>
+#include <cassert>
 
 using namespace smt;
 
@@ -15,7 +16,7 @@ namespace ratio
 
     EXECUTOR_EXPORT void executor::tick()
     {
-        LOG("current time: " << current_time);
+        LOG("current time: " << to_string(current_time));
     manage_tick:
         while (!pulses.empty() && *pulses.cbegin() <= current_time)
         { // we have something to do..
@@ -143,6 +144,7 @@ namespace ratio
             slv.take_decision(xi);
             break;
         }
+        assert(slv.get_sat_core().value(xi) == True);
         build_timelines();
     }
     void executor::inconsistent_problem()
@@ -157,6 +159,7 @@ namespace ratio
         if (const atom_flaw *af = dynamic_cast<const atom_flaw *>(&f))
         { // .. hence we force each atom to start after the current time..
             atom &atm = af->get_atom();
+            // either the atom is not active, or the xi variable is false, or the execution bounds must be enforced..
             atom_adaptation adapt = {slv.get_sat_core().new_conj({atm.get_sigma(), xi}), {}};
             switch (slv.get_sat_core().value(af->get_atom().get_sigma()))
             {
@@ -167,11 +170,11 @@ namespace ratio
                     if (!slv.get_sat_core().new_clause({slv.geq(s_expr, slv.new_real(current_time))->l}))
                         throw execution_exception();
                     const auto c_s_bnds = slv.arith_bounds(s_expr);
-                    atom_adaptation::arith_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
+                    atom_adaptation::exec_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
                     adapt.bounds.emplace(&*s_expr, s_bnds);
                     arith_expr e_expr = atm.get(RATIO_END);
                     const auto c_e_bnds = slv.arith_bounds(e_expr);
-                    atom_adaptation::arith_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
+                    atom_adaptation::exec_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
                     adapt.bounds.emplace(&*e_expr, e_bnds);
                 }
                 else if (slv.is_impulse(atm))
@@ -180,7 +183,7 @@ namespace ratio
                     if (!slv.get_sat_core().new_clause({slv.geq(at_expr, slv.new_real(current_time))->l}))
                         throw execution_exception();
                     const auto c_bnds = slv.arith_bounds(at_expr);
-                    atom_adaptation::arith_bounds bnds = {c_bnds.first, c_bnds.second};
+                    atom_adaptation::exec_bounds bnds = {c_bnds.first, c_bnds.second};
                     adapt.bounds.emplace(&*at_expr, bnds);
                 }
                 all_atoms.emplace(atm.get_sigma(), &atm);
@@ -190,18 +193,18 @@ namespace ratio
                 { // we have an interval atom..
                     arith_expr s_expr = atm.get(RATIO_START);
                     const auto c_s_bnds = slv.arith_bounds(s_expr);
-                    atom_adaptation::arith_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
+                    atom_adaptation::exec_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
                     adapt.bounds.emplace(&*s_expr, s_bnds);
                     arith_expr e_expr = atm.get(RATIO_END);
                     const auto c_e_bnds = slv.arith_bounds(e_expr);
-                    atom_adaptation::arith_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
+                    atom_adaptation::exec_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
                     adapt.bounds.emplace(&*e_expr, e_bnds);
                 }
                 else if (slv.is_impulse(atm))
                 { // we have an impulsive atom..
                     arith_expr at_expr = atm.get(RATIO_AT);
                     const auto c_bnds = slv.arith_bounds(at_expr);
-                    atom_adaptation::arith_bounds bnds = {c_bnds.first, c_bnds.second};
+                    atom_adaptation::exec_bounds bnds = {c_bnds.first, c_bnds.second};
                     adapt.bounds.emplace(&*at_expr, bnds);
                 }
                 bind(af->get_atom().get_sigma());
@@ -259,7 +262,7 @@ namespace ratio
     void executor::freeze(atom &atm, arith_expr &xpr)
     {
         auto val = slv.arith_value(xpr);
-        atom_adaptation::arith_bounds bnds = {val, val};
+        atom_adaptation::exec_bounds bnds = {val, val};
         adaptations.at(&atm).bounds.emplace(&*xpr, bnds);
         if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(xpr->l), val, adaptations.at(&atm).sigma_xi))
         { // freezing the arithmetic expression caused a conflict..

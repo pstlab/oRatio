@@ -15,12 +15,12 @@ namespace ratio
 
   struct atom_adaptation
   {
-    struct arith_bounds
+    struct exec_bounds
     {
       smt::inf_rational lb, ub;
     };
     smt::lit sigma_xi;
-    std::unordered_map<arith_item *, arith_bounds> bounds;
+    std::unordered_map<arith_item *, exec_bounds> bounds;
   };
 
   class executor final : public core_listener, public solver_listener, public smt::theory
