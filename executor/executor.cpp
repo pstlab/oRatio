@@ -262,8 +262,8 @@ namespace ratio
     void executor::freeze(atom &atm, arith_expr &xpr)
     {
         auto val = slv.arith_value(xpr);
-        atom_adaptation::exec_bounds bnds = {val, val};
-        adaptations.at(&atm).bounds.emplace(&*xpr, bnds);
+        adaptations.at(&atm).bounds.at(&*xpr).lb = val;
+        adaptations.at(&atm).bounds.at(&*xpr).ub = val;
         if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(xpr->l), val, adaptations.at(&atm).sigma_xi))
         { // freezing the arithmetic expression caused a conflict..
             swap_conflict(slv.get_lra_theory());
