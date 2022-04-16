@@ -34,8 +34,6 @@ namespace ratio
     solver &get_solver() { return slv; }
     const smt::rational &get_current_time() const { return current_time; };
 
-    EXECUTOR_EXPORT atom &get_atom(const smt::var &sigma) const { return *all_atoms.at(sigma); }
-
     EXECUTOR_EXPORT void tick();
 
     EXECUTOR_EXPORT void dont_start_yet(const std::unordered_set<atom *> &atoms) { dont_start.insert(atoms.cbegin(), atoms.cend()); }
@@ -68,7 +66,7 @@ namespace ratio
     const smt::rational units_per_tick;                                     // the number of plan units for each tick..
     smt::lit xi;                                                            // the execution variable..
     std::unordered_map<const atom *, atom_adaptation> adaptations;          // for each atom, the numeric adaptations done during the executions (i.e., freezes and delays)..
-    std::unordered_map<smt::var, atom *> all_atoms;                         // all the interesting atoms indexed by their sigma variable..
+    std::unordered_map<smt::var, atom *> all_atoms;                         // all the interesting atoms indexed by their sigma_xi variable..
     std::unordered_set<const atom *> dont_start;                            // the starting atoms which are not yet ready to start..
     std::unordered_set<const atom *> dont_end;                              // the ending atoms which are not yet ready to end..
     std::map<smt::inf_rational, std::unordered_set<atom *>> s_atms, e_atms; // for each pulse, the atoms starting/ending at that pulse..

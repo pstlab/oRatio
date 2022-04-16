@@ -12,7 +12,11 @@ using namespace smt;
 
 namespace ratio
 {
-    EXECUTOR_EXPORT executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), units_per_tick(units_per_tick), xi(slv.get_sat_core().new_var()) { build_timelines(); }
+    EXECUTOR_EXPORT executor::executor(solver &slv, const rational &units_per_tick) : core_listener(slv), solver_listener(slv), smt::theory(slv.get_sat_core()), units_per_tick(units_per_tick), xi(slv.get_sat_core().new_var())
+    {
+        bind(variable(xi));
+        build_timelines();
+    }
 
     EXECUTOR_EXPORT void executor::tick()
     {
@@ -120,17 +124,16 @@ namespace ratio
 
     bool executor::propagate(const smt::lit &p) noexcept
     {
-        if (slv.get_sat_core().value(p) == True)
-        { // an atom has been activated..
-            auto &atm = get_atom(variable(p));
-            if (const auto &adapt_i = adaptations.find(&atm); adapt_i != adaptations.end())
-                for (const auto &bnds : adapt_i->second.bounds)
-                    if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.lb, p) || !slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.ub, p))
+        assert(p == xi);
+        // we propagate the active bounds..
+        for (const auto &adapt : adaptations)
+            if (slv.get_sat_core().value(adapt.second.sigma_xi) == True)
+                for (const auto &bnds : adapt.second.bounds)
+                    if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.lb, adapt.second.sigma_xi) || !slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.ub, adapt.second.sigma_xi))
                     { // setting the lower bound caused a conflict..
                         swap_conflict(slv.get_lra_theory());
                         return false;
                     }
-        }
         return true;
     }
 
@@ -144,7 +147,14 @@ namespace ratio
             slv.take_decision(xi);
             break;
         }
-        assert(slv.get_sat_core().value(xi) == True);
+        switch (slv.get_sat_core().value(xi))
+        {
+        case False: // the plan can't be executed anymore..
+            throw execution_exception();
+        case Undefined: // we attempt to solve the problem again..
+            slv.solve();
+            break;
+        }
         build_timelines();
     }
     void executor::inconsistent_problem()
@@ -161,55 +171,29 @@ namespace ratio
             atom &atm = af->get_atom();
             // either the atom is not active, or the xi variable is false, or the execution bounds must be enforced..
             atom_adaptation adapt = {slv.get_sat_core().new_conj({atm.get_sigma(), xi}), {}};
-            switch (slv.get_sat_core().value(af->get_atom().get_sigma()))
-            {
-            case True: // the atom is already active..
-                if (slv.is_interval(atm))
-                { // we have an interval atom..
-                    arith_expr s_expr = atm.get(RATIO_START);
-                    if (!slv.get_sat_core().new_clause({slv.geq(s_expr, slv.new_real(current_time))->l}))
-                        throw execution_exception();
-                    const auto c_s_bnds = slv.arith_bounds(s_expr);
-                    atom_adaptation::exec_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
-                    adapt.bounds.emplace(&*s_expr, s_bnds);
-                    arith_expr e_expr = atm.get(RATIO_END);
-                    const auto c_e_bnds = slv.arith_bounds(e_expr);
-                    atom_adaptation::exec_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
-                    adapt.bounds.emplace(&*e_expr, e_bnds);
-                }
-                else if (slv.is_impulse(atm))
-                { // we have an impulsive atom..
-                    arith_expr at_expr = atm.get(RATIO_AT);
-                    if (!slv.get_sat_core().new_clause({slv.geq(at_expr, slv.new_real(current_time))->l}))
-                        throw execution_exception();
-                    const auto c_bnds = slv.arith_bounds(at_expr);
-                    atom_adaptation::exec_bounds bnds = {c_bnds.first, c_bnds.second};
-                    adapt.bounds.emplace(&*at_expr, bnds);
-                }
-                all_atoms.emplace(atm.get_sigma(), &atm);
-                break;
-            case Undefined:
-                if (slv.is_interval(atm))
-                { // we have an interval atom..
-                    arith_expr s_expr = atm.get(RATIO_START);
-                    const auto c_s_bnds = slv.arith_bounds(s_expr);
-                    atom_adaptation::exec_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
-                    adapt.bounds.emplace(&*s_expr, s_bnds);
-                    arith_expr e_expr = atm.get(RATIO_END);
-                    const auto c_e_bnds = slv.arith_bounds(e_expr);
-                    atom_adaptation::exec_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
-                    adapt.bounds.emplace(&*e_expr, e_bnds);
-                }
-                else if (slv.is_impulse(atm))
-                { // we have an impulsive atom..
-                    arith_expr at_expr = atm.get(RATIO_AT);
-                    const auto c_bnds = slv.arith_bounds(at_expr);
-                    atom_adaptation::exec_bounds bnds = {c_bnds.first, c_bnds.second};
-                    adapt.bounds.emplace(&*at_expr, bnds);
-                }
-                bind(af->get_atom().get_sigma());
-                all_atoms.emplace(atm.get_sigma(), &atm);
-                break;
+            all_atoms.emplace(variable(adapt.sigma_xi), &atm);
+
+            if (slv.is_interval(atm))
+            { // we have an interval atom..
+                arith_expr s_expr = atm.get(RATIO_START);
+                if (slv.get_sat_core().value(af->get_atom().get_sigma()) == True && !slv.get_sat_core().new_clause({slv.geq(s_expr, slv.new_real(current_time))->l}))
+                    throw execution_exception();
+                const auto c_s_bnds = slv.arith_bounds(s_expr);
+                atom_adaptation::exec_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
+                adapt.bounds.emplace(&*s_expr, s_bnds);
+                arith_expr e_expr = atm.get(RATIO_END);
+                const auto c_e_bnds = slv.arith_bounds(e_expr);
+                atom_adaptation::exec_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
+                adapt.bounds.emplace(&*e_expr, e_bnds);
+            }
+            else if (slv.is_impulse(atm))
+            { // we have an impulsive atom..
+                arith_expr at_expr = atm.get(RATIO_AT);
+                if (slv.get_sat_core().value(af->get_atom().get_sigma()) == True && !slv.get_sat_core().new_clause({slv.geq(at_expr, slv.new_real(current_time))->l}))
+                    throw execution_exception();
+                const auto c_bnds = slv.arith_bounds(at_expr);
+                atom_adaptation::exec_bounds bnds = {c_bnds.first, c_bnds.second};
+                adapt.bounds.emplace(&*at_expr, bnds);
             }
             adaptations.emplace(&atm, std::move(adapt));
         }
