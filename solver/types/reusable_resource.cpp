@@ -38,10 +38,10 @@ namespace ratio
                 {
                     for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
                         if (to_check.count(static_cast<const item *>(val)))
-                            rr_instances[static_cast<item *>(val)].push_back(atm);
+                            rr_instances[static_cast<item *>(val)].emplace_back(atm);
                 }
                 else if (to_check.count(static_cast<item *>(&*c_scope)))
-                    rr_instances[static_cast<item *>(&*c_scope)].push_back(atm);
+                    rr_instances[static_cast<item *>(&*c_scope)].emplace_back(atm);
             }
 
         // we detect inconsistencies for each of the instances..
@@ -105,7 +105,7 @@ namespace ratio
                         // we increase the size of the current mcs..
                         while (mcs_usage <= c_capacity && mcs_end != inc_atoms.cend())
                         {
-                            c_mcs.push_back(*mcs_end);
+                            c_mcs.emplace_back(*mcs_end);
                             arith_expr amount = (*mcs_end)->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
                             mcs_usage += get_core().arith_value(amount);
                             ++mcs_end;
@@ -140,7 +140,7 @@ namespace ratio
                                             const auto work = (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a1_start).get_rational()) * (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a1_start).get_rational());
                                             const auto commit = work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator());
 #endif
-                                            choices.push_back({a0_a1_it->second, commit});
+                                            choices.emplace_back(a0_a1_it->second, commit);
                                         }
 
                                 if (auto a1_it = leqs.find(as[1]); a1_it != leqs.cend())
@@ -154,7 +154,7 @@ namespace ratio
                                             const auto work = (get_solver().arith_value(a0_end).get_rational() - get_solver().arith_value(a0_start).get_rational()) * (get_solver().arith_value(a1_end).get_rational() - get_solver().arith_value(a0_start).get_rational());
                                             const auto commit = work == rational::ZERO ? -std::numeric_limits<double>::max() : 1l - 1l / (static_cast<double>(work.numerator()) / work.denominator());
 #endif
-                                            choices.push_back({a1_a0_it->second, commit});
+                                            choices.emplace_back(a1_a0_it->second, commit);
                                         }
 
                                 expr a0_tau = as[0]->get(TAU);
@@ -167,22 +167,22 @@ namespace ratio
                                     auto a1_vals = get_solver().enum_value(a1_tau_itm);
                                     for (const auto &plc : plcs.at({as[0], as[1]}))
                                         if (get_solver().get_sat_core().value(plc.first) == Undefined)
-                                            choices.push_back({plc.first, 1l - 2l / static_cast<double>(a0_vals.size() + a1_vals.size())});
+                                            choices.emplace_back(plc.first, 1l - 2l / static_cast<double>(a0_vals.size() + a1_vals.size()));
                                 }
                                 else if (a0_tau_itm)
                                 { // only 'a1_tau' is a singleton variable..
                                     if (auto a0_vals = get_solver().enum_value(a0_tau_itm); a0_vals.count(&*a1_tau))
                                         if (get_solver().get_sat_core().value(get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau)) == Undefined)
-                                            choices.push_back({!get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau), 1l - 1l / static_cast<double>(a0_vals.size())});
+                                            choices.emplace_back(!get_solver().get_ov_theory().allows(static_cast<var_item *>(a0_tau_itm)->ev, *a1_tau), 1l - 1l / static_cast<double>(a0_vals.size()));
                                 }
                                 else if (a1_tau_itm)
                                 { // only 'a0_tau' is a singleton variable..
                                     if (auto a1_vals = get_solver().enum_value(a1_tau_itm); a1_vals.count(&*a0_tau))
                                         if (get_solver().get_sat_core().value(get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau)) == Undefined)
-                                            choices.push_back({!get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau), 1l - 1l / static_cast<double>(a1_vals.size())});
+                                            choices.emplace_back(!get_solver().get_ov_theory().allows(static_cast<var_item *>(a1_tau_itm)->ev, *a0_tau), 1l - 1l / static_cast<double>(a1_vals.size()));
                                 }
                             }
-                            incs.push_back(choices);
+                            incs.emplace_back(choices);
 
                             // we decrease the size of the mcs..
                             arith_expr amount = c_mcs.front()->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
@@ -225,7 +225,7 @@ namespace ratio
             store_variables(atm, *c_atm.first);
 
         // we store, for the atom, its atom listener..
-        atoms.push_back({&atm, new rr_atom_listener(*this, atm)});
+        atoms.emplace_back(&atm, new rr_atom_listener(*this, atm));
 
         // we filter out those atoms which are not strictly active..
         if (get_core().get_sat_core().value(atm.get_sigma()) == True)
@@ -273,7 +273,7 @@ namespace ratio
 #endif
                         found = true;
                     }
-                    plcs[{&atm0, &atm1}].push_back({get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_tau_itm->ev, *v0), !get_solver().get_ov_theory().allows(a1_tau_itm->ev, *v0)}), static_cast<const item *>(v0)});
+                    plcs[{&atm0, &atm1}].emplace_back(get_solver().get_sat_core().new_conj({get_solver().get_ov_theory().allows(a0_tau_itm->ev, *v0), !get_solver().get_ov_theory().allows(a1_tau_itm->ev, *v0)}), static_cast<const item *>(v0));
                 }
         }
         else if (a0_tau_itm)
@@ -418,10 +418,10 @@ namespace ratio
                 if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
                 {
                     for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
-                        rr_instances[static_cast<const item *>(val)].push_back(atm);
+                        rr_instances[static_cast<const item *>(val)].emplace_back(atm);
                 }
                 else
-                    rr_instances[static_cast<item *>(&*c_scope)].push_back(atm);
+                    rr_instances[static_cast<item *>(&*c_scope)].emplace_back(atm);
             }
 
         for (const auto &[rr, atms] : rr_instances)
@@ -481,13 +481,13 @@ namespace ratio
                 {
                     arith_expr amount = atm->get(REUSABLE_RESOURCE_USE_AMOUNT_NAME);
                     c_usage += get_core().arith_value(amount);
-                    j_atms.push_back(new long_val(atm->get_id()));
+                    j_atms.emplace_back(new long_val(atm->get_id()));
                 }
                 j_val->set("atoms", new array_val(j_atms));
 
                 j_val->set("usage", to_json(c_usage));
 
-                j_vals.push_back(j_val);
+                j_vals.emplace_back(j_val);
 
                 if (const auto at_start_p = starting_atoms.find(*p); at_start_p != starting_atoms.cend())
                     overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
@@ -497,7 +497,7 @@ namespace ratio
             }
             tl->set("values", new array_val(j_vals));
 
-            tls.push_back(tl);
+            tls.emplace_back(tl);
         }
 
         return new array_val(tls);

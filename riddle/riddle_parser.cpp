@@ -13,7 +13,7 @@ namespace riddle
         while (pos >= tks.size())
         {
             token *c_tk = lex.next();
-            tks.push_back(c_tk);
+            tks.emplace_back(c_tk);
         }
         return tks[pos++];
     }
@@ -49,19 +49,19 @@ namespace riddle
             switch (tk->sym)
             {
             case TYPEDEF_ID:
-                ts.push_back(_typedef_declaration());
+                ts.emplace_back(_typedef_declaration());
                 break;
             case ENUM_ID:
-                ts.push_back(_enum_declaration());
+                ts.emplace_back(_enum_declaration());
                 break;
             case CLASS_ID:
-                ts.push_back(_class_declaration());
+                ts.emplace_back(_class_declaration());
                 break;
             case PREDICATE_ID:
-                ps.push_back(_predicate_declaration());
+                ps.emplace_back(_predicate_declaration());
                 break;
             case VOID_ID:
-                ms.push_back(_method_declaration());
+                ms.emplace_back(_method_declaration());
                 break;
             case BOOL_ID:
             case INT_ID:
@@ -75,7 +75,7 @@ namespace riddle
             case BoolLiteral_ID:
             case IntLiteral_ID:
             case RealLiteral_ID:
-                stmnts.push_back(_statement());
+                stmnts.emplace_back(_statement());
                 break;
             case ID_ID:
             {
@@ -89,12 +89,12 @@ namespace riddle
                 if (match(ID_ID) && match(LPAREN_ID))
                 {
                     backtrack(c_pos);
-                    ms.push_back(_method_declaration());
+                    ms.emplace_back(_method_declaration());
                 }
                 else
                 {
                     backtrack(c_pos);
-                    stmnts.push_back(_statement());
+                    stmnts.emplace_back(_statement());
                 }
                 break;
             }
@@ -168,13 +168,13 @@ namespace riddle
                 tk = next();
                 if (!match(StringLiteral_ID))
                     error("expected string literal..");
-                es.push_back(*static_cast<string_token *>(tks[pos - 2]));
+                es.emplace_back(*static_cast<string_token *>(tks[pos - 2]));
 
                 while (match(COMMA_ID))
                 {
                     if (!match(StringLiteral_ID))
                         error("expected string literal..");
-                    es.push_back(*static_cast<string_token *>(tks[pos - 2]));
+                    es.emplace_back(*static_cast<string_token *>(tks[pos - 2]));
                 }
 
                 if (!match(RBRACE_ID))
@@ -183,15 +183,15 @@ namespace riddle
             case ID_ID:
             {
                 std::vector<id_token> ids;
-                ids.push_back(*static_cast<id_token *>(tk));
+                ids.emplace_back(*static_cast<id_token *>(tk));
                 tk = next();
                 while (match(DOT_ID))
                 {
                     if (!match(ID_ID))
                         error("expected identifier..");
-                    ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                    ids.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
                 }
-                trs.push_back(ids);
+                trs.emplace_back(ids);
                 break;
             }
             default:
@@ -231,9 +231,9 @@ namespace riddle
                 {
                     if (!match(ID_ID))
                         error("expected identifier..");
-                    ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                    ids.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
                 } while (match(DOT_ID));
-                bcs.push_back(ids);
+                bcs.emplace_back(ids);
             } while (match(COMMA_ID));
         }
 
@@ -245,19 +245,19 @@ namespace riddle
             switch (tk->sym)
             {
             case TYPEDEF_ID:
-                ts.push_back(_typedef_declaration());
+                ts.emplace_back(_typedef_declaration());
                 break;
             case ENUM_ID:
-                ts.push_back(_enum_declaration());
+                ts.emplace_back(_enum_declaration());
                 break;
             case CLASS_ID:
-                ts.push_back(_class_declaration());
+                ts.emplace_back(_class_declaration());
                 break;
             case PREDICATE_ID:
-                ps.push_back(_predicate_declaration());
+                ps.emplace_back(_predicate_declaration());
                 break;
             case VOID_ID:
-                ms.push_back(_method_declaration());
+                ms.emplace_back(_method_declaration());
                 break;
             case BOOL_ID:
             case INT_ID:
@@ -273,13 +273,13 @@ namespace riddle
                 {
                 case LPAREN_ID:
                     backtrack(c_pos);
-                    ms.push_back(_method_declaration());
+                    ms.emplace_back(_method_declaration());
                     break;
                 case EQ_ID:
                 case COMMA_ID:
                 case SEMICOLON_ID:
                     backtrack(c_pos);
-                    fs.push_back(_field_declaration());
+                    fs.emplace_back(_field_declaration());
                     break;
                 default:
                     error("expected either '(' or '=' or ';'..");
@@ -294,7 +294,7 @@ namespace riddle
                 {
                 case LPAREN_ID:
                     backtrack(c_pos);
-                    cs.push_back(_constructor_declaration());
+                    cs.emplace_back(_constructor_declaration());
                     break;
                 case DOT_ID:
                     while (match(DOT_ID))
@@ -306,12 +306,12 @@ namespace riddle
                     {
                     case LPAREN_ID:
                         backtrack(c_pos);
-                        ms.push_back(_method_declaration());
+                        ms.emplace_back(_method_declaration());
                         break;
                     case EQ_ID:
                     case SEMICOLON_ID:
                         backtrack(c_pos);
-                        fs.push_back(_field_declaration());
+                        fs.emplace_back(_field_declaration());
                         break;
                     default:
                         error("expected either '(' or '=' or ';'..");
@@ -323,12 +323,12 @@ namespace riddle
                     {
                     case LPAREN_ID:
                         backtrack(c_pos);
-                        ms.push_back(_method_declaration());
+                        ms.emplace_back(_method_declaration());
                         break;
                     case EQ_ID:
                     case SEMICOLON_ID:
                         backtrack(c_pos);
-                        fs.push_back(_field_declaration());
+                        fs.emplace_back(_field_declaration());
                         break;
                     default:
                         error("expected either '(' or '=' or ';'..");
@@ -355,33 +355,33 @@ namespace riddle
         switch (tk->sym)
         {
         case BOOL_ID:
-            tp.push_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
+            tp.emplace_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
             tk = next();
             break;
         case INT_ID:
-            tp.push_back(id_token(0, 0, 0, 0, INT_KEYWORD));
+            tp.emplace_back(id_token(0, 0, 0, 0, INT_KEYWORD));
             tk = next();
             break;
         case REAL_ID:
-            tp.push_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
+            tp.emplace_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
             tk = next();
             break;
         case TP_ID:
-            tp.push_back(id_token(0, 0, 0, 0, TP_KEYWORD));
+            tp.emplace_back(id_token(0, 0, 0, 0, TP_KEYWORD));
             tk = next();
             break;
         case STRING_ID:
-            tp.push_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
+            tp.emplace_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
             tk = next();
             break;
         case ID_ID:
-            tp.push_back(*static_cast<id_token *>(tk));
+            tp.emplace_back(*static_cast<id_token *>(tk));
             tk = next();
             while (match(DOT_ID))
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                tp.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                tp.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
             }
             break;
         default:
@@ -393,9 +393,9 @@ namespace riddle
         id_token n = *static_cast<id_token *>(tks[pos - 2]);
 
         if (match(EQ_ID))
-            ds.push_back(new_variable_declaration(n, _expression()));
+            ds.emplace_back(new_variable_declaration(n, _expression()));
         else
-            ds.push_back(new_variable_declaration(n));
+            ds.emplace_back(new_variable_declaration(n));
 
         while (match(COMMA_ID))
         {
@@ -404,9 +404,9 @@ namespace riddle
             id_token c_n = *static_cast<id_token *>(tks[pos - 2]);
 
             if (match(EQ_ID))
-                ds.push_back(new_variable_declaration(c_n, _expression()));
+                ds.emplace_back(new_variable_declaration(c_n, _expression()));
             else
-                ds.push_back(new_variable_declaration(c_n));
+                ds.emplace_back(new_variable_declaration(c_n));
         }
 
         if (!match(SEMICOLON_ID))
@@ -427,7 +427,7 @@ namespace riddle
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                rt.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                rt.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
             } while (match(DOT_ID));
         }
 
@@ -446,33 +446,33 @@ namespace riddle
                 switch (tk->sym)
                 {
                 case BOOL_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
                     tk = next();
                     break;
                 case INT_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, INT_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, INT_KEYWORD));
                     tk = next();
                     break;
                 case REAL_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
                     tk = next();
                     break;
                 case TP_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, TP_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, TP_KEYWORD));
                     tk = next();
                     break;
                 case STRING_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
                     tk = next();
                     break;
                 case ID_ID:
-                    p_ids.push_back(*static_cast<id_token *>(tk));
+                    p_ids.emplace_back(*static_cast<id_token *>(tk));
                     tk = next();
                     while (match(DOT_ID))
                     {
                         if (!match(ID_ID))
                             error("expected identifier..");
-                        p_ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                        p_ids.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
                     }
                     break;
                 default:
@@ -481,7 +481,7 @@ namespace riddle
                 if (!match(ID_ID))
                     error("expected identifier..");
                 id_token pn = *static_cast<id_token *>(tks[pos - 2]);
-                pars.push_back({p_ids, pn});
+                pars.emplace_back(p_ids, pn);
             } while (match(COMMA_ID));
 
             if (!match(RPAREN_ID))
@@ -492,7 +492,7 @@ namespace riddle
             error("expected '{'..");
 
         while (!match(RBRACE_ID))
-            stmnts.push_back(_statement());
+            stmnts.emplace_back(_statement());
 
         return new_method_declaration(rt, n, pars, stmnts);
     }
@@ -517,33 +517,33 @@ namespace riddle
                 switch (tk->sym)
                 {
                 case ID_ID:
-                    p_ids.push_back(*static_cast<id_token *>(tk));
+                    p_ids.emplace_back(*static_cast<id_token *>(tk));
                     tk = next();
                     while (match(DOT_ID))
                     {
                         if (!match(ID_ID))
                             error("expected identifier..");
-                        p_ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                        p_ids.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
                     }
                     break;
                 case BOOL_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
                     tk = next();
                     break;
                 case INT_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, INT_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, INT_KEYWORD));
                     tk = next();
                     break;
                 case REAL_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
                     tk = next();
                     break;
                 case TP_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, TP_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, TP_KEYWORD));
                     tk = next();
                     break;
                 case STRING_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
                     tk = next();
                     break;
                 default:
@@ -552,7 +552,7 @@ namespace riddle
                 if (!match(ID_ID))
                     error("expected identifier..");
                 id_token pn = *static_cast<id_token *>(tks[pos - 2]);
-                pars.push_back({p_ids, pn});
+                pars.emplace_back(p_ids, pn);
             } while (match(COMMA_ID));
 
             if (!match(RPAREN_ID))
@@ -575,13 +575,13 @@ namespace riddle
                 {
                     do
                     {
-                        xprs.push_back(_expression());
+                        xprs.emplace_back(_expression());
                     } while (match(COMMA_ID));
 
                     if (!match(RPAREN_ID))
                         error("expected ')'..");
                 }
-                il.push_back({pn, xprs});
+                il.emplace_back(pn, xprs);
             } while (match(COMMA_ID));
         }
 
@@ -589,7 +589,7 @@ namespace riddle
             error("expected '{'..");
 
         while (!match(RBRACE_ID))
-            stmnts.push_back(_statement());
+            stmnts.emplace_back(_statement());
 
         return new_constructor_declaration(pars, il, stmnts);
     }
@@ -618,33 +618,33 @@ namespace riddle
                 switch (tk->sym)
                 {
                 case BOOL_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
                     tk = next();
                     break;
                 case INT_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, INT_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, INT_KEYWORD));
                     tk = next();
                     break;
                 case REAL_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
                     tk = next();
                     break;
                 case TP_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, TP_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, TP_KEYWORD));
                     tk = next();
                     break;
                 case STRING_ID:
-                    p_ids.push_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
+                    p_ids.emplace_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
                     tk = next();
                     break;
                 case ID_ID:
-                    p_ids.push_back(*static_cast<id_token *>(tk));
+                    p_ids.emplace_back(*static_cast<id_token *>(tk));
                     tk = next();
                     while (match(DOT_ID))
                     {
                         if (!match(ID_ID))
                             error("expected identifier..");
-                        p_ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                        p_ids.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
                     }
                     break;
                 default:
@@ -653,7 +653,7 @@ namespace riddle
                 if (!match(ID_ID))
                     error("expected identifier..");
                 id_token pn = *static_cast<id_token *>(tks[pos - 2]);
-                pars.push_back({p_ids, pn});
+                pars.emplace_back(p_ids, pn);
             } while (match(COMMA_ID));
 
             if (!match(RPAREN_ID))
@@ -669,9 +669,9 @@ namespace riddle
                 {
                     if (!match(ID_ID))
                         error("expected identifier..");
-                    p_ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                    p_ids.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
                 } while (match(DOT_ID));
-                pl.push_back(p_ids);
+                pl.emplace_back(p_ids);
             } while (match(COMMA_ID));
         }
 
@@ -679,7 +679,7 @@ namespace riddle
             error("expected '{'..");
 
         while (!match(RBRACE_ID))
-            stmnts.push_back(_statement());
+            stmnts.emplace_back(_statement());
 
         return new_predicate_declaration(n, pars, pl, stmnts);
     }
@@ -698,19 +698,19 @@ namespace riddle
             switch (tk->sym)
             {
             case BOOL_ID:
-                ft.push_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
+                ft.emplace_back(id_token(0, 0, 0, 0, BOOL_KEYWORD));
                 break;
             case INT_ID:
-                ft.push_back(id_token(0, 0, 0, 0, INT_KEYWORD));
+                ft.emplace_back(id_token(0, 0, 0, 0, INT_KEYWORD));
                 break;
             case REAL_ID:
-                ft.push_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
+                ft.emplace_back(id_token(0, 0, 0, 0, REAL_KEYWORD));
                 break;
             case TP_ID:
-                ft.push_back(id_token(0, 0, 0, 0, TP_KEYWORD));
+                ft.emplace_back(id_token(0, 0, 0, 0, TP_KEYWORD));
                 break;
             case STRING_ID:
-                ft.push_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
+                ft.emplace_back(id_token(0, 0, 0, 0, STRING_KEYWORD));
                 break;
             default:
                 error("expected either 'bool' or 'int' or 'real' or 'string'..");
@@ -724,15 +724,15 @@ namespace riddle
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                ns.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                ns.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
 
                 if (tk->sym == EQ_ID)
                 {
                     tk = next();
-                    es.push_back(_expression());
+                    es.emplace_back(_expression());
                 }
                 else
-                    es.push_back(nullptr);
+                    es.emplace_back(nullptr);
             } while (match(COMMA_ID));
 
             if (!match(SEMICOLON_ID))
@@ -744,13 +744,13 @@ namespace riddle
         {
             size_t c_pos = pos;
             std::vector<id_token> is;
-            is.push_back(*static_cast<id_token *>(tk));
+            is.emplace_back(*static_cast<id_token *>(tk));
             tk = next();
             while (match(DOT_ID))
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                is.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                is.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
             }
 
             switch (tk->sym)
@@ -762,15 +762,15 @@ namespace riddle
 
                 do
                 {
-                    ns.push_back(*static_cast<id_token *>(tk));
+                    ns.emplace_back(*static_cast<id_token *>(tk));
                     tk = next();
                     if (tk->sym == EQ_ID)
                     {
                         tk = next();
-                        es.push_back(_expression());
+                        es.emplace_back(_expression());
                     }
                     else
-                        es.push_back(nullptr);
+                        es.emplace_back(nullptr);
                 } while (match(COMMA_ID));
 
                 if (!match(SEMICOLON_ID))
@@ -821,7 +821,7 @@ namespace riddle
             std::vector<const statement *> stmnts;
             do
             {
-                stmnts.push_back(_statement());
+                stmnts.emplace_back(_statement());
             } while (!match(RBRACE_ID));
             switch (tk->sym)
             {
@@ -836,7 +836,7 @@ namespace riddle
                     if (!match(RBRACKET_ID))
                         error("expected ']'..");
                 }
-                conjs.push_back({stmnts, e});
+                conjs.emplace_back(stmnts, e);
                 while (match(OR_ID))
                 {
                     stmnts.clear();
@@ -844,14 +844,14 @@ namespace riddle
                     if (!match(LBRACE_ID))
                         error("expected '{'..");
                     while (!match(RBRACE_ID))
-                        stmnts.push_back(_statement());
+                        stmnts.emplace_back(_statement());
                     if (match(LBRACKET_ID))
                     {
                         e = _expression();
                         if (!match(RBRACKET_ID))
                             error("expected ']'..");
                     }
-                    conjs.push_back({stmnts, e});
+                    conjs.emplace_back(stmnts, e);
                 }
                 return new_disjunction_statement(conjs);
             }
@@ -881,7 +881,7 @@ namespace riddle
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                scp.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                scp.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
             } while (match(DOT_ID));
 
             id_token pn = scp.back();
@@ -902,7 +902,7 @@ namespace riddle
                         error("expected ':'..");
 
                     expression *xpr = _expression();
-                    assns.push_back({assgn_name, xpr});
+                    assns.emplace_back(assgn_name, xpr);
                 } while (match(COMMA_ID));
 
                 if (!match(RPAREN_ID))
@@ -970,7 +970,7 @@ namespace riddle
                 {
                     if (!match(ID_ID))
                         error("expected identifier..");
-                    ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                    ids.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
                 } while (match(DOT_ID));
 
                 if (!match(RPAREN_ID))
@@ -1008,7 +1008,7 @@ namespace riddle
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                ids.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                ids.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
             } while (match(DOT_ID));
 
             std::vector<const expression *> xprs;
@@ -1019,7 +1019,7 @@ namespace riddle
             {
                 do
                 {
-                    xprs.push_back(_expression());
+                    xprs.emplace_back(_expression());
                 } while (match(COMMA_ID));
 
                 if (!match(RPAREN_ID))
@@ -1032,13 +1032,13 @@ namespace riddle
         case ID_ID:
         {
             std::vector<id_token> is;
-            is.push_back(*static_cast<id_token *>(tk));
+            is.emplace_back(*static_cast<id_token *>(tk));
             tk = next();
             while (match(DOT_ID))
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
-                is.push_back(*static_cast<id_token *>(tks[pos - 2]));
+                is.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
             }
             if (match(LPAREN_ID))
             {
@@ -1053,7 +1053,7 @@ namespace riddle
                 {
                     do
                     {
-                        xprs.push_back(_expression());
+                        xprs.emplace_back(_expression());
                     } while (match(COMMA_ID));
 
                     if (!match(RPAREN_ID))
@@ -1137,10 +1137,10 @@ namespace riddle
             {
                 assert(1 >= pr);
                 std::vector<const expression *> xprs;
-                xprs.push_back(e);
+                xprs.emplace_back(e);
 
                 while (match(BAR_ID))
-                    xprs.push_back(_expression(2));
+                    xprs.emplace_back(_expression(2));
 
                 e = new_disjunction_expression(xprs);
                 break;
@@ -1149,10 +1149,10 @@ namespace riddle
             {
                 assert(1 >= pr);
                 std::vector<const expression *> xprs;
-                xprs.push_back(e);
+                xprs.emplace_back(e);
 
                 while (match(AMP_ID))
-                    xprs.push_back(_expression(2));
+                    xprs.emplace_back(_expression(2));
 
                 e = new_conjunction_expression(xprs);
                 break;
@@ -1161,10 +1161,10 @@ namespace riddle
             {
                 assert(1 >= pr);
                 std::vector<const expression *> xprs;
-                xprs.push_back(e);
+                xprs.emplace_back(e);
 
                 while (match(CARET_ID))
-                    xprs.push_back(_expression(2));
+                    xprs.emplace_back(_expression(2));
 
                 e = new_exct_one_expression(xprs);
                 break;
@@ -1173,10 +1173,10 @@ namespace riddle
             {
                 assert(2 >= pr);
                 std::vector<const expression *> xprs;
-                xprs.push_back(e);
+                xprs.emplace_back(e);
 
                 while (match(PLUS_ID))
-                    xprs.push_back(_expression(3));
+                    xprs.emplace_back(_expression(3));
 
                 e = new_addition_expression(xprs);
                 break;
@@ -1185,10 +1185,10 @@ namespace riddle
             {
                 assert(2 >= pr);
                 std::vector<const expression *> xprs;
-                xprs.push_back(e);
+                xprs.emplace_back(e);
 
                 while (match(MINUS_ID))
-                    xprs.push_back(_expression(3));
+                    xprs.emplace_back(_expression(3));
 
                 e = new_subtraction_expression(xprs);
                 break;
@@ -1197,10 +1197,10 @@ namespace riddle
             {
                 assert(3 >= pr);
                 std::vector<const expression *> xprs;
-                xprs.push_back(e);
+                xprs.emplace_back(e);
 
                 while (match(STAR_ID))
-                    xprs.push_back(_expression(4));
+                    xprs.emplace_back(_expression(4));
 
                 e = new_multiplication_expression(xprs);
                 break;
@@ -1209,10 +1209,10 @@ namespace riddle
             {
                 assert(3 >= pr);
                 std::vector<const expression *> xprs;
-                xprs.push_back(e);
+                xprs.emplace_back(e);
 
                 while (match(SLASH_ID))
-                    xprs.push_back(_expression(4));
+                    xprs.emplace_back(_expression(4));
 
                 e = new_division_expression(xprs);
                 break;

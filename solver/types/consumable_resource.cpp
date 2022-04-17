@@ -58,7 +58,7 @@ namespace ratio
         // since flaws might require planning, we can't store the variables for on-line flaw resolution..
 
         // we store, for the atom, its atom listener..
-        atoms.push_back({&atm, new cr_atom_listener(*this, atm)});
+        atoms.emplace_back(&atm, new cr_atom_listener(*this, atm));
 
         // we filter out those atoms which are not strictly active..
         if (atm.get_core().get_sat_core().value(atm.get_sigma()) == True)
@@ -106,10 +106,10 @@ namespace ratio
                 if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
                 {
                     for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
-                        cr_instances[static_cast<const item *>(val)].push_back(atm);
+                        cr_instances[static_cast<const item *>(val)].emplace_back(atm);
                 }
                 else
-                    cr_instances[static_cast<item *>(&*c_scope)].push_back(atm);
+                    cr_instances[static_cast<item *>(&*c_scope)].emplace_back(atm);
             }
 
         for (const auto &[cr, atms] : cr_instances)
@@ -183,7 +183,7 @@ namespace ratio
                     c_coeff /= (get_core().arith_value(e_expr) - get_core().arith_value(s_expr)).get_rational();
                     c_angular_coefficient += c_coeff;
 
-                    j_atms.push_back(new long_val(atm->get_id()));
+                    j_atms.emplace_back(new long_val(atm->get_id()));
                 }
                 j_val->set("atoms", new array_val(j_atms));
 
@@ -191,7 +191,7 @@ namespace ratio
                 c_val += (c_angular_coefficient *= (*p - *std::prev(p)).get_rational());
                 j_val->set("end", to_json(c_val));
 
-                j_vals.push_back(j_val);
+                j_vals.emplace_back(j_val);
 
                 if (const auto at_start_p = starting_atoms.find(*p); at_start_p != starting_atoms.cend())
                     overlapping_atoms.insert(at_start_p->second.cbegin(), at_start_p->second.cend());
@@ -201,7 +201,7 @@ namespace ratio
             }
             tl->set("values", new array_val(j_vals));
 
-            tls.push_back(tl);
+            tls.emplace_back(tl);
         }
 
         return new array_val(tls);

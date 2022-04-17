@@ -23,7 +23,7 @@ namespace smt
             dist_constr.emplace(fr_to, var_dists.at(variable(d->b)));
         for (const auto &[fr_to, ds] : orig.dist_constrs)
             for (const auto &d : ds)
-                dist_constrs[fr_to].push_back(var_dists.at(variable(d->b)));
+                dist_constrs[fr_to].emplace_back(var_dists.at(variable(d->b)));
     }
     SMT_EXPORT rdl_theory::~rdl_theory()
     {
@@ -52,7 +52,7 @@ namespace smt
             bind(ctr);
             const auto dst_cnst = new rdl_distance(ctr_lit, from, to, dist);
             var_dists.emplace(ctr, dst_cnst);
-            dist_constrs[{from, to}].push_back(dst_cnst);
+            dist_constrs[{from, to}].emplace_back(dst_cnst);
             return ctr_lit;
         }
     }
@@ -386,13 +386,13 @@ namespace smt
                     if (const auto &c_d = dist_constr.find({_preds[dist->to][c_to], c_to}); c_d != dist_constr.cend())
                     {
                         if (sat->value(c_d->second->b) == True)
-                            cnfl.push_back(!c_d->second->b);
+                            cnfl.emplace_back(!c_d->second->b);
                         else if (sat->value(c_d->second->b) == False)
-                            cnfl.push_back(c_d->second->b);
+                            cnfl.emplace_back(c_d->second->b);
                     }
                     c_to = _preds[dist->to][c_to];
                 }
-                cnfl.push_back(!p);
+                cnfl.emplace_back(!p);
                 return false;
             }
             else if (_dists[dist->from][dist->to] > dist->dist)
@@ -419,13 +419,13 @@ namespace smt
                     if (const auto &c_d = dist_constr.find({_preds[dist->from][c_from], c_from}); c_d != dist_constr.cend())
                     {
                         if (sat->value(c_d->second->b) == True)
-                            cnfl.push_back(!c_d->second->b);
+                            cnfl.emplace_back(!c_d->second->b);
                         else if (sat->value(c_d->second->b) == False)
-                            cnfl.push_back(c_d->second->b);
+                            cnfl.emplace_back(c_d->second->b);
                     }
                     c_from = _preds[dist->from][c_from];
                 }
-                cnfl.push_back(!p);
+                cnfl.emplace_back(!p);
                 return false;
             }
             else if (_dists[dist->to][dist->from] >= -dist->dist)
@@ -458,12 +458,11 @@ namespace smt
                                    return _dists[dist.second->to][dist.second->from] < -dist.second->dist;
                                default: // the constraint is not asserted..
                                    return true;
-                               }
-                           }));
+                               } }));
         return true;
     }
 
-    void rdl_theory::push() noexcept { layers.push_back(layer()); }
+    void rdl_theory::push() noexcept { layers.emplace_back(layer()); }
 
     void rdl_theory::pop() noexcept
     {
@@ -487,8 +486,8 @@ namespace smt
         std::vector<var> set_i;
         std::vector<var> set_j;
         std::vector<std::pair<var, var>> c_updates;
-        c_updates.push_back({from, to});
-        c_updates.push_back({to, from});
+        c_updates.emplace_back(from, to);
+        c_updates.emplace_back(to, from);
 
         // we start with an O(n) loop..
         for (size_t u = 0; u < size(); ++u)
@@ -497,17 +496,17 @@ namespace smt
             { // u -> from -> to is shorter than u -> to..
                 set_dist(u, to, _dists[u][from] + dist);
                 set_pred(u, to, from);
-                set_i.push_back(u);
-                c_updates.push_back({u, to});
-                c_updates.push_back({to, u});
+                set_i.emplace_back(u);
+                c_updates.emplace_back(u, to);
+                c_updates.emplace_back(to, u);
             }
             if (_dists[to][u] < _dists[from][u] - dist)
             { // from -> to -> u is shorter than from -> u..
                 set_dist(from, u, _dists[to][u] + dist);
                 set_pred(from, u, _preds[to][u]);
-                set_j.push_back(u);
-                c_updates.push_back({from, u});
-                c_updates.push_back({u, from});
+                set_j.emplace_back(u);
+                c_updates.emplace_back(from, u);
+                c_updates.emplace_back(u, from);
             }
         }
 
@@ -518,8 +517,8 @@ namespace smt
                 { // i -> from -> to -> j is shorter than i -> j--
                     set_dist(i, j, _dists[i][to] + _dists[to][j]);
                     set_pred(i, j, _preds[to][j]);
-                    c_updates.push_back({i, j});
-                    c_updates.push_back({j, i});
+                    c_updates.emplace_back(i, j);
+                    c_updates.emplace_back(j, i);
                 }
 
         for (const auto &c_pairs : c_updates)
@@ -528,15 +527,15 @@ namespace smt
                     if (sat->value(c_dist->b) == Undefined)
                         if (_dists[c_dist->to][c_dist->from] < -c_dist->dist)
                         { // the constraint is inconsistent..
-                            cnfl.push_back(!c_dist->b);
+                            cnfl.emplace_back(!c_dist->b);
                             var c_to = c_dist->from;
                             while (c_to != c_dist->to)
                             {
                                 if (const auto &c_d = dist_constr.find({_preds[c_dist->to][c_to], c_to}); c_d != dist_constr.cend())
                                     if (sat->value(c_d->second->b) == True)
-                                        cnfl.push_back(!c_d->second->b);
+                                        cnfl.emplace_back(!c_d->second->b);
                                     else if (sat->value(c_d->second->b) == False)
-                                        cnfl.push_back(c_d->second->b);
+                                        cnfl.emplace_back(c_d->second->b);
                                 c_to = _preds[c_dist->to][c_to];
                             }
                             // we propagate the reason for assigning false to dist->b..
@@ -545,15 +544,15 @@ namespace smt
                         }
                         else if (_dists[c_dist->from][c_dist->to] <= c_dist->dist)
                         { // the constraint is redundant..
-                            cnfl.push_back(c_dist->b);
+                            cnfl.emplace_back(c_dist->b);
                             var c_to = c_dist->to;
                             while (c_to != c_dist->from)
                             {
                                 if (const auto &c_d = dist_constr.find({_preds[c_dist->from][c_to], c_to}); c_d != dist_constr.cend())
                                     if (sat->value(c_d->second->b) == True)
-                                        cnfl.push_back(!c_d->second->b);
+                                        cnfl.emplace_back(!c_d->second->b);
                                     else if (sat->value(c_d->second->b) == False)
-                                        cnfl.push_back(c_d->second->b);
+                                        cnfl.emplace_back(c_d->second->b);
                                 c_to = _preds[c_dist->from][c_to];
                             }
                             // we propagate the reason for assigning true to dist->b..

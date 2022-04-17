@@ -39,7 +39,7 @@ namespace ratio
             restore_ni();
         }
 
-        atoms.push_back({&atm, new agnt_atom_listener(*this, atm)});
+        atoms.emplace_back(&atm, new agnt_atom_listener(*this, atm));
         to_check.insert(&atm);
     }
 
@@ -62,10 +62,10 @@ namespace ratio
                 if (var_item *enum_scope = dynamic_cast<var_item *>(&*c_scope))
                 {
                     for (const auto &val : get_core().get_ov_theory().value(enum_scope->ev))
-                        agnt_instances[static_cast<const item *>(val)].push_back(atm);
+                        agnt_instances[static_cast<const item *>(val)].emplace_back(atm);
                 }
                 else
-                    agnt_instances[static_cast<item *>(&*c_scope)].push_back(atm);
+                    agnt_instances[static_cast<item *>(&*c_scope)].emplace_back(atm);
             }
 
         for (const auto &[agnt, atms] : agnt_instances)
@@ -93,9 +93,9 @@ namespace ratio
             std::vector<json> j_atms;
             for (const auto &p : pulses)
                 for (const auto &atm : starting_atoms.at(p))
-                    j_atms.push_back(new long_val(atm->get_id()));
+                    j_atms.emplace_back(new long_val(atm->get_id()));
             tl->set("values", new array_val(j_atms));
-            tls.push_back(tl);
+            tls.emplace_back(tl);
         }
         return new array_val(tls);
     }
