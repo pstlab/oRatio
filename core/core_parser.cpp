@@ -49,8 +49,8 @@ namespace ratio
             for (const auto &ex : expressions)
             {
                 expr i = dynamic_cast<const ast::expression *>(ex)->evaluate(scp, ctx);
-                exprs.push_back(i);
-                par_types.push_back(&i->get_type());
+                exprs.emplace_back(i);
+                par_types.emplace_back(&i->get_type());
             }
 
             return static_cast<type *>(s)->get_constructor(par_types).new_instance(ctx, exprs);
@@ -116,18 +116,19 @@ namespace ratio
             for (const auto &ex : expressions)
             {
                 expr i = dynamic_cast<const ast::expression *>(ex)->evaluate(scp, ctx);
-                exprs.push_back(i);
-                par_types.push_back(&i->get_type());
+                exprs.emplace_back(i);
+                par_types.emplace_back(&i->get_type());
             }
 
-            if (method &m = s->get_method(function_name.id, par_types); m.get_return_type())
+            if (method &m = s->get_method(function_name.id, par_types); m.get_return_type().has_value())
             {
-                if (m.get_return_type() == &scp.get_core().get_type(BOOL_KEYWORD))
-                    return bool_expr(static_cast<bool_item *>(m.invoke(ctx, exprs)));
-                else if (m.get_return_type() == &scp.get_core().get_type(INT_KEYWORD) || m.get_return_type() == &scp.get_core().get_type(REAL_KEYWORD) || m.get_return_type() == &scp.get_core().get_type(TP_KEYWORD))
-                    return arith_expr(static_cast<arith_item *>(m.invoke(ctx, exprs)));
+                const auto rt = m.get_return_type().value();
+                if (rt == &scp.get_core().get_type(BOOL_KEYWORD))
+                    return bool_expr(static_cast<bool_item *>(m.invoke(ctx, exprs).value()));
+                else if (rt == &scp.get_core().get_type(INT_KEYWORD) || rt == &scp.get_core().get_type(REAL_KEYWORD) || rt == &scp.get_core().get_type(TP_KEYWORD))
+                    return arith_expr(static_cast<arith_item *>(m.invoke(ctx, exprs).value()));
                 else
-                    return expr(m.invoke(ctx, exprs));
+                    return expr(m.invoke(ctx, exprs).value());
             }
             else
                 return scp.get_core().new_bool(true);
@@ -155,7 +156,7 @@ namespace ratio
         {
             std::vector<bool_expr> exprs;
             for (const auto &e : expressions)
-                exprs.push_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
+                exprs.emplace_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
             return scp.get_core().disj(exprs);
         }
 
@@ -164,7 +165,7 @@ namespace ratio
         {
             std::vector<bool_expr> exprs;
             for (const auto &e : expressions)
-                exprs.push_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
+                exprs.emplace_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
             return scp.get_core().conj(exprs);
         }
 
@@ -173,7 +174,7 @@ namespace ratio
         {
             std::vector<bool_expr> exprs;
             for (const auto &e : expressions)
-                exprs.push_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
+                exprs.emplace_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
             return scp.get_core().exct_one(exprs);
         }
 
@@ -182,7 +183,7 @@ namespace ratio
         {
             std::vector<arith_expr> exprs;
             for (const auto &e : expressions)
-                exprs.push_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
+                exprs.emplace_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
             return scp.get_core().add(exprs);
         }
 
@@ -191,7 +192,7 @@ namespace ratio
         {
             std::vector<arith_expr> exprs;
             for (const auto &e : expressions)
-                exprs.push_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
+                exprs.emplace_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
             return scp.get_core().sub(exprs);
         }
 
@@ -200,7 +201,7 @@ namespace ratio
         {
             std::vector<arith_expr> exprs;
             for (const auto &e : expressions)
-                exprs.push_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
+                exprs.emplace_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
             return scp.get_core().mult(exprs);
         }
 
@@ -209,7 +210,7 @@ namespace ratio
         {
             std::vector<arith_expr> exprs;
             for (const auto &e : expressions)
-                exprs.push_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
+                exprs.emplace_back(dynamic_cast<const ast::expression *>(e)->evaluate(scp, ctx));
             return scp.get_core().div(exprs);
         }
 
@@ -269,7 +270,7 @@ namespace ratio
                         throw std::invalid_argument("invalid disjunct cost: expected a constant..");
                     cost = scp.get_core().arith_value(a_xpr).get_rational();
                 }
-                cs.push_back(new conjunction(scp.get_core(), scp, cost, std::move(stmnts)));
+                cs.emplace_back(new conjunction(scp.get_core(), scp, cost, std::move(stmnts)));
             }
             scp.get_core().new_disjunction(ctx, cs);
         }
@@ -318,7 +319,7 @@ namespace ratio
                         std::vector<smt::lit> not_alwd_vals;                                                           // the not allowed values..
                         for (const auto &ev : alwd_vals)
                             if (!tt.is_assignable_from(static_cast<const item *>(ev)->get_type())) // the target type is not a superclass of the value..
-                                not_alwd_vals.push_back(!scp.get_core().get_ov_theory().allows(ae->ev, *ev));
+                                not_alwd_vals.emplace_back(!scp.get_core().get_ov_theory().allows(ae->ev, *ev));
                         if (alwd_vals.size() == not_alwd_vals.size()) // none of the values is allowed..
                             throw inconsistency_exception();
                         else // we inhibit the not allowed values..
@@ -374,7 +375,7 @@ namespace ratio
         method_declaration::method_declaration(const std::vector<riddle::id_token> &rt, const riddle::id_token &n, const std::vector<std::pair<const std::vector<riddle::id_token>, const riddle::id_token>> &pars, const std::vector<const riddle::ast::statement *> &stmnts) : riddle::ast::method_declaration(rt, n, pars, stmnts) {}
         void method_declaration::refine(scope &scp) const
         {
-            type *rt = nullptr;
+            std::optional<type *> rt;
             if (!return_type.empty())
             {
                 scope *s = &scp;
@@ -390,7 +391,7 @@ namespace ratio
                 for (const auto &id_tk : id_tkns)
                     s = &s->get_type(id_tk.id);
                 type *tp = static_cast<type *>(s);
-                args.push_back(new field(*tp, id_tkn.id));
+                args.emplace_back(new field(*tp, id_tkn.id));
             }
 
             if (method *m = new method(scp.get_core(), scp, rt, name.id, args, statements); core *c = dynamic_cast<core *>(&scp))
@@ -409,7 +410,7 @@ namespace ratio
                 for (const auto &id_tk : id_tkns)
                     s = &s->get_type(id_tk.id);
                 type *tp = static_cast<type *>(s);
-                args.push_back(new field(*tp, id_tkn.id));
+                args.emplace_back(new field(*tp, id_tkn.id));
             }
 
             predicate *p = new predicate(scp.get_core(), scp, name.id, args, statements);
@@ -449,7 +450,7 @@ namespace ratio
 
             // We add the enum values..
             for (const auto &e : enums)
-                et->instances.push_back(scp.get_core().new_string(e.str));
+                et->instances.emplace_back(scp.get_core().new_string(e.str));
 
             if (core *c = dynamic_cast<core *>(&scp))
                 c->new_types({et});
@@ -466,7 +467,7 @@ namespace ratio
                     scope *s = &scp;
                     for (const auto &id_tk : tr)
                         s = &s->get_type(id_tk.id);
-                    et->enums.push_back(static_cast<enum_type *>(s));
+                    et->enums.emplace_back(static_cast<enum_type *>(s));
                 }
             }
         }
@@ -494,12 +495,12 @@ namespace ratio
                 for (const auto &id_tk : id_tkns)
                     s = &s->get_type(id_tk.id);
                 type *tp = static_cast<type *>(s);
-                args.push_back(new field(*tp, id_tkn.id));
+                args.emplace_back(new field(*tp, id_tkn.id));
             }
 
             std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> il;
             for (const auto &[id_tkn, xprs] : init_list)
-                il.push_back({id_tkn.id, xprs});
+                il.emplace_back(id_tkn.id, xprs);
 
             static_cast<type &>(scp).new_constructors({new constructor(scp.get_core(), scp, std::move(args), std::move(il), std::move(statements))});
         }

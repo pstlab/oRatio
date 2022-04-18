@@ -19,18 +19,18 @@ namespace ratio
     friend class type;
 
   public:
-    method(core &cr, scope &scp, type *const return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
+    method(core &cr, scope &scp, const std::optional<type *> &return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
     method(const method &orig) = delete;
 
-    inline const type *get_return_type() const noexcept { return return_type; }        // returns the return type of this method (can be nullptr)..
-    inline std::string get_name() const noexcept { return name; }                      // returns the name of this method..
-    inline const std::vector<const field *> get_args() const noexcept { return args; } // returns the list of arguments of this method..
+    inline std::optional<const type *> get_return_type() const noexcept { return return_type; } // returns the return type of this method (can be nullptr)..
+    inline std::string get_name() const noexcept { return name; }                               // returns the name of this method..
+    inline const std::vector<const field *> get_args() const noexcept { return args; }          // returns the list of arguments of this method..
 
-    item *invoke(context &ctx, const std::vector<expr> &exprs);
+    std::optional<item *> invoke(context &ctx, const std::vector<expr> &exprs);
 
   private:
-    const type *const return_type; // the return type of this method (can be nullptr)..
-    const std::string name;        // the name of this method..
+    std::optional<const type *const> return_type; // the return type of this method (can be nullptr)..
+    const std::string name;                       // the name of this method..
 
   private:
     const std::vector<const field *> args;                        // the arguments of this paper..

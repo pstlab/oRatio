@@ -7,16 +7,16 @@
 
 namespace ratio
 {
-    method::method(core &cr, scope &scp, type *const return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts) : scope(cr, scp), return_type(return_type), name(name), args(args), statements(stmnts)
+    method::method(core &cr, scope &scp, const std::optional<type *> &return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts) : scope(cr, scp), return_type(return_type), name(name), args(args), statements(stmnts)
     {
         if (type *t = dynamic_cast<type *>(&scp))
             new_fields({new field(*t, THIS_KEYWORD, nullptr, true)});
-        if (return_type)
-            new_fields({new field(*return_type, RETURN_KEYWORD, nullptr, true)});
+        if (return_type.has_value())
+            new_fields({new field(*return_type.value(), RETURN_KEYWORD, nullptr, true)});
         new_fields(args);
     }
 
-    item *method::invoke(context &ctx, const std::vector<expr> &exprs)
+    std::optional<item *> method::invoke(context &ctx, const std::vector<expr> &exprs)
     {
         assert(args.size() == exprs.size());
         context c_ctx(new env(get_core(), context(ctx)));
@@ -26,7 +26,7 @@ namespace ratio
         for (const auto &s : statements)
             dynamic_cast<const ast::statement *>(s)->execute(*this, c_ctx);
 
-        if (return_type)
+        if (return_type.has_value())
             return &*c_ctx->exprs.at(RETURN_KEYWORD);
         else
             return nullptr;
