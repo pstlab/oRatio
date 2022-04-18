@@ -14,8 +14,8 @@ namespace ratio
 
   private:
     void init() noexcept override;
-    void enqueue(flaw &f);
-    void propagate_costs(flaw &f);
+    void enqueue(flaw &f) override;
+    void propagate_costs(flaw &f) override;
 
     void build() override; // builds the h_1 planning graph..
 #ifdef GRAPH_PRUNING
