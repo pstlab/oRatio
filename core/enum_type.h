@@ -16,7 +16,7 @@ namespace ratio
     friend class ast::enum_declaration;
 
   public:
-    enum_type(core &cr, scope &scp, std::string name);
+    enum_type(scope &scp, std::string name);
     enum_type(const enum_type &orig) = delete;
     virtual ~enum_type() = default;
 

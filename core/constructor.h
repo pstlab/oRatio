@@ -19,7 +19,7 @@ namespace ratio
     friend class type;
 
   public:
-    CORE_EXPORT constructor(core &cr, scope &scp, std::vector<const field *> args, std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> il, std::vector<const riddle::ast::statement *> stmnts);
+    CORE_EXPORT constructor(scope &scp, std::vector<const field *> args, std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> il, std::vector<const riddle::ast::statement *> stmnts);
     constructor(const constructor &orig) = delete;
     CORE_EXPORT virtual ~constructor() = default;
 

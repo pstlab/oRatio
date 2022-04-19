@@ -31,7 +31,7 @@ namespace ratio
     friend class ast::class_declaration;
 
   public:
-    CORE_EXPORT type(core &cr, scope &scp, const std::string &name, bool primitive = false);
+    CORE_EXPORT type(scope &scp, const std::string &name, bool primitive = false);
     type(const type &orig) = delete;
     CORE_EXPORT virtual ~type();
 

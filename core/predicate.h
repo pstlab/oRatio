@@ -15,7 +15,7 @@ namespace ratio
   class predicate : public type
   {
   public:
-    CORE_EXPORT predicate(core &cr, scope &scp, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
+    CORE_EXPORT predicate(scope &scp, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
     predicate(const predicate &orig) = delete;
     CORE_EXPORT virtual ~predicate() = default;
 

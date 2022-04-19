@@ -75,6 +75,8 @@ namespace ratio
     core(const core &orig) = delete;
     CORE_EXPORT ~core();
 
+    inline core &get_core() const override { return const_cast<core &>(*this); }
+
     inline smt::sat_core &get_sat_core() noexcept { return sat_cr; }     // returns the sat core..
     inline smt::lra_theory &get_lra_theory() noexcept { return lra_th; } // returns the linear-real-arithmetic theory..
     inline smt::ov_theory &get_ov_theory() noexcept { return ov_th; }    // returns the object-variable theory..

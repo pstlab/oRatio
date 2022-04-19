@@ -7,7 +7,7 @@
 
 namespace ratio
 {
-    CORE_EXPORT constructor::constructor(core &cr, scope &scp, std::vector<const field *> args, std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> il, std::vector<const riddle::ast::statement *> stmnts) : scope(cr, scp), args(std::move(args)), init_list(std::move(il)), statements(std::move(stmnts))
+    CORE_EXPORT constructor::constructor(scope &scp, std::vector<const field *> args, std::vector<std::pair<const std::string, const std::vector<const riddle::ast::expression *>>> il, std::vector<const riddle::ast::statement *> stmnts) : scope(scp), args(std::move(args)), init_list(std::move(il)), statements(std::move(stmnts))
     {
         new_fields({new field(static_cast<type &>(scp), THIS_KEYWORD, nullptr, true)});
         new_fields(args);

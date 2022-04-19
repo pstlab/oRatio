@@ -12,7 +12,7 @@ namespace ratio
   class typedef_type final : public type
   {
   public:
-    typedef_type(core &cr, scope &scp, const std::string &name, const type &base_type, const riddle::ast::expression *const e);
+    typedef_type(scope &scp, const std::string &name, const type &base_type, const riddle::ast::expression *const e);
     typedef_type(const typedef_type &orig) = delete;
 
     expr new_instance(context &ctx) override;

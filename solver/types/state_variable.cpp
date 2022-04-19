@@ -265,7 +265,7 @@ namespace ratio
         }
     }
 
-    state_variable::sv_constructor::sv_constructor(state_variable &sv) : constructor(sv.get_solver(), sv, {}, {}, {}) {}
+    state_variable::sv_constructor::sv_constructor(state_variable &sv) : constructor(sv, {}, {}, {}) {}
 
     state_variable::sv_atom_listener::sv_atom_listener(state_variable &sv, atom &atm) : atom_listener(atm), sv(sv) { something_changed(); }
 

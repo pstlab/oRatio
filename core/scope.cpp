@@ -3,7 +3,7 @@
 
 namespace ratio
 {
-    scope::scope(core &cr, scope &scp) : cr(cr), scp(scp) {}
+    scope::scope(scope &scp) : cr(scp.get_core()), scp(scp) {}
     scope::~scope()
     {
         // we delete the fields defined within this scope..

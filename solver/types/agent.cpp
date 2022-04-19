@@ -43,7 +43,7 @@ namespace ratio
         to_check.insert(&atm);
     }
 
-    agent::agnt_constructor::agnt_constructor(agent &agnt) : constructor(agnt.get_solver(), agnt, {}, {}, {}) {}
+    agent::agnt_constructor::agnt_constructor(agent &agnt) : constructor(agnt, {}, {}, {}) {}
     agent::agnt_constructor::~agnt_constructor() {}
 
     agent::agnt_atom_listener::agnt_atom_listener(agent &agnt, atom &atm) : atom_listener(atm), agnt(agnt) {}

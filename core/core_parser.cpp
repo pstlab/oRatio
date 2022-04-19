@@ -270,7 +270,7 @@ namespace ratio
                         throw std::invalid_argument("invalid disjunct cost: expected a constant..");
                     cost = scp.get_core().arith_value(a_xpr).get_rational();
                 }
-                cs.emplace_back(new conjunction(scp.get_core(), scp, cost, std::move(stmnts)));
+                cs.emplace_back(new conjunction(scp, cost, std::move(stmnts)));
             }
             scp.get_core().new_disjunction(ctx, cs);
         }
@@ -394,7 +394,7 @@ namespace ratio
                 args.emplace_back(new field(*tp, id_tkn.id));
             }
 
-            if (method *m = new method(scp.get_core(), scp, rt, name.id, args, statements); core *c = dynamic_cast<core *>(&scp))
+            if (method *m = new method(scp, rt, name.id, args, statements); core *c = dynamic_cast<core *>(&scp))
                 c->new_methods({m});
             else if (type *t = dynamic_cast<type *>(&scp))
                 t->new_methods({m});
@@ -413,7 +413,7 @@ namespace ratio
                 args.emplace_back(new field(*tp, id_tkn.id));
             }
 
-            predicate *p = new predicate(scp.get_core(), scp, name.id, args, statements);
+            predicate *p = new predicate(scp, name.id, args, statements);
 
             // we add the supertypes.. notice that we do not support forward declaration for predicate supertypes!!
             for (const auto &sp : predicate_list)
@@ -434,7 +434,7 @@ namespace ratio
         void typedef_declaration::declare(scope &scp) const
         {
             // A new typedef type has been declared..
-            typedef_type *td = new typedef_type(scp.get_core(), scp, name.id, scp.get_type(primitive_type.id), xpr);
+            typedef_type *td = new typedef_type(scp, name.id, scp.get_type(primitive_type.id), xpr);
 
             if (core *c = dynamic_cast<core *>(&scp))
                 c->new_types({td});
@@ -446,7 +446,7 @@ namespace ratio
         void enum_declaration::declare(scope &scp) const
         {
             // A new enum type has been declared..
-            enum_type *et = new enum_type(scp.get_core(), scp, name.id);
+            enum_type *et = new enum_type(scp, name.id);
 
             // We add the enum values..
             for (const auto &e : enums)
@@ -502,14 +502,14 @@ namespace ratio
             for (const auto &[id_tkn, xprs] : init_list)
                 il.emplace_back(id_tkn.id, xprs);
 
-            static_cast<type &>(scp).new_constructors({new constructor(scp.get_core(), scp, std::move(args), std::move(il), std::move(statements))});
+            static_cast<type &>(scp).new_constructors({new constructor(scp, std::move(args), std::move(il), std::move(statements))});
         }
 
         class_declaration::class_declaration(const riddle::id_token &n, const std::vector<std::vector<riddle::id_token>> &bcs, const std::vector<const riddle::ast::field_declaration *> &fs, const std::vector<const riddle::ast::constructor_declaration *> &cs, const std::vector<const riddle::ast::method_declaration *> &ms, const std::vector<const riddle::ast::predicate_declaration *> &ps, const std::vector<const riddle::ast::type_declaration *> &ts) : riddle::ast::class_declaration(n, bcs, fs, cs, ms, ps, ts) {}
         void class_declaration::declare(scope &scp) const
         {
             // A new type has been declared..
-            type *tp = new type(scp.get_core(), scp, name.id);
+            type *tp = new type(scp, name.id);
 
             if (core *c = dynamic_cast<core *>(&scp))
                 c->new_types({tp});
@@ -534,7 +534,7 @@ namespace ratio
                 dynamic_cast<const ast::field_declaration *>(f)->refine(tp);
 
             if (constructors.empty())
-                tp.new_constructors({new constructor(scp.get_core(), tp, {}, {}, {})}); // we add a default constructor..
+                tp.new_constructors({new constructor(tp, {}, {}, {})}); // we add a default constructor..
             else
                 for (const auto &c : constructors)
                     dynamic_cast<const ast::constructor_declaration *>(c)->refine(tp);

@@ -12,7 +12,7 @@
 
 namespace ratio
 {
-    CORE_EXPORT type::type(core &cr, scope &scp, const std::string &name, bool primitive) : scope(cr, scp), name(name), primitive(primitive) {}
+    CORE_EXPORT type::type(scope &scp, const std::string &name, bool primitive) : scope(scp), name(name), primitive(primitive) {}
     CORE_EXPORT type::~type()
     {
         // we delete the predicates..
@@ -285,21 +285,21 @@ namespace ratio
         throw std::out_of_range(p_name);
     }
 
-    bool_type::bool_type(core &cr) : type(cr, cr, BOOL_KEYWORD, true) {}
+    bool_type::bool_type(core &cr) : type(cr, BOOL_KEYWORD, true) {}
     expr bool_type::new_instance(context &) noexcept { return get_core().new_bool(); }
 
-    int_type::int_type(core &cr) : type(cr, cr, INT_KEYWORD, true) {}
+    int_type::int_type(core &cr) : type(cr, INT_KEYWORD, true) {}
     bool int_type::is_assignable_from(const type &t) const noexcept { return &t == this || &t == &get_core().get_type(TP_KEYWORD); }
     expr int_type::new_instance(context &) noexcept { return get_core().new_int(); }
 
-    real_type::real_type(core &cr) : type(cr, cr, REAL_KEYWORD, true) {}
+    real_type::real_type(core &cr) : type(cr, REAL_KEYWORD, true) {}
     bool real_type::is_assignable_from(const type &t) const noexcept { return &t == this || &t == &get_core().get_type(TP_KEYWORD); }
     expr real_type::new_instance(context &) noexcept { return get_core().new_real(); }
 
-    tp_type::tp_type(core &cr) : type(cr, cr, TP_KEYWORD, true) {}
+    tp_type::tp_type(core &cr) : type(cr, TP_KEYWORD, true) {}
     bool tp_type::is_assignable_from(const type &t) const noexcept { return &t == this || &t == &get_core().get_type(INT_KEYWORD) || &t == &get_core().get_type(REAL_KEYWORD); }
     expr tp_type::new_instance(context &) noexcept { return get_core().new_tp(); }
 
-    string_type::string_type(core &cr) : type(cr, cr, STRING_KEYWORD, true) {}
+    string_type::string_type(core &cr) : type(cr, STRING_KEYWORD, true) {}
     expr string_type::new_instance(context &) noexcept { return get_core().new_string(); }
 } // namespace ratio
