@@ -10,11 +10,11 @@ namespace ratio
 
     void bool_flaw::compute_resolvers()
     {
-        add_resolver(*new choose_value(get_solver(), smt::rational(1, 2), *this, b_itm.l));
-        add_resolver(*new choose_value(get_solver(), smt::rational(1, 2), *this, !b_itm.l));
+        add_resolver(*new choose_value(smt::rational(1, 2), *this, b_itm.l));
+        add_resolver(*new choose_value(smt::rational(1, 2), *this, !b_itm.l));
     }
 
-    bool_flaw::choose_value::choose_value(solver &slv, smt::rational cst, bool_flaw &bl_flaw, const smt::lit &val) : resolver(slv, val, cst, bl_flaw) {}
+    bool_flaw::choose_value::choose_value(smt::rational cst, bool_flaw &bl_flaw, const smt::lit &val) : resolver(val, cst, bl_flaw) {}
 
     std::string bool_flaw::choose_value::get_data() const noexcept { return "{\"rho\":\"" + to_string(get_rho()) + "\"}"; }
 

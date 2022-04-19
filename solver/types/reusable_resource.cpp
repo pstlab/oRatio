@@ -388,19 +388,19 @@ namespace ratio
         }
     }
 
-    reusable_resource::order_resolver::order_resolver(rr_flaw &flw, const lit &r, const atom &before, const atom &after) : resolver(flw.get_solver(), r, rational::ZERO, flw), before(before), after(after) {}
+    reusable_resource::order_resolver::order_resolver(rr_flaw &flw, const lit &r, const atom &before, const atom &after) : resolver(r, rational::ZERO, flw), before(before), after(after) {}
 
     std::string reusable_resource::order_resolver::get_data() const { return "{\"type\":\"order\", \"rho\":\"" + to_string(get_rho()) + "\", \"before_sigma\":" + std::to_string(before.get_sigma()) + ", \"after_sigma\":" + std::to_string(after.get_sigma()) + ", \"before_atom\":\"" + std::to_string(before.get_id()) + "\", \"after_atom\":\"" + std::to_string(after.get_id()) + "\"}"; }
 
     void reusable_resource::order_resolver::apply() {}
 
-    reusable_resource::place_resolver::place_resolver(rr_flaw &flw, const lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm) : resolver(flw.get_solver(), r, rational::ZERO, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
+    reusable_resource::place_resolver::place_resolver(rr_flaw &flw, const lit &r, atom &plc_atm, const item &plc_itm, atom &frbd_atm) : resolver(r, rational::ZERO, flw), plc_atm(plc_atm), plc_itm(plc_itm), frbd_atm(frbd_atm) {}
 
     std::string reusable_resource::place_resolver::get_data() const { return "{\"type\":\"place\", \"rho\":\"" + to_string(get_rho()) + "\", \"place_sigma\":" + std::to_string(plc_atm.get_sigma()) + ", \"forbid_sigma\":" + std::to_string(frbd_atm.get_sigma()) + ", \"place_atom\":\"" + std::to_string(plc_atm.get_id()) + "\", \"forbid_atom\":\"" + std::to_string(frbd_atm.get_id()) + "\"}"; }
 
     void reusable_resource::place_resolver::apply() {}
 
-    reusable_resource::forbid_resolver::forbid_resolver(rr_flaw &flw, atom &atm, item &itm) : resolver(flw.get_solver(), rational::ZERO, flw), atm(atm), itm(itm) {}
+    reusable_resource::forbid_resolver::forbid_resolver(rr_flaw &flw, atom &atm, item &itm) : resolver(rational::ZERO, flw), atm(atm), itm(itm) {}
 
     std::string reusable_resource::forbid_resolver::get_data() const { return "{\"type\":\"forbid\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom_sigma\":" + std::to_string(atm.get_sigma()) + ", \"atom\":" + std::to_string(atm.get_id()) + "}"; }
 

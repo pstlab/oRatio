@@ -17,7 +17,7 @@ namespace ratio
         }
     }
 
-    disjunction_flaw::choose_conjunction::choose_conjunction(solver &slv, disjunction_flaw &disj_flaw, const context &ctx, conjunction &conj) : resolver(slv, conj.get_cost(), disj_flaw), ctx(ctx), conj(conj) {}
+    disjunction_flaw::choose_conjunction::choose_conjunction(solver &slv, disjunction_flaw &disj_flaw, const context &ctx, conjunction &conj) : resolver(conj.get_cost(), disj_flaw), ctx(ctx), conj(conj) {}
 
     std::string disjunction_flaw::choose_conjunction::get_data() const noexcept { return "{\"rho\":\"" + to_string(get_rho()) + "\"}"; }
 

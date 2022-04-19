@@ -16,8 +16,8 @@ namespace ratio
     friend class flaw;
 
   public:
-    resolver(solver &slv, const smt::rational &cost, flaw &eff);
-    resolver(solver &slv, const smt::lit &r, const smt::rational &cost, flaw &eff);
+    resolver(const smt::rational &cost, flaw &eff);
+    resolver(const smt::lit &r, const smt::rational &cost, flaw &eff);
     resolver(const resolver &that) = delete;
     virtual ~resolver() = default;
 

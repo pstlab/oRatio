@@ -6,6 +6,6 @@ using namespace smt;
 
 namespace ratio
 {
-    resolver::resolver(solver &slv, const rational &cost, flaw &eff) : resolver(slv, lit(slv.get_sat_core().new_var()), cost, eff) {}
-    resolver::resolver(solver &slv, const lit &r, const rational &cost, flaw &eff) : slv(slv), rho(r), intrinsic_cost(cost), effect(eff) {}
+    resolver::resolver(const rational &cost, flaw &eff) : resolver(lit(eff.slv.get_sat_core().new_var()), cost, eff) {}
+    resolver::resolver(const lit &r, const rational &cost, flaw &eff) : slv(eff.slv), rho(r), intrinsic_cost(cost), effect(eff) {}
 } // namespace ratio

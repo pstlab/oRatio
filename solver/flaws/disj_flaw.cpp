@@ -10,10 +10,10 @@ namespace ratio
     void disj_flaw::compute_resolvers()
     {
         for (const auto &p : lits)
-            add_resolver(*new choose_lit(get_solver(), smt::rational(1, static_cast<smt::I>(lits.size())), *this, p));
+            add_resolver(*new choose_lit(smt::rational(1, static_cast<smt::I>(lits.size())), *this, p));
     }
 
-    disj_flaw::choose_lit::choose_lit(solver &slv, smt::rational cst, disj_flaw &disj_flaw, const smt::lit &p) : resolver(slv, p, cst, disj_flaw) {}
+    disj_flaw::choose_lit::choose_lit(smt::rational cst, disj_flaw &disj_flaw, const smt::lit &p) : resolver(p, cst, disj_flaw) {}
 
     std::string disj_flaw::choose_lit::get_data() const noexcept { return "{\"rho\":\"" + to_string(get_rho()) + "\"}"; }
 

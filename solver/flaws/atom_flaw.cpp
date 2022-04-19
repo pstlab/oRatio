@@ -46,7 +46,7 @@ namespace ratio
                 if (get_solver().get_sat_core().value(eq_lit) == False)
                     continue; // the two atoms cannot unify, hence, we skip this instance..
 
-                unify_atom *u_res = new unify_atom(get_solver(), *this, atm, t_atm, {lit(atm.get_sigma(), false), lit(t_atm.get_sigma()), eq_lit});
+                unify_atom *u_res = new unify_atom(*this, atm, t_atm, {lit(atm.get_sigma(), false), lit(t_atm.get_sigma()), eq_lit});
                 assert(get_solver().get_sat_core().value(u_res->get_rho()) != False);
                 add_resolver(*u_res);
                 get_solver().new_causal_link(t_flaw, *u_res);
@@ -54,17 +54,17 @@ namespace ratio
 
         if (is_fact)
             if (get_resolvers().empty())
-                add_resolver(*new activate_fact(get_solver(), get_phi(), *this, atm));
+                add_resolver(*new activate_fact(get_phi(), *this, atm));
             else
-                add_resolver(*new activate_fact(get_solver(), *this, atm));
+                add_resolver(*new activate_fact(*this, atm));
         else if (get_resolvers().empty())
-            add_resolver(*new activate_goal(get_solver(), get_phi(), *this, atm));
+            add_resolver(*new activate_goal(get_phi(), *this, atm));
         else
-            add_resolver(*new activate_goal(get_solver(), *this, atm));
+            add_resolver(*new activate_goal(*this, atm));
     }
 
-    atom_flaw::activate_fact::activate_fact(solver &slv, atom_flaw &f, atom &a) : resolver(slv, rational::ZERO, f), atm(a) {}
-    atom_flaw::activate_fact::activate_fact(solver &slv, const lit &r, atom_flaw &f, atom &a) : resolver(slv, r, rational::ZERO, f), atm(a) {}
+    atom_flaw::activate_fact::activate_fact(atom_flaw &f, atom &a) : resolver(rational::ZERO, f), atm(a) {}
+    atom_flaw::activate_fact::activate_fact(const lit &r, atom_flaw &f, atom &a) : resolver(r, rational::ZERO, f), atm(a) {}
 
     std::string atom_flaw::activate_fact::get_data() const noexcept { return "{\"type\":\"activate\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":" + std::to_string(atm.get_id()) + "}"; }
 
@@ -74,8 +74,8 @@ namespace ratio
             throw unsolvable_exception();
     }
 
-    atom_flaw::activate_goal::activate_goal(solver &slv, atom_flaw &f, atom &a) : resolver(slv, rational::ONE, f), atm(a) {}
-    atom_flaw::activate_goal::activate_goal(solver &slv, const lit &r, atom_flaw &f, atom &a) : resolver(slv, r, rational::ONE, f), atm(a) {}
+    atom_flaw::activate_goal::activate_goal(atom_flaw &f, atom &a) : resolver(rational::ONE, f), atm(a) {}
+    atom_flaw::activate_goal::activate_goal(const lit &r, atom_flaw &f, atom &a) : resolver(r, rational::ONE, f), atm(a) {}
 
     std::string atom_flaw::activate_goal::get_data() const noexcept { return "{\"type\":\"activate\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":" + std::to_string(atm.get_id()) + "}"; }
 
@@ -87,7 +87,7 @@ namespace ratio
         static_cast<predicate &>(atm.get_type()).apply_rule(atm);
     }
 
-    atom_flaw::unify_atom::unify_atom(solver &slv, atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(slv, rational::ONE, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}
+    atom_flaw::unify_atom::unify_atom(atom_flaw &f, atom &atm, atom &trgt, const std::vector<lit> &unif_lits) : resolver(rational::ONE, f), atm(atm), trgt(trgt), unif_lits(unif_lits) {}
 
     std::string atom_flaw::unify_atom::get_data() const noexcept { return "{\"type\":\"unify\", \"rho\":\"" + to_string(get_rho()) + "\", \"atom\":" + std::to_string(atm.get_id()) + ", \"target\":\"" + std::to_string(trgt.get_id()) + "\"}"; }
 

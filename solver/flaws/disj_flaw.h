@@ -19,7 +19,7 @@ namespace ratio
     class choose_lit final : public resolver
     {
     public:
-      choose_lit(solver &slv, smt::rational cst, disj_flaw &disj_flaw, const smt::lit &p);
+      choose_lit(smt::rational cst, disj_flaw &disj_flaw, const smt::lit &p);
       choose_lit(const choose_lit &that) = delete;
 
       std::string get_data() const noexcept override;

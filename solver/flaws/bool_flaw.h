@@ -21,7 +21,7 @@ namespace ratio
     class choose_value final : public resolver
     {
     public:
-      choose_value(solver &slv, smt::rational cst, bool_flaw &bl_flaw, const smt::lit &val);
+      choose_value(smt::rational cst, bool_flaw &bl_flaw, const smt::lit &val);
       choose_value(const choose_value &that) = delete;
 
       std::string get_data() const noexcept override;

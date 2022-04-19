@@ -30,8 +30,8 @@ namespace ratio
     class activate_fact final : public resolver
     {
     public:
-      activate_fact(solver &slv, atom_flaw &f, atom &a);
-      activate_fact(solver &slv, const smt::lit &r, atom_flaw &f, atom &a);
+      activate_fact(atom_flaw &f, atom &a);
+      activate_fact(const smt::lit &r, atom_flaw &f, atom &a);
       activate_fact(const activate_fact &that) = delete;
 
       std::string get_data() const noexcept override;
@@ -46,8 +46,8 @@ namespace ratio
     class activate_goal final : public resolver
     {
     public:
-      activate_goal(solver &slv, atom_flaw &f, atom &a);
-      activate_goal(solver &slv, const smt::lit &r, atom_flaw &f, atom &a);
+      activate_goal(atom_flaw &f, atom &a);
+      activate_goal(const smt::lit &r, atom_flaw &f, atom &a);
       activate_goal(const activate_goal &that) = delete;
 
       std::string get_data() const noexcept override;
@@ -62,7 +62,7 @@ namespace ratio
     class unify_atom final : public resolver
     {
     public:
-      unify_atom(solver &slv, atom_flaw &atm_flaw, atom &atm, atom &trgt, const std::vector<smt::lit> &unif_lits);
+      unify_atom(atom_flaw &atm_flaw, atom &atm, atom &trgt, const std::vector<smt::lit> &unif_lits);
       unify_atom(const unify_atom &that) = delete;
 
       std::string get_data() const noexcept override;
