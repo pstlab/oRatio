@@ -20,7 +20,7 @@ namespace ratio
     friend class type;
 
   public:
-    method(scope &scp, const std::optional<type *> &return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
+    method(core &cr, scope &scp, const std::optional<type *> &return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
     method(const method &orig) = delete;
 
     inline std::optional<const type *> get_return_type() const noexcept { return return_type; } // returns the return type of this method (can be nullptr)..
