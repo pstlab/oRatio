@@ -1,4 +1,6 @@
-class MaintainanceCompany {}
+class MaintainanceCompany {
+    ReusableResource activity = new ReusableResource(1.0);
+}
 
 class Road {}
 
@@ -23,15 +25,18 @@ class Maintainance : Agent {
     predicate RoadMaintainance(Road r, MaintainanceCompany mc) : Interval {
         duration >= 20.0;
         goal rm = new DoesRoadMaintainance(mc:mc);
+        fact mc_activity = new mc.activity.Use(start:start, duration:duration, end:end, amount:1.0);
     }
 
     predicate BuildingMaintainance(Building b, MaintainanceCompany mc) : Interval {
         duration >= 30.0;
         goal rm = new DoesBuildingMaintainance(mc:mc);
+        fact mc_activity = new mc.activity.Use(start:start, duration:duration, end:end, amount:1.0);
     }
 
     predicate GreenSpacesMaintainance(GreenSpace gs, MaintainanceCompany mc) : Interval {
         duration >= 20.0;
         goal rm = new DoesGreenSpaceMaintainance(mc:mc);
+        fact mc_activity = new mc.activity.Use(start:start, duration:duration, end:end, amount:1.0);
     }
 }

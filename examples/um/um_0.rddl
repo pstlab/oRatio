@@ -4,6 +4,7 @@ fact mc0_rm = new DoesRoadMaintainance(mc:mc0);
 fact mc1_rm = new DoesRoadMaintainance(mc:mc1);
 fact mc0_bm = new DoesBuildingMaintainance(mc:mc0);
 fact mc1_gsm = new DoesGreenSpaceMaintainance(mc:mc1);
+fact mc0_unav = new mc0.activity.Use(start:10.0, end:15.0, amount:1.0);
 
 Road r0 = new Road();
 Road r1 = new Road();
