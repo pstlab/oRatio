@@ -62,8 +62,8 @@ class Reasoner {
                         const end_var = atm.pars.find(xpr => xpr.name == 'end');
                         vals.push({
                             id: atm.id,
-                            content: atom_content(atm),
-                            title: atom_title(atm),
+                            content: this.atom_content(atm),
+                            title: this.atom_title(atm),
                             start: start_var.value.num / start_var.value.den,
                             end: end_var.value.num / end_var.value.den,
                             group: tl.id
@@ -79,8 +79,8 @@ class Reasoner {
                             const end_var = atm.pars.find(xpr => xpr.name == 'end');
                             vals.push({
                                 id: atm.id,
-                                content: atom_content(atm),
-                                title: atom_title(atm),
+                                content: this.atom_content(atm),
+                                title: this.atom_title(atm),
                                 start: start_var.value.num / start_var.value.den,
                                 end: end_var.value.num / end_var.value.den,
                                 group: tl.id
@@ -89,7 +89,7 @@ class Reasoner {
                             const at_var = atm.pars.find(xpr => xpr.name == 'at');
                             vals.push({
                                 id: atm.id,
-                                content: atom_content(atm),
+                                content: this.atom_content(atm),
                                 start: at_var.value.num / at_var.value.den,
                                 group: tl.id
                             });
@@ -117,8 +117,8 @@ class Reasoner {
                         const end_var = atm.pars.find(xpr => xpr.name == 'end');
                         vals.push({
                             id: atm.id,
-                            content: atom_content(atm),
-                            title: atom_title(atm),
+                            content: this.atom_content(atm),
+                            title: this.atom_title(atm),
                             start: start_var.value.num / start_var.value.den,
                             end: end_var.value.num / end_var.value.den,
                             group: tl.id
@@ -146,8 +146,8 @@ class Reasoner {
                         const end_var = atm.pars.find(xpr => xpr.name == 'end');
                         vals.push({
                             id: atm.id,
-                            content: atom_content(atm),
-                            title: atom_title(atm),
+                            content: this.atom_content(atm),
+                            title: this.atom_title(atm),
                             start: start_var.value.num / start_var.value.den,
                             end: end_var.value.num / end_var.value.den,
                             group: tl.id
@@ -389,7 +389,7 @@ class Reasoner {
     starting(message) {
         console.log('starting');
         for (const t of message.starting)
-            console.log(atom_content(this.atoms.get(t)));
+            console.log(this.atom_content(this.atoms.get(t)));
     }
 
     start(message) {
@@ -401,7 +401,7 @@ class Reasoner {
     ending(message) {
         console.log('ending');
         for (const t of message.ending)
-            console.log(atom_content(this.atoms.get(t)));
+            console.log(this.atom_content(this.atoms.get(t)));
     }
 
     end(message) {
@@ -415,6 +415,30 @@ class Reasoner {
         for (const t of message.executing)
             this.executing_tasks.add(t);
         this.timeline.setSelection(Array.from(this.executing_tasks), { animate: animation });
+    }
+
+    atom_content(atm) { return atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par.name).sort().join(', ') + ')'; }
+
+    atom_title(atm) { return '\u03C3' + atm.sigma + ' ' + atm.predicate + '(' + atm.pars.filter(par => par.name != 'tau').map(par => '<br>' + this.par_to_string(par)).sort().join(',') + '<br>)'; }
+
+    par_to_string(par) {
+        switch (par.type) {
+            case 'bool': return par.name + ': ' + par.value;
+            case 'real':
+                const lb = par.value.lb ? par.value.lb.num / par.value.lb.den : Number.NEGATIVE_INFINITY;
+                const ub = par.value.ub ? par.value.ub.num / par.value.ub.den : Number.POSITIVE_INFINITY;
+                if (lb == ub)
+                    return par.name + ': ' + par.value.num / par.value.den;
+                else
+                    return par.name + ': ' + par.value.num / par.value.den + ' [' + lb + ', ' + ub + ']';
+            case 'string': return par.name + ': ' + par.value;
+            default:
+                if (typeof par.value == 'object') {
+                    if (par.value.vals.length == 1) return par.name + ': ' + this.items.get(par.value.vals[0]).name;
+                    else return par.name + ': [' + par.value.vals.map(itm_id => this.items.get(itm_id).name).sort().join(',') + ']';
+                } else
+                    return par.name + ': ' + this.items.get(par.value).name;
+        }
     }
 }
 
@@ -432,25 +456,6 @@ function cr_value_class(cr, val) {
     if (cr.capacity.num / cr.capacity.den < val.start.num / val.start.den || cr.capacity.num / cr.capacity.den < val.end.num / val.end.den) return 'rr-inconsistent';
     if (0 > val.start.num / val.start.den || 0 > val.end.num / val.end.den) return 'rr-inconsistent';
     return 'rr-consistent'
-}
-
-function atom_content(atm) { return atm.predicate + '(' + atm.pars.filter(par => par.name != 'start' && par.name != 'end' && par.name != 'duration' && par.name != 'tau').map(par => par.name).sort().join(', ') + ')'; }
-
-function atom_title(atm) { return '\u03C3' + atm.sigma + ' ' + atm.predicate + '(' + atm.pars.filter(par => par.name != 'tau').map(par => '<br>' + par_to_string(par)).sort().join(',') + '<br>)'; }
-
-function par_to_string(par) {
-    switch (par.type) {
-        case 'bool': return par.name + ': ' + par.value;
-        case 'real':
-            const lb = par.value.lb ? par.value.lb.num / par.value.lb.den : Number.NEGATIVE_INFINITY;
-            const ub = par.value.ub ? par.value.ub.num / par.value.ub.den : Number.POSITIVE_INFINITY;
-            if (lb == ub)
-                return par.name + ': ' + par.value.num / par.value.den;
-            else
-                return par.name + ': ' + par.value.num / par.value.den + ' [' + lb + ', ' + ub + ']';
-        case 'string': return par.name + ': ' + par.value;
-        default: return par.name;
-    }
 }
 
 function color(n) {

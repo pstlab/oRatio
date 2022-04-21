@@ -36,6 +36,9 @@ namespace ratio
         json j_itm;
         j_itm->set("id", new long_val(get_id()));
         j_itm->set("type", new string_val(tp.get_full_name()));
+#if defined(VERBOSE_LOG) || defined(BUILD_LISTENERS)
+        j_itm->set("name", new string_val(cr.guess_name(*this)));
+#endif
         if (!env::exprs.empty())
             j_itm->set("exprs", env::to_json());
         return j_itm;
