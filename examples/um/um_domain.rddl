@@ -22,21 +22,36 @@ predicate DoesGreenSpaceMaintainance(MaintainanceCompany mc) {
 
 class Maintainance : Agent {
 
+    predicate RoadMaintainanceDocuments(Road r, MaintainanceCompany mc) : Interval {
+        duration >= 1.0;
+    }
+
     predicate RoadMaintainance(Road r, MaintainanceCompany mc) : Interval {
         duration >= 20.0;
         goal rm = new DoesRoadMaintainance(mc:mc);
         fact mc_activity = new mc.activity.Use(start:start, duration:duration, end:end, amount:1.0);
+        goal rmd = new RoadMaintainanceDocuments(r:r, mc:mc, end:start);
+    }
+
+    predicate BuildingMaintainanceDocuments(Building b, MaintainanceCompany mc) : Interval {
+        duration >= 1.0;
     }
 
     predicate BuildingMaintainance(Building b, MaintainanceCompany mc) : Interval {
         duration >= 30.0;
         goal rm = new DoesBuildingMaintainance(mc:mc);
         fact mc_activity = new mc.activity.Use(start:start, duration:duration, end:end, amount:1.0);
+        goal rmd = new BuildingMaintainanceDocuments(b:b, mc:mc, end:start);
+    }
+
+    predicate GreenSpacesMaintainanceDocuments(GreenSpace gs, MaintainanceCompany mc) : Interval {
+        duration >= 1.0;
     }
 
     predicate GreenSpacesMaintainance(GreenSpace gs, MaintainanceCompany mc) : Interval {
         duration >= 20.0;
         goal rm = new DoesGreenSpaceMaintainance(mc:mc);
         fact mc_activity = new mc.activity.Use(start:start, duration:duration, end:end, amount:1.0);
+        goal rmd = new GreenSpacesMaintainanceDocuments(gs:gs, mc:mc, end:start);
     }
 }
