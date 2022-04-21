@@ -61,7 +61,7 @@ class Reasoner {
                         const start_var = atm.pars.find(xpr => xpr.name == 'start');
                         const end_var = atm.pars.find(xpr => xpr.name == 'end');
                         vals.push({
-                            id: atm.id,
+                            id: '' + atm.id,
                             content: this.atom_content(atm),
                             title: this.atom_title(atm),
                             start: start_var.value.num / start_var.value.den,
@@ -78,7 +78,7 @@ class Reasoner {
                         if (start_var) {
                             const end_var = atm.pars.find(xpr => xpr.name == 'end');
                             vals.push({
-                                id: atm.id,
+                                id: '' + atm.id,
                                 content: this.atom_content(atm),
                                 title: this.atom_title(atm),
                                 start: start_var.value.num / start_var.value.den,
@@ -88,7 +88,7 @@ class Reasoner {
                         } else {
                             const at_var = atm.pars.find(xpr => xpr.name == 'at');
                             vals.push({
-                                id: atm.id,
+                                id: '' + atm.id,
                                 content: this.atom_content(atm),
                                 start: at_var.value.num / at_var.value.den,
                                 group: tl.id
@@ -101,7 +101,7 @@ class Reasoner {
                     tl.values.forEach((val, id) => {
                         vals.push({
                             id: '' + tl.id + id,
-                            content: val.usage.num / val.usage.den,
+                            content: '' + val.usage.num / val.usage.den,
                             className: rr_value_class(tl, val),
                             start: val.from.num / val.from.den,
                             end: val.to.num / val.to.den,
@@ -116,7 +116,7 @@ class Reasoner {
                         const start_var = atm.pars.find(xpr => xpr.name == 'start');
                         const end_var = atm.pars.find(xpr => xpr.name == 'end');
                         vals.push({
-                            id: atm.id,
+                            id: '' + atm.id,
                             content: this.atom_content(atm),
                             title: this.atom_title(atm),
                             start: start_var.value.num / start_var.value.den,
@@ -145,7 +145,7 @@ class Reasoner {
                         const start_var = atm.pars.find(xpr => xpr.name == 'start');
                         const end_var = atm.pars.find(xpr => xpr.name == 'end');
                         vals.push({
-                            id: atm.id,
+                            id: '' + atm.id,
                             content: this.atom_content(atm),
                             title: this.atom_title(atm),
                             start: start_var.value.num / start_var.value.den,
