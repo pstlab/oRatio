@@ -179,12 +179,18 @@ namespace ratio
                 if (slv.get_sat_core().value(af->get_atom().get_sigma()) == True && !slv.get_sat_core().new_clause({slv.geq(s_expr, slv.new_real(current_time))->l}))
                     throw execution_exception();
                 const auto c_s_bnds = slv.arith_bounds(s_expr);
-                atom_adaptation::exec_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
-                adapt.bounds.emplace(&*s_expr, s_bnds);
+                if (c_s_bnds.first < c_s_bnds.second)
+                { // not a constant..
+                    atom_adaptation::exec_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
+                    adapt.bounds.emplace(&*s_expr, s_bnds);
+                }
                 arith_expr e_expr = atm.get(RATIO_END);
                 const auto c_e_bnds = slv.arith_bounds(e_expr);
-                atom_adaptation::exec_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
-                adapt.bounds.emplace(&*e_expr, e_bnds);
+                if (c_e_bnds.first < c_e_bnds.second)
+                { // not a constant..
+                    atom_adaptation::exec_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
+                    adapt.bounds.emplace(&*e_expr, e_bnds);
+                }
             }
             else if (slv.is_impulse(atm))
             { // we have an impulsive atom..
@@ -192,10 +198,14 @@ namespace ratio
                 if (slv.get_sat_core().value(af->get_atom().get_sigma()) == True && !slv.get_sat_core().new_clause({slv.geq(at_expr, slv.new_real(current_time))->l}))
                     throw execution_exception();
                 const auto c_bnds = slv.arith_bounds(at_expr);
-                atom_adaptation::exec_bounds bnds = {c_bnds.first, c_bnds.second};
-                adapt.bounds.emplace(&*at_expr, bnds);
+                if (c_bnds.first < c_bnds.second)
+                { // not a constant..
+                    atom_adaptation::exec_bounds bnds = {c_bnds.first, c_bnds.second};
+                    adapt.bounds.emplace(&*at_expr, bnds);
+                }
             }
-            adaptations.emplace(&atm, std::move(adapt));
+            if (!adapt.bounds.empty())
+                adaptations.emplace(&atm, std::move(adapt));
         }
     }
 
@@ -245,14 +255,17 @@ namespace ratio
 
     void executor::freeze(atom &atm, arith_expr &xpr)
     {
-        auto val = slv.arith_value(xpr);
-        adaptations.at(&atm).bounds.at(&*xpr).lb = val;
-        adaptations.at(&atm).bounds.at(&*xpr).ub = val;
-        if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(xpr->l), val, adaptations.at(&atm).sigma_xi))
-        { // freezing the arithmetic expression caused a conflict..
-            swap_conflict(slv.get_lra_theory());
-            if (!backtrack_analyze_and_backjump())
-                throw execution_exception();
+        if (adaptations.count(&atm))
+        { // not a constant atom..
+            auto val = slv.arith_value(xpr);
+            adaptations.at(&atm).bounds.at(&*xpr).lb = val;
+            adaptations.at(&atm).bounds.at(&*xpr).ub = val;
+            if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(xpr->l), val, adaptations.at(&atm).sigma_xi))
+            { // freezing the arithmetic expression caused a conflict..
+                swap_conflict(slv.get_lra_theory());
+                if (!backtrack_analyze_and_backjump())
+                    throw execution_exception();
+            }
         }
     }
 

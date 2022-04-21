@@ -43,6 +43,7 @@ namespace smt
 
     SMT_EXPORT var lra_theory::new_var(const lin &l) noexcept
     { // we create, if needed, a new arithmetic variable which is equal to the given linear expression..
+        assert(!l.vars.empty());
         const std::string s_expr = to_string(l);
         if (const auto at_expr = exprs.find(s_expr); at_expr != exprs.cend()) // the expression already exists..
             return at_expr->second;
