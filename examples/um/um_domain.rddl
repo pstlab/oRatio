@@ -1,0 +1,37 @@
+class MaintainanceCompany {}
+
+class Road {}
+
+class Building {}
+
+class GreenSpace {}
+
+predicate DoesRoadMaintainance(MaintainanceCompany mc) {
+    false;
+}
+
+predicate DoesBuildingMaintainance(MaintainanceCompany mc) {
+    false;
+}
+
+predicate DoesGreenSpaceMaintainance(MaintainanceCompany mc) {
+    false;
+}
+
+class Maintainance : Agent {
+
+    predicate RoadMaintainance(Road r, MaintainanceCompany mc) : Interval {
+        duration >= 20.0;
+        goal rm = new DoesRoadMaintainance(mc:mc);
+    }
+
+    predicate BuildingMaintainance(Building b, MaintainanceCompany mc) : Interval {
+        duration >= 30.0;
+        goal rm = new DoesBuildingMaintainance(mc:mc);
+    }
+
+    predicate GreenSpacesMaintainance(GreenSpace gs, MaintainanceCompany mc) : Interval {
+        duration >= 20.0;
+        goal rm = new DoesGreenSpaceMaintainance(mc:mc);
+    }
+}

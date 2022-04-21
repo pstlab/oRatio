@@ -1,0 +1,22 @@
+MaintainanceCompany mc0 = new MaintainanceCompany();
+MaintainanceCompany mc1 = new MaintainanceCompany();
+fact mc0_rm = new DoesRoadMaintainance(mc:mc0);
+fact mc1_rm = new DoesRoadMaintainance(mc:mc1);
+fact mc0_bm = new DoesBuildingMaintainance(mc:mc0);
+fact mc1_gsm = new DoesGreenSpaceMaintainance(mc:mc1);
+
+Road r0 = new Road();
+Road r1 = new Road();
+
+Building b0 = new Building();
+Building b1 = new Building();
+
+GreenSpace gs0 = new GreenSpace();
+GreenSpace gs1 = new GreenSpace();
+
+Maintainance agnt = new Maintainance();
+goal bm = new agnt.BuildingMaintainance();
+goal gm = new agnt.GreenSpacesMaintainance();
+goal rm = new agnt.RoadMaintainance();
+rm.start >= bm.end;
+rm.start >= gm.end;
