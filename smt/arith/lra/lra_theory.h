@@ -95,7 +95,11 @@ namespace smt
     void pivot(const var x_i, const var x_j) noexcept;
     void new_row(const var &x, const lin &l) noexcept;
 
-    inline void listen(const var &v, lra_value_listener *const l) noexcept { listening[v].insert(l); }
+    inline void listen(const var &v, lra_value_listener *const l) noexcept
+    {
+      if (lb(v) < ub(v))
+        listening[v].insert(l);
+    }
 
     inline static size_t lb_index(const var &v) noexcept { return v << 1; }       // the index of the lower bound of the 'v' variable..
     inline static size_t ub_index(const var &v) noexcept { return (v << 1) ^ 1; } // the index of the upper bound of the 'v' variable..

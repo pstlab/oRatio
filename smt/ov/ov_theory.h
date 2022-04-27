@@ -34,7 +34,11 @@ namespace smt
     void push() noexcept override;
     void pop() noexcept override;
 
-    inline void listen(const var &v, ov_value_listener *const l) noexcept { listening[v].insert(l); }
+    inline void listen(const var &v, ov_value_listener *const l) noexcept
+    {
+      if (value(v).size() > 1)
+        listening[v].insert(l);
+    }
 
   private:
     struct layer

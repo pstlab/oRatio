@@ -104,7 +104,11 @@ namespace smt
     void pop_one() noexcept;
 
     inline void bind(const var &v, theory &th) noexcept { bounds[v].insert(&th); }
-    inline void listen(const var &v, sat_value_listener &l) noexcept { listening[v].insert(&l); }
+    inline void listen(const var &v, sat_value_listener &l) noexcept
+    {
+      if (value(v) == Undefined)
+        listening[v].insert(&l);
+    }
 
   private:
 #ifdef PARALLELIZE

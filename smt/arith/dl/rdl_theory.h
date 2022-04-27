@@ -55,7 +55,11 @@ namespace smt
 
     void resize(const size_t &size) noexcept;
 
-    inline void listen(const var &v, rdl_value_listener *const l) noexcept { listening[v].insert(l); }
+    inline void listen(const var &v, rdl_value_listener *const l) noexcept
+    {
+      if (lb(v) < ub(v))
+        listening[v].insert(l);
+    }
 
   private:
     class rdl_distance final
