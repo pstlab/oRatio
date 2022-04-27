@@ -32,32 +32,19 @@ namespace ratio
 
     atom_listener::atom_listener(atom &atm) : smt::sat_value_listener(atm.get_core().get_sat_core()), smt::lra_value_listener(atm.get_core().get_lra_theory()), smt::rdl_value_listener(atm.get_core().get_rdl_theory()), smt::ov_value_listener(atm.get_core().get_ov_theory()), atm(atm)
     {
-        std::queue<const type *> q;
-        q.push(&atm.get_type());
-        while (!q.empty())
-        {
-            for (const auto &[f_name, f] : q.front()->get_fields())
-                if (!f->is_synthetic())
-                {
-                    item *i = &*atm.get(f_name);
-                    if (bool_item *be = dynamic_cast<bool_item *>(i))
-                        listen_sat(variable(be->l));
-                    else if (arith_item *ae = dynamic_cast<arith_item *>(i))
-                    {
-                        if (ae->get_type().get_name().compare(TP_KEYWORD) == 0)
-                            for (const auto &[v, c] : ae->l.vars)
-                                listen_rdl(v);
-                        else
-                            for (const auto &[v, c] : ae->l.vars)
-                                listen_lra(v);
-                    }
-                    else if (var_item *ee = dynamic_cast<var_item *>(i))
-                        listen_set(ee->ev);
-                }
-
-            for (const auto &st : q.front()->get_supertypes())
-                q.push(st);
-            q.pop();
-        }
+        for (const auto &[xpr_name, xpr] : atm.get_exprs())
+            if (bool_item *be = dynamic_cast<bool_item *>(&*xpr))
+                listen_sat(variable(be->l));
+            else if (arith_item *ae = dynamic_cast<arith_item *>(&*xpr))
+            {
+                if (ae->get_type().get_name().compare(TP_KEYWORD) == 0)
+                    for (const auto &[v, c] : ae->l.vars)
+                        listen_rdl(v);
+                else
+                    for (const auto &[v, c] : ae->l.vars)
+                        listen_lra(v);
+            }
+            else if (var_item *ee = dynamic_cast<var_item *>(&*xpr))
+                listen_set(ee->ev);
     }
 } // namespace ratio
