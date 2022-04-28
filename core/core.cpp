@@ -105,13 +105,13 @@ namespace ratio
     type &core::get_type(const std::vector<arith_expr> &xprs) const
     {
         if (std::all_of(xprs.cbegin(), xprs.cend(), [](const arith_expr &aex)
-                        { return aex->get_type().get_name().compare(INT_KEYWORD) == 0; }))
+                        { return aex->get_type().get_name() == INT_KEYWORD; }))
             return *types.at(INT_KEYWORD);
         else if (std::all_of(xprs.cbegin(), xprs.cend(), [](const arith_expr &aex)
-                             { return aex->get_type().get_name().compare(REAL_KEYWORD) == 0; }))
+                             { return aex->get_type().get_name() == REAL_KEYWORD; }))
             return *types.at(REAL_KEYWORD);
         else if (std::all_of(xprs.cbegin(), xprs.cend(), [this](const arith_expr &aex)
-                             { return aex->get_type().get_name().compare(TP_KEYWORD) == 0 || aex->l.vars.empty() || lra_th.lb(aex->l) == lra_th.ub(aex->l); }))
+                             { return aex->get_type().get_name() == TP_KEYWORD || aex->l.vars.empty() || lra_th.lb(aex->l) == lra_th.ub(aex->l); }))
             return *types.at(TP_KEYWORD);
         else
             return *types.at(REAL_KEYWORD);
@@ -120,16 +120,16 @@ namespace ratio
     CORE_EXPORT expr core::new_enum(type &tp, const std::vector<item *> &allowed_vals)
     {
         assert(allowed_vals.size() > 1);
-        assert(tp.get_name().compare(BOOL_KEYWORD) != 0);
-        assert(tp.get_name().compare(INT_KEYWORD) != 0);
-        assert(tp.get_name().compare(REAL_KEYWORD) != 0);
-        assert(tp.get_name().compare(TP_KEYWORD) != 0);
+        assert(tp.get_name() != BOOL_KEYWORD);
+        assert(tp.get_name() != INT_KEYWORD);
+        assert(tp.get_name() != REAL_KEYWORD);
+        assert(tp.get_name() != TP_KEYWORD);
         return new var_item(*this, tp, ov_th.new_var(std::vector<var_value *>(allowed_vals.cbegin(), allowed_vals.cend())));
     }
 
     expr core::new_enum(type &tp, const std::vector<lit> &lits, const std::vector<item *> &vals) noexcept
     {
-        if (tp.get_name().compare(BOOL_KEYWORD) == 0)
+        if (tp.get_name() == BOOL_KEYWORD)
         {
             bool_expr b = new_bool();
             [[maybe_unused]] bool nc;
@@ -140,7 +140,7 @@ namespace ratio
             }
             return b;
         }
-        else if (tp.get_name().compare(INT_KEYWORD) == 0)
+        else if (tp.get_name() == INT_KEYWORD)
         {
             auto min = inf_rational(rational::POSITIVE_INFINITY);
             auto max = inf_rational(rational::NEGATIVE_INFINITY);
@@ -175,7 +175,7 @@ namespace ratio
                 return ie;
             }
         }
-        else if (tp.get_name().compare(REAL_KEYWORD) == 0)
+        else if (tp.get_name() == REAL_KEYWORD)
         {
             auto min = inf_rational(rational::POSITIVE_INFINITY);
             auto max = inf_rational(rational::NEGATIVE_INFINITY);
@@ -208,7 +208,7 @@ namespace ratio
                 return re;
             }
         }
-        else if (tp.get_name().compare(TP_KEYWORD) == 0)
+        else if (tp.get_name() == TP_KEYWORD)
         {
             auto min = inf_rational(rational::POSITIVE_INFINITY);
             auto max = inf_rational(rational::NEGATIVE_INFINITY);
@@ -343,35 +343,35 @@ namespace ratio
 
     CORE_EXPORT bool_expr core::lt(arith_expr left, arith_expr right) noexcept
     {
-        if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
+        if (get_type({left, right}).get_name() == TP_KEYWORD)
             return new bool_item(*this, rdl_th.new_lt(left->l, right->l));
         else
             return new bool_item(*this, lra_th.new_lt(left->l, right->l));
     }
     CORE_EXPORT bool_expr core::leq(arith_expr left, arith_expr right) noexcept
     {
-        if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
+        if (get_type({left, right}).get_name() == TP_KEYWORD)
             return new bool_item(*this, rdl_th.new_leq(left->l, right->l));
         else
             return new bool_item(*this, lra_th.new_leq(left->l, right->l));
     }
     CORE_EXPORT bool_expr core::eq(arith_expr left, arith_expr right) noexcept
     {
-        if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
+        if (get_type({left, right}).get_name() == TP_KEYWORD)
             return new bool_item(*this, rdl_th.new_eq(left->l, right->l));
         else
             return new bool_item(*this, lra_th.new_eq(left->l, right->l));
     }
     CORE_EXPORT bool_expr core::geq(arith_expr left, arith_expr right) noexcept
     {
-        if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
+        if (get_type({left, right}).get_name() == TP_KEYWORD)
             return new bool_item(*this, rdl_th.new_geq(left->l, right->l));
         else
             return new bool_item(*this, lra_th.new_geq(left->l, right->l));
     }
     CORE_EXPORT bool_expr core::gt(arith_expr left, arith_expr right) noexcept
     {
-        if (get_type({left, right}).get_name().compare(TP_KEYWORD) == 0)
+        if (get_type({left, right}).get_name() == TP_KEYWORD)
             return new bool_item(*this, rdl_th.new_gt(left->l, right->l));
         else
             return new bool_item(*this, lra_th.new_gt(left->l, right->l));
@@ -473,14 +473,14 @@ namespace ratio
     CORE_EXPORT lbool core::bool_value(const bool_expr &x) const noexcept { return sat_cr.value(x->l); }
     std::pair<inf_rational, inf_rational> core::arith_bounds(const arith_expr &x) const noexcept
     {
-        if (x->get_type().get_name().compare(TP_KEYWORD) == 0)
+        if (x->get_type().get_name() == TP_KEYWORD)
             return rdl_th.bounds(x->l);
         else
             return lra_th.bounds(x->l);
     }
     CORE_EXPORT inf_rational core::arith_value(const arith_expr &x) const noexcept
     {
-        if (x->get_type().get_name().compare(TP_KEYWORD) == 0)
+        if (x->get_type().get_name() == TP_KEYWORD)
             return rdl_th.bounds(x->l).first;
         else
             return lra_th.value(x->l);
