@@ -148,6 +148,17 @@ namespace ratio
                         if ((*at).l.vars.empty())
                             continue; // we have a constant: nothing to propagate..
                         const auto val = slv.arith_value(at);
+                        auto [it, added] = adaptations.at(atm).bounds.emplace(&*at, nullptr);
+                        if (added)
+                        { // we have to add new bounds..
+                            const auto bnds = slv.arith_bounds(at);
+                            it->second = new atom_adaptation::arith_bounds{val, val};
+                        }
+                        else
+                        { // we update the bounds..
+                            static_cast<atom_adaptation::arith_bounds *>(it->second)->lb = val;
+                            static_cast<atom_adaptation::arith_bounds *>(it->second)->ub = val;
+                        }
                         if (at->get_type().get_name() == REAL_KEYWORD)
                         { // we have a real variable..
                             if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*at).l), val, adaptations.at(atm).sigma_xi))
@@ -164,6 +175,17 @@ namespace ratio
                         if ((*end).l.vars.empty())
                             continue; // we have a constant: nothing to propagate..
                         const auto val = slv.arith_value(end);
+                        auto [it, added] = adaptations.at(atm).bounds.emplace(&*end, nullptr);
+                        if (added)
+                        { // we have to add new bounds..
+                            const auto bnds = slv.arith_bounds(end);
+                            it->second = new atom_adaptation::arith_bounds{val, val};
+                        }
+                        else
+                        { // we update the bounds..
+                            static_cast<atom_adaptation::arith_bounds *>(it->second)->lb = val;
+                            static_cast<atom_adaptation::arith_bounds *>(it->second)->ub = val;
+                        }
                         if (end->get_type().get_name() == REAL_KEYWORD)
                         { // we have a real variable..
                             if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*end).l), val, adaptations.at(atm).sigma_xi))
