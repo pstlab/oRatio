@@ -43,12 +43,22 @@ namespace ratio
                         if ((*xpr).l.vars.empty())
                             throw execution_exception(); // we can't delay constants..
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
-                        static_cast<atom_adaptation::arith_bounds *>(adaptations.at(atm).bounds.at(&*xpr))->lb = lb;
-                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
-                        { // setting the lower bound caused a conflict..
-                            swap_conflict(slv.get_lra_theory());
-                            if (!backtrack_analyze_and_backjump())
-                                throw execution_exception();
+                        auto [it, added] = adaptations.at(atm).bounds.emplace(&*xpr, nullptr);
+                        if (added)
+                        { // we have to add new bounds..
+                            const auto bnds = slv.arith_bounds(xpr);
+                            it->second = new atom_adaptation::arith_bounds{lb, bnds.second};
+                        }
+                        else // we update the lower bound..
+                            static_cast<atom_adaptation::arith_bounds *>(it->second)->lb = lb;
+                        if (xpr->get_type().get_name() == REAL_KEYWORD)
+                        { // we have a real variable..
+                            if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
+                            { // setting the lower bound caused a conflict..
+                                swap_conflict(slv.get_lra_theory());
+                                if (!backtrack_analyze_and_backjump())
+                                    throw execution_exception();
+                            }
                         }
                         delays = true;
                         dont_start.erase(at_atm);
@@ -61,12 +71,22 @@ namespace ratio
                         if ((*xpr).l.vars.empty())
                             throw execution_exception(); // we can't delay constants
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
-                        static_cast<atom_adaptation::arith_bounds *>(adaptations.at(atm).bounds.at(&*xpr))->lb = lb;
-                        if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
-                        { // setting the lower bound caused a conflict..
-                            swap_conflict(slv.get_lra_theory());
-                            if (!backtrack_analyze_and_backjump())
-                                throw execution_exception();
+                        auto [it, added] = adaptations.at(atm).bounds.emplace(&*xpr, nullptr);
+                        if (added)
+                        { // we have to add new bounds..
+                            const auto bnds = slv.arith_bounds(xpr);
+                            it->second = new atom_adaptation::arith_bounds{lb, bnds.second};
+                        }
+                        else // we update the lower bound..
+                            static_cast<atom_adaptation::arith_bounds *>(it->second)->lb = lb;
+                        if (xpr->get_type().get_name() == REAL_KEYWORD)
+                        { // we have a real variable..
+                            if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
+                            { // setting the lower bound caused a conflict..
+                                swap_conflict(slv.get_lra_theory());
+                                if (!backtrack_analyze_and_backjump())
+                                    throw execution_exception();
+                            }
                         }
                         delays = true;
                         dont_end.erase(at_atm);
@@ -95,14 +115,17 @@ namespace ratio
                             { // we store the arithmetic value and, if not a constant, we propagate also the bounds..
                                 if (ai->l.vars.empty())
                                     continue; // we have a constant: nothing to propagate..
-                                const auto val = ai->get_type().get_name() == TP_KEYWORD ? slv.get_rdl_theory().bounds(ai->l).first : slv.get_lra_theory().value(ai->l);
-                                adaptations.at(atm).bounds.emplace(itm, new atom_adaptation::arith_bounds{val, val});
-                                // we freeze the arithmetic value..
-                                if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(ai->l), val, adaptations.at(atm).sigma_xi))
-                                { // freezing the arithmetic expression caused a conflict..
-                                    swap_conflict(slv.get_lra_theory());
-                                    if (!backtrack_analyze_and_backjump())
-                                        throw execution_exception();
+                                if (ai->get_type().get_name() == REAL_KEYWORD)
+                                { // we have a real variable..
+                                    const auto val = slv.get_lra_theory().value(ai->l);
+                                    adaptations.at(atm).bounds.emplace(itm, new atom_adaptation::arith_bounds{val, val});
+                                    // we freeze the arithmetic value..
+                                    if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(ai->l), val, adaptations.at(atm).sigma_xi))
+                                    { // freezing the arithmetic expression caused a conflict..
+                                        swap_conflict(slv.get_lra_theory());
+                                        if (!backtrack_analyze_and_backjump())
+                                            throw execution_exception();
+                                    }
                                 }
                             }
                             else if (const var_item *vi = dynamic_cast<const var_item *>(itm))
@@ -125,11 +148,14 @@ namespace ratio
                         if ((*at).l.vars.empty())
                             continue; // we have a constant: nothing to propagate..
                         const auto val = slv.arith_value(at);
-                        if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*at).l), val, adaptations.at(atm).sigma_xi))
-                        { // freezing the arithmetic expression caused a conflict..
-                            swap_conflict(slv.get_lra_theory());
-                            if (!backtrack_analyze_and_backjump())
-                                throw execution_exception();
+                        if (at->get_type().get_name() == REAL_KEYWORD)
+                        { // we have a real variable..
+                            if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*at).l), val, adaptations.at(atm).sigma_xi))
+                            { // freezing the arithmetic expression caused a conflict..
+                                swap_conflict(slv.get_lra_theory());
+                                if (!backtrack_analyze_and_backjump())
+                                    throw execution_exception();
+                            }
                         }
                     }
                     else if (slv.is_interval(*atm))
@@ -138,11 +164,14 @@ namespace ratio
                         if ((*end).l.vars.empty())
                             continue; // we have a constant: nothing to propagate..
                         const auto val = slv.arith_value(end);
-                        if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*end).l), val, adaptations.at(atm).sigma_xi))
-                        { // freezing the arithmetic expression caused a conflict..
-                            swap_conflict(slv.get_lra_theory());
-                            if (!backtrack_analyze_and_backjump())
-                                throw execution_exception();
+                        if (end->get_type().get_name() == REAL_KEYWORD)
+                        { // we have a real variable..
+                            if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*end).l), val, adaptations.at(atm).sigma_xi))
+                            { // freezing the arithmetic expression caused a conflict..
+                                swap_conflict(slv.get_lra_theory());
+                                if (!backtrack_analyze_and_backjump())
+                                    throw execution_exception();
+                            }
                         }
                     }
                 // we notify that some atoms are ending their execution..
@@ -226,8 +255,12 @@ namespace ratio
             all_atoms.emplace(atm.get_sigma(), &atm);
             // we bind the sigma variable for propagating the bounds..
             bind(atm.get_sigma());
+            // we create a new variable for propagating the execution constraints..
+            const auto sigma_xi = slv.get_sat_core().new_var();
             // either the atom is not active, or the xi variable is false, or the execution bounds must be enforced..
-            adaptations.emplace(&atm, atom_adaptation(slv.get_sat_core().new_conj({atm.get_sigma(), xi})));
+            [[maybe_unused]] bool nc = slv.get_sat_core().new_clause({smt::lit(atm.get_sigma(), false), !xi, smt::lit(sigma_xi)});
+            assert(nc);
+            adaptations.emplace(&atm, smt::lit(sigma_xi));
         }
     }
 
@@ -295,10 +328,13 @@ namespace ratio
             if (static_cast<const ratio::arith_item *>(&itm)->l.vars.empty())
                 return true; // we have a constant: nothing to propagate..
             const auto var = slv.get_lra_theory().new_var(static_cast<const ratio::arith_item *>(&itm)->l);
-            if (!slv.get_lra_theory().set_lb(var, aa->lb, reason) || !slv.get_lra_theory().set_ub(var, aa->ub, reason))
-            { // setting the bounds caused a conflict..
-                swap_conflict(slv.get_lra_theory());
-                return false;
+            if (itm.get_type().get_name() == REAL_KEYWORD)
+            { // we have a real variable..
+                if (!slv.get_lra_theory().set_lb(var, aa->lb, reason) || !slv.get_lra_theory().set_ub(var, aa->ub, reason))
+                { // setting the bounds caused a conflict..
+                    swap_conflict(slv.get_lra_theory());
+                    return false;
+                }
             }
         }
         else if (const atom_adaptation::var_bounds *va = dynamic_cast<const atom_adaptation::var_bounds *>(&bounds))
