@@ -40,6 +40,8 @@ namespace ratio
                     if (const auto at_atm = dont_start.find(atm); at_atm != dont_start.end())
                     { // this starting atom is not ready to be started..
                         const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_START);
+                        if ((*xpr).l.vars.empty())
+                            throw execution_exception(); // we can't delay constants..
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         static_cast<atom_adaptation::arith_bounds *>(adaptations.at(atm).bounds.at(&*xpr))->lb = lb;
                         if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
@@ -56,6 +58,8 @@ namespace ratio
                     if (const auto at_atm = dont_end.find(atm); at_atm != dont_end.end())
                     { // this ending atom is not ready to be ended..
                         const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_END);
+                        if ((*xpr).l.vars.empty())
+                            throw execution_exception(); // we can't delay constants
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
                         static_cast<atom_adaptation::arith_bounds *>(adaptations.at(atm).bounds.at(&*xpr))->lb = lb;
                         if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
@@ -88,7 +92,9 @@ namespace ratio
                                 adaptations.at(atm).bounds.emplace(itm, new atom_adaptation::bool_bounds{slv.get_sat_core().value(bi->l)});
                             }
                             else if (const arith_item *ai = dynamic_cast<const arith_item *>(itm))
-                            { // we store the arithmetic value and propagate the bounds..
+                            { // we store the arithmetic value and, if not a constant, we propagate also the bounds..
+                                if (ai->l.vars.empty())
+                                    continue; // we have a constant: nothing to propagate..
                                 const auto val = ai->get_type().get_name() == TP_KEYWORD ? slv.get_rdl_theory().bounds(ai->l).first : slv.get_lra_theory().value(ai->l);
                                 adaptations.at(atm).bounds.emplace(itm, new atom_adaptation::arith_bounds{val, val});
                                 // we freeze the arithmetic value..
@@ -116,6 +122,8 @@ namespace ratio
                     if (slv.is_impulse(*atm))
                     { // we have an impulsive atom..
                         arith_expr at = atm->get(RATIO_AT);
+                        if ((*at).l.vars.empty())
+                            continue; // we have a constant: nothing to propagate..
                         const auto val = slv.arith_value(at);
                         if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*at).l), val, adaptations.at(atm).sigma_xi))
                         { // freezing the arithmetic expression caused a conflict..
@@ -127,6 +135,8 @@ namespace ratio
                     else if (slv.is_interval(*atm))
                     { // we have an interval atom..
                         arith_expr end = atm->get(RATIO_END);
+                        if ((*end).l.vars.empty())
+                            continue; // we have a constant: nothing to propagate..
                         const auto val = slv.arith_value(end);
                         if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*end).l), val, adaptations.at(atm).sigma_xi))
                         { // freezing the arithmetic expression caused a conflict..
@@ -282,6 +292,8 @@ namespace ratio
         }
         else if (const atom_adaptation::arith_bounds *aa = dynamic_cast<const atom_adaptation::arith_bounds *>(&bounds))
         {
+            if (static_cast<const ratio::arith_item *>(&itm)->l.vars.empty())
+                return true; // we have a constant: nothing to propagate..
             const auto var = slv.get_lra_theory().new_var(static_cast<const ratio::arith_item *>(&itm)->l);
             if (!slv.get_lra_theory().set_lb(var, aa->lb, reason) || !slv.get_lra_theory().set_ub(var, aa->ub, reason))
             { // setting the bounds caused a conflict..
