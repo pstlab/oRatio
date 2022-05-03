@@ -7,6 +7,7 @@
 #define RATIO_AT "at"
 #define RATIO_START "start"
 #define RATIO_END "end"
+#define RATIO_DURATION "duration"
 #define RATIO_IMPULSE "Impulse"
 #define RATIO_INTERVAL "Interval"
 

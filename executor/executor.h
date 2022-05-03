@@ -15,12 +15,36 @@ namespace ratio
 
   struct atom_adaptation
   {
-    struct exec_bounds
+    struct item_bounds
     {
+      virtual ~item_bounds() = default;
+    };
+    struct bool_bounds : public item_bounds
+    {
+      bool_bounds(const smt::lbool &val) : val(val) {}
+      const smt::lbool val;
+    };
+    struct arith_bounds : public item_bounds
+    {
+      arith_bounds(const smt::inf_rational &lb, const smt::inf_rational &ub) : lb(lb), ub(ub) {}
       smt::inf_rational lb, ub;
     };
+    struct var_bounds : public item_bounds
+    {
+      var_bounds(smt::var_value &val) : val(val) {}
+      smt::var_value &val;
+    };
+
+    atom_adaptation(const smt::lit &sigma_xi) : sigma_xi(sigma_xi) {}
+    ~atom_adaptation()
+    {
+      // we delete the bounds..
+      for ([[maybe_unused]] const auto &[itm, bnd] : bounds)
+        delete bnd;
+    }
+
     smt::lit sigma_xi;
-    std::unordered_map<arith_item *, exec_bounds> bounds;
+    std::unordered_map<item *, item_bounds *> bounds;
   };
 
   class executor final : public core_listener, public solver_listener, public smt::theory
@@ -56,7 +80,7 @@ namespace ratio
     void flaw_created(const flaw &f) override;
 
     void build_timelines();
-    void freeze(atom &atm, arith_expr &xpr);
+    bool propagate_bounds(const ratio::item &itm, const atom_adaptation::item_bounds &bounds, const smt::lit &reason);
 
     void reset_relevant_predicates();
 

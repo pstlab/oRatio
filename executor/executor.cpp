@@ -4,6 +4,7 @@
 #include "predicate.h"
 #include "atom.h"
 #include "atom_flaw.h"
+#include "riddle_lexer.h"
 #include <chrono>
 #include <sstream>
 #include <cassert>
@@ -40,7 +41,7 @@ namespace ratio
                     { // this starting atom is not ready to be started..
                         const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_START);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
-                        adaptations.at(atm).bounds.at(&*xpr).lb = lb;
+                        static_cast<atom_adaptation::arith_bounds *>(adaptations.at(atm).bounds.at(&*xpr))->lb = lb;
                         if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
                         { // setting the lower bound caused a conflict..
                             swap_conflict(slv.get_lra_theory());
@@ -56,7 +57,7 @@ namespace ratio
                     { // this ending atom is not ready to be ended..
                         const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_END);
                         const auto lb = slv.arith_value(xpr) + units_per_tick;
-                        adaptations.at(atm).bounds.at(&*xpr).lb = lb;
+                        static_cast<atom_adaptation::arith_bounds *>(adaptations.at(atm).bounds.at(&*xpr))->lb = lb;
                         if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(xpr->l), lb, adaptations.at(atm).sigma_xi))
                         { // setting the lower bound caused a conflict..
                             swap_conflict(slv.get_lra_theory());
@@ -75,28 +76,64 @@ namespace ratio
             }
 
             if (const auto starting_atms = s_atms.find(*pulses.cbegin()); starting_atms != s_atms.cend())
-            { // we freeze the start of the starting atoms..
+            { // we have to freeze the starting atoms..
                 for (auto &atm : starting_atms->second)
-                {
-                    arith_expr start = atm->get(RATIO_START);
-                    freeze(*atm, start);
-                }
+                    for (const auto &[xpr_name, xpr] : atm->get_exprs()) // we freeze the starting atoms' expressions..
+                        if (xpr_name != RATIO_AT && xpr_name != RATIO_DURATION && xpr_name != RATIO_END)
+                        { // we store the value for propagating it in case of backtracking..
+                            item *itm = &*xpr;
+                            if (const bool_item *bi = dynamic_cast<const bool_item *>(itm))
+                            { // we store the propositional value..
+                                assert(slv.get_sat_core().value(bi->l) != Undefined);
+                                adaptations.at(atm).bounds.emplace(itm, new atom_adaptation::bool_bounds{slv.get_sat_core().value(bi->l)});
+                            }
+                            else if (const arith_item *ai = dynamic_cast<const arith_item *>(itm))
+                            { // we store the arithmetic value and propagate the bounds..
+                                const auto val = ai->get_type().get_name() == TP_KEYWORD ? slv.get_rdl_theory().bounds(ai->l).first : slv.get_lra_theory().value(ai->l);
+                                adaptations.at(atm).bounds.emplace(itm, new atom_adaptation::arith_bounds{val, val});
+                                // we freeze the arithmetic value..
+                                if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(ai->l), val, adaptations.at(atm).sigma_xi))
+                                { // freezing the arithmetic expression caused a conflict..
+                                    swap_conflict(slv.get_lra_theory());
+                                    if (!backtrack_analyze_and_backjump())
+                                        throw execution_exception();
+                                }
+                            }
+                            else if (const var_item *vi = dynamic_cast<const var_item *>(itm))
+                            { // we store the variable value..
+                                const auto vals = slv.get_ov_theory().value(vi->ev);
+                                assert(vals.size() == 1);
+                                adaptations.at(atm).bounds.emplace(itm, new atom_adaptation::var_bounds{**vals.begin()});
+                            }
+                        }
                 // we notify that some atoms are starting their execution..
                 for (const auto &l : listeners)
                     l->start(starting_atms->second);
             }
             if (const auto ending_atms = e_atms.find(*pulses.cbegin()); ending_atms != e_atms.cend())
-            { // we freeze the at and the end of the ending atoms..
+            { // we freeze the 'at' and the 'end' of the ending atoms..
                 for (auto &atm : ending_atms->second)
-                    if (slv.is_impulse(*atm)) // we have an impulsive atom..
-                    {
+                    if (slv.is_impulse(*atm))
+                    { // we have an impulsive atom..
                         arith_expr at = atm->get(RATIO_AT);
-                        freeze(*atm, at);
+                        const auto val = slv.arith_value(at);
+                        if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*at).l), val, adaptations.at(atm).sigma_xi))
+                        { // freezing the arithmetic expression caused a conflict..
+                            swap_conflict(slv.get_lra_theory());
+                            if (!backtrack_analyze_and_backjump())
+                                throw execution_exception();
+                        }
                     }
-                    else if (slv.is_interval(*atm)) // we have an interval atom..
-                    {
+                    else if (slv.is_interval(*atm))
+                    { // we have an interval atom..
                         arith_expr end = atm->get(RATIO_END);
-                        freeze(*atm, end);
+                        const auto val = slv.arith_value(end);
+                        if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var((*end).l), val, adaptations.at(atm).sigma_xi))
+                        { // freezing the arithmetic expression caused a conflict..
+                            swap_conflict(slv.get_lra_theory());
+                            if (!backtrack_analyze_and_backjump())
+                                throw execution_exception();
+                        }
                     }
                 // we notify that some atoms are ending their execution..
                 for (const auto &l : listeners)
@@ -106,6 +143,7 @@ namespace ratio
             pulses.erase(pulses.cbegin());
         }
 
+        // we update the current time..
         current_time += units_per_tick;
 
         // we notify that a tick has arised..
@@ -124,16 +162,22 @@ namespace ratio
 
     bool executor::propagate(const smt::lit &p) noexcept
     {
-        assert(p == xi);
-        // we propagate the active bounds..
-        for (const auto &adapt : adaptations)
-            if (slv.get_sat_core().value(adapt.second.sigma_xi) == True)
-                for (const auto &bnds : adapt.second.bounds)
-                    if (!slv.get_lra_theory().set_lb(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.lb, adapt.second.sigma_xi) || !slv.get_lra_theory().set_ub(slv.get_lra_theory().new_var(bnds.first->l), bnds.second.ub, adapt.second.sigma_xi))
-                    { // setting the lower bound caused a conflict..
-                        swap_conflict(slv.get_lra_theory());
-                        return false;
-                    }
+        if (p == xi)
+        { // we propagate the active bounds..
+            for (const auto &adapt : adaptations)
+                if (slv.get_sat_core().value(adapt.second.sigma_xi) == True)
+                    for (const auto &bnds : adapt.second.bounds)
+                        if (!propagate_bounds(*bnds.first, *bnds.second, adapt.second.sigma_xi))
+                            return false;
+        }
+        else if (slv.get_sat_core().value(variable(p)) == True)
+        { // an atom has been activated..
+            const atom *atm = all_atoms.at(variable(p));
+            const auto &adapt = adaptations.at(atm);
+            for (const auto &bnds : adapt.bounds)
+                if (!propagate_bounds(*bnds.first, *bnds.second, p))
+                    return false;
+        }
         return true;
     }
 
@@ -165,47 +209,15 @@ namespace ratio
     }
 
     void executor::flaw_created(const flaw &f)
-    { // we cannot plan in the past..
+    {
         if (const atom_flaw *af = dynamic_cast<const atom_flaw *>(&f))
-        { // .. hence we force each atom to start after the current time..
+        { // we create an adaptation for adapting the atom at execution time..
             atom &atm = af->get_atom();
+            all_atoms.emplace(atm.get_sigma(), &atm);
+            // we bind the sigma variable for propagating the bounds..
+            bind(atm.get_sigma());
             // either the atom is not active, or the xi variable is false, or the execution bounds must be enforced..
-            atom_adaptation adapt = {slv.get_sat_core().new_conj({atm.get_sigma(), xi}), {}};
-            all_atoms.emplace(variable(adapt.sigma_xi), &atm);
-
-            if (slv.is_interval(atm))
-            { // we have an interval atom..
-                arith_expr s_expr = atm.get(RATIO_START);
-                if (slv.get_sat_core().value(af->get_atom().get_sigma()) == True && !slv.get_sat_core().new_clause({slv.geq(s_expr, slv.new_real(current_time))->l}))
-                    throw execution_exception();
-                const auto c_s_bnds = slv.arith_bounds(s_expr);
-                if (c_s_bnds.first < c_s_bnds.second)
-                { // not a constant..
-                    atom_adaptation::exec_bounds s_bnds = {c_s_bnds.first, c_s_bnds.second};
-                    adapt.bounds.emplace(&*s_expr, s_bnds);
-                }
-                arith_expr e_expr = atm.get(RATIO_END);
-                const auto c_e_bnds = slv.arith_bounds(e_expr);
-                if (c_e_bnds.first < c_e_bnds.second)
-                { // not a constant..
-                    atom_adaptation::exec_bounds e_bnds = {c_e_bnds.first, c_e_bnds.second};
-                    adapt.bounds.emplace(&*e_expr, e_bnds);
-                }
-            }
-            else if (slv.is_impulse(atm))
-            { // we have an impulsive atom..
-                arith_expr at_expr = atm.get(RATIO_AT);
-                if (slv.get_sat_core().value(af->get_atom().get_sigma()) == True && !slv.get_sat_core().new_clause({slv.geq(at_expr, slv.new_real(current_time))->l}))
-                    throw execution_exception();
-                const auto c_bnds = slv.arith_bounds(at_expr);
-                if (c_bnds.first < c_bnds.second)
-                { // not a constant..
-                    atom_adaptation::exec_bounds bnds = {c_bnds.first, c_bnds.second};
-                    adapt.bounds.emplace(&*at_expr, bnds);
-                }
-            }
-            if (!adapt.bounds.empty())
-                adaptations.emplace(&atm, std::move(adapt));
+            adaptations.emplace(&atm, atom_adaptation(slv.get_sat_core().new_conj({atm.get_sigma(), xi})));
         }
     }
 
@@ -253,20 +265,44 @@ namespace ratio
             }
     }
 
-    void executor::freeze(atom &atm, arith_expr &xpr)
+    bool executor::propagate_bounds(const ratio::item &itm, const atom_adaptation::item_bounds &bounds, const smt::lit &reason)
     {
-        if (adaptations.count(&atm))
-        { // not a constant atom..
-            auto val = slv.arith_value(xpr);
-            adaptations.at(&atm).bounds.at(&*xpr).lb = val;
-            adaptations.at(&atm).bounds.at(&*xpr).ub = val;
-            if (!slv.get_lra_theory().set(slv.get_lra_theory().new_var(xpr->l), val, adaptations.at(&atm).sigma_xi))
-            { // freezing the arithmetic expression caused a conflict..
-                swap_conflict(slv.get_lra_theory());
-                if (!backtrack_analyze_and_backjump())
-                    throw execution_exception();
+        if (const atom_adaptation::bool_bounds *ba = dynamic_cast<const atom_adaptation::bool_bounds *>(&bounds))
+        {
+            const auto var = static_cast<const ratio::bool_item *>(&itm)->l;
+            const auto val = slv.get_sat_core().value(var);
+            if (val == Undefined)
+                record({var, !reason});
+            else if (val != ba->val)
+            { // we have a conflict..
+                cnfl.push_back(var);
+                cnfl.push_back(!reason);
+                return false;
             }
         }
+        else if (const atom_adaptation::arith_bounds *aa = dynamic_cast<const atom_adaptation::arith_bounds *>(&bounds))
+        {
+            const auto var = slv.get_lra_theory().new_var(static_cast<const ratio::arith_item *>(&itm)->l);
+            if (!slv.get_lra_theory().set_lb(var, aa->lb, reason) || !slv.get_lra_theory().set_ub(var, aa->ub, reason))
+            { // setting the bounds caused a conflict..
+                swap_conflict(slv.get_lra_theory());
+                return false;
+            }
+        }
+        else if (const atom_adaptation::var_bounds *va = dynamic_cast<const atom_adaptation::var_bounds *>(&bounds))
+        {
+            const auto var = static_cast<const ratio::var_item *>(&itm)->ev;
+            const auto val = slv.get_ov_theory().value(var);
+            if (val.size() > 1)
+                record({slv.get_ov_theory().allows(var, va->val), !reason});
+            else if (*val.begin() != &va->val)
+            { // we have a conflict..
+                cnfl.push_back(slv.get_ov_theory().allows(var, va->val));
+                cnfl.push_back(!reason);
+                return false;
+            }
+        }
+        return true;
     }
 
     void executor::reset_relevant_predicates()
