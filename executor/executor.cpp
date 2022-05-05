@@ -149,11 +149,8 @@ namespace ratio
                             continue; // we have a constant: nothing to propagate..
                         const auto val = slv.arith_value(at);
                         auto [it, added] = adaptations.at(atm).bounds.emplace(&*at, nullptr);
-                        if (added)
-                        { // we have to add new bounds..
-                            const auto bnds = slv.arith_bounds(at);
+                        if (added) // we have to add new bounds..
                             it->second = new atom_adaptation::arith_bounds{val, val};
-                        }
                         else
                         { // we update the bounds..
                             static_cast<atom_adaptation::arith_bounds *>(it->second)->lb = val;
@@ -176,11 +173,8 @@ namespace ratio
                             continue; // we have a constant: nothing to propagate..
                         const auto val = slv.arith_value(end);
                         auto [it, added] = adaptations.at(atm).bounds.emplace(&*end, nullptr);
-                        if (added)
-                        { // we have to add new bounds..
-                            const auto bnds = slv.arith_bounds(end);
+                        if (added) // we have to add new bounds..
                             it->second = new atom_adaptation::arith_bounds{val, val};
-                        }
                         else
                         { // we update the bounds..
                             static_cast<atom_adaptation::arith_bounds *>(it->second)->lb = val;
