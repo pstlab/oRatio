@@ -1,6 +1,4 @@
 #include "deliberative_manager.h"
-#include <thread>
-#include <chrono>
 
 using namespace ratio;
 
@@ -18,17 +16,8 @@ int main(int argc, char **argv)
 
     deliberative_manager dm(nh);
 
-    std::thread t([&dm]()
-                  {
-                      std::chrono::steady_clock::time_point tick_time = std::chrono::steady_clock::now() + std::chrono::milliseconds(tick_duration);
-                      while (ros::ok())
-                      {
-                          dm.tick();
-                          ros::spinOnce();
-                          std::this_thread::sleep_until(tick_time += std::chrono::milliseconds(tick_duration));
-                      }
-                  });
-    t.join();
+    ros::Timer tick_timer = nh.createTimer(ros::Duration(1.0), std::bind(&ratio::deliberative_manager::tick, &dm));
+    ros::spin();
 
     return 0;
 }
