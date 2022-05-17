@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 title: Lifted Heuristics for Timeline-based Planning
 message: Please cite this software using these metadata.
-type: article
+type: software
 doi: 10.3233/FAIA200362
 authors:
   - given-names: Riccardo
