@@ -1,7 +1,8 @@
 cff-version: 1.2.0
 title: Lifted Heuristics for Timeline-based Planning
 message: Please cite this software using these metadata.
-type: software
+type: article
+doi: 10.3233/FAIA200362
 authors:
   - given-names: Riccardo
     family-names: De Benedictis
@@ -13,3 +14,9 @@ authors:
     email: amedeo.cesta@istc.cnr.it
     orcid: 'https://orcid.org/0000-0002-0703-9122'
     affiliation: 'CNR - Italian National Research Council, ISTC'
+booktitle: ECAI 2020 - 24th European Conference on Artificial Intelligence, 29 August-8 September 2020, Santiago de Compostela, Spain, August 29 - September 8, 2020 - Including 10th Conference on Prestigious Applications of Artificial Intelligence (PAIS 2020)
+series: Frontiers in Artificial Intelligence and Applications
+volume: 325
+pages: 2330--2337
+publisher: IOS Press
+year: 2020
