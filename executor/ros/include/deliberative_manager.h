@@ -1,13 +1,12 @@
 #pragma once
 
-#include "deliberative_tier/create_reasoner.h"
-#include "deliberative_tier/destroy_reasoner.h"
-#include "deliberative_tier/task_finished.h"
-#include "deliberative_tier/new_requirement.h"
-#include "deliberative_tier/get_state.h"
+#include "deliberative_tier/reasoner_creator.h"
+#include "deliberative_tier/reasoner_destroyer.h"
+#include "deliberative_tier/task_closer.h"
+#include "deliberative_tier/requirement_creator.h"
+#include "deliberative_tier/state_collector.h"
 #include <ros/ros.h>
 #include <unordered_map>
-#include <queue>
 
 namespace ratio
 {
@@ -29,18 +28,18 @@ namespace ratio
     void tick();
 
   private:
-    bool create_reasoner(deliberative_tier::create_reasoner::Request &req, deliberative_tier::create_reasoner::Response &res);
-    bool destroy_reasoner(deliberative_tier::destroy_reasoner::Request &req, deliberative_tier::destroy_reasoner::Response &res);
-    bool new_requirement(deliberative_tier::new_requirement::Request &req, deliberative_tier::new_requirement::Response &res);
-    bool task_finished(deliberative_tier::task_finished::Request &req, deliberative_tier::task_finished::Response &res);
-    bool get_state(deliberative_tier::get_state::Request &req, deliberative_tier::get_state::Response &res);
+    bool create_reasoner(deliberative_tier::reasoner_creator::Request &req, deliberative_tier::reasoner_creator::Response &res);
+    bool destroy_reasoner(deliberative_tier::reasoner_destroyer::Request &req, deliberative_tier::reasoner_destroyer::Response &res);
+    bool new_requirements(deliberative_tier::requirement_creator::Request &req, deliberative_tier::requirement_creator::Response &res);
+    bool close_task(deliberative_tier::task_closer::Request &req, deliberative_tier::task_closer::Response &res);
+    bool get_state(deliberative_tier::state_collector::Request &req, deliberative_tier::state_collector::Response &res);
 
   private:
     ros::NodeHandle &handle;
     ros::ServiceServer create_reasoner_server;
     ros::ServiceServer destroy_reasoner_server;
-    ros::ServiceServer new_requirement_server;
-    ros::ServiceServer task_finished_server;
+    ros::ServiceServer new_requirements_server;
+    ros::ServiceServer close_task_server;
     ros::ServiceServer state_server;
     ros::Publisher notify_state;
     ros::Publisher notify_graph;
@@ -50,6 +49,5 @@ namespace ratio
     ros::ServiceClient can_end;
     ros::ServiceClient end_task;
     std::unordered_map<uint64_t, deliberative_executor *> executors;
-    std::unordered_map<uint64_t, std::queue<std::string>> pending_requirements;
   };
 } // namespace ratio

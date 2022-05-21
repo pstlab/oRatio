@@ -129,7 +129,7 @@ uint8 deliberative_state
 Each time a reasoner changes its state, in particular, a `deliberative_tier\deliberative_state` message is communicated to the to the `deliberative_state` topic.
 
 ### Creating a reasoner
-The first step for using oRatio in a ROS environment consists in creating a new reasoner. The creation of a reasoner is done through the `create_reasoner` service. This service has type `deliberative_tier/create_reasoner` which is structured as follows:
+The first step for using oRatio in a ROS environment consists in creating a new reasoner. The creation of a reasoner is done through the `reasoner_creator` service. This service has type `deliberative_tier/reasoner_creator` which is structured as follows:
 
 ```
 string[] domain_files
@@ -143,7 +143,7 @@ bool consistent
 In particular, the service requires a set of paths to domain files, a set of requirements in the riddle language, and a set of predicates, among those defined within the domain files, of which one is interested in being notified of their start. The service returns an id of the reasoner, which is needed for querying it later, and a boolean that indicates whether the reasoning problem is consistent or not. Note that the returned consistency is not determined by the resolution process, hence, only trivial consistencies/inconsistencies are detected. Creating a new reasoner, however, automatically triggers the resolution process, whose result can be detected through a subscription to the `deliberative_state` topic.
 
 ### Incremental planning
-oRatio allows incremental planning. In case new requirements emerge during the execution of a plan, in particular, these can be communicated to a reasoner, which integrates them into the current plan. It is possible to communicate new requirements through the `create_reasoner` service of type `deliberative_tier/new_requirement`, which is structured as follows:
+oRatio allows incremental planning. In case new requirements emerge during the execution of a plan, in particular, these can be communicated to a reasoner, which integrates them into the current plan. It is possible to communicate new requirements through the `reasoner_creator` service of type `deliberative_tier/requirement_creator`, which is structured as follows:
 
 ```
 uint64 reasoner_id
@@ -155,7 +155,7 @@ bool consistent
 Intuitively, the service allows to add a new requirement to the reasoner identified by the `reasoner_id`, returning whether the resulting problem is consistent or not. Similarly to the reasoner creation service, the incremental planning service is able to detect only trivial consistencies/inconsistencies. The incremental planning, nonetheless, triggers the resolution process. The result of this resolution process can be detected through a subscription to the `deliberative_state` topic.
 
 ### Destroying a reasoner
-At any time it is possible to destroy a reasoner. The process of destroying a reasoner is done by means of the `destroy_reasoner` service of type `deliberative_tier/destroy_reasoner`, which is structured as follows:
+At any time it is possible to destroy a reasoner. The process of destroying a reasoner is done by means of the `reasoner_destroyer` service of type `deliberative_tier/reasoner_destroyer`, which is structured as follows:
 
 ```
 uint64 reasoner_id
@@ -193,7 +193,7 @@ string[] par_values
 In addition to an identifier of the reasoner which generated it and an identifier of the task itself, each task has a name `task_name`, corresponding to the associated predicate as defined in one of the domain files, a set of parameter names `par_names`, defined in the domain files, and a set of parameter values `par_values`, a value for each parameter, established by the planner.
 
 ### Verification of executability and execution
-During the execution of the generated plans, the executors need to know if tasks can be started or ended at a certain time and to communicate the start and the end of the task execution. For this reason oRatio expects the invoking module to implement some ROS services. Specifically, the implementation of four ROS services of typr `deliberative_tier/task_service` is required, which are structured as follows:
+During the execution of the generated plans, the executors need to know if tasks can be started or ended at a certain time and to communicate the start and the end of the task execution. For this reason oRatio expects the invoking module to implement some ROS services. Specifically, the implementation of four ROS services of typr `deliberative_tier/task_executor` is required, which are structured as follows:
 
 ```
 task task
@@ -208,7 +208,7 @@ The four services are:
 4. `end_task`, which requires the ending of the given task and returns a boolean indicating whether the task has actually  ended;
 
 ### Closing the tasks
-Once the tasks have been started, the reasoners wait to receive a message indicating their termination. Specifically, the termination of a task is done by means of the `task_finished` service of type `deliberative_tier/task_finished`, which is structured as follows:
+Once the tasks have been started, the reasoners wait to receive a message indicating their termination. Specifically, the termination of a task is done by means of the `task_closer` service of type `deliberative_tier/task_closer`, which is structured as follows:
 
 ```
 task task

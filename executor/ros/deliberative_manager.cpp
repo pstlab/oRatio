@@ -2,23 +2,23 @@
 #include "deliberative_executor.h"
 #include "deliberative_tier/deliberative_state.h"
 #include "deliberative_tier/timelines.h"
-#include "deliberative_tier/task_service.h"
+#include "deliberative_tier/task_executor.h"
 
 namespace ratio
 {
     deliberative_manager::deliberative_manager(ros::NodeHandle &h) : handle(h),
                                                                      create_reasoner_server(h.advertiseService("create_reasoner", &deliberative_manager::create_reasoner, this)),
                                                                      destroy_reasoner_server(h.advertiseService("destroy_reasoner", &deliberative_manager::destroy_reasoner, this)),
-                                                                     new_requirement_server(h.advertiseService("new_requirement", &deliberative_manager::new_requirement, this)),
-                                                                     task_finished_server(h.advertiseService("task_finished", &deliberative_manager::task_finished, this)),
+                                                                     new_requirements_server(h.advertiseService("new_requirements", &deliberative_manager::new_requirements, this)),
+                                                                     close_task_server(h.advertiseService("close_task", &deliberative_manager::close_task, this)),
                                                                      state_server(h.advertiseService("get_state", &deliberative_manager::get_state, this)),
                                                                      notify_state(handle.advertise<deliberative_tier::deliberative_state>("deliberative_state", 10, true)),
                                                                      notify_graph(handle.advertise<deliberative_tier::graph>("graph", 10)),
                                                                      notify_timelines(handle.advertise<deliberative_tier::timelines>("timelines", 10)),
-                                                                     can_start(h.serviceClient<deliberative_tier::task_service>("can_start")),
-                                                                     start_task(h.serviceClient<deliberative_tier::task_service>("start_task")),
-                                                                     can_end(h.serviceClient<deliberative_tier::task_service>("can_end")),
-                                                                     end_task(h.serviceClient<deliberative_tier::task_service>("end_task"))
+                                                                     can_start(h.serviceClient<deliberative_tier::task_executor>("can_start")),
+                                                                     start_task(h.serviceClient<deliberative_tier::task_executor>("start_task")),
+                                                                     can_end(h.serviceClient<deliberative_tier::task_executor>("can_end")),
+                                                                     end_task(h.serviceClient<deliberative_tier::task_executor>("end_task"))
     {
         can_start.waitForExistence();
         start_task.waitForExistence();
@@ -29,42 +29,17 @@ namespace ratio
 
     void deliberative_manager::tick()
     {
-        if (!pending_requirements.empty())
-        {
-            ROS_DEBUG("Disposing pending requirements..");
-            for (auto &req : pending_requirements)
-            {
-                while (!executors.at(req.first)->get_solver().root_level()) // we go at root level..
-                    executors.at(req.first)->get_solver().get_sat_core().pop();
-                while (!req.second.empty())
-                { // we read the pending requirement..
-                    const std::string c_req = req.second.front();
-                    ROS_DEBUG("[%lu] %s", req.first, c_req.c_str());
-                    executors.at(req.first)->get_solver().read(c_req);
-                    req.second.pop();
-                }
-                // we solve the problem again..
-                executors.at(req.first)->get_solver().solve();
-            }
-            pending_requirements.clear();
-        }
         for (auto &exec : executors)
-            exec.second->get_executor().tick();
+            exec.second->tick();
     }
 
-    bool deliberative_manager::create_reasoner(deliberative_tier::create_reasoner::Request &req, deliberative_tier::create_reasoner::Response &res)
+    bool deliberative_manager::create_reasoner(deliberative_tier::reasoner_creator::Request &req, deliberative_tier::reasoner_creator::Response &res)
     {
         res.reasoner_id = executors.size();
         ROS_DEBUG("Creating new reasoner %lu..", res.reasoner_id);
-        std::vector<std::string> relevant_predicates;
-        relevant_predicates.insert(relevant_predicates.end(), req.notify_start.begin(), req.notify_start.end());
 
-        executors[res.reasoner_id] = new deliberative_executor(*this, res.reasoner_id, req.domain_files, relevant_predicates);
-
-        for (const auto &r : req.requirements)
-            pending_requirements[res.reasoner_id].push(r);
-
-        res.consistent = true;
+        executors[res.reasoner_id] = new deliberative_executor(*this, res.reasoner_id, req.domain_files, req.requirements);
+        res.consistent = executors[res.reasoner_id]->state != deliberative_tier::deliberative_state::inconsistent;
 
         deliberative_tier::deliberative_state state_msg;
         state_msg.reasoner_id = res.reasoner_id;
@@ -73,18 +48,13 @@ namespace ratio
         return true;
     }
 
-    bool deliberative_manager::destroy_reasoner(deliberative_tier::destroy_reasoner::Request &req, deliberative_tier::destroy_reasoner::Response &res)
+    bool deliberative_manager::destroy_reasoner(deliberative_tier::reasoner_destroyer::Request &req, deliberative_tier::reasoner_destroyer::Response &res)
     {
         ROS_DEBUG("Destroying reasoner %lu..", req.reasoner_id);
-        if (executors.find(req.reasoner_id) == executors.end())
+        if (const auto exec = executors.find(req.reasoner_id); exec != executors.end())
         {
-            ROS_WARN("Reasoner %lu does not exists..", req.reasoner_id);
-            res.destroyed = false;
-        }
-        else
-        {
-            delete executors.at(req.reasoner_id);
-            executors.erase(req.reasoner_id);
+            delete exec->second;
+            executors.erase(exec);
             res.destroyed = true;
 
             deliberative_tier::deliberative_state state_msg;
@@ -92,42 +62,47 @@ namespace ratio
             state_msg.deliberative_state = deliberative_tier::deliberative_state::destroyed;
             notify_state.publish(state_msg);
         }
+        else
+        {
+            ROS_WARN("Reasoner %lu does not exists..", req.reasoner_id);
+            res.destroyed = false;
+        }
         return true;
     }
 
-    bool deliberative_manager::new_requirement(deliberative_tier::new_requirement::Request &req, deliberative_tier::new_requirement::Response &res)
+    bool deliberative_manager::new_requirements(deliberative_tier::requirement_creator::Request &req, deliberative_tier::requirement_creator::Response &res)
     {
-        ROS_DEBUG("Adding new requirement to reasoner %lu..", req.reasoner_id);
-        if (executors.find(req.reasoner_id) == executors.end())
+        ROS_DEBUG("Adding new requirements to reasoner %lu..", req.reasoner_id);
+        if (const auto exec = executors.find(req.reasoner_id); exec != executors.end())
+        {
+            exec->second->append_requirements(req.requirements);
+            res.consistent = exec->second->state != deliberative_tier::deliberative_state::inconsistent;
+        }
+        else
         {
             ROS_WARN("Reasoner %lu does not exist..", req.reasoner_id);
             res.consistent = false;
         }
-        else
-        {
-            pending_requirements[req.reasoner_id].push(req.requirement);
-            res.consistent = true;
-        }
         return true;
     }
 
-    bool deliberative_manager::task_finished(deliberative_tier::task_finished::Request &req, deliberative_tier::task_finished::Response &res)
+    bool deliberative_manager::close_task(deliberative_tier::task_closer::Request &req, deliberative_tier::task_closer::Response &res)
     {
         ROS_DEBUG("Ending task %lu for reasoner %lu..", req.task.task_id, req.task.reasoner_id);
-        if (executors.find(req.task.reasoner_id) == executors.end())
+        if (const auto exec = executors.find(req.task.reasoner_id); exec != executors.end())
+        {
+            exec->second->close_task(req.task.task_id, req.success);
+            res.ended = true;
+        }
+        else
         {
             ROS_WARN("Reasoner %lu does not exist..", req.task.reasoner_id);
             res.ended = false;
         }
-        else
-        {
-            executors.at(req.task.reasoner_id)->finish_task(req.task.task_id, req.success);
-            res.ended = true;
-        }
         return true;
     }
 
-    bool deliberative_manager::get_state(deliberative_tier::get_state::Request &req, deliberative_tier::get_state::Response &res)
+    bool deliberative_manager::get_state(deliberative_tier::state_collector::Request &req, deliberative_tier::state_collector::Response &res)
     {
         ROS_DEBUG("Getting Deliberative Manager state");
         for (const auto &exec : executors)

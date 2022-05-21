@@ -27,13 +27,13 @@ add_message_files(
 ## Declare ROS services
 add_service_files(
     FILES
-    create_reasoner.srv
-    destroy_reasoner.srv
-    new_requirement.srv
-    executor_state_update.srv
-    task_service.srv
-    task_finished.srv
-    get_state.srv
+    reasoner_creator.srv
+    reasoner_destroyer.srv
+    requirement_creator.srv
+    executor.srv
+    task_executor.srv
+    task_closer.srv
+    state_collector.srv
 )
 
 ## Generate added messages and services

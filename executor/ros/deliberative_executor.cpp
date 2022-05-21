@@ -4,26 +4,103 @@
 #include "atom.h"
 #include "deliberative_tier/deliberative_state.h"
 #include "deliberative_tier/timelines.h"
-#include "deliberative_tier/task_service.h"
+#include "deliberative_tier/task_executor.h"
 #include <ros/ros.h>
 #include <sstream>
 
 namespace ratio
 {
-    deliberative_executor::deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, std::vector<std::string> notify_start_ids) : d_mngr(d_mngr), reasoner_id(id), slv(), exec(slv), dcl(*this), dsl(*this), del(*this), notify_start_ids(std::move(notify_start_ids))
+    deliberative_executor::deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, const std::vector<std::string> &requirements) : d_mngr(d_mngr), reasoner_id(id), slv(), exec(slv), dcl(*this), dsl(*this), del(*this)
     {
-        // we read the domain files..
-        ROS_DEBUG("[%lu] Reading domain..", reasoner_id);
-        for (const auto &domain_file : domain_files)
+        // a new reasoner has just been created..
+        set_state(deliberative_tier::deliberative_state::created);
+
+        try
         {
-            ROS_DEBUG("[%lu] %s", reasoner_id, domain_file.c_str());
+            // we read the domain files..
+            ROS_DEBUG("[%lu] Reading domain..", reasoner_id);
+            for (const auto &domain_file : domain_files)
+            {
+                ROS_DEBUG("[%lu] %s", reasoner_id, domain_file.c_str());
+            }
+            slv.read(domain_files);
+
+            // we read the requirements..
+            ROS_DEBUG("[%lu] Reading requirements..", reasoner_id);
+            for (const auto &requirement : requirements)
+            {
+                ROS_DEBUG("[%lu] %s", reasoner_id, requirement.c_str());
+                slv.read(requirement);
+            }
+
+            pending_requirements = true;
         }
-
-        slv.read(domain_files);
-
-        set_state(deliberative_tier::deliberative_state::idle);
+        catch (const inconsistency_exception &e)
+        { // the problem is inconsistent..
+            ROS_DEBUG("[%lu] The problem is inconsistent..", reasoner_id);
+            set_state(deliberative_tier::deliberative_state::inconsistent);
+        }
+        catch (const unsolvable_exception &e)
+        { // the problem is unsolvable..
+            ROS_DEBUG("[%lu] The problem is unsolvable..", reasoner_id);
+            set_state(deliberative_tier::deliberative_state::inconsistent);
+        }
     }
-    deliberative_executor::~deliberative_executor() {}
+
+    void deliberative_executor::tick()
+    {
+        if (pending_requirements)
+        { // we solve the problem again..
+            slv.solve();
+            pending_requirements = false;
+        }
+    }
+    void deliberative_executor::append_requirements(const std::vector<std::string> &requirements)
+    {
+        try
+        {
+            ROS_DEBUG("[%lu] Going at root level..", reasoner_id);
+            while (!slv.root_level()) // we go at root level..
+                slv.get_sat_core().pop();
+            ROS_DEBUG("[%lu] Reading requirements..", reasoner_id);
+            for (const auto &requirement : requirements)
+            {
+                ROS_DEBUG("[%lu] %s", reasoner_id, requirement.c_str());
+                slv.read(requirement);
+            }
+
+            pending_requirements = true;
+        }
+        catch (const inconsistency_exception &e)
+        { // the problem is inconsistent..
+            ROS_DEBUG("[%lu] The problem is inconsistent..", reasoner_id);
+            set_state(deliberative_tier::deliberative_state::inconsistent);
+        }
+        catch (const unsolvable_exception &e)
+        { // the problem is unsolvable..
+            ROS_DEBUG("[%lu] The problem is unsolvable..", reasoner_id);
+            set_state(deliberative_tier::deliberative_state::inconsistent);
+        }
+    }
+    void deliberative_executor::deliberative_executor_listener::tick(const smt::rational &time)
+    {
+        ROS_DEBUG("Current time: %s", to_string(time).c_str());
+        exec.current_time = time;
+
+        deliberative_tier::timelines time_msg;
+        time_msg.reasoner_id = exec.reasoner_id;
+        time_msg.update = deliberative_tier::timelines::time_changed;
+        time_msg.time.num = time.numerator();
+        time_msg.time.den = time.denominator();
+        exec.d_mngr.notify_timelines.publish(time_msg);
+
+        arith_expr horizon = exec.slv.get("horizon");
+        if (exec.slv.arith_value(horizon) <= exec.exec.get_current_time() && exec.current_tasks.empty())
+        {
+            ROS_DEBUG("[%lu] Exhausted plan..", exec.reasoner_id);
+            exec.set_state(deliberative_tier::deliberative_state::finished);
+        }
+    }
 
     void deliberative_executor::set_state(const unsigned int &st)
     {
@@ -148,30 +225,10 @@ namespace ratio
             exec.notify_start.insert(&exec.get_predicate(pred));
     }
 
-    void deliberative_executor::deliberative_executor_listener::tick(const smt::rational &time)
-    {
-        ROS_DEBUG("Current time: %s", to_string(time).c_str());
-        exec.current_time = time;
-
-        deliberative_tier::timelines time_msg;
-        time_msg.reasoner_id = exec.reasoner_id;
-        time_msg.update = deliberative_tier::timelines::time_changed;
-        time_msg.time.num = time.numerator();
-        time_msg.time.den = time.denominator();
-        exec.d_mngr.notify_timelines.publish(time_msg);
-
-        arith_expr horizon = exec.slv.get("horizon");
-        if (exec.slv.arith_value(horizon) <= exec.exec.get_current_time() && exec.current_tasks.empty())
-        {
-            ROS_DEBUG("[%lu] Exhausted plan..", exec.reasoner_id);
-            exec.set_state(deliberative_tier::deliberative_state::finished);
-        }
-    }
-
     void deliberative_executor::deliberative_executor_listener::starting(const std::unordered_set<atom *> &atms)
     { // tell the executor the atoms which are not yet ready to start..
         std::unordered_set<ratio::atom *> dsy;
-        deliberative_tier::task_service cs_srv;
+        deliberative_tier::task_executor cs_srv;
         task t;
         for (const auto &atm : atms)
             if (exec.notify_start.count(static_cast<predicate *>(&atm->get_type())))
@@ -189,7 +246,7 @@ namespace ratio
     }
     void deliberative_executor::deliberative_executor_listener::start(const std::unordered_set<atom *> &atms)
     { // these atoms are now started..
-        deliberative_tier::task_service st_srv;
+        deliberative_tier::task_executor st_srv;
         task t;
         for (const auto &atm : atms)
             if (exec.notify_start.count(static_cast<predicate *>(&atm->get_type())))
@@ -240,9 +297,9 @@ namespace ratio
         exec.d_mngr.notify_timelines.publish(executing_msg);
     }
 
-    void deliberative_executor::finish_task(const smt::var &id, const bool &success)
+    void deliberative_executor::close_task(const smt::var &id, const bool &success)
     {
-        ROS_DEBUG("[%lu] Ending task %s..", reasoner_id, current_tasks.at(id)->get_type().get_name().c_str());
+        ROS_DEBUG("[%lu] Closing task %s..", reasoner_id, current_tasks.at(id)->get_type().get_name().c_str());
         if (!success) // the task failed..
             exec.failure({current_tasks.at(id)});
         current_tasks.erase(id);

@@ -1,0 +1,5 @@
+# creates new requirements for the given reasoner id
+uint64 reasoner_id
+string[] requirements
+---
+bool consistent

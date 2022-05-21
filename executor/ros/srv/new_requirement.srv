@@ -1,5 +1,0 @@
-# creates a new requirement for the given reasoner id
-uint64 reasoner_id
-string requirement
----
-bool consistent

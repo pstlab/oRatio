@@ -11,14 +11,15 @@ namespace ratio
     friend class deliberative_manager;
 
   public:
-    deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, std::vector<std::string> notify_start_ids = {});
-    ~deliberative_executor();
+    deliberative_executor(deliberative_manager &d_mngr, const uint64_t &id, const std::vector<std::string> &domain_files, const std::vector<std::string> &requirements);
 
     uint64_t get_reasoner_id() { return reasoner_id; }
     ratio::solver &get_solver() { return slv; }
     ratio::executor &get_executor() { return exec; }
 
-    void finish_task(const smt::var &id, const bool &success = true);
+    void tick();
+    void append_requirements(const std::vector<std::string> &requirements);
+    void close_task(const smt::var &id, const bool &success = true);
 
   private:
     void set_state(const unsigned int &state);
@@ -105,7 +106,8 @@ namespace ratio
     deliberative_solver_listener dsl;
     deliberative_executor_listener del;
     unsigned int state = -1;
-    std::vector<std::string> notify_start_ids;
+    bool pending_requirements = false;
+    std::vector<std::string> notify_start_ids, notify_end_ids;
     std::unordered_set<const ratio::predicate *> notify_start;
     std::unordered_map<smt::var, ratio::atom *> current_tasks;
     std::unordered_set<const flaw *> flaws;
