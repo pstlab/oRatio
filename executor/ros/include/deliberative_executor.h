@@ -17,6 +17,7 @@ namespace ratio
     ratio::solver &get_solver() { return slv; }
     ratio::executor &get_executor() { return exec; }
 
+    void start_execution(const std::vector<std::string> &notify_start_ids, const std::vector<std::string> &notify_end_ids);
     void tick();
     void append_requirements(const std::vector<std::string> &requirements);
     void close_task(const smt::var &id, const bool &success = true);
@@ -42,14 +43,9 @@ namespace ratio
       ~deliberative_core_listener() {}
 
     private:
-      void read(const std::string &) override { reset_relevant_predicates(); }
-      void read(const std::vector<std::string> &) override { reset_relevant_predicates(); }
-
       void started_solving() override;
       void solution_found() override;
       void inconsistent_problem() override;
-
-      void reset_relevant_predicates();
 
     private:
       deliberative_executor &exec;
@@ -107,8 +103,8 @@ namespace ratio
     deliberative_executor_listener del;
     unsigned int state = -1;
     bool pending_requirements = false;
-    std::vector<std::string> notify_start_ids, notify_end_ids;
-    std::unordered_set<const ratio::predicate *> notify_start;
+    bool restart_execution = true;
+    std::unordered_set<const ratio::predicate *> notify_start, notify_end;
     std::unordered_map<smt::var, ratio::atom *> current_tasks;
     std::unordered_set<const flaw *> flaws;
     std::unordered_set<const resolver *> resolvers;

@@ -47,6 +47,20 @@ namespace ratio
         }
     }
 
+    void deliberative_executor::start_execution(const std::vector<std::string> &notify_start_ids, const std::vector<std::string> &notify_end_ids)
+    {
+        ROS_DEBUG("[%lu] Starting execution..", reasoner_id);
+
+        notify_start.clear();
+        for (const auto &pred : notify_start_ids)
+            notify_start.insert(&get_predicate(pred));
+        notify_end.clear();
+        for (const auto &pred : notify_end_ids)
+            notify_end.insert(&get_predicate(pred));
+
+        restart_execution = true;
+        set_state(deliberative_tier::deliberative_state::executing);
+    }
     void deliberative_executor::tick()
     {
         if (pending_requirements)
@@ -54,6 +68,8 @@ namespace ratio
             slv.solve();
             pending_requirements = false;
         }
+        if (state == deliberative_tier::deliberative_state::executing)
+            exec.tick();
     }
     void deliberative_executor::append_requirements(const std::vector<std::string> &requirements)
     {
@@ -207,7 +223,7 @@ namespace ratio
 
         exec.d_mngr.notify_timelines.publish(timelines_msg);
 
-        exec.set_state(deliberative_tier::deliberative_state::executing);
+        exec.set_state(exec.restart_execution ? deliberative_tier::deliberative_state::executing : deliberative_tier::deliberative_state::idle);
     }
     void deliberative_executor::deliberative_core_listener::inconsistent_problem()
     {
@@ -217,12 +233,6 @@ namespace ratio
         exec.current_resolver = nullptr;
 
         exec.set_state(deliberative_tier::deliberative_state::inconsistent);
-    }
-
-    void deliberative_executor::deliberative_core_listener::reset_relevant_predicates()
-    {
-        for (const auto &pred : exec.notify_start_ids)
-            exec.notify_start.insert(&exec.get_predicate(pred));
     }
 
     void deliberative_executor::deliberative_executor_listener::starting(const std::unordered_set<atom *> &atms)
@@ -274,8 +284,19 @@ namespace ratio
     void deliberative_executor::deliberative_executor_listener::ending(const std::unordered_set<atom *> &atms)
     { // tell the executor the atoms which are not yet ready to finish..
         std::unordered_set<ratio::atom *> dey;
+        deliberative_tier::task_executor ce_srv;
+        task t;
         for (const auto &atm : atms)
-            if (exec.current_tasks.count(atm->get_id()))
+            if (exec.notify_end.count(static_cast<predicate *>(&atm->get_type())))
+            {
+                t = to_task(*atm);
+                ce_srv.request.task.task_name = t.task_name;
+                ce_srv.request.task.par_names = t.par_names;
+                ce_srv.request.task.par_values = t.par_values;
+                if (exec.d_mngr.can_end.call(ce_srv) && !ce_srv.response.success)
+                    dey.insert(atm);
+            }
+            else if (exec.current_tasks.count(atm->get_id()))
                 dey.insert(atm);
 
         if (!dey.empty())

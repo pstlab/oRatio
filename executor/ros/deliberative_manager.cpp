@@ -8,6 +8,7 @@ namespace ratio
 {
     deliberative_manager::deliberative_manager(ros::NodeHandle &h) : handle(h),
                                                                      create_reasoner_server(h.advertiseService("create_reasoner", &deliberative_manager::create_reasoner, this)),
+                                                                     start_execution_server(h.advertiseService("start_execution", &deliberative_manager::start_execution, this)),
                                                                      destroy_reasoner_server(h.advertiseService("destroy_reasoner", &deliberative_manager::destroy_reasoner, this)),
                                                                      new_requirements_server(h.advertiseService("new_requirements", &deliberative_manager::new_requirements, this)),
                                                                      close_task_server(h.advertiseService("close_task", &deliberative_manager::close_task, this)),
@@ -45,6 +46,22 @@ namespace ratio
         state_msg.reasoner_id = res.reasoner_id;
         state_msg.deliberative_state = deliberative_tier::deliberative_state::created;
         notify_state.publish(state_msg);
+        return true;
+    }
+
+    bool deliberative_manager::start_execution(deliberative_tier::executor::Request &req, deliberative_tier::executor::Response &res)
+    {
+        ROS_DEBUG("Staarting execution for reasoner %lu..", req.reasoner_id);
+        if (const auto exec = executors.find(req.reasoner_id); exec != executors.end())
+        {
+            exec->second->start_execution(req.notify_start, req.notify_end);
+            res.new_state = exec->second->state;
+        }
+        else
+        {
+            ROS_WARN("Reasoner %lu does not exists..", req.reasoner_id);
+            res.new_state = deliberative_tier::deliberative_state::destroyed;
+        }
         return true;
     }
 

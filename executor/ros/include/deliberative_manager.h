@@ -1,6 +1,7 @@
 #pragma once
 
 #include "deliberative_tier/reasoner_creator.h"
+#include "deliberative_tier/executor.h"
 #include "deliberative_tier/reasoner_destroyer.h"
 #include "deliberative_tier/task_closer.h"
 #include "deliberative_tier/requirement_creator.h"
@@ -29,6 +30,7 @@ namespace ratio
 
   private:
     bool create_reasoner(deliberative_tier::reasoner_creator::Request &req, deliberative_tier::reasoner_creator::Response &res);
+    bool start_execution(deliberative_tier::executor::Request &req, deliberative_tier::executor::Response &res);
     bool destroy_reasoner(deliberative_tier::reasoner_destroyer::Request &req, deliberative_tier::reasoner_destroyer::Response &res);
     bool new_requirements(deliberative_tier::requirement_creator::Request &req, deliberative_tier::requirement_creator::Response &res);
     bool close_task(deliberative_tier::task_closer::Request &req, deliberative_tier::task_closer::Response &res);
@@ -37,6 +39,7 @@ namespace ratio
   private:
     ros::NodeHandle &handle;
     ros::ServiceServer create_reasoner_server;
+    ros::ServiceServer start_execution_server;
     ros::ServiceServer destroy_reasoner_server;
     ros::ServiceServer new_requirements_server;
     ros::ServiceServer close_task_server;
