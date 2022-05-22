@@ -1,0 +1,5 @@
+# notifies the deliberative tier that a task has finished
+task task
+bool success
+---
+bool ended

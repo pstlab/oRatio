@@ -1,56 +1,55 @@
 #pragma once
 
+#include "lit.h"
 #include "rational.h"
+#include "graph.h"
 #include <vector>
-
-namespace smt
-{
-typedef size_t var;
-} // namespace smt
 
 namespace ratio
 {
+  class solver;
+  class flaw;
 
-class solver;
-class graph;
-class flaw;
+  class resolver
+  {
+    friend class solver;
+    friend class flaw;
 
-class resolver
-{
-  friend class solver;
-  friend class graph;
-  friend class flaw;
+  public:
+    resolver(const smt::rational &cost, flaw &eff);
+    resolver(const smt::lit &r, const smt::rational &cost, flaw &eff);
+    resolver(const resolver &that) = delete;
+    virtual ~resolver() = default;
 
-public:
-  resolver(graph &gr, const smt::rational &cost, flaw &eff);
-  resolver(graph &gr, const smt::var &r, const smt::rational &cost, flaw &eff);
-  resolver(const resolver &that) = delete;
-  ~resolver();
+    /**
+     * @brief Get the id of this resolver.
+     *
+     * @return uintptr_t an id of this resolver.
+     */
+    uintptr_t get_id() const noexcept { return reinterpret_cast<uintptr_t>(this); }
 
-  graph &get_graph() const { return gr; }
-  smt::var get_rho() const { return rho; }
-  smt::rational get_intrinsic_cost() const { return intrinsic_cost; }
-  smt::rational get_estimated_cost() const;
-  flaw &get_effect() const { return effect; }
-  const std::vector<flaw *> &get_preconditions() const { return preconditions; }
+    inline solver &get_solver() const noexcept { return slv; }
+    inline smt::lit get_rho() const noexcept { return rho; }
+    inline smt::rational get_intrinsic_cost() const noexcept { return intrinsic_cost; }
+    smt::rational get_estimated_cost() const noexcept { return slv.get_graph().get_estimated_cost(*this); }
+    inline flaw &get_effect() const noexcept { return effect; }
+    inline const std::vector<flaw *> &get_preconditions() const noexcept { return preconditions; }
 
-#ifdef BUILD_GUI
-  virtual std::string get_label() const = 0;
-#endif
+    virtual std::string get_data() const = 0;
 
-private:
-  /**
-   * Applies this resolver, introducing subgoals and/or constraints.
-   * 
-   * @pre the solver must be at root-level.
-   */
-  virtual void apply() = 0;
+  private:
+    /**
+     * Applies this resolver, introducing subgoals and/or constraints.
+     *
+     * @pre the solver must be at root-level.
+     */
+    virtual void apply() = 0;
 
-private:
-  graph &gr;                          // the graph this resolver belongs to..
-  const smt::var rho;                 // the propositional variable indicating whether the resolver is active or not..
-  const smt::rational intrinsic_cost; // the intrinsic cost of the resolver..
-  flaw &effect;                       // the flaw solved by this resolver..
-  std::vector<flaw *> preconditions;  // the preconditions of this resolver..
-};
+  private:
+    solver &slv;                        // the solver this resolver belongs to..
+    const smt::lit rho;                 // the propositional literal indicating whether the resolver is active or not..
+    const smt::rational intrinsic_cost; // the intrinsic cost of the resolver..
+    flaw &effect;                       // the flaw solved by this resolver..
+    std::vector<flaw *> preconditions;  // the preconditions of this resolver..
+  };
 } // namespace ratio

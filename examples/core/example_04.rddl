@@ -1,0 +1,23 @@
+/*
+* This problem is intended to introduce some basic concepts about inheritance.
+*/
+
+class Block {
+}
+
+class HeavyBlock : Block {
+
+  real weight;
+
+  HeavyBlock(real weight) : weight(weight) {}
+}
+
+Block b0 = new Block();
+Block b1 = new Block(), b2 = new Block();
+HeavyBlock b3 = new HeavyBlock(3.5);
+
+// a variable whose domain contains all the Block's instances..
+Block b;
+
+// removes from 'b' the 'b0' instance..
+b != b0;

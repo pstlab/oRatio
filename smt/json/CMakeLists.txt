@@ -1,0 +1,13 @@
+file(GLOB JSON_SOURCES *.cpp)
+file(GLOB JSON_HEADERS *.h)
+
+add_library(json SHARED ${JSON_SOURCES})
+GENERATE_EXPORT_HEADER(json)
+
+target_include_directories(json PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}> $<INSTALL_INTERFACE:>)
+
+install(TARGETS json LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(FILES ${JSON_HEADERS} ${CMAKE_CURRENT_BINARY_DIR}/json_export.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/json)
+configure_package_config_file(jsonConfig.cmake.in jsonConfig.cmake INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/json PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/jsonConfigVersion.cmake VERSION 1.0.0 COMPATIBILITY SameMajorVersion)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/jsonConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/jsonConfigVersion.cmake DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/json)

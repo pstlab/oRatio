@@ -1,6 +1,6 @@
 # oRatio
 
-[![Build Travis-CI Status](https://travis-ci.org/pstlab/oRatio.svg?branch=master)](https://travis-ci.org/pstlab/oRatio)
+[![Build Travis-CI Status](https://travis-ci.com/pstlab/oRatio.svg?branch=master)](https://travis-ci.org/pstlab/oRatio)
 
 > Dum loquimur, fugerit invida aetas: carpe diem, quam minimum credula postero. (Orazio, Odi, I, 11, 7-8)
 
@@ -107,3 +107,10 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 ```
+
+## ROS
+Integrating oRatio into a [ROS](https://www.ros.org/) environment is a straightforward task! You just need clone this repository into a [catkin](http://wiki.ros.org/catkin) workspace and compile the workspace. That's all!
+
+oRatio contains a catkin package which, through the implementation of some ROS services and messages, manages the communication to and from other ROS nodes. The package provides ROS services for the creation of reasoners, problem solving, their execution and their adaptation during execution. If on the one hand oRatio deals with the management of the reasoners, on the other hand some ROS services must be implemented by the invoking modules, so as to allow the execution of the dispatched activities.
+
+More details about how to interface with oRatio in a ROS environment can be found [here](https://github.com/pstlab/oRatio/tree/master/executor/ros).

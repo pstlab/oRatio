@@ -1,0 +1,38 @@
+real base_x = 0.0;
+real base_y = 0.0;
+
+real dest_x = 1.0;
+real dest_y = 0.0;
+
+real dest_x1 = -1.0;
+real dest_y1 = 0.0;
+
+
+class Navigator : StateVariable {
+
+    predicate At(real x, real y) {
+        duration >= 5.0;
+        goal going_at = new GoingTo(end:start, x:x, y:y);
+    }
+
+    predicate GoingTo(real x, real y) {
+        duration >= 5.0;
+        goal at = new At(end:start);
+    }
+}
+
+class Robot : StateVariable {
+
+    Navigator nav = new Navigator();
+}
+
+Robot r0 = new Robot();
+
+fact at0 = new r0.nav.At(start:origin, x:base_x, y:base_y);
+at0.duration >= 5.0;
+
+{
+    goal destination = new r0.nav.At(end:horizon, x:dest_x, y:dest_y);
+} or {
+    goal destination = new r0.nav.At(end:horizon, x:dest_x1, y:dest_y1);
+} 

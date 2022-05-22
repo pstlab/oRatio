@@ -1,0 +1,95 @@
+real base_x = 0.0;
+real base_y = 0.0;
+
+real phys_x = -0.85136;
+real phys_y =  7.77870;
+
+real cogn_x = -2.11301;
+real cogn_y = -3.14830;
+
+class Navigator : StateVariable {
+
+    predicate At(real x, real y) {
+        duration >= 5.0;
+        goal going_at = new GoingTo(end:start, x:x, y:y);
+    }
+
+    predicate GoingTo(real x, real y) {
+        duration >= 60.0;
+        goal at = new At(end:start);
+    }
+}
+
+class Arm : StateVariable {
+
+    predicate RaiseHand() {
+        duration >= 5.0;
+    }
+
+    predicate LowerHand() {
+        duration >= 5.0;
+    }
+}
+
+class Robot : StateVariable {
+
+    Navigator nav = new Navigator();
+    Arm left_arm = new Arm();
+    Arm right_arm = new Arm();
+
+    predicate CheckUserAround() {
+        duration >= 10.0;
+        duration <= 100.0;
+
+        goal rlh = new left_arm.RaiseHand(start:start);
+        goal rrh = new right_arm.RaiseHand(start:start);
+
+        goal llh = new left_arm.LowerHand(start:end);
+        goal lrh = new right_arm.LowerHand(start:end);
+    }
+
+    predicate CognitiveExercize(int ex_id) {
+        duration >= 60.0;
+
+        goal at = new nav.At(x:cogn_x, y:cogn_y);
+        at.start <= start - 10.0;
+        at.end >= end + 5.0;
+
+        goal chck_usr = new CheckUserAround(end:start);
+        chck_usr.start <= at.start;
+
+        goal going_at0 = new nav.GoingTo(start:at.end, x:base_x, y:base_y);
+        goal at0 = new nav.At(start:going_at0.end, x:base_x, y:base_y);
+        at0.start >= end;
+        at0.start <= end + 300.0;
+    }
+
+    predicate PhysicalExercize(int ex_id) {
+        duration >= 60.0;
+
+        goal at = new nav.At(x:phys_x, y:phys_y);
+        at.start <= start - 10.0;
+        at.end >= end + 5.0;
+
+        goal chck_usr = new CheckUserAround(end:start);
+        chck_usr.start <= at.start;
+
+        goal going_at0 = new nav.GoingTo(start:at.end, x:base_x, y:base_y);
+        goal at0 = new nav.At(start:going_at0.end, x:base_x, y:base_y);
+        at0.start >= end;
+        at0.start <= end + 300.0;
+    }
+}
+
+predicate KeepHealthy(Robot r) {
+    goal ce = new r.CognitiveExercize(ex_id:1);
+    goal pe = new r.PhysicalExercize(ex_id:2);
+    ce.end <= pe.start - 600.0;
+}
+
+Robot r0 = new Robot();
+
+fact at0 = new r0.nav.At(start:origin, x:base_x, y:base_y);
+at0.duration >= 10.0;
+
+goal keep_healthy = new KeepHealthy(r:r0);

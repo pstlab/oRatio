@@ -1,41 +1,40 @@
 #pragma once
 
 #include "scope.h"
+#include <optional>
 
 namespace riddle::ast
 {
-class statement;
+  class statement;
 } // namespace riddle::ast
 
 namespace ratio
 {
+  class context;
+  class expr;
+  class item;
 
-class context;
-class expr;
-class item;
+  class method final : public scope
+  {
+    friend class core;
+    friend class type;
 
-class method : public scope
-{
-  friend class core;
-  friend class type;
+  public:
+    method(scope &scp, const std::optional<type *> &return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
+    method(const method &orig) = delete;
 
-public:
-  method(core &cr, scope &scp, const type *const return_type, const std::string &name, const std::vector<const field *> &args, const std::vector<const riddle::ast::statement *> &stmnts);
-  method(const method &orig) = delete;
-  virtual ~method();
+    inline std::optional<const type *> get_return_type() const noexcept { return return_type; } // returns the return type of this method (can be nullptr)..
+    inline std::string get_name() const noexcept { return name; }                               // returns the name of this method..
+    inline const std::vector<const field *> get_args() const noexcept { return args; }          // returns the list of arguments of this method..
 
-  const type *get_return_type() const { return return_type; }        // returns the return type of this method (can be nullptr)..
-  std::string get_name() const { return name; }                      // returns the name of this method..
-  const std::vector<const field *> get_args() const { return args; } // returns the list of arguments of this method..
+    std::optional<item *> invoke(context &ctx, const std::vector<expr> &exprs);
 
-  item *invoke(context &ctx, const std::vector<expr> &exprs) const;
+  private:
+    std::optional<const type *const> return_type; // the return type of this method (can be nullptr)..
+    const std::string name;                       // the name of this method..
 
-private:
-  const type *const return_type; // the return type of this method (can be nullptr)..
-  const std::string name;        // the name of this method..
-
-private:
-  const std::vector<const field *> args;                        // the arguments of this paper..
-  const std::vector<const riddle::ast::statement *> statements; // the statements within the method's body..
-};
+  private:
+    const std::vector<const field *> args;                        // the arguments of this paper..
+    const std::vector<const riddle::ast::statement *> statements; // the statements within the method's body..
+  };
 } // namespace ratio

@@ -1,0 +1,7 @@
+set(EXECUTOR_VERSION 1.0.0)
+
+@PACKAGE_INIT@
+
+set_and_check(EXECUTOR_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@/executor")
+
+check_required_components(executor)

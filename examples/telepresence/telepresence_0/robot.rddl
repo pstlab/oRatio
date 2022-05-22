@@ -1,0 +1,138 @@
+class Navigator : StateVariable {
+
+    predicate At(real x, real y) {
+        duration >= 5.0;
+        goal going_at = new GoingTo(end:start, x:x, y:y);
+    }
+
+    predicate GoingTo(real x, real y) {
+        duration >= 5.0;
+        {
+            goal at = new At(end:start);
+        } or
+        {
+            goal fu = new FollowUser(end:start);
+        }
+    }
+
+    predicate FindUser(real x, real y) {
+        duration >= 5.0;
+        goal at = new At(end:start, x:x, y:y);
+    }
+
+    predicate FollowUser(real x, real y) {
+        duration >= 5.0;
+        goal at = new FindUser(end:start, x:x, y:y);
+    }
+}
+
+class Robot : Agent {
+
+    Navigator nav = new Navigator();
+
+    predicate CognitiveExercize(User u) : Interval {
+        duration >= 10.0;
+
+        goal chck_usr = new nav.FollowUser(x:cogn_x, y:cogn_y);
+        chck_usr.start <= start - 10.0;
+        chck_usr.end >= end + 5.0;
+
+        fact use = new u.busy.Use(start:start - 5.0, end:end + 5.0, duration:duration + 10.0, amount:1.0);
+
+        {
+            goal cw = new CountWords(difficulty:"easy");
+            cw.start >= start;
+            cw.end <= end;
+        } or {
+            goal cw = new CountWords(difficulty:"hard");
+            cw.start >= start;
+            cw.end <= end;
+        }
+    }
+
+    predicate CountWords(string difficulty) : Interval {
+        duration >= 10.0;
+    }
+
+    predicate PhysicalExercize(User u) : Interval {
+        duration >= 10.0;
+
+        goal chck_usr = new nav.FollowUser(x:phys_x, y:phys_y);
+        chck_usr.start <= start - 10.0;
+        chck_usr.end >= end + 5.0;
+
+        fact use = new u.busy.Use(start:start - 5.0, end:end + 5.0, duration:duration + 10.0, amount:1.0);
+
+        {
+            goal cp1 = new ChestPress(session:1, num_reps:10.0);
+            cp1.start >= start;
+            cp1.end <= end;
+
+            goal cp2 = new ChestPress(session:2, num_reps:10.0);
+            cp2.start >= start;
+            cp2.end <= end;
+
+            goal cp3 = new ChestPress(session:3, num_reps:10.0);
+            cp3.start >= start;
+            cp3.end <= end;
+
+            cp1.end + 60.0 <= cp2.start;
+            cp2.end + 60.0 <= cp3.start;
+        } or {
+            goal fsr1 = new FrontShoulderRaise(session:1, num_reps:10.0);
+            fsr1.start >= start;
+            fsr1.end <= end;
+
+            goal fsr2 = new FrontShoulderRaise(session:2, num_reps:10.0);
+            fsr2.start >= start;
+            fsr2.end <= end;
+
+            goal fsr3 = new FrontShoulderRaise(session:3, num_reps:10.0);
+            fsr3.start >= start;
+            fsr3.end <= end;
+
+            fsr1.end + 60.0 <= fsr2.start;
+            fsr2.end + 60.0 <= fsr3.start;
+        }
+    }
+
+    predicate ChestPress(int session, real num_reps) : Interval {
+        duration >= 10.0;
+    }
+
+    predicate FrontShoulderRaise(int session, real num_reps) : Interval {
+        duration >= 10.0;
+    }
+
+    predicate Communication(User u, string intent) : Interval {
+        duration >= 10.0;
+
+        goal chck_usr = new nav.FollowUser();
+        chck_usr.start <= start - 10.0;
+        chck_usr.end >= end + 5.0;
+
+        fact use = new u.busy.Use(start:start - 5.0, end:end + 5.0, duration:duration + 10.0, amount:1.0);
+    }
+
+    predicate KeepHealthy(User u) {
+        {
+            u.is_forgetful;
+            goal ce = new CognitiveExercize(u:u);
+            ce.start >= 50.0;
+            ce.start <= 100.0;
+            goal bpm_rem = new Communication(u:u, intent:"blood_pressure_measurement_reminder");
+            bpm_rem.start >= 250.0;
+            bpm_rem.start <= 300.0;
+            {
+                u.is_hypertensive;
+                goal bpp_rem = new Communication(u:u, intent:"blood_pressure_pills_reminder");
+                bpp_rem.start >= 350.0;
+                bpp_rem.start <= 400.0;
+            } or { !u.is_hypertensive; }
+        } or { !u.is_forgetful; }
+
+        goal pe = new PhysicalExercize(u:u);
+        pe.start >= 150.0;
+        pe.start <= 200.0;
+    }
+}

@@ -1,0 +1,128 @@
+class Intensity {}
+Intensity light = new Intensity();
+Intensity moderate = new Intensity();
+
+class PhysicalExerciseStateVariable : StateVariable {
+
+    predicate UprightRow(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate FrontShoulderRaise(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate BicepsCurl(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate ShoulderT(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate StandingTricepsExtension(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate OverheadPress(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate PushUps(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate StandingHamstringsCurl(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate StandingCalfRaises(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate ChairSquats(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate SupineHipLifts(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate SideHipRaise(Intensity intensity) {
+        duration >= 10.0;
+    }
+
+    predicate AbdominalCrunch() {
+        duration >= 10.0;
+    }
+
+    predicate BackExtensions() {
+        duration >= 10.0;
+    }
+}
+
+predicate UpperBodyExercise() : Interval {
+    {
+        goal ur = new sv.UprightRow();
+        ur.start >= start; ur.end <= end;
+    } or {
+        goal fsr = new sv.FrontShoulderRaise();
+        fsr.start >= start; fsr.end <= end;
+    } or {
+        goal bc = new sv.BicepsCurl();
+        bc.start >= start; bc.end <= end;
+    } or {
+        goal st = new sv.ShoulderT();
+        st.start >= start; st.end <= end;
+    } or {
+        goal ste = new sv.StandingTricepsExtension();
+        ste.start >= start; ste.end <= end;
+    } or {
+        goal op = new sv.OverheadPress();
+        op.start >= start; op.end <= end;
+    } or {
+        goal pu = new sv.PushUps();
+        pu.start >= start; pu.end <= end;
+    }
+}
+
+predicate LowerBodyExercise() : Interval {
+    {
+        goal shc = new sv.StandingHamstringsCurl();
+        shc.start >= start; shc.end <= end;
+    } or {
+        goal scr = new sv.StandingCalfRaises();
+        scr.start >= start; scr.end <= end;
+    } or {
+        goal cs = new sv.ChairSquats();
+        cs.start >= start; cs.end <= end;
+    } or {
+        goal shl = new sv.SupineHipLifts();
+        shl.start >= start; shl.end <= end;
+    } or {
+        goal shr = new sv.SideHipRaise();
+        shr.start >= start; shr.end <= end;
+    }
+}
+
+predicate LowerBackAbdominalExercise() : Interval {
+    {
+        goal ac = new sv.AbdominalCrunch();
+        ac.start >= start; ac.end <= end;
+    } or {
+        goal be = new sv.BackExtensions();
+        be.start >= start; be.end <= end;
+    }
+}
+
+predicate PhysicalExercise() : Interval {
+    goal ube = new UpperBodyExercise();
+    ube.start >= start; ube.end <= end;
+    goal lbe = new LowerBodyExercise();
+    lbe.start >= start; lbe.end <= end;
+    goal lbae = new LowerBackAbdominalExercise();
+    lbae.start >= start; lbae.end <= end;
+}
+
+PhysicalExerciseStateVariable sv = new PhysicalExerciseStateVariable();
+goal pe = new PhysicalExercise();

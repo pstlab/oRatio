@@ -1,88 +1,113 @@
 #pragma once
 
 #include "env.h"
-#include "lit.h"
+#include "sat_core.h"
 #include "lin.h"
 #include "var_value.h"
 
 namespace ratio
 {
+  class type;
 
-class type;
+  class item : public env, public smt::var_value
+  {
+    friend class env;
 
-class item : public env, public smt::var_value
-{
-public:
-  item(core &cr, const context ctx, const type &tp);
-  item(const item &orig) = delete;
-  virtual ~item();
+  public:
+    item(core &cr, const context ctx, type &tp);
+    item(const item &orig) = delete;
+    virtual ~item() = default;
 
-  const type &get_type() const { return tp; }
+    /**
+     * @brief Get the id of this item.
+     *
+     * @return uintptr_t an id of this item.
+     */
+    CORE_EXPORT uintptr_t get_id() const noexcept { return reinterpret_cast<uintptr_t>(this); }
 
-  virtual smt::var eq(item &i) noexcept;
-  virtual bool equates(const item &i) const noexcept;
+    inline type &get_type() const noexcept { return tp; }
 
-private:
-  const type &tp;
-};
+    virtual smt::lit new_eq(item &i) noexcept;
+    virtual bool equates(item &i) noexcept;
 
-class bool_item : public item
-{
-public:
-  bool_item(core &cr, const smt::lit &l);
-  bool_item(const bool_item &that) = delete;
-  virtual ~bool_item();
+    virtual smt::json to_json() const noexcept;
 
-  smt::var eq(item &i) noexcept override;
-  bool equates(const item &i) const noexcept override;
+  private:
+    virtual smt::json value_to_json() const noexcept;
 
-public:
-  smt::lit l;
-};
+  private:
+    type &tp;
+  };
 
-class arith_item : public item
-{
-public:
-  arith_item(core &cr, const type &t, const smt::lin &l);
-  arith_item(const arith_item &that) = delete;
-  virtual ~arith_item();
+  class bool_item : public item
+  {
+  public:
+    CORE_EXPORT bool_item(core &cr, const smt::lit &l);
+    bool_item(const bool_item &that) = delete;
+    CORE_EXPORT virtual ~bool_item() = default;
 
-  smt::var eq(item &i) noexcept override;
-  bool equates(const item &i) const noexcept override;
+    smt::lit new_eq(item &i) noexcept override;
+    bool equates(item &i) noexcept override;
 
-public:
-  const smt::lin l;
-};
+  private:
+    smt::json value_to_json() const noexcept override;
 
-class var_item : public item
-{
-public:
-  var_item(core &cr, const type &t, smt::var ev);
-  var_item(const var_item &that) = delete;
-  virtual ~var_item();
+  public:
+    smt::lit l;
+  };
 
-  expr get(const std::string &name) const override;
+  class arith_item : public item
+  {
+  public:
+    CORE_EXPORT arith_item(core &cr, type &t, const smt::lin &l);
+    arith_item(const arith_item &that) = delete;
+    CORE_EXPORT virtual ~arith_item() = default;
 
-  smt::var eq(item &i) noexcept override;
-  bool equates(const item &i) const noexcept override;
+    smt::lit new_eq(item &i) noexcept override;
+    bool equates(item &i) noexcept override;
 
-public:
-  const smt::var ev;
-};
+  private:
+    smt::json value_to_json() const noexcept override;
 
-class string_item : public item
-{
-public:
-  string_item(core &cr, const std::string &l);
-  string_item(const string_item &that) = delete;
-  virtual ~string_item();
+  public:
+    const smt::lin l;
+  };
 
-  std::string get_value() { return l; }
+  class var_item : public item
+  {
+  public:
+    CORE_EXPORT var_item(core &cr, type &t, smt::var ev);
+    var_item(const var_item &that) = delete;
+    CORE_EXPORT virtual ~var_item() = default;
 
-  smt::var eq(item &i) noexcept override;
-  bool equates(const item &i) const noexcept override;
+    expr get(const std::string &name) override;
 
-private:
-  std::string l;
-};
+    smt::lit new_eq(item &i) noexcept override;
+    bool equates(item &i) noexcept override;
+
+  private:
+    smt::json value_to_json() const noexcept override;
+
+  public:
+    const smt::var ev;
+  };
+
+  class string_item : public item
+  {
+  public:
+    CORE_EXPORT string_item(core &cr, const std::string &l);
+    string_item(const string_item &that) = delete;
+    CORE_EXPORT virtual ~string_item() = default;
+
+    inline std::string get_value() const { return l; }
+
+    smt::lit new_eq(item &i) noexcept override;
+    bool equates(item &i) noexcept override;
+
+  private:
+    smt::json value_to_json() const noexcept override;
+
+  private:
+    std::string l;
+  };
 } // namespace ratio

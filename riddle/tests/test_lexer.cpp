@@ -1,4 +1,4 @@
-#include "lexer.h"
+#include "riddle_lexer.h"
 #include <sstream>
 #include <cassert>
 
@@ -23,7 +23,7 @@ void test_lexer_0()
     token *t6 = l.next();
     assert(t6->sym == SEMICOLON_ID);
     token *t7 = l.next();
-    assert(t7->sym == FALSE_ID);
+    assert(t7->sym == BoolLiteral_ID);
     token *t8 = l.next();
     assert(t8->sym == SEMICOLON_ID);
     token *t9 = l.next();

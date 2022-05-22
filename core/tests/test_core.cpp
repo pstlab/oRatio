@@ -8,9 +8,9 @@ using namespace ratio;
 
 class test_solver : public core
 {
-    virtual void solve() override {}
+    virtual bool solve() override { return true; }
     virtual void new_atom(atom &atm, const bool &is_fact) override {}
-    virtual void new_disjunction(context &ctx, const disjunction &disj) override {}
+    virtual void new_disjunction(context &ctx, const std::vector<conjunction *> &conjs) override {}
 };
 
 void test_core_0()
@@ -23,7 +23,10 @@ void test_core_0()
     smt::lbool b_val = s.bool_value(b0);
     assert(b_val == smt::Undefined);
 
-    s.assert_facts({b0->l});
+    bool nc = s.get_sat_core().new_clause({b0->l});
+    assert(nc);
+    bool prop = s.get_sat_core().propagate();
+    assert(prop);
     b_val = s.bool_value(b0);
     assert(b_val == smt::True);
 }
@@ -38,7 +41,10 @@ void test_core_1()
     smt::lbool b_val = s.bool_value(b0);
     assert(b_val == smt::Undefined);
 
-    s.assert_facts({b0->l});
+    bool nc = s.get_sat_core().new_clause({b0->l});
+    assert(nc);
+    bool prop = s.get_sat_core().propagate();
+    assert(prop);
     b_val = s.bool_value(b0);
     assert(b_val == smt::True);
 }

@@ -1,17 +1,13 @@
 #include "solver.h"
-#ifdef BUILD_GUI
-#include "socket_listener.h"
-#endif
 #include <iostream>
-#include <fstream>
+
+using namespace ratio;
 
 int main(int argc, char *argv[])
 {
-    using namespace ratio;
-
     if (argc < 3)
     {
-        std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>" << std::endl;
+        std::cerr << "usage: oRatio <input-file> [<input-file> ...] <output-file>\n";
         return -1;
     }
 
@@ -24,34 +20,32 @@ int main(int argc, char *argv[])
     std::string sol_name = argv[argc - 1];
 
     std::cout << "starting oRatio";
-#ifdef BUILD_GUI
+#ifndef NDEBUG
     std::cout << " in debug mode";
 #endif
-    std::cout << ".." << std::endl;
+    std::cout << "..\n";
 
-    solver s;
-#ifdef BUILD_GUI
-    socket_listener l(s, HOST, PORT);
-#endif
-
-    s.init();
-    try
+    for (size_t i = 0; i < NUM_TESTS; ++i)
     {
-        std::cout << "parsing input files.." << std::endl;
-        s.read(prob_names);
+        solver s;
+        try
+        {
+            std::cout << "parsing input files..\n";
+            s.read(prob_names);
 
-        std::cout << "solving the problem.." << std::endl;
-        s.solve();
-        std::cout << "hurray!! we have found a solution.." << std::endl;
-
-        std::ofstream sol_file;
-        sol_file.open(sol_name);
-        sol_file << s.to_string();
-        sol_file.close();
-    }
-    catch (const std::exception &ex)
-    {
-        std::cout << ex.what() << std::endl;
-        return 1;
+            std::cout << "solving the problem..\n";
+            if (s.solve())
+                std::cout << "hurray!! we have found a solution..\n";
+            else
+            {
+                std::cout << "the problem is unsolvable..\n";
+                return 1;
+            }
+        }
+        catch (const std::exception &ex)
+        {
+            std::cout << ex.what() << '\n';
+            return 1;
+        }
     }
 }

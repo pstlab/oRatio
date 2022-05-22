@@ -1,27 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="smt::lit">
+    <DisplayString Condition="x%2==0">{{ ¬β{x/2} }}</DisplayString>
+    <DisplayString Condition="x%2==1">{{ β{x/2} }}</DisplayString>
+  </Type>
   <Type Name="ratio::flaw">
-    <DisplayString>{{ φ{phi} }}</DisplayString>
+    <DisplayString>{{ ϕ{phi} }}</DisplayString>
     <Expand>
-      <Item Name="[φ]">phi</Item>
+      <Item Name="[ϕ]">phi</Item>
       <Item Name="[causes]">causes</Item>
       <Item Name="[resolvers]">resolvers</Item>
     </Expand>
   </Type>
   <Type Name="ratio::atom_flaw">
-    <DisplayString Condition="is_fact">{{ φ{phi} fact σ{atm.sigma} }}</DisplayString>
-    <DisplayString>{{ φ{phi} goal σ{atm.sigma} }}</DisplayString>
+    <DisplayString Condition="is_fact">{{ ϕ{phi} fact σ{atm.sigma} }}</DisplayString>
+    <DisplayString>{{ ϕ{phi} goal σ{atm.sigma} }}</DisplayString>
     <Expand>
-      <Item Name="[φ]">phi</Item>
+      <Item Name="[ϕ]">phi</Item>
       <Item Name="[atom]">atm</Item>
       <Item Name="[causes]">causes</Item>
       <Item Name="[resolvers]">resolvers</Item>
     </Expand>
   </Type>
   <Type Name="ratio::disjunction_flaw">
-    <DisplayString>{{ φ{phi} disj }}</DisplayString>
+    <DisplayString>{{ ϕ{phi} disj }}</DisplayString>
     <Expand>
-      <Item Name="[φ]">phi</Item>
+      <Item Name="[ϕ]">phi</Item>
       <Item Name="[causes]">causes</Item>
       <Item Name="[resolvers]">resolvers</Item>
     </Expand>

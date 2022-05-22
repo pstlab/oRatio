@@ -1,0 +1,19 @@
+Airplane apn = new Airplane();
+
+Truck tru1 = new Truck();
+
+City city1 = new City();
+Airport apt1 = new Airport(city1);
+Location pos1 = new Location(city1);
+
+Package obj11 = new Package();
+Package obj12 = new Package();
+Package obj13 = new Package();
+
+fact at_apn1_apt1 = new apn.At(a:apt1, start:origin);  at_apn1_apt1.duration >= 1.0;
+fact at_tru1_pos1 = new tru1.At(l:pos1, start:origin);  at_tru1_pos1.duration >= 1.0;
+fact at_obj11_pos1 = new obj11.At(l:pos1, start:origin);  at_obj11_pos1.duration >= 1.0;
+fact at_obj12_pos1 = new obj12.At(l:pos1, start:origin);  at_obj12_pos1.duration >= 1.0;
+fact at_obj13_pos1 = new obj13.At(l:pos1, start:origin);  at_obj13_pos1.duration >= 1.0;
+
+goal at_obj11_apt1 = new obj11.At(l:apt1, end:horizon);

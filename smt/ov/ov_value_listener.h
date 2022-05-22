@@ -4,24 +4,22 @@
 
 namespace smt
 {
+  class ov_value_listener
+  {
+    friend class ov_theory;
 
-class ov_value_listener
-{
-  friend class ov_theory;
+  public:
+    ov_value_listener(ov_theory &s) : th(s) {}
+    ov_value_listener(const ov_value_listener &that) = delete;
+    virtual ~ov_value_listener() = default;
 
-public:
-  ov_value_listener(ov_theory &s) : th(s) {}
-  ov_value_listener(const ov_value_listener &that) = delete;
+  protected:
+    inline void listen_set(var v) noexcept { th.listen(v, this); }
 
-  virtual ~ov_value_listener() {}
+  private:
+    virtual void ov_value_change(const var &) {}
 
-protected:
-  void listen_set(var v) { th.listen(v, this); }
-
-private:
-  virtual void ov_value_change(const var &) {}
-
-private:
-  ov_theory &th;
-};
+  private:
+    ov_theory &th;
+  };
 } // namespace smt

@@ -1,0 +1,82 @@
+class City {}
+
+class Location {
+
+    City city;
+
+    Location(City city) : city(city) {}
+}
+
+class Airport : Location {
+
+    Airport(City city) : Location(city) {}
+}
+
+class Truck : StateVariable {
+
+    predicate At(Location l) {
+        duration >= 1.0;
+        goal dt = new DriveTo(l:l, end:start);
+    }
+
+    predicate DriveTo(Location l) {
+        duration >= 1.0;
+        goal at = new At(end:start);
+        at.l.city == l.city;
+    }
+}
+
+class Airplane : StateVariable {
+
+    predicate At(Airport a) {
+        duration >= 1.0;
+        goal dt = new FlyTo(a:a, end:start);
+    }
+
+    predicate FlyTo(Airport a) {
+        duration >= 1.0;
+        goal at = new At(end:start);
+    }
+}
+
+class Package : StateVariable {
+
+    predicate At(Location l) {
+        duration >= 1.0;
+        { goal ul = new UnloadTruck(l:l, end:start); } or { goal ul = new UnloadAirplane(a:l, end:start); }
+    }
+
+    predicate UnloadTruck(Truck t, Location l) {
+        duration >= 1.0;
+        goal at_t = new t.At(l:l); at_t.start <= start; at_t.end >= end;
+        goal i = new IntoTruck(t:t, end:start);
+    }
+
+    predicate IntoTruck(Truck t) {
+        duration >= 1.0;
+        goal lo = new LoadTruck(t:t, end:start);
+    }
+
+    predicate LoadTruck(Truck t, Location l) {
+        duration >= 1.0;
+        goal at_t = new t.At(l:l); at_t.start <= start; at_t.end >= end;
+        goal at = new At(l:l, end:start);
+    }
+
+    predicate UnloadAirplane(Airplane pn, Airport a) {
+        duration >= 1.0;
+        goal at_pn = new pn.At(a:a); at_pn.start <= start; at_pn.end >= end;
+        goal i = new IntoAirplane(pn:pn, end:start);
+    }
+
+    predicate IntoAirplane(Airplane pn) {
+        duration >= 1.0;
+        goal lo = new LoadAirplane(pn:pn, end:start);
+    }
+
+    predicate LoadAirplane(Airplane pn, Airport a) {
+        duration >= 1.0;
+        goal at_pn = new pn.At(a:a); at_pn.start <= start; at_pn.end >= end;
+        goal at = new At(l:a, end:start);
+    }
+}

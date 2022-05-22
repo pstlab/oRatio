@@ -4,29 +4,28 @@
 
 namespace ratio
 {
+  class item;
 
-class item;
+  namespace ast
+  {
+    class enum_declaration;
+  } // namespace ast
 
-namespace ast
-{
-class enum_declaration;
-} // namespace ast
+  class enum_type : public type
+  {
+    friend class ast::enum_declaration;
 
-class enum_type : public type
-{
-  friend class ast::enum_declaration;
+  public:
+    enum_type(scope &scp, std::string name);
+    enum_type(const enum_type &orig) = delete;
+    virtual ~enum_type() = default;
 
-public:
-  enum_type(core &cr, scope &scp, std::string name);
-  enum_type(const enum_type &orig) = delete;
-  virtual ~enum_type();
+    expr new_instance(context &ctx) override;
 
-  expr new_instance(context &ctx) override;
+  private:
+    std::vector<item *> get_all_instances() const noexcept;
 
-private:
-  std::vector<item *> get_all_instances() const;
-
-private:
-  std::vector<enum_type *> enums;
-};
+  private:
+    std::vector<enum_type *> enums;
+  };
 } // namespace ratio

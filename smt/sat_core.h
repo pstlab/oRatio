@@ -1,101 +1,136 @@
 #pragma once
 
+#include "smt_export.h"
 #include "lit.h"
-#include "lbool.h"
-#include "theory.h"
+#ifdef PARALLELIZE
+#include "thread_pool.h"
+#endif
 #include <vector>
 #include <queue>
 #include <string>
 #include <unordered_map>
 #include <set>
+#ifdef VERBOSE_LOG
+#include <iostream>
+
+#ifdef WIN32
+#define COLOR_NORMAL ""
+#define COLOR_RED ""
+#define COLOR_GREEN ""
+#define COLOR_YELLOW ""
+#else
+#define COLOR_NORMAL "\033[0m"
+#define COLOR_RED "\033[31m"
+#define COLOR_GREEN "\033[32m"
+#define COLOR_YELLOW "\033[33m"
+#endif
+
+#define LOG_ERR(msg) std::cerr << COLOR_RED << __FILE__ << "(" << __LINE__ << "): " << msg << COLOR_NORMAL << '\n'
+#define LOG_WARN(msg) std::clog << COLOR_YELLOW << __FILE__ << "(" << __LINE__ << "): " << msg << COLOR_NORMAL << '\n'
+#define LOG_DEBUG(msg) std::clog << COLOR_GREEN << __FILE__ << "(" << __LINE__ << "): " << msg << COLOR_NORMAL << '\n'
+#define LOG(msg) std::cout << COLOR_NORMAL << __FILE__ << "(" << __LINE__ << "): " << msg << COLOR_NORMAL << '\n'
+#else
+#define LOG_ERR(msg)
+#define LOG_WARN(msg)
+#define LOG_DEBUG(msg)
+#define LOG(msg)
+#endif
 
 namespace smt
 {
+  class sat_stack;
+  class constr;
+  class theory;
+  class sat_value_listener;
 
-static const var FALSE_var = 0;
-static const var TRUE_var = 1;
-
-class clause;
-class theory;
-class sat_value_listener;
-
-class sat_core
-{
-  friend class clause;
-  friend class theory;
-  friend class sat_value_listener;
-
-public:
-  sat_core();
-  sat_core(const sat_core &orig) = delete;
-  ~sat_core();
-
-  var new_var();                                 // creates a new propositional variable..
-  bool new_clause(const std::vector<lit> &lits); // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
-
-  var new_eq(const lit &left, const lit &right);   // creates a new reified equality..
-  var new_conj(const std::vector<lit> &ls);        // creates a new reified conjunction..
-  var new_disj(const std::vector<lit> &ls);        // creates a new reified disjunction..
-  var new_at_most_one(const std::vector<lit> &ls); // creates a new reified at-most-one..
-  var new_exct_one(const std::vector<lit> &ls);    // creates a new reified exct-one..
-
-  bool eq(const lit &left, const lit &right, const var &p = TRUE_var);   // creates a new reified equality controlled by the 'p' literal..
-  bool conj(const std::vector<lit> &ls, const var &p = TRUE_var);        // creates a new reified conjunction controlled by the 'p' literal..
-  bool disj(const std::vector<lit> &ls, const var &p = TRUE_var);        // creates a new reified disjunction controlled by the 'p' literal..
-  bool at_most_one(const std::vector<lit> &ls, const var &p = TRUE_var); // creates a new reified at-most-one controlled by the 'p' literal..
-  bool exct_one(const std::vector<lit> &ls, const var &p = TRUE_var);    // creates a new reified exct-one controlled by the 'p' literal..
-
-  bool assume(const lit &p);
-  void pop();
-  bool simplify_db();
-  bool check();
-  bool check(const std::vector<lit> &lits);
-
-  lbool value(const var &x) const { return assigns.at(x); } // returns the value of variable 'x'..
-  lbool value(const lit &p) const
+  class sat_core
   {
-    switch (value(p.get_var()))
+    friend class sat_stack;
+    friend class constr;
+    friend class theory;
+    friend class sat_value_listener;
+
+  public:
+    SMT_EXPORT sat_core();
+    SMT_EXPORT sat_core(const sat_core &orig);
+    SMT_EXPORT sat_core(sat_core &&orig) = default;
+    SMT_EXPORT ~sat_core();
+
+#ifdef PARALLELIZE
+    thread_pool &get_thread_pool()
     {
-    case True:
-      return p.get_sign() ? True : False;
-    case False:
-      return p.get_sign() ? False : True;
-    default:
-      return Undefined;
+      return th_pool;
     }
-  }                                                          // returns the value of literal 'p'..
-  size_t decision_level() const { return trail_lim.size(); } // returns the current decision level..
-  bool root_level() const { return trail_lim.empty(); }      // checks whether the current decision level is root level..
+#endif
 
-private:
-  static size_t index(const lit &p) { return p.get_sign() ? p.get_var() << 1 : (p.get_var() << 1) ^ 1; }
-  static std::string to_string(const lit &p) { return (p.get_sign() ? "b" : "!b") + std::to_string(p.get_var()); }
+    SMT_EXPORT var new_var() noexcept;                          // creates a new propositional variable..
+    SMT_EXPORT bool new_clause(std::vector<lit> lits) noexcept; // creates a new clause given the 'lits' literals returning 'false' if some trivial inconsistency is detected..
 
-  bool propagate(std::vector<lit> &cnfl);
-  void analyze(std::vector<lit> &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel);
-  void record(const std::vector<lit> &lits);
+    SMT_EXPORT lit new_eq(const lit &left, const lit &right) noexcept; // creates a new reified equality..
+    SMT_EXPORT lit new_conj(std::vector<lit> ls) noexcept;             // creates a new reified conjunction..
+    SMT_EXPORT lit new_disj(std::vector<lit> ls) noexcept;             // creates a new reified disjunction..
+    SMT_EXPORT lit new_at_most_one(std::vector<lit> ls) noexcept;      // creates a new reified at-most-one..
+    SMT_EXPORT lit new_exct_one(std::vector<lit> ls) noexcept;         // creates a new reified exct-one..
 
-  bool enqueue(const lit &p, clause *const c = nullptr);
-  void pop_one();
+    SMT_EXPORT bool assume(const lit &p) noexcept;
+    SMT_EXPORT void pop() noexcept;
+    SMT_EXPORT bool simplify_db() noexcept;
+    SMT_EXPORT bool propagate() noexcept;
+    SMT_EXPORT bool next() noexcept;
+    SMT_EXPORT bool check(std::vector<lit> lits) noexcept;
 
-  void add_theory(theory &th) { theories.push_back(&th); }
-  void bind(const var &v, theory &th) { bounds[v].insert(&th); }
-  void listen(const var &v, sat_value_listener &l) { listening[v].insert(&l); }
+    inline lbool value(const var &x) const noexcept { return assigns.at(x); } // returns the value of variable 'x'..
+    inline lbool value(const lit &p) const noexcept
+    {
+      switch (value(variable(p)))
+      {
+      case True:
+        return sign(p) ? True : False;
+      case False:
+        return sign(p) ? False : True;
+      default:
+        return Undefined;
+      }
+    }                                                                                       // returns the value of literal 'p'..
+    inline size_t decision_level() const noexcept { return trail_lim.size(); }              // returns the current decision level..
+    inline bool root_level() const noexcept { return trail_lim.empty(); }                   // checks whether the current decision level is root level..
+    SMT_EXPORT const std::vector<lit> &get_decisions() const noexcept { return decisions; } // returns the decisions taken so far in chronological order..
 
-private:
-  std::vector<clause *> constrs;              // the collection of problem constraints..
-  std::vector<std::vector<clause *>> watches; // for each literal 'p', a list of constraints watching 'p'..
-  std::queue<lit> prop_q;                     // propagation queue..
-  std::vector<lbool> assigns;                 // the current assignments..
-  std::vector<lit> trail;                     // the list of assignment in chronological order..
-  std::vector<size_t> trail_lim;              // separator indices for different decision levels in 'trail'..
-  std::vector<clause *> reason;               // for each variable, the constraint that implied its value..
-  std::vector<size_t> level;                  // for each variable, the decision level it was assigned..
-  std::unordered_map<std::string, var> exprs; // the already existing expressions (string to bool variable)..
+  private:
+    void analyze(constr &cnfl, std::vector<lit> &out_learnt, size_t &out_btlevel) noexcept;
+    void record(std::vector<lit> lits) noexcept;
 
-  std::vector<theory *> theories; // all the theories..
-  std::unordered_map<var, std::set<theory *>> bounds;
-  std::unordered_map<var, std::set<sat_value_listener *>> listening;
-};
+    bool enqueue(const lit &p, constr *const c = nullptr) noexcept;
+    void pop_one() noexcept;
+
+    inline void bind(const var &v, theory &th) noexcept { bounds[v].insert(&th); }
+    inline void listen(const var &v, sat_value_listener &l) noexcept
+    {
+      if (value(v) == Undefined)
+        listening[v].insert(&l);
+    }
+
+  private:
+#ifdef PARALLELIZE
+    thread_pool th_pool;
+#endif
+
+    std::vector<constr *> constrs;              // the collection of problem constraints..
+    std::vector<std::vector<constr *>> watches; // for each literal 'p', a list of constraints watching 'p'..
+    std::vector<lbool> assigns;                 // the current assignments..
+
+    std::queue<lit> prop_q;                     // propagation queue..
+    std::vector<lit> trail;                     // the list of assignment in chronological order..
+    std::vector<size_t> trail_lim;              // separator indices for different decision levels in 'trail'..
+    std::vector<lit> decisions;                 // the list of decisions in chronological order..
+    std::vector<constr *> reason;               // for each variable, the constraint that implied its value..
+    std::vector<size_t> level;                  // for each variable, the decision level it was assigned..
+    std::unordered_map<std::string, lit> exprs; // the already existing expressions (string to literal)..
+
+    std::vector<theory *> theories; // all the theories..
+    std::unordered_map<size_t, std::set<theory *>> bounds;
+    std::vector<sat_value_listener *> listeners; // all the listeners..
+    std::unordered_map<size_t, std::set<sat_value_listener *>> listening;
+  };
 
 } // namespace smt

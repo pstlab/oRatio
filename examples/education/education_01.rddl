@@ -1,0 +1,95 @@
+class User {
+
+  int id;
+  bool c_archeologia;
+  bool c_architettura;
+  bool c_arte;
+  bool c_geografia;
+  bool c_economia;
+  bool c_storia;
+  bool c_scienza;
+  bool c_biologia;
+  bool c_agricoltura;
+  bool c_antropologia;
+  bool c_astronomia;
+  bool c_botanica;
+  bool c_branche_della_fisica;
+  bool c_chiese_ditalia;
+  bool c_chimica;
+  bool c_cinema;
+  bool c_cultura;
+  bool c_elettronica;
+  bool c_farmaci;
+  bool c_geologia;
+  bool c_industria;
+  bool c_informatica;
+  bool c_ingegneria;
+  bool c_letteratura;
+  bool c_medicina;
+  bool c_musica;
+  bool c_natura;
+  bool c_opere_darte;
+  bool c_politica;
+  bool c_psichiatria;
+  bool c_psicologia;
+  bool c_filosofia;
+  bool c_religione;
+  bool c_societa;
+  bool c_sociologia;
+  bool c_software;
+  bool c_statistica;
+  bool c_tecnologia;
+  ReusableResource busy_time = new ReusableResource(1.0);
+
+  User(int id, bool c_archeologia, bool c_architettura, bool c_arte, bool c_geografia, bool c_economia, bool c_storia, bool c_scienza, bool c_biologia, bool c_agricoltura, bool c_antropologia, bool c_astronomia, bool c_botanica, bool c_branche_della_fisica, bool c_chiese_ditalia, bool c_chimica, bool c_cinema, bool c_cultura, bool c_elettronica, bool c_farmaci, bool c_geologia, bool c_industria, bool c_informatica, bool c_ingegneria, bool c_letteratura, bool c_medicina, bool c_musica, bool c_natura, bool c_opere_darte, bool c_politica, bool c_psichiatria, bool c_psicologia, bool c_filosofia, bool c_religione, bool c_societa, bool c_sociologia, bool c_software, bool c_statistica, bool c_tecnologia) : id(id), c_archeologia(c_archeologia), c_architettura(c_architettura), c_arte(c_arte), c_geografia(c_geografia), c_economia(c_economia), c_storia(c_storia), c_scienza(c_scienza), c_biologia(c_biologia), c_agricoltura(c_agricoltura), c_antropologia(c_antropologia), c_astronomia(c_astronomia), c_botanica(c_botanica), c_branche_della_fisica(c_branche_della_fisica), c_chiese_ditalia(c_chiese_ditalia), c_chimica(c_chimica), c_cinema(c_cinema), c_cultura(c_cultura), c_elettronica(c_elettronica), c_farmaci(c_farmaci), c_geologia(c_geologia), c_industria(c_industria), c_informatica(c_informatica), c_ingegneria(c_ingegneria), c_letteratura(c_letteratura), c_medicina(c_medicina), c_musica(c_musica), c_natura(c_natura), c_opere_darte(c_opere_darte), c_politica(c_politica), c_psichiatria(c_psichiatria), c_psicologia(c_psicologia), c_filosofia(c_filosofia), c_religione(c_religione), c_societa(c_societa), c_sociologia(c_sociologia), c_software(c_software), c_statistica(c_statistica), c_tecnologia(c_tecnologia) {}
+}
+
+class Lesson {
+
+  predicate St_3(User u) : Interval {
+    duration >= 6979.0;
+    { u.c_geografia; } or { u.c_societa; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+
+    goal st4 = new St_4();
+    st4.start >= end;
+
+    goal st5 = new St_5();
+    st5.start >= end;
+  }
+
+  predicate St_4(User u) : Interval {
+    duration >= 385.0;
+    { u.c_architettura; } or { u.c_chimica; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+
+    goal st6 = new St_6();
+    st6.start >= end;
+
+    goal st7 = new St_7();
+    st7.start >= end;
+  }
+
+  predicate St_5(User u) : Interval {
+    duration >= 1437.0;
+    { u.c_antropologia; } or { u.c_architettura; } or { u.c_archeologia; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_6(User u) : Interval {
+    duration >= 968.0;
+    { u.c_architettura; } or { u.c_geografia; } or { u.c_geologia; } or { u.c_arte; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+
+  predicate St_7(User u) : Interval {
+    duration >= 2405.0;
+    { u.c_architettura; } or { u.c_geografia; } or { u.c_societa; } or { u.c_chimica; } or { u.c_economia; }
+    fact bt = new u.busy_time.Use(start:start, duration:duration, end:end, amount:1.0);
+  }
+}
+
+Lesson l_52 = new Lesson();
+User u_51 = new User(51, true, true, true, true, false, false, true, true, true, false, true, false, false, false, true, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, true, false, false, false, false);
+
+goal st3 = new l_52.St_3();

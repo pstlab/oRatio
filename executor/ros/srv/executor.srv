@@ -1,0 +1,5 @@
+uint64 reasoner_id
+string[] notify_start
+string[] notify_end
+---
+uint8 new_state

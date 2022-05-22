@@ -1,0 +1,7 @@
+set(CONCURRENT_VERSION 1.0.0)
+
+@PACKAGE_INIT@
+
+set_and_check(CONCURRENT_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@/concurrent")
+
+check_required_components(concurrent)

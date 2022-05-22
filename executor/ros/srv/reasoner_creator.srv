@@ -1,0 +1,6 @@
+# creates a new reasoner with the given reasoner id
+string[] domain_files
+string[] requirements
+---
+uint64 reasoner_id
+bool consistent

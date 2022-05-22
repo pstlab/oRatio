@@ -1,31 +1,41 @@
 #pragma once
 
-#include <cstddef>
+#include "smt_export.h"
+#include "defs.h"
+#include <limits>
+#include <string>
 
 namespace smt
 {
+  /**
+   * This class is used for representing propositional literals.
+   */
+  class lit
+  {
+  public:
+    explicit constexpr lit(var v = -1, bool sign = true) : x((v << 1) + sign) {}
 
-typedef size_t var;
+    inline friend var variable(const lit &p) noexcept { return p.x >> 1; }
+    inline friend bool sign(const lit &p) noexcept { return p.x & 1; }
+    inline friend size_t index(const lit &p) noexcept { return p.x; }
+    inline friend bool is_undefined(const lit &p) noexcept { return p.x == std::numeric_limits<size_t>::max(); }
 
-/**
- * This class is used for representing propositional literals.
- */
-class lit
-{
-public:
-  lit(var v = -1, bool sign = true) : v(v), sign(sign) {}
-  virtual ~lit() {}
+    inline constexpr lit operator!() const
+    {
+      lit p;
+      p.x = x ^ 1;
+      return p;
+    }
+    inline bool operator<(const lit &rhs) const noexcept { return x < rhs.x; }
+    inline bool operator==(const lit &rhs) const noexcept { return x == rhs.x; }
+    inline bool operator!=(const lit &rhs) const noexcept { return x != rhs.x; }
 
-  const var &get_var() const { return v; }
-  const bool &get_sign() const { return sign; }
+    friend std::string to_string(const lit &p) noexcept { return sign(p) ? ("b" + std::to_string(variable(p))) : ("¬b" + std::to_string(variable(p))); }
 
-  lit operator!() const { return lit(v, !sign); }
-  bool operator<(const lit &rhs) const { return v < rhs.v || (v == rhs.v && sign < rhs.sign); }
-  bool operator==(const lit &rhs) const { return v == rhs.v && sign == rhs.sign; }
-  bool operator!=(const lit &rhs) const { return !operator==(rhs); }
+  private:
+    size_t x;
+  };
 
-private:
-  var v;     // this is the variable of the propositional literal..
-  bool sign; // this is the sign of the propositional literal..
-};
+  constexpr lit FALSE_lit(FALSE_var);
+  constexpr lit TRUE_lit = !FALSE_lit;
 } // namespace smt

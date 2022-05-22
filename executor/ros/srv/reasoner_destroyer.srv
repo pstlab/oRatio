@@ -1,0 +1,4 @@
+# destroys the reasoner identified by the given reasoner id
+uint64 reasoner_id
+---
+bool destroyed
