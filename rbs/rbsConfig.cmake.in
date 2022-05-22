@@ -1,0 +1,7 @@
+set(RBS_VERSION 1.0.0)
+
+@PACKAGE_INIT@
+
+set_and_check(RBS_INCLUDE_DIR "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@/rbs")
+
+check_required_components(rbs)

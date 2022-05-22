@@ -1,62 +1,34 @@
 #pragma once
 
-#include "riddle_export.h"
+#include "rbs_export.h"
 #include "rational.h"
 #include <istream>
 #include <cmath>
 
-#define BOOL_KEYWORD "bool"
-#define INT_KEYWORD "int"
-#define REAL_KEYWORD "real"
-#define TP_KEYWORD "tp"
-#define STRING_KEYWORD "string"
-
-namespace riddle
+namespace rbs
 {
   enum symbol
   {
-    BOOL_ID,          // 'bool'
-    INT_ID,           // 'int'
-    REAL_ID,          // 'real'
-    TP_ID,            // 'tp'
-    STRING_ID,        // 'string'
-    TYPEDEF_ID,       // 'typedef'
-    ENUM_ID,          // 'enum'
-    CLASS_ID,         // 'class'
-    GOAL_ID,          // 'goal'
-    FACT_ID,          // 'fact'
-    PREDICATE_ID,     // 'predicate'
-    NEW_ID,           // 'new'
-    OR_ID,            // 'or'
-    THIS_ID,          // 'this'
-    VOID_ID,          // 'void'
-    RETURN_ID,        // 'return'
     DOT_ID,           // '.'
     COMMA_ID,         // ','
     COLON_ID,         // ':'
     SEMICOLON_ID,     // ';'
     LPAREN_ID,        // '('
     RPAREN_ID,        // ')'
-    LBRACKET_ID,      // '['
-    RBRACKET_ID,      // ']'
-    LBRACE_ID,        // '{'
-    RBRACE_ID,        // '}'
+    BANG_ID,          // '!'
+    GT_ID,            // '>'
+    LT_ID,            // '<'
+    EQEQ_ID,          // '=='
+    LTEQ_ID,          // '<='
+    GTEQ_ID,          // '>='
+    BANGEQ_ID,        // '!='
     PLUS_ID,          // '+'
     MINUS_ID,         // '-'
     STAR_ID,          // '*'
     SLASH_ID,         // '/'
     AMP_ID,           // '&'
     BAR_ID,           // '|'
-    EQ_ID,            // '='
-    GT_ID,            // '>'
-    LT_ID,            // '<'
-    BANG_ID,          // '!'
-    EQEQ_ID,          // '=='
-    LTEQ_ID,          // '<='
-    GTEQ_ID,          // '>='
-    BANGEQ_ID,        // '!='
-    IMPLICATION_ID,   // '->'
-    CARET_ID,         // '^'
+    IMPLICATION_ID,   // '=>'
     ID_ID,            // ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
     BoolLiteral_ID,   // 'true' | 'false'
     IntLiteral_ID,    // [0-9]+
@@ -127,10 +99,10 @@ namespace riddle
   class lexer final
   {
   public:
-    RIDDLE_EXPORT lexer(std::istream &is);
+    RBS_EXPORT lexer(std::istream &is);
     lexer(const lexer &orig) = delete;
 
-    RIDDLE_EXPORT token *next();
+    RBS_EXPORT token *next();
 
   private:
     static bool is_id_part(const char &ch) noexcept { return ch == '_' || (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9'); }
@@ -197,4 +169,4 @@ namespace riddle
     size_t end_line = 0;
     size_t end_pos = 0;
   };
-} // namespace riddle
+} // namespace rbs

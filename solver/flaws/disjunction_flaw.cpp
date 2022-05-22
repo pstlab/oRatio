@@ -13,11 +13,11 @@ namespace ratio
         for (auto &cnj : conjs)
         {
             context cnj_ctx(new env(get_solver(), context(ctx)));
-            add_resolver(*new choose_conjunction(get_solver(), *this, cnj_ctx, *cnj));
+            add_resolver(*new choose_conjunction(*this, cnj_ctx, *cnj));
         }
     }
 
-    disjunction_flaw::choose_conjunction::choose_conjunction(solver &slv, disjunction_flaw &disj_flaw, const context &ctx, conjunction &conj) : resolver(conj.get_cost(), disj_flaw), ctx(ctx), conj(conj) {}
+    disjunction_flaw::choose_conjunction::choose_conjunction(disjunction_flaw &disj_flaw, const context &ctx, conjunction &conj) : resolver(conj.get_cost(), disj_flaw), ctx(ctx), conj(conj) {}
 
     std::string disjunction_flaw::choose_conjunction::get_data() const noexcept { return "{\"rho\":\"" + to_string(get_rho()) + "\"}"; }
 

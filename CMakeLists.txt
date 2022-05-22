@@ -16,7 +16,7 @@ option(VERBOSE_LOG "Makes log more verbose" OFF)
 option(PARALLELIZE "Performs some activities in parallel" OFF)
 
 option(BUILD_EXECUTOR "Builds the executor" OFF)
-
+option(BUILD_RBS "Builds the rule based system" OFF)
 option(BUILD_JAVA_API "Builds the Java API" OFF)
 option(BUILD_PYTHON_API "Builds the Python API" OFF)
 option(BUILD_GUI_SERVER "Builds the server" OFF)
@@ -49,6 +49,11 @@ endif()
 message(STATUS "Build executor:           ${BUILD_EXECUTOR}")
 if(BUILD_EXECUTOR)
     add_subdirectory(executor)
+endif()
+
+message(STATUS "Build rule based system:  ${BUILD_RBS}")
+if(BUILD_RBS)
+    add_subdirectory(rbs)
 endif()
 
 message(STATUS "Build Java API:           ${BUILD_JAVA_API}")

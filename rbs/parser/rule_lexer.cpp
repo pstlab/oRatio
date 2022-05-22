@@ -1,8 +1,8 @@
-#include "riddle_lexer.h"
+#include "rule_lexer.h"
 
-namespace riddle
+namespace rbs
 {
-    RIDDLE_EXPORT lexer::lexer(std::istream &is)
+    RBS_EXPORT lexer::lexer(std::istream &is)
     {
         char buffer[1024];
         while (is.read(buffer, sizeof(buffer)))
@@ -11,7 +11,7 @@ namespace riddle
         ch = next_char();
     }
 
-    RIDDLE_EXPORT token *lexer::next()
+    RBS_EXPORT token *lexer::next()
     {
         switch (ch)
         {
@@ -64,13 +64,6 @@ namespace riddle
                     }
             }
             return mk_token(SLASH_ID);
-        case '=':
-            if ((ch = next_char()) == '=')
-            {
-                ch = next_char();
-                return mk_token(EQEQ_ID);
-            }
-            return mk_token(EQ_ID);
         case '>':
             if ((ch = next_char()) == '=')
             {
@@ -104,9 +97,6 @@ namespace riddle
         case '&':
             ch = next_char();
             return mk_token(AMP_ID);
-        case '^':
-            ch = next_char();
-            return mk_token(CARET_ID);
         case '!':
             if ((ch = next_char()) == '=')
             {
@@ -161,18 +151,6 @@ namespace riddle
         case ')':
             ch = next_char();
             return mk_token(RPAREN_ID);
-        case '[':
-            ch = next_char();
-            return mk_token(LBRACKET_ID);
-        case ']':
-            ch = next_char();
-            return mk_token(RBRACKET_ID);
-        case '{':
-            ch = next_char();
-            return mk_token(LBRACE_ID);
-        case '}':
-            ch = next_char();
-            return mk_token(RBRACE_ID);
         case '0': // in a number literal..
         case '1':
         case '2':
@@ -230,247 +208,37 @@ namespace riddle
                     return mk_integer_token(intgr);
                 }
         }
-        case 'b':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'o')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'o')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'l')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                return finish_id(str);
-            else
-                return mk_token(BOOL_ID);
-        }
-        case 'c':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'l')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'a')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 's')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 's')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                return finish_id(str);
-            else
-                return mk_token(CLASS_ID);
-        }
-        case 'e':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'n')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'u')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'm')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                return finish_id(str);
-            else
-                return mk_token(ENUM_ID);
-        }
         case 'f':
         {
             std::string str;
             if (str += ch; (ch = next_char()) != 'a')
                 return finish_id(str);
-            switch (str += ch; ch = next_char())
-            {
-            case 'c':
-                if (str += ch; (ch = next_char()) != 't')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                    return finish_id(str);
-                else
-                    return mk_token(FACT_ID);
-            case 'l':
-                if (str += ch; (ch = next_char()) != 's')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != 'e')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                    return finish_id(str);
-                else
-                    return mk_bool_token(false);
-            default:
-                return finish_id(str);
-            }
-        }
-        case 'g':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'o')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'a')
-                return finish_id(str);
             if (str += ch; (ch = next_char()) != 'l')
                 return finish_id(str);
-            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                return finish_id(str);
-            else
-                return mk_token(GOAL_ID);
-        }
-        case 'i':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'n')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 't')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                return finish_id(str);
-            else
-                return mk_token(INT_ID);
-        }
-        case 'n':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'e')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'w')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                return finish_id(str);
-            else
-                return mk_token(NEW_ID);
-        }
-        case 'o':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'r')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                return finish_id(str);
-            else
-                return mk_token(OR_ID);
-        }
-        case 'p':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'r')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'e')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'd')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'i')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'c')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'a')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 't')
+            if (str += ch; (ch = next_char()) != 's')
                 return finish_id(str);
             if (str += ch; (ch = next_char()) != 'e')
                 return finish_id(str);
             if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
-                return mk_token(PREDICATE_ID);
-        }
-        case 'r':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'e')
-                return finish_id(str);
-            switch (str += ch; ch = next_char())
-            {
-            case 'a':
-                if (str += ch; (ch = next_char()) != 'l')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                    return finish_id(str);
-                else
-                    return mk_token(REAL_ID);
-            case 't':
-                if (str += ch; (ch = next_char()) != 'u')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != 'r')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != 'n')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                    return finish_id(str);
-                else
-                    return mk_token(RETURN_ID);
-            default:
-                return finish_id(str);
-            }
-        }
-        case 's':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 't')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'r')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'i')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'n')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'g')
-                return finish_id(str);
-            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                return finish_id(str);
-            else
-                return mk_token(STRING_ID);
+                return mk_bool_token(false);
         }
         case 't':
         {
             std::string str;
-            switch (str += ch; ch = next_char())
-            {
-            case 'p':
-                if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                    return finish_id(str);
-                else
-                    return mk_token(TP_ID);
-            case 'r':
-                if (str += ch; (ch = next_char()) != 'u')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != 'e')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                    return finish_id(str);
-                else
-                    return mk_bool_token(true);
-            case 'y':
-                if (str += ch; (ch = next_char()) != 'p')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != 'e')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != 'd')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != 'e')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != 'f')
-                    return finish_id(str);
-                if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
-                    return finish_id(str);
-                else
-                    return mk_token(TYPEDEF_ID);
-            default:
+            if (str += ch; (ch = next_char()) != 't')
                 return finish_id(str);
-            }
-        }
-        case 'v':
-        {
-            std::string str;
-            if (str += ch; (ch = next_char()) != 'o')
+            if (str += ch; (ch = next_char()) != 'r')
                 return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'i')
+            if (str += ch; (ch = next_char()) != 'u')
                 return finish_id(str);
-            if (str += ch; (ch = next_char()) != 'd')
+            if (str += ch; (ch = next_char()) != 'e')
                 return finish_id(str);
             if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
                 return finish_id(str);
             else
-                return mk_token(VOID_ID);
+                return mk_bool_token(true);
         }
         case 'a':
         case 'd':
@@ -586,4 +354,4 @@ namespace riddle
     }
 
     void lexer::error(const std::string &err) { throw std::invalid_argument("[" + std::to_string(start_line) + ", " + std::to_string(start_pos) + "] " + err); }
-} // namespace riddle
+} // namespace rbs
