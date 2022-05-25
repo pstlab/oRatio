@@ -96,10 +96,74 @@ namespace rbs
                 error("expected ')'..");
         }
 
-        return ns.size() == 2 ? new fact_statement(ns.at(0), ns.at(1), assns) : new fact_statement(id_token(0, 0, 0, 0, "r" + std::to_string(rand())), ns.at(0), assns);
+        if (!match(SEMICOLON_ID))
+            error("expected ';'..");
+
+        return ns.size() == 2 ? new fact_statement(ns.at(0), ns.at(1), assns) : new fact_statement(id_token(0, 0, 0, 0, "f" + std::to_string(rand())), ns.at(0), assns);
     }
 
-    ast::rule_declaration *parser::_rule_declaration() {}
+    ast::function_statement *parser::_function_statement()
+    {
+        if (!match(ID_ID))
+            error("expected identifier..");
+        id_token fn = *static_cast<id_token *>(tks[pos - 2]);
+
+        std::vector<const expression *> xprs;
+
+        if (!match(LPAREN_ID))
+            error("expected '('..");
+
+        if (!match(RPAREN_ID))
+        {
+            do
+            {
+                xprs.emplace_back(_expression());
+            } while (match(COMMA_ID));
+
+            if (!match(RPAREN_ID))
+                error("expected ')'..");
+        }
+
+        return new function_statement(fn, xprs);
+    }
+
+    ast::rule_declaration *parser::_rule_declaration()
+    {
+        if (!match(LPAREN_ID))
+            error("expected '('..");
+
+        if (!match(ID_ID))
+            error("expected identifier..");
+        // the name of the rule..
+        id_token n = *static_cast<id_token *>(tks[pos - 2]);
+
+        expression *cond = _expression();
+        std::vector<const function_statement *> fns;
+
+        if (!match(IMPLICATION_ID))
+            error("expected '=>'..");
+
+        if (match(LBRACKET_ID))
+        {
+            if (!match(RBRACKET_ID))
+            {
+                do
+                {
+                    fns.emplace_back(_function_statement());
+                } while (match(SEMICOLON_ID));
+
+                if (!match(RBRACKET_ID))
+                    error("expected ']'..");
+            }
+        }
+        else
+            fns.emplace_back(_function_statement());
+
+        if (!match(RPAREN_ID))
+            error("expected ')'..");
+
+        return new_rule_declaration(n, cond, fns);
+    }
 
     expression *parser::_expression(const size_t &pr)
     {
@@ -147,18 +211,21 @@ namespace rbs
             std::vector<id_token> is;
             is.emplace_back(*static_cast<id_token *>(tk));
             tk = next();
-            while (match(DOT_ID))
+
+            switch (tk->sym)
+            {
+            case DOT_ID:
+                if (!match(ID_ID))
+                    error("expected identifier..");
+                is.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
+                e = new_id_expression(is);
+                break;
+            case COLON_ID:
             {
                 if (!match(ID_ID))
                     error("expected identifier..");
                 is.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
-            }
-            if (match(LPAREN_ID))
-            {
-                tk = next();
-                id_token fn = is.back();
-                is.pop_back();
-                std::vector<const expression *> xprs;
+                std::vector<std::pair<const id_token, const expression *const>> assns;
                 if (!match(LPAREN_ID))
                     error("expected '('..");
 
@@ -166,17 +233,50 @@ namespace rbs
                 {
                     do
                     {
-                        xprs.emplace_back(_expression());
+                        if (!match(ID_ID))
+                            error("expected identifier..");
+                        id_token assgn_name = *static_cast<id_token *>(tks[pos - 2]);
+
+                        if (!match(COLON_ID))
+                            error("expected ':'..");
+
+                        expression *xpr = _expression();
+                        assns.emplace_back(assgn_name, xpr);
                     } while (match(COMMA_ID));
 
                     if (!match(RPAREN_ID))
                         error("expected ')'..");
                 }
-
-                e = new_function_expression(fn, xprs);
+                e = new_fact_expression(is.at(0), is.at(1), assns);
             }
-            else
-                e = new_id_expression(is);
+            break;
+            case LPAREN_ID:
+            {
+                std::vector<std::pair<const id_token, const expression *const>> assns;
+                if (!match(RPAREN_ID))
+                {
+                    do
+                    {
+                        if (!match(ID_ID))
+                            error("expected identifier..");
+                        id_token assgn_name = *static_cast<id_token *>(tks[pos - 2]);
+
+                        if (!match(COLON_ID))
+                            error("expected ':'..");
+
+                        expression *xpr = _expression();
+                        assns.emplace_back(assgn_name, xpr);
+                    } while (match(COMMA_ID));
+
+                    if (!match(RPAREN_ID))
+                        error("expected ')'..");
+                }
+                e = new_fact_expression(id_token(0, 0, 0, 0, "f" + std::to_string(rand())), is.at(0), assns);
+            }
+            break;
+            default:
+                error("expected either '.' or ':'..");
+            }
             break;
         }
         default:
