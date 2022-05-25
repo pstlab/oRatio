@@ -320,12 +320,20 @@ namespace rbs
       const std::vector<const expression *> expressions;
     };
 
-    class fact_expression : public expression
+    class statement
     {
     public:
-      fact_expression(const id_token &fn, const id_token &pn, const std::vector<std::pair<const id_token, const expression *const>> &assns) : fact_name(fn), predicate_name(pn), assignments(assns) {}
-      fact_expression(const fact_expression &orig) = delete;
-      virtual ~fact_expression()
+      statement() = default;
+      statement(const statement &orig) = delete;
+      virtual ~statement() = default;
+    };
+
+    class fact_statement : public statement
+    {
+    public:
+      fact_statement(const id_token &fn, const id_token &pn, const std::vector<std::pair<const id_token, const expression *const>> &assns) : fact_name(fn), predicate_name(pn), assignments(assns) {}
+      fact_statement(const fact_statement &orig) = delete;
+      virtual ~fact_statement()
       {
         for ([[maybe_unused]] const auto &[id_tkn, xpr] : assignments)
           delete xpr;
@@ -374,7 +382,7 @@ namespace rbs
     class compilation_unit
     {
     public:
-      compilation_unit(const std::vector<const fact_expression *> &fs, const std::vector<const rule_declaration *> &rs) : facts(fs), rules(rs) {}
+      compilation_unit(const std::vector<const fact_statement *> &fs, const std::vector<const rule_declaration *> &rs) : facts(fs), rules(rs) {}
       compilation_unit(const compilation_unit &orig) = delete;
       virtual ~compilation_unit()
       {
@@ -385,7 +393,7 @@ namespace rbs
       }
 
     protected:
-      const std::vector<const fact_expression *> facts;
+      const std::vector<const fact_statement *> facts;
       const std::vector<const rule_declaration *> rules;
     };
   } // namespace ast
@@ -404,6 +412,7 @@ namespace rbs
     bool match(const symbol &sym);
     void backtrack(const size_t &p) noexcept;
 
+    ast::fact_statement *_fact_statement();
     ast::rule_declaration *_rule_declaration();
     ast::expression *_expression(const size_t &pr = 0);
 
@@ -413,7 +422,12 @@ namespace rbs
      * The declarations.
      */
     virtual ast::rule_declaration *new_rule_declaration(const id_token &n, const ast::expression *const cond, const std::vector<const ast::expression *> &fns) const noexcept { return new ast::rule_declaration(n, cond, fns); }
-    virtual ast::compilation_unit *new_compilation_unit(const std::vector<const ast::fact_expression *> &fs, const std::vector<const ast::rule_declaration *> &rs) const noexcept { return new ast::compilation_unit(fs, rs); }
+    virtual ast::compilation_unit *new_compilation_unit(const std::vector<const ast::fact_statement *> &fs, const std::vector<const ast::rule_declaration *> &rs) const noexcept { return new ast::compilation_unit(fs, rs); }
+
+    /**
+     * The statements.
+     */
+    virtual ast::fact_statement *new_fact_statement(const id_token &fn, const id_token &pn, const std::vector<std::pair<const id_token, const ast::expression *const>> &assns) const noexcept { return new ast::fact_statement(fn, pn, assns); }
 
     /**
      * The expressions.
@@ -431,7 +445,6 @@ namespace rbs
     virtual ast::leq_expression *new_leq_expression(const ast::expression *const l, const ast::expression *const r) const noexcept { return new ast::leq_expression(l, r); }
     virtual ast::geq_expression *new_geq_expression(const ast::expression *const l, const ast::expression *const r) const noexcept { return new ast::geq_expression(l, r); }
     virtual ast::gt_expression *new_gt_expression(const ast::expression *const l, const ast::expression *const r) const noexcept { return new ast::gt_expression(l, r); }
-    virtual ast::function_expression *new_function_expression(const id_token &fn, const std::vector<const ast::expression *> &xprs) const noexcept { return new ast::function_expression(fn, xprs); }
     virtual ast::id_expression *new_id_expression(const std::vector<id_token> &is) const noexcept { return new ast::id_expression(is); }
     virtual ast::implication_expression *new_implication_expression(const ast::expression *const l, const ast::expression *const r) const noexcept { return new ast::implication_expression(l, r); }
     virtual ast::disjunction_expression *new_disjunction_expression(const std::vector<const ast::expression *> &es) const noexcept { return new ast::disjunction_expression(es); }
@@ -441,6 +454,7 @@ namespace rbs
     virtual ast::subtraction_expression *new_subtraction_expression(const std::vector<const ast::expression *> &es) const noexcept { return new ast::subtraction_expression(es); }
     virtual ast::multiplication_expression *new_multiplication_expression(const std::vector<const ast::expression *> &es) const noexcept { return new ast::multiplication_expression(es); }
     virtual ast::division_expression *new_division_expression(const std::vector<const ast::expression *> &es) const noexcept { return new ast::division_expression(es); }
+    virtual ast::function_expression *new_function_expression(const id_token &fn, const std::vector<const ast::expression *> &xprs) const noexcept { return new ast::function_expression(fn, xprs); }
 
   private:
     lexer lex;                // the current lexer..

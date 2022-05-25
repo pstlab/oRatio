@@ -151,6 +151,12 @@ namespace rbs
         case ')':
             ch = next_char();
             return mk_token(RPAREN_ID);
+        case '[':
+            ch = next_char();
+            return mk_token(LBRACKET_ID);
+        case ']':
+            ch = next_char();
+            return mk_token(RBRACKET_ID);
         case '0': // in a number literal..
         case '1':
         case '2':

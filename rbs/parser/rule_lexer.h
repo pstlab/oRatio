@@ -15,6 +15,8 @@ namespace rbs
     SEMICOLON_ID,     // ';'
     LPAREN_ID,        // '('
     RPAREN_ID,        // ')'
+    LBRACKET_ID,      // '['
+    RBRACKET_ID,      // ']'
     BANG_ID,          // '!'
     GT_ID,            // '>'
     LT_ID,            // '<'
