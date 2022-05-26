@@ -233,8 +233,6 @@ namespace rbs
         case 't':
         {
             std::string str;
-            if (str += ch; (ch = next_char()) != 't')
-                return finish_id(str);
             if (str += ch; (ch = next_char()) != 'r')
                 return finish_id(str);
             if (str += ch; (ch = next_char()) != 'u')
@@ -247,14 +245,25 @@ namespace rbs
                 return mk_bool_token(true);
         }
         case 'a':
+        case 'b':
+        case 'c':
         case 'd':
+        case 'e':
+        case 'g':
         case 'h':
+        case 'i':
         case 'j':
         case 'k':
         case 'l':
         case 'm':
+        case 'n':
+        case 'o':
+        case 'p':
         case 'q':
+        case 'r':
+        case 's':
         case 'u':
+        case 'v':
         case 'w':
         case 'x':
         case 'y':
