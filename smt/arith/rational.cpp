@@ -11,7 +11,11 @@ namespace smt
 
     SMT_EXPORT rational::rational() : num(0), den(1) {}
     SMT_EXPORT rational::rational(I n) : num(n), den(1) {}
-    SMT_EXPORT rational::rational(I n, I d) : num(n), den(d) { normalize(); }
+    SMT_EXPORT rational::rational(I n, I d) : num(n), den(d)
+    {
+        assert(n != 0 || d != 0);
+        normalize();
+    }
 
     SMT_EXPORT bool rational::operator!=(const rational &rhs) const noexcept { return num != rhs.num || den != rhs.den; }
     SMT_EXPORT bool rational::operator<(const rational &rhs) const noexcept { return (den == rhs.den) ? num < rhs.num : num * rhs.den < den * rhs.num; }
