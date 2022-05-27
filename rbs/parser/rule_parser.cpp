@@ -215,6 +215,7 @@ namespace rbs
             switch (tk->sym)
             {
             case DOT_ID:
+                tk = next();
                 if (!match(ID_ID))
                     error("expected identifier..");
                 is.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
@@ -222,6 +223,7 @@ namespace rbs
                 break;
             case COLON_ID:
             {
+                tk = next();
                 if (!match(ID_ID))
                     error("expected identifier..");
                 is.emplace_back(*static_cast<id_token *>(tks[pos - 2]));
@@ -252,6 +254,7 @@ namespace rbs
             break;
             case LPAREN_ID:
             {
+                tk = next();
                 std::vector<std::pair<const id_token, const expression *const>> assns;
                 if (!match(RPAREN_ID))
                 {
@@ -285,7 +288,7 @@ namespace rbs
 
         while (
             ((tk->sym == EQEQ_ID || tk->sym == BANGEQ_ID) && 0 >= pr) ||
-            ((tk->sym == LT_ID || tk->sym == LTEQ_ID || tk->sym == GTEQ_ID || tk->sym == GT_ID || tk->sym == IMPLICATION_ID || tk->sym == BAR_ID || tk->sym == AMP_ID) && 1 >= pr) ||
+            ((tk->sym == LT_ID || tk->sym == LTEQ_ID || tk->sym == GTEQ_ID || tk->sym == GT_ID || tk->sym == BAR_ID || tk->sym == AMP_ID) && 1 >= pr) ||
             ((tk->sym == PLUS_ID || tk->sym == MINUS_ID) && 2 >= pr) ||
             ((tk->sym == STAR_ID || tk->sym == SLASH_ID) && 3 >= pr))
         {
@@ -335,15 +338,6 @@ namespace rbs
                 expression *l = e;
                 expression *r = _expression(2);
                 e = new_gt_expression(l, r);
-                break;
-            }
-            case IMPLICATION_ID:
-            {
-                assert(1 >= pr);
-                tk = next();
-                expression *l = e;
-                expression *r = _expression(2);
-                e = new_implication_expression(l, r);
                 break;
             }
             case BAR_ID:

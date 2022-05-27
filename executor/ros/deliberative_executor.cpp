@@ -157,7 +157,7 @@ namespace ratio
         throw std::out_of_range(pred);
     }
 
-    deliberative_executor::task deliberative_executor::to_task(const ratio::atom &atm)
+    deliberative_executor::task deliberative_executor::to_task(const atom &atm)
     {
         uint64_t task_id = atm.get_id();
         std::string task_name = atm.get_type().get_name();
@@ -237,7 +237,7 @@ namespace ratio
 
     void deliberative_executor::deliberative_executor_listener::starting(const std::unordered_set<atom *> &atms)
     { // tell the executor the atoms which are not yet ready to start..
-        std::unordered_set<ratio::atom *> dsy;
+        std::unordered_map<const atom *, smt::rational> dsy;
         deliberative_tier::task_executor cs_srv;
         task t;
         for (const auto &atm : atms)
@@ -247,12 +247,12 @@ namespace ratio
                 cs_srv.request.task.task_name = t.task_name;
                 cs_srv.request.task.par_names = t.par_names;
                 cs_srv.request.task.par_values = t.par_values;
-                if (exec.d_mngr.can_start.call(cs_srv) && !cs_srv.response.success)
-                    dsy.insert(atm);
+                if (exec.d_mngr.can_start.call(cs_srv) && !cs_srv.response.result)
+                    dsy[atm] = cs_srv.response.delay.den != 0 ? smt::rational(cs_srv.response.delay.num, cs_srv.response.delay.den) : exec.get_executor().get_units_per_tick();
             }
 
         if (!dsy.empty())
-            exec.exec.dont_start_yet(atms);
+            exec.exec.dont_start_yet(dsy);
     }
     void deliberative_executor::deliberative_executor_listener::start(const std::unordered_set<atom *> &atms)
     { // these atoms are now started..
@@ -269,7 +269,11 @@ namespace ratio
                 st_srv.request.task.task_name = t.task_name;
                 st_srv.request.task.par_names = t.par_names;
                 st_srv.request.task.par_values = t.par_values;
-                if (exec.d_mngr.start_task.call(st_srv) && st_srv.response.success)
+                if (!exec.d_mngr.start_task.call(st_srv) || !st_srv.response.result)
+                {
+                    ROS_WARN("[%lu] Task %s doesn't want to start..", exec.reasoner_id, atm->get_type().get_name().c_str());
+                }
+                else
                     exec.current_tasks.emplace(atm->get_id(), atm);
             }
 
@@ -283,7 +287,7 @@ namespace ratio
 
     void deliberative_executor::deliberative_executor_listener::ending(const std::unordered_set<atom *> &atms)
     { // tell the executor the atoms which are not yet ready to finish..
-        std::unordered_set<ratio::atom *> dey;
+        std::unordered_map<const atom *, smt::rational> dey;
         deliberative_tier::task_executor ce_srv;
         task t;
         for (const auto &atm : atms)
@@ -293,21 +297,34 @@ namespace ratio
                 ce_srv.request.task.task_name = t.task_name;
                 ce_srv.request.task.par_names = t.par_names;
                 ce_srv.request.task.par_values = t.par_values;
-                if (exec.d_mngr.can_end.call(ce_srv) && !ce_srv.response.success)
-                    dey.insert(atm);
+                if (exec.d_mngr.can_end.call(ce_srv) && !ce_srv.response.result)
+                    dey[atm] = ce_srv.response.delay.den != 0 ? smt::rational(ce_srv.response.delay.num, ce_srv.response.delay.den) : exec.get_executor().get_units_per_tick();
             }
             else if (exec.current_tasks.count(atm->get_id()))
-                dey.insert(atm);
+                dey[atm] = exec.get_executor().get_units_per_tick();
 
         if (!dey.empty())
-            exec.exec.dont_end_yet(atms);
+            exec.exec.dont_end_yet(dey);
     }
     void deliberative_executor::deliberative_executor_listener::end(const std::unordered_set<atom *> &atms)
     { // these atoms are now ended..
+        deliberative_tier::task_executor ce_srv;
+        task t;
         for (const auto &atm : atms)
         {
-            exec.executing.erase(atm);
-            ROS_DEBUG("[%lu] Ended task %s..", exec.reasoner_id, atm->get_type().get_name().c_str());
+            ROS_DEBUG("[%lu] Ending task %s..", exec.reasoner_id, atm->get_type().get_name().c_str());
+            t = to_task(*atm);
+            ce_srv.request.task.reasoner_id = exec.reasoner_id;
+            ce_srv.request.task.task_id = t.task_id;
+            ce_srv.request.task.task_name = t.task_name;
+            ce_srv.request.task.par_names = t.par_names;
+            ce_srv.request.task.par_values = t.par_values;
+            if (!exec.d_mngr.end_task.call(ce_srv) || !ce_srv.response.result)
+            {
+                ROS_WARN("[%lu] Task %s doesn't want to end..", exec.reasoner_id, atm->get_type().get_name().c_str());
+            }
+            else
+                exec.executing.erase(atm);
         }
 
         deliberative_tier::timelines executing_msg;

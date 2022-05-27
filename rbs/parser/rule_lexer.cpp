@@ -157,6 +157,17 @@ namespace rbs
         case ']':
             ch = next_char();
             return mk_token(RBRACKET_ID);
+        case '=':
+            if ((ch = next_char()) == '>')
+            {
+                ch = next_char();
+                return mk_token(IMPLICATION_ID);
+            }
+            else
+            {
+                error("invalid token..");
+                return nullptr;
+            }
         case '0': // in a number literal..
         case '1':
         case '2':
