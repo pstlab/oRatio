@@ -1,4 +1,5 @@
 #include "rule_parser.h"
+#include "knowledge_base.h"
 #include <sstream>
 #include <cassert>
 
@@ -18,8 +19,14 @@ void test_parser_1()
     ast::compilation_unit *cu = p.parse();
 }
 
+void test_kb_0()
+{
+    knowledge_base kb;
+}
+
 int main(int, char **)
 {
     test_parser_0();
     test_parser_1();
+    test_kb_0();
 }

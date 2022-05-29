@@ -91,7 +91,7 @@ namespace ratio
     std::map<std::string, std::vector<method *>> methods; // the methods, indexed by their name, defined within this type..
     std::map<std::string, type *> types;                  // the inner types, indexed by their name, defined within this type..
     std::map<std::string, predicate *> predicates;        // the inner predicates, indexed by their name, defined within this type..
-    std::vector<expr> instances;                          // a vector containing all the instances defined within this type..
+    std::vector<expr> instances;                          // a vector containing all the instances of this type..
   };
 
   class bool_type final : public type
