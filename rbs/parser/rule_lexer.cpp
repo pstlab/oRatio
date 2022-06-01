@@ -82,11 +82,7 @@ namespace rbs
             ch = next_char();
             return mk_token(PLUS_ID);
         case '-':
-            if ((ch = next_char()) == '>')
-            {
-                ch = next_char();
-                return mk_token(IMPLICATION_ID);
-            }
+            ch = next_char();
             return mk_token(MINUS_ID);
         case '*':
             ch = next_char();
@@ -163,11 +159,7 @@ namespace rbs
                 ch = next_char();
                 return mk_token(IMPLICATION_ID);
             }
-            else
-            {
-                error("invalid token..");
-                return nullptr;
-            }
+            return mk_token(EQ_ID);
         case '0': // in a number literal..
         case '1':
         case '2':
@@ -225,6 +217,24 @@ namespace rbs
                     return mk_integer_token(intgr);
                 }
         }
+        case 'a':
+        {
+            std::string str;
+            if (str += ch; (ch = next_char()) != 's')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != 's')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != 'e')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != 'r')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != 't')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
+                return finish_id(str);
+            else
+                return mk_token(ASSERT_ID);
+        }
         case 'f':
         {
             std::string str;
@@ -241,6 +251,26 @@ namespace rbs
             else
                 return mk_bool_token(false);
         }
+        case 'r':
+        {
+            std::string str;
+            if (str += ch; (ch = next_char()) != 'e')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != 't')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != 'r')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != 'a')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != 'c')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != 't')
+                return finish_id(str);
+            if (str += ch; (ch = next_char()) != -1 && is_id_part(ch))
+                return finish_id(str);
+            else
+                return mk_token(RETRACT_ID);
+        }
         case 't':
         {
             std::string str;
@@ -255,7 +285,6 @@ namespace rbs
             else
                 return mk_bool_token(true);
         }
-        case 'a':
         case 'b':
         case 'c':
         case 'd':
@@ -271,7 +300,6 @@ namespace rbs
         case 'o':
         case 'p':
         case 'q':
-        case 'r':
         case 's':
         case 'u':
         case 'v':

@@ -9,6 +9,8 @@ namespace rbs
 {
   enum symbol
   {
+    ASSERT_ID,        // 'assert'
+    RETRACT_ID,       // 'retract'
     DOT_ID,           // '.'
     COMMA_ID,         // ','
     COLON_ID,         // ':'
@@ -30,6 +32,7 @@ namespace rbs
     SLASH_ID,         // '/'
     AMP_ID,           // '&'
     BAR_ID,           // '|'
+    EQ_ID,            // '='
     IMPLICATION_ID,   // '=>'
     ID_ID,            // ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*
     BoolLiteral_ID,   // 'true' | 'false'

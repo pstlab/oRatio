@@ -345,12 +345,12 @@ namespace rbs
       virtual ~statement() = default;
     };
 
-    class fact_statement : public statement
+    class assert_statement : public statement
     {
     public:
-      fact_statement(const id_token &fn, const id_token &pn, const std::vector<std::pair<const id_token, const expression *const>> &assns) : fact_name(fn), predicate_name(pn), assignments(assns) {}
-      fact_statement(const fact_statement &orig) = delete;
-      virtual ~fact_statement()
+      assert_statement(const id_token &fn, const id_token &pn, const std::vector<std::pair<const id_token, const expression *const>> &assns) : fact_name(fn), predicate_name(pn), assignments(assns) {}
+      assert_statement(const assert_statement &orig) = delete;
+      virtual ~assert_statement()
       {
         for ([[maybe_unused]] const auto &[id_tkn, xpr] : assignments)
           delete xpr;
@@ -360,6 +360,33 @@ namespace rbs
       const id_token fact_name;
       const id_token predicate_name;
       const std::vector<std::pair<const id_token, const expression *const>> assignments;
+    };
+
+    class retract_statement : public statement
+    {
+    public:
+      retract_statement(const std::vector<id_token> &fns) : fact_names(fns) {}
+      retract_statement(const retract_statement &orig) = delete;
+      virtual ~retract_statement() {}
+
+    protected:
+      const std::vector<id_token> fact_names;
+    };
+
+    class assignment_statement : public statement
+    {
+    public:
+      assignment_statement(const std::vector<std::vector<id_token>> &is, const std::vector<const expression *> es) : ids(is), xprs(es) {}
+      assignment_statement(const assignment_statement &orig) = delete;
+      virtual ~assignment_statement()
+      {
+        for (const auto &xpr : xprs)
+          delete xpr;
+      }
+
+    protected:
+      const std::vector<std::vector<id_token>> ids;
+      const std::vector<const expression *> xprs;
     };
 
     class function_statement : public statement
@@ -381,36 +408,36 @@ namespace rbs
     class rule_declaration
     {
     public:
-      rule_declaration(const id_token &n, const expression *const cond, const std::vector<const function_statement *> &fns) : name(n), condition(cond), functions(fns) {}
+      rule_declaration(const id_token &n, const expression *const cond, const std::vector<const statement *> &ss) : name(n), condition(cond), statements(ss) {}
       rule_declaration(const rule_declaration &orig) = delete;
       virtual ~rule_declaration()
       {
         delete condition;
-        for (const auto &f : functions)
-          delete f;
+        for (const auto &stmnt : statements)
+          delete stmnt;
       }
 
     protected:
       const id_token name;
       const expression *const condition;
-      const std::vector<const function_statement *> functions;
+      const std::vector<const statement *> statements;
     };
 
     class compilation_unit
     {
     public:
-      compilation_unit(const std::vector<const fact_statement *> &fs, const std::vector<const rule_declaration *> &rs) : facts(fs), rules(rs) {}
+      compilation_unit(const std::vector<const statement *> &ss, const std::vector<const rule_declaration *> &rs) : statements(ss), rules(rs) {}
       compilation_unit(const compilation_unit &orig) = delete;
       virtual ~compilation_unit()
       {
-        for (const auto &f : facts)
-          delete f;
+        for (const auto &stmnt : statements)
+          delete stmnt;
         for (const auto &r : rules)
           delete r;
       }
 
     protected:
-      const std::vector<const fact_statement *> facts;
+      const std::vector<const statement *> statements;
       const std::vector<const rule_declaration *> rules;
     };
   } // namespace ast
@@ -429,9 +456,8 @@ namespace rbs
     bool match(const symbol &sym);
     void backtrack(const size_t &p) noexcept;
 
-    ast::fact_statement *_fact_statement();
-    ast::function_statement *_function_statement();
     ast::rule_declaration *_rule_declaration();
+    ast::statement *_statement();
     ast::expression *_expression(const size_t &pr = 0);
 
     void error(const std::string &err);
@@ -439,13 +465,15 @@ namespace rbs
     /**
      * The declarations.
      */
-    virtual ast::rule_declaration *new_rule_declaration(const id_token &n, const ast::expression *const cond, const std::vector<const ast::function_statement *> &fns) const noexcept { return new ast::rule_declaration(n, cond, fns); }
-    virtual ast::compilation_unit *new_compilation_unit(const std::vector<const ast::fact_statement *> &fs, const std::vector<const ast::rule_declaration *> &rs) const noexcept { return new ast::compilation_unit(fs, rs); }
+    virtual ast::rule_declaration *new_rule_declaration(const id_token &n, const ast::expression *const cond, const std::vector<const ast::statement *> &ss) const noexcept { return new ast::rule_declaration(n, cond, ss); }
+    virtual ast::compilation_unit *new_compilation_unit(const std::vector<const ast::statement *> &fs, const std::vector<const ast::rule_declaration *> &rs) const noexcept { return new ast::compilation_unit(fs, rs); }
 
     /**
      * The statements.
      */
-    virtual ast::fact_statement *new_fact_statement(const id_token &fn, const id_token &pn, const std::vector<std::pair<const id_token, const ast::expression *const>> &assns) const noexcept { return new ast::fact_statement(fn, pn, assns); }
+    virtual ast::assert_statement *new_assert_statement(const id_token &fn, const id_token &pn, const std::vector<std::pair<const id_token, const ast::expression *const>> &assns) const noexcept { return new ast::assert_statement(fn, pn, assns); }
+    virtual ast::retract_statement *new_retract_statement(const std::vector<id_token> &fns) const noexcept { return new ast::retract_statement(fns); }
+    virtual ast::assignment_statement *new_assignment_statement(const std::vector<std::vector<id_token>> &is, const std::vector<const ast::expression *> es) const noexcept { return new ast::assignment_statement(is, es); }
     virtual ast::function_statement *new_function_statement(const id_token &fn, const std::vector<const ast::expression *> &xprs) const noexcept { return new ast::function_statement(fn, xprs); }
 
     /**
