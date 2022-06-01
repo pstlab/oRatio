@@ -1,4 +1,4 @@
-# Backus-Naur Form
+# Extended Backus-Naur Form
 
 ```
 <compilation_unit> ::= (<statement>|<rule>)*;
