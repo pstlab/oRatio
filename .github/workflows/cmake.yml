@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Debug, Release]
         check_incs: [ON, OFF]
         #heuristic_type: [h_max, h_add, h2_max, h2_add]
@@ -21,7 +21,7 @@ jobs:
       HEURISTIC_TYPE: ${{ matrix.heuristic_type }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCHECK_INCONSISTENCIES=${{env.CHECK_INCONSISTENCIES}} -DHEURISTIC_TYPE=${{env.HEURISTIC_TYPE}}
