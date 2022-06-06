@@ -46,9 +46,9 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
     env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
 
     auto &exec = *get_executor(env, obj);
-    std::unordered_set<atom *> atms;
+    std::unordered_map<const atom *, rational> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms.insert(&exec.get_atom(input[i]));
+        atms[reinterpret_cast<atom *>(input[i])] = rational(1, 1);
 
     exec.dont_start_yet(atms);
 }
@@ -60,9 +60,9 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
     env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
 
     auto &exec = *get_executor(env, obj);
-    std::unordered_set<atom *> atms;
+    std::unordered_map<const atom *, rational> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms.insert(&exec.get_atom(input[i]));
+        atms[reinterpret_cast<atom *>(input[i])] = rational(1, 1);
 
     exec.dont_start_yet(atms);
 }
@@ -76,7 +76,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_f
     auto &exec = *get_executor(env, obj);
     std::unordered_set<atom *> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms.insert(&exec.get_atom(input[i]));
+        atms.insert(reinterpret_cast<atom *>(input[i]));
 
     try
     {
