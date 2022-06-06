@@ -10,7 +10,7 @@ extern "C" {
 /*
  * Class:     it_cnr_istc_pst_oratio_timelines_TimelinesExecutor
  * Method:    new_instance
- * Signature: (Ljava/lang/String;JJ)J
+ * Signature: (JJ)J
  */
 JNIEXPORT jlong JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_new_1instance
   (JNIEnv *, jobject, jlong, jlong);
@@ -34,18 +34,18 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_t
 /*
  * Class:     it_cnr_istc_pst_oratio_timelines_TimelinesExecutor
  * Method:    dont_start_yet
- * Signature: ([J)V
+ * Signature: ([J[J[J)V
  */
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1start_1yet
-  (JNIEnv *, jobject, jlongArray);
+  (JNIEnv *, jobject, jlongArray, jlongArray, jlongArray);
 
 /*
  * Class:     it_cnr_istc_pst_oratio_timelines_TimelinesExecutor
  * Method:    dont_end_yet
- * Signature: ([J)V
+ * Signature: ([J[J[J)V
  */
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1end_1yet
-  (JNIEnv *, jobject, jlongArray);
+  (JNIEnv *, jobject, jlongArray, jlongArray, jlongArray);
 
 /*
  * Class:     it_cnr_istc_pst_oratio_timelines_TimelinesExecutor

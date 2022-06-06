@@ -1,6 +1,7 @@
 #include "it_cnr_istc_pst_oratio_timelines_TimelinesExecutor.h"
 #include "java_executor_listener.h"
 #include "timer.h"
+#include <cassert>
 
 using namespace ratio;
 using namespace smt;
@@ -39,30 +40,50 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_t
     }
 }
 
-JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1start_1yet(JNIEnv *env, jobject obj, jlongArray atoms)
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1start_1yet(JNIEnv *env, jobject obj, jlongArray atoms, jlongArray delay_nums, jlongArray delay_dens)
 {
     const jsize atms_size = env->GetArrayLength(atoms);
-    std::vector<jlong> input(atms_size);
-    env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
+    const jsize nums_size = env->GetArrayLength(delay_nums);
+    const jsize dens_size = env->GetArrayLength(delay_dens);
+    assert(atms_size == nums_size && atms_size == dens_size);
+
+    std::vector<jlong> j_atms(atms_size);
+    env->GetLongArrayRegion(atoms, 0, atms_size, j_atms.data());
+
+    std::vector<jlong> j_delay_nums(nums_size);
+    env->GetLongArrayRegion(delay_nums, 0, nums_size, j_delay_nums.data());
+
+    std::vector<jlong> j_delay_dens(dens_size);
+    env->GetLongArrayRegion(delay_dens, 0, dens_size, j_delay_dens.data());
 
     auto &exec = *get_executor(env, obj);
     std::unordered_map<const atom *, rational> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms[reinterpret_cast<atom *>(input[i])] = rational(1, 1);
+        atms[reinterpret_cast<atom *>(j_atms[i])] = rational((j_delay_nums[i]), j_delay_dens[i]);
 
     exec.dont_start_yet(atms);
 }
 
-JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1end_1yet(JNIEnv *env, jobject obj, jlongArray atoms)
+JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1end_1yet(JNIEnv *env, jobject obj, jlongArray atoms, jlongArray delay_nums, jlongArray delay_dens)
 {
     const jsize atms_size = env->GetArrayLength(atoms);
-    std::vector<jlong> input(atms_size);
-    env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
+    const jsize nums_size = env->GetArrayLength(delay_nums);
+    const jsize dens_size = env->GetArrayLength(delay_dens);
+    assert(atms_size == nums_size && atms_size == dens_size);
+
+    std::vector<jlong> j_atms(atms_size);
+    env->GetLongArrayRegion(atoms, 0, atms_size, j_atms.data());
+
+    std::vector<jlong> j_delay_nums(nums_size);
+    env->GetLongArrayRegion(delay_nums, 0, nums_size, j_delay_nums.data());
+
+    std::vector<jlong> j_delay_dens(dens_size);
+    env->GetLongArrayRegion(delay_dens, 0, dens_size, j_delay_dens.data());
 
     auto &exec = *get_executor(env, obj);
     std::unordered_map<const atom *, rational> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms[reinterpret_cast<atom *>(input[i])] = rational(1, 1);
+        atms[reinterpret_cast<atom *>(j_atms[i])] = rational(j_delay_nums[i], j_delay_dens[i]);
 
     exec.dont_start_yet(atms);
 }
@@ -70,13 +91,13 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_failure(JNIEnv *env, jobject obj, jlongArray atoms)
 {
     const jsize atms_size = env->GetArrayLength(atoms);
-    std::vector<jlong> input(atms_size);
-    env->GetLongArrayRegion(atoms, 0, atms_size, input.data());
+    std::vector<jlong> j_atms(atms_size);
+    env->GetLongArrayRegion(atoms, 0, atms_size, j_atms.data());
 
     auto &exec = *get_executor(env, obj);
     std::unordered_set<atom *> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms.insert(reinterpret_cast<atom *>(input[i]));
+        atms.insert(reinterpret_cast<atom *>(j_atms[i]));
 
     try
     {

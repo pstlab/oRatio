@@ -17,12 +17,13 @@ public class Atom extends Item {
     private AtomState state;
 
     @SuppressWarnings("unused")
-    private Atom(final Solver solver, final Predicate predicate, final long sigma, final byte state) {
-        this(solver, predicate, sigma, AtomState.values()[state]);
+    private Atom(final Solver solver, final Predicate predicate, final long id, final long sigma, final byte state) {
+        this(solver, predicate, id, sigma, AtomState.values()[state]);
     }
 
-    Atom(final Solver solver, final Predicate predicate, final long sigma, final AtomState state) {
-        super(solver, predicate);
+    private Atom(final Solver solver, final Predicate predicate, final long id, final long sigma,
+            final AtomState state) {
+        super(solver, predicate, id);
         this.sigma = sigma;
         this.state = state;
         setName("σ" + sigma);

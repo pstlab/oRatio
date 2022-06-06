@@ -2,7 +2,11 @@ package it.cnr.istc.pst.oratio.timelines;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
+import it.cnr.istc.pst.oratio.Atom;
 import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
 
@@ -27,11 +31,87 @@ public class TimelinesExecutor {
 
     public synchronized native void tick() throws ExecutorException;
 
-    public synchronized native void dont_start_yet(long[] atoms) throws ExecutorException;
+    public void dontStartYet(Set<Atom> atoms) throws ExecutorException {
+        long[] atom_ids = new long[atoms.size()];
+        long[] delay_nums = new long[atoms.size()];
+        long[] delay_dens = new long[atoms.size()];
+        int i = 0;
+        for (Atom atm : atoms) {
+            atom_ids[i] = atm.getId();
+            delay_nums[i] = 1;
+            delay_dens[i] = 1;
+            i++;
+        }
+        dont_start_yet(atom_ids, delay_nums, delay_dens);
+    }
 
-    public synchronized native void dont_end_yet(long[] atoms) throws ExecutorException;
+    public void dontStartYet(Map<Atom, Optional<Rational>> atoms) throws ExecutorException {
+        long[] atom_ids = new long[atoms.size()];
+        long[] delay_nums = new long[atoms.size()];
+        long[] delay_dens = new long[atoms.size()];
+        int i = 0;
+        for (Map.Entry<Atom, Optional<Rational>> atm : atoms.entrySet()) {
+            atom_ids[i] = atm.getKey().getId();
+            if (atm.getValue().isPresent()) {
+                delay_nums[i] = atm.getValue().get().getNumerator();
+                delay_dens[i] = atm.getValue().get().getDenominator();
+            } else {
+                delay_nums[i] = 1;
+                delay_dens[i] = 1;
+            }
+            i++;
+        }
+        dont_start_yet(atom_ids, delay_nums, delay_dens);
+    }
 
-    public synchronized native void failure(long[] atoms) throws ExecutorException;
+    private synchronized native void dont_start_yet(long[] atoms, long[] delay_nums, long[] delay_dens)
+            throws ExecutorException;
+
+    public void dontEndYet(Set<Atom> atoms) throws ExecutorException {
+        long[] atom_ids = new long[atoms.size()];
+        long[] delay_nums = new long[atoms.size()];
+        long[] delay_dens = new long[atoms.size()];
+        int i = 0;
+        for (Atom atm : atoms) {
+            atom_ids[i] = atm.getId();
+            delay_nums[i] = 1;
+            delay_dens[i] = 1;
+            i++;
+        }
+        dont_end_yet(atom_ids, delay_nums, delay_dens);
+    }
+
+    public void dontEndYet(Map<Atom, Optional<Rational>> atoms) throws ExecutorException {
+        long[] atom_ids = new long[atoms.size()];
+        long[] delay_nums = new long[atoms.size()];
+        long[] delay_dens = new long[atoms.size()];
+        int i = 0;
+        for (Map.Entry<Atom, Optional<Rational>> atm : atoms.entrySet()) {
+            atom_ids[i] = atm.getKey().getId();
+            if (atm.getValue().isPresent()) {
+                delay_nums[i] = atm.getValue().get().getNumerator();
+                delay_dens[i] = atm.getValue().get().getDenominator();
+            } else {
+                delay_nums[i] = 1;
+                delay_dens[i] = 1;
+            }
+            i++;
+        }
+        dont_end_yet(atom_ids, delay_nums, delay_dens);
+    }
+
+    private synchronized native void dont_end_yet(long[] atoms, long[] delay_nums, long[] delay_dens)
+            throws ExecutorException;
+
+    public void failure(Set<Atom> atoms) throws ExecutorException {
+        long[] atom_ids = new long[atoms.size()];
+        int i = 0;
+        for (Atom atm : atoms)
+            atom_ids[i++] = atm.getId();
+        failure(atom_ids);
+    }
+
+    private synchronized native void failure(long[] atoms) throws ExecutorException;
 
     private void fireTick(final long current_time_num, final long current_time_den) {
         final Rational current_time = new Rational(current_time_num, current_time_den);
