@@ -455,7 +455,7 @@ namespace ratio
                            { return sat->value(f->phi) == True; }));
         assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f)
-                                                { return sat->value(f->phi) != True || (flaws.count(f) || std::any_of(trail.cbegin(), trail.cend(), [this, f](const auto &l)
+                                                { return sat->value(f->phi) != True || (flaws.count(f) || std::any_of(trail.cbegin(), trail.cend(), [f](const auto &l)
                                                                                                                       { return l.solved_flaws.count(f); })); }); }));
         assert(std::all_of(gr.phis.cbegin(), gr.phis.cend(), [this](const auto &v_fs)
                            { return std::all_of(v_fs.second.cbegin(), v_fs.second.cend(), [this](const auto &f)
