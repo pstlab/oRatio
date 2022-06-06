@@ -103,7 +103,7 @@ namespace ratio
                     do
                     { // we have to search..
                         next();
-                    } while (std::any_of(flaws.cbegin(), flaws.cend(), [this](const auto &f)
+                    } while (std::any_of(flaws.cbegin(), flaws.cend(), [](const auto &f)
                                          { return is_infinite(f->get_estimated_cost()); }));
                     // we solve all the current inconsistencies..
                     solve_inconsistencies();
