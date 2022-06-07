@@ -1,7 +1,7 @@
 #include "rule.h"
 
-namespace rbs
+namespace kb
 {
     rule::rule() {}
     rule::~rule() {}
-} // namespace rbs
+} // namespace kb

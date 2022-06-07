@@ -1,6 +1,6 @@
 #pragma once
 
-namespace rbs
+namespace kb
 {
   class rule
   {
@@ -11,4 +11,4 @@ namespace rbs
   private:
     /* data */
   };
-} // namespace rbs
+} // namespace kb

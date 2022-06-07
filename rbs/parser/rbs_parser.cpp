@@ -1,4 +1,4 @@
-#include "rule_parser.h"
+#include "rbs_parser.h"
 #include <cassert>
 
 namespace rbs

@@ -1,4 +1,4 @@
-#include "rule_parser.h"
+#include "rbs_parser.h"
 #include "knowledge_base.h"
 #include <sstream>
 #include <cassert>
@@ -21,7 +21,7 @@ void test_parser_1()
 
 void test_kb_0()
 {
-    knowledge_base kb;
+    kb::knowledge_base kb;
 }
 
 int main(int, char **)

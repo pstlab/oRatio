@@ -1,9 +1,9 @@
 #include "knowledge_base.h"
-#include "fact.h"
+#include "wme.h"
 #include "predicate.h"
 #include "rule.h"
 
-namespace rbs
+namespace kb
 {
     knowledge_base::knowledge_base() {}
     knowledge_base::~knowledge_base()
@@ -18,4 +18,4 @@ namespace rbs
         for ([[maybe_unused]] const auto &[pred_name, pred] : predicates)
             delete pred;
     }
-} // namespace rbs
+} // namespace kb

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rule_lexer.h"
+#include "rbs_lexer.h"
 #include <vector>
 
 namespace rbs

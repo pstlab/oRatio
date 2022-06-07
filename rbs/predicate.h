@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-namespace rbs
+namespace kb
 {
   class fact;
   class rule;
@@ -19,4 +19,4 @@ namespace rbs
     std::vector<fact *> instances; // a vector containing all the instances of this type..
     std::vector<rule *> rules;     // a vector containing all the rules in which this type appears..
   };
-} // namespace rbs
+} // namespace kb

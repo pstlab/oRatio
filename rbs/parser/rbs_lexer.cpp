@@ -1,4 +1,4 @@
-#include "rule_lexer.h"
+#include "rbs_lexer.h"
 
 namespace rbs
 {
