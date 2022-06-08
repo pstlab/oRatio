@@ -1,10 +1,10 @@
-MaintainanceCompany mc0 = new MaintainanceCompany();
-MaintainanceCompany mc1 = new MaintainanceCompany();
-fact mc0_rm = new DoesRoadMaintainance(mc:mc0);
-fact mc1_rm = new DoesRoadMaintainance(mc:mc1);
-fact mc0_bm = new DoesBuildingMaintainance(mc:mc0);
-fact mc1_gsm = new DoesGreenSpaceMaintainance(mc:mc1);
-fact mc0_unav = new mc0.activity.Use(start:10.0, end:15.0, amount:1.0);
+MunicipalTechnician mt0 = new MunicipalTechnician();
+MunicipalTechnician mt1 = new MunicipalTechnician();
+fact mt0_rm = new DoesRoadMaintainance(mt:mt0);
+fact mt1_rm = new DoesRoadMaintainance(mt:mt1);
+fact mt0_bm = new DoesBuildingMaintainance(mt:mt0);
+fact mt1_gsm = new DoesGreenSpaceMaintainance(mt:mt1);
+fact mt0_unav = new mt0.activity.Use(start:10.0, end:15.0, amount:1.0);
 
 Road r0 = new Road();
 Road r1 = new Road();
