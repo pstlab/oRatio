@@ -471,7 +471,7 @@ namespace ratio
     }
 
     CORE_EXPORT lbool core::bool_value(const bool_expr &x) const noexcept { return sat_cr.value(x->l); }
-    std::pair<inf_rational, inf_rational> core::arith_bounds(const arith_expr &x) const noexcept
+    CORE_EXPORT std::pair<inf_rational, inf_rational> core::arith_bounds(const arith_expr &x) const noexcept
     {
         if (x->get_type().get_name() == TP_KEYWORD)
             return rdl_th.bounds(x->l);

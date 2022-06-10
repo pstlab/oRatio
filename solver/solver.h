@@ -70,7 +70,7 @@ namespace ratio
     /**
      * Takes the given decision and propagates its effects.
      */
-    void take_decision(const smt::lit &ch);
+    SOLVER_EXPORT void take_decision(const smt::lit &ch);
 
     bool_expr new_bool() noexcept override;
     expr new_enum(type &tp, const std::vector<item *> &allowed_vals) override;

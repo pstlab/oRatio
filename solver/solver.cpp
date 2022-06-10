@@ -176,7 +176,7 @@ namespace ratio
         }
     }
 
-    void solver::take_decision(const lit &ch)
+    SOLVER_EXPORT void solver::take_decision(const lit &ch)
     {
         assert(get_sat_core().value(ch) == Undefined);
 

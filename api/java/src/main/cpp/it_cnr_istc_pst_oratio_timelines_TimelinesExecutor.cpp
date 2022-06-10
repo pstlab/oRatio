@@ -48,7 +48,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
     auto &exec = *get_executor(env, obj);
     std::unordered_set<atom *> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms.insert(&exec.get_atom(input[i]));
+        atms.insert(reinterpret_cast<atom *>(input[i]));
 
     exec.dont_start_yet(atms);
 }
@@ -62,7 +62,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
     auto &exec = *get_executor(env, obj);
     std::unordered_set<atom *> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms.insert(&exec.get_atom(input[i]));
+        atms.insert(reinterpret_cast<atom *>(input[i]));
 
     exec.dont_start_yet(atms);
 }
@@ -76,7 +76,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_f
     auto &exec = *get_executor(env, obj);
     std::unordered_set<atom *> atms;
     for (jsize i = 0; i < atms_size; i++)
-        atms.insert(&exec.get_atom(input[i]));
+        atms.insert(reinterpret_cast<atom *>(input[i]));
 
     try
     {

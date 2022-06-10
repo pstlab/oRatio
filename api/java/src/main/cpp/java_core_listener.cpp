@@ -115,7 +115,7 @@ namespace ratio
         for (size_t i = 0; i < c_files.size(); ++i)
             env->SetObjectArrayElement(files_array, static_cast<jsize>(i), c_files[i]);
 
-        env->CallVoidMethod(slv_obj, read1_mthd_id, c_files);
+        env->CallVoidMethod(slv_obj, read1_mthd_id, files_array);
 
         for (const auto &f : c_files)
             env->DeleteLocalRef(f);
@@ -164,7 +164,7 @@ namespace ratio
             jstring m_name = env->NewStringUTF(mthd_name.c_str());
             for (const auto &mthd : mthds)
             {
-                jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
+                jobject rt = mthd->get_return_type().has_value() ? all_types.at(mthd->get_return_type().value()) : NULL;
                 jobjectArray fields_array = new_fields_array(env, mthd->get_args());
 
                 jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, slv_obj, m_name, rt, fields_array);
@@ -305,7 +305,7 @@ namespace ratio
             jstring m_name = env->NewStringUTF(mthd_name.c_str());
             for (const auto &mthd : mthds)
             {
-                jobject rt = mthd->get_return_type() ? all_types.at(mthd->get_return_type()) : NULL;
+                jobject rt = mthd->get_return_type().has_value() ? all_types.at(mthd->get_return_type().value()) : NULL;
                 jobjectArray fields_array = new_fields_array(env, mthd->get_args());
 
                 jobject c_method = env->NewObject(mthd_cls, mthd_ctr_id, slv_obj, c_type, m_name, rt, fields_array);
