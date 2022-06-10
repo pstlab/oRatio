@@ -209,7 +209,7 @@ namespace ratio
     CORE_EXPORT void fire_state_changed() const noexcept;
     CORE_EXPORT void fire_started_solving() const noexcept;
     CORE_EXPORT void fire_solution_found() const noexcept;
-    void fire_inconsistent_problem() const noexcept;
+    CORE_EXPORT void fire_inconsistent_problem() const noexcept;
 #endif
   };
 

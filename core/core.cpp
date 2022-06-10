@@ -595,7 +595,7 @@ namespace ratio
         for (const auto &l : listeners)
             l->solution_found();
     }
-    void core::fire_inconsistent_problem() const noexcept
+    CORE_EXPORT void core::fire_inconsistent_problem() const noexcept
     {
         for (const auto &l : listeners)
             l->inconsistent_problem();
