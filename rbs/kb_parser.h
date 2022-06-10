@@ -1,7 +1,7 @@
 #pragma once
 
 #include "rbs_parser.h"
-#include "wme.h"
+#include "kb_item.h"
 
 namespace kb
 {

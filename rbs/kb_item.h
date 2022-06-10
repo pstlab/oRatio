@@ -4,19 +4,16 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <unordered_set>
 
 namespace kb
 {
-  class predicate;
-
   class item
   {
   public:
     item() = default;
     virtual ~item() = default;
   };
-
-  using expr = std::shared_ptr<item>;
 
   class bool_item : public item
   {
@@ -45,18 +42,5 @@ namespace kb
     std::string val;
   };
 
-  class fact
-  {
-  public:
-    fact(const predicate &p) : pred(p) {}
-    ~fact() = default;
-
-    const predicate &get_predicate() const noexcept { return pred; }
-    expr get(const std::string &fn) const { return xprs.at(fn); }
-
-  private:
-    const predicate &pred;
-    std::map<std::string, expr> xprs;
-    std::vector<const fact *> supports;
-  };
+  using expr = std::shared_ptr<item>;
 } // namespace kb

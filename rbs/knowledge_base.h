@@ -14,7 +14,10 @@ namespace kb
     knowledge_base();
     ~knowledge_base();
 
-    bool exists_predicate(const std::string &p_name) { return predicates.count(p_name); }
+    bool exists_predicate(const std::string &p_name) const noexcept { return predicates.count(p_name); }
+
+  private:
+    predicate &create_predicate(const std::string &p_name);
 
   private:
     std::unordered_map<std::string, predicate *> predicates;
