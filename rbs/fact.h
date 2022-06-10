@@ -32,7 +32,7 @@ namespace kb
     expr get(const std::string &fn) const { return xprs.at(fn); }
     void set(const std::string &fn, expr xpr);
 
-    bool eq(const item &it);
+    bool eq(const item &it) const noexcept override;
 
   private:
     predicate &pred;

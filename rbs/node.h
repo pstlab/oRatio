@@ -18,17 +18,18 @@ namespace kb
 
   private:
     std::unordered_set<item *> evaluated_items;
-    std::unordered_set<node *> next_nodes;
+    std::unordered_set<node *> previous_nodes, next_nodes;
     std::vector<rule *> rules; // a vector containing all the rules in which this node appears..
   };
 
   class predicate_node : public node
   {
   public:
-    predicate_node(const predicate &pred);
+    predicate_node(const std::string &id, const predicate &pred);
     ~predicate_node();
 
   private:
+    const std::string id;
     const predicate &pred; // the predicate represented by this node..
   };
 

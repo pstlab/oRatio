@@ -104,9 +104,9 @@ namespace ratio
       void apply() override;
 
     private:
-      atom &plc_atm;       // applying the resolver will force this atom on the 'plc_item' item..
-      const item &plc_itm; // applying the resolver will force the 'plc_atm' atom on this item..
-      atom &frbd_atm;      // applying the resolver will forbid this atom on the 'plc_itm' item..
+      atom &plc_atm;                        // applying the resolver will force this atom on the 'plc_item' item..
+      [[maybe_unused]] const item &plc_itm; // applying the resolver will force the 'plc_atm' atom on this item..
+      atom &frbd_atm;                       // applying the resolver will forbid this atom on the 'plc_itm' item..
     };
 
     // a resolver for forbidding atoms on a specific state-variable..
