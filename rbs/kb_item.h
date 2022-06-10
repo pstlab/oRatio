@@ -13,6 +13,8 @@ namespace kb
   public:
     item() = default;
     virtual ~item() = default;
+
+    virtual bool eq(const item &it) = 0;
   };
 
   class bool_item : public item
@@ -21,6 +23,17 @@ namespace kb
     bool_item(bool val) : val(val) {}
     ~bool_item() = default;
 
+    bool eq(const item &it)
+    {
+      if (const bool_item *bi = dynamic_cast<const bool_item *>(&it))
+        return val == bi->val;
+      else
+        return false;
+    }
+
+    inline bool get() const noexcept { return val; }
+
+  private:
     bool val;
   };
 
@@ -30,6 +43,17 @@ namespace kb
     arith_item(smt::rational val) : val(val) {}
     ~arith_item() = default;
 
+    bool eq(const item &it)
+    {
+      if (const arith_item *ai = dynamic_cast<const arith_item *>(&it))
+        return val == ai->val;
+      else
+        return false;
+    }
+
+    inline smt::rational get() const noexcept { return val; }
+
+  private:
     smt::rational val;
   };
 
@@ -39,6 +63,17 @@ namespace kb
     string_item(const std::string &val) : val(val) {}
     ~string_item() = default;
 
+    bool eq(const item &it)
+    {
+      if (const string_item *si = dynamic_cast<const string_item *>(&it))
+        return val == si->val;
+      else
+        return false;
+    }
+
+    inline std::string get() const noexcept { return val; }
+
+  private:
     std::string val;
   };
 

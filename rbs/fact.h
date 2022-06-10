@@ -32,6 +32,8 @@ namespace kb
     expr get(const std::string &fn) const { return xprs.at(fn); }
     void set(const std::string &fn, expr xpr);
 
+    bool eq(const item &it);
+
   private:
     predicate &pred;
     std::map<std::string, expr> xprs;
