@@ -105,7 +105,7 @@ namespace ratio
     bool pending_requirements = false;
     bool restart_execution = true;
     std::unordered_set<const ratio::predicate *> notify_start, notify_end;
-    std::unordered_map<smt::var, ratio::atom *> current_tasks;
+    std::unordered_set<const ratio::atom *> current_tasks;
     std::unordered_set<const flaw *> flaws;
     std::unordered_set<const resolver *> resolvers;
     const flaw *current_flaw = nullptr;

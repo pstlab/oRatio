@@ -1,3 +1,4 @@
 task task
 ---
+rational delay
 bool success

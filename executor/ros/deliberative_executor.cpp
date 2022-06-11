@@ -237,7 +237,7 @@ namespace ratio
 
     void deliberative_executor::deliberative_executor_listener::starting(const std::unordered_set<atom *> &atms)
     { // tell the executor the atoms which are not yet ready to start..
-        std::unordered_set<ratio::atom *> dsy;
+        std::unordered_map<const ratio::atom *, rational> dsy;
         deliberative_tier::task_executor cs_srv;
         task t;
         for (const auto &atm : atms)
@@ -248,11 +248,11 @@ namespace ratio
                 cs_srv.request.task.par_names = t.par_names;
                 cs_srv.request.task.par_values = t.par_values;
                 if (exec.d_mngr.can_start.call(cs_srv) && !cs_srv.response.success)
-                    dsy.insert(atm);
+                    dsy[atm] = cs_srv.response.delay.den == 0 ? smt::rational(1) : smt::rational(cs_srv.response.delay.num, cs_srv.response.delay.den);
             }
 
         if (!dsy.empty())
-            exec.exec.dont_start_yet(atms);
+            exec.exec.dont_start_yet(dsy);
     }
     void deliberative_executor::deliberative_executor_listener::start(const std::unordered_set<atom *> &atms)
     { // these atoms are now started..
@@ -270,8 +270,10 @@ namespace ratio
                 st_srv.request.task.par_names = t.par_names;
                 st_srv.request.task.par_values = t.par_values;
                 if (exec.d_mngr.start_task.call(st_srv) && st_srv.response.success)
-                    exec.current_tasks.emplace(atm->get_id(), atm);
+                    exec.current_tasks.insert(atm);
             }
+            else if (exec.notify_end.count(static_cast<predicate *>(&atm->get_type())))
+                exec.current_tasks.insert(atm);
 
         deliberative_tier::timelines executing_msg;
         executing_msg.reasoner_id = exec.reasoner_id;
@@ -283,7 +285,7 @@ namespace ratio
 
     void deliberative_executor::deliberative_executor_listener::ending(const std::unordered_set<atom *> &atms)
     { // tell the executor the atoms which are not yet ready to finish..
-        std::unordered_set<ratio::atom *> dey;
+        std::unordered_map<const ratio::atom *, rational> dey;
         deliberative_tier::task_executor ce_srv;
         task t;
         for (const auto &atm : atms)
@@ -294,13 +296,13 @@ namespace ratio
                 ce_srv.request.task.par_names = t.par_names;
                 ce_srv.request.task.par_values = t.par_values;
                 if (exec.d_mngr.can_end.call(ce_srv) && !ce_srv.response.success)
-                    dey.insert(atm);
+                    dey[atm] = ce_srv.response.delay.den == 0 ? smt::rational(1) : smt::rational(ce_srv.response.delay.num, ce_srv.response.delay.den);
             }
             else if (exec.current_tasks.count(atm->get_id()))
-                dey.insert(atm);
+                dey[atm] = smt::rational(1);
 
         if (!dey.empty())
-            exec.exec.dont_end_yet(atms);
+            exec.exec.dont_end_yet(dey);
     }
     void deliberative_executor::deliberative_executor_listener::end(const std::unordered_set<atom *> &atms)
     { // these atoms are now ended..

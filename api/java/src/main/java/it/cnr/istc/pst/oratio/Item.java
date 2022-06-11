@@ -8,12 +8,14 @@ public class Item implements Env {
 
     final Solver solver;
     final Type type;
+    final long id;
     final Map<String, Item> exprs = new HashMap<>();
     private String name; // a mnemonic name..
 
-    Item(final Solver solver, final Type type) {
+    Item(final Solver solver, final Type type, final long id) {
         this.solver = solver;
         this.type = type;
+        this.id = id;
     }
 
     /**
@@ -29,6 +31,13 @@ public class Item implements Env {
      */
     public Type getType() {
         return type;
+    }
+
+    /**
+     * @return the id.
+     */
+    public long getId() {
+        return id;
     }
 
     /**
@@ -71,12 +80,12 @@ public class Item implements Env {
         private LBool val;
 
         @SuppressWarnings("unused")
-        private BoolItem(final Solver solver, final String lit, final byte val) {
-            this(solver, lit, LBool.values()[val]);
+        private BoolItem(final Solver solver, final long id, final String lit, final byte val) {
+            this(solver, id, lit, LBool.values()[val]);
         }
 
-        BoolItem(final Solver solver, final String lit, final LBool val) {
-            super(solver, solver.types.get(Solver.BOOL));
+        BoolItem(final Solver solver, final long id, final String lit, final LBool val) {
+            super(solver, solver.types.get(Solver.BOOL), id);
             this.lit = lit;
             this.val = val;
         }
@@ -120,9 +129,10 @@ public class Item implements Env {
         private final String lin;
         private final InfRational lb, ub, val;
 
-        ArithItem(final Solver solver, final Type type, final String lin, final InfRational lb, final InfRational ub,
+        ArithItem(final Solver solver, final Type type, final long id, final String lin, final InfRational lb,
+                final InfRational ub,
                 final InfRational val) {
-            super(solver, type);
+            super(solver, type, id);
             this.lin = lin;
             this.lb = lb;
             this.ub = ub;
@@ -176,8 +186,8 @@ public class Item implements Env {
         private final String var;
         private Item[] vals;
 
-        EnumItem(final Solver solver, final Type type, final String var, final Item[] vals) {
-            super(solver, type);
+        EnumItem(final Solver solver, final Type type, final long id, final String var, final Item[] vals) {
+            super(solver, type, id);
             this.var = var;
             this.vals = vals;
         }
@@ -200,8 +210,8 @@ public class Item implements Env {
 
         private String val;
 
-        StringItem(final Solver solver, final String val) {
-            super(solver, solver.types.get(Solver.STRING));
+        StringItem(final Solver solver, final long id, final String val) {
+            super(solver, solver.types.get(Solver.STRING), id);
             this.val = val;
         }
 

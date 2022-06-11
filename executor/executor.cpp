@@ -42,7 +42,7 @@ namespace ratio
                         const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_START);
                         if ((*xpr).l.vars.empty())
                             throw execution_exception(); // we can't delay constants..
-                        const auto lb = slv.arith_value(xpr) + units_per_tick;
+                        const auto lb = slv.arith_value(xpr) + at_atm->second;
                         auto [it, added] = adaptations.at(atm).bounds.emplace(&*xpr, nullptr);
                         if (added)
                         { // we have to add new bounds..
@@ -70,7 +70,7 @@ namespace ratio
                         const arith_expr xpr = slv.is_impulse(*atm) ? atm->get(RATIO_AT) : atm->get(RATIO_END);
                         if ((*xpr).l.vars.empty())
                             throw execution_exception(); // we can't delay constants
-                        const auto lb = slv.arith_value(xpr) + units_per_tick;
+                        const auto lb = slv.arith_value(xpr) + at_atm->second;
                         auto [it, added] = adaptations.at(atm).bounds.emplace(&*xpr, nullptr);
                         if (added)
                         { // we have to add new bounds..

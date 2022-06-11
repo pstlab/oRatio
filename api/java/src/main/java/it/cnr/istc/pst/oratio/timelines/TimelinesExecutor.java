@@ -2,7 +2,13 @@ package it.cnr.istc.pst.oratio.timelines;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import it.cnr.istc.pst.oratio.Atom;
 import it.cnr.istc.pst.oratio.Rational;
 import it.cnr.istc.pst.oratio.Solver;
 
@@ -27,11 +33,55 @@ public class TimelinesExecutor {
 
     public synchronized native void tick() throws ExecutorException;
 
-    public synchronized native void dont_start_yet(long[] atoms) throws ExecutorException;
+    public void dontStartYet(Set<Atom> atoms) throws ExecutorException {
+        dontStartYet(atoms.stream().collect(Collectors.toMap(Function.identity(), atm -> new Rational(1))));
+    }
 
-    public synchronized native void dont_end_yet(long[] atoms) throws ExecutorException;
+    public void dontStartYet(Map<Atom, Rational> atoms) throws ExecutorException {
+        long[] ids = new long[atoms.size()];
+        long[] nums = new long[atoms.size()];
+        long[] dens = new long[atoms.size()];
+        int i = 0;
+        for (Entry<Atom, Rational> atm : atoms.entrySet()) {
+            ids[i] = atm.getKey().getId();
+            nums[i] = atm.getValue().getNumerator();
+            dens[i] = atm.getValue().getDenominator();
+            i++;
+        }
+        dont_start_yet(ids, nums, dens);
+    }
 
-    public synchronized native void failure(long[] atoms) throws ExecutorException;
+    private synchronized native void dont_start_yet(long[] atoms, long[] nums, long[] dens) throws ExecutorException;
+
+    public void dontEndYet(Set<Atom> atoms) throws ExecutorException {
+        dontEndYet(atoms.stream().collect(Collectors.toMap(Function.identity(), atm -> new Rational(1))));
+    }
+
+    public void dontEndYet(Map<Atom, Rational> atoms) throws ExecutorException {
+        long[] ids = new long[atoms.size()];
+        long[] nums = new long[atoms.size()];
+        long[] dens = new long[atoms.size()];
+        int i = 0;
+        for (Entry<Atom, Rational> atm : atoms.entrySet()) {
+            ids[i] = atm.getKey().getId();
+            nums[i] = atm.getValue().getNumerator();
+            dens[i] = atm.getValue().getDenominator();
+            i++;
+        }
+        dont_end_yet(ids, nums, dens);
+    }
+
+    private synchronized native void dont_end_yet(long[] atoms, long[] nums, long[] dens) throws ExecutorException;
+
+    public void failure(Set<Atom> atoms) throws ExecutorException {
+        long[] ids = new long[atoms.size()];
+        int i = 0;
+        for (Atom atm : atoms)
+            ids[i++] = atm.getId();
+        failure(ids);
+    }
+
+    private synchronized native void failure(long[] atoms) throws ExecutorException;
 
     private void fireTick(final long current_time_num, final long current_time_den) {
         final Rational current_time = new Rational(current_time_num, current_time_den);

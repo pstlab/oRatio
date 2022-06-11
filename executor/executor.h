@@ -60,8 +60,8 @@ namespace ratio
 
     EXECUTOR_EXPORT void tick();
 
-    EXECUTOR_EXPORT void dont_start_yet(const std::unordered_set<atom *> &atoms) { dont_start.insert(atoms.cbegin(), atoms.cend()); }
-    EXECUTOR_EXPORT void dont_end_yet(const std::unordered_set<atom *> &atoms) { dont_end.insert(atoms.cbegin(), atoms.cend()); }
+    EXECUTOR_EXPORT void dont_start_yet(const std::unordered_map<const atom *, smt::rational> &atoms) { dont_start.insert(atoms.cbegin(), atoms.cend()); }
+    EXECUTOR_EXPORT void dont_end_yet(const std::unordered_map<const atom *, smt::rational> &atoms) { dont_end.insert(atoms.cbegin(), atoms.cend()); }
     EXECUTOR_EXPORT void failure(const std::unordered_set<atom *> &atoms);
 
   private:
@@ -91,8 +91,7 @@ namespace ratio
     smt::lit xi;                                                            // the execution variable..
     std::unordered_map<const atom *, atom_adaptation> adaptations;          // for each atom, the numeric adaptations done during the executions (i.e., freezes and delays)..
     std::unordered_map<smt::var, atom *> all_atoms;                         // all the interesting atoms indexed by their sigma_xi variable..
-    std::unordered_set<const atom *> dont_start;                            // the starting atoms which are not yet ready to start..
-    std::unordered_set<const atom *> dont_end;                              // the ending atoms which are not yet ready to end..
+    std::unordered_map<const atom *, smt::rational> dont_start, dont_end;   // the starting (ending) atoms which are not yet ready to start (end)..
     std::map<smt::inf_rational, std::unordered_set<atom *>> s_atms, e_atms; // for each pulse, the atoms starting/ending at that pulse..
     std::set<smt::inf_rational> pulses;                                     // all the pulses of the plan..
     std::vector<executor_listener *> listeners;                             // the executor listeners..

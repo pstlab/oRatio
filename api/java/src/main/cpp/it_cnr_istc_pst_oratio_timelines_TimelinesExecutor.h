@@ -37,7 +37,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_t
  * Signature: ([J)V
  */
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1start_1yet
-  (JNIEnv *, jobject, jlongArray);
+  (JNIEnv *, jobject, jlongArray, jlongArray, jlongArray);
 
 /*
  * Class:     it_cnr_istc_pst_oratio_timelines_TimelinesExecutor
@@ -45,7 +45,7 @@ JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_d
  * Signature: ([J)V
  */
 JNIEXPORT void JNICALL Java_it_cnr_istc_pst_oratio_timelines_TimelinesExecutor_dont_1end_1yet
-  (JNIEnv *, jobject, jlongArray);
+  (JNIEnv *, jobject, jlongArray, jlongArray, jlongArray);
 
 /*
  * Class:     it_cnr_istc_pst_oratio_timelines_TimelinesExecutor
