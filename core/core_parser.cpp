@@ -394,7 +394,7 @@ namespace ratio
                 args.emplace_back(new field(*tp, id_tkn.id));
             }
 
-            if (method *m = new method(scp, rt, name.id, args, statements); core *c = static_cast<core *>(&scp))
+            if (method *m = new method(scp, rt, name.id, args, statements); core *c = dynamic_cast<core *>(&scp))
                 c->new_methods({m});
             else if (type *t = dynamic_cast<type *>(&scp))
                 t->new_methods({m});
