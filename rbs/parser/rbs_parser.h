@@ -376,7 +376,7 @@ namespace rbs
     class assignment_statement : public statement
     {
     public:
-      assignment_statement(const std::vector<std::vector<id_token>> &is, const std::vector<const expression *> es) : ids(is), xprs(es) {}
+      assignment_statement(const std::vector<std::vector<id_token>> &is, const std::vector<const expression *> &es) : ids(is), xprs(es) {}
       assignment_statement(const assignment_statement &orig) = delete;
       virtual ~assignment_statement()
       {

@@ -19,4 +19,18 @@ namespace kb
     {
         xprs[fn] = xpr;
     }
+
+    bool fact::eq(const item &it) const noexcept
+    {
+        if (const fact *fi = dynamic_cast<const fact *>(&it))
+        {
+            for (const auto &xpr : fi->xprs)
+                if (const auto &xpr_it = xprs.find(xpr.first); xpr_it != xprs.end())
+                    if (!xpr_it->second->eq(*xpr.second.get()))
+                        return false;
+            return true;
+        }
+        else
+            return false;
+    }
 } // namespace kb

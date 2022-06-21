@@ -120,6 +120,43 @@ namespace kb
             }
             return std::make_shared<bool_item>(false);
         }
+
+        assert_statement::assert_statement(const rbs::id_token &fn, const rbs::id_token &pn, const std::vector<std::pair<const rbs::id_token, const rbs::ast::expression *const>> &assns) : rbs::ast::assert_statement(fn, pn, assns) {}
+        void assert_statement::execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const
+        {
+        }
+
+        retract_statement::retract_statement(const std::vector<rbs::id_token> &fns) : rbs::ast::retract_statement(fns) {}
+        void retract_statement::execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const
+        {
+        }
+
+        assignment_statement::assignment_statement(const std::vector<std::vector<rbs::id_token>> &is, const std::vector<const rbs::ast::expression *> &es) : rbs::ast::assignment_statement(is, es) {}
+        void assignment_statement::execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const
+        {
+        }
+
+        function_statement::function_statement(const rbs::id_token &fn, const std::vector<const rbs::ast::expression *> &xprs) : rbs::ast::function_statement(fn, xprs) {}
+        void function_statement::execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const
+        {
+        }
+
+        rule_declaration::rule_declaration(const rbs::id_token &n, const rbs::ast::expression *const cond, const std::vector<const rbs::ast::statement *> &ss) : rbs::ast::rule_declaration(n, cond, ss) {}
+        void rule_declaration::declare(knowledge_base &kb) const
+        {
+        }
+
+        compilation_unit::compilation_unit(const std::vector<const rbs::ast::statement *> &ss, const std::vector<const rbs::ast::rule_declaration *> &rs) : rbs::ast::compilation_unit(ss, rs) {}
+        void compilation_unit::declare(knowledge_base &kb) const
+        {
+            for (const auto &r : rules)
+                static_cast<const ast::rule_declaration *>(r)->declare(kb);
+        }
+        void compilation_unit::execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const
+        {
+            for (const auto &stmnt : statements)
+                static_cast<const ast::statement *>(stmnt)->execute(kb, ctx);
+        }
     } // namespace ast
 
     kb_parser::kb_parser(std::istream &is) : rbs::parser(is) {}

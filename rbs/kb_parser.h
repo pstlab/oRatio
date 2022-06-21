@@ -25,9 +25,9 @@ namespace kb
     public:
       RBS_EXPORT bool_literal_expression(const rbs::bool_token &l);
       bool_literal_expression(const bool_literal_expression &orig) = delete;
-      RBS_EXPORT virtual ~bool_literal_expression() = default;
+      RBS_EXPORT ~bool_literal_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class int_literal_expression : public rbs::ast::int_literal_expression, public expression
@@ -35,9 +35,9 @@ namespace kb
     public:
       RBS_EXPORT int_literal_expression(const rbs::int_token &l);
       int_literal_expression(const int_literal_expression &orig) = delete;
-      RBS_EXPORT virtual ~int_literal_expression() = default;
+      RBS_EXPORT ~int_literal_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class real_literal_expression : public rbs::ast::real_literal_expression, public expression
@@ -45,9 +45,9 @@ namespace kb
     public:
       RBS_EXPORT real_literal_expression(const rbs::real_token &l);
       real_literal_expression(const real_literal_expression &orig) = delete;
-      RBS_EXPORT virtual ~real_literal_expression() = default;
+      RBS_EXPORT ~real_literal_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class string_literal_expression : public rbs::ast::string_literal_expression, public expression
@@ -55,9 +55,9 @@ namespace kb
     public:
       RBS_EXPORT string_literal_expression(const rbs::string_token &l);
       string_literal_expression(const string_literal_expression &orig) = delete;
-      RBS_EXPORT virtual ~string_literal_expression() = default;
+      RBS_EXPORT ~string_literal_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class plus_expression : public rbs::ast::plus_expression, public expression
@@ -65,9 +65,9 @@ namespace kb
     public:
       plus_expression(const rbs::ast::expression *const e);
       plus_expression(const plus_expression &orig) = delete;
-      virtual ~plus_expression() = default;
+      ~plus_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class minus_expression : public rbs::ast::minus_expression, public expression
@@ -75,9 +75,9 @@ namespace kb
     public:
       minus_expression(const rbs::ast::expression *const e);
       minus_expression(const minus_expression &orig) = delete;
-      virtual ~minus_expression() = default;
+      ~minus_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class not_expression : public rbs::ast::not_expression, public expression
@@ -85,9 +85,9 @@ namespace kb
     public:
       not_expression(const rbs::ast::expression *const e);
       not_expression(const not_expression &orig) = delete;
-      virtual ~not_expression() = default;
+      ~not_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class eq_expression : public rbs::ast::eq_expression, public expression
@@ -95,9 +95,9 @@ namespace kb
     public:
       eq_expression(const rbs::ast::expression *const l, const rbs::ast::expression *const r);
       eq_expression(const eq_expression &orig) = delete;
-      virtual ~eq_expression() = default;
+      ~eq_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class neq_expression : public rbs::ast::neq_expression, public expression
@@ -105,9 +105,9 @@ namespace kb
     public:
       neq_expression(const rbs::ast::expression *const l, const rbs::ast::expression *const r);
       neq_expression(const neq_expression &orig) = delete;
-      virtual ~neq_expression() = default;
+      ~neq_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class lt_expression : public rbs::ast::lt_expression, public expression
@@ -115,9 +115,9 @@ namespace kb
     public:
       RBS_EXPORT lt_expression(const rbs::ast::expression *const l, const rbs::ast::expression *const r);
       lt_expression(const lt_expression &orig) = delete;
-      RBS_EXPORT virtual ~lt_expression() = default;
+      RBS_EXPORT ~lt_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class leq_expression : public rbs::ast::leq_expression, public expression
@@ -125,9 +125,9 @@ namespace kb
     public:
       RBS_EXPORT leq_expression(const rbs::ast::expression *const l, const rbs::ast::expression *const r);
       leq_expression(const leq_expression &orig) = delete;
-      RBS_EXPORT virtual ~leq_expression() = default;
+      RBS_EXPORT ~leq_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class geq_expression : public rbs::ast::geq_expression, public expression
@@ -135,9 +135,9 @@ namespace kb
     public:
       RBS_EXPORT geq_expression(const rbs::ast::expression *const l, const rbs::ast::expression *const r);
       geq_expression(const geq_expression &orig) = delete;
-      RBS_EXPORT virtual ~geq_expression() = default;
+      RBS_EXPORT ~geq_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class gt_expression : public rbs::ast::gt_expression, public expression
@@ -145,9 +145,9 @@ namespace kb
     public:
       RBS_EXPORT gt_expression(const rbs::ast::expression *const l, const rbs::ast::expression *const r);
       gt_expression(const gt_expression &orig) = delete;
-      RBS_EXPORT virtual ~gt_expression() = default;
+      RBS_EXPORT ~gt_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class id_expression : public rbs::ast::id_expression, public expression
@@ -155,9 +155,9 @@ namespace kb
     public:
       RBS_EXPORT id_expression(const std::vector<rbs::id_token> &is);
       id_expression(const id_expression &orig) = delete;
-      RBS_EXPORT virtual ~id_expression() = default;
+      RBS_EXPORT ~id_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class implication_expression : public rbs::ast::implication_expression, public expression
@@ -165,9 +165,9 @@ namespace kb
     public:
       implication_expression(const rbs::ast::expression *const l, const rbs::ast::expression *const r);
       implication_expression(const implication_expression &orig) = delete;
-      virtual ~implication_expression() = default;
+      ~implication_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class disjunction_expression : public rbs::ast::disjunction_expression, public expression
@@ -175,9 +175,9 @@ namespace kb
     public:
       disjunction_expression(const std::vector<const rbs::ast::expression *> &es);
       disjunction_expression(const disjunction_expression &orig) = delete;
-      virtual ~disjunction_expression() = default;
+      ~disjunction_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class conjunction_expression : public rbs::ast::conjunction_expression, public expression
@@ -185,9 +185,9 @@ namespace kb
     public:
       conjunction_expression(const std::vector<const rbs::ast::expression *> &es);
       conjunction_expression(const conjunction_expression &orig) = delete;
-      virtual ~conjunction_expression() = default;
+      ~conjunction_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class exct_one_expression : public rbs::ast::exct_one_expression, public expression
@@ -195,9 +195,9 @@ namespace kb
     public:
       exct_one_expression(const std::vector<const rbs::ast::expression *> &es);
       exct_one_expression(const exct_one_expression &orig) = delete;
-      virtual ~exct_one_expression() = default;
+      ~exct_one_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class addition_expression : public rbs::ast::addition_expression, public expression
@@ -205,9 +205,9 @@ namespace kb
     public:
       addition_expression(const std::vector<const rbs::ast::expression *> &es);
       addition_expression(const addition_expression &orig) = delete;
-      virtual ~addition_expression() = default;
+      ~addition_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class subtraction_expression : public rbs::ast::subtraction_expression, public expression
@@ -215,9 +215,9 @@ namespace kb
     public:
       subtraction_expression(const std::vector<const rbs::ast::expression *> &es);
       subtraction_expression(const subtraction_expression &orig) = delete;
-      virtual ~subtraction_expression() = default;
+      ~subtraction_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class multiplication_expression : public rbs::ast::multiplication_expression, public expression
@@ -225,9 +225,9 @@ namespace kb
     public:
       multiplication_expression(const std::vector<const rbs::ast::expression *> &es);
       multiplication_expression(const multiplication_expression &orig) = delete;
-      virtual ~multiplication_expression() = default;
+      ~multiplication_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class division_expression : public rbs::ast::division_expression, public expression
@@ -235,9 +235,9 @@ namespace kb
     public:
       division_expression(const std::vector<const rbs::ast::expression *> &es);
       division_expression(const division_expression &orig) = delete;
-      virtual ~division_expression() = default;
+      ~division_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class fact_expression : public rbs::ast::fact_expression, public expression
@@ -245,9 +245,9 @@ namespace kb
     public:
       fact_expression(const rbs::id_token &fn, const rbs::id_token &pn, const std::vector<std::pair<const rbs::id_token, const rbs::ast::expression *const>> &assns);
       fact_expression(const fact_expression &orig) = delete;
-      virtual ~fact_expression() = default;
+      ~fact_expression() = default;
 
-      virtual expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      expr evaluate(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class statement : public rbs::ast::statement
@@ -265,9 +265,9 @@ namespace kb
     public:
       assert_statement(const rbs::id_token &fn, const rbs::id_token &pn, const std::vector<std::pair<const rbs::id_token, const rbs::ast::expression *const>> &assns);
       assert_statement(const assert_statement &orig) = delete;
-      virtual ~assert_statement() = default;
+      ~assert_statement() = default;
 
-      virtual void execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      void execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class retract_statement : public rbs::ast::retract_statement, public statement
@@ -275,19 +275,19 @@ namespace kb
     public:
       retract_statement(const std::vector<rbs::id_token> &fns);
       retract_statement(const retract_statement &orig) = delete;
-      virtual ~retract_statement() = default;
+      ~retract_statement() = default;
 
-      virtual void execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      void execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class assignment_statement : public rbs::ast::assignment_statement, public statement
     {
     public:
-      assignment_statement(const std::vector<std::vector<rbs::id_token>> &is, const std::vector<const rbs::ast::expression *> es);
+      assignment_statement(const std::vector<std::vector<rbs::id_token>> &is, const std::vector<const rbs::ast::expression *> &es);
       assignment_statement(const assignment_statement &orig) = delete;
-      virtual ~assignment_statement() = default;
+      ~assignment_statement() = default;
 
-      virtual void execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      void execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class function_statement : public rbs::ast::function_statement, public statement
@@ -295,9 +295,9 @@ namespace kb
     public:
       function_statement(const rbs::id_token &fn, const std::vector<const rbs::ast::expression *> &xprs);
       function_statement(const function_statement &orig) = delete;
-      virtual ~function_statement() = default;
+      ~function_statement() = default;
 
-      virtual void execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
+      void execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const override;
     };
 
     class rule_declaration : public rbs::ast::rule_declaration
@@ -305,9 +305,9 @@ namespace kb
     public:
       rule_declaration(const rbs::id_token &n, const rbs::ast::expression *const cond, const std::vector<const rbs::ast::statement *> &ss);
       rule_declaration(const rule_declaration &orig) = delete;
-      virtual ~rule_declaration() = default;
+      ~rule_declaration() = default;
 
-      virtual void declare(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const;
+      void declare(knowledge_base &kb) const;
     };
 
     class compilation_unit : public rbs::ast::compilation_unit
@@ -315,9 +315,10 @@ namespace kb
     public:
       compilation_unit(const std::vector<const rbs::ast::statement *> &ss, const std::vector<const rbs::ast::rule_declaration *> &rs);
       compilation_unit(const compilation_unit &orig) = delete;
-      virtual ~compilation_unit() = default;
+      ~compilation_unit() = default;
 
-      virtual void declare(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const;
+      void declare(knowledge_base &kb) const;
+      void execute(knowledge_base &kb, std::unordered_map<std::string, expr> &ctx) const;
     };
   } // namespace ast
 
@@ -326,7 +327,7 @@ namespace kb
   public:
     kb_parser(std::istream &is);
     kb_parser(const kb_parser &orig) = delete;
-    virtual ~kb_parser() = default;
+    ~kb_parser() = default;
 
   private:
     /**

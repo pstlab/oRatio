@@ -30,9 +30,11 @@ namespace kb
 
     predicate &get_predicate() const noexcept { return pred; }
     expr get(const std::string &fn) const { return xprs.at(fn); }
-    void set(const std::string &fn, expr xpr);
 
     bool eq(const item &it) const noexcept override;
+
+  private:
+    void set(const std::string &fn, expr xpr);
 
   private:
     predicate &pred;
