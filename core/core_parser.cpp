@@ -32,10 +32,10 @@ namespace ratio
         expr plus_expression::evaluate(scope &scp, context &ctx) const { return static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx); }
 
         minus_expression::minus_expression(const riddle::ast::expression *const e) : riddle::ast::minus_expression(e) {}
-        expr minus_expression::evaluate(scope &scp, context &ctx) const { return scp.get_core().minus(static_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx)); }
+        expr minus_expression::evaluate(scope &scp, context &ctx) const { return scp.get_core().minus(static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)); }
 
         not_expression::not_expression(const riddle::ast::expression *const e) : riddle::ast::not_expression(e) {}
-        expr not_expression::evaluate(scope &scp, context &ctx) const { return scp.get_core().negate(static_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx)); }
+        expr not_expression::evaluate(scope &scp, context &ctx) const { return scp.get_core().negate(static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx)); }
 
         constructor_expression::constructor_expression(const std::vector<riddle::id_token> &it, const std::vector<const riddle::ast::expression *> &es) : riddle::ast::constructor_expression(it, es) {}
         expr constructor_expression::evaluate(scope &scp, context &ctx) const
@@ -59,48 +59,48 @@ namespace ratio
         eq_expression::eq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::eq_expression(l, r) {}
         expr eq_expression::evaluate(scope &scp, context &ctx) const
         {
-            expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
-            expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
+            expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
+            expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
             return scp.get_core().eq(l, r);
         }
 
         neq_expression::neq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::neq_expression(l, r) {}
         expr neq_expression::evaluate(scope &scp, context &ctx) const
         {
-            expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
-            expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
+            expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
+            expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
             return scp.get_core().negate(scp.get_core().eq(l, r));
         }
 
         CORE_EXPORT lt_expression::lt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::lt_expression(l, r) {}
         expr lt_expression::evaluate(scope &scp, context &ctx) const
         {
-            arith_expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
-            arith_expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
+            arith_expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
+            arith_expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
             return scp.get_core().lt(l, r);
         }
 
         CORE_EXPORT leq_expression::leq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::leq_expression(l, r) {}
         expr leq_expression::evaluate(scope &scp, context &ctx) const
         {
-            arith_expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
-            arith_expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
+            arith_expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
+            arith_expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
             return scp.get_core().leq(l, r);
         }
 
         CORE_EXPORT geq_expression::geq_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::geq_expression(l, r) {}
         expr geq_expression::evaluate(scope &scp, context &ctx) const
         {
-            arith_expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
-            arith_expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
+            arith_expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
+            arith_expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
             return scp.get_core().geq(l, r);
         }
 
         CORE_EXPORT gt_expression::gt_expression(const riddle::ast::expression *const l, const riddle::ast::expression *const r) : riddle::ast::gt_expression(l, r) {}
         expr gt_expression::evaluate(scope &scp, context &ctx) const
         {
-            arith_expr l = static_cast<const ast::expression *const>(left)->evaluate(scp, ctx);
-            arith_expr r = static_cast<const ast::expression *const>(right)->evaluate(scp, ctx);
+            arith_expr l = static_cast<const ast::expression *>(left)->evaluate(scp, ctx);
+            arith_expr r = static_cast<const ast::expression *>(right)->evaluate(scp, ctx);
             return scp.get_core().gt(l, r);
         }
 
@@ -252,7 +252,7 @@ namespace ratio
         CORE_EXPORT expression_statement::expression_statement(const riddle::ast::expression *const e) : riddle::ast::expression_statement(e) {}
         void expression_statement::execute(scope &scp, context &ctx) const
         {
-            bool_expr be = static_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx);
+            bool_expr be = static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx);
             scp.get_core().assert_facts({be->l});
         }
 
@@ -265,7 +265,7 @@ namespace ratio
                 smt::rational cost(1);
                 if (xpr)
                 {
-                    arith_expr a_xpr = static_cast<const ast::expression *const>(xpr)->evaluate(scp, ctx);
+                    arith_expr a_xpr = static_cast<const ast::expression *>(xpr)->evaluate(scp, ctx);
                     if (!a_xpr->l.vars.empty())
                         throw std::invalid_argument("invalid disjunct cost: expected a constant..");
                     cost = scp.get_core().arith_value(a_xpr).get_rational();
