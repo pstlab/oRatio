@@ -8,7 +8,6 @@
 #include "core_listener.h"
 #endif
 #include <algorithm>
-#include <iostream>
 #include <sstream>
 #include <fstream>
 #include <cassert>
