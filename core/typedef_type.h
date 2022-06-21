@@ -18,7 +18,7 @@ namespace ratio
     expr new_instance(context &ctx) override;
 
   private:
-    [[maybe_unused]] const type &base_type;
+    const type &base_type;
     const riddle::ast::expression *const xpr;
   };
 } // namespace ratio
